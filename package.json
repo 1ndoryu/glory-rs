@@ -3,6 +3,7 @@
   "private": true,
   "description": "Comandos unificados para el monorepo Rust + React",
   "scripts": {
+    "dev": "concurrently --names BACK,FRONT --prefix-colors blue,green \"cargo run\" \"npm --prefix frontend run dev\"",
     "check": "cargo check && cargo clippy && npm --prefix frontend run type-check",
     "check:back": "cargo check && cargo clippy",
     "check:front": "npm --prefix frontend run type-check",
@@ -12,5 +13,8 @@
     "dev:front": "npm --prefix frontend run dev",
     "codegen": "npm --prefix frontend run codegen",
     "test": "cargo test"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0"
   }
 }

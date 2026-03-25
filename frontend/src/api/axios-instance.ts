@@ -15,7 +15,10 @@ instance.interceptors.request.use((config) => {
 
 /**
  * 253A-7: Mutator para Orval v8 — la firma cambió a (url, config) en v8.
- * Convierte RequestInit a AxiosRequestConfig y usa axios.
+ * Orval genera tipos con forma { data, status, headers }, así que el mutator
+ * debe retornar ese objeto completo (no solo response.data).
+ * FIX: retornar { data, status, headers } para que los componentes puedan
+ * hacer data?.status === 200 ? data.data : null correctamente.
  */
 export const customInstance = async <T>(
   url: string,
@@ -23,7 +26,7 @@ export const customInstance = async <T>(
 ): Promise<T> => {
   const { body, headers, method, signal } = config;
 
-  const response = await instance.request<T>({
+  const response = await instance.request({
     url,
     method: method as string,
     data: body,
@@ -31,7 +34,11 @@ export const customInstance = async <T>(
     signal: signal ?? undefined,
   });
 
-  return response.data;
+  return {
+    data: response.data,
+    status: response.status,
+    headers: response.headers,
+  } as T;
 };
 
 export default instance;
