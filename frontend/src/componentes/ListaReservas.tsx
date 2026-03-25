@@ -26,7 +26,7 @@ function ListaReservas() {
           <h1 className="tituloPagina">Reservas</h1>
           <p className="subtituloPagina">{reservas ? `${reservas.total} registros` : ''}</p>
         </div>
-        <Boton className="botonNuevo" onClick={() => navigate('/reservas/nueva')}>+ Nueva Reserva</Boton>
+        <Boton variante="exito" onClick={() => navigate('/reservas/nueva')}>+ Nueva Reserva</Boton>
       </div>
 
       <div className="contenedorLista">
@@ -59,7 +59,8 @@ function ListaReservas() {
                     </td>
                     <td>
                       <Boton
-                        className="botonEliminar"
+                        variante="peligro"
+                        tamano="sm"
                         onClick={() => eliminarMutation.mutate({ id: r.id })}
                         disabled={eliminarMutation.isPending}
                       >
@@ -72,9 +73,9 @@ function ListaReservas() {
             </table>
 
             <div className="paginacion">
-              <Boton className="botonPagina" disabled={pagina <= 1} onClick={() => setPagina(pagina - 1)}>← Anterior</Boton>
-              <span className="infoPagina">Página {pagina} de {Math.ceil(reservas.total / porPagina)}</span>
-              <Boton className="botonPagina" disabled={pagina * porPagina >= reservas.total} onClick={() => setPagina(pagina + 1)}>Siguiente →</Boton>
+              <Boton variante="fantasma" tamano="sm" disabled={pagina <= 1} onClick={() => setPagina(pagina - 1)}>Anterior</Boton>
+              <span className="infoPagina">Pagina {pagina} de {Math.ceil(reservas.total / porPagina)}</span>
+              <Boton variante="fantasma" tamano="sm" disabled={pagina * porPagina >= reservas.total} onClick={() => setPagina(pagina + 1)}>Siguiente</Boton>
             </div>
           </>
         ) : (

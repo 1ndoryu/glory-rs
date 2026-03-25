@@ -31,13 +31,13 @@ function Inicio() {
       </div>
 
       <div className="accionesInicio">
-        <Boton className="botonAccion venta" onClick={() => navigate('/ventas/nueva')}>
+        <Boton variante="exito" onClick={() => navigate('/ventas/nueva')}>
           + Nueva Venta
         </Boton>
-        <Boton className="botonAccion gasto" onClick={() => navigate('/gastos/nuevo')}>
+        <Boton variante="primario" onClick={() => navigate('/gastos/nuevo')}>
           + Nuevo Gasto
         </Boton>
-        <Boton className="botonAccion reserva" onClick={() => navigate('/reservas/nueva')}>
+        <Boton variante="secundario" onClick={() => navigate('/reservas/nueva')}>
           + Nueva Reserva
         </Boton>
       </div>

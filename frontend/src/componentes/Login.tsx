@@ -43,8 +43,8 @@ function Login() {
             />
           </div>
 
-          <Boton className="botonLogin" type="submit" disabled={cargando}>
-            {cargando ? 'Cargando...' : modoRegistro ? 'Crear cuenta' : 'Entrar'}
+          <Boton variante="primario" ancho type="submit" cargando={cargando}>
+            {modoRegistro ? 'Crear cuenta' : 'Entrar'}
           </Boton>
         </form>
 

@@ -61,8 +61,8 @@ function FormularioReserva() {
           <Textarea id="notas" rows={3} value={campos.notas} onChange={(e) => cambiarCampo('notas', e.target.value)} placeholder="Alergias, preferencias, etc." />
         </div>
 
-        <Boton className="botonEnviar" type="submit" disabled={cargando}>
-          {cargando ? 'Guardando...' : 'Crear Reserva'}
+        <Boton variante="primario" ancho type="submit" cargando={cargando}>
+          Crear Reserva
         </Boton>
       </form>
     </div>

@@ -1,9 +1,39 @@
-/* 253A-10: Componente atómico Textarea — reemplaza <textarea> nativo (regla html-nativo-en-vez-de-componente) */
+/* [253A-13] Componente Textarea con variantes (tamano, etiqueta, error).
+ * Sin etiqueta: renderiza solo el textarea estilizado (backward-compatible).
+ * Con etiqueta: renderiza wrapper completo con label + error. */
 
 import { TextareaHTMLAttributes } from 'react';
+import '../../estilos/Componentes.css';
 
-function Textarea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return <textarea {...props} />;
+type TamanoCampo = 'sm' | 'md' | 'lg';
+
+interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
+  tamano?: TamanoCampo;
+  etiqueta?: string;
+  error?: string;
+}
+
+const claseTamano: Record<TamanoCampo, string> = {
+  sm: 'campoSm',
+  md: 'campoMd',
+  lg: 'campoLg',
+};
+
+function Textarea({ tamano = 'md', etiqueta, error, className, id, ...rest }: TextareaProps) {
+  const textareaId = id ?? etiqueta?.toLowerCase().replace(/\s+/g, '-');
+  const textareaClases = `campoEntrada ${claseTamano[tamano]} ${className ?? ''}`.trim();
+
+  if (!etiqueta && !error) {
+    return <textarea id={textareaId} className={textareaClases} {...rest} />;
+  }
+
+  return (
+    <div className={`campo ${error ? 'campoError' : ''}`}>
+      {etiqueta && <label className="campoEtiqueta" htmlFor={textareaId}>{etiqueta}</label>}
+      <textarea id={textareaId} className={textareaClases} {...rest} />
+      {error && <span className="campoMensajeError">{error}</span>}
+    </div>
+  );
 }
 
 export default Textarea;

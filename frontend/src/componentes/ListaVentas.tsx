@@ -30,7 +30,7 @@ function ListaVentas() {
           <h1 className="tituloPagina">Ventas</h1>
           <p className="subtituloPagina">{ventas ? `${ventas.total} registros` : ''}</p>
         </div>
-        <Boton className="botonNuevo" onClick={() => navigate('/ventas/nueva')}>+ Nueva Venta</Boton>
+        <Boton variante="exito" onClick={() => navigate('/ventas/nueva')}>+ Nueva Venta</Boton>
       </div>
 
       <div className="contenedorLista">
@@ -63,7 +63,8 @@ function ListaVentas() {
                     <td><strong>{formatearMoneda((parseFloat(v.importe_base) + parseFloat(v.importe_iva)).toFixed(2))}</strong></td>
                     <td>
                       <Boton
-                        className="botonEliminar"
+                        variante="peligro"
+                        tamano="sm"
                         onClick={() => eliminarMutation.mutate({ id: v.id })}
                         disabled={eliminarMutation.isPending}
                       >
@@ -76,9 +77,9 @@ function ListaVentas() {
             </table>
 
             <div className="paginacion">
-              <Boton className="botonPagina" disabled={pagina <= 1} onClick={() => setPagina(pagina - 1)}>← Anterior</Boton>
-              <span className="infoPagina">Página {pagina} de {Math.ceil(ventas.total / porPagina)}</span>
-              <Boton className="botonPagina" disabled={pagina * porPagina >= ventas.total} onClick={() => setPagina(pagina + 1)}>Siguiente →</Boton>
+              <Boton variante="fantasma" tamano="sm" disabled={pagina <= 1} onClick={() => setPagina(pagina - 1)}>Anterior</Boton>
+              <span className="infoPagina">Pagina {pagina} de {Math.ceil(ventas.total / porPagina)}</span>
+              <Boton variante="fantasma" tamano="sm" disabled={pagina * porPagina >= ventas.total} onClick={() => setPagina(pagina + 1)}>Siguiente</Boton>
             </div>
           </>
         ) : (

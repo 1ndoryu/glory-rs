@@ -1,9 +1,60 @@
-/* 253A-10: Componente atómico Boton — reemplaza <button> nativo (regla html-nativo-en-vez-de-componente) */
+/* [253A-13] Componente Boton con variantes reales (tamano, tipo, cargando, ancho).
+ * Reemplaza <button> nativo. Usa clases de Componentes.css. */
 
-import { ButtonHTMLAttributes } from 'react';
+import { ButtonHTMLAttributes, ReactNode } from 'react';
+import '../../estilos/Componentes.css';
 
-function Boton(props: ButtonHTMLAttributes<HTMLButtonElement>) {
-  return <button {...props} />;
+type VarianteBoton = 'primario' | 'secundario' | 'peligro' | 'exito' | 'fantasma';
+type TamanoBoton = 'sm' | 'md' | 'lg';
+
+interface BotonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  variante?: VarianteBoton;
+  tamano?: TamanoBoton;
+  cargando?: boolean;
+  ancho?: boolean;
+  icono?: ReactNode;
+}
+
+const claseVariante: Record<VarianteBoton, string> = {
+  primario: 'botonPrimario',
+  secundario: 'botonSecundario',
+  peligro: 'botonPeligro',
+  exito: 'botonExito',
+  fantasma: 'botonFantasma',
+};
+
+const claseTamano: Record<TamanoBoton, string> = {
+  sm: 'botonSm',
+  md: 'botonMd',
+  lg: 'botonLg',
+};
+
+function Boton({
+  variante = 'primario',
+  tamano = 'md',
+  cargando = false,
+  ancho = false,
+  icono,
+  className,
+  children,
+  disabled,
+  ...rest
+}: BotonProps) {
+  const clases = [
+    'boton',
+    claseVariante[variante],
+    claseTamano[tamano],
+    ancho ? 'botonAncho' : '',
+    cargando ? 'botonCargando' : '',
+    className ?? '',
+  ].filter(Boolean).join(' ');
+
+  return (
+    <button className={clases} disabled={disabled || cargando} {...rest}>
+      {icono && <span>{icono}</span>}
+      {children}
+    </button>
+  );
 }
 
 export default Boton;

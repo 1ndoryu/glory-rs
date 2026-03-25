@@ -57,7 +57,7 @@ function BarraLateral() {
       </nav>
 
       <div className="pieBarraLateral">
-        <Boton className="botonCerrarSesion" onClick={salir}>
+        <Boton variante="fantasma" tamano="sm" onClick={salir}>
           Cerrar sesión
         </Boton>
       </div>

@@ -101,8 +101,8 @@ function FormularioVenta() {
                     </div>
                 </div>
 
-                <Boton className="botonEnviar" type="submit" disabled={cargando}>
-                    {cargando ? 'Guardando...' : 'Registrar Venta'}
+                <Boton variante="primario" ancho type="submit" cargando={cargando}>
+                    Registrar Venta
                 </Boton>
             </form>
         </div>

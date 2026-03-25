@@ -81,8 +81,8 @@ function FormularioGasto() {
           <label htmlFor="recurrente">Gasto recurrente</label>
         </div>
 
-        <Boton className="botonEnviar" type="submit" disabled={cargando}>
-          {cargando ? 'Guardando...' : 'Registrar Gasto'}
+        <Boton variante="primario" ancho type="submit" cargando={cargando}>
+          Registrar Gasto
         </Boton>
       </form>
     </div>
