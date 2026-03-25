@@ -13,7 +13,8 @@
     "dev:back": "cargo run",
     "dev:front": "npm --prefix frontend run dev",
     "codegen": "npm --prefix frontend run codegen",
-    "test": "cargo test"
+    "test": "cargo test",
+    "self-check": "powershell -ExecutionPolicy Bypass -File scripts/self-check.ps1"
   },
   "devDependencies": {
     "concurrently": "^9.0.0"

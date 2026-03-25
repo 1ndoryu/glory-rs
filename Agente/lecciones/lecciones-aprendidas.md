@@ -29,3 +29,9 @@ Cada lección debe ser concisa y accionable.
 **Problema:** Login no funcionaba. `customInstance` retornaba `response.data` pero Orval v8 genera tipos que esperan `{ data, status, headers }`.
 **Causa raíz:** Los componentes checaban `respuesta.status === 200` que nunca era true.
 **Solución:** Retornar `{ data: response.data, status: response.status, headers: response.headers } as T`.
+
+## 2026-03-25 — PowerShell 5 limitaciones en scripts
+
+**Problema:** Scripts PS1 con em dash (`—`), ternarios inline, o comas entre hashtables en arrays fallan en PS5.
+**Causa raíz:** PS5 tiene parser más limitado que PS7.
+**Solución:** Solo ASCII, if/else estándar, sin comas entre elementos de array de hashtables.

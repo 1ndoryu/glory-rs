@@ -180,7 +180,7 @@ Hacer commit final. Luego sincronizar la rama local con remoto (`git pull --reba
 `coolify-manager-rs` debe tratarse como herramienta viva: si durante una tarea aparece un escenario de deploy, health, logs, restart, backup, restore o exec que no cubre bien, dejar constancia de que puede y debe mejorarse para soportar ese caso de uso de forma robusta.
 
 ### Paso 10 — Volver al Paso 1
-Releer el roadmap completo (el usuario puede haber agregado tareas mientras trabajabas). Repetir el ciclo hasta que no queden tareas pendientes. Solo entonces, cerrar con un resumen breve de lo realizado.
+Releer el roadmap completo (el usuario puede haber agregado tareas mientras trabajabas). Ejecutar `npm run self-check -- -TareaId {ID}` y confirmar cada punto del checklist antes de pasar a la siguiente tarea. Repetir el ciclo hasta que no queden tareas pendientes. Solo entonces, cerrar con un resumen breve de lo realizado.
 
 ---
 
