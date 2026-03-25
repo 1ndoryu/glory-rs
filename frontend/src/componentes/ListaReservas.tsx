@@ -1,15 +1,16 @@
 /* 253A-7: Lista paginada de reservas
-   253A-10: componentes UI atómicos */
+   253A-10: componentes UI atomicos
+   253A-14: modal para crear reserva en vez de ruta separada */
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useListarReservas, useEliminarReserva } from '../api/generated';
-import { Boton } from './ui';
+import { Boton, Modal } from './ui';
+import FormularioReserva from './FormularioReserva';
 import '../estilos/Formularios.css';
 
 function ListaReservas() {
-  const navigate = useNavigate();
   const [pagina, setPagina] = useState(1);
+  const [modalAbierto, setModalAbierto] = useState(false);
   const porPagina = 15;
 
   const { data, isLoading, refetch } = useListarReservas({ page: pagina, per_page: porPagina });
@@ -19,6 +20,11 @@ function ListaReservas() {
 
   const reservas = data?.status === 200 ? data.data : null;
 
+  const cerrarModalYRefrescar = () => {
+    setModalAbierto(false);
+    refetch();
+  };
+
   return (
     <div>
       <div className="cabeceraLista">
@@ -26,8 +32,12 @@ function ListaReservas() {
           <h1 className="tituloPagina">Reservas</h1>
           <p className="subtituloPagina">{reservas ? `${reservas.total} registros` : ''}</p>
         </div>
-        <Boton variante="exito" onClick={() => navigate('/reservas/nueva')}>+ Nueva Reserva</Boton>
+        <Boton variante="exito" onClick={() => setModalAbierto(true)}>+ Nueva Reserva</Boton>
       </div>
+
+      <Modal abierto={modalAbierto} onCerrar={() => setModalAbierto(false)} titulo="Nueva Reserva">
+        <FormularioReserva onExito={cerrarModalYRefrescar} />
+      </Modal>
 
       <div className="contenedorLista">
         {isLoading ? (

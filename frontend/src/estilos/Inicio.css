@@ -1,8 +1,9 @@
-/* 253A-7: Página de inicio — dashboard simplificado */
+/* 253A-7: Pagina de inicio -- dashboard simplificado
+   253A-14: responsive mobile/tablet */
 
 .inicioGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 1.2rem;
   margin-bottom: 2rem;
 }
@@ -115,4 +116,20 @@
   text-align: center;
   color: var(--colorTextoSecundario);
   padding: 2rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .inicioGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .accionesInicio {
+    flex-direction: column;
+  }
+
+  .conteoReservas {
+    flex-direction: column;
+    gap: 1rem;
+  }
 }

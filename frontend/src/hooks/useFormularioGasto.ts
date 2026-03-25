@@ -1,4 +1,5 @@
-/* 253A-10: Hook para FormularioGasto — reduce 10 useState a 2 (regla usestate-excesivo) */
+/* 253A-10: Hook para FormularioGasto — reduce 10 useState a 2 (regla usestate-excesivo)
+   253A-14: acepta onExito para uso en modales */
 
 import { useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -16,7 +17,7 @@ interface CamposGasto {
   importeIva: string;
 }
 
-function useFormularioGasto() {
+function useFormularioGasto(onExito?: () => void) {
   const navigate = useNavigate();
   const [error, setError] = useState('');
   const [campos, setCampos] = useState<CamposGasto>({
@@ -41,7 +42,10 @@ function useFormularioGasto() {
   const mutation = useCrearGasto({
     mutation: {
       onSuccess: (res) => {
-        if (res.status === 201) navigate('/gastos');
+        if (res.status === 201) {
+          if (onExito) onExito();
+          else navigate('/gastos');
+        }
       },
       onError: () => setError('Error al crear el gasto'),
     },

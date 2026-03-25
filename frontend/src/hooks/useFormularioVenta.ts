@@ -1,4 +1,5 @@
-/* 253A-10: Hook para FormularioVenta — reduce 10 useState a 2 (regla usestate-excesivo) */
+/* 253A-10: Hook para FormularioVenta — reduce 10 useState a 2 (regla usestate-excesivo)
+   253A-14: acepta onExito para uso en modales */
 
 import { useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -16,7 +17,7 @@ interface CamposVenta {
   importeIva: string;
 }
 
-function useFormularioVenta() {
+function useFormularioVenta(onExito?: () => void) {
   const navigate = useNavigate();
   const [error, setError] = useState('');
   const [campos, setCampos] = useState<CamposVenta>({
@@ -49,7 +50,10 @@ function useFormularioVenta() {
   const mutation = useCrearVenta({
     mutation: {
       onSuccess: (res) => {
-        if (res.status === 201) navigate('/ventas');
+        if (res.status === 201) {
+          if (onExito) onExito();
+          else navigate('/ventas');
+        }
       },
       onError: () => setError('Error al crear la venta'),
     },

@@ -1,4 +1,5 @@
-/* 253A-7: Layout principal — sidebar + contenido */
+/* 253A-7: Layout principal -- sidebar + contenido
+   253A-14: responsive para mobile/tablet */
 
 .layoutPrincipal {
   display: flex;
@@ -26,4 +27,13 @@
   color: var(--colorTextoSecundario);
   font-size: 0.9rem;
   margin-top: 0.3rem;
+}
+
+/* Mobile: sidebar se oculta, contenido ocupa todo */
+@media (max-width: 768px) {
+  .contenidoPrincipal {
+    margin-left: 0;
+    padding: 1rem;
+    padding-bottom: 5rem;
+  }
 }

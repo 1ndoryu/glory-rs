@@ -220,3 +220,33 @@
 .textoCapitalizado {
   text-transform: capitalize;
 }
+
+/* 253A-14: Responsive mobile/tablet */
+@media (max-width: 768px) {
+  .formularioPagina {
+    max-width: 100%;
+  }
+
+  .filaFormulario {
+    grid-template-columns: 1fr;
+  }
+
+  .cabeceraLista {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.8rem;
+  }
+
+  /* Tabla scroll horizontal en mobile */
+  .contenedorLista {
+    overflow-x: auto;
+  }
+
+  .tabla {
+    min-width: 600px;
+  }
+
+  .paginacion {
+    gap: 0.5rem;
+  }
+}

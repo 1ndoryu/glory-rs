@@ -1,20 +1,27 @@
 /* 253A-7: Formulario para registrar una nueva venta
-   253A-10: hook useFormularioVenta + componentes UI atómicos */
+   253A-10: hook useFormularioVenta + componentes UI atomicos
+   253A-14: acepta onExito para uso en modales, omite cabecera si se pasa */
 
 import {Turno, CanalVenta, MetodoPago} from '../api/generated';
 import useFormularioVenta from '../hooks/useFormularioVenta';
 import {Input, Select, Boton} from './ui';
 import '../estilos/Formularios.css';
 
-function FormularioVenta() {
-    const {campos, cambiarCampo, error, manejarEnvio, cargando} = useFormularioVenta();
+interface Props {
+    onExito?: () => void;
+}
+
+function FormularioVenta({ onExito }: Props) {
+    const {campos, cambiarCampo, error, manejarEnvio, cargando} = useFormularioVenta(onExito);
 
     return (
-        <div className="formularioPagina">
-            <div className="cabeceraPagina">
-                <h1 className="tituloPagina">Nueva Venta</h1>
-                <p className="subtituloPagina">Registrar una venta del restaurante</p>
-            </div>
+        <div className={onExito ? '' : 'formularioPagina'}>
+            {!onExito && (
+                <div className="cabeceraPagina">
+                    <h1 className="tituloPagina">Nueva Venta</h1>
+                    <p className="subtituloPagina">Registrar una venta del restaurante</p>
+                </div>
+            )}
 
             {error && <div className="errorFormulario">{error}</div>}
 

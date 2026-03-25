@@ -169,3 +169,70 @@
   font-size: 0.78rem;
   color: var(--colorPeligro);
 }
+
+/* === MODAL === */
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  animation: aparecer 0.15s ease;
+}
+
+@keyframes aparecer {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modalContenido {
+  background: var(--colorFondoPanel);
+  border-radius: calc(var(--radio) * 1.5);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: deslizar 0.2s ease;
+}
+
+@keyframes deslizar {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modalCabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--colorBorde);
+}
+
+.modalTitulo {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--colorTexto);
+}
+
+.modalCuerpo {
+  padding: 1.5rem;
+}
+
+/* Responsive modal */
+@media (max-width: 640px) {
+  .modalContenido {
+    max-width: 100%;
+    border-radius: var(--radio) var(--radio) 0 0;
+    margin-top: auto;
+  }
+  
+  .modalOverlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+}

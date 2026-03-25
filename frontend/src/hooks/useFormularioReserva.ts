@@ -1,4 +1,5 @@
-/* 253A-10: Hook para FormularioReserva — reduce 8 useState a 2 (regla usestate-excesivo) */
+/* 253A-10: Hook para FormularioReserva — reduce 8 useState a 2 (regla usestate-excesivo)
+   253A-14: acepta onExito para uso en modales */
 
 import { useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -14,7 +15,7 @@ interface CamposReserva {
   estado: EstadoReserva;
 }
 
-function useFormularioReserva() {
+function useFormularioReserva(onExito?: () => void) {
   const navigate = useNavigate();
   const [error, setError] = useState('');
   const [campos, setCampos] = useState<CamposReserva>({
@@ -34,7 +35,10 @@ function useFormularioReserva() {
   const mutation = useCrearReserva({
     mutation: {
       onSuccess: (res) => {
-        if (res.status === 201) navigate('/reservas');
+        if (res.status === 201) {
+          if (onExito) onExito();
+          else navigate('/reservas');
+        }
       },
       onError: () => setError('Error al crear la reserva'),
     },

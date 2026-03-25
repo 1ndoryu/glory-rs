@@ -1,10 +1,11 @@
 /* 253A-7: Lista paginada de ventas
-   253A-10: componentes UI atómicos */
+   253A-10: componentes UI atomicos
+   253A-14: modal para crear venta en vez de ruta separada */
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useListarVentas, useEliminarVenta } from '../api/generated';
-import { Boton } from './ui';
+import { Boton, Modal } from './ui';
+import FormularioVenta from './FormularioVenta';
 import '../estilos/Formularios.css';
 
 function formatearMoneda(valor: string): string {
@@ -12,8 +13,8 @@ function formatearMoneda(valor: string): string {
 }
 
 function ListaVentas() {
-  const navigate = useNavigate();
   const [pagina, setPagina] = useState(1);
+  const [modalAbierto, setModalAbierto] = useState(false);
   const porPagina = 15;
 
   const { data, isLoading, refetch } = useListarVentas({ page: pagina, per_page: porPagina });
@@ -23,6 +24,11 @@ function ListaVentas() {
 
   const ventas = data?.status === 200 ? data.data : null;
 
+  const cerrarModalYRefrescar = () => {
+    setModalAbierto(false);
+    refetch();
+  };
+
   return (
     <div>
       <div className="cabeceraLista">
@@ -30,8 +36,12 @@ function ListaVentas() {
           <h1 className="tituloPagina">Ventas</h1>
           <p className="subtituloPagina">{ventas ? `${ventas.total} registros` : ''}</p>
         </div>
-        <Boton variante="exito" onClick={() => navigate('/ventas/nueva')}>+ Nueva Venta</Boton>
+        <Boton variante="exito" onClick={() => setModalAbierto(true)}>+ Nueva Venta</Boton>
       </div>
+
+      <Modal abierto={modalAbierto} onCerrar={() => setModalAbierto(false)} titulo="Nueva Venta">
+        <FormularioVenta onExito={cerrarModalYRefrescar} />
+      </Modal>
 
       <div className="contenedorLista">
         {isLoading ? (

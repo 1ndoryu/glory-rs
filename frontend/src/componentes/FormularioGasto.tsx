@@ -1,20 +1,27 @@
 /* 253A-7: Formulario para registrar un nuevo gasto
-   253A-10: hook useFormularioGasto + componentes UI atómicos */
+   253A-10: hook useFormularioGasto + componentes UI atomicos
+   253A-14: acepta onExito para uso en modales */
 
 import { MetodoPago, TipoDocumento } from '../api/generated';
 import useFormularioGasto from '../hooks/useFormularioGasto';
 import { Input, Select, Boton } from './ui';
 import '../estilos/Formularios.css';
 
-function FormularioGasto() {
-  const { campos, cambiarCampo, error, manejarEnvio, cargando, categorias } = useFormularioGasto();
+interface Props {
+  onExito?: () => void;
+}
+
+function FormularioGasto({ onExito }: Props) {
+  const { campos, cambiarCampo, error, manejarEnvio, cargando, categorias } = useFormularioGasto(onExito);
 
   return (
-    <div className="formularioPagina">
-      <div className="cabeceraPagina">
-        <h1 className="tituloPagina">Nuevo Gasto</h1>
-        <p className="subtituloPagina">Registrar un gasto del restaurante</p>
-      </div>
+    <div className={onExito ? '' : 'formularioPagina'}>
+      {!onExito && (
+        <div className="cabeceraPagina">
+          <h1 className="tituloPagina">Nuevo Gasto</h1>
+          <p className="subtituloPagina">Registrar un gasto del restaurante</p>
+        </div>
+      )}
 
       {error && <div className="errorFormulario">{error}</div>}
 

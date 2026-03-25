@@ -1,4 +1,5 @@
-/* 253A-7: Barra lateral de navegación */
+/* 253A-7: Barra lateral de navegacion
+   253A-14: responsive — barra inferior en mobile */
 
 .barraLateral {
   position: fixed;
@@ -51,7 +52,6 @@
   border-left-color: var(--colorExito);
 }
 
-/* 253A-9: ajustado para SVG inline en vez de span+emoji */
 .iconoLateral {
   width: 1.2rem;
   height: 1.2rem;
@@ -63,16 +63,45 @@
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.botonCerrarSesion {
-  width: 100%;
-  padding: 0.6rem;
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.8);
-  border-radius: var(--radio);
-  font-size: 0.85rem;
-}
+/* Mobile: barra inferior tipo tab bar */
+@media (max-width: 768px) {
+  .barraLateral {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: auto;
+    flex-direction: row;
+    align-items: center;
+  }
 
-.botonCerrarSesion:hover {
-  background: var(--colorPeligro);
-  color: white;
+  .logoBarraLateral {
+    display: none;
+  }
+
+  .navegacionLateral {
+    flex-direction: row;
+    flex: 1;
+    padding: 0;
+    justify-content: space-around;
+  }
+
+  .enlaceLateral {
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 0.6rem 0.4rem;
+    font-size: 0.7rem;
+    border-left: none;
+    border-top: 2px solid transparent;
+    text-align: center;
+  }
+
+  .enlaceLateral.activo {
+    border-left-color: transparent;
+    border-top-color: var(--colorExito);
+  }
+
+  .pieBarraLateral {
+    display: none;
+  }
 }

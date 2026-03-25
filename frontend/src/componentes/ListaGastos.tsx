@@ -1,10 +1,11 @@
 /* 253A-7: Lista paginada de gastos
-   253A-10: componentes UI atómicos */
+   253A-10: componentes UI atomicos
+   253A-14: modal para crear gasto en vez de ruta separada */
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useListarGastos, useEliminarGasto } from '../api/generated';
-import { Boton } from './ui';
+import { Boton, Modal } from './ui';
+import FormularioGasto from './FormularioGasto';
 import '../estilos/Formularios.css';
 
 function formatearMoneda(valor: string): string {
@@ -12,8 +13,8 @@ function formatearMoneda(valor: string): string {
 }
 
 function ListaGastos() {
-  const navigate = useNavigate();
   const [pagina, setPagina] = useState(1);
+  const [modalAbierto, setModalAbierto] = useState(false);
   const porPagina = 15;
 
   const { data, isLoading, refetch } = useListarGastos({ page: pagina, per_page: porPagina });
@@ -23,6 +24,11 @@ function ListaGastos() {
 
   const gastos = data?.status === 200 ? data.data : null;
 
+  const cerrarModalYRefrescar = () => {
+    setModalAbierto(false);
+    refetch();
+  };
+
   return (
     <div>
       <div className="cabeceraLista">
@@ -30,8 +36,12 @@ function ListaGastos() {
           <h1 className="tituloPagina">Gastos</h1>
           <p className="subtituloPagina">{gastos ? `${gastos.total} registros` : ''}</p>
         </div>
-        <Boton variante="exito" onClick={() => navigate('/gastos/nuevo')}>+ Nuevo Gasto</Boton>
+        <Boton variante="exito" onClick={() => setModalAbierto(true)}>+ Nuevo Gasto</Boton>
       </div>
+
+      <Modal abierto={modalAbierto} onCerrar={() => setModalAbierto(false)} titulo="Nuevo Gasto">
+        <FormularioGasto onExito={cerrarModalYRefrescar} />
+      </Modal>
 
       <div className="contenedorLista">
         {isLoading ? (

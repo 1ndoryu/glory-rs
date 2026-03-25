@@ -1,4 +1,5 @@
-/* 253A-7: Pantalla de login */
+/* 253A-7: Pantalla de login
+   253A-14: responsive */
 
 .contenedorLogin {
   display: flex;
@@ -76,6 +77,36 @@
   border-radius: var(--radio);
   font-size: 0.85rem;
   text-align: center;
+}
+
+.enlaceRegistro {
+  text-align: center;
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  color: var(--colorTextoSecundario);
+}
+
+.enlaceRegistro span {
+  color: var(--colorInfo);
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.enlaceRegistro span:hover {
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .tarjetaLogin {
+    padding: 1.5rem;
+    border-radius: 0;
+    max-width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
 }
 
 .enlaceRegistro {

@@ -1,20 +1,27 @@
 /* 253A-7: Formulario para crear una nueva reserva
-   253A-10: hook useFormularioReserva + componentes UI atómicos */
+   253A-10: hook useFormularioReserva + componentes UI atomicos
+   253A-14: acepta onExito para uso en modales */
 
 import { EstadoReserva } from '../api/generated';
 import useFormularioReserva from '../hooks/useFormularioReserva';
 import { Input, Select, Textarea, Boton } from './ui';
 import '../estilos/Formularios.css';
 
-function FormularioReserva() {
-  const { campos, cambiarCampo, error, manejarEnvio, cargando } = useFormularioReserva();
+interface Props {
+  onExito?: () => void;
+}
+
+function FormularioReserva({ onExito }: Props) {
+  const { campos, cambiarCampo, error, manejarEnvio, cargando } = useFormularioReserva(onExito);
 
   return (
-    <div className="formularioPagina">
-      <div className="cabeceraPagina">
-        <h1 className="tituloPagina">Nueva Reserva</h1>
-        <p className="subtituloPagina">Registrar una reserva</p>
-      </div>
+    <div className={onExito ? '' : 'formularioPagina'}>
+      {!onExito && (
+        <div className="cabeceraPagina">
+          <h1 className="tituloPagina">Nueva Reserva</h1>
+          <p className="subtituloPagina">Registrar una reserva</p>
+        </div>
+      )}
 
       {error && <div className="errorFormulario">{error}</div>}
 
