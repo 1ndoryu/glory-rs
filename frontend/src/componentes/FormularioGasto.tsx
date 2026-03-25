@@ -4,7 +4,7 @@
 
 import { MetodoPago, TipoDocumento } from '../api/generated';
 import useFormularioGasto from '../hooks/useFormularioGasto';
-import { Input, Select, Boton } from './ui';
+import { Input, Select, Boton } from '@glory/componentes/ui';
 import '../estilos/Formularios.css';
 
 interface Props {

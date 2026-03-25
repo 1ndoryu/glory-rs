@@ -4,7 +4,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Home, DollarSign, BarChart3, ClipboardList, LogOut } from 'lucide-react';
 import { useAuthStore } from '../stores/authStore';
-import { Boton } from './ui';
+import { Boton } from '@glory/componentes/ui';
 import '../estilos/BarraLateral.css';
 
 function BarraLateral() {

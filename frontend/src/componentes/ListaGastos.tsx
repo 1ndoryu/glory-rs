@@ -4,7 +4,7 @@
 
 import { useState } from 'react';
 import { useListarGastos, useEliminarGasto } from '../api/generated';
-import { Boton, Modal } from './ui';
+import { Boton, Modal } from '@glory/componentes/ui';
 import FormularioGasto from './FormularioGasto';
 import '../estilos/Formularios.css';
 

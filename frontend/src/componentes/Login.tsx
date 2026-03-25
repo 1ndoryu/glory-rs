@@ -2,7 +2,7 @@
    253A-10: hook useLoginForm + componentes UI atómicos */
 
 import useLoginForm from '../hooks/useLoginForm';
-import { Input, Boton } from './ui';
+import { Input, Boton } from '@glory/componentes/ui';
 import '../estilos/Login.css';
 
 function Login() {

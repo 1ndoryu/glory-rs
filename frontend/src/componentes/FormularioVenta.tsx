@@ -4,7 +4,7 @@
 
 import {Turno, CanalVenta, MetodoPago} from '../api/generated';
 import useFormularioVenta from '../hooks/useFormularioVenta';
-import {Input, Select, Boton} from './ui';
+import { Input, Select, Boton } from '@glory/componentes/ui';
 import '../estilos/Formularios.css';
 
 interface Props {

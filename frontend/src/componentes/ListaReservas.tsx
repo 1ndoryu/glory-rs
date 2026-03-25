@@ -4,7 +4,7 @@
 
 import { useState } from 'react';
 import { useListarReservas, useEliminarReserva } from '../api/generated';
-import { Boton, Modal } from './ui';
+import { Boton, Modal } from '@glory/componentes/ui';
 import FormularioReserva from './FormularioReserva';
 import '../estilos/Formularios.css';
 

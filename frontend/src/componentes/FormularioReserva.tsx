@@ -4,7 +4,7 @@
 
 import { EstadoReserva } from '../api/generated';
 import useFormularioReserva from '../hooks/useFormularioReserva';
-import { Input, Select, Textarea, Boton } from './ui';
+import { Input, Select, Textarea, Boton } from '@glory/componentes/ui';
 import '../estilos/Formularios.css';
 
 interface Props {
