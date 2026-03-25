@@ -1,5 +1,18 @@
+/* 253A-7: App principal — rutas y providers */
+
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import './App.css';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { useAuthStore } from './stores/authStore';
+import Layout from './componentes/Layout';
+import Login from './componentes/Login';
+import Inicio from './componentes/Inicio';
+import ListaVentas from './componentes/ListaVentas';
+import FormularioVenta from './componentes/FormularioVenta';
+import ListaGastos from './componentes/ListaGastos';
+import FormularioGasto from './componentes/FormularioGasto';
+import ListaReservas from './componentes/ListaReservas';
+import FormularioReserva from './componentes/FormularioReserva';
+import './estilos/global.css';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -11,34 +24,25 @@ const queryClient = new QueryClient({
 });
 
 function App() {
+  const autenticado = useAuthStore((s) => s.estaAutenticado)();
+
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="aplicacion">
-        <h1 className="titulo">Glory RS</h1>
-        <p className="descripcion">
-          Template funcionando correctamente. Backend Rust + Frontend React + OpenAPI.
-        </p>
-        <nav className="navegacion">
-          <a
-            className="enlace"
-            href="http://localhost:3000/swagger-ui/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Swagger UI — Documentación de la API
-          </a>
-        </nav>
-        <section className="instrucciones">
-          <h2>Primeros pasos</h2>
-          <ol>
-            <li>Copia <code>.env.example</code> a <code>.env</code> y configura tus variables</li>
-            <li>Crea la base de datos PostgreSQL</li>
-            <li>Ejecuta el backend: <code>cargo run</code></li>
-            <li>Ejecuta el frontend: <code>cd frontend && npm run dev</code></li>
-            <li>Genera el cliente API: <code>npm run codegen</code></li>
-          </ol>
-        </section>
-      </div>
+      <Routes>
+        <Route path="/login" element={autenticado ? <Navigate to="/" replace /> : <Login />} />
+
+        <Route element={<Layout />}>
+          <Route path="/" element={<Inicio />} />
+          <Route path="/ventas" element={<ListaVentas />} />
+          <Route path="/ventas/nueva" element={<FormularioVenta />} />
+          <Route path="/gastos" element={<ListaGastos />} />
+          <Route path="/gastos/nuevo" element={<FormularioGasto />} />
+          <Route path="/reservas" element={<ListaReservas />} />
+          <Route path="/reservas/nueva" element={<FormularioReserva />} />
+        </Route>
+
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </QueryClientProvider>
   );
 }

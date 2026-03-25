@@ -1,0 +1,96 @@
+/* 253A-7: Pantalla de login */
+
+.contenedorLogin {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--colorPrimario), var(--colorSecundario));
+}
+
+.tarjetaLogin {
+  background: var(--colorFondoPanel);
+  border-radius: 12px;
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.tituloLogin {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--colorPrimario);
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.subtituloLogin {
+  text-align: center;
+  color: var(--colorTextoSecundario);
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.formularioLogin {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.grupoInput {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.etiqueta {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--colorTexto);
+}
+
+.botonLogin {
+  background: var(--colorAccento);
+  color: white;
+  padding: 0.75rem;
+  border-radius: var(--radio);
+  font-size: 1rem;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+.botonLogin:hover {
+  background: var(--colorPrimario);
+}
+
+.botonLogin:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.errorLogin {
+  background: #ffeaea;
+  color: var(--colorPeligro);
+  padding: 0.6rem;
+  border-radius: var(--radio);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.enlaceRegistro {
+  text-align: center;
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  color: var(--colorTextoSecundario);
+}
+
+.enlaceRegistro span {
+  color: var(--colorAccento);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.enlaceRegistro span:hover {
+  text-decoration: underline;
+}

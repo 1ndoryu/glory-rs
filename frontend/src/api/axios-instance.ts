@@ -1,5 +1,4 @@
 import axios from 'axios';
-import type { AxiosRequestConfig } from 'axios';
 
 const instance = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
@@ -15,20 +14,24 @@ instance.interceptors.request.use((config) => {
 });
 
 /**
- * Mutator para Orval — envuelve axios para que los hooks generados
- * funcionen con React Query y cancellation.
+ * 253A-7: Mutator para Orval v8 — la firma cambió a (url, config) en v8.
+ * Convierte RequestInit a AxiosRequestConfig y usa axios.
  */
-export const customInstance = <T>(config: AxiosRequestConfig): Promise<T> => {
-  const source = axios.CancelToken.source();
-  const promise = instance({
-    ...config,
-    cancelToken: source.token,
-  }).then(({ data }) => data);
+export const customInstance = async <T>(
+  url: string,
+  config: RequestInit,
+): Promise<T> => {
+  const { body, headers, method, signal } = config;
 
-  // @ts-expect-error -- propiedad cancel para React Query
-  promise.cancel = () => source.cancel('Query cancelado');
+  const response = await instance.request<T>({
+    url,
+    method: method as string,
+    data: body,
+    headers: headers as Record<string, string>,
+    signal: signal ?? undefined,
+  });
 
-  return promise;
+  return response.data;
 };
 
 export default instance;

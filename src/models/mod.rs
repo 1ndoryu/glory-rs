@@ -1,3 +1,4 @@
+pub mod common;
 mod dashboard;
 mod gasto;
 mod reserva;

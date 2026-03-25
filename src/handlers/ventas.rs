@@ -20,8 +20,8 @@ use crate::AppState;
     request_body = CrearVentaRequest,
     responses(
         (status = 201, description = "Venta creada", body = Venta),
-        (status = 401, description = "No autorizado", body = crate::errors::ErrorResponse),
-        (status = 422, description = "Error de validación", body = crate::errors::ErrorResponse)
+        (status = 401, description = "No autorizado", body = ErrorResponse),
+        (status = 422, description = "Error de validación", body = ErrorResponse)
     ),
     security(("bearer_auth" = []))
 )]
@@ -43,8 +43,8 @@ pub async fn crear_venta(
     params(("id" = Uuid, Path, description = "ID de la venta")),
     responses(
         (status = 200, description = "Venta encontrada", body = Venta),
-        (status = 404, description = "Venta no encontrada", body = crate::errors::ErrorResponse),
-        (status = 401, description = "No autorizado", body = crate::errors::ErrorResponse)
+        (status = 404, description = "Venta no encontrada", body = ErrorResponse),
+        (status = 401, description = "No autorizado", body = ErrorResponse)
     ),
     security(("bearer_auth" = []))
 )]
@@ -64,7 +64,7 @@ pub async fn obtener_venta(
     params(VentasQuery),
     responses(
         (status = 200, description = "Lista de ventas", body = VentasPaginadas),
-        (status = 401, description = "No autorizado", body = crate::errors::ErrorResponse)
+        (status = 401, description = "No autorizado", body = ErrorResponse)
     ),
     security(("bearer_auth" = []))
 )]
@@ -92,8 +92,8 @@ pub async fn listar_ventas(
     params(("id" = Uuid, Path, description = "ID de la venta")),
     responses(
         (status = 204, description = "Venta eliminada"),
-        (status = 404, description = "Venta no encontrada", body = crate::errors::ErrorResponse),
-        (status = 401, description = "No autorizado", body = crate::errors::ErrorResponse)
+        (status = 404, description = "Venta no encontrada", body = ErrorResponse),
+        (status = 401, description = "No autorizado", body = ErrorResponse)
     ),
     security(("bearer_auth" = []))
 )]

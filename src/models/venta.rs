@@ -40,18 +40,8 @@ pub enum CanalVenta {
     Eventos,
 }
 
-/// Métodos de pago soportados
-#[derive(Debug, Clone, Serialize, Deserialize, ToSchema, sqlx::Type)]
-#[sqlx(type_name = "VARCHAR")]
-#[serde(rename_all = "snake_case")]
-pub enum MetodoPago {
-    #[sqlx(rename = "efectivo")]
-    Efectivo,
-    #[sqlx(rename = "tarjeta")]
-    Tarjeta,
-    #[sqlx(rename = "transferencia")]
-    Transferencia,
-}
+/// Métodos de pago — re-exportado desde common
+pub use super::common::MetodoPago;
 
 /// Venta registrada en el restaurante
 #[derive(Debug, Clone, FromRow, Serialize, ToSchema)]

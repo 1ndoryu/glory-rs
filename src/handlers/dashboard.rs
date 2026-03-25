@@ -28,7 +28,7 @@ pub struct ResumenQuery {
     params(ResumenQuery),
     responses(
         (status = 200, description = "Resumen económico", body = ResumenEconomico),
-        (status = 401, description = "No autorizado", body = crate::errors::ErrorResponse)
+        (status = 401, description = "No autorizado", body = ErrorResponse)
     ),
     security(("bearer_auth" = []))
 )]

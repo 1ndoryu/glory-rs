@@ -1,0 +1,29 @@
+/* 253A-7: Layout principal — sidebar + contenido */
+
+.layoutPrincipal {
+  display: flex;
+  min-height: 100vh;
+}
+
+.contenidoPrincipal {
+  margin-left: var(--anchoBarraLateral);
+  flex: 1;
+  padding: 2rem;
+  min-height: 100vh;
+}
+
+.cabeceraPagina {
+  margin-bottom: 1.5rem;
+}
+
+.tituloPagina {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--colorPrimario);
+}
+
+.subtituloPagina {
+  color: var(--colorTextoSecundario);
+  font-size: 0.9rem;
+  margin-top: 0.3rem;
+}

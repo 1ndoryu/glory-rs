@@ -16,8 +16,8 @@ use crate::AppState;
     request_body = RegisterRequest,
     responses(
         (status = 201, description = "Usuario registrado", body = AuthResponse),
-        (status = 409, description = "Email ya registrado", body = crate::errors::ErrorResponse),
-        (status = 422, description = "Error de validación", body = crate::errors::ErrorResponse)
+        (status = 409, description = "Email ya registrado", body = ErrorResponse),
+        (status = 422, description = "Error de validación", body = ErrorResponse)
     )
 )]
 pub async fn register(
@@ -38,7 +38,7 @@ pub async fn register(
     request_body = LoginRequest,
     responses(
         (status = 200, description = "Login exitoso", body = AuthResponse),
-        (status = 401, description = "Credenciales inválidas", body = crate::errors::ErrorResponse)
+        (status = 401, description = "Credenciales inválidas", body = ErrorResponse)
     )
 )]
 pub async fn login(

@@ -13,6 +13,8 @@ use tower_http::trace::TraceLayer;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
+use crate::errors::ErrorResponse;
+
 use crate::AppState;
 
 /// Define el esquema de seguridad Bearer para Swagger UI
@@ -80,7 +82,7 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::MetodoPago,
         crate::models::TipoDocumento,
         crate::models::EstadoReserva,
-        crate::errors::ErrorResponse,
+        ErrorResponse,
     )),
     modifiers(&SecurityAddon),
     info(

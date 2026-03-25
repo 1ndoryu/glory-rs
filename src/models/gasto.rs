@@ -8,6 +8,8 @@ use utoipa::{IntoParams, ToSchema};
 use uuid::Uuid;
 use validator::Validate;
 
+use super::common::MetodoPago;
+
 /// Tipos de documento de gasto
 #[derive(Debug, Clone, Serialize, Deserialize, ToSchema, sqlx::Type)]
 #[sqlx(type_name = "VARCHAR")]
@@ -56,7 +58,7 @@ pub struct CrearGastoRequest {
     pub proveedor: Option<String>,
     pub categoria_id: Option<Uuid>,
     pub tipo_documento: TipoDocumento,
-    pub metodo_pago: super::venta::MetodoPago,
+    pub metodo_pago: MetodoPago,
     #[validate(length(
         max = 100,
         message = "El número de documento no debe exceder 100 caracteres"

@@ -23,8 +23,8 @@ use crate::AppState;
     request_body = CrearReservaRequest,
     responses(
         (status = 201, description = "Reserva creada", body = Reserva),
-        (status = 401, description = "No autorizado", body = crate::errors::ErrorResponse),
-        (status = 422, description = "Error de validación", body = crate::errors::ErrorResponse)
+        (status = 401, description = "No autorizado", body = ErrorResponse),
+        (status = 422, description = "Error de validación", body = ErrorResponse)
     ),
     security(("bearer_auth" = []))
 )]
@@ -46,8 +46,8 @@ pub async fn crear_reserva(
     params(("id" = Uuid, Path, description = "ID de la reserva")),
     responses(
         (status = 200, description = "Reserva encontrada", body = Reserva),
-        (status = 404, description = "Reserva no encontrada", body = crate::errors::ErrorResponse),
-        (status = 401, description = "No autorizado", body = crate::errors::ErrorResponse)
+        (status = 404, description = "Reserva no encontrada", body = ErrorResponse),
+        (status = 401, description = "No autorizado", body = ErrorResponse)
     ),
     security(("bearer_auth" = []))
 )]
@@ -67,7 +67,7 @@ pub async fn obtener_reserva(
     params(ReservasQuery),
     responses(
         (status = 200, description = "Lista de reservas", body = ReservasPaginadas),
-        (status = 401, description = "No autorizado", body = crate::errors::ErrorResponse)
+        (status = 401, description = "No autorizado", body = ErrorResponse)
     ),
     security(("bearer_auth" = []))
 )]
@@ -95,8 +95,8 @@ pub async fn listar_reservas(
     request_body = ActualizarReservaRequest,
     responses(
         (status = 200, description = "Reserva actualizada", body = Reserva),
-        (status = 404, description = "Reserva no encontrada", body = crate::errors::ErrorResponse),
-        (status = 401, description = "No autorizado", body = crate::errors::ErrorResponse)
+        (status = 404, description = "Reserva no encontrada", body = ErrorResponse),
+        (status = 401, description = "No autorizado", body = ErrorResponse)
     ),
     security(("bearer_auth" = []))
 )]
@@ -119,8 +119,8 @@ pub async fn actualizar_reserva(
     params(("id" = Uuid, Path, description = "ID de la reserva")),
     responses(
         (status = 204, description = "Reserva eliminada"),
-        (status = 404, description = "Reserva no encontrada", body = crate::errors::ErrorResponse),
-        (status = 401, description = "No autorizado", body = crate::errors::ErrorResponse)
+        (status = 404, description = "Reserva no encontrada", body = ErrorResponse),
+        (status = 401, description = "No autorizado", body = ErrorResponse)
     ),
     security(("bearer_auth" = []))
 )]
@@ -139,7 +139,7 @@ pub async fn eliminar_reserva(
     path = "/api/reservas/conteo",
     responses(
         (status = 200, description = "Conteo de reservas", body = ReservasConteo),
-        (status = 401, description = "No autorizado", body = crate::errors::ErrorResponse)
+        (status = 401, description = "No autorizado", body = ErrorResponse)
     ),
     security(("bearer_auth" = []))
 )]

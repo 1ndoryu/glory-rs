@@ -20,8 +20,8 @@ use crate::AppState;
     request_body = CrearGastoRequest,
     responses(
         (status = 201, description = "Gasto creado", body = Gasto),
-        (status = 401, description = "No autorizado", body = crate::errors::ErrorResponse),
-        (status = 422, description = "Error de validación", body = crate::errors::ErrorResponse)
+        (status = 401, description = "No autorizado", body = ErrorResponse),
+        (status = 422, description = "Error de validación", body = ErrorResponse)
     ),
     security(("bearer_auth" = []))
 )]
@@ -43,8 +43,8 @@ pub async fn crear_gasto(
     params(("id" = Uuid, Path, description = "ID del gasto")),
     responses(
         (status = 200, description = "Gasto encontrado", body = Gasto),
-        (status = 404, description = "Gasto no encontrado", body = crate::errors::ErrorResponse),
-        (status = 401, description = "No autorizado", body = crate::errors::ErrorResponse)
+        (status = 404, description = "Gasto no encontrado", body = ErrorResponse),
+        (status = 401, description = "No autorizado", body = ErrorResponse)
     ),
     security(("bearer_auth" = []))
 )]
@@ -64,7 +64,7 @@ pub async fn obtener_gasto(
     params(GastosQuery),
     responses(
         (status = 200, description = "Lista de gastos", body = GastosPaginados),
-        (status = 401, description = "No autorizado", body = crate::errors::ErrorResponse)
+        (status = 401, description = "No autorizado", body = ErrorResponse)
     ),
     security(("bearer_auth" = []))
 )]
@@ -93,8 +93,8 @@ pub async fn listar_gastos(
     params(("id" = Uuid, Path, description = "ID del gasto")),
     responses(
         (status = 204, description = "Gasto eliminado"),
-        (status = 404, description = "Gasto no encontrado", body = crate::errors::ErrorResponse),
-        (status = 401, description = "No autorizado", body = crate::errors::ErrorResponse)
+        (status = 404, description = "Gasto no encontrado", body = ErrorResponse),
+        (status = 401, description = "No autorizado", body = ErrorResponse)
     ),
     security(("bearer_auth" = []))
 )]
