@@ -3,6 +3,7 @@
 
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
+import { Boton } from './ui';
 import '../estilos/BarraLateral.css';
 
 /* SVG icons para la barra lateral — evita emojis Unicode (regla 18) */
@@ -56,9 +57,9 @@ function BarraLateral() {
       </nav>
 
       <div className="pieBarraLateral">
-        <button className="botonCerrarSesion" onClick={salir}>
+        <Boton className="botonCerrarSesion" onClick={salir}>
           Cerrar sesión
-        </button>
+        </Boton>
       </div>
     </aside>
   );

@@ -30,4 +30,7 @@ desktop.ini
 # Debug
 /frontend/openapi-debug.json
 
+# Reportes generados
+.sentinel-report.md
+
 cliente/

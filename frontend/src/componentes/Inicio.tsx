@@ -1,7 +1,9 @@
-/* 253A-7: Inicio — dashboard con resumen económico y accesos rápidos */
+/* 253A-7: Inicio — dashboard con resumen económico y accesos rápidos
+   253A-10: componentes UI atómicos */
 
 import { useNavigate } from 'react-router-dom';
 import { useResumen, useConteoReservas } from '../api/generated';
+import { Boton } from './ui';
 import '../estilos/Inicio.css';
 
 function formatearMoneda(valor: string): string {
@@ -29,15 +31,15 @@ function Inicio() {
       </div>
 
       <div className="accionesInicio">
-        <button className="botonAccion venta" onClick={() => navigate('/ventas/nueva')}>
+        <Boton className="botonAccion venta" onClick={() => navigate('/ventas/nueva')}>
           + Nueva Venta
-        </button>
-        <button className="botonAccion gasto" onClick={() => navigate('/gastos/nuevo')}>
+        </Boton>
+        <Boton className="botonAccion gasto" onClick={() => navigate('/gastos/nuevo')}>
           + Nuevo Gasto
-        </button>
-        <button className="botonAccion reserva" onClick={() => navigate('/reservas/nueva')}>
+        </Boton>
+        <Boton className="botonAccion reserva" onClick={() => navigate('/reservas/nueva')}>
           + Nueva Reserva
-        </button>
+        </Boton>
       </div>
 
       {cargandoResumen ? (

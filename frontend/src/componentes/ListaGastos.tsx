@@ -1,8 +1,10 @@
-/* 253A-7: Lista paginada de gastos */
+/* 253A-7: Lista paginada de gastos
+   253A-10: componentes UI atómicos */
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useListarGastos, useEliminarGasto } from '../api/generated';
+import { Boton } from './ui';
 import '../estilos/Formularios.css';
 
 function formatearMoneda(valor: string): string {
@@ -28,7 +30,7 @@ function ListaGastos() {
           <h1 className="tituloPagina">Gastos</h1>
           <p className="subtituloPagina">{gastos ? `${gastos.total} registros` : ''}</p>
         </div>
-        <button className="botonNuevo" onClick={() => navigate('/gastos/nuevo')}>+ Nuevo Gasto</button>
+        <Boton className="botonNuevo" onClick={() => navigate('/gastos/nuevo')}>+ Nuevo Gasto</Boton>
       </div>
 
       <div className="contenedorLista">
@@ -60,13 +62,13 @@ function ListaGastos() {
                     <td>{formatearMoneda(g.importe_iva)}</td>
                     <td><strong>{formatearMoneda((parseFloat(g.importe_base) + parseFloat(g.importe_iva)).toFixed(2))}</strong></td>
                     <td>
-                      <button
+                      <Boton
                         className="botonEliminar"
                         onClick={() => eliminarMutation.mutate({ id: g.id })}
                         disabled={eliminarMutation.isPending}
                       >
                         Eliminar
-                      </button>
+                      </Boton>
                     </td>
                   </tr>
                 ))}
@@ -74,9 +76,9 @@ function ListaGastos() {
             </table>
 
             <div className="paginacion">
-              <button className="botonPagina" disabled={pagina <= 1} onClick={() => setPagina(pagina - 1)}>← Anterior</button>
+              <Boton className="botonPagina" disabled={pagina <= 1} onClick={() => setPagina(pagina - 1)}>← Anterior</Boton>
               <span className="infoPagina">Página {pagina} de {Math.ceil(gastos.total / porPagina)}</span>
-              <button className="botonPagina" disabled={pagina * porPagina >= gastos.total} onClick={() => setPagina(pagina + 1)}>Siguiente →</button>
+              <Boton className="botonPagina" disabled={pagina * porPagina >= gastos.total} onClick={() => setPagina(pagina + 1)}>Siguiente →</Boton>
             </div>
           </>
         ) : (

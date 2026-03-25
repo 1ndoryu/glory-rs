@@ -1,64 +1,13 @@
-/* 253A-7: Formulario para registrar un nuevo gasto */
+/* 253A-7: Formulario para registrar un nuevo gasto
+   253A-10: hook useFormularioGasto + componentes UI atómicos */
 
-import { useState, FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useCrearGasto, useListarCategorias, MetodoPago, TipoDocumento } from '../api/generated';
+import { MetodoPago, TipoDocumento } from '../api/generated';
+import useFormularioGasto from '../hooks/useFormularioGasto';
+import { Input, Select, Boton } from './ui';
 import '../estilos/Formularios.css';
 
 function FormularioGasto() {
-  const navigate = useNavigate();
-  const [error, setError] = useState('');
-
-  const hoy = new Date().toISOString().split('T')[0];
-  const [fecha, setFecha] = useState(hoy);
-  const [proveedor, setProveedor] = useState('');
-  const [categoriaId, setCategoriaId] = useState('');
-  const [tipoDocumento, setTipoDocumento] = useState<TipoDocumento>(TipoDocumento.factura);
-  const [metodoPago, setMetodoPago] = useState<MetodoPago>(MetodoPago.efectivo);
-  const [numeroDocumento, setNumeroDocumento] = useState('');
-  const [recurrente, setRecurrente] = useState(false);
-  const [importeBase, setImporteBase] = useState('');
-  const [importeIva, setImporteIva] = useState('');
-
-  const { data: categoriasResp } = useListarCategorias();
-  const categorias = categoriasResp?.status === 200 ? categoriasResp.data : [];
-
-  const mutation = useCrearGasto({
-    mutation: {
-      onSuccess: (res) => {
-        if (res.status === 201) {
-          navigate('/gastos');
-        }
-      },
-      onError: () => {
-        setError('Error al crear el gasto');
-      },
-    },
-  });
-
-  const manejarEnvio = (e: FormEvent) => {
-    e.preventDefault();
-    setError('');
-
-    if (!fecha || !importeBase || !importeIva) {
-      setError('Completa los campos obligatorios');
-      return;
-    }
-
-    mutation.mutate({
-      data: {
-        fecha,
-        proveedor: proveedor || null,
-        categoria_id: categoriaId || null,
-        tipo_documento: tipoDocumento,
-        metodo_pago: metodoPago,
-        numero_documento: numeroDocumento || null,
-        recurrente: recurrente || null,
-        importe_base: importeBase,
-        importe_iva: importeIva,
-      },
-    });
-  };
+  const { campos, cambiarCampo, error, manejarEnvio, cargando, categorias } = useFormularioGasto();
 
   return (
     <div className="formularioPagina">
@@ -73,68 +22,68 @@ function FormularioGasto() {
         <div className="filaFormulario">
           <div className="grupoFormulario">
             <label className="etiquetaFormulario" htmlFor="fecha">Fecha</label>
-            <input id="fecha" type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
+            <Input id="fecha" type="date" value={campos.fecha} onChange={(e) => cambiarCampo('fecha', e.target.value)} />
           </div>
           <div className="grupoFormulario">
             <label className="etiquetaFormulario" htmlFor="proveedor">Proveedor</label>
-            <input id="proveedor" type="text" value={proveedor} onChange={(e) => setProveedor(e.target.value)} placeholder="Opcional" />
+            <Input id="proveedor" type="text" value={campos.proveedor} onChange={(e) => cambiarCampo('proveedor', e.target.value)} placeholder="Opcional" />
           </div>
         </div>
 
         <div className="filaFormulario">
           <div className="grupoFormulario">
             <label className="etiquetaFormulario" htmlFor="categoria">Categoría</label>
-            <select id="categoria" value={categoriaId} onChange={(e) => setCategoriaId(e.target.value)}>
+            <Select id="categoria" value={campos.categoriaId} onChange={(e) => cambiarCampo('categoriaId', e.target.value)}>
               <option value="">Sin categoría</option>
               {categorias.map((cat) => (
                 <option key={cat.id} value={cat.id}>{cat.nombre}</option>
               ))}
-            </select>
+            </Select>
           </div>
           <div className="grupoFormulario">
             <label className="etiquetaFormulario" htmlFor="tipoDocumento">Tipo documento</label>
-            <select id="tipoDocumento" value={tipoDocumento} onChange={(e) => setTipoDocumento(e.target.value as TipoDocumento)}>
+            <Select id="tipoDocumento" value={campos.tipoDocumento} onChange={(e) => cambiarCampo('tipoDocumento', e.target.value as TipoDocumento)}>
               <option value={TipoDocumento.factura}>Factura</option>
               <option value={TipoDocumento.albaran}>Albarán</option>
               <option value={TipoDocumento.ticket}>Ticket</option>
-            </select>
+            </Select>
           </div>
         </div>
 
         <div className="filaFormulario">
           <div className="grupoFormulario">
             <label className="etiquetaFormulario" htmlFor="metodoPago">Método de pago</label>
-            <select id="metodoPago" value={metodoPago} onChange={(e) => setMetodoPago(e.target.value as MetodoPago)}>
+            <Select id="metodoPago" value={campos.metodoPago} onChange={(e) => cambiarCampo('metodoPago', e.target.value as MetodoPago)}>
               <option value={MetodoPago.efectivo}>Efectivo</option>
               <option value={MetodoPago.tarjeta}>Tarjeta</option>
               <option value={MetodoPago.transferencia}>Transferencia</option>
-            </select>
+            </Select>
           </div>
           <div className="grupoFormulario">
             <label className="etiquetaFormulario" htmlFor="numeroDocumento">Nº documento</label>
-            <input id="numeroDocumento" type="text" value={numeroDocumento} onChange={(e) => setNumeroDocumento(e.target.value)} placeholder="Opcional" />
+            <Input id="numeroDocumento" type="text" value={campos.numeroDocumento} onChange={(e) => cambiarCampo('numeroDocumento', e.target.value)} placeholder="Opcional" />
           </div>
         </div>
 
         <div className="filaFormulario">
           <div className="grupoFormulario">
             <label className="etiquetaFormulario" htmlFor="importeBase">Importe base (€)</label>
-            <input id="importeBase" type="number" step="0.01" min="0" value={importeBase} onChange={(e) => setImporteBase(e.target.value)} placeholder="0.00" />
+            <Input id="importeBase" type="number" step="0.01" min="0" value={campos.importeBase} onChange={(e) => cambiarCampo('importeBase', e.target.value)} placeholder="0.00" />
           </div>
           <div className="grupoFormulario">
             <label className="etiquetaFormulario" htmlFor="importeIva">Importe IVA (€)</label>
-            <input id="importeIva" type="number" step="0.01" min="0" value={importeIva} onChange={(e) => setImporteIva(e.target.value)} placeholder="0.00" />
+            <Input id="importeIva" type="number" step="0.01" min="0" value={campos.importeIva} onChange={(e) => cambiarCampo('importeIva', e.target.value)} placeholder="0.00" />
           </div>
         </div>
 
         <div className="checkboxFormulario">
-          <input id="recurrente" type="checkbox" checked={recurrente} onChange={(e) => setRecurrente(e.target.checked)} />
+          <Input id="recurrente" type="checkbox" checked={campos.recurrente} onChange={(e) => cambiarCampo('recurrente', e.target.checked)} />
           <label htmlFor="recurrente">Gasto recurrente</label>
         </div>
 
-        <button className="botonEnviar" type="submit" disabled={mutation.isPending}>
-          {mutation.isPending ? 'Guardando...' : 'Registrar Gasto'}
-        </button>
+        <Boton className="botonEnviar" type="submit" disabled={cargando}>
+          {cargando ? 'Guardando...' : 'Registrar Gasto'}
+        </Boton>
       </form>
     </div>
   );

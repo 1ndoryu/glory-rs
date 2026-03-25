@@ -1,8 +1,10 @@
-/* 253A-7: Lista paginada de reservas */
+/* 253A-7: Lista paginada de reservas
+   253A-10: componentes UI atómicos */
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useListarReservas, useEliminarReserva } from '../api/generated';
+import { Boton } from './ui';
 import '../estilos/Formularios.css';
 
 function ListaReservas() {
@@ -24,7 +26,7 @@ function ListaReservas() {
           <h1 className="tituloPagina">Reservas</h1>
           <p className="subtituloPagina">{reservas ? `${reservas.total} registros` : ''}</p>
         </div>
-        <button className="botonNuevo" onClick={() => navigate('/reservas/nueva')}>+ Nueva Reserva</button>
+        <Boton className="botonNuevo" onClick={() => navigate('/reservas/nueva')}>+ Nueva Reserva</Boton>
       </div>
 
       <div className="contenedorLista">
@@ -56,13 +58,13 @@ function ListaReservas() {
                       <span className={`badgeEstado ${r.estado}`}>{r.estado}</span>
                     </td>
                     <td>
-                      <button
+                      <Boton
                         className="botonEliminar"
                         onClick={() => eliminarMutation.mutate({ id: r.id })}
                         disabled={eliminarMutation.isPending}
                       >
                         Eliminar
-                      </button>
+                      </Boton>
                     </td>
                   </tr>
                 ))}
@@ -70,9 +72,9 @@ function ListaReservas() {
             </table>
 
             <div className="paginacion">
-              <button className="botonPagina" disabled={pagina <= 1} onClick={() => setPagina(pagina - 1)}>← Anterior</button>
+              <Boton className="botonPagina" disabled={pagina <= 1} onClick={() => setPagina(pagina - 1)}>← Anterior</Boton>
               <span className="infoPagina">Página {pagina} de {Math.ceil(reservas.total / porPagina)}</span>
-              <button className="botonPagina" disabled={pagina * porPagina >= reservas.total} onClick={() => setPagina(pagina + 1)}>Siguiente →</button>
+              <Boton className="botonPagina" disabled={pagina * porPagina >= reservas.total} onClick={() => setPagina(pagina + 1)}>Siguiente →</Boton>
             </div>
           </>
         ) : (

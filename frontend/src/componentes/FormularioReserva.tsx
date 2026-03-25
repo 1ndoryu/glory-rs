@@ -1,57 +1,13 @@
-/* 253A-7: Formulario para crear una nueva reserva */
+/* 253A-7: Formulario para crear una nueva reserva
+   253A-10: hook useFormularioReserva + componentes UI atómicos */
 
-import { useState, FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useCrearReserva, EstadoReserva } from '../api/generated';
+import { EstadoReserva } from '../api/generated';
+import useFormularioReserva from '../hooks/useFormularioReserva';
+import { Input, Select, Textarea, Boton } from './ui';
 import '../estilos/Formularios.css';
 
 function FormularioReserva() {
-  const navigate = useNavigate();
-  const [error, setError] = useState('');
-
-  const hoy = new Date().toISOString().split('T')[0];
-  const [fecha, setFecha] = useState(hoy);
-  const [hora, setHora] = useState('20:00');
-  const [nombreCliente, setNombreCliente] = useState('');
-  const [numPersonas, setNumPersonas] = useState('2');
-  const [telefono, setTelefono] = useState('');
-  const [notas, setNotas] = useState('');
-  const [estado, setEstado] = useState<EstadoReserva>(EstadoReserva.pendiente);
-
-  const mutation = useCrearReserva({
-    mutation: {
-      onSuccess: (res) => {
-        if (res.status === 201) {
-          navigate('/reservas');
-        }
-      },
-      onError: () => {
-        setError('Error al crear la reserva');
-      },
-    },
-  });
-
-  const manejarEnvio = (e: FormEvent) => {
-    e.preventDefault();
-    setError('');
-
-    if (!fecha || !hora || !nombreCliente || !numPersonas) {
-      setError('Completa los campos obligatorios');
-      return;
-    }
-
-    mutation.mutate({
-      data: {
-        fecha,
-        hora,
-        nombre_cliente: nombreCliente,
-        num_personas: parseInt(numPersonas, 10),
-        telefono: telefono || null,
-        notas: notas || null,
-        estado,
-      },
-    });
-  };
+  const { campos, cambiarCampo, error, manejarEnvio, cargando } = useFormularioReserva();
 
   return (
     <div className="formularioPagina">
@@ -66,48 +22,48 @@ function FormularioReserva() {
         <div className="filaFormulario">
           <div className="grupoFormulario">
             <label className="etiquetaFormulario" htmlFor="fecha">Fecha</label>
-            <input id="fecha" type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
+            <Input id="fecha" type="date" value={campos.fecha} onChange={(e) => cambiarCampo('fecha', e.target.value)} />
           </div>
           <div className="grupoFormulario">
             <label className="etiquetaFormulario" htmlFor="hora">Hora</label>
-            <input id="hora" type="time" value={hora} onChange={(e) => setHora(e.target.value)} />
+            <Input id="hora" type="time" value={campos.hora} onChange={(e) => cambiarCampo('hora', e.target.value)} />
           </div>
         </div>
 
         <div className="filaFormulario">
           <div className="grupoFormulario">
             <label className="etiquetaFormulario" htmlFor="nombreCliente">Nombre del cliente</label>
-            <input id="nombreCliente" type="text" value={nombreCliente} onChange={(e) => setNombreCliente(e.target.value)} placeholder="Nombre completo" />
+            <Input id="nombreCliente" type="text" value={campos.nombreCliente} onChange={(e) => cambiarCampo('nombreCliente', e.target.value)} placeholder="Nombre completo" />
           </div>
           <div className="grupoFormulario">
             <label className="etiquetaFormulario" htmlFor="numPersonas">Personas</label>
-            <input id="numPersonas" type="number" min="1" value={numPersonas} onChange={(e) => setNumPersonas(e.target.value)} />
+            <Input id="numPersonas" type="number" min="1" value={campos.numPersonas} onChange={(e) => cambiarCampo('numPersonas', e.target.value)} />
           </div>
         </div>
 
         <div className="filaFormulario">
           <div className="grupoFormulario">
             <label className="etiquetaFormulario" htmlFor="telefono">Teléfono</label>
-            <input id="telefono" type="tel" value={telefono} onChange={(e) => setTelefono(e.target.value)} placeholder="Opcional" />
+            <Input id="telefono" type="tel" value={campos.telefono} onChange={(e) => cambiarCampo('telefono', e.target.value)} placeholder="Opcional" />
           </div>
           <div className="grupoFormulario">
             <label className="etiquetaFormulario" htmlFor="estado">Estado</label>
-            <select id="estado" value={estado} onChange={(e) => setEstado(e.target.value as EstadoReserva)}>
+            <Select id="estado" value={campos.estado} onChange={(e) => cambiarCampo('estado', e.target.value as EstadoReserva)}>
               <option value={EstadoReserva.pendiente}>Pendiente</option>
               <option value={EstadoReserva.confirmada}>Confirmada</option>
               <option value={EstadoReserva.cancelada}>Cancelada</option>
-            </select>
+            </Select>
           </div>
         </div>
 
         <div className="grupoFormulario ancho">
           <label className="etiquetaFormulario" htmlFor="notas">Notas</label>
-          <textarea id="notas" rows={3} value={notas} onChange={(e) => setNotas(e.target.value)} placeholder="Alergias, preferencias, etc." />
+          <Textarea id="notas" rows={3} value={campos.notas} onChange={(e) => cambiarCampo('notas', e.target.value)} placeholder="Alergias, preferencias, etc." />
         </div>
 
-        <button className="botonEnviar" type="submit" disabled={mutation.isPending}>
-          {mutation.isPending ? 'Guardando...' : 'Crear Reserva'}
-        </button>
+        <Boton className="botonEnviar" type="submit" disabled={cargando}>
+          {cargando ? 'Guardando...' : 'Crear Reserva'}
+        </Boton>
       </form>
     </div>
   );

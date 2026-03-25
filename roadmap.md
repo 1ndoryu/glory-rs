@@ -24,8 +24,6 @@ En caso de que puedas analizar todos los archivos en jpg y de audio en la carpet
 
 Puedes ajustar los pendientes. Si puedes analizar todo el contenido y sacar el texto de los audios, hazlo sin dudar. 
 
-## Pendientes
-
 # Especificaciones del Proyecto: Plataforma de Gestión de Restaurantes
 
 > **⚠️ NOTA IMPORTANTE DE ÚLTIMA HORA:** > El cliente ha notificado una instrucción directa del propietario del restaurante para simplificar radicalmente el proyecto. **En la parte económica, el sistema ahora solo debe incluir las funciones básicas de Gastos, Ventas y Margen** (Ventas menos Gastos).
@@ -87,3 +85,10 @@ Puedes ajustar los pendientes. Si puedes analizar todo el contenido y sacar el t
 - Tres columnas de estado: Nuevas, En curso (estudiándose) y Resueltas.
 - Ficha de incidencia con: Estado, proveedor, prioridad (baja, media, alta), motivo, documento vinculado y un botón de "Contactar proveedor" para enviar el reporte directamente.
 
+# Pendientes.
+
+1. Los componentes no me parecene componentes reales, no hay opciones tamaño, primario, secundario, etc. 
+2. Entiendo que los audios se transcribieron pero probablemente los videos no, tambien se necesita transcribir de alguna forma para averiguar que es lo que dicen. 
+3. El diseño necesita mejora, debe ser mas moderno y minimalista, los elementos de crear nuevas reservas, gastos y esas cosas deben ser modales. 
+4. Necesito que añadas contenido de prueba para vizualizar como se vera todo. 
+5. Los iconos parecen hechos manualmente en vez de usar una bibioleteca. 
