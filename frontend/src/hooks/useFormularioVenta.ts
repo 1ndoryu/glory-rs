@@ -1,87 +1,116 @@
-/* 253A-10: Hook para FormularioVenta — reduce 10 useState a 2 (regla usestate-excesivo)
-   253A-14: acepta onExito para uso en modales */
+/* 253A-10: Hook useFormularioVenta — estado del formulario de ventas.
+   253A-14: acepta onExito para uso en modales.
+   253A-19: Refactorizado para turnos multi-select y detalles por turno.
+   El backend acepta un turno por venta, así que se crean simultáneamente N ventas
+   (una por turno) usando Promise.all con crearVenta directamente. */
 
 import { useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useCrearVenta, Turno, CanalVenta, MetodoPago } from '../api/generated';
+import { useQueryClient } from '@tanstack/react-query';
+import { crearVenta, getListarVentasQueryKey, Turno, CanalVenta, MetodoPago, CrearVentaRequest } from '../api/generated';
+
+export interface DetalleTurno {
+  importeBase: string;
+  metodoPago: MetodoPago;
+}
 
 interface CamposVenta {
   fecha: string;
   comensales: string;
   descripcion: string;
   ivaPorcentaje: string;
-  turno: Turno;
+  permitirDuplicados: boolean;
+  turnos: Turno[];
   canal: CanalVenta;
-  metodoPago: MetodoPago;
-  importeBase: string;
-  importeIva: string;
+  detalles: Record<Turno, DetalleTurno>;
 }
 
-function useFormularioVenta(onExito?: () => void) {
-  const navigate = useNavigate();
-  const [error, setError] = useState('');
-  const [campos, setCampos] = useState<CamposVenta>({
+const detallePorDefecto = (): DetalleTurno => ({ importeBase: '', metodoPago: MetodoPago.efectivo });
+
+function camposIniciales(): CamposVenta {
+  return {
     fecha: new Date().toISOString().split('T')[0],
     comensales: '',
     descripcion: '',
     ivaPorcentaje: '10',
-    turno: Turno.mediodia,
+    permitirDuplicados: false,
+    turnos: [Turno.mediodia],
     canal: CanalVenta.comedor,
-    metodoPago: MetodoPago.efectivo,
-    importeBase: '',
-    importeIva: '',
-  });
-
-  const cambiarCampo = <K extends keyof CamposVenta>(campo: K, valor: CamposVenta[K]) => {
-    setCampos(prev => {
-      const nuevo = { ...prev, [campo]: valor };
-      /* Auto-calcular IVA al cambiar importe base o porcentaje */
-      if (campo === 'importeBase' || campo === 'ivaPorcentaje') {
-        const base = campo === 'importeBase' ? parseFloat(valor as string) : parseFloat(prev.importeBase);
-        const pct = campo === 'ivaPorcentaje' ? parseFloat(valor as string) : parseFloat(prev.ivaPorcentaje);
-        if (!isNaN(base) && !isNaN(pct)) {
-          nuevo.importeIva = (base * pct / 100).toFixed(2);
-        }
-      }
-      return nuevo;
-    });
-  };
-
-  const mutation = useCrearVenta({
-    mutation: {
-      onSuccess: (res) => {
-        if (res.status === 201) {
-          if (onExito) onExito();
-          else navigate('/ventas');
-        }
-      },
-      onError: () => setError('Error al crear la venta'),
+    detalles: {
+      [Turno.manana]: detallePorDefecto(),
+      [Turno.mediodia]: detallePorDefecto(),
+      [Turno.noche]: detallePorDefecto(),
     },
-  });
+  };
+}
 
-  const manejarEnvio = (e: FormEvent) => {
+export function calcularIva(importeBase: string, ivaPorcentaje: string): string {
+  const base = parseFloat(importeBase);
+  const pct = parseFloat(ivaPorcentaje);
+  if (isNaN(base) || isNaN(pct)) return '0.00';
+  return (base * pct / 100).toFixed(2);
+}
+
+function useFormularioVenta(onExito?: () => void) {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [error, setError] = useState('');
+  const [cargando, setCargando] = useState(false);
+  const [campos, setCampos] = useState<CamposVenta>(camposIniciales);
+
+  function cambiarCampo<K extends keyof CamposVenta>(campo: K, valor: CamposVenta[K]) {
+    setCampos(prev => ({ ...prev, [campo]: valor }));
+  }
+
+  function toggleTurno(turno: Turno) {
+    setCampos(prev => {
+      const ya = prev.turnos.includes(turno);
+      const nuevos = ya ? prev.turnos.filter(t => t !== turno) : [...prev.turnos, turno];
+      /* Mínimo 1 turno siempre seleccionado */
+      return nuevos.length > 0 ? { ...prev, turnos: nuevos } : prev;
+    });
+  }
+
+  function cambiarDetalle(turno: Turno, campo: keyof DetalleTurno, valor: string | MetodoPago) {
+    setCampos(prev => ({
+      ...prev,
+      detalles: { ...prev.detalles, [turno]: { ...prev.detalles[turno], [campo]: valor } },
+    }));
+  }
+
+  async function manejarEnvio(e: FormEvent) {
     e.preventDefault();
     setError('');
-    if (!campos.fecha || !campos.importeBase || !campos.importeIva) {
-      setError('Completa los campos obligatorios');
-      return;
+    if (!campos.fecha) { setError('La fecha es obligatoria'); return; }
+    const sinImporte = campos.turnos.filter(t => !campos.detalles[t].importeBase);
+    if (sinImporte.length > 0) { setError('Todos los turnos seleccionados deben tener importe'); return; }
+    setCargando(true);
+    try {
+      await Promise.all(campos.turnos.map(turno => {
+        const d = campos.detalles[turno];
+        const req: CrearVentaRequest = {
+          fecha: campos.fecha,
+          comensales: campos.comensales ? parseInt(campos.comensales, 10) : null,
+          descripcion: campos.descripcion || null,
+          iva_porcentaje: campos.ivaPorcentaje,
+          turno,
+          canal: campos.canal,
+          metodo_pago: d.metodoPago,
+          importe_base: d.importeBase,
+          importe_iva: calcularIva(d.importeBase, campos.ivaPorcentaje),
+        };
+        return crearVenta(req);
+      }));
+      await queryClient.invalidateQueries({ queryKey: getListarVentasQueryKey() });
+      if (onExito) onExito(); else navigate('/ventas');
+    } catch {
+      setError('Error al registrar la venta');
+    } finally {
+      setCargando(false);
     }
-    mutation.mutate({
-      data: {
-        fecha: campos.fecha,
-        comensales: campos.comensales ? parseInt(campos.comensales, 10) : null,
-        descripcion: campos.descripcion || null,
-        iva_porcentaje: campos.ivaPorcentaje,
-        turno: campos.turno,
-        canal: campos.canal,
-        metodo_pago: campos.metodoPago,
-        importe_base: campos.importeBase,
-        importe_iva: campos.importeIva,
-      },
-    });
-  };
+  }
 
-  return { campos, cambiarCampo, error, manejarEnvio, cargando: mutation.isPending };
+  return { campos, cambiarCampo, toggleTurno, cambiarDetalle, error, manejarEnvio, cargando };
 }
 
 export default useFormularioVenta;

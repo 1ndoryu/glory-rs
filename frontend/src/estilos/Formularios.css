@@ -250,3 +250,203 @@
     gap: 0.5rem;
   }
 }
+
+/* 253A-20: Menú de 3 opciones para Nuevo Gasto y vista Digitalizar */
+
+.menuGasto {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+button.tarjetaModoGasto {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 1.5rem 1rem;
+  border: 1.5px solid var(--colorBorde);
+  border-radius: var(--radio);
+  background: var(--colorFondoPanel);
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  text-align: center;
+  width: 100%;
+}
+
+button.tarjetaModoGasto:hover:not(:disabled) {
+  border-color: var(--colorAccento);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+button.tarjetaModoGasto.deshabilitado,
+button.tarjetaModoGasto:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.iconoModoGasto {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.tituloModoGasto {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--colorTexto);
+}
+
+.descripcionModoGasto {
+  font-size: 0.78rem;
+  color: var(--colorTextoSecundario);
+}
+
+.areaDigitalizar {
+  border: 2px dashed var(--colorBorde);
+  border-radius: var(--radio);
+  padding: 2.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: center;
+}
+
+.iconoDigitalizar {
+  font-size: 2.5rem;
+}
+
+.textoDigitalizar {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--colorTexto);
+  margin: 0;
+}
+
+.subtextoDigitalizar {
+  font-size: 0.82rem;
+  color: var(--colorTextoSecundario);
+  margin: 0;
+  max-width: 360px;
+}
+
+/* Etiqueta "(Opcional)" en fields */
+.etiquetaOpcional {
+  font-weight: 400;
+  color: var(--colorTextoSecundario);
+  font-size: 0.78rem;
+}
+
+@media (max-width: 768px) {
+  .menuGasto {
+    grid-template-columns: 1fr;
+  }
+}
+
+.selectorTurnos {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* Especificidad button.chipTurno (0,1,1) supera a .boton/.botonMd (0,1,0) de Glory-rs */
+button.chipTurno {
+  padding: 0.4rem 0.9rem;
+  border: 1.5px solid var(--colorBorde);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--colorTextoSecundario);
+  background: var(--colorFondoPanel);
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+button.chipTurno.activo {
+  border-color: var(--colorAccento);
+  background: #e8eef5;
+  color: var(--colorAccento);
+  font-weight: 600;
+}
+
+button.chipTurno:hover:not(.activo) {
+  border-color: var(--colorTextoSecundario);
+  color: var(--colorTexto);
+  background: var(--colorFondoPanel);
+}
+
+.detalleTurno {
+  border: 1px solid var(--colorBorde);
+  border-radius: var(--radio);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: var(--colorFondo);
+}
+
+.etiquetaDetalleTurno {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--colorAccento);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.totalCalculado {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 0.75rem;
+  background: var(--colorFondoPanel);
+  border: 1px solid var(--colorBorde);
+  border-radius: var(--radio);
+  font-size: 0.9rem;
+  color: var(--colorTextoSecundario);
+  font-variant-numeric: tabular-nums;
+}
+
+.opcionesAvanzadas {
+  border: 1px solid var(--colorBorde);
+  border-radius: var(--radio);
+  overflow: hidden;
+}
+
+.resumenAvanzado {
+  padding: 0.7rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--colorTextoSecundario);
+  list-style: none;
+}
+
+.resumenAvanzado::-webkit-details-marker {
+  display: none;
+}
+
+.resumenAvanzado::before {
+  content: '▸  ';
+}
+
+details[open] .resumenAvanzado::before {
+  content: '▾  ';
+}
+
+.contenidoAvanzado {
+  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--colorBorde);
+}
+
+/* checkbox dentro de opciones avanzadas — alineado en la parte inferior del grupo */
+.checkboxAvanzado {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 0.5rem;
+  padding-bottom: 0.3rem;
+}
+
+.checkboxAvanzado input[type="checkbox"] {
+  width: auto;
+  margin-bottom: 0.1rem;
+}
