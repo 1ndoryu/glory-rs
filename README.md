@@ -126,14 +126,23 @@ La estructura es idéntica en cada rama. Solo cambia el contenido específico de
 ## Comandos útiles
 
 ```bash
+# Comando unificado — verifica todo el proyecto (backend + frontend)
+npm run check
+
 # Backend
 cargo run                    # Iniciar servidor
 cargo check                  # Verificar compilación
 cargo clippy                 # Linter (nivel paranoia)
 cargo test                   # Tests
 cargo fmt                    # Formatear código
+npm run check:back           # cargo check + clippy
 
 # Frontend
+npm run dev:front            # Dev server con HMR
+npm run check:front          # Type-check TypeScript
+npm run codegen              # Regenerar cliente API desde OpenAPI
+
+# O directamente desde frontend/
 cd frontend
 npm run dev                  # Dev server con HMR
 npm run build                # Build producción

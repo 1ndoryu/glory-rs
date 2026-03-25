@@ -4,37 +4,32 @@ Objetivo: crear un template de Rust + Ts React + OpenAPI + Codegen + Clippy nive
 
 Ver `Agente/completados/tareas-2026-03-25.md` para detalles.
 
+## Stack implementado
+
+| Capa | Herramienta |
+|------|-------------|
+| Framework web | Axum 0.7 |
+| OpenAPI | utoipa 4 + utoipa-swagger-ui 7 |
+| Serialización | serde |
+| Base de datos | SQLx 0.8 (PostgreSQL) |
+| Migraciones | SQLx migrate |
+| Validación | validator 0.18 |
+| Variables de entorno | dotenvy |
+| Logging | tracing + tracing-subscriber |
+| Errores | thiserror 2 |
+| Auth | jsonwebtoken + argon2 |
+| CORS | tower-http |
+| Linter | clippy (deny all + warn pedantic) |
+| Frontend | React 18 + TypeScript + Vite |
+| State | React Query + Zustand |
+| Codegen | Orval 8 (reemplaza openapi-typescript-codegen) |
+
 ## Pendientes
 
-si hay alguna herramienta que consideres que falta o que sea mejor, puedes agregarla o remplazar a una existe: prioridad: 1. Velocidad de desarrollo, 2. Facilitar cualquier decisión futura nueva sobre el proyecto por ejemplo, una app nativa. 3. Rendimiento, 4. Seguridad, 5. Popularidad de la herramienta (comunidad, mantenimiento, etc), 6. Facilidad de uso, 7. Documentación, 8. Compatibilidad con otras herramientas, 9. Flexibilidad y personalización, 10. Escalabilidad.
+*(Agregar nuevas tareas aquí)*
 
-Capa                │ Herramienta         │ ¿Para qué?
-────────────────────┼─────────────────────┼──────────────────────────
-Framework web       │ Axum                │ HTTP, routing, middleware
-OpenAPI generation  │ utoipa + utoipa-swagger-ui │ Genera esquema OpenAPI desde código
-Serialización       │ serde               │ JSON ↔ Structs
-Base de datos       │ SQLx                │ Queries SQL con verificación en compilación
-Migraciones         │ SQLx (integrado)    │ Control de esquema DB
-Validación          │ validator           │ Validar inputs del usuario
-Variables de entorno│ dotenvy             │ Cargar .env
-Configuración       │ config (crate)      │ Settings por entorno
-Logging             │ tracing + tracing-subscriber │ Logs estructurados
-Manejo de errores   │ thiserror           │ Errores tipados y limpios
-Auth (JWT)          │ jsonwebtoken        │ Tokens
-Hashing passwords   │ argon2              │ Hashing seguro
-CORS                │ tower-http          │ Middleware CORS
-Testing             │ cargo test + reqwest│ Tests integración
-Linter              │ clippy (paranoia)   │ Código limpio
-Codegen frontend    │ openapi-typescript-codegen │ Genera cliente TS
-────────────────────┼─────────────────────┼──────────────────────────
+## Notas
 
-Un paso extra sería que falta configurar /coolify-manager-rs (lo he dejado en el entorno), para que se pueda desplegar proyectos rust 
+- Configurar coolify-manager-rs para desplegar proyectos Rust (repo separado)
+- Prioridades: 1. Velocidad desarrollo, 2. Decisiones futuras, 3. Rendimiento, 4. Seguridad, 5. Popularidad, 6. Facilidad, 7. Docs, 8. Compatibilidad, 9. Flexibilidad, 10. Escalabilidad
 
-
-# NOTA: 
-
-planifica mejor este roadmap
-
-## OTRA NOTA:
-
-Veo que el front me carca errores. Todos los errores de backend y front deberían ser detectados con un solo comando para facilitar el desarrollo. 
