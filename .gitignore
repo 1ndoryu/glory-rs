@@ -1,0 +1,26 @@
+# Rust
+/target/
+**/*.rs.bk
+*.pdb
+
+# Environment (secrets)
+.env
+
+# Frontend
+/frontend/node_modules/
+/frontend/dist/
+/frontend/src/api/generated/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
