@@ -89,10 +89,10 @@ Puedes ajustar los pendientes. Si puedes analizar todo el contenido y sacar el t
 
 ## Tambien Pendiente, hacer eso tambien:
 
-- Configurar coolify-manager-rs para desplegar proyectos Rust (repo separado)
+- ~~Configurar coolify-manager-rs para desplegar proyectos Rust (repo separado)~~ ✅ 253A-8
 
 ## Otra tarea
 
-estas usando query_as en vez query_as!, ajusta todo!! y agrega una regla en .github\instructions\test.instructions.md de que todo siempre es preferible detectar los erres antes.
+~~estas usando query_as en vez query_as!, ajusta todo!! y agrega una regla en .github\instructions\test.instructions.md de que todo siempre es preferible detectar los erres antes.~~ ✅ 253A-6
 
-agrega otra regla o un paso entre el ciclo o lo que sea en .github\instructions\test.instructions.md sobre de que todo tiene que ser testeable y comprobado para ahorrar tiempo en corregir cosas al ejecutar, no se cual sea la forma mas eficiente pero implementalo no solo como regla sino tambien en este proyecto.
+~~agrega otra regla o un paso entre el ciclo o lo que sea en .github\instructions\test.instructions.md sobre de que todo tiene que ser testeable y comprobado para ahorrar tiempo en corregir cosas al ejecutar, no se cual sea la forma mas eficiente pero implementalo no solo como regla sino tambien en este proyecto.~~ ✅ 253A-6
