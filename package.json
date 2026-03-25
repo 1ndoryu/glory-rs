@@ -7,6 +7,7 @@
     "check": "cargo check && cargo clippy && npm --prefix frontend run type-check",
     "check:back": "cargo check && cargo clippy",
     "check:front": "npm --prefix frontend run type-check",
+    "verify": "cargo check && cargo clippy -- -D warnings && cargo test && npm --prefix frontend run type-check",
     "fmt": "cargo fmt",
     "fmt:check": "cargo fmt --check",
     "dev:back": "cargo run",

@@ -2,12 +2,13 @@
 applyTo: '**'
 ---
 
-# Protocolo de Desarrollo v5.0 — Rust + React + OpenAPI
+# Protocolo de Desarrollo v5.0 (25 marzo 2026)
+Nota: si un proyecto no cumple o no encaja con v5.0, adaptar progresivamente el proyecto con lo que se pueda de su estructura o empezarla de cero.
 
 ## I. REGLAS ABSOLUTAS (por prioridad)
 
-**-1. LO MAS DIFICIL PRIMERO.**
-Siempre abordar primero lo mas complejo, la tarea mas dificil primero.
+**-1. LO MAS DIFICIL PRIMERO.** 
+Siempre abordar primero lo mas complejo, la tarea mas dificil primero. 
 
 **0. El flujo es obligatorio e innegociable.**
 Antes de ejecutar cualquier tarea, la primera respuesta al usuario SIEMPRE debe ser un anuncio breve con este formato exacto:
@@ -30,6 +31,8 @@ Sin este anuncio, no se inicia ninguna tarea. Esta regla existe para que el agen
 
 **1. Autonomia total.** Trabaja continua y prolongadamente sin detenerte. Prohibido pedir confirmacion trivial, dividir tareas artificialmente o interrumpir el flujo. Maxima eficiencia por interaccion.
 
+**1.1 Trabajo en equipo con otros agentes.** Otros agentes pueden estar trabajando en el mismo repositorio simultaneamente. Si encuentras cambios, archivos nuevos, commits o ramas que no son tuyos, no los borres ni los reviertas — son trabajo de otro agente o del usuario. Si un conflicto con el trabajo de otro agente te impide completar una tarea, salta esa tarea temporalmente y continua con la siguiente. Vuelve a intentarla cuando el conflicto se haya resuelto. Tu responsabilidad es tu ciclo de tareas; el trabajo ajeno no es tu problema salvo que interfiera directamente, en cuyo caso lo rodeas, no lo destruyes.
+
 **2. Cero parches.** Toda solucion debe escalar 10x sin reescritura. Antes de implementar: "Es la mejor opcion arquitectonica o el camino facil?" Si es lo segundo, redisenar. Prohibido justificar con "es temporal" o "lo refactorizamos despues".
 
 **2.1 Pensamiento expansivo obligatorio.** Incluso si la tarea parece pequena, primero evaluar si revela un problema de arquitectura, sincronizacion, contratos, cache, observabilidad o UX mas profundo. No limitarse al sintoma pedido si existe una solucion raiz claramente superior. Cada tarea es una oportunidad para mejorar el sistema, no solo para apagar un fuego local.
@@ -38,125 +41,81 @@ Sin este anuncio, no se inicia ninguna tarea. Esta regla existe para que el agen
 
 **4. Guardian del orden.** Eres responsable absoluto de que el proyecto no se desordene. Al tocar un archivo, corregir toda violacion visible de bajo riesgo (imports muertos, hardcodeo, codigo muerto, nombres confusos). Si la correccion es compleja, dejar TO-DO en el codigo. No existe "no es mi tarea".
 
-**5. Seguridad primero.** 
-  - SQL: siempre prepared statements / query builders (usar `sqlx::query_as!` para detectar problemas en tiempo real). Prohibido interpolar strings en queries. Usar parametros `$1, $2...` siempre.
-  - Rust: todo input externo se valida con tipos fuertes y `serde` + validadores (`validator` crate o validacion manual en constructores). Newtypes para IDs y valores de dominio (`UserId(i64)`, `Email(String)`) — nunca `String` crudo para datos semanticos.
-  - Secrets: siempre variables de entorno (`.env` + `dotenvy`), nunca en codigo fuente. Secrets nunca en logs ni en respuestas de error.
-  - Endpoints: autenticacion/autorizacion explicita por ruta. Prohibido endpoint sin guard de permisos a menos que sea intencionalmente publico (documentar con comentario).
-  - Frontend: sanitizar toda entrada antes de renderizar. Prohibido `dangerouslySetInnerHTML` con datos dinamicos sin sanitizar. CORS configurado explicitamente en el backend.
-  - Dependencias: `cargo audit` y `npm audit` como parte de la validacion. Vulnerabilidades criticas se corrigen antes de avanzar.
+**5. Seguridad primero.**
+  - SQL: siempre prepared statements, query builders o macros tipados (`query_as!`, `$wpdb->prepare()`, etc.). Nunca interpolar strings en queries.
+  - Backend: handlers/controllers con manejo de errores global. SSL explicito en APIs de pago. Escapar argumentos de procesos externos (`escapeshellarg()` en PHP, `std::process::Command` con args separados en Rust).
+  - Secrets: siempre variables de entorno, nunca en codigo fuente. Permisos de API lo mas restrictivos posible.
+  - Input: validar/sanitizar toda entrada en el boundary del sistema. Prohibido `eval()`, `innerHTML` con datos dinamicos sin sanitizar, `unwrap()` en Rust para input externo.
 
 **6. Sin fallos silenciosos.**
-  - Rust: todo `Result` y `Option` se maneja explicitamente. Prohibido `.unwrap()` en codigo de produccion excepto en inicializacion con comentario justificando por que no puede fallar. Usar `?`, `map_err`, `context()` (anyhow/thiserror). Prohibido `let _ = operacion_que_puede_fallar()`.
-  - Errores de dominio usan `thiserror` con variantes semanticas. Errores internos usan `anyhow` con contexto. Los handlers traducen errores de dominio a HTTP status codes apropiados.
-  - Logging estructurado obligatorio: `tracing` con spans por request. Toda operacion I/O, BD, red: debe tener tracing con contexto suficiente para debuggear en produccion.
-  - React: errores de API retornan estructura tipada, nunca enmascarar como exito. Toda falla = feedback visible al usuario (toast/banner). Updates optimistas con rollback si falla. React Query maneja reintentos y cache.
-  - OpenAPI: toda respuesta de error documentada en el schema (`utoipa::path` responses). El codegen genera tipos de error que el frontend usa.
+  - Toda operacion I/O, red, BD, parsing: manejo de errores con logging util. Errores silenciados = prohibido.
+  - Rust: propagar errores con `?` y `thiserror`/`anyhow`. Prohibido `.unwrap()` en codigo de produccion salvo invariantes probadas. Cleanup en `Drop` o guardas RAII.
+  - React: errores retornan `ok: false`, nunca enmascarar como exito. Toda falla = feedback visible al usuario (toast). Updates optimistas con rollback si falla. `useEffect` async con `AbortController`.
+  - Metodos criticos (INSERT/UPDATE/DELETE/APIs) retornan resultado, nunca void.
+  - Race conditions: usar upsert atomico o constraints UNIQUE, no buscar-crear secuencial.
 
 **7. Rendimiento.**
-  - Prohibido queries N+1 o roundtrips innecesarios. Combinar con CTEs/CASE/JOINs. `sqlx::query!` valida queries en compile-time contra la BD.
-  - Connection pooling obligatorio (sqlx `PgPool`). Configurar `max_connections`, `min_connections`, timeouts.
-  - Zustand/React Query: selectores especificos, nunca store completo. React Query para server state, Zustand solo para client state.
-  - Paginacion obligatoria en endpoints que retornan listas. Cursor-based preferido sobre offset.
-  - Indices de BD documentados junto al schema. Toda query nueva: verificar que existe indice apropiado.
+  - Prohibido queries N+1 o roundtrips innecesarios. Combinar con CTEs/CASE/JOINs.
+  - Zustand: selectores especificos (`useStore(s => s.campo)`), nunca store completo.
+  - PostgreSQL INTERVAL: validar con whitelist, nunca interpolar.
 
 **8. Arquitectura SOLID.**
-  - Backend (Rust): separacion en capas — `handlers/` (HTTP), `services/` (logica), `repositories/` (BD), `models/` (structs/domain), `errors/` (tipos de error). Handlers delgados: extraer body → llamar service → retornar response.
-  - Newtypes y enums para todo valor de dominio. Prohibido `String` o `i64` desnudo como parametro de funcion de dominio.
-  - Frontend (React): componentes max 300 lineas, hooks max 120, utils max 150. Logica >5 lineas va en hook separado. Max 3 `useState` por componente.
-  - Directorios por dominio/feature: `features/users/`, `features/auth/`. Componentes compartidos en `components/ui/`. API generada en `src/api/` (no tocar manualmente).
-  - OCP (extender por props/composicion), ISP (props minimas), DIP (depender de traits/interfaces, no implementaciones concretas).
+  - SRP: 1 componente = 1 responsabilidad. Max 3 `useState`. Logica >5 lineas va en hook separado (`useMiComponente.ts`).
+  - Limites: componentes/estilos max 300 lineas, hooks max 120, utils max 150. Si excede, dividir.
+  - Directorios jerarquicos por dominio (`components/ui/`, `features/auth/`). Prohibido carpeta plana.
+  - OCP (extender por props/composicion), ISP (props minimas), DIP (depender de abstracciones).
 
 **9. Estandares de codigo.**
-  - Rust: `snake_case` funciones/variables, `PascalCase` structs/enums/traits, `SCREAMING_SNAKE` constantes. `cargo fmt` + `cargo clippy` obligatorios antes de commit. Clippy con `#![deny(clippy::all)]` en `main.rs`/`lib.rs`.
-  - TypeScript: `camelCase` vars/funcs, `PascalCase` componentes/tipos/interfaces.
+  - JS/TS: `camelCase` vars/funcs, `PascalCase` componentes/clases.
   - CSS: nombres en espanol y `camelCase` (`.contenedorPrincipal`). Todo en archivos `.css` separados. Prohibido CSS inline. Variables obligatorias para colores/espaciados/tipografia.
   - Verificar que toda referencia existe antes de usarla (variables CSS, imports, tipos). Si lo creas, conectalo.
-  - Codigo generado por Orval/codegen: NUNCA editar manualmente. Cambios van en el schema OpenAPI (Rust) → regenerar.
-  - UI atomica: todo elemento reutilizable es su propio componente. Zustand para estado global de cliente. React Query para estado de servidor.
+  - UI atomica: todo elemento reutilizable es su propio componente. Zustand para estado global.
 
 **10. Comentarios = memoria del proyecto.**
-  - Formato: bloques `/* ... */` o `// ...` explicando el "por que". Prohibido barras decorativas (`====`).
-  - Rust: `///` para doc comments publicos (structs, funciones, traits). `//` para comentarios internos.
+  - Formato: bloques `/* ... */` explicando el "por que". Prohibido barras decorativas (`====`).
   - Al completar una tarea, dejar comentario compacto en el codigo con: que se hizo, por que, gotchas encontrados, que queda pendiente.
   - No borrar comentarios de tareas anteriores — son registro de evolucion. Actualizar si quedan obsoletos.
-  - Las lecciones aprendidas viven en los comentarios del codigo, no en MDs.
+  - Las lecciones aprendidas viven en `Agente/lecciones/lecciones-aprendidas.md` Y en los comentarios del codigo. Despues de cada tarea completada, evaluar si hubo una leccion nueva y registrarla en ambos lugares.
 
 **11. Validacion obligatoria — errores ajenos incluidos.**
-  - Despues de editar cualquier archivo Rust: `cargo check` sobre el workspace.
+  - Despues de editar cualquier archivo: ejecutar `get_errors` sobre ese archivo.
   - Despues de editar `.ts`/`.tsx`: ejecutar `npm run type-check`.
-  - Despues de editar `.css`: validar variables/clases referenciadas.
-  - Antes de cada commit Rust: `cargo fmt --check` + `cargo clippy` + `cargo test`.
-  - Antes de cada commit frontend: `npm run type-check` como minimo.
+  - Despues de editar `.css`: ejecutar VarSense (`cssVarsValidator.scanAllDiagnostics`).
+  - Generacion masiva (>3 archivos): ejecutar Code Sentinel (`codeSentinel.analyzeWorkspace`).
+  - Antes de cada commit: `npm run type-check` como minimo.
   - **Si los comandos reportan errores — aunque no esten relacionados con tu tarea — corregirlos es tu responsabilidad.** No se avanza ni se commitea con errores pendientes. Los errores pre-existentes encontrados se corrigen en el mismo commit o en uno separado si son muchos.
-  - Despues de cambios en endpoints/schemas de Rust: regenerar cliente con `npm run codegen` y verificar que el frontend compila.
 
 **12. Commits.**
   - Prohibido `git add .` o `git add --all`. Siempre `git add archivo1 archivo2` explicito.
   - Verificar `git diff --stat HEAD` y `git status` antes de commitear.
   - Cada tarea = un commit separado. Mensaje claro: `{id}: descripcion breve`.
   - Commit automatico al completar tarea, sin pedir permiso.
-  - Archivos generados por Orval/codegen se commitean junto con los cambios de schema que los causaron.
 
-**12.1 Git limpio — cero archivos sin trackear.**
-  - Antes de cada commit: `git status` no debe mostrar archivos untracked que no esten en `.gitignore`.
-  - Si se instalan dependencias (`npm install`, `cargo add`), verificar que `.gitignore` cubre los directorios generados (`node_modules/`, `target/`, `dist/`, etc.).
-  - Prohibido commitear carpetas de dependencias, builds, cache de IDE, logs o archivos temporales. Si un nuevo directorio generado aparece como untracked, anadirlo a `.gitignore` primero.
-  - Todo archivo `.gitignore` debe cubrir al menos: `/target/`, `node_modules/`, `.env`, `*.log`, `/logs/`, `/frontend/dist/`, IDE files.
-  - El `.gitignore` raiz cubre tanto la raiz (`node_modules/`) como subdirectorios (`/frontend/node_modules/`).
-  - Si VSCode muestra archivos pendientes de commit que no son parte de la tarea, no ignorarlos — investigar y resolver antes de avanzar.
+**13. PowerShell + SSH.**
+  - SQL complejo via SSH: usar base64 (`[Convert]::ToBase64String` + `base64 -d` en remoto). PS5 no tiene heredoc.
+  - Alternativa: crear `.sh` local, copiar con `scp`, ejecutar remotamente.
 
-**13. OpenAPI como contrato unico.**
-  - El schema OpenAPI se genera desde Rust (`utoipa`). Es la unica fuente de verdad del contrato API.
-  - Prohibido escribir tipos de API manualmente en el frontend. Todo sale del codegen.
-  - Cambiar un endpoint = cambiar la anotacion `utoipa` → regenerar → verificar que el frontend compila → si hay breaking change, actualizar componentes afectados.
-  - El archivo `openapi.json` generado se commitea en el repositorio para trazabilidad.
-  - Todo campo opcional debe ser `Option<T>` en Rust y se refleja como `T | undefined` en el tipo generado. No hay ambiguedad.
+**14. Glory Sentinel.** 
+  - Aplicar sentinel-disable-file limite-lineas solo a archivos con justificacion valida (clases de utilidad central, controllers REST con muchas rutas, archivos legacy temporales). Prohibido usarlo para evitar refactorings necesarios o para justificar codigo desordenado. Si se usa, explicar claramente la razón.
 
-**14. Migraciones de BD.**
-  - Toda modificacion de schema de base de datos usa migraciones versionadas (`sqlx migrate`).
-  - Naming: `{YYYYMMDDHHMMSS}_{descripcion}.sql` (generado por `sqlx migrate add`).
-  - Migraciones son inmutables una vez commiteadas. Correciones van en migraciones nuevas.
-  - Toda migracion incluye tanto `up` como `down` cuando sea posible.
-  - `sqlx::query!` valida contra el schema actual — si cambias la BD, los queries que no compilen se detectan automaticamente.
+**15. Diseño responsive obligatorio.**
+  - Todo componente UI debe funcionar en mobile (≥320px), tablet (≥768px) y desktop (≥1024px).
+  - Usar media queries o contenedores CSS con breakpoints estandar. Prohibido diseñar solo para desktop.
+  - Testear visualmente en al menos 2 resoluciones antes de dar por completada una tarea de UI.
 
-**15. Deteccion de errores en compile-time — siempre preferir.**
-  - Prioridad absoluta: detectar errores antes de ejecutar, no despues. Si existe una herramienta o macro que valide en compile-time, usarla obligatoriamente.
-  - SQL: siempre `sqlx::query_as!` / `sqlx::query!` (macros con `!`) en vez de `sqlx::query_as` / `sqlx::query` (funciones). Las macros validan queries contra la BD real en compile-time: detectan typos en nombres de columnas, tipos incompatibles y parametros faltantes antes de ejecutar.
-  - Para que compile sin BD: mantener cache offline con `cargo sqlx prepare` y commitear `.sqlx/` en el repositorio. Despues de cualquier cambio en queries o schema: `cargo sqlx prepare` de nuevo.
-  - Rust: preferir tipos fuertes sobre validacion manual. Si el compilador puede atrapar un error, no dejarlo para runtime.
-  - TypeScript: `strict: true` obligatorio. Sin `any` excepto en fronteras con librerias sin tipos. Preferir inferencia cuando el tipo es obvio.
-  - Toda dependencia de un valor externo (env vars, config) se valida al inicio del programa, no al primer uso. Fail-fast en startup.
+**16. Revision final del roadmap.**
+  - Despues de cada commit, despues de cada resumen, SIEMPRE releer el roadmap como ultima accion antes de cerrar o pasar a la siguiente tarea. Esta regla existe porque se omite sistematicamente. No es opcional.
 
-**16. Todo es testeable — verificacion antes de cerrar.**
-  - **Cada tarea debe terminar con evidencia de que funciona**, no con "deberia funcionar". Si no hay test automatico, hacer test manual documentado.
-  - Backend: todo endpoint nuevo o modificado se prueba con un request real (`cargo test` con tests de integracion, o request manual con curl/herramienta equivalente). Verificar status code Y body.
-  - Queries SQL: al usar `query_as!`, el compile-time check ya verifica la query contra la BD. Pero los resultados logicos (filtros, paginacion, calculos) necesitan test funcional.
-  - Frontend: verificar que la UI renderiza sin errores y que los datos fluyen correctamente. `npm run type-check` obligatorio pero NO suficiente — verificar visualmente si es posible.
-  - Errores encontrados DURANTE testing se corrigen ANTES de cerrar la tarea, no se dejan como "tarea siguiente".
-  - Si un test no es posible en el entorno actual (dependencia de terceros, hardware), documentar explicitamente por que se omitio en el comentario del commit.
-  - Regla de oro: si despues de tu commit alguien hace `cargo test` / `npm run type-check` y falla, la tarea esta incompleta.
-
-**17. Glory Sentinel como herramienta de prevencion.**
-  - Glory Sentinel (code-sentinel) es una extension VS Code que vive en el workspace y detecta violaciones de calidad, seguridad y patrones prohibidos mediante analisis estatico determinista.
-  - **Obligatorio consultarla**: antes de cerrar una tarea, verificar si el error corregido o la funcionalidad implementada puede ser detectado automaticamente por una regla de Sentinel. Si puede, y no existe la regla, crearla como parte de la tarea.
-  - **Prevencion sistematica**: cada vez que se corrige un bug que un humano no deberia volver a cometer, preguntarse: "Glory Sentinel puede detectar esto?" Si la respuesta es si, implementar la regla. Corregir el mismo error dos veces sin crear deteccion automatica es una falla del flujo.
-  - **Reglas Sentinel para React/TS que aplican a este proyecto**: emoji-en-codigo, inline-style-prohibido, useeffect-sin-cleanup, zustand-sin-selector, mutacion-directa-estado, key-index-lista, error-enmascarado, fallo-sin-feedback.
-  - **Reglas Sentinel para Rust** (futuras): query-sin-macro (usa `query_as` en vez de `query_as!`), unwrap-en-produccion, `git add .` en scripts.
-  - **Integracion con el flujo**: el Paso 7 (Prevencion) debe considerar Glory Sentinel como primera opcion para automatizar deteccion.
-  - Para anadir una regla nueva: 1) Registrar en `ruleRegistry.ts`, 2) Implementar deteccion en el analyzer apropiado (`reactAnalyzer`, `staticAnalyzer`, etc.), 3) Verificar que detecta el patron.
-
-**18. Emojis prohibidos — usar SVG o componentes.**
-  - Prohibido usar caracteres emoji Unicode en componentes React, CSS o HTML. Los emojis no son accesibles, no escalan bien, varian entre plataformas y son impredecibles en produccion.
-  - Usar SVG (importados como componentes o `<img>`) o iconos de una libreria dedicada.
-  - Esta regla debe ser detectable por Glory Sentinel via la regla `emoji-en-codigo`.
-  - Excepcion unica: comentarios de codigo donde el emoji es parte de documentacion narrativa (ej: roadmap), nunca en codigo renderizable.
+**17. Glory Framework (submodulo agnostico).**
+  - Si la funcionalidad implementada es reutilizable entre proyectos (componentes UI atomicos, logica de pagos, WebSocket, chat, utilidades de estilos), debe vivir en el submodulo Glory del proyecto (`glory-rs` para Rust, `glory` para PHP).
+  - Al completar una tarea, preguntarse: "Esto es especifico de este proyecto o es agnostico?" Si es agnostico, moverlo al submodulo.
+  - La evaluacion de si algo debe ir en Glory es parte del paso de cierre de cada tarea.
 
 ---
 
 ## II. FLUJO DE TRABAJO (ciclo continuo)
 
-El roadmap (`App/roadmap.md`) es el canal de comunicacion. El usuario escribe tareas ahi, tu las ejecutas. El flujo es un ciclo **tarea por tarea**: los 10 pasos se ejecutan completos para UNA tarea antes de tomar la siguiente. No se acumulan tareas ni se saltan pasos.
+El roadmap (`roadmap.md` en la raiz del proyecto) es el canal de comunicacion. El usuario escribe tareas ahi, tu las ejecutas. El flujo es un ciclo **tarea por tarea**: los 10 pasos se ejecutan completos para UNA tarea antes de tomar la siguiente. No se acumulan tareas ni se saltan pasos.
 
 ### ID de tarea
 Cada tarea recibe un ID unico basado en la fecha: `{DD}{M}{A}-{N}`
@@ -167,7 +126,7 @@ Cada tarea recibe un ID unico basado en la fecha: `{DD}{M}{A}-{N}`
 - Ejemplo: 17 marzo 2026, tarea 1 = `173A-1`. Tarea 2 ese dia = `173A-2`.
 
 ### Paso 1 — Leer roadmap y planes
-Leer `App/roadmap.md` completo. Identificar tareas pendientes. Revisar `App/Agente/planes/` por planes activos que requieran continuacion.
+Leer `roadmap.md` completo. Identificar tareas pendientes. Revisar `Agente/planes/` por planes activos que requieran continuacion.
 
 Si una tarea del roadmap no es suficientemente clara para ejecutarse con seguridad tecnica, dejar una nota breve pidiendo aclaracion en el lugar adecuado del flujo del agente, saltar a la siguiente tarea y volver luego. Prohibido bloquear el ciclo completo por una ambiguedad aislada.
 
@@ -178,57 +137,47 @@ Tomar una tarea pendiente y completarla. Reglas:
 - **2.3** Dejar comentarios en el codigo referenciando la tarea: que se hizo, instrucciones clave, problemas enfrentados, pendientes sobre esa funcionalidad. No borrar comentarios anteriores.
 - **2.4** Prohibido avanzar sin marcar la tarea como completada, hacer commit y organizar los MDs.
 - **2.5** Editar archivo por archivo. No acumular cambios en muchos archivos sin validar entre cada uno.
-- **2.6** Si la tarea es compleja (>1 sesion o multiples fases) o es un problema repetitivo que ya reaparecio, crear un plan en `App/Agente/planes/` con nombre `plan-tema-YYYY-MM-DD.md` describiendo fases, estado actual y proximos pasos. Continuar desde donde se quedo.
-- **2.7** Si la tarea modifica un endpoint o schema de Rust: despues de compilar el backend, regenerar el cliente frontend (`npm run codegen`) y verificar que `npm run type-check` pasa. Si rompe componentes, arreglarlos como parte de la misma tarea.
+- **2.6** Si la tarea es compleja (>1 sesion o multiples fases) o es un problema repetitivo que ya reaparecio, crear un plan en `Agente/planes/` con nombre `plan-tema-YYYY-MM-DD.md` describiendo fases, estado actual y proximos pasos. Continuar desde donde se quedo.
 
 ### Paso 3 — Validar y corregir errores reportados
 Despues de cada tarea, ejecutar los comandos de validacion correspondientes (ver seccion V). **Si los comandos reportan errores — aunque no tengan relacion con la tarea actual — corregirlos antes de continuar.** Los errores reportados por herramientas son tu responsabilidad. No se avanza con errores pendientes.
 
-Backend:
-- `cargo check` → `cargo clippy` → `cargo test`
-- Si se modifico schema BD: verificar que migraciones estan al dia y `sqlx prepare` actualizado.
+Si la tarea toca React, hooks, stores, islands o servicios frontend, no alcanza con type-check abstracto: revisar especificamente que el flujo renderizado afectado siga funcionando y que no haya regresiones evidentes en hydration, estados vacios, modales, menus, contadores o navegacion.
 
-Frontend:
-- `npm run codegen` (si cambio el schema OpenAPI) → `npm run type-check`
-- Si la tarea toca React, hooks, stores o servicios frontend: revisar que el flujo renderizado afectado siga funcionando y que no haya regresiones en estados vacios, modales, navegacion o carga de datos.
+Si Glory Sentinel reporta un **falso positivo** (la regla no aplica al caso concreto), crear un MD en `Agente/prevencion/` describiendo el falso positivo y la correccion necesaria en la regla de Sentinel para evitarlo en el futuro.
 
 ### Paso 4 — Testear la tarea
 Antes de marcar como completada, verificar que la funcionalidad implementada o corregida funciona:
-- Backend: ejecutar `cargo test`. Para endpoints nuevos/modificados: hacer request manual (curl o herramienta equivalente) y verificar response body y status code.
-- Frontend: verificar que la UI renderiza correctamente y que los datos fluyen del backend al componente.
+- Ejecutar la feature o el fix en local y confirmar el resultado esperado.
+- Si el problema es visible en UI/HTML/CSS o texto renderizado, la verificacion local debe incluir abrir el flujo afectado y comprobar exactamente el elemento cambiado. No alcanza con type-check, lectura de codigo o asumir que "deberia funcionar".
 - Si hay tests existentes, ejecutarlos. Si la tarea lo amerita y es viable, agregar un test.
 - Solo si no es posible testear en local (dependencia de terceros, hardware, etc.), omitir con justificacion en el comentario del commit.
 - **Una tarea no se marca como completada hasta que este testeada y confirmada.**
 
 ### Regla adicional de cierre
-- Prohibido mover una tarea a completados si el sintoma original sigue visible localmente o si no se verifico el flujo exacto reportado por el usuario cuando el entorno local permite hacerlo.
+- Prohibido mover una tarea a completados si el sintoma original sigue visible localmente o si no se verifico el selector/texto/flujo exacto reportado por el usuario cuando el entorno local permite hacerlo.
 
-### Paso 5 — Archivar tarea completada + limpiar roadmap
-Mover la tarea completada del roadmap a un archivo en `App/Agente/completados/` con nombre `tareas-YYYY-MM-DD.md`. Si ya existe uno con la fecha de hoy, agregar ahi. **Borrar completamente la tarea del roadmap** — no dejarla tachada con `~~`, no marcarla con check. El roadmap solo contiene tareas pendientes, nunca completadas. Las tareas completadas viven exclusivamente en `completados/`. Si la tarea tenia un plan en `App/Agente/planes/`, mover el plan a `App/Agente/planes/completados/`.
+### Paso 5 — Archivar tarea completada
+Mover la tarea completada del roadmap a un archivo en `Agente/completados/` con nombre `tareas-YYYY-MM-DD.md`. Si ya existe uno con la fecha de hoy, agregar ahi. El roadmap nunca acumula tareas completadas. Si la tarea tenia un plan en `Agente/planes/`, mover el plan a `Agente/planes/completados/`.
 
 ### Paso 6 — Documentar (obligatorio cuando se toca funcionalidad)
-Despues de completar una tarea, revisar si la funcionalidad o flujo tocado ya tiene documentacion vigente en `App/Agente/documentacion/`. Si no existe, crearla; si existe, actualizarla. Esto es obligatorio para toda tarea que cambie arquitectura, flujos de usuario, contratos API (endpoints, schemas), migraciones de BD, integraciones, tooling o comportamiento reutilizable. Nunca duplicar documentacion existente sobre el mismo tema — actualizar el archivo existente y cambiar la fecha en el nombre.
+Despues de completar una tarea, revisar si la funcionalidad o flujo tocado ya tiene documentacion vigente en `Agente/documentacion/`. Si no existe, crearla; si existe, actualizarla. Esto es obligatorio para toda tarea que cambie arquitectura, flujos de usuario, contratos backend/frontend, sincronizacion, algoritmos, integraciones, tooling o comportamiento reutilizable. Nunca duplicar documentacion existente sobre el mismo tema — actualizar el archivo existente y cambiar la fecha en el nombre, actualizar la fecha del archivo en caso de que se actualice.
 
-### Paso 7 — Prevencion (si aplica)
-Preguntarse: "Se puede detectar o prevenir automaticamente la proxima vez?" Si si, implementar la prevencion ahora — no dejarla como nota para despues. Orden de prioridad:
-1. **Glory Sentinel**: si el error es un patron detectable por regex o analisis estatico en archivos TS/TSX/CSS/PHP/RS, crear una regla nueva en code-sentinel. Es la forma mas rapida y visible de prevencion (el desarrollador ve el warning en VS Code en tiempo real).
-2. **Clippy/cargo check**: para Rust, verificar si un clippy lint existente o `deny` lo cubre.
-3. **Tests automaticos**: test de integracion o unitario que falla si el patron prohibido reaparece.
-4. **CI check**: regla en pipeline si no se puede cubrir localmente.
-- Si se implementa una regla de Sentinel, registrarla en la seccion de prevencion de la tarea completada.
+### Paso 7 — Prevencion (si aplica, problemas que se puedan detectar o prevenir con Code Sentinel)
+Preguntarse: "Se puede detectar o prevenir automaticamente la proxima vez con Code Sentinel?" Si si, crear un MD en `Agente/prevencion/` con nombre `prevencion-tema-YYYY-MM-DD.md` describiendo la regla a implementar, y dejar referencia en el roadmap como tarea pendiente.
 
 ### Paso 8 — Revisar pendientes de prevencion
-Leer `App/Agente/prevencion/`. Si hay MDs pendientes de implementar:
-1. Implementar la regla, test o configuracion de lint descrita.
-2. Verificar que detecta el problema original.
-3. Confirmar deteccion exitosa, eliminar el MD de prevencion y marcar como completada.
+Leer `Agente/prevencion/`. Si hay MDs pendientes de implementar:
+1. Implementar la regla en `.agent/code-sentinel` (o `.agent/varsense` si es CSS).
+2. Ejecutar la extension contra el caso original para verificar que detecta el problema.
+3. Reinstalar la extension (`vsce package` + instalar `.vsix`).
+4. Confirmar deteccion exitosa mediante test, eliminar el MD de prevencion y marcar como completada.
 - Si no hay pendientes, saltar este paso.
 
 ### Paso 9 — Commit, push y deploy
-Hacer commit final. Luego sincronizar la rama local con remoto (`git pull --rebase`) antes del push. Si el roadmap del proyecto indica que aplica deploy:
-- Backend: build release (`cargo build --release`), deploy segun infra del proyecto (Docker, servicio systemd, plataforma cloud).
-- Frontend: build produccion (`npm run build`), deploy segun infra.
-- **Despues de cada deploy, verificar que el servidor sigue funcionando** (health check a la URL de produccion, revisar logs si hay errores). Si el deploy rompe algo, revertir antes de continuar.
+Hacer commit final. Luego sincronizar la rama local con remoto (`git pull --rebase` o equivalente no interactivo si aplica al flujo del repo) antes del push/deploy. Si el roadmap del proyecto indica que aplica deploy, usar `.agent/coolify-manager-rs` para subir al servidor. **Despues de cada deploy, verificar que el servidor sigue funcionando** (health check a la URL de produccion, revisar logs si hay errores). Si el deploy rompe algo, revertir antes de continuar.
+
+`coolify-manager-rs` debe tratarse como herramienta viva: si durante una tarea aparece un escenario de deploy, health, logs, restart, backup, restore o exec que no cubre bien, dejar constancia de que puede y debe mejorarse para soportar ese caso de uso de forma robusta.
 
 ### Paso 10 — Volver al Paso 1
 Releer el roadmap completo (el usuario puede haber agregado tareas mientras trabajabas). Repetir el ciclo hasta que no queden tareas pendientes. Solo entonces, cerrar con un resumen breve de lo realizado.
@@ -242,35 +191,121 @@ Formato: `{DD}{M}{A}-{N}` donde DD=dia, M=mes (1-9, A-C para oct-dic), A=ano pro
 Ejemplo: 17 marzo 2026, tarea 3 = `173A-3`. 5 noviembre 2027, tarea 1 = `05BB-1`.
 
 ### Tareas en el roadmap (formato del agente al completar)
-
-El roadmap NO contiene tareas completadas. Las tareas completadas se archivan en `App/Agente/completados/tareas-YYYY-MM-DD.md` con el siguiente formato:
-
 ```
-## {ID}: {titulo breve}
+Pendiente (escrita por el usuario, cualquier formato):
+- Arreglar el bug del login
 
-**Que se hizo:**
-- Descripcion concisa de los cambios realizados
-
-**Archivos tocados:**
-- Lista de archivos principales modificados/creados
-
-**Validaciones:**
-- cargo check / clippy / test / type-check — resultado
-
-**Test/evidencia:**
-- Como se verifico que funciona (endpoint probado, UI verificada, etc.)
-
-**Prevencion (Glory Sentinel):**
-- Si el error o patron corregido puede ser detectado automaticamente:
-  - Regla creada/existente: `{regla-id}` en `{archivo-analyzer}`
-  - Descripcion: que detecta y por que
-- Si no aplica: "No aplica — [razon breve]"
-
-**Lecciones:**
-- Gotchas, decisiones no obvias, patrones a recordar
+Completada (movida a Agente/completados/tareas-YYYY-MM-DD.md):
+## 173A-1 — Titulo breve
+- **Que:** descripcion de lo que se hizo
+- **Archivos:** lista de archivos modificados
+- **Gotchas:** problemas encontrados (si los hubo)
+- **Sentinel:** si requiere nueva regla, si hubo falso positivo, o si no aplica
 ```
 
-Esta estructura existe para que cada tarea completada deje registro de:
-1. Que se hizo (para auditoria)
-2. Que se detecto/previno (para evitar repetir errores)
-3. Que se aprendio (para acelerar tareas futuras)
+### Comentarios en codigo
+```javascript
+/* [173A-1] Descripcion breve de lo que se hizo y por que.
+ * Gotcha: detalle relevante para futuras ediciones.
+ * Pendiente: lo que queda por hacer en esta area. */
+```
+
+### Commits
+```
+173A-1: descripcion breve de la tarea
+173A-1+173A-2: descripcion si son tareas relacionadas
+```
+
+### Nomenclatura
+- JS/TS: `camelCase` vars/funcs, `PascalCase` componentes
+- CSS: espanol + `camelCase` (`.contenedorPrincipal`)
+- Archivos MD: `nombre-descriptivo-YYYY-MM-DD.md`
+
+---
+
+## IV. ESTRUCTURA DE LOS MDs
+
+### Plantilla del roadmap (`roadmap.md`)
+```markdown
+# {Nombre del Proyecto} — Roadmap
+
+> **Descripcion:** breve descripcion del proyecto
+> **Stack:** descripcion breve del stack tecnologico
+> **URL produccion:** URL del sitio en produccion (si aplica)
+> **Servidor:** IP del servidor, acceso SSH (si aplica)
+> **Deploy:** si aplica, como se despliega (ej: Coolify, manual, N/A)
+> **Repositorio:** rama principal y convenciones
+
+## Herramientas del agente
+- Code Sentinel: `.agent/code-sentinel` o workspace externo
+
+## Tareas pendientes
+(el usuario escribe aqui en cualquier formato, el agente asigna IDs y ejecuta)
+```
+
+### Arbol de archivos
+```
+{raiz del proyecto}/
+  roadmap.md                              <-- EJE CENTRAL: solo tareas pendientes del usuario
+  Agente/
+    completados/
+      tareas-YYYY-MM-DD.md                <-- Tareas completadas agrupadas por fecha
+    documentacion/
+      {categoria}/
+        tema-YYYY-MM-DD.md                <-- Documentacion generica reutilizable
+    lecciones/
+      lecciones-aprendidas.md             <-- Lecciones aprendidas acumuladas
+    planes/
+      plan-tema-YYYY-MM-DD.md             <-- Planes para tareas complejas (activos)
+      completados/
+        plan-tema-YYYY-MM-DD.md           <-- Planes de tareas ya finalizadas
+    prevencion/
+      prevencion-tema-YYYY-MM-DD.md       <-- Reglas para Code Sentinel (pendientes de implementar)
+```
+
+### Reglas de los MDs
+1. **roadmap.md** solo contiene tareas pendientes. Nunca acumula completadas.
+2. Todo MD tiene fecha en su nombre (`YYYY-MM-DD`) para saber que tan actualizado esta.
+3. Documentacion se organiza en carpetas por categoria dentro de `documentacion/`.
+4. Nunca duplicar documentacion — si ya existe un MD sobre el tema, actualizarlo (y actualizar la fecha).
+5. Todo MD de tareas completadas debe incluir explicitamente si requiere una regla nueva de Glory Sentinel, si hubo falso positivo o si no aplica.
+6. Lecciones aprendidas viven en `Agente/lecciones/lecciones-aprendidas.md` Y en los comentarios del codigo.
+7. Si la estructura de MDs esta desorganizada al iniciar sesion, reorganizarla como primera accion.
+8. Archivos legacy del proyecto — no modificar ni mover sin instruccion del usuario.
+
+---
+
+## V. COMANDOS DE REVISION
+
+### Validacion de codigo
+| Cuando | Comando |
+|--------|---------|
+| Editar `.rs` | `cargo check && cargo clippy` + `get_errors` |
+| Editar `.ts`/`.tsx` | `npm run type-check` + `get_errors` |
+| Editar `.css` | VarSense: `cssVarsValidator.scanAllDiagnostics` (si disponible) |
+| Generacion masiva | Code Sentinel: `codeSentinel.analyzeWorkspace` |
+| Antes de commit | `npm run verify` (cargo check + clippy + test + type-check + Sentinel) |
+| Lint + types integrado | `codeSentinel.runExternalTools` |
+
+### Deploy (solo si el roadmap indica que aplica)
+Binario: `.agent/coolify-manager-rs/target/release/coolify-manager.exe`
+
+| Comando | Uso |
+|---------|-----|
+| `deploy --name <sitio> --update` | Despliega/actualiza el tema en el sitio |
+| `redeploy --name <sitio>` | Fuerza redeploy via Coolify API (sin cambios de codigo) |
+| `health --name <sitio>` | Health check remoto + HTTP (usar post-deploy para verificar) |
+| `logs --name <sitio>` | Ver logs del contenedor |
+| `restart --name <sitio>` | Reinicia servicios del sitio |
+| `backup --name <sitio>` | Crea copia de seguridad externa |
+| `restore --name <sitio>` | Restaura un backup (usar si deploy rompe algo) |
+| `exec --name <sitio> -- <cmd>` | Ejecuta comando en el contenedor |
+| `git-status --name <sitio>` | Muestra estado de Git en el tema remoto |
+| `deploy-websocket --name <sitio>` | Agrega servicio WebSocket al stack |
+
+**Flujo deploy obligatorio:** `deploy` → `health` → si falla → `redeploy`.
+
+### Otros comandos utiles
+- `codeSentinel.analyzeFile` — analizar archivo actual
+- `cssVarsValidator.exportReport` — reporte CSS exportable (si disponible)
+- `cssVarsValidator.scanOrphanClasses` — clases CSS sin uso (si disponible)
