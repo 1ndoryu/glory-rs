@@ -1,5 +1,6 @@
 /* 253A-10: Hook para FormularioGasto — reduce 10 useState a 2 (regla usestate-excesivo)
-   253A-14: acepta onExito para uso en modales */
+   253A-14: acepta onExito para uso en modales
+   253A-21: metodo_pago es opcional — puede enviarse null si el usuario no selecciona */
 
 import { useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -10,7 +11,7 @@ interface CamposGasto {
   proveedor: string;
   categoriaId: string;
   tipoDocumento: TipoDocumento;
-  metodoPago: MetodoPago;
+  metodoPago: MetodoPago | '';
   numeroDocumento: string;
   recurrente: boolean;
   importeBase: string;
@@ -64,7 +65,7 @@ function useFormularioGasto(onExito?: () => void) {
         proveedor: campos.proveedor || null,
         categoria_id: campos.categoriaId || null,
         tipo_documento: campos.tipoDocumento,
-        metodo_pago: campos.metodoPago,
+        metodo_pago: campos.metodoPago || null,
         numero_documento: campos.numeroDocumento || null,
         recurrente: campos.recurrente || null,
         importe_base: campos.importeBase,

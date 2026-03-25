@@ -58,7 +58,8 @@ pub struct CrearGastoRequest {
     pub proveedor: Option<String>,
     pub categoria_id: Option<Uuid>,
     pub tipo_documento: TipoDocumento,
-    pub metodo_pago: MetodoPago,
+    /* 253A-21: metodo_pago es opcional segun la plataforma Haddock (video 7) */
+    pub metodo_pago: Option<MetodoPago>,
     #[validate(length(
         max = 100,
         message = "El número de documento no debe exceder 100 caracteres"

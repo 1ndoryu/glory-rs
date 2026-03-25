@@ -1,14 +1,6 @@
 /* 253A-7: Estilos compartidos para formularios y listas */
 
-.formularioPagina {
-  max-width: 600px;
-}
-
 .formulario {
-  background: var(--colorFondoPanel);
-  border-radius: var(--radio);
-  padding: 1.5rem;
-  box-shadow: var(--sombra);
   display: flex;
   flex-direction: column;
   gap: 1rem;

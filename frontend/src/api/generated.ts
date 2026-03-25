@@ -123,7 +123,8 @@ export interface CrearGastoRequest {
   fecha: string;
   importe_base: string;
   importe_iva: string;
-  metodo_pago: MetodoPago;
+  /** @nullable — campo opcional según plataforma Haddock (253A-21) */
+  metodo_pago?: MetodoPago | null;
   /** @nullable */
   numero_documento?: string | null;
   /** @nullable */

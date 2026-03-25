@@ -20,10 +20,12 @@ impl GastoService {
             .ok()
             .and_then(|v| v.as_str().map(String::from))
             .unwrap_or_else(|| "ticket".into());
-        let metodo = serde_json::to_value(&req.metodo_pago)
-            .ok()
+        /* 253A-21: metodo_pago es opcional — se almacena cadena vacía si no se proporciona */
+        let metodo = req.metodo_pago
+            .as_ref()
+            .and_then(|m| serde_json::to_value(m).ok())
             .and_then(|v| v.as_str().map(String::from))
-            .unwrap_or_else(|| "efectivo".into());
+            .unwrap_or_default();
 
         let proveedor = req.proveedor.as_deref().unwrap_or("");
         let numero_documento = req.numero_documento.as_deref().unwrap_or("");

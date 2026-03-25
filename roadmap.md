@@ -87,6 +87,6 @@ Puedes ajustar los pendientes. Si puedes analizar todo el contenido y sacar el t
 
 # Pendientes.
 
-> Nota: `metodo_pago` en `CrearGastoRequest` (Rust) no es nullable. El video del cliente indica que es opcional. Pendiente ajustar el handler y la struct Rust para aceptar `Option<MetodoPago>`.
+(Sin tareas pendientes)
 
-- **253A-21:** Hacer `metodo_pago` opcional en backend Rust para gasto (el campo existe en el modelo pero Haddock lo trata como opcional según video 7). Cambiar `metodo_pago: MetodoPago` a `metodo_pago: Option<MetodoPago>` en `CrearGastoRequest` Rust y handler. Regenerar OpenAPI. Actualizar campo en frontend de `MetodoPago` a `MetodoPago | null`. Agregar `<option value="">— sin especificar —</option>` de vuelta al selector.
+1. Por favor haz una revision todas las indicaciones del cliente y revisa si falta hacer algo de lo que pidio (no me refiero a lo que se omitio a ultima hora)

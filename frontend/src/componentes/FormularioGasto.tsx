@@ -119,7 +119,8 @@ function FormularioGasto({ onExito }: Props) {
         <div className="filaFormulario">
           <div className="grupoFormulario">
             <label className="etiquetaFormulario" htmlFor="metodoPago">Método de pago <span className="etiquetaOpcional">(Opcional)</span></label>
-            <Select id="metodoPago" value={campos.metodoPago} onChange={(e) => cambiarCampo('metodoPago', e.target.value as MetodoPago)}>
+            <Select id="metodoPago" value={campos.metodoPago} onChange={(e) => cambiarCampo('metodoPago', e.target.value as MetodoPago | '')}>
+              <option value="">— sin especificar —</option>
               <option value={MetodoPago.efectivo}>Efectivo</option>
               <option value={MetodoPago.tarjeta}>Tarjeta</option>
               <option value={MetodoPago.transferencia}>Transferencia</option>
