@@ -1,5 +1,11 @@
 mod auth;
-mod note;
+mod dashboard;
+mod gasto;
+mod reserva;
+mod venta;
 
 pub use auth::AuthService;
-pub use note::NoteService;
+pub use dashboard::DashboardService;
+pub use gasto::GastoService;
+pub use reserva::ReservaService;
+pub use venta::VentaService;

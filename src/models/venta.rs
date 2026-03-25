@@ -1,0 +1,116 @@
+/* 253A-5: Modelo de venta para el restaurante.
+Campos basados en especificaciones del cliente (audios 4, 8-9) y roadmap sección 4. */
+
+use chrono::{DateTime, NaiveDate, Utc};
+use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
+use utoipa::{IntoParams, ToSchema};
+use uuid::Uuid;
+use validator::Validate;
+
+/// Turnos de servicio del restaurante
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema, sqlx::Type)]
+#[sqlx(type_name = "VARCHAR")]
+#[serde(rename_all = "snake_case")]
+pub enum Turno {
+    #[sqlx(rename = "manana")]
+    Manana,
+    #[sqlx(rename = "mediodia")]
+    Mediodia,
+    #[sqlx(rename = "noche")]
+    Noche,
+}
+
+/// Canales de venta disponibles
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema, sqlx::Type)]
+#[sqlx(type_name = "VARCHAR")]
+#[serde(rename_all = "snake_case")]
+pub enum CanalVenta {
+    #[sqlx(rename = "comedor")]
+    Comedor,
+    #[sqlx(rename = "barra")]
+    Barra,
+    #[sqlx(rename = "terraza")]
+    Terraza,
+    #[sqlx(rename = "delivery")]
+    Delivery,
+    #[sqlx(rename = "just_eat")]
+    JustEat,
+    #[sqlx(rename = "eventos")]
+    Eventos,
+}
+
+/// Métodos de pago soportados
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema, sqlx::Type)]
+#[sqlx(type_name = "VARCHAR")]
+#[serde(rename_all = "snake_case")]
+pub enum MetodoPago {
+    #[sqlx(rename = "efectivo")]
+    Efectivo,
+    #[sqlx(rename = "tarjeta")]
+    Tarjeta,
+    #[sqlx(rename = "transferencia")]
+    Transferencia,
+}
+
+/// Venta registrada en el restaurante
+#[derive(Debug, Clone, FromRow, Serialize, ToSchema)]
+pub struct Venta {
+    pub id: Uuid,
+    pub user_id: Uuid,
+    pub fecha: NaiveDate,
+    pub comensales: Option<i32>,
+    pub descripcion: String,
+    pub iva_porcentaje: rust_decimal::Decimal,
+    pub turno: String,
+    pub canal: String,
+    pub metodo_pago: String,
+    pub importe_base: rust_decimal::Decimal,
+    pub importe_iva: rust_decimal::Decimal,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+}
+
+/// Request para crear una venta
+#[derive(Debug, Deserialize, Validate, ToSchema)]
+pub struct CrearVentaRequest {
+    pub fecha: NaiveDate,
+    pub comensales: Option<i32>,
+    #[validate(length(max = 500, message = "La descripción no debe exceder 500 caracteres"))]
+    pub descripcion: Option<String>,
+    pub iva_porcentaje: rust_decimal::Decimal,
+    pub turno: Turno,
+    pub canal: CanalVenta,
+    pub metodo_pago: MetodoPago,
+    pub importe_base: rust_decimal::Decimal,
+    pub importe_iva: rust_decimal::Decimal,
+}
+
+/// Response paginada de ventas
+#[derive(Debug, Serialize, ToSchema)]
+pub struct VentasPaginadas {
+    pub items: Vec<Venta>,
+    pub total: i64,
+    pub page: i64,
+    pub per_page: i64,
+}
+
+/// Query params para listar ventas con filtro por fecha
+#[derive(Debug, Deserialize, IntoParams)]
+pub struct VentasQuery {
+    #[serde(default = "default_page")]
+    pub page: i64,
+    #[serde(default = "default_per_page")]
+    pub per_page: i64,
+    /// Filtrar desde esta fecha (YYYY-MM-DD)
+    pub desde: Option<NaiveDate>,
+    /// Filtrar hasta esta fecha (YYYY-MM-DD)
+    pub hasta: Option<NaiveDate>,
+}
+
+fn default_page() -> i64 {
+    1
+}
+fn default_per_page() -> i64 {
+    20
+}

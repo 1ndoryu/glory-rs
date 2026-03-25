@@ -1,8 +1,11 @@
 #![allow(clippy::needless_for_each)] // Generado por utoipa OpenApi derive
 
 mod auth;
+mod dashboard;
+mod gastos;
 mod health;
-mod notes;
+mod reservas;
+mod ventas;
 
 use axum::Router;
 use tower_http::cors::{Any, CorsLayer};
@@ -37,28 +40,53 @@ impl utoipa::Modify for SecurityAddon {
         health::health_check,
         auth::register,
         auth::login,
-        notes::create_note,
-        notes::get_note,
-        notes::list_notes,
-        notes::update_note,
-        notes::delete_note,
+        ventas::crear_venta,
+        ventas::obtener_venta,
+        ventas::listar_ventas,
+        ventas::eliminar_venta,
+        gastos::crear_gasto,
+        gastos::obtener_gasto,
+        gastos::listar_gastos,
+        gastos::eliminar_gasto,
+        gastos::listar_categorias,
+        reservas::crear_reserva,
+        reservas::obtener_reserva,
+        reservas::listar_reservas,
+        reservas::actualizar_reserva,
+        reservas::eliminar_reserva,
+        reservas::conteo_reservas,
+        dashboard::resumen,
     ),
     components(schemas(
         health::HealthResponse,
         crate::models::RegisterRequest,
         crate::models::LoginRequest,
         crate::models::AuthResponse,
-        crate::models::Note,
-        crate::models::CreateNoteRequest,
-        crate::models::UpdateNoteRequest,
-        crate::models::PaginatedNotes,
+        crate::models::Venta,
+        crate::models::CrearVentaRequest,
+        crate::models::VentasPaginadas,
+        crate::models::Gasto,
+        crate::models::CrearGastoRequest,
+        crate::models::GastosPaginados,
+        crate::models::CategoriaGasto,
+        crate::models::Reserva,
+        crate::models::CrearReservaRequest,
+        crate::models::ActualizarReservaRequest,
+        crate::models::ReservasPaginadas,
+        crate::models::ReservasConteo,
+        crate::models::ResumenEconomico,
+        crate::models::Turno,
+        crate::models::CanalVenta,
+        crate::models::MetodoPago,
+        crate::models::TipoDocumento,
+        crate::models::EstadoReserva,
         crate::errors::ErrorResponse,
     )),
     modifiers(&SecurityAddon),
     info(
-        title = "Glory RS API",
+        title = "Gestión Restaurante API",
         version = "0.1.0",
-        description = "Template API — Rust + Axum + OpenAPI"
+        description = "API para gestión de restaurantes — Ventas, Gastos, Reservas, Dashboard"
     )
 )]
 #[allow(clippy::needless_for_each)]
@@ -89,5 +117,8 @@ fn api_routes() -> Router<AppState> {
     Router::new()
         .merge(health::routes())
         .merge(auth::routes())
-        .merge(notes::routes())
+        .merge(ventas::routes())
+        .merge(gastos::routes())
+        .merge(reservas::routes())
+        .merge(dashboard::routes())
 }

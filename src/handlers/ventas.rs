@@ -1,0 +1,113 @@
+/* 253A-5: Handlers de ventas — CRUD endpoints */
+
+use axum::extract::{Path, Query, State};
+use axum::http::StatusCode;
+use axum::routing::{get, post};
+use axum::{Json, Router};
+use uuid::Uuid;
+use validator::Validate;
+
+use crate::errors::AppError;
+use crate::middleware::AuthUser;
+use crate::models::{CrearVentaRequest, Venta, VentasPaginadas, VentasQuery};
+use crate::services::VentaService;
+use crate::AppState;
+
+/// Crear una venta
+#[utoipa::path(
+    post,
+    path = "/api/ventas",
+    request_body = CrearVentaRequest,
+    responses(
+        (status = 201, description = "Venta creada", body = Venta),
+        (status = 401, description = "No autorizado", body = crate::errors::ErrorResponse),
+        (status = 422, description = "Error de validación", body = crate::errors::ErrorResponse)
+    ),
+    security(("bearer_auth" = []))
+)]
+pub async fn crear_venta(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    Json(req): Json<CrearVentaRequest>,
+) -> Result<(StatusCode, Json<Venta>), AppError> {
+    req.validate()
+        .map_err(|e| AppError::Validation(e.to_string()))?;
+    let venta = VentaService::create(&state.pool, auth.user_id, req).await?;
+    Ok((StatusCode::CREATED, Json(venta)))
+}
+
+/// Obtener una venta por ID
+#[utoipa::path(
+    get,
+    path = "/api/ventas/{id}",
+    params(("id" = Uuid, Path, description = "ID de la venta")),
+    responses(
+        (status = 200, description = "Venta encontrada", body = Venta),
+        (status = 404, description = "Venta no encontrada", body = crate::errors::ErrorResponse),
+        (status = 401, description = "No autorizado", body = crate::errors::ErrorResponse)
+    ),
+    security(("bearer_auth" = []))
+)]
+pub async fn obtener_venta(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    Path(id): Path<Uuid>,
+) -> Result<Json<Venta>, AppError> {
+    let venta = VentaService::get(&state.pool, id, auth.user_id).await?;
+    Ok(Json(venta))
+}
+
+/// Listar ventas con paginación y filtros de fecha
+#[utoipa::path(
+    get,
+    path = "/api/ventas",
+    params(VentasQuery),
+    responses(
+        (status = 200, description = "Lista de ventas", body = VentasPaginadas),
+        (status = 401, description = "No autorizado", body = crate::errors::ErrorResponse)
+    ),
+    security(("bearer_auth" = []))
+)]
+pub async fn listar_ventas(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    Query(params): Query<VentasQuery>,
+) -> Result<Json<VentasPaginadas>, AppError> {
+    let ventas = VentaService::list(
+        &state.pool,
+        auth.user_id,
+        params.page,
+        params.per_page,
+        params.desde,
+        params.hasta,
+    )
+    .await?;
+    Ok(Json(ventas))
+}
+
+/// Eliminar una venta
+#[utoipa::path(
+    delete,
+    path = "/api/ventas/{id}",
+    params(("id" = Uuid, Path, description = "ID de la venta")),
+    responses(
+        (status = 204, description = "Venta eliminada"),
+        (status = 404, description = "Venta no encontrada", body = crate::errors::ErrorResponse),
+        (status = 401, description = "No autorizado", body = crate::errors::ErrorResponse)
+    ),
+    security(("bearer_auth" = []))
+)]
+pub async fn eliminar_venta(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    Path(id): Path<Uuid>,
+) -> Result<StatusCode, AppError> {
+    VentaService::delete(&state.pool, id, auth.user_id).await?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
+pub fn routes() -> Router<AppState> {
+    Router::new()
+        .route("/ventas", post(crear_venta).get(listar_ventas))
+        .route("/ventas/{id}", get(obtener_venta).delete(eliminar_venta))
+}
