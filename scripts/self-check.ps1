@@ -1,4 +1,5 @@
 ﻿# [253A-12] Script de auto-verificacion de cumplimiento del protocolo v5.0.
+# [253A-15] Anadida regla 18 (proactividad).
 # Se ejecuta como ultimo paso antes de cerrar una tarea.
 # Imprime un checklist de todas las reglas y el agente debe confirmar cada una.
 # Las reglas marcadas [CONDICIONAL] solo aplican si la tarea toco ese dominio.
@@ -26,6 +27,7 @@ $reglas = @(
     @{ id = "15"; nombre = "Responsive"; pregunta = "Mobile 320px, tablet 768px, desktop 1024px?"; cond = $true }
     @{ id = "16"; nombre = "Revision roadmap"; pregunta = "Roadmap releido DESPUES de commit y resumen?"; cond = $false }
     @{ id = "17"; nombre = "Glory Framework"; pregunta = "Funcionalidad agnostica evaluada para submodulo?"; cond = $false }
+    @{ id = "18"; nombre = "Proactividad"; pregunta = "Mejora del proceso detectada e implementada? self-check.ps1 existe?"; cond = $false }
 )
 
 $pasos = @(

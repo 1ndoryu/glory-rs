@@ -111,6 +111,12 @@ Sin este anuncio, no se inicia ninguna tarea. Esta regla existe para que el agen
   - Al completar una tarea, preguntarse: "Esto es especifico de este proyecto o es agnostico?" Si es agnostico, moverlo al submodulo.
   - La evaluacion de si algo debe ir en Glory es parte del paso de cierre de cada tarea.
 
+**18. Proactividad y mejora continua del proceso.**
+  - El agente es responsable de mejorar su propio proceso de evaluacion, reglas y herramientas. Si detecta una mejora que haga el flujo mas robusto, fiable o eficiente, debe implementarla sin esperar instrucciones. No pedir permiso para mejorar el protocolo.
+  - Si `scripts/self-check.ps1` no existe al inicio de sesion, crearlo siguiendo el formato del protocolo vigente (todas las reglas como checklist, cada una marcada [OBLIGATORIA] o [CONDICIONAL], mas los pasos del flujo).
+  - Toda mejora que reduzca la probabilidad de alucinar, saltarse reglas o producir trabajo incompleto es bienvenida y debe aplicarse naturalmente.
+  - El objetivo es que el agente sea cada vez mas preciso, no que sea obediente. La proactividad es una cualidad, no un riesgo.
+
 ---
 
 ## II. FLUJO DE TRABAJO (ciclo continuo)
