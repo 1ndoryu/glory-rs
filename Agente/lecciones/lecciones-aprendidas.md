@@ -35,3 +35,15 @@ Cada lección debe ser concisa y accionable.
 **Problema:** Scripts PS1 con em dash (`—`), ternarios inline, o comas entre hashtables en arrays fallan en PS5.
 **Causa raíz:** PS5 tiene parser más limitado que PS7.
 **Solución:** Solo ASCII, if/else estándar, sin comas entre elementos de array de hashtables.
+
+## 2026-03-25 — Git submodule con ruta local
+
+**Problema:** `git submodule add ../glory-rs-framework glory-rs` resuelve contra la URL remota de GitHub, no contra el filesystem local.
+**Causa raíz:** Git interpreta paths relativos en relación al remote origin, no al directorio actual.
+**Solución:** Usar path absoluto + `git config --global protocol.file.allow always` (Git moderno bloquea file:// por defecto).
+
+## 2026-03-25 — TypeScript en submódulo necesita sus propias deps
+
+**Problema:** Componentes TSX en un submódulo no resuelven `react` types. Errores como "Property 'children' does not exist on BotonProps" aunque extends `ButtonHTMLAttributes`.
+**Causa raíz:** TypeScript busca `node_modules` ascendiendo desde la ubicación del archivo. El submódulo no tiene `node_modules` y el del proyecto consumidor está en `frontend/node_modules`, no en la raíz.
+**Solución:** El submódulo necesita su propio `package.json` con devDependencies (react, @types/react, lucide-react) y `npm install`. También necesita `server.fs.allow: ['..']` en Vite.
