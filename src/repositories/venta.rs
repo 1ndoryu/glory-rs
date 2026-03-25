@@ -24,23 +24,24 @@ pub struct VentaRepository;
 impl VentaRepository {
     pub async fn create(pool: &PgPool, data: &NuevaVenta<'_>) -> Result<Venta, sqlx::Error> {
         let id = Uuid::new_v4();
-        sqlx::query_as::<_, Venta>(
+        sqlx::query_as!(
+            Venta,
             "INSERT INTO ventas (id, user_id, fecha, comensales, descripcion, iva_porcentaje, \
              turno, canal, metodo_pago, importe_base, importe_iva) \
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) \
              RETURNING *",
+            id,
+            data.user_id,
+            data.fecha,
+            data.comensales,
+            data.descripcion,
+            data.iva_porcentaje,
+            data.turno,
+            data.canal,
+            data.metodo_pago,
+            data.importe_base,
+            data.importe_iva
         )
-        .bind(id)
-        .bind(data.user_id)
-        .bind(data.fecha)
-        .bind(data.comensales)
-        .bind(data.descripcion)
-        .bind(data.iva_porcentaje)
-        .bind(data.turno)
-        .bind(data.canal)
-        .bind(data.metodo_pago)
-        .bind(data.importe_base)
-        .bind(data.importe_iva)
         .fetch_one(pool)
         .await
     }
@@ -50,11 +51,14 @@ impl VentaRepository {
         id: Uuid,
         user_id: Uuid,
     ) -> Result<Option<Venta>, sqlx::Error> {
-        sqlx::query_as::<_, Venta>("SELECT * FROM ventas WHERE id = $1 AND user_id = $2")
-            .bind(id)
-            .bind(user_id)
-            .fetch_optional(pool)
-            .await
+        sqlx::query_as!(
+            Venta,
+            "SELECT * FROM ventas WHERE id = $1 AND user_id = $2",
+            id,
+            user_id
+        )
+        .fetch_optional(pool)
+        .await
     }
 
     pub async fn list(
@@ -67,40 +71,43 @@ impl VentaRepository {
     ) -> Result<(Vec<Venta>, i64), sqlx::Error> {
         let offset = (page - 1) * per_page;
 
-        let items = sqlx::query_as::<_, Venta>(
+        let items = sqlx::query_as!(
+            Venta,
             "SELECT * FROM ventas WHERE user_id = $1 \
              AND ($4::DATE IS NULL OR fecha >= $4) \
              AND ($5::DATE IS NULL OR fecha <= $5) \
              ORDER BY fecha DESC, created_at DESC LIMIT $2 OFFSET $3",
+            user_id,
+            per_page,
+            offset,
+            desde,
+            hasta
         )
-        .bind(user_id)
-        .bind(per_page)
-        .bind(offset)
-        .bind(desde)
-        .bind(hasta)
         .fetch_all(pool)
         .await?;
 
-        let (total,): (i64,) = sqlx::query_as(
-            "SELECT COUNT(*) FROM ventas WHERE user_id = $1 \
+        let rec = sqlx::query!(
+            "SELECT COUNT(*) as total FROM ventas WHERE user_id = $1 \
              AND ($2::DATE IS NULL OR fecha >= $2) \
              AND ($3::DATE IS NULL OR fecha <= $3)",
+            user_id,
+            desde,
+            hasta
         )
-        .bind(user_id)
-        .bind(desde)
-        .bind(hasta)
         .fetch_one(pool)
         .await?;
 
-        Ok((items, total))
+        Ok((items, rec.total.unwrap_or(0)))
     }
 
     pub async fn delete(pool: &PgPool, id: Uuid, user_id: Uuid) -> Result<bool, sqlx::Error> {
-        let result = sqlx::query("DELETE FROM ventas WHERE id = $1 AND user_id = $2")
-            .bind(id)
-            .bind(user_id)
-            .execute(pool)
-            .await?;
+        let result = sqlx::query!(
+            "DELETE FROM ventas WHERE id = $1 AND user_id = $2",
+            id,
+            user_id
+        )
+        .execute(pool)
+        .await?;
         Ok(result.rows_affected() > 0)
     }
 
@@ -111,15 +118,15 @@ impl VentaRepository {
         desde: chrono::NaiveDate,
         hasta: chrono::NaiveDate,
     ) -> Result<rust_decimal::Decimal, sqlx::Error> {
-        let (total,): (Option<rust_decimal::Decimal>,) = sqlx::query_as(
-            "SELECT COALESCE(SUM(importe_base), 0) FROM ventas \
+        let rec = sqlx::query!(
+            "SELECT COALESCE(SUM(importe_base), 0) as total FROM ventas \
              WHERE user_id = $1 AND fecha >= $2 AND fecha <= $3",
+            user_id,
+            desde,
+            hasta
         )
-        .bind(user_id)
-        .bind(desde)
-        .bind(hasta)
         .fetch_one(pool)
         .await?;
-        Ok(total.unwrap_or_default())
+        Ok(rec.total.unwrap_or_default())
     }
 }

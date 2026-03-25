@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COALESCE(SUM(importe_base), 0) as total FROM gastos WHERE user_id = $1 AND fecha >= $2 AND fecha <= $3",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "total",
+        "type_info": "Numeric"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Date",
+        "Date"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "750904cae4072d4a4b179e9d12e1b480e9cdeb6e0b19fd52531fcfe6cdf697c0"
+}

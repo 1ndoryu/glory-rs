@@ -112,6 +112,23 @@ Sin este anuncio, no se inicia ninguna tarea. Esta regla existe para que el agen
   - Toda migracion incluye tanto `up` como `down` cuando sea posible.
   - `sqlx::query!` valida contra el schema actual — si cambias la BD, los queries que no compilen se detectan automaticamente.
 
+**15. Deteccion de errores en compile-time — siempre preferir.**
+  - Prioridad absoluta: detectar errores antes de ejecutar, no despues. Si existe una herramienta o macro que valide en compile-time, usarla obligatoriamente.
+  - SQL: siempre `sqlx::query_as!` / `sqlx::query!` (macros con `!`) en vez de `sqlx::query_as` / `sqlx::query` (funciones). Las macros validan queries contra la BD real en compile-time: detectan typos en nombres de columnas, tipos incompatibles y parametros faltantes antes de ejecutar.
+  - Para que compile sin BD: mantener cache offline con `cargo sqlx prepare` y commitear `.sqlx/` en el repositorio. Despues de cualquier cambio en queries o schema: `cargo sqlx prepare` de nuevo.
+  - Rust: preferir tipos fuertes sobre validacion manual. Si el compilador puede atrapar un error, no dejarlo para runtime.
+  - TypeScript: `strict: true` obligatorio. Sin `any` excepto en fronteras con librerias sin tipos. Preferir inferencia cuando el tipo es obvio.
+  - Toda dependencia de un valor externo (env vars, config) se valida al inicio del programa, no al primer uso. Fail-fast en startup.
+
+**16. Todo es testeable — verificacion antes de cerrar.**
+  - **Cada tarea debe terminar con evidencia de que funciona**, no con "deberia funcionar". Si no hay test automatico, hacer test manual documentado.
+  - Backend: todo endpoint nuevo o modificado se prueba con un request real (`cargo test` con tests de integracion, o request manual con curl/herramienta equivalente). Verificar status code Y body.
+  - Queries SQL: al usar `query_as!`, el compile-time check ya verifica la query contra la BD. Pero los resultados logicos (filtros, paginacion, calculos) necesitan test funcional.
+  - Frontend: verificar que la UI renderiza sin errores y que los datos fluyen correctamente. `npm run type-check` obligatorio pero NO suficiente — verificar visualmente si es posible.
+  - Errores encontrados DURANTE testing se corrigen ANTES de cerrar la tarea, no se dejan como "tarea siguiente".
+  - Si un test no es posible en el entorno actual (dependencia de terceros, hardware), documentar explicitamente por que se omitio en el comentario del commit.
+  - Regla de oro: si despues de tu commit alguien hace `cargo test` / `npm run type-check` y falla, la tarea esta incompleta.
+
 ---
 
 ## II. FLUJO DE TRABAJO (ciclo continuo)

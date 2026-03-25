@@ -1,0 +1,90 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO reservas (id, user_id, fecha, hora, nombre_cliente, num_personas, estado, notas, telefono) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "fecha",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 3,
+        "name": "hora",
+        "type_info": "Time"
+      },
+      {
+        "ordinal": 4,
+        "name": "nombre_cliente",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "num_personas",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 6,
+        "name": "estado",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 7,
+        "name": "notas",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 8,
+        "name": "telefono",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 9,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 10,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Date",
+        "Time",
+        "Varchar",
+        "Int4",
+        "Varchar",
+        "Text",
+        "Varchar"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "5e7b1b6da3b43c5d6786c12a827e171151a71f9378e775a2a7942093cc397f25"
+}

@@ -1,0 +1,104 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO gastos (id, user_id, fecha, proveedor, categoria_id, tipo_documento, metodo_pago, numero_documento, recurrente, importe_base, importe_iva) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "fecha",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 3,
+        "name": "proveedor",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "categoria_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 5,
+        "name": "tipo_documento",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "metodo_pago",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 7,
+        "name": "numero_documento",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 8,
+        "name": "recurrente",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 9,
+        "name": "importe_base",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 10,
+        "name": "importe_iva",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 11,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 12,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Date",
+        "Varchar",
+        "Uuid",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Bool",
+        "Numeric",
+        "Numeric"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "705a80fd1b3a97a38038bd6fc7017c3e2f0df73aafdd5d8453edcbcf1c5d768f"
+}
