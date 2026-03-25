@@ -6,7 +6,8 @@
 # Environment (secrets)
 .env
 
-# Frontend
+# Node (raíz y frontend)
+node_modules/
 /frontend/node_modules/
 /frontend/dist/
 /frontend/src/api/generated/
@@ -24,5 +25,9 @@ desktop.ini
 
 # Logs
 *.log
+/logs/
+
+# Debug
+/frontend/openapi-debug.json
 
 cliente/

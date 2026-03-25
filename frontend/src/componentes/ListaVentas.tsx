@@ -53,9 +53,9 @@ function ListaVentas() {
                 {ventas.items.map((v) => (
                   <tr key={v.id}>
                     <td>{v.fecha}</td>
-                    <td style={{ textTransform: 'capitalize' }}>{v.turno}</td>
-                    <td style={{ textTransform: 'capitalize' }}>{v.canal}</td>
-                    <td style={{ textTransform: 'capitalize' }}>{v.metodo_pago}</td>
+                    <td className="textoCapitalizado">{v.turno}</td>
+                    <td className="textoCapitalizado">{v.canal}</td>
+                    <td className="textoCapitalizado">{v.metodo_pago}</td>
                     <td>{formatearMoneda(v.importe_base)}</td>
                     <td>{formatearMoneda(v.importe_iva)}</td>
                     <td><strong>{formatearMoneda((parseFloat(v.importe_base) + parseFloat(v.importe_iva)).toFixed(2))}</strong></td>

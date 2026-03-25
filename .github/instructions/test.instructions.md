@@ -98,6 +98,14 @@ Sin este anuncio, no se inicia ninguna tarea. Esta regla existe para que el agen
   - Commit automatico al completar tarea, sin pedir permiso.
   - Archivos generados por Orval/codegen se commitean junto con los cambios de schema que los causaron.
 
+**12.1 Git limpio — cero archivos sin trackear.**
+  - Antes de cada commit: `git status` no debe mostrar archivos untracked que no esten en `.gitignore`.
+  - Si se instalan dependencias (`npm install`, `cargo add`), verificar que `.gitignore` cubre los directorios generados (`node_modules/`, `target/`, `dist/`, etc.).
+  - Prohibido commitear carpetas de dependencias, builds, cache de IDE, logs o archivos temporales. Si un nuevo directorio generado aparece como untracked, anadirlo a `.gitignore` primero.
+  - Todo archivo `.gitignore` debe cubrir al menos: `/target/`, `node_modules/`, `.env`, `*.log`, `/logs/`, `/frontend/dist/`, IDE files.
+  - El `.gitignore` raiz cubre tanto la raiz (`node_modules/`) como subdirectorios (`/frontend/node_modules/`).
+  - Si VSCode muestra archivos pendientes de commit que no son parte de la tarea, no ignorarlos — investigar y resolver antes de avanzar.
+
 **13. OpenAPI como contrato unico.**
   - El schema OpenAPI se genera desde Rust (`utoipa`). Es la unica fuente de verdad del contrato API.
   - Prohibido escribir tipos de API manualmente en el frontend. Todo sale del codegen.
@@ -128,6 +136,21 @@ Sin este anuncio, no se inicia ninguna tarea. Esta regla existe para que el agen
   - Errores encontrados DURANTE testing se corrigen ANTES de cerrar la tarea, no se dejan como "tarea siguiente".
   - Si un test no es posible en el entorno actual (dependencia de terceros, hardware), documentar explicitamente por que se omitio en el comentario del commit.
   - Regla de oro: si despues de tu commit alguien hace `cargo test` / `npm run type-check` y falla, la tarea esta incompleta.
+
+**17. Glory Sentinel como herramienta de prevencion.**
+  - Glory Sentinel (code-sentinel) es una extension VS Code que vive en el workspace y detecta violaciones de calidad, seguridad y patrones prohibidos mediante analisis estatico determinista.
+  - **Obligatorio consultarla**: antes de cerrar una tarea, verificar si el error corregido o la funcionalidad implementada puede ser detectado automaticamente por una regla de Sentinel. Si puede, y no existe la regla, crearla como parte de la tarea.
+  - **Prevencion sistematica**: cada vez que se corrige un bug que un humano no deberia volver a cometer, preguntarse: "Glory Sentinel puede detectar esto?" Si la respuesta es si, implementar la regla. Corregir el mismo error dos veces sin crear deteccion automatica es una falla del flujo.
+  - **Reglas Sentinel para React/TS que aplican a este proyecto**: emoji-en-codigo, inline-style-prohibido, useeffect-sin-cleanup, zustand-sin-selector, mutacion-directa-estado, key-index-lista, error-enmascarado, fallo-sin-feedback.
+  - **Reglas Sentinel para Rust** (futuras): query-sin-macro (usa `query_as` en vez de `query_as!`), unwrap-en-produccion, `git add .` en scripts.
+  - **Integracion con el flujo**: el Paso 7 (Prevencion) debe considerar Glory Sentinel como primera opcion para automatizar deteccion.
+  - Para anadir una regla nueva: 1) Registrar en `ruleRegistry.ts`, 2) Implementar deteccion en el analyzer apropiado (`reactAnalyzer`, `staticAnalyzer`, etc.), 3) Verificar que detecta el patron.
+
+**18. Emojis prohibidos — usar SVG o componentes.**
+  - Prohibido usar caracteres emoji Unicode en componentes React, CSS o HTML. Los emojis no son accesibles, no escalan bien, varian entre plataformas y son impredecibles en produccion.
+  - Usar SVG (importados como componentes o `<img>`) o iconos de una libreria dedicada.
+  - Esta regla debe ser detectable por Glory Sentinel via la regla `emoji-en-codigo`.
+  - Excepcion unica: comentarios de codigo donde el emoji es parte de documentacion narrativa (ej: roadmap), nunca en codigo renderizable.
 
 ---
 
@@ -180,14 +203,19 @@ Antes de marcar como completada, verificar que la funcionalidad implementada o c
 ### Regla adicional de cierre
 - Prohibido mover una tarea a completados si el sintoma original sigue visible localmente o si no se verifico el flujo exacto reportado por el usuario cuando el entorno local permite hacerlo.
 
-### Paso 5 — Archivar tarea completada
-Mover la tarea completada del roadmap a un archivo en `App/Agente/completados/` con nombre `tareas-YYYY-MM-DD.md`. Si ya existe uno con la fecha de hoy, agregar ahi. El roadmap nunca acumula tareas completadas. Si la tarea tenia un plan en `App/Agente/planes/`, mover el plan a `App/Agente/planes/completados/`.
+### Paso 5 — Archivar tarea completada + limpiar roadmap
+Mover la tarea completada del roadmap a un archivo en `App/Agente/completados/` con nombre `tareas-YYYY-MM-DD.md`. Si ya existe uno con la fecha de hoy, agregar ahi. **Borrar completamente la tarea del roadmap** — no dejarla tachada con `~~`, no marcarla con check. El roadmap solo contiene tareas pendientes, nunca completadas. Las tareas completadas viven exclusivamente en `completados/`. Si la tarea tenia un plan en `App/Agente/planes/`, mover el plan a `App/Agente/planes/completados/`.
 
 ### Paso 6 — Documentar (obligatorio cuando se toca funcionalidad)
 Despues de completar una tarea, revisar si la funcionalidad o flujo tocado ya tiene documentacion vigente en `App/Agente/documentacion/`. Si no existe, crearla; si existe, actualizarla. Esto es obligatorio para toda tarea que cambie arquitectura, flujos de usuario, contratos API (endpoints, schemas), migraciones de BD, integraciones, tooling o comportamiento reutilizable. Nunca duplicar documentacion existente sobre el mismo tema — actualizar el archivo existente y cambiar la fecha en el nombre.
 
 ### Paso 7 — Prevencion (si aplica)
-Preguntarse: "Se puede detectar o prevenir automaticamente la proxima vez?" Si si, dejar nota en el roadmap o crear issue. Para Rust, considerar si un clippy lint custom, un test de integracion, o una regla de CI cubre el caso. Para frontend, considerar si un lint rule o test e2e lo previene.
+Preguntarse: "Se puede detectar o prevenir automaticamente la proxima vez?" Si si, implementar la prevencion ahora — no dejarla como nota para despues. Orden de prioridad:
+1. **Glory Sentinel**: si el error es un patron detectable por regex o analisis estatico en archivos TS/TSX/CSS/PHP/RS, crear una regla nueva en code-sentinel. Es la forma mas rapida y visible de prevencion (el desarrollador ve el warning en VS Code en tiempo real).
+2. **Clippy/cargo check**: para Rust, verificar si un clippy lint existente o `deny` lo cubre.
+3. **Tests automaticos**: test de integracion o unitario que falla si el patron prohibido reaparece.
+4. **CI check**: regla en pipeline si no se puede cubrir localmente.
+- Si se implementa una regla de Sentinel, registrarla en la seccion de prevencion de la tarea completada.
 
 ### Paso 8 — Revisar pendientes de prevencion
 Leer `App/Agente/prevencion/`. Si hay MDs pendientes de implementar:
@@ -214,3 +242,35 @@ Formato: `{DD}{M}{A}-{N}` donde DD=dia, M=mes (1-9, A-C para oct-dic), A=ano pro
 Ejemplo: 17 marzo 2026, tarea 3 = `173A-3`. 5 noviembre 2027, tarea 1 = `05BB-1`.
 
 ### Tareas en el roadmap (formato del agente al completar)
+
+El roadmap NO contiene tareas completadas. Las tareas completadas se archivan en `App/Agente/completados/tareas-YYYY-MM-DD.md` con el siguiente formato:
+
+```
+## {ID}: {titulo breve}
+
+**Que se hizo:**
+- Descripcion concisa de los cambios realizados
+
+**Archivos tocados:**
+- Lista de archivos principales modificados/creados
+
+**Validaciones:**
+- cargo check / clippy / test / type-check — resultado
+
+**Test/evidencia:**
+- Como se verifico que funciona (endpoint probado, UI verificada, etc.)
+
+**Prevencion (Glory Sentinel):**
+- Si el error o patron corregido puede ser detectado automaticamente:
+  - Regla creada/existente: `{regla-id}` en `{archivo-analyzer}`
+  - Descripcion: que detecta y por que
+- Si no aplica: "No aplica — [razon breve]"
+
+**Lecciones:**
+- Gotchas, decisiones no obvias, patrones a recordar
+```
+
+Esta estructura existe para que cada tarea completada deje registro de:
+1. Que se hizo (para auditoria)
+2. Que se detecto/previno (para evitar repetir errores)
+3. Que se aprendio (para acelerar tareas futuras)

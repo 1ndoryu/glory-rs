@@ -215,3 +215,8 @@
 .checkboxFormulario input[type="checkbox"] {
   width: auto;
 }
+
+/* 253A-9: clase para reemplazar inline style={{ textTransform: 'capitalize' }} */
+.textoCapitalizado {
+  text-transform: capitalize;
+}

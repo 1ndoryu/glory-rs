@@ -54,8 +54,8 @@ function ListaGastos() {
                   <tr key={g.id}>
                     <td>{g.fecha}</td>
                     <td>{g.proveedor || '—'}</td>
-                    <td style={{ textTransform: 'capitalize' }}>{g.tipo_documento}</td>
-                    <td style={{ textTransform: 'capitalize' }}>{g.metodo_pago}</td>
+                    <td className="textoCapitalizado">{g.tipo_documento}</td>
+                    <td className="textoCapitalizado">{g.metodo_pago}</td>
                     <td>{formatearMoneda(g.importe_base)}</td>
                     <td>{formatearMoneda(g.importe_iva)}</td>
                     <td><strong>{formatearMoneda((parseFloat(g.importe_base) + parseFloat(g.importe_iva)).toFixed(2))}</strong></td>

@@ -51,10 +51,11 @@
   border-left-color: var(--colorExito);
 }
 
+/* 253A-9: ajustado para SVG inline en vez de span+emoji */
 .iconoLateral {
-  font-size: 1.1rem;
-  width: 1.4rem;
-  text-align: center;
+  width: 1.2rem;
+  height: 1.2rem;
+  flex-shrink: 0;
 }
 
 .pieBarraLateral {
