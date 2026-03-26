@@ -9,7 +9,6 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import Layout from '@/components/layout';
 import Login from './componentes/Login';
-import Inicio from './componentes/Inicio';
 import ListaVentas from './componentes/ListaVentas';
 import ListaGastos from './componentes/ListaGastos';
 import ListaReservas from './componentes/ListaReservas';
@@ -50,7 +49,7 @@ function App() {
             <Route path="/reset-password" element={<ResetPassword />} />
 
             <Route element={<Layout />}>
-              <Route path="/" element={<Inicio />} />
+              <Route path="/" element={<DashboardReservas />} />
               <Route path="/ventas" element={<ListaVentas />} />
               <Route path="/gastos" element={<ListaGastos />} />
               <Route path="/reservas" element={<ListaReservas />} />
@@ -58,7 +57,6 @@ function App() {
               <Route path="/clientes" element={<ListaClientes />} />
               <Route path="/canales" element={<ListaCanales />} />
               <Route path="/reservas/no-shows" element={<EstadisticasNoShows />} />
-              <Route path="/reservas/dashboard" element={<DashboardReservas />} />
               <Route path="/plano-sala" element={<PlanoSala />} />
               <Route path="/configuracion" element={<Configuracion />} />
               <Route path="/marketing/campanas" element={<ListaCampanas />} />

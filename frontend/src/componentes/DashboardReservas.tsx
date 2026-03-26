@@ -1,15 +1,20 @@
 /* [263A-16] DashboardReservas — reescrito con shadcn Card + Button + Tailwind.
- * 3 paneles con tabs: Resumen, Ocupación, Análisis.
- * [263A-25] Gráficos migrados a ChartContainer de shadcn — colores adaptativos dark/light. */
+ * [263A-25] Gráficos migrados a ChartContainer de shadcn — colores adaptativos dark/light.
+ * [263A-27] Fusionado con Inicio: tab "General" = acciones rápidas + resumen económico + reservas hoy. */
 
 import { useState } from 'react';
-import { useDashboardReservas, ResumenReservas, OcupacionReservas, AnalisisReservas, AgrupacionCanal } from '../api/generated';
+import { useDashboardReservas, useResumen, useConteoReservas, ResumenReservas, OcupacionReservas, AnalisisReservas, AgrupacionCanal } from '../api/generated';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, PieChart, Pie, Cell } from 'recharts';
+import { DollarSign, TrendingDown, TrendingUp, CalendarDays } from 'lucide-react';
+import FormularioVenta from './FormularioVenta';
+import FormularioGasto from './FormularioGasto';
+import FormularioReserva from './FormularioReserva';
 
 /* CSS vars del tema — se adaptan automáticamente a dark/light mode */
 const PIE_COLORS = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)'];
@@ -23,7 +28,7 @@ function DashboardReservas() {
   const ahora = new Date();
   const [anio, setAnio] = useState(ahora.getFullYear());
   const [mes, setMes] = useState(ahora.getMonth() + 1);
-  const [pestana, setPestana] = useState<'resumen' | 'ocupacion' | 'analisis'>('resumen');
+  const [pestana, setPestana] = useState<'general' | 'resumen' | 'ocupacion' | 'analisis'>('general');
 
   const { data, isLoading } = useDashboardReservas({ year: anio, month: mes });
   const dashboard = data?.status === 200 ? data.data : null;
@@ -55,7 +60,7 @@ function DashboardReservas() {
       </div>
 
       <div className="flex gap-1 border-b">
-        {(['resumen', 'ocupacion', 'analisis'] as const).map(tab => (
+        {(['general', 'resumen', 'ocupacion', 'analisis'] as const).map(tab => (
           <Button
             key={tab}
             variant="ghost"
@@ -63,17 +68,134 @@ function DashboardReservas() {
             className={`rounded-b-none ${pestana === tab ? 'border-b-2 border-primary font-semibold' : ''}`}
             onClick={() => setPestana(tab)}
           >
-            {tab === 'resumen' ? 'Resumen' : tab === 'ocupacion' ? 'Ocupación' : 'Análisis'}
+            {tab === 'general' ? 'General' : tab === 'resumen' ? 'Resumen' : tab === 'ocupacion' ? 'Ocupación' : 'Análisis'}
           </Button>
         ))}
       </div>
 
-      {isLoading && <p className="text-sm text-muted-foreground text-center py-8">Cargando dashboard...</p>}
+      {isLoading && pestana !== 'general' && <p className="text-sm text-muted-foreground text-center py-8">Cargando dashboard...</p>}
 
+      {pestana === 'general' && <PanelGeneral anio={anio} mes={mes} />}
       {dashboard && pestana === 'resumen' && <PanelResumen data={dashboard.resumen} />}
       {dashboard && pestana === 'ocupacion' && <PanelOcupacion data={dashboard.ocupacion} />}
       {dashboard && pestana === 'analisis' && <PanelAnalisis data={dashboard.analisis} />}
     </div>
+  );
+}
+
+/* [263A-27] Panel General: acciones rápidas + resumen económico + conteo reservas.
+ * Contenido migrado desde Inicio.tsx para unificar la experiencia. */
+function PanelGeneral({ anio, mes }: { anio: number; mes: number }) {
+  const [modalVenta, setModalVenta] = useState(false);
+  const [modalGasto, setModalGasto] = useState(false);
+  const [modalReserva, setModalReserva] = useState(false);
+
+  const { data: resumen, isLoading: cargandoResumen, refetch: refetchResumen } = useResumen({ year: anio, month: mes });
+  const { data: conteo, isLoading: cargandoConteo, refetch: refetchConteo } = useConteoReservas();
+
+  const datosResumen = resumen?.status === 200 ? resumen.data : null;
+  const datosConteo = conteo?.status === 200 ? conteo.data : null;
+
+  const formatearMoneda = (valor: string) =>
+    new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(parseFloat(valor));
+
+  return (
+    <>
+      {/* Acciones rápidas */}
+      <div className="flex flex-wrap gap-3">
+        <Button onClick={() => setModalVenta(true)} className="bg-green-600 hover:bg-green-700 text-white">
+          + Venta
+        </Button>
+        <Button onClick={() => setModalGasto(true)} variant="default">
+          + Gasto
+        </Button>
+        <Button onClick={() => setModalReserva(true)} variant="secondary">
+          + Reserva
+        </Button>
+      </div>
+
+      {/* Modales */}
+      <Dialog open={modalVenta} onOpenChange={setModalVenta}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader><DialogTitle>Nueva Venta</DialogTitle></DialogHeader>
+          <FormularioVenta onExito={() => { setModalVenta(false); refetchResumen(); }} />
+        </DialogContent>
+      </Dialog>
+      <Dialog open={modalGasto} onOpenChange={setModalGasto}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader><DialogTitle>Nuevo Gasto</DialogTitle></DialogHeader>
+          <FormularioGasto onExito={() => { setModalGasto(false); refetchResumen(); }} />
+        </DialogContent>
+      </Dialog>
+      <Dialog open={modalReserva} onOpenChange={setModalReserva}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader><DialogTitle>Nueva Reserva</DialogTitle></DialogHeader>
+          <FormularioReserva onExito={() => { setModalReserva(false); refetchConteo(); }} />
+        </DialogContent>
+      </Dialog>
+
+      {/* Resumen económico */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Ventas</CardTitle>
+            <TrendingUp className="size-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">
+              {cargandoResumen ? '...' : datosResumen ? formatearMoneda(datosResumen.total_ventas) : '—'}
+            </div>
+            <p className="text-xs text-muted-foreground">Total del mes</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Gastos</CardTitle>
+            <TrendingDown className="size-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-600">
+              {cargandoResumen ? '...' : datosResumen ? formatearMoneda(datosResumen.total_gastos) : '—'}
+            </div>
+            <p className="text-xs text-muted-foreground">Total del mes</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Margen</CardTitle>
+            <DollarSign className="size-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className={`text-2xl font-bold ${datosResumen && parseFloat(datosResumen.margen) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {cargandoResumen ? '...' : datosResumen ? formatearMoneda(datosResumen.margen) : '—'}
+            </div>
+            <p className="text-xs text-muted-foreground">Ventas − Gastos</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Reservas */}
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Reservas hoy</CardTitle>
+            <CalendarDays className="size-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{cargandoConteo ? '...' : datosConteo ? datosConteo.total_hoy : 0}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Reservas este mes</CardTitle>
+            <CalendarDays className="size-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{cargandoConteo ? '...' : datosConteo ? datosConteo.total_mes : 0}</div>
+          </CardContent>
+        </Card>
+      </div>
+    </>
   );
 }
 

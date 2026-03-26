@@ -18,7 +18,6 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import {
-  Home,
   DollarSign,
   BarChart3,
   ClipboardList,
@@ -36,12 +35,11 @@ import {
 } from "lucide-react"
 
 const navPrincipal = [
-  { title: "Inicio", url: "/", icon: <Home /> },
+  { title: "Dashboard", url: "/", icon: <LayoutDashboard /> },
   { title: "Ventas", url: "/ventas", icon: <DollarSign /> },
   { title: "Gastos", url: "/gastos", icon: <BarChart3 /> },
   { title: "Reservas", url: "/reservas", icon: <ClipboardList /> },
   { title: "Calendario", url: "/reservas/calendario", icon: <Calendar /> },
-  { title: "Dashboard", url: "/reservas/dashboard", icon: <LayoutDashboard /> },
   { title: "Clientes", url: "/clientes", icon: <Users /> },
   { title: "Canales", url: "/canales", icon: <Radio /> },
   { title: "No-Shows", url: "/reservas/no-shows", icon: <UserX /> },

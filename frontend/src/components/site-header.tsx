@@ -5,7 +5,7 @@ import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 
 const titulos: Record<string, string> = {
-  "/": "Inicio",
+  "/": "Dashboard",
   "/ventas": "Ventas",
   "/gastos": "Gastos",
   "/reservas": "Reservas",
@@ -13,7 +13,6 @@ const titulos: Record<string, string> = {
   "/clientes": "Clientes",
   "/canales": "Canales de Reserva",
   "/reservas/no-shows": "No-Shows",
-  "/reservas/dashboard": "Dashboard Reservas",
   "/plano-sala": "Plano de Sala",
   "/configuracion": "Configuración",
   "/marketing/campanas": "Campañas de Marketing",
