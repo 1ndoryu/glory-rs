@@ -1,4 +1,5 @@
-/* 253A-5: Handler de dashboard — resumen económico */
+/* 253A-5: Handler de dashboard — resumen económico
+ * 263A-13: Dashboard de reservas Fase 2 */
 
 use axum::extract::{Query, State};
 use axum::routing::get;
@@ -8,7 +9,7 @@ use utoipa::IntoParams;
 
 use crate::errors::AppError;
 use crate::middleware::AuthUser;
-use crate::models::ResumenEconomico;
+use crate::models::{DashboardReservas, ResumenEconomico};
 use crate::services::DashboardService;
 use crate::AppState;
 
@@ -38,11 +39,40 @@ pub async fn resumen(
     auth: AuthUser,
     Query(params): Query<ResumenQuery>,
 ) -> Result<Json<ResumenEconomico>, AppError> {
-    let resumen =
+    let data =
         DashboardService::resumen_mes(&state.pool, auth.user_id, params.year, params.month).await?;
-    Ok(Json(resumen))
+    Ok(Json(data))
+}
+
+/// Dashboard completo de reservas: resumen, ocupacion y analisis
+#[utoipa::path(
+    get,
+    path = "/api/dashboard/reservas",
+    tag = "Dashboard",
+    params(ResumenQuery),
+    responses(
+        (status = 200, description = "Dashboard de reservas", body = DashboardReservas),
+        (status = 401, description = "No autorizado", body = ErrorResponse)
+    ),
+    security(("bearer_auth" = []))
+)]
+pub async fn dashboard_reservas(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    Query(params): Query<ResumenQuery>,
+) -> Result<Json<DashboardReservas>, AppError> {
+    let data = DashboardService::dashboard_reservas(
+        &state.pool,
+        auth.user_id,
+        params.year,
+        params.month,
+    )
+    .await?;
+    Ok(Json(data))
 }
 
 pub fn routes() -> Router<AppState> {
-    Router::new().route("/dashboard/resumen", get(resumen))
+    Router::new()
+        .route("/dashboard/resumen", get(resumen))
+        .route("/dashboard/reservas", get(dashboard_reservas))
 }

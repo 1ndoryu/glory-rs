@@ -1,0 +1,175 @@
+/* [263A-13] Estilos del dashboard de reservas Fase 2.
+ * 3 paneles: resumen, ocupacion, analisis. Responsive. */
+
+.dashboardReservas {
+  max-width: 1200px;
+}
+
+.selectorMesDashboard {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.selectorMesDashboard select {
+  padding: 0.4rem 0.6rem;
+  border-radius: var(--radio);
+  border: 1px solid var(--colorBorde);
+  background: var(--colorFondoPanel);
+  color: var(--colorTexto);
+  font-size: 0.9rem;
+}
+
+.pestanasDashboard {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--colorBorde);
+  margin-bottom: 1.5rem;
+}
+
+.pestanaDashboard {
+  padding: 0.6rem 1.2rem;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: var(--colorTextoSecundario);
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.pestanaDashboard:hover {
+  color: var(--colorPrimario);
+}
+
+.pestanaDashboard.activa {
+  color: var(--colorPrimario);
+  border-bottom-color: var(--colorPrimario);
+  font-weight: 600;
+}
+
+/* Tarjetas KPI */
+.kpisGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.tarjetaKpi {
+  background: var(--colorFondoPanel);
+  border-radius: var(--radio);
+  padding: 1rem;
+  box-shadow: var(--sombra);
+}
+
+.tarjetaKpi .kpiEtiqueta {
+  font-size: 0.75rem;
+  color: var(--colorTextoSecundario);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.2rem;
+}
+
+.tarjetaKpi .kpiValor {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--colorTexto);
+}
+
+.tarjetaKpi .kpiDetalle {
+  font-size: 0.8rem;
+  color: var(--colorTextoSecundario);
+  margin-top: 0.2rem;
+}
+
+.kpiPositivo {
+  color: var(--colorExito) !important;
+}
+
+.kpiNegativo {
+  color: var(--colorPeligro) !important;
+}
+
+/* Gráficos */
+.graficosGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.panelGrafico {
+  background: var(--colorFondoPanel);
+  border-radius: var(--radio);
+  padding: 1.2rem;
+  box-shadow: var(--sombra);
+}
+
+.panelGrafico h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--colorTexto);
+  margin-bottom: 1rem;
+}
+
+/* Tabla simple de distribución */
+.tablaDistribucion {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.tablaDistribucion th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--colorTextoSecundario);
+  padding: 0.4rem 0.6rem;
+  border-bottom: 1px solid var(--colorBorde);
+}
+
+.tablaDistribucion td {
+  padding: 0.4rem 0.6rem;
+  border-bottom: 1px solid var(--colorBorde);
+}
+
+.tablaDistribucion tr:last-child td {
+  border-bottom: none;
+}
+
+.barraCanal {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.barraProgreso {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--colorPrimario);
+  transition: width 0.3s;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .kpisGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .graficosGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .selectorMesDashboard {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .kpisGrid {
+    grid-template-columns: 1fr;
+  }
+}

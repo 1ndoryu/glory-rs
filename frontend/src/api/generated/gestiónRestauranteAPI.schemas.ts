@@ -80,6 +80,62 @@ export interface ActualizarReservaRequest {
 }
 
 /**
+ * Reservas agrupadas por canal de reserva
+ */
+export interface AgrupacionCanal {
+  canal: string;
+  porcentaje: number;
+  total: number;
+}
+
+/**
+ * Reservas agrupadas por dia de la semana (lunes-domingo)
+ */
+export interface AgrupacionDiaSemana {
+  dia: string;
+  total: number;
+}
+
+/**
+ * Reservas agrupadas por fecha
+ */
+export interface AgrupacionFecha {
+  fecha: string;
+  personas: number;
+  total: number;
+}
+
+/**
+ * Reservas agrupadas por hora del dia
+ */
+export interface AgrupacionHora {
+  hora: string;
+  total: number;
+}
+
+/**
+ * Reservas agrupadas por turno (comida/cena)
+ */
+export interface AgrupacionTurno {
+  personas: number;
+  total: number;
+  turno: string;
+}
+
+/**
+ * Panel 3 — Analisis: efectividad, comensales, ticket medio
+ */
+export interface AnalisisReservas {
+  comensales_por_reserva: number;
+  reservas_efectivas: number;
+  /** @nullable */
+  ticket_medio_persona?: string | null;
+  /** @nullable */
+  ticket_medio_reserva?: string | null;
+  total_comensales: number;
+}
+
+/**
  * Response con token JWT después de autenticarse
  */
 export interface AuthResponse {
@@ -323,6 +379,41 @@ export interface CrearVentaRequest {
 }
 
 /**
+ * Panel 2 — Ocupacion: medias, distribucion horaria, turnos, procedencia
+ */
+export interface OcupacionReservas {
+  antelacion_media_dias: number;
+  media_personas: number;
+  media_reservas_dia: number;
+  por_hora: AgrupacionHora[];
+  por_procedencia: AgrupacionCanal[];
+  por_turno: AgrupacionTurno[];
+  total_reservas: number;
+}
+
+/**
+ * Panel 1 — Resumen: totales, comparativa, distribuciones
+ */
+export interface ResumenReservas {
+  clientes_nuevos: number;
+  por_canal: AgrupacionCanal[];
+  por_dia: AgrupacionFecha[];
+  por_dia_semana: AgrupacionDiaSemana[];
+  total_mes_anterior: number;
+  total_reservas: number;
+  variacion_porcentaje: number;
+}
+
+/**
+ * Dashboard completo de reservas: 3 paneles de analisis
+ */
+export interface DashboardReservas {
+  analisis: AnalisisReservas;
+  ocupacion: OcupacionReservas;
+  resumen: ResumenReservas;
+}
+
+/**
  * Estructura de respuesta de error expuesta en la API
  */
 export interface ErrorResponse {
@@ -541,6 +632,18 @@ per_page?: number;
  * @nullable
  */
 busqueda?: string | null;
+};
+
+export type DashboardReservasParams = {
+/**
+ * Año (ej: 2026)
+ */
+year: number;
+/**
+ * Mes (1-12)
+ * @minimum 0
+ */
+month: number;
 };
 
 export type ResumenParams = {

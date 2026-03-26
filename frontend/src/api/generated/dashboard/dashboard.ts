@@ -21,6 +21,8 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  DashboardReservas,
+  DashboardReservasParams,
   ErrorResponse,
   ResumenEconomico,
   ResumenParams
@@ -30,6 +32,130 @@ import { customInstance } from '../../axios-instance';
 
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
+
+
+/**
+ * @summary Dashboard completo de reservas: resumen, ocupacion y analisis
+ */
+export type dashboardReservasResponse200 = {
+  data: DashboardReservas
+  status: 200
+}
+
+export type dashboardReservasResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type dashboardReservasResponseSuccess = (dashboardReservasResponse200) & {
+  headers: Headers;
+};
+export type dashboardReservasResponseError = (dashboardReservasResponse401) & {
+  headers: Headers;
+};
+
+export type dashboardReservasResponse = (dashboardReservasResponseSuccess | dashboardReservasResponseError)
+
+export const getDashboardReservasUrl = (params: DashboardReservasParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/dashboard/reservas?${stringifiedParams}` : `/api/dashboard/reservas`
+}
+
+export const dashboardReservas = async (params: DashboardReservasParams, options?: RequestInit): Promise<dashboardReservasResponse> => {
+
+  return customInstance<dashboardReservasResponse>(getDashboardReservasUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getDashboardReservasQueryKey = (params?: DashboardReservasParams,) => {
+    return [
+    `/api/dashboard/reservas`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getDashboardReservasQueryOptions = <TData = Awaited<ReturnType<typeof dashboardReservas>>, TError = ErrorResponse>(params: DashboardReservasParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof dashboardReservas>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getDashboardReservasQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof dashboardReservas>>> = ({ signal }) => dashboardReservas(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof dashboardReservas>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type DashboardReservasQueryResult = NonNullable<Awaited<ReturnType<typeof dashboardReservas>>>
+export type DashboardReservasQueryError = ErrorResponse
+
+
+export function useDashboardReservas<TData = Awaited<ReturnType<typeof dashboardReservas>>, TError = ErrorResponse>(
+ params: DashboardReservasParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof dashboardReservas>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof dashboardReservas>>,
+          TError,
+          Awaited<ReturnType<typeof dashboardReservas>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useDashboardReservas<TData = Awaited<ReturnType<typeof dashboardReservas>>, TError = ErrorResponse>(
+ params: DashboardReservasParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof dashboardReservas>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof dashboardReservas>>,
+          TError,
+          Awaited<ReturnType<typeof dashboardReservas>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useDashboardReservas<TData = Awaited<ReturnType<typeof dashboardReservas>>, TError = ErrorResponse>(
+ params: DashboardReservasParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof dashboardReservas>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Dashboard completo de reservas: resumen, ocupacion y analisis
+ */
+
+export function useDashboardReservas<TData = Awaited<ReturnType<typeof dashboardReservas>>, TError = ErrorResponse>(
+ params: DashboardReservasParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof dashboardReservas>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getDashboardReservasQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
 
 
 

@@ -2,6 +2,7 @@ pub mod common;
 mod canal_reserva;
 mod cliente;
 mod dashboard;
+mod dashboard_reservas;
 mod etiqueta;
 mod gasto;
 mod reserva;
@@ -13,6 +14,10 @@ pub use cliente::{
     ActualizarClienteRequest, Cliente, ClientesPaginados, ClientesQuery, CrearClienteRequest,
 };
 pub use dashboard::ResumenEconomico;
+pub use dashboard_reservas::{
+    AgrupacionCanal, AgrupacionDiaSemana, AgrupacionFecha, AgrupacionHora, AgrupacionTurno,
+    AnalisisReservas, DashboardReservas, OcupacionReservas, ResumenReservas,
+};
 pub use etiqueta::{
     CategoriaEtiqueta, CrearCategoriaEtiquetaRequest, CrearEtiquetaRequest, Etiqueta,
     EtiquetaConCategoria, EtiquetasQuery,
