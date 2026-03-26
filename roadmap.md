@@ -213,11 +213,13 @@ DELETE http://localhost:3000/api/ventas/de507550-2c03-4a42-8717-d6a547058825 405
 
 ~~25. Cambia el preset de shadcn a --preset b0, cambiar de white a dark mode no funciona, revisa si tailwind esta funcionando correctamente~~ → 263A-25
 
-25. La forma en la que se construye el plano de la sala, por ajemplo abre alertas en vez de modales, no tiene iconos, deberia poder arrastrarse primero y despues colocar el nombre, cosas basicas que mejoran la experiencia de usuario, tambien veo que los estados no se conservan al mover las mesas. (no se arreglo a pesar de shadcn, hace falta mejorar la ui ux), por ejemplo las alertas deberian ser dialogos (componente de shadcn)
+~~25. La forma en la que se construye el plano de la sala, por ajemplo abre alertas en vez de modales, no tiene iconos, deberia poder arrastrarse primero y despues colocar el nombre, cosas basicas que mejoran la experiencia de usuario, tambien veo que los estados no se conservan al mover las mesas. (no se arreglo a pesar de shadcn, hace falta mejorar la ui ux), por ejemplo las alertas deberian ser dialogos (componente de shadcn)~~ → 263A-28
 
 26. LOs botones en el panel lateral de navegación no tienen gap, y los botones de crear venta y gasto en el panel lateral la palabra "nueva es redudante"
 
 27. Cambia el present de shandc a --preset bJfDQCym
 
 28. el main necesita gap 
+
+29. Cambiar de white a dark o viceversa no funciona.
 
