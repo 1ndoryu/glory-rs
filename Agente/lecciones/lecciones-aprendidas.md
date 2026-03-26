@@ -76,3 +76,33 @@ Cada lección debe ser concisa y accionable.
 **Problema:** Hooks Orval retornan `ConfiguracionRestaurante | ErrorResponse`. Acceder a campos de datos sin narrowing causa error TS.
 **Causa raíz:** Orval genera tipos union para cubrir respuestas 200 y errores. TypeScript no permite acceder a campos específicos sin discriminar.
 **Solución:** Usar `datos.status === 200` como discriminante antes de acceder a campos de datos.
+
+## 2026-03-26 — Coolify beta 460 no soporta dockerfile_inline en servicios
+
+**Problema:** `POST /api/v1/services` acepta un compose con `build: dockerfile_inline:`, pero Coolify transforma el compose reemplazando `dockerfile_inline` con `dockerfile: Dockerfile.rust` y el build nunca se ejecuta.
+**Causa raíz:** Limitación de Coolify beta 460 — los servicios no soportan builds inline, solo imágenes pre-construidas.
+**Solución:** Construir la imagen Docker directamente en el servidor via SSH (`docker build -t nombre:latest .`) y usar `image: nombre:latest` en el compose de Coolify.
+**Acción preventiva:** El template de coolify-manager-rs debería generar un workflow que construye en el servidor, no depender de Coolify para builds.
+
+## 2026-03-26 — Submodulo git con URL local no funciona en Deploy
+
+**Problema:** `.gitmodules` apuntaba a ruta Windows local (`c:\Users\...`). El `git clone --recurse-submodules` en Linux fallaba.
+**Solución:** Crear repo público en GitHub para el submodulo y actualizar `.gitmodules` con URL HTTPS.
+**Acción preventiva:** Nunca usar paths locales en `.gitmodules` — siempre URLs de repositorios remotos.
+
+## 2026-03-26 — Dockerfile: verificar MSRV antes de elegir imagen Rust
+
+**Problema:** `rust:1.83` y `rust:1.85` no soportaban crates que requieren Rust ≥1.88 (time-core, home).
+**Causa raíz:** Las dependencias actualizan su MSRV con cada release, pero la imagen Docker se fijó en una versión antigua.
+**Solución:** Usar `rust:1.88-bookworm` (mínimo requerido por las dependencias). Verificar MSRV con `cargo check` localmente.
+
+## 2026-03-26 — Traefik necesita estar en la misma red Docker
+
+**Problema:** Gateway Timeout al acceder via dominio. La app era accesible directamente por puerto pero Traefik no la alcanzaba.
+**Causa raíz:** Traefik (coolify-proxy) no estaba conectado a la red del servicio (`b8s0cks...`). Solo podía resolver el contenedor desde redes donde ambos estuvieran presentes.
+**Solución:** `docker network connect <red-servicio> coolify-proxy`. También funciona conectar la app a la red `coolify`.
+
+## 2026-03-26 — Coolify API: docker_compose_raw requiere base64
+
+**Problema:** PATCH al campo `docker_compose` retorna 422 "This field is not allowed". El campo correcto es `docker_compose_raw` pero debe ser base64-encoded.
+**Solución:** Usar `docker_compose_raw` con el YAML codificado en base64. PATCH envs via `/envs` sin UUID en la ruta.

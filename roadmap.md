@@ -1,5 +1,10 @@
 ## Stack implementado
 
+> **URL producción:** http://app-b8s0cks444o0sogo8kg8wcgw.66.94.100.241.sslip.io (Swagger UI: /swagger-ui/)
+> **URL directa:** http://66.94.100.241:3001
+> **Servidor:** 66.94.100.241 (Coolify, servicio UUID: b8s0cks444o0sogo8kg8wcgw)
+> **Deploy:** `scripts/deploy-server.sh` via SSH (requiere DB_PASSWORD y JWT_SECRET como env vars)
+
 | Capa                 | Herramienta                                    |
 | -------------------- | ---------------------------------------------- |
 | Framework web        | Axum 0.7                                       |
@@ -166,7 +171,7 @@ Puedes ajustar los pendientes. Si puedes analizar todo el contenido y sacar el t
 
 ~~9. Error `cargo run` sin especificar binario en dev.ps1~~ → 263A-21
 
-10. Crear template `rust-stack.yaml` en coolify-manager-rs y desplegar automáticamente con `new --name`
+~~10. Crear template `rust-stack.yaml` en coolify-manager-rs y desplegar automáticamente con `new --name`~~ → 263A-22
 
 11. Implementar Módulo de Marketing — Fase 4a (campañas manuales: backend + frontend)
 
@@ -175,3 +180,31 @@ Puedes ajustar los pendientes. Si puedes analizar todo el contenido y sacar el t
 13. Implementar Módulo de Marketing — Fase 4c (recordatorios automáticos de reservas)
 
 14. Merge de clientes duplicados — Fase 4d
+
+15. Veo algunos problemas como
+
+Failed to load resource: net::ERR_CONNECTION_REFUSEDComprende este error
+:3000/api/auth/login:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)Comprende este error
+:3000/api/reservas/no-shows:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)Comprende este error
+:3000/api/reservas/no-shows:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)Comprende este error
+:3000/api/reservas/no-shows:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+DELETE http://localhost:3000/api/ventas/de507550-2c03-4a42-8717-d6a547058825 405 (Method Not Allowed)
+
+
+16. me di cuenta qeu son muchos problemas de diseño que lo mejor en este caso es usar https://ui.shadcn.com, rehacer toda la interfaz en https://ui.shadcn.com, tambien seria bueno preparar el white y black mode, usar es block "npx shadcn@latest add dashboard-01" shadcn tambien tiene Charts & Graphs, usaremos esos, he creado este present para este proyecto --preset bKGlrC2C (https://ui.shadcn.com/docs/installation)
+
+(todo lo siguiente fue planificado antes de 16, no tomar tanto en cuenta si se refiere al diseño pues, shadcn solucionara alguans cosas)
+
+17. los botoenes de eliminar deberian ser iconos en vez de texto, 
+
+18. .menuGasto debería display flex column y esta usando emojis en vez de icono lo cual es una violacion
+
+19. Creo que inicio y dashboard deberían convinarse en una sola cosa al menos que claro que el cliente lo haya pedido por separado pero no croe.
+
+20. Siempre dice No hay reservas para esta fecha pero en calendario sale que si. (Datos de prueba) Pero ya vi que es porque "todos los estados" en realidad no muestran todos los estados. 
+
+21. En pieBarraLateral las letras son oscuras y el fondo tambien.
+
+22. La barra lateral debería poder encogerse a solo iconos y expandirse, el estado debe perdurar aunque se recargue la pestaña.
+
+23. La forma en la que se construye el plano de la sala, por ajemplo abre alertas en vez de modales, no tiene iconos, deberia poder arrastrarse primero y despues colocar el nombre, cosas basicas que mejoran la experiencia de usuario, tambien veo que los estados no se conservan al mover las mesas.
