@@ -121,14 +121,57 @@ Puedes ajustar los pendientes. Si puedes analizar todo el contenido y sacar el t
 - Marketing: el cliente indicó que dará detalles más adelante.
 - Merge de clientes duplicados: unificar 2 clientes que son la misma persona.
 
+### Fase 4 — Marketing (Data III, basado en Cover Manager SMS)
+
+> Referencia: `cliente/Data III/mensajes.md` + transcripción video + captura Cover Manager SMS
+> El cliente pide un módulo donde el propietario cree campañas de marketing multi-canal.
+
+#### Fase 4a — Campañas manuales
+- Crear campañas de publicidad multi-canal: SMS, email, WhatsApp (seleccionar una, varias o todas a la vez).
+- Redactar mensaje con texto + adjuntar fotos/vídeos (para email y WhatsApp).
+- Segmentación de destinatarios por actividad: clientes habituales, sin venir 1/3/6/9/12/+12 meses (extensible).
+- Formulario campaña: nombre interno, descripción interna, cuerpo del mensaje, aviso de coste SMS, opción baja de comunicaciones comerciales.
+- Contador de caracteres SMS (máx 160, caracteres especiales ¡¿ cuentan doble).
+- Referencia visual: captura Cover Manager (`cliente/Data III/WhatsApp Image...`).
+
+#### Fase 4b — Plantillas WhatsApp (Meta Business API)
+- Pestaña "Plantillas" dentro de Marketing.
+- Crear nueva plantilla: texto + archivos (fotos/vídeos) → enviar a Meta para aprobación.
+- Historial de plantillas aprobadas (ordenadas por fecha, preview de imagen/primer frame + cuerpo).
+- Historial de plantillas no aprobadas (misma vista + columna "Razón" del rechazo).
+- Integración con Meta Business API / WhatsApp Business API para envío y gestión de plantillas.
+
+#### Fase 4c — Recordatorios automáticos
+- Los recordatorios de reserva deben enviarse automáticamente (no manualmente).
+- Definir reglas: cuándo enviar (ej: 24h antes, 1h antes), por qué canal.
+
+#### Fase 4d — Merge clientes duplicados
+- Unificar 2+ clientes que son la misma persona en el CRM.
+
+#### Fase 4e — Métricas de marketing (futuro)
+- Medir cuántos clientes vinieron al restaurante después de recibir un mensaje de campaña.
+
 ## ~~Configuración del restaurante~~ → 263A-17
 
 - ~~Configuración de datos obligatorios al reservar (email, teléfono, nombre, apellidos).~~
 - ~~IVA por defecto del establecimiento.~~
 
-6. ~~deberia unificarse npm run verify y self-check.ps1 para reducir la alucinacion, supongo que esto implica ajustar las instrucciones .github\instructions\test.instructions.md, tambien presiento que hay cosas que necesitan ser mas genericas en .github\instructions\test.instructions.md, por ejemplo cuando dice  `npm run verify` (cargo check + clippy + test + type-check + Sentinel) no aclara que en proyecto actual puede que no se este usando cargo por que no es rust, o~~ → 263A-18
+## Tareas pendientes
 
-7. ~~Agregar una regla de que frontend\src\api\generated.ts siempre tiene que estar dividido~~ → 263A-19
+~~6. deberia unificarse npm run verify y self-check.ps1~~ → 263A-18
 
-8. ~~Cuando todo este listo desplegar con coolify-manager-rs, ajustar lo que sea necesario, la url sera temporal.~~ → 263A-20 (Fase 1: Dockerfile + static serving. Fase 2 pendiente: configurar servicio en Coolify UI)
+~~7. Agregar una regla de que frontend\src\api\generated.ts siempre tiene que estar dividido~~ → 263A-19
 
+~~8. Cuando todo este listo desplegar con coolify-manager-rs, ajustar lo que sea necesario~~ → 263A-20 (Fase 1 completada)
+
+~~9. Error `cargo run` sin especificar binario en dev.ps1~~ → 263A-21
+
+10. Crear template `rust-stack.yaml` en coolify-manager-rs y desplegar automáticamente con `new --name`
+
+11. Implementar Módulo de Marketing — Fase 4a (campañas manuales: backend + frontend)
+
+12. Implementar Módulo de Marketing — Fase 4b (plantillas WhatsApp / Meta Business API)
+
+13. Implementar Módulo de Marketing — Fase 4c (recordatorios automáticos de reservas)
+
+14. Merge de clientes duplicados — Fase 4d

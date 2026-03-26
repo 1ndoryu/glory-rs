@@ -5,6 +5,7 @@ edition = "2021"
 description = "Glory RS — Template para sitios web con Rust + React + OpenAPI"
 license = "MIT"
 authors = ["1ndoryu"]
+default-run = "glory-backend"
 
 [dependencies]
 # Web framework
