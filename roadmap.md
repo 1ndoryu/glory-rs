@@ -114,7 +114,7 @@ Puedes ajustar los pendientes. Si puedes analizar todo el contenido y sacar el t
 - ~~Constructor de plano: el dueño construye su plano arrastrando mesas. Configurar cada mesa: número, zona, mín/máx personas. Múltiples plantas/zonas (barra, restaurante, terraza).~~ → 263A-14
 - ~~Combinación de mesas: seleccionar mesas combinables, definir máx/mín personas en combinación.~~ → 263A-14
 - ~~Exportar/importar plano de sala para backup.~~ → 263A-14
-- Mostrar plano con mesas ocupadas en la vista de reservas por día. → PENDIENTE (integración Fase 3b)
+- ~~Mostrar plano con mesas ocupadas en la vista de reservas por día.~~ → 263A-16 (integración Fase 3b)
 
 ### Fase 4 — Pendiente de detalle del cliente
 
@@ -131,3 +131,4 @@ Puedes ajustar los pendientes. Si puedes analizar todo el contenido y sacar el t
 7. Agregar una regla de que frontend\src\api\generated.ts siempre tiene que estar dividido 
 
 8. Cuando todo este listo desplegar con coolify-manager-rs, ajustar lo que sea necesario, la url sera temporal. 
+
