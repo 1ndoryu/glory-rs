@@ -17,6 +17,7 @@ use crate::AppState;
 #[utoipa::path(
     post,
     path = "/api/ventas",
+    tag = "Ventas",
     request_body = CrearVentaRequest,
     responses(
         (status = 201, description = "Venta creada", body = Venta),
@@ -40,6 +41,7 @@ pub async fn crear_venta(
 #[utoipa::path(
     get,
     path = "/api/ventas/{id}",
+    tag = "Ventas",
     params(("id" = Uuid, Path, description = "ID de la venta")),
     responses(
         (status = 200, description = "Venta encontrada", body = Venta),
@@ -61,6 +63,7 @@ pub async fn obtener_venta(
 #[utoipa::path(
     get,
     path = "/api/ventas",
+    tag = "Ventas",
     params(VentasQuery),
     responses(
         (status = 200, description = "Lista de ventas", body = VentasPaginadas),
@@ -89,6 +92,7 @@ pub async fn listar_ventas(
 #[utoipa::path(
     delete,
     path = "/api/ventas/{id}",
+    tag = "Ventas",
     params(("id" = Uuid, Path, description = "ID de la venta")),
     responses(
         (status = 204, description = "Venta eliminada"),

@@ -13,6 +13,7 @@ use crate::AppState;
 #[utoipa::path(
     post,
     path = "/api/auth/register",
+    tag = "Auth",
     request_body = RegisterRequest,
     responses(
         (status = 201, description = "Usuario registrado", body = AuthResponse),
@@ -35,6 +36,7 @@ pub async fn register(
 #[utoipa::path(
     post,
     path = "/api/auth/login",
+    tag = "Auth",
     request_body = LoginRequest,
     responses(
         (status = 200, description = "Login exitoso", body = AuthResponse),

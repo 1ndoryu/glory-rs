@@ -17,6 +17,7 @@ use crate::AppState;
 #[utoipa::path(
     post,
     path = "/api/gastos",
+    tag = "Gastos",
     request_body = CrearGastoRequest,
     responses(
         (status = 201, description = "Gasto creado", body = Gasto),
@@ -40,6 +41,7 @@ pub async fn crear_gasto(
 #[utoipa::path(
     get,
     path = "/api/gastos/{id}",
+    tag = "Gastos",
     params(("id" = Uuid, Path, description = "ID del gasto")),
     responses(
         (status = 200, description = "Gasto encontrado", body = Gasto),
@@ -61,6 +63,7 @@ pub async fn obtener_gasto(
 #[utoipa::path(
     get,
     path = "/api/gastos",
+    tag = "Gastos",
     params(GastosQuery),
     responses(
         (status = 200, description = "Lista de gastos", body = GastosPaginados),
@@ -90,6 +93,7 @@ pub async fn listar_gastos(
 #[utoipa::path(
     delete,
     path = "/api/gastos/{id}",
+    tag = "Gastos",
     params(("id" = Uuid, Path, description = "ID del gasto")),
     responses(
         (status = 204, description = "Gasto eliminado"),
@@ -111,6 +115,7 @@ pub async fn eliminar_gasto(
 #[utoipa::path(
     get,
     path = "/api/gastos/categorias",
+    tag = "Gastos",
     responses(
         (status = 200, description = "Lista de categorías", body = Vec<CategoriaGasto>)
     )

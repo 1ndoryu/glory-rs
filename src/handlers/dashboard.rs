@@ -25,6 +25,7 @@ pub struct ResumenQuery {
 #[utoipa::path(
     get,
     path = "/api/dashboard/resumen",
+    tag = "Dashboard",
     params(ResumenQuery),
     responses(
         (status = 200, description = "Resumen económico", body = ResumenEconomico),

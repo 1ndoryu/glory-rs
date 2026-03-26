@@ -19,6 +19,7 @@ use crate::AppState;
 #[utoipa::path(
     post,
     path = "/api/clientes",
+    tag = "Clientes",
     request_body = CrearClienteRequest,
     responses(
         (status = 201, description = "Cliente creado", body = Cliente),
@@ -42,6 +43,7 @@ pub async fn crear_cliente(
 #[utoipa::path(
     get,
     path = "/api/clientes/{id}",
+    tag = "Clientes",
     params(("id" = Uuid, Path, description = "ID del cliente")),
     responses(
         (status = 200, description = "Cliente encontrado", body = Cliente),
@@ -63,6 +65,7 @@ pub async fn obtener_cliente(
 #[utoipa::path(
     get,
     path = "/api/clientes",
+    tag = "Clientes",
     params(ClientesQuery),
     responses(
         (status = 200, description = "Lista de clientes", body = ClientesPaginados),
@@ -83,6 +86,7 @@ pub async fn listar_clientes(
 #[utoipa::path(
     put,
     path = "/api/clientes/{id}",
+    tag = "Clientes",
     params(("id" = Uuid, Path, description = "ID del cliente")),
     request_body = ActualizarClienteRequest,
     responses(
@@ -108,6 +112,7 @@ pub async fn actualizar_cliente(
 #[utoipa::path(
     delete,
     path = "/api/clientes/{id}",
+    tag = "Clientes",
     params(("id" = Uuid, Path, description = "ID del cliente")),
     responses(
         (status = 204, description = "Cliente eliminado"),

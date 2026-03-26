@@ -29,6 +29,7 @@ pub struct TagAssignBody {
 #[utoipa::path(
     get,
     path = "/api/etiquetas/categorias",
+    tag = "Etiquetas",
     responses(
         (status = 200, description = "Lista de categorías", body = Vec<CategoriaEtiqueta>),
         (status = 401, description = "No autorizado", body = ErrorResponse)
@@ -47,6 +48,7 @@ pub async fn listar_categorias(
 #[utoipa::path(
     post,
     path = "/api/etiquetas/categorias",
+    tag = "Etiquetas",
     request_body = CrearCategoriaEtiquetaRequest,
     responses(
         (status = 201, description = "Categoría creada", body = CategoriaEtiqueta),
@@ -74,6 +76,7 @@ pub async fn crear_categoria(
 #[utoipa::path(
     get,
     path = "/api/etiquetas",
+    tag = "Etiquetas",
     params(EtiquetasQuery),
     responses(
         (status = 200, description = "Lista de etiquetas", body = Vec<EtiquetaConCategoria>),
@@ -94,6 +97,7 @@ pub async fn listar_etiquetas(
 #[utoipa::path(
     post,
     path = "/api/etiquetas",
+    tag = "Etiquetas",
     request_body = CrearEtiquetaRequest,
     responses(
         (status = 201, description = "Etiqueta creada", body = EtiquetaConCategoria),
@@ -117,6 +121,7 @@ pub async fn crear_etiqueta(
 #[utoipa::path(
     delete,
     path = "/api/etiquetas/{id}",
+    tag = "Etiquetas",
     params(("id" = Uuid, Path, description = "ID de la etiqueta")),
     responses(
         (status = 204, description = "Etiqueta eliminada"),
@@ -140,6 +145,7 @@ pub async fn eliminar_etiqueta(
 #[utoipa::path(
     post,
     path = "/api/clientes/{id}/etiquetas",
+    tag = "Etiquetas",
     params(("id" = Uuid, Path, description = "ID del cliente")),
     request_body = TagAssignBody,
     responses(
@@ -162,6 +168,7 @@ pub async fn asignar_etiqueta_cliente(
 #[utoipa::path(
     delete,
     path = "/api/clientes/{cliente_id}/etiquetas/{etiqueta_id}",
+    tag = "Etiquetas",
     params(
         ("cliente_id" = Uuid, Path, description = "ID del cliente"),
         ("etiqueta_id" = Uuid, Path, description = "ID de la etiqueta")
@@ -186,6 +193,7 @@ pub async fn desasignar_etiqueta_cliente(
 #[utoipa::path(
     get,
     path = "/api/clientes/{id}/etiquetas",
+    tag = "Etiquetas",
     params(("id" = Uuid, Path, description = "ID del cliente")),
     responses(
         (status = 200, description = "Etiquetas del cliente", body = Vec<EtiquetaConCategoria>),
@@ -208,6 +216,7 @@ pub async fn obtener_etiquetas_cliente(
 #[utoipa::path(
     post,
     path = "/api/reservas/{id}/etiquetas",
+    tag = "Etiquetas",
     params(("id" = Uuid, Path, description = "ID de la reserva")),
     request_body = TagAssignBody,
     responses(
@@ -230,6 +239,7 @@ pub async fn asignar_etiqueta_reserva(
 #[utoipa::path(
     delete,
     path = "/api/reservas/{reserva_id}/etiquetas/{etiqueta_id}",
+    tag = "Etiquetas",
     params(
         ("reserva_id" = Uuid, Path, description = "ID de la reserva"),
         ("etiqueta_id" = Uuid, Path, description = "ID de la etiqueta")
@@ -254,6 +264,7 @@ pub async fn desasignar_etiqueta_reserva(
 #[utoipa::path(
     get,
     path = "/api/reservas/{id}/etiquetas",
+    tag = "Etiquetas",
     params(("id" = Uuid, Path, description = "ID de la reserva")),
     responses(
         (status = 200, description = "Etiquetas de la reserva", body = Vec<EtiquetaConCategoria>),
