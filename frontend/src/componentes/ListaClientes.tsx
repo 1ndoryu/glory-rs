@@ -1,9 +1,13 @@
-/* 263A-1: ListaClientes — CRM con búsqueda, paginación y modal crear/editar */
+/* [263A-16] Lista de clientes — reescrita con shadcn Table + Dialog + Input.
+ * CRM con búsqueda, paginación, modal crear/editar. Iconos para acciones. */
 
 import useListaClientes from '../hooks/useListaClientes';
-import { Boton, Input, Modal } from '@glory/componentes/ui';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Trash2, Pencil } from 'lucide-react';
 import FormularioCliente from './FormularioCliente';
-import '../estilos/Formularios.css';
 
 function ListaClientes() {
   const {
@@ -23,84 +27,92 @@ function ListaClientes() {
   } = useListaClientes();
 
   return (
-    <div>
-      <div className="cabeceraLista">
-        <div className="cabeceraPagina">
-          <h1 className="tituloPagina">Clientes</h1>
-          <p className="subtituloPagina">{clientes ? `${clientes.total} registros` : ''}</p>
-        </div>
-        <Boton variante="exito" onClick={() => setModalCrear(true)}>+ Nuevo Cliente</Boton>
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">{clientes ? `${clientes.total} registros` : ''}</p>
+        <Button onClick={() => setModalCrear(true)}>+ Nuevo Cliente</Button>
       </div>
 
-      <div className="filtroBusqueda">
-        <Input
-          type="search"
-          placeholder="Buscar por nombre, apellidos, teléfono o email..."
-          value={busqueda}
-          onChange={(e) => buscar(e.target.value)}
-        />
-      </div>
+      <Input
+        type="search"
+        placeholder="Buscar por nombre, apellidos, teléfono o email..."
+        value={busqueda}
+        onChange={(e) => buscar(e.target.value)}
+        className="max-w-md"
+      />
 
-      {/* Modal crear */}
-      <Modal abierto={modalCrear} onCerrar={() => setModalCrear(false)} titulo="Nuevo Cliente">
-        <FormularioCliente onExito={cerrarModalYRefrescar} />
-      </Modal>
+      <Dialog open={modalCrear} onOpenChange={setModalCrear}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Nuevo Cliente</DialogTitle>
+          </DialogHeader>
+          <FormularioCliente onExito={cerrarModalYRefrescar} />
+        </DialogContent>
+      </Dialog>
 
-      {/* Modal editar */}
-      <Modal abierto={!!clienteEditar} onCerrar={() => setClienteEditar(null)} titulo="Editar Cliente">
-        {clienteEditar && <FormularioCliente onExito={cerrarModalYRefrescar} cliente={clienteEditar} />}
-      </Modal>
+      <Dialog open={!!clienteEditar} onOpenChange={(open) => { if (!open) setClienteEditar(null); }}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Editar Cliente</DialogTitle>
+          </DialogHeader>
+          {clienteEditar && <FormularioCliente onExito={cerrarModalYRefrescar} cliente={clienteEditar} />}
+        </DialogContent>
+      </Dialog>
 
-      <div className="contenedorLista">
-        {isLoading ? (
-          <p className="sinDatos">Cargando...</p>
-        ) : clientes && clientes.items.length > 0 ? (
-          <>
-            <table className="tabla">
-              <thead>
-                <tr>
-                  <th>Nombre</th>
-                  <th>Teléfono</th>
-                  <th>Email</th>
-                  <th>Empresa</th>
-                  <th>Notas</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
+      {isLoading ? (
+        <p className="text-sm text-muted-foreground">Cargando...</p>
+      ) : clientes && clientes.items.length > 0 ? (
+        <>
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nombre</TableHead>
+                  <TableHead>Teléfono</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Empresa</TableHead>
+                  <TableHead>Notas</TableHead>
+                  <TableHead className="w-20"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {clientes.items.map((c) => (
-                  <tr key={c.id}>
-                    <td>{c.nombre} {c.apellidos}</td>
-                    <td>{c.telefono ? `${c.prefijo_telefono} ${c.telefono}` : '—'}</td>
-                    <td>{c.email || '—'}</td>
-                    <td>{c.empresa || '—'}</td>
-                    <td className="textoTruncado">{c.notas || '—'}</td>
-                    <td className="accionesTabla">
-                      <Boton variante="fantasma" tamano="sm" onClick={() => setClienteEditar(c)}>Editar</Boton>
-                      <Boton
-                        variante="peligro"
-                        tamano="sm"
-                        onClick={() => eliminarMut.mutate({ id: c.id })}
-                        disabled={eliminarMut.isPending}
-                      >
-                        Eliminar
-                      </Boton>
-                    </td>
-                  </tr>
+                  <TableRow key={c.id}>
+                    <TableCell>{c.nombre} {c.apellidos}</TableCell>
+                    <TableCell>{c.telefono ? `${c.prefijo_telefono} ${c.telefono}` : '—'}</TableCell>
+                    <TableCell>{c.email || '—'}</TableCell>
+                    <TableCell>{c.empresa || '—'}</TableCell>
+                    <TableCell className="max-w-32 truncate">{c.notas || '—'}</TableCell>
+                    <TableCell>
+                      <div className="flex gap-1">
+                        <Button variant="ghost" size="icon" onClick={() => setClienteEditar(c)}>
+                          <Pencil className="size-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => eliminarMut.mutate({ id: c.id })}
+                          disabled={eliminarMut.isPending}
+                        >
+                          <Trash2 className="size-4 text-destructive" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
+          </div>
 
-            <div className="paginacion">
-              <Boton variante="fantasma" tamano="sm" disabled={pagina <= 1} onClick={() => setPagina(pagina - 1)}>Anterior</Boton>
-              <span className="infoPagina">Página {pagina} de {Math.ceil(clientes.total / porPagina)}</span>
-              <Boton variante="fantasma" tamano="sm" disabled={pagina * porPagina >= clientes.total} onClick={() => setPagina(pagina + 1)}>Siguiente</Boton>
-            </div>
-          </>
-        ) : (
-          <p className="sinDatos">No hay clientes registrados</p>
-        )}
-      </div>
+          <div className="flex items-center justify-between">
+            <Button variant="outline" size="sm" disabled={pagina <= 1} onClick={() => setPagina(pagina - 1)}>Anterior</Button>
+            <span className="text-sm text-muted-foreground">Página {pagina} de {Math.ceil(clientes.total / porPagina)}</span>
+            <Button variant="outline" size="sm" disabled={pagina * porPagina >= clientes.total} onClick={() => setPagina(pagina + 1)}>Siguiente</Button>
+          </div>
+        </>
+      ) : (
+        <p className="text-sm text-muted-foreground">No hay clientes registrados</p>
+      )}
     </div>
   );
 }

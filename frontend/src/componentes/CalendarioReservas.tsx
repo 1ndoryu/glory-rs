@@ -1,12 +1,11 @@
-/* 263A-7: Vista de reservas por mes — cuadrícula calendario.
-   Muestra personas + reservas por día, totales mensuales.
-   Click en día → navega a vista día con fecha seleccionada. */
+/* [263A-16] Calendario de reservas — reescrito con shadcn Button + Card + Tailwind grid.
+ * Cuadrícula mensual, click en día navega a ListaReservas con fecha. */
 
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useResumenMensual } from '../api/generated';
-import { Boton } from '@glory/componentes/ui';
-import '../estilos/Calendario.css';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 
 const NOMBRES_MES = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -24,7 +23,6 @@ function CalendarioReservas() {
   const { data, isLoading } = useResumenMensual({ anio, mes });
   const resumen = data?.status === 200 ? data.data : [];
 
-  /* Totales del mes */
   const totales = useMemo(() => {
     let reservas = 0;
     let personas = 0;
@@ -35,7 +33,6 @@ function CalendarioReservas() {
     return { reservas, personas };
   }, [resumen]);
 
-  /* Mapa fecha→datos para lookup rápido */
   const mapaFechas = useMemo(() => {
     const m = new Map<string, { reservas: number; personas: number }>();
     for (const d of resumen) {
@@ -44,16 +41,13 @@ function CalendarioReservas() {
     return m;
   }, [resumen]);
 
-  /* Generar grid del calendario (lunes = inicio de semana) */
   const diasGrid = useMemo(() => {
     const primerDia = new Date(anio, mes - 1, 1);
     const ultimoDia = new Date(anio, mes, 0).getDate();
-    /* getDay: 0=dom..6=sab → convertir a lunes=0 */
     const offsetInicio = (primerDia.getDay() + 6) % 7;
     const celdas: (number | null)[] = [];
     for (let i = 0; i < offsetInicio; i++) celdas.push(null);
     for (let d = 1; d <= ultimoDia; d++) celdas.push(d);
-    /* Rellenar hasta completar semana */
     while (celdas.length % 7 !== 0) celdas.push(null);
     return celdas;
   }, [anio, mes]);
@@ -77,50 +71,47 @@ function CalendarioReservas() {
     anio === hoy.getFullYear() && mes === hoy.getMonth() + 1 && dia === hoy.getDate();
 
   return (
-    <div>
-      <div className="cabeceraLista">
-        <div className="cabeceraPagina">
-          <h1 className="tituloPagina">Calendario de Reservas</h1>
-          <p className="subtituloPagina">
-            {totales.reservas} reservas · {totales.personas} personas en {NOMBRES_MES[mes - 1]}
-          </p>
-        </div>
-      </div>
+    <div className="flex flex-col gap-4">
+      <p className="text-sm text-muted-foreground">
+        {totales.reservas} reservas · {totales.personas} personas en {NOMBRES_MES[mes - 1]}
+      </p>
 
-      <div className="navegacionCalendario">
-        <Boton variante="fantasma" tamano="sm" onClick={mesAnterior}>← Anterior</Boton>
-        <span className="mesActual">{NOMBRES_MES[mes - 1]} {anio}</span>
-        <Boton variante="fantasma" tamano="sm" onClick={mesSiguiente}>Siguiente →</Boton>
+      <div className="flex items-center justify-between">
+        <Button variant="ghost" size="sm" onClick={mesAnterior}>← Anterior</Button>
+        <span className="font-medium">{NOMBRES_MES[mes - 1]} {anio}</span>
+        <Button variant="ghost" size="sm" onClick={mesSiguiente}>Siguiente →</Button>
       </div>
 
       {isLoading ? (
-        <p className="sinDatos">Cargando...</p>
+        <p className="text-sm text-muted-foreground text-center py-8">Cargando...</p>
       ) : (
-        <div className="gridCalendario">
-          {DIAS_SEMANA.map((d) => (
-            <div key={d} className="cabeceraDiaSemana">{d}</div>
+        <div className="grid grid-cols-7 gap-1">
+          {DIAS_SEMANA.map(d => (
+            <div key={d} className="text-center text-xs font-medium text-muted-foreground py-2">{d}</div>
           ))}
           {diasGrid.map((dia, i) => {
-            if (dia === null) return <div key={`v-${i}`} className="celdaDiaVacia" />;
+            if (dia === null) return <div key={`v-${i}`} />;
             const fechaKey = `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
             const datos = mapaFechas.get(fechaKey);
             return (
-              <div
+              <Card
                 key={dia}
-                className={`celdaDia ${esHoy(dia) ? 'celdaDiaHoy' : ''} ${datos ? 'celdaDiaConDatos' : ''}`}
+                className={`cursor-pointer transition-colors hover:border-primary ${esHoy(dia) ? 'border-primary bg-primary/5' : ''} ${datos ? 'bg-accent/30' : ''}`}
                 onClick={() => irADia(dia)}
                 role="button"
                 tabIndex={0}
-                onKeyDown={(e) => e.key === 'Enter' && irADia(dia)}
+                onKeyDown={e => e.key === 'Enter' && irADia(dia)}
               >
-                <span className="numeroDia">{dia}</span>
-                {datos && (
-                  <div className="datosDia">
-                    <span className="reservasDia">{datos.reservas} res.</span>
-                    <span className="personasDia">{datos.personas} pers.</span>
-                  </div>
-                )}
-              </div>
+                <CardContent className="p-2 text-center">
+                  <span className={`text-sm ${esHoy(dia) ? 'font-bold text-primary' : ''}`}>{dia}</span>
+                  {datos && (
+                    <div className="mt-1 flex flex-col text-[10px] text-muted-foreground">
+                      <span>{datos.reservas} res.</span>
+                      <span>{datos.personas} pers.</span>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             );
           })}
         </div>

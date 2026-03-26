@@ -1,63 +1,74 @@
-/* [263A-15] Pantalla "Restablecer contraseña" — formulario para nueva contraseña.
- * Recibe token via query param (?token=...). Hook useResetPasswordForm maneja lógica.
- * Redirige al login tras éxito. */
+/* [263A-16] Pantalla "Restablecer contraseña" — reescrita con shadcn.
+ * Token via query param (?token=...). Hook useResetPasswordForm maneja lógica. */
 
 import { Link } from 'react-router-dom';
-import { Input, Boton } from '@glory/componentes/ui';
 import useResetPasswordForm from '../hooks/useResetPasswordForm';
-import '../estilos/Login.css';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
 
 function ResetPassword() {
   const { form, set, manejarEnvio, cargando } = useResetPasswordForm();
 
   return (
-    <div className="contenedorLogin">
-      <div className="tarjetaLogin">
-        <h1 className="tituloLogin">Nueva contraseña</h1>
-        <p className="subtituloLogin">
-          {form.exito
-            ? 'Contraseña actualizada. Redirigiendo al login...'
-            : 'Introduce tu nueva contraseña.'}
-        </p>
-
-        {form.error && <div className="errorLogin">{form.error}</div>}
-
-        {!form.exito && (
-          <form className="formularioLogin" onSubmit={manejarEnvio}>
-            <div className="grupoInput">
-              <label className="etiqueta" htmlFor="password">Nueva contraseña</label>
-              <Input
-                id="password"
-                type="password"
-                value={form.password}
-                onChange={(e) => set({ password: e.target.value })}
-                placeholder="Mínimo 8 caracteres"
-                autoComplete="new-password"
-              />
+    <div className="flex min-h-screen items-center justify-center bg-background p-4">
+      <Card className="w-full max-w-sm">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl">Nueva contraseña</CardTitle>
+          <CardDescription>
+            {form.exito
+              ? 'Contraseña actualizada. Redirigiendo al login...'
+              : 'Introduce tu nueva contraseña.'}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {form.error && (
+            <div className="mb-4 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+              {form.error}
             </div>
+          )}
 
-            <div className="grupoInput">
-              <label className="etiqueta" htmlFor="confirmar">Confirmar contraseña</label>
-              <Input
-                id="confirmar"
-                type="password"
-                value={form.confirmar}
-                onChange={(e) => set({ confirmar: e.target.value })}
-                placeholder="Repite la contraseña"
-                autoComplete="new-password"
-              />
-            </div>
+          {!form.exito && (
+            <form className="flex flex-col gap-4" onSubmit={manejarEnvio}>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="password">Nueva contraseña</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={form.password}
+                  onChange={(e) => set({ password: e.target.value })}
+                  placeholder="Mínimo 8 caracteres"
+                  autoComplete="new-password"
+                />
+              </div>
 
-            <Boton variante="primario" ancho type="submit" cargando={cargando}>
-              Restablecer contraseña
-            </Boton>
-          </form>
-        )}
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="confirmar">Confirmar contraseña</Label>
+                <Input
+                  id="confirmar"
+                  type="password"
+                  value={form.confirmar}
+                  onChange={(e) => set({ confirmar: e.target.value })}
+                  placeholder="Repite la contraseña"
+                  autoComplete="new-password"
+                />
+              </div>
 
-        <p className="enlaceRegistro">
-          <Link to="/login">Volver al inicio de sesión</Link>
-        </p>
-      </div>
+              <Button type="submit" className="w-full" disabled={cargando}>
+                {cargando ? 'Restableciendo...' : 'Restablecer contraseña'}
+              </Button>
+            </form>
+          )}
+        </CardContent>
+        <CardFooter className="justify-center">
+          <p className="text-sm text-muted-foreground">
+            <Link to="/login" className="underline underline-offset-4 hover:text-primary">
+              Volver al inicio de sesión
+            </Link>
+          </p>
+        </CardFooter>
+      </Card>
     </div>
   );
 }

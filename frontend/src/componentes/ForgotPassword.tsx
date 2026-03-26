@@ -1,11 +1,13 @@
-/* [263A-15] Pantalla "Olvidé mi contraseña" — solicita email para enviar enlace de reset.
- * Usa useForgotPassword de Orval. Siempre muestra éxito para no revelar si el email existe. */
+/* [263A-16] Pantalla "Olvidé mi contraseña" — reescrita con shadcn.
+ * Siempre muestra éxito para no revelar si el email existe (seguridad). */
 
 import { useState, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { Input, Boton } from '@glory/componentes/ui';
 import { useForgotPassword } from '../api/generated';
-import '../estilos/Login.css';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
 
 function ForgotPassword() {
   const [email, setEmail] = useState('');
@@ -30,41 +32,51 @@ function ForgotPassword() {
   };
 
   return (
-    <div className="contenedorLogin">
-      <div className="tarjetaLogin">
-        <h1 className="tituloLogin">Recuperar contraseña</h1>
-        <p className="subtituloLogin">
-          {enviado
-            ? 'Si el email existe, recibirás un enlace para restablecer tu contraseña.'
-            : 'Introduce tu email y te enviaremos un enlace para restablecer tu contraseña.'}
-        </p>
-
-        {error && <div className="errorLogin">{error}</div>}
-
-        {!enviado && (
-          <form className="formularioLogin" onSubmit={manejarEnvio}>
-            <div className="grupoInput">
-              <label className="etiqueta" htmlFor="email">Email</label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="correo@ejemplo.com"
-                autoComplete="email"
-              />
+    <div className="flex min-h-screen items-center justify-center bg-background p-4">
+      <Card className="w-full max-w-sm">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl">Recuperar contraseña</CardTitle>
+          <CardDescription>
+            {enviado
+              ? 'Si el email existe, recibirás un enlace para restablecer tu contraseña.'
+              : 'Introduce tu email y te enviaremos un enlace para restablecer tu contraseña.'}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {error && (
+            <div className="mb-4 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+              {error}
             </div>
+          )}
 
-            <Boton variante="primario" ancho type="submit" cargando={mutation.isPending}>
-              Enviar enlace
-            </Boton>
-          </form>
-        )}
+          {!enviado && (
+            <form className="flex flex-col gap-4" onSubmit={manejarEnvio}>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="correo@ejemplo.com"
+                  autoComplete="email"
+                />
+              </div>
 
-        <p className="enlaceRegistro">
-          <Link to="/login">Volver al inicio de sesión</Link>
-        </p>
-      </div>
+              <Button type="submit" className="w-full" disabled={mutation.isPending}>
+                {mutation.isPending ? 'Enviando...' : 'Enviar enlace'}
+              </Button>
+            </form>
+          )}
+        </CardContent>
+        <CardFooter className="justify-center">
+          <p className="text-sm text-muted-foreground">
+            <Link to="/login" className="underline underline-offset-4 hover:text-primary">
+              Volver al inicio de sesión
+            </Link>
+          </p>
+        </CardFooter>
+      </Card>
     </div>
   );
 }

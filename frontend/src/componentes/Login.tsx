@@ -1,67 +1,79 @@
-/* 253A-7: Login — formulario de autenticación
-   253A-10: hook useLoginForm + componentes UI atómicos */
+/* [263A-16] Login — reescrito con shadcn Card + Input + Button.
+ * Hook useLoginForm se mantiene intacto (lógica separada de presentación). */
 
 import { Link } from 'react-router-dom';
 import useLoginForm from '../hooks/useLoginForm';
-import { Input, Boton } from '@glory/componentes/ui';
-import '../estilos/Login.css';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
 
 function Login() {
   const { credenciales, cambiarCredencial, modoRegistro, alternarModo, error, manejarEnvio, cargando } = useLoginForm();
 
   return (
-    <div className="contenedorLogin">
-      <div className="tarjetaLogin">
-        <h1 className="tituloLogin">Gestión Restaurante</h1>
-        <p className="subtituloLogin">
-          {modoRegistro ? 'Crea tu cuenta' : 'Inicia sesión para continuar'}
-        </p>
-
-        {error && <div className="errorLogin">{error}</div>}
-
-        <form className="formularioLogin" onSubmit={manejarEnvio}>
-          <div className="grupoInput">
-            <label className="etiqueta" htmlFor="email">Email</label>
-            <Input
-              id="email"
-              type="email"
-              value={credenciales.email}
-              onChange={(e) => cambiarCredencial('email', e.target.value)}
-              placeholder="correo@ejemplo.com"
-              autoComplete="email"
-            />
-          </div>
-
-          <div className="grupoInput">
-            <label className="etiqueta" htmlFor="password">Contraseña</label>
-            <Input
-              id="password"
-              type="password"
-              value={credenciales.password}
-              onChange={(e) => cambiarCredencial('password', e.target.value)}
-              placeholder="••••••••"
-              autoComplete={modoRegistro ? 'new-password' : 'current-password'}
-            />
-          </div>
-
-          <Boton variante="primario" ancho type="submit" cargando={cargando}>
-            {modoRegistro ? 'Crear cuenta' : 'Entrar'}
-          </Boton>
-
-          {!modoRegistro && (
-            <p className="enlaceRegistro">
-              <Link to="/forgot-password">¿Olvidaste tu contraseña?</Link>
-            </p>
+    <div className="flex min-h-screen items-center justify-center bg-background p-4">
+      <Card className="w-full max-w-sm">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl">Gestión Restaurante</CardTitle>
+          <CardDescription>
+            {modoRegistro ? 'Crea tu cuenta' : 'Inicia sesión para continuar'}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {error && (
+            <div className="mb-4 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+              {error}
+            </div>
           )}
-        </form>
 
-        <p className="enlaceRegistro">
-          {modoRegistro ? '¿Ya tienes cuenta? ' : '¿No tienes cuenta? '}
-          <span onClick={alternarModo}>
-            {modoRegistro ? 'Inicia sesión' : 'Regístrate'}
-          </span>
-        </p>
-      </div>
+          <form className="flex flex-col gap-4" onSubmit={manejarEnvio}>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={credenciales.email}
+                onChange={(e) => cambiarCredencial('email', e.target.value)}
+                placeholder="correo@ejemplo.com"
+                autoComplete="email"
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="password">Contraseña</Label>
+              <Input
+                id="password"
+                type="password"
+                value={credenciales.password}
+                onChange={(e) => cambiarCredencial('password', e.target.value)}
+                placeholder="••••••••"
+                autoComplete={modoRegistro ? 'new-password' : 'current-password'}
+              />
+            </div>
+
+            <Button type="submit" className="w-full" disabled={cargando}>
+              {cargando ? 'Cargando...' : modoRegistro ? 'Crear cuenta' : 'Entrar'}
+            </Button>
+
+            {!modoRegistro && (
+              <p className="text-center text-sm text-muted-foreground">
+                <Link to="/forgot-password" className="underline underline-offset-4 hover:text-primary">
+                  ¿Olvidaste tu contraseña?
+                </Link>
+              </p>
+            )}
+          </form>
+        </CardContent>
+        <CardFooter className="justify-center">
+          <p className="text-sm text-muted-foreground">
+            {modoRegistro ? '¿Ya tienes cuenta? ' : '¿No tienes cuenta? '}
+            <span onClick={alternarModo} className="cursor-pointer underline underline-offset-4 hover:text-primary">
+              {modoRegistro ? 'Inicia sesión' : 'Regístrate'}
+            </span>
+          </p>
+        </CardFooter>
+      </Card>
     </div>
   );
 }

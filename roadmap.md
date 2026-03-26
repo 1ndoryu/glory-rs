@@ -208,3 +208,5 @@ DELETE http://localhost:3000/api/ventas/de507550-2c03-4a42-8717-d6a547058825 405
 22. La barra lateral debería poder encogerse a solo iconos y expandirse, el estado debe perdurar aunque se recargue la pestaña.
 
 23. La forma en la que se construye el plano de la sala, por ajemplo abre alertas en vez de modales, no tiene iconos, deberia poder arrastrarse primero y despues colocar el nombre, cosas basicas que mejoran la experiencia de usuario, tambien veo que los estados no se conservan al mover las mesas.
+
+24. Me parece que tailwind no esta funcionando, pues todo se ve muy diferente a como es shadcn en en realidad.

@@ -1,10 +1,12 @@
-/* 253A-7: Formulario para crear una nueva reserva
-   263A-6: Añade num_mesa, apellidos_cliente, estado lista_espera/no_show */
+/* [263A-16] Formulario de reserva — reescrito con shadcn Input + Button + Label + Textarea. */
 
 import { EstadoReserva } from '../api/generated';
 import useFormularioReserva from '../hooks/useFormularioReserva';
-import { Input, Select, Textarea, Boton } from '@glory/componentes/ui';
-import '../estilos/Formularios.css';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface Props {
   onExito?: () => void;
@@ -14,74 +16,72 @@ function FormularioReserva({ onExito }: Props) {
   const { campos, cambiarCampo, error, manejarEnvio, cargando } = useFormularioReserva(onExito);
 
   return (
-    <div className={onExito ? '' : 'formularioPagina'}>
-      {!onExito && (
-        <div className="cabeceraPagina">
-          <h1 className="tituloPagina">Nueva Reserva</h1>
-          <p className="subtituloPagina">Registrar una reserva</p>
-        </div>
+    <div>
+      {error && (
+        <div className="mb-4 rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
       )}
 
-      {error && <div className="errorFormulario">{error}</div>}
-
-      <form className="formulario" onSubmit={manejarEnvio}>
-        <div className="filaFormulario">
-          <div className="grupoFormulario">
-            <label className="etiquetaFormulario" htmlFor="fecha">Fecha</label>
-            <Input id="fecha" type="date" value={campos.fecha} onChange={(e) => cambiarCampo('fecha', e.target.value)} />
+      <form className="flex flex-col gap-4" onSubmit={manejarEnvio}>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="fecha">Fecha</Label>
+            <Input id="fecha" type="date" value={campos.fecha} onChange={e => cambiarCampo('fecha', e.target.value)} />
           </div>
-          <div className="grupoFormulario">
-            <label className="etiquetaFormulario" htmlFor="hora">Hora</label>
-            <Input id="hora" type="time" value={campos.hora} onChange={(e) => cambiarCampo('hora', e.target.value)} />
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="hora">Hora</Label>
+            <Input id="hora" type="time" value={campos.hora} onChange={e => cambiarCampo('hora', e.target.value)} />
           </div>
         </div>
 
-        <div className="filaFormulario">
-          <div className="grupoFormulario">
-            <label className="etiquetaFormulario" htmlFor="nombreCliente">Nombre</label>
-            <Input id="nombreCliente" type="text" value={campos.nombreCliente} onChange={(e) => cambiarCampo('nombreCliente', e.target.value)} placeholder="Nombre" />
+        <div className="grid grid-cols-2 gap-4">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="nombreCliente">Nombre</Label>
+            <Input id="nombreCliente" type="text" value={campos.nombreCliente} onChange={e => cambiarCampo('nombreCliente', e.target.value)} placeholder="Nombre" />
           </div>
-          <div className="grupoFormulario">
-            <label className="etiquetaFormulario" htmlFor="apellidosCliente">Apellidos</label>
-            <Input id="apellidosCliente" type="text" value={campos.apellidosCliente} onChange={(e) => cambiarCampo('apellidosCliente', e.target.value)} placeholder="Apellidos" />
-          </div>
-        </div>
-
-        <div className="filaFormulario">
-          <div className="grupoFormulario">
-            <label className="etiquetaFormulario" htmlFor="numPersonas">Personas</label>
-            <Input id="numPersonas" type="number" min="1" value={campos.numPersonas} onChange={(e) => cambiarCampo('numPersonas', e.target.value)} />
-          </div>
-          <div className="grupoFormulario">
-            <label className="etiquetaFormulario" htmlFor="numMesa">Nº Mesa</label>
-            <Input id="numMesa" type="number" min="1" value={campos.numMesa} onChange={(e) => cambiarCampo('numMesa', e.target.value)} placeholder="Opcional" />
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="apellidosCliente">Apellidos</Label>
+            <Input id="apellidosCliente" type="text" value={campos.apellidosCliente} onChange={e => cambiarCampo('apellidosCliente', e.target.value)} placeholder="Apellidos" />
           </div>
         </div>
 
-        <div className="filaFormulario">
-          <div className="grupoFormulario">
-            <label className="etiquetaFormulario" htmlFor="telefono">Teléfono</label>
-            <Input id="telefono" type="tel" value={campos.telefono} onChange={(e) => cambiarCampo('telefono', e.target.value)} placeholder="Opcional" />
+        <div className="grid grid-cols-2 gap-4">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="numPersonas">Personas</Label>
+            <Input id="numPersonas" type="number" min="1" value={campos.numPersonas} onChange={e => cambiarCampo('numPersonas', e.target.value)} />
           </div>
-          <div className="grupoFormulario">
-            <label className="etiquetaFormulario" htmlFor="estado">Estado</label>
-            <Select id="estado" value={campos.estado} onChange={(e) => cambiarCampo('estado', e.target.value as EstadoReserva)}>
-              <option value={EstadoReserva.pendiente}>Pendiente</option>
-              <option value={EstadoReserva.confirmada}>Confirmada</option>
-              <option value={EstadoReserva.lista_espera}>Lista de espera</option>
-              <option value={EstadoReserva.cancelada}>Cancelada</option>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="numMesa">Nº Mesa</Label>
+            <Input id="numMesa" type="number" min="1" value={campos.numMesa} onChange={e => cambiarCampo('numMesa', e.target.value)} placeholder="Opcional" />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="telefono">Teléfono</Label>
+            <Input id="telefono" type="tel" value={campos.telefono} onChange={e => cambiarCampo('telefono', e.target.value)} placeholder="Opcional" />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="estado">Estado</Label>
+            <Select value={campos.estado} onValueChange={v => cambiarCampo('estado', v as EstadoReserva)}>
+              <SelectTrigger id="estado"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value={EstadoReserva.pendiente}>Pendiente</SelectItem>
+                <SelectItem value={EstadoReserva.confirmada}>Confirmada</SelectItem>
+                <SelectItem value={EstadoReserva.lista_espera}>Lista de espera</SelectItem>
+                <SelectItem value={EstadoReserva.cancelada}>Cancelada</SelectItem>
+              </SelectContent>
             </Select>
           </div>
         </div>
 
-        <div className="grupoFormulario ancho">
-          <label className="etiquetaFormulario" htmlFor="notas">Notas</label>
-          <Textarea id="notas" rows={3} value={campos.notas} onChange={(e) => cambiarCampo('notas', e.target.value)} placeholder="Alergias, preferencias, etc." />
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="notas">Notas</Label>
+          <Textarea id="notas" rows={3} value={campos.notas} onChange={e => cambiarCampo('notas', e.target.value)} placeholder="Alergias, preferencias, etc." />
         </div>
 
-        <Boton variante="primario" ancho type="submit" cargando={cargando}>
-          Crear Reserva
-        </Boton>
+        <Button type="submit" className="w-full" disabled={cargando}>
+          {cargando ? 'Creando...' : 'Crear Reserva'}
+        </Button>
       </form>
     </div>
   );

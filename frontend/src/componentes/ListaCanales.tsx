@@ -1,11 +1,15 @@
-/* [263A-11] ListaCanales — CRUD canales de reserva (WhatsApp, Instagram, teléfono, web, etc.)
- * Los canales se usan para clasificar por dónde entran las reservas y generar estadísticas. */
+/* [263A-16] Lista de canales — reescrita con shadcn Table + Dialog + Input.
+ * CRUD canales de reserva (WhatsApp, Instagram, teléfono, web, etc.) */
 
 import { useState } from 'react';
 import { useListarCanales, useCrearCanal, useEliminarCanal, getListarCanalesQueryKey } from '../api/generated';
-import { Boton, Input, Modal } from '@glory/componentes/ui';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Label } from '@/components/ui/label';
+import { Trash2 } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
-import '../estilos/Formularios.css';
 
 function ListaCanales() {
   const [modalCrear, setModalCrear] = useState(false);
@@ -40,69 +44,69 @@ function ListaCanales() {
   };
 
   return (
-    <div>
-      <div className="cabeceraLista">
-        <div className="cabeceraPagina">
-          <h1 className="tituloPagina">Canales de Reserva</h1>
-          <p className="subtituloPagina">{canales.length} canales configurados</p>
-        </div>
-        <Boton variante="exito" onClick={() => setModalCrear(true)}>+ Nuevo Canal</Boton>
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">{canales.length} canales configurados</p>
+        <Button onClick={() => setModalCrear(true)}>+ Nuevo Canal</Button>
       </div>
 
-      <Modal abierto={modalCrear} onCerrar={() => { setModalCrear(false); setNombre(''); }} titulo="Nuevo Canal">
-        <form onSubmit={(e) => { e.preventDefault(); handleCrear(); }} className="formulario">
-          <div className="campoFormulario">
-            <label>Nombre del canal</label>
-            <Input
-              placeholder="Ej: WhatsApp, Instagram, Teléfono, Web..."
-              value={nombre}
-              onChange={(e) => setNombre(e.target.value)}
-              autoFocus
-            />
-          </div>
-          <div className="accionesFormulario">
-            <Boton type="submit" variante="exito" disabled={crearMut.isPending || !nombre.trim()}>
+      <Dialog open={modalCrear} onOpenChange={(open) => { setModalCrear(open); if (!open) setNombre(''); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Nuevo Canal</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={(e) => { e.preventDefault(); handleCrear(); }} className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+              <Label>Nombre del canal</Label>
+              <Input
+                placeholder="Ej: WhatsApp, Instagram, Teléfono, Web..."
+                value={nombre}
+                onChange={(e) => setNombre(e.target.value)}
+                autoFocus
+              />
+            </div>
+            <Button type="submit" disabled={crearMut.isPending || !nombre.trim()}>
               {crearMut.isPending ? 'Creando...' : 'Crear Canal'}
-            </Boton>
-          </div>
-        </form>
-      </Modal>
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
 
-      <div className="contenedorLista">
-        {isLoading ? (
-          <p className="sinDatos">Cargando...</p>
-        ) : canales.length > 0 ? (
-          <table className="tabla">
-            <thead>
-              <tr>
-                <th>Canal</th>
-                <th>Fecha de creación</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
+      {isLoading ? (
+        <p className="text-sm text-muted-foreground">Cargando...</p>
+      ) : canales.length > 0 ? (
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Canal</TableHead>
+                <TableHead>Fecha de creación</TableHead>
+                <TableHead className="w-10"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {canales.map((c) => (
-                <tr key={c.id}>
-                  <td>{c.nombre}</td>
-                  <td>{new Date(c.created_at).toLocaleDateString('es-ES')}</td>
-                  <td className="accionesTabla">
-                    <Boton
-                      variante="peligro"
-                      tamano="sm"
+                <TableRow key={c.id}>
+                  <TableCell className="font-medium">{c.nombre}</TableCell>
+                  <TableCell>{new Date(c.created_at).toLocaleDateString('es-ES')}</TableCell>
+                  <TableCell>
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => eliminarMut.mutate({ id: c.id })}
                       disabled={eliminarMut.isPending}
                     >
-                      Eliminar
-                    </Boton>
-                  </td>
-                </tr>
+                      <Trash2 className="size-4 text-destructive" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
-        ) : (
-          <p className="sinDatos">No hay canales configurados. Crea uno para clasificar por dónde llegan las reservas.</p>
-        )}
-      </div>
+            </TableBody>
+          </Table>
+        </div>
+      ) : (
+        <p className="text-sm text-muted-foreground">No hay canales configurados. Crea uno para clasificar por dónde llegan las reservas.</p>
+      )}
     </div>
   );
 }

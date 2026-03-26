@@ -1,11 +1,14 @@
-/* [263A-11] EstadisticasNoShows — Panel de estadísticas de no-shows con filtro de fechas
- * y desglose por canal de reserva. Usa el endpoint GET /api/reservas/no-shows. */
+/* [263A-16] EstadisticasNoShows — reescrito con shadcn Card + Table + Button + Input.
+ * Filtro de fechas y desglose por canal. Endpoint GET /api/reservas/no-shows. */
 
 import { useState } from 'react';
 import { useNoShowStats } from '../api/generated';
-import { Boton, Input } from '@glory/componentes/ui';
-import '../estilos/Formularios.css';
-import '../estilos/NoShows.css';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
 
 function EstadisticasNoShows() {
   const [fechaDesde, setFechaDesde] = useState('');
@@ -25,79 +28,76 @@ function EstadisticasNoShows() {
   };
 
   return (
-    <div>
-      <div className="cabeceraPagina">
-        <h1 className="tituloPagina">No-Shows</h1>
-        <p className="subtituloPagina">Reservas no presentadas — ratio y desglose por canal</p>
-      </div>
-
-      <div className="filtrosNoShows">
-        <div className="filtroFecha">
-          <label>Desde</label>
-          <Input type="date" value={fechaDesde} onChange={(e) => setFechaDesde(e.target.value)} />
+    <div className="flex flex-col gap-6">
+      <div className="flex items-end gap-4">
+        <div className="flex flex-col gap-2">
+          <Label>Desde</Label>
+          <Input type="date" value={fechaDesde} onChange={e => setFechaDesde(e.target.value)} />
         </div>
-        <div className="filtroFecha">
-          <label>Hasta</label>
-          <Input type="date" value={fechaHasta} onChange={(e) => setFechaHasta(e.target.value)} />
+        <div className="flex flex-col gap-2">
+          <Label>Hasta</Label>
+          <Input type="date" value={fechaHasta} onChange={e => setFechaHasta(e.target.value)} />
         </div>
         {(fechaDesde || fechaHasta) && (
-          <Boton variante="fantasma" tamano="sm" onClick={limpiarFiltros}>Limpiar</Boton>
+          <Button variant="ghost" size="sm" onClick={limpiarFiltros}>Limpiar</Button>
         )}
       </div>
 
       {isLoading ? (
-        <p className="sinDatos">Cargando estadísticas...</p>
+        <p className="text-sm text-muted-foreground text-center py-8">Cargando estadísticas...</p>
       ) : stats ? (
         <>
-          <div className="panelResumenNoShows">
-            <div className="tarjetaNoShow">
-              <span className="tarjetaNoShowValor">{stats.total_reservas}</span>
-              <span className="tarjetaNoShowLabel">Total reservas</span>
-            </div>
-            <div className="tarjetaNoShow tarjetaNoShowPeligro">
-              <span className="tarjetaNoShowValor">{stats.total_no_shows}</span>
-              <span className="tarjetaNoShowLabel">No-shows</span>
-            </div>
-            <div className="tarjetaNoShow">
-              <span className="tarjetaNoShowValor">{stats.ratio_porcentaje.toFixed(1)}%</span>
-              <span className="tarjetaNoShowLabel">Ratio no-show</span>
-            </div>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <Card>
+              <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Total reservas</CardTitle></CardHeader>
+              <CardContent><span className="text-2xl font-bold">{stats.total_reservas}</span></CardContent>
+            </Card>
+            <Card className="border-destructive/50">
+              <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-destructive">No-shows</CardTitle></CardHeader>
+              <CardContent><span className="text-2xl font-bold text-destructive">{stats.total_no_shows}</span></CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Ratio no-show</CardTitle></CardHeader>
+              <CardContent><span className="text-2xl font-bold">{stats.ratio_porcentaje.toFixed(1)}%</span></CardContent>
+            </Card>
           </div>
 
           {stats.por_canal.length > 0 ? (
-            <div className="contenedorLista">
-              <h2 className="subtituloSeccion">Desglose por canal</h2>
-              <table className="tabla">
-                <thead>
-                  <tr>
-                    <th>Canal</th>
-                    <th>Reservas</th>
-                    <th>No-shows</th>
-                    <th>Ratio</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {stats.por_canal.map((canal, i) => (
-                    <tr key={i}>
-                      <td>{canal.canal_nombre || 'Sin canal'}</td>
-                      <td>{canal.total_reservas}</td>
-                      <td>{canal.no_shows}</td>
-                      <td>
-                        <span className={canal.ratio_porcentaje > 20 ? 'ratioAlto' : canal.ratio_porcentaje > 10 ? 'ratioMedio' : 'ratioBajo'}>
-                          {canal.ratio_porcentaje.toFixed(1)}%
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div>
+              <h2 className="text-lg font-semibold mb-3">Desglose por canal</h2>
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Canal</TableHead>
+                      <TableHead className="text-right">Reservas</TableHead>
+                      <TableHead className="text-right">No-shows</TableHead>
+                      <TableHead className="text-right">Ratio</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {stats.por_canal.map((canal, i) => (
+                      <TableRow key={i}>
+                        <TableCell>{canal.canal_nombre || 'Sin canal'}</TableCell>
+                        <TableCell className="text-right">{canal.total_reservas}</TableCell>
+                        <TableCell className="text-right">{canal.no_shows}</TableCell>
+                        <TableCell className="text-right">
+                          <Badge variant={canal.ratio_porcentaje > 20 ? 'destructive' : canal.ratio_porcentaje > 10 ? 'secondary' : 'outline'}>
+                            {canal.ratio_porcentaje.toFixed(1)}%
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </div>
           ) : (
-            <p className="sinDatos">No hay datos de canales para el período seleccionado</p>
+            <p className="text-sm text-muted-foreground text-center">No hay datos de canales para el período seleccionado</p>
           )}
         </>
       ) : (
-        <p className="sinDatos">No hay datos de reservas</p>
+        <p className="text-sm text-muted-foreground text-center py-8">No hay datos de reservas</p>
       )}
     </div>
   );

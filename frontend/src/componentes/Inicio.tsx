@@ -1,14 +1,16 @@
-/* 253A-7: Inicio -- dashboard con resumen economico y accesos rapidos
-   253A-10: componentes UI atomicos
-   253A-14: botones de accion abren modales en vez de navegar */
+/* [263A-16] Inicio — reescrito con shadcn Card y Dialog.
+ * Combina resumen económico (Ventas/Gastos/Margen) + conteo reservas.
+ * Modales para crear venta/gasto/reserva usan shadcn Dialog. */
 
 import { useState } from 'react';
 import { useResumen, useConteoReservas } from '../api/generated';
-import { Boton, Modal } from '@glory/componentes/ui';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { DollarSign, TrendingDown, TrendingUp, CalendarDays } from 'lucide-react';
 import FormularioVenta from './FormularioVenta';
 import FormularioGasto from './FormularioGasto';
 import FormularioReserva from './FormularioReserva';
-import '../estilos/Inicio.css';
 
 function formatearMoneda(valor: string): string {
   const num = parseFloat(valor);
@@ -30,97 +32,110 @@ function Inicio() {
   const datosConteo = conteo?.status === 200 ? conteo.data : null;
 
   return (
-    <div>
-      <div className="cabeceraPagina">
-        <h1 className="tituloPagina">Inicio</h1>
-        <p className="subtituloPagina">Resumen del mes actual</p>
-      </div>
-
-      <div className="accionesInicio">
-        <Boton variante="exito" onClick={() => setModalVenta(true)}>
+    <div className="flex flex-col gap-6">
+      {/* Acciones rápidas */}
+      <div className="flex flex-wrap gap-3">
+        <Button onClick={() => setModalVenta(true)} className="bg-green-600 hover:bg-green-700 text-white">
           + Nueva Venta
-        </Boton>
-        <Boton variante="primario" onClick={() => setModalGasto(true)}>
+        </Button>
+        <Button onClick={() => setModalGasto(true)} variant="default">
           + Nuevo Gasto
-        </Boton>
-        <Boton variante="secundario" onClick={() => setModalReserva(true)}>
+        </Button>
+        <Button onClick={() => setModalReserva(true)} variant="secondary">
           + Nueva Reserva
-        </Boton>
+        </Button>
       </div>
 
-      <Modal abierto={modalVenta} onCerrar={() => setModalVenta(false)} titulo="Nueva Venta">
-        <FormularioVenta onExito={() => { setModalVenta(false); refetchResumen(); }} />
-      </Modal>
-      <Modal abierto={modalGasto} onCerrar={() => setModalGasto(false)} titulo="Nuevo Gasto">
-        <FormularioGasto onExito={() => { setModalGasto(false); refetchResumen(); }} />
-      </Modal>
-      <Modal abierto={modalReserva} onCerrar={() => setModalReserva(false)} titulo="Nueva Reserva">
-        <FormularioReserva onExito={() => { setModalReserva(false); refetchConteo(); }} />
-      </Modal>
+      {/* Modales */}
+      <Dialog open={modalVenta} onOpenChange={setModalVenta}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Nueva Venta</DialogTitle>
+          </DialogHeader>
+          <FormularioVenta onExito={() => { setModalVenta(false); refetchResumen(); }} />
+        </DialogContent>
+      </Dialog>
+      <Dialog open={modalGasto} onOpenChange={setModalGasto}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Nuevo Gasto</DialogTitle>
+          </DialogHeader>
+          <FormularioGasto onExito={() => { setModalGasto(false); refetchResumen(); }} />
+        </DialogContent>
+      </Dialog>
+      <Dialog open={modalReserva} onOpenChange={setModalReserva}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Nueva Reserva</DialogTitle>
+          </DialogHeader>
+          <FormularioReserva onExito={() => { setModalReserva(false); refetchConteo(); }} />
+        </DialogContent>
+      </Dialog>
 
-      {cargandoResumen ? (
-        <p className="cargando">Cargando resumen...</p>
-      ) : datosResumen ? (
-        <div className="inicioGrid">
-          <div className="tarjetaResumen">
-            <div className="etiquetaResumen">Ventas</div>
-            <div className="valorResumen positivo">{formatearMoneda(datosResumen.total_ventas)}</div>
-          </div>
-          <div className="tarjetaResumen">
-            <div className="etiquetaResumen">Gastos</div>
-            <div className="valorResumen negativo">{formatearMoneda(datosResumen.total_gastos)}</div>
-          </div>
-          <div className="tarjetaResumen">
-            <div className="etiquetaResumen">Margen</div>
-            <div className={`valorResumen ${parseFloat(datosResumen.margen) >= 0 ? 'positivo' : 'negativo'}`}>
-              {formatearMoneda(datosResumen.margen)}
+      {/* Resumen económico */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Ventas</CardTitle>
+            <TrendingUp className="size-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">
+              {cargandoResumen ? '...' : datosResumen ? formatearMoneda(datosResumen.total_ventas) : '—'}
             </div>
-          </div>
-        </div>
-      ) : (
-        <div className="inicioGrid">
-          <div className="tarjetaResumen">
-            <div className="etiquetaResumen">Ventas</div>
-            <div className="valorResumen neutro">—</div>
-          </div>
-          <div className="tarjetaResumen">
-            <div className="etiquetaResumen">Gastos</div>
-            <div className="valorResumen neutro">—</div>
-          </div>
-          <div className="tarjetaResumen">
-            <div className="etiquetaResumen">Margen</div>
-            <div className="valorResumen neutro">—</div>
-          </div>
-        </div>
-      )}
+            <p className="text-xs text-muted-foreground">Total del mes</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Gastos</CardTitle>
+            <TrendingDown className="size-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-600">
+              {cargandoResumen ? '...' : datosResumen ? formatearMoneda(datosResumen.total_gastos) : '—'}
+            </div>
+            <p className="text-xs text-muted-foreground">Total del mes</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Margen</CardTitle>
+            <DollarSign className="size-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className={`text-2xl font-bold ${datosResumen && parseFloat(datosResumen.margen) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {cargandoResumen ? '...' : datosResumen ? formatearMoneda(datosResumen.margen) : '—'}
+            </div>
+            <p className="text-xs text-muted-foreground">Ventas − Gastos</p>
+          </CardContent>
+        </Card>
+      </div>
 
-      <div className="seccionReservas">
-        <h2 className="tituloSeccion">Reservas</h2>
-        {cargandoConteo ? (
-          <p className="cargando">Cargando...</p>
-        ) : datosConteo ? (
-          <div className="conteoReservas">
-            <div className="conteoItem">
-              <div className="conteoNumero">{datosConteo.total_hoy}</div>
-              <div className="conteoEtiqueta">Hoy</div>
+      {/* Reservas */}
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Reservas hoy</CardTitle>
+            <CalendarDays className="size-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {cargandoConteo ? '...' : datosConteo ? datosConteo.total_hoy : 0}
             </div>
-            <div className="conteoItem">
-              <div className="conteoNumero">{datosConteo.total_mes}</div>
-              <div className="conteoEtiqueta">Este mes</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Reservas este mes</CardTitle>
+            <CalendarDays className="size-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {cargandoConteo ? '...' : datosConteo ? datosConteo.total_mes : 0}
             </div>
-          </div>
-        ) : (
-          <div className="conteoReservas">
-            <div className="conteoItem">
-              <div className="conteoNumero">0</div>
-              <div className="conteoEtiqueta">Hoy</div>
-            </div>
-            <div className="conteoItem">
-              <div className="conteoNumero">0</div>
-              <div className="conteoEtiqueta">Este mes</div>
-            </div>
-          </div>
-        )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

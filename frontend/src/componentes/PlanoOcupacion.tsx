@@ -1,9 +1,10 @@
 /* [263A-16] Vista de ocupación del plano de sala — solo lectura.
- * Muestra mesas coloreadas por estado: libre (gris), ocupada (verde), no-show (rojo), inactiva.
- * Se integra dentro de ListaReservas (vista día). Click en mesa muestra reservas en tooltip. */
+ * Reescrito imports a shadcn Button. Mantiene PlanoOcupacion.css para canvas/mesas.
+ * Mesas coloreadas: libre (gris), ocupada (verde), no-show (rojo), inactiva.
+ * Se integra dentro de ListaReservas. Click en mesa muestra reservas en tooltip. */
 
 import { useState } from 'react';
-import { Boton } from '@glory/componentes/ui';
+import { Button } from '@/components/ui/button';
 import { useObtenerOcupacion, MesaOcupacion, ZonaOcupacion } from '../api/generated';
 import '../estilos/PlanoOcupacion.css';
 
@@ -12,7 +13,6 @@ interface Props {
   turno: string;
 }
 
-/* [263A-16] Color de mesa según reservas asociadas */
 function estadoMesa(mesa: MesaOcupacion): 'libre' | 'ocupada' | 'no_show' | 'inactiva' {
   if (!mesa.activa) return 'inactiva';
   if (mesa.reservas.length === 0) return 'libre';
@@ -30,41 +30,39 @@ function PlanoOcupacion({ fecha, turno }: Props) {
   const [zonaActiva, setZonaActiva] = useState<string | null>(null);
   const [mesaHover, setMesaHover] = useState<string | null>(null);
 
-  /* Auto-seleccionar primera zona */
   if (plano && plano.zonas.length > 0 && !zonaActiva) {
     setZonaActiva(plano.zonas[0].id);
   }
 
   const zonaData = plano?.zonas.find((z: ZonaOcupacion) => z.id === zonaActiva);
 
-  if (isLoading) return <p className="sinDatos">Cargando plano...</p>;
+  if (isLoading) return <p className="text-sm text-muted-foreground text-center py-4">Cargando plano...</p>;
   if (!plano || plano.zonas.length === 0) return null;
 
   return (
-    <div className="planoOcupacion">
-      <h3 className="planoOcupacionTitulo">Plano de sala</h3>
+    <div className="flex flex-col gap-3">
+      <h3 className="font-semibold text-sm">Plano de sala</h3>
 
       {/* Tabs de zonas */}
-      <div className="planoOcupacionZonas">
+      <div className="flex gap-1 flex-wrap">
         {plano.zonas.map((z: ZonaOcupacion) => (
-          <Boton
+          <Button
             key={z.id}
-            variante="fantasma"
-            tamano="sm"
-            className={`planoOcupacionZonaTab ${z.id === zonaActiva ? 'activa' : ''}`}
+            variant={z.id === zonaActiva ? 'default' : 'outline'}
+            size="sm"
             onClick={() => { setZonaActiva(z.id); setMesaHover(null); }}
           >
             {z.nombre}
-          </Boton>
+          </Button>
         ))}
       </div>
 
       {/* Leyenda */}
-      <div className="planoOcupacionLeyenda">
-        <span className="planoOcupacionLeyendaItem"><span className="indicador libre" /> Libre</span>
-        <span className="planoOcupacionLeyendaItem"><span className="indicador ocupada" /> Ocupada</span>
-        <span className="planoOcupacionLeyendaItem"><span className="indicador no_show" /> No Show</span>
-        <span className="planoOcupacionLeyendaItem"><span className="indicador inactiva" /> Inactiva</span>
+      <div className="flex gap-4 text-xs text-muted-foreground">
+        <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-sm bg-muted" /> Libre</span>
+        <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-sm bg-green-500" /> Ocupada</span>
+        <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-sm bg-destructive" /> No Show</span>
+        <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-sm bg-muted-foreground/30" /> Inactiva</span>
       </div>
 
       {/* Canvas */}
@@ -92,7 +90,6 @@ function PlanoOcupacion({ fecha, turno }: Props) {
               >
                 <span className="mesaOcupacionNumero">{mesa.numero}</span>
 
-                {/* Tooltip con reservas */}
                 {esHover && mesa.reservas.length > 0 && (
                   <div className="mesaOcupacionTooltip">
                     {mesa.reservas.map((r) => (

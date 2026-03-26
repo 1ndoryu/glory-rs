@@ -1,8 +1,12 @@
-/* [263A-14] Panel lateral para editar propiedades de una mesa seleccionada */
+/* [263A-16] Panel lateral para editar propiedades de una mesa seleccionada — shadcn */
 
 import { useState } from 'react';
 import type { ActualizarMesaRequest, Mesa } from '../../api/generated';
-import { Boton, Input, Select } from '@glory/componentes/ui';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface PanelConfigMesaProps {
   mesa: Mesa;
@@ -38,85 +42,51 @@ function PanelConfigMesa({ mesa, onGuardar, onEliminar, onCerrar }: PanelConfigM
   };
 
   return (
-    <div className="planoConfigPanel">
-      <h3>Mesa {mesa.numero}</h3>
-      <div className="planoConfigCampo">
-        <label>Número</label>
-        <Input
-          type="number"
-          tamano="sm"
-          value={form.numero}
-          onChange={(e) => set('numero', Number(e.target.value))}
-        />
+    <div className="rounded-lg border bg-card p-4 flex flex-col gap-3 max-w-xs">
+      <h3 className="font-semibold">Mesa {mesa.numero}</h3>
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="cfg-numero">Número</Label>
+        <Input id="cfg-numero" type="number" value={form.numero} onChange={e => set('numero', Number(e.target.value))} />
       </div>
-      <div className="planoConfigCampo">
-        <label>Mín personas</label>
-        <Input
-          type="number"
-          tamano="sm"
-          value={form.minP}
-          onChange={(e) => set('minP', Number(e.target.value))}
-        />
+      <div className="grid grid-cols-2 gap-3">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="cfg-minP">Mín personas</Label>
+          <Input id="cfg-minP" type="number" value={form.minP} onChange={e => set('minP', Number(e.target.value))} />
+        </div>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="cfg-maxP">Máx personas</Label>
+          <Input id="cfg-maxP" type="number" value={form.maxP} onChange={e => set('maxP', Number(e.target.value))} />
+        </div>
       </div>
-      <div className="planoConfigCampo">
-        <label>Máx personas</label>
-        <Input
-          type="number"
-          tamano="sm"
-          value={form.maxP}
-          onChange={(e) => set('maxP', Number(e.target.value))}
-        />
-      </div>
-      <div className="planoConfigCampo">
-        <label>Forma</label>
-        <Select
-          tamano="sm"
-          value={form.forma}
-          onChange={(e) => set('forma', e.target.value)}
-        >
-          <option value="cuadrada">Cuadrada</option>
-          <option value="redonda">Redonda</option>
-          <option value="rectangular">Rectangular</option>
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="cfg-forma">Forma</Label>
+        <Select value={form.forma} onValueChange={v => set('forma', v)}>
+          <SelectTrigger id="cfg-forma"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="cuadrada">Cuadrada</SelectItem>
+            <SelectItem value="redonda">Redonda</SelectItem>
+            <SelectItem value="rectangular">Rectangular</SelectItem>
+          </SelectContent>
         </Select>
       </div>
-      <div className="planoConfigCampo">
-        <label>Ancho (px)</label>
-        <Input
-          type="number"
-          tamano="sm"
-          value={form.ancho}
-          onChange={(e) => set('ancho', Number(e.target.value))}
-        />
+      <div className="grid grid-cols-2 gap-3">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="cfg-ancho">Ancho (px)</Label>
+          <Input id="cfg-ancho" type="number" value={form.ancho} onChange={e => set('ancho', Number(e.target.value))} />
+        </div>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="cfg-alto">Alto (px)</Label>
+          <Input id="cfg-alto" type="number" value={form.alto} onChange={e => set('alto', Number(e.target.value))} />
+        </div>
       </div>
-      <div className="planoConfigCampo">
-        <label>Alto (px)</label>
-        <Input
-          type="number"
-          tamano="sm"
-          value={form.alto}
-          onChange={(e) => set('alto', Number(e.target.value))}
-        />
+      <div className="flex items-center gap-2">
+        <Switch id="cfg-activa" checked={form.activa} onCheckedChange={checked => set('activa', checked)} />
+        <Label htmlFor="cfg-activa">Activa</Label>
       </div>
-      <div className="planoConfigCampo">
-        <label>
-          <Input
-            type="checkbox"
-            checked={form.activa}
-            onChange={(e) => set('activa', e.target.checked)}
-          />{' '}
-          Activa
-        </label>
-      </div>
-      <div className="planoConfigAcciones">
-        <Boton tamano="sm" variante="primario" onClick={guardar}>
-          Guardar
-        </Boton>
-        <Boton tamano="sm" variante="peligro" onClick={() => onEliminar(mesa.id)}>
-          Eliminar
-        </Boton>
-        <Boton tamano="sm" variante="fantasma" onClick={onCerrar}>
-          Cerrar
-        </Boton>
+      <div className="flex gap-2 pt-2">
+        <Button size="sm" onClick={guardar}>Guardar</Button>
+        <Button size="sm" variant="destructive" onClick={() => onEliminar(mesa.id)}>Eliminar</Button>
+        <Button size="sm" variant="ghost" onClick={onCerrar}>Cerrar</Button>
       </div>
     </div>
   );

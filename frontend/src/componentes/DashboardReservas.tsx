@@ -1,15 +1,17 @@
-/* [263A-13] DashboardReservas — Dashboard de reservas Fase 2.
+/* [263A-16] DashboardReservas — reescrito con shadcn Card + Button + Tailwind.
  * 3 paneles con tabs: Resumen, Ocupación, Análisis.
  * Usa recharts para gráficos y el endpoint GET /api/dashboard/reservas. */
 
 import { useState } from 'react';
 import { useDashboardReservas, ResumenReservas, OcupacionReservas, AnalisisReservas, AgrupacionCanal } from '../api/generated';
-import { Boton, Select } from '@glory/componentes/ui';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend
 } from 'recharts';
-import '../estilos/DashboardReservas.css';
 
 const COLORES = ['#4A90D9', '#50E3C2', '#F5A623', '#E91E63', '#7B61FF', '#4CAF50', '#FF5722', '#9C27B0'];
 
@@ -28,47 +30,41 @@ function DashboardReservas() {
   ];
 
   return (
-    <div className="dashboardReservas">
-      <div className="cabeceraPagina">
-        <h1 className="tituloPagina">Dashboard Reservas</h1>
-        <p className="subtituloPagina">Análisis detallado del mes</p>
-      </div>
-
-      <div className="selectorMesDashboard">
-        <Select tamano="sm" value={mes} onChange={e => setMes(Number(e.target.value))}>
-          {meses.map((nombre, i) => (
-            <option key={i + 1} value={i + 1}>{nombre}</option>
-          ))}
+    <div className="flex flex-col gap-6">
+      <div className="flex items-center gap-3">
+        <Select value={String(mes)} onValueChange={v => setMes(Number(v))}>
+          <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {meses.map((nombre, i) => (
+              <SelectItem key={i + 1} value={String(i + 1)}>{nombre}</SelectItem>
+            ))}
+          </SelectContent>
         </Select>
-        <Select tamano="sm" value={anio} onChange={e => setAnio(Number(e.target.value))}>
-          {[anio - 1, anio, anio + 1].map(a => (
-            <option key={a} value={a}>{a}</option>
-          ))}
+        <Select value={String(anio)} onValueChange={v => setAnio(Number(v))}>
+          <SelectTrigger className="w-24"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {[anio - 1, anio, anio + 1].map(a => (
+              <SelectItem key={a} value={String(a)}>{a}</SelectItem>
+            ))}
+          </SelectContent>
         </Select>
       </div>
 
-      <div className="pestanasDashboard">
-        <Boton
-          variante="fantasma"
-          tamano="sm"
-          className={`pestanaDashboard ${pestana === 'resumen' ? 'activa' : ''}`}
-          onClick={() => setPestana('resumen')}
-        >Resumen</Boton>
-        <Boton
-          variante="fantasma"
-          tamano="sm"
-          className={`pestanaDashboard ${pestana === 'ocupacion' ? 'activa' : ''}`}
-          onClick={() => setPestana('ocupacion')}
-        >Ocupación</Boton>
-        <Boton
-          variante="fantasma"
-          tamano="sm"
-          className={`pestanaDashboard ${pestana === 'analisis' ? 'activa' : ''}`}
-          onClick={() => setPestana('analisis')}
-        >Análisis</Boton>
+      <div className="flex gap-1 border-b">
+        {(['resumen', 'ocupacion', 'analisis'] as const).map(tab => (
+          <Button
+            key={tab}
+            variant="ghost"
+            size="sm"
+            className={`rounded-b-none ${pestana === tab ? 'border-b-2 border-primary font-semibold' : ''}`}
+            onClick={() => setPestana(tab)}
+          >
+            {tab === 'resumen' ? 'Resumen' : tab === 'ocupacion' ? 'Ocupación' : 'Análisis'}
+          </Button>
+        ))}
       </div>
 
-      {isLoading && <p className="cargando">Cargando dashboard...</p>}
+      {isLoading && <p className="text-sm text-muted-foreground text-center py-8">Cargando dashboard...</p>}
 
       {dashboard && pestana === 'resumen' && <PanelResumen data={dashboard.resumen} />}
       {dashboard && pestana === 'ocupacion' && <PanelOcupacion data={dashboard.ocupacion} />}
@@ -77,155 +73,173 @@ function DashboardReservas() {
   );
 }
 
-/* ========== Panel Resumen ========== */
 function PanelResumen({ data }: { data: ResumenReservas }) {
   const signoVariacion = data.variacion_porcentaje >= 0 ? '+' : '';
 
   return (
     <>
-      <div className="kpisGrid">
-        <div className="tarjetaKpi">
-          <div className="kpiEtiqueta">Total reservas</div>
-          <div className="kpiValor">{data.total_reservas}</div>
-          <div className={`kpiDetalle ${data.variacion_porcentaje >= 0 ? 'kpiPositivo' : 'kpiNegativo'}`}>
-            {signoVariacion}{data.variacion_porcentaje}% vs mes anterior ({data.total_mes_anterior})
-          </div>
-        </div>
-        <div className="tarjetaKpi">
-          <div className="kpiEtiqueta">Clientes nuevos</div>
-          <div className="kpiValor">{data.clientes_nuevos}</div>
-        </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Total reservas</CardTitle></CardHeader>
+          <CardContent>
+            <span className="text-2xl font-bold">{data.total_reservas}</span>
+            <p className={`text-xs ${data.variacion_porcentaje >= 0 ? 'text-green-600' : 'text-destructive'}`}>
+              {signoVariacion}{data.variacion_porcentaje}% vs mes anterior ({data.total_mes_anterior})
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Clientes nuevos</CardTitle></CardHeader>
+          <CardContent><span className="text-2xl font-bold">{data.clientes_nuevos}</span></CardContent>
+        </Card>
       </div>
 
-      <div className="graficosGrid">
-        <div className="panelGrafico">
-          <h3>Reservas por día</h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={data.por_dia.map((d: { fecha: string; total: number }) => ({ ...d, fecha: d.fecha.slice(5) }))}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="fecha" fontSize={11} />
-              <YAxis allowDecimals={false} />
-              <Tooltip />
-              <Bar dataKey="total" fill="#4A90D9" name="Reservas" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        <div className="panelGrafico">
-          <h3>Por día de semana</h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={data.por_dia_semana}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="dia" fontSize={11} />
-              <YAxis allowDecimals={false} />
-              <Tooltip />
-              <Bar dataKey="total" fill="#50E3C2" name="Reservas" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        <div className="panelGrafico">
-          <h3>Distribución por canal</h3>
-          {data.por_canal.length > 0 ? (
+      <div className="grid gap-4 lg:grid-cols-3">
+        <Card>
+          <CardHeader><CardTitle className="text-sm">Reservas por día</CardTitle></CardHeader>
+          <CardContent>
             <ResponsiveContainer width="100%" height={250}>
-              <PieChart>
-                <Pie data={data.por_canal} dataKey="total" nameKey="canal" cx="50%" cy="50%" outerRadius={90} label={({ name, value }: { name?: string; value?: number }) => `${name ?? ''} (${value ?? 0})`}>
-                  {data.por_canal.map((_: AgrupacionCanal, i: number) => (
-                    <Cell key={i} fill={COLORES[i % COLORES.length]} />
-                  ))}
-                </Pie>
+              <BarChart data={data.por_dia.map((d: { fecha: string; total: number }) => ({ ...d, fecha: d.fecha.slice(5) }))}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="fecha" fontSize={11} />
+                <YAxis allowDecimals={false} />
                 <Tooltip />
-                <Legend />
-              </PieChart>
+                <Bar dataKey="total" fill="hsl(var(--primary))" name="Reservas" />
+              </BarChart>
             </ResponsiveContainer>
-          ) : (
-            <p className="cargando">Sin datos de canales</p>
-          )}
-        </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader><CardTitle className="text-sm">Por día de semana</CardTitle></CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={data.por_dia_semana}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="dia" fontSize={11} />
+                <YAxis allowDecimals={false} />
+                <Tooltip />
+                <Bar dataKey="total" fill="#50E3C2" name="Reservas" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader><CardTitle className="text-sm">Distribución por canal</CardTitle></CardHeader>
+          <CardContent>
+            {data.por_canal.length > 0 ? (
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie data={data.por_canal} dataKey="total" nameKey="canal" cx="50%" cy="50%" outerRadius={90} label={({ name, value }: { name?: string; value?: number }) => `${name ?? ''} (${value ?? 0})`}>
+                    {data.por_canal.map((_: AgrupacionCanal, i: number) => (
+                      <Cell key={i} fill={COLORES[i % COLORES.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center">Sin datos de canales</p>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </>
   );
 }
 
-/* ========== Panel Ocupación ========== */
 function PanelOcupacion({ data }: { data: OcupacionReservas }) {
   return (
     <>
-      <div className="kpisGrid">
-        <div className="tarjetaKpi">
-          <div className="kpiEtiqueta">Media personas/reserva</div>
-          <div className="kpiValor">{data.media_personas}</div>
-        </div>
-        <div className="tarjetaKpi">
-          <div className="kpiEtiqueta">Media reservas/día</div>
-          <div className="kpiValor">{data.media_reservas_dia}</div>
-        </div>
-        <div className="tarjetaKpi">
-          <div className="kpiEtiqueta">Total reservas</div>
-          <div className="kpiValor">{data.total_reservas}</div>
-        </div>
-        <div className="tarjetaKpi">
-          <div className="kpiEtiqueta">Antelación media</div>
-          <div className="kpiValor">{data.antelacion_media_dias} días</div>
-        </div>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Media personas/reserva</CardTitle></CardHeader>
+          <CardContent><span className="text-2xl font-bold">{data.media_personas}</span></CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Media reservas/día</CardTitle></CardHeader>
+          <CardContent><span className="text-2xl font-bold">{data.media_reservas_dia}</span></CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Total reservas</CardTitle></CardHeader>
+          <CardContent><span className="text-2xl font-bold">{data.total_reservas}</span></CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Antelación media</CardTitle></CardHeader>
+          <CardContent><span className="text-2xl font-bold">{data.antelacion_media_dias} días</span></CardContent>
+        </Card>
       </div>
 
-      <div className="graficosGrid">
-        <div className="panelGrafico">
-          <h3>Distribución por hora</h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={data.por_hora}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="hora" fontSize={11} />
-              <YAxis allowDecimals={false} />
-              <Tooltip />
-              <Bar dataKey="total" fill="#7B61FF" name="Reservas" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+      <div className="grid gap-4 lg:grid-cols-3">
+        <Card>
+          <CardHeader><CardTitle className="text-sm">Distribución por hora</CardTitle></CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={data.por_hora}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="hora" fontSize={11} />
+                <YAxis allowDecimals={false} />
+                <Tooltip />
+                <Bar dataKey="total" fill="#7B61FF" name="Reservas" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
 
-        <div className="panelGrafico">
-          <h3>Por turno</h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={data.por_turno}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="turno" fontSize={11} />
-              <YAxis allowDecimals={false} />
-              <Tooltip />
-              <Bar dataKey="total" fill="#F5A623" name="Reservas" />
-              <Bar dataKey="personas" fill="#4CAF50" name="Personas" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+        <Card>
+          <CardHeader><CardTitle className="text-sm">Por turno</CardTitle></CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={data.por_turno}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="turno" fontSize={11} />
+                <YAxis allowDecimals={false} />
+                <Tooltip />
+                <Bar dataKey="total" fill="#F5A623" name="Reservas" />
+                <Bar dataKey="personas" fill="#4CAF50" name="Personas" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
 
-        <div className="panelGrafico">
-          <h3>Procedencia (canal)</h3>
-          <table className="tablaDistribucion">
-            <thead>
-              <tr><th>Canal</th><th>Reservas</th><th>%</th><th></th></tr>
-            </thead>
-            <tbody>
-              {data.por_procedencia.map((c: AgrupacionCanal) => (
-                <tr key={c.canal}>
-                  <td>{c.canal}</td>
-                  <td>{c.total}</td>
-                  <td>{c.porcentaje}%</td>
-                  <td>
-                    <div className="barraCanal">
-                      <div className="barraProgreso" style={{ width: `${Math.min(c.porcentaje, 100)}%`, maxWidth: '100px' }} />
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Card>
+          <CardHeader><CardTitle className="text-sm">Procedencia (canal)</CardTitle></CardHeader>
+          <CardContent>
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Canal</TableHead>
+                    <TableHead className="text-right">Reservas</TableHead>
+                    <TableHead className="text-right">%</TableHead>
+                    <TableHead></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data.por_procedencia.map((c: AgrupacionCanal) => (
+                    <TableRow key={c.canal}>
+                      <TableCell>{c.canal}</TableCell>
+                      <TableCell className="text-right">{c.total}</TableCell>
+                      <TableCell className="text-right">{c.porcentaje}%</TableCell>
+                      <TableCell>
+                        <div className="h-2 w-full max-w-[100px] rounded-full bg-muted">
+                          <div className="h-2 rounded-full bg-primary" style={{ width: `${Math.min(c.porcentaje, 100)}%` }} />
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </>
   );
 }
 
-/* ========== Panel Análisis ========== */
 function PanelAnalisis({ data }: { data: AnalisisReservas }) {
   const formatMoneda = (v: string | null | undefined) => {
     if (!v) return '—';
@@ -233,30 +247,36 @@ function PanelAnalisis({ data }: { data: AnalisisReservas }) {
   };
 
   return (
-    <div className="kpisGrid">
-      <div className="tarjetaKpi">
-        <div className="kpiEtiqueta">Reservas efectivas</div>
-        <div className="kpiValor">{data.reservas_efectivas}</div>
-        <div className="kpiDetalle">Sin cancelaciones ni no-shows</div>
-      </div>
-      <div className="tarjetaKpi">
-        <div className="kpiEtiqueta">Total comensales</div>
-        <div className="kpiValor">{data.total_comensales}</div>
-      </div>
-      <div className="tarjetaKpi">
-        <div className="kpiEtiqueta">Comensales/reserva</div>
-        <div className="kpiValor">{data.comensales_por_reserva}</div>
-      </div>
-      <div className="tarjetaKpi">
-        <div className="kpiEtiqueta">Ticket medio/reserva</div>
-        <div className="kpiValor">{formatMoneda(data.ticket_medio_reserva)}</div>
-        <div className="kpiDetalle">Ventas ÷ reservas efectivas</div>
-      </div>
-      <div className="tarjetaKpi">
-        <div className="kpiEtiqueta">Ticket medio/persona</div>
-        <div className="kpiValor">{formatMoneda(data.ticket_medio_persona)}</div>
-        <div className="kpiDetalle">Ventas ÷ total comensales</div>
-      </div>
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <Card>
+        <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Reservas efectivas</CardTitle></CardHeader>
+        <CardContent>
+          <span className="text-2xl font-bold">{data.reservas_efectivas}</span>
+          <p className="text-xs text-muted-foreground">Sin cancelaciones ni no-shows</p>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Total comensales</CardTitle></CardHeader>
+        <CardContent><span className="text-2xl font-bold">{data.total_comensales}</span></CardContent>
+      </Card>
+      <Card>
+        <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Comensales/reserva</CardTitle></CardHeader>
+        <CardContent><span className="text-2xl font-bold">{data.comensales_por_reserva}</span></CardContent>
+      </Card>
+      <Card>
+        <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Ticket medio/reserva</CardTitle></CardHeader>
+        <CardContent>
+          <span className="text-2xl font-bold">{formatMoneda(data.ticket_medio_reserva)}</span>
+          <p className="text-xs text-muted-foreground">Ventas ÷ reservas efectivas</p>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Ticket medio/persona</CardTitle></CardHeader>
+        <CardContent>
+          <span className="text-2xl font-bold">{formatMoneda(data.ticket_medio_persona)}</span>
+          <p className="text-xs text-muted-foreground">Ventas ÷ total comensales</p>
+        </CardContent>
+      </Card>
     </div>
   );
 }
