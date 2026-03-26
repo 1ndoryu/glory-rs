@@ -1,6 +1,8 @@
-/* [253A-16] Script de seed para generar datos de prueba realistas.
- * Crea un usuario demo (demo@restaurante.com / demo1234) y
- * inserta ventas, gastos y reservas del mes actual y los 2 anteriores.
+/* [263A-12] Script de seed actualizado — genera datos de prueba realistas.
+ * Crea usuario demo (demo@restaurante.com / demo1234) e inserta:
+ * canales de reserva, clientes, ventas, gastos, reservas (con no-shows
+ * y canal_id/cliente_id), y asigna etiquetas del sistema a clientes.
+ * Idempotente: limpia datos del usuario demo antes de insertar.
  * Uso: cargo run --bin seed */
 
 use argon2::{
@@ -24,7 +26,7 @@ async fn main() {
 
     println!("Conectado a la base de datos.");
 
-    /* Paso 1: crear usuario demo */
+    /* Crear/actualizar usuario demo */
     let email = "demo@restaurante.com";
     let password = "demo1234";
 
@@ -46,27 +48,124 @@ async fn main() {
     .await
     .expect("Error al crear usuario demo");
 
-    println!("Usuario demo creado: {email} (id: {user_id})");
+    println!("Usuario demo: {email} (id: {user_id})");
 
-    /* Paso 2: generar datos para los ultimos 3 meses */
+    /* Limpiar datos anteriores del usuario demo (idempotente) */
+    limpiar_datos(&pool, user_id).await;
+
+    /* Generar datos de prueba */
     let hoy = Local::now().date_naive();
     let inicio = primer_dia_mes(hoy) - Duration::days(60);
 
+    let canal_ids = seed_canales(&pool, user_id).await;
+    let cliente_ids = seed_clientes(&pool, user_id).await;
     seed_ventas(&pool, user_id, inicio, hoy).await;
     seed_gastos(&pool, user_id, inicio, hoy).await;
-    seed_reservas(&pool, user_id, hoy).await;
+    seed_reservas(&pool, user_id, hoy, &canal_ids, &cliente_ids).await;
+    seed_etiquetas_clientes(&pool, user_id, &cliente_ids).await;
 
-    println!("Seed completado exitosamente.");
+    println!("\nSeed completado exitosamente.");
 }
 
 fn primer_dia_mes(d: NaiveDate) -> NaiveDate {
     NaiveDate::from_ymd_opt(d.year(), d.month(), 1).unwrap_or(d)
 }
 
+/* Limpia todos los datos del usuario demo respetando FKs */
+async fn limpiar_datos(pool: &PgPool, user_id: Uuid) {
+    let sentencias = [
+        "DELETE FROM clientes_etiquetas WHERE cliente_id IN (SELECT id FROM clientes WHERE user_id = $1)",
+        "DELETE FROM reservas_etiquetas WHERE reserva_id IN (SELECT id FROM reservas WHERE user_id = $1)",
+        "DELETE FROM reservas WHERE user_id = $1",
+        "DELETE FROM clientes WHERE user_id = $1",
+        "DELETE FROM canales_reserva WHERE user_id = $1",
+        "DELETE FROM ventas WHERE user_id = $1",
+        "DELETE FROM gastos WHERE user_id = $1",
+    ];
+    for sql in &sentencias {
+        sqlx::query(sql)
+            .bind(user_id)
+            .execute(pool)
+            .await
+            .unwrap_or_else(|e| panic!("Error limpiando datos: {e}"));
+    }
+    println!("Datos anteriores limpiados.");
+}
+
+/* 6 canales de reserva tipicos de restaurante */
+async fn seed_canales(pool: &PgPool, user_id: Uuid) -> Vec<Uuid> {
+    let nombres = [
+        "Teléfono", "WhatsApp", "Web", "Walk-in", "Google Maps", "Instagram",
+    ];
+    let mut ids = Vec::with_capacity(nombres.len());
+    for nombre in &nombres {
+        let id: Uuid = sqlx::query_scalar(
+            "INSERT INTO canales_reserva (user_id, nombre) VALUES ($1, $2) RETURNING id",
+        )
+        .bind(user_id)
+        .bind(*nombre)
+        .fetch_one(pool)
+        .await
+        .expect("Error al insertar canal");
+        ids.push(id);
+    }
+    println!("  {} canales insertados.", ids.len());
+    ids
+}
+
+/* 18 clientes demo con datos variados */
+#[allow(clippy::type_complexity)]
+async fn seed_clientes(pool: &PgPool, user_id: Uuid) -> Vec<Uuid> {
+    /* (nombre, apellidos, telefono, email, empresa, alergias, pref_bebida, pref_ubicacion) */
+    let datos: &[(&str, &str, &str, &str, &str, &str, &str, &str)] = &[
+        ("María", "García López", "612345678", "maria.garcia@email.com", "", "Frutos secos", "Vino tinto", ""),
+        ("Carlos", "Rodríguez Pérez", "623456789", "carlos.rod@email.com", "Deloitte", "", "Cerveza artesanal", ""),
+        ("Ana", "Martínez Sánchez", "634567890", "", "", "Celiaca", "", ""),
+        ("Pedro", "Sánchez Ruiz", "645678901", "pedro.s@email.com", "", "", "", "Ventana"),
+        ("Laura", "Fernández Díaz", "656789012", "laura.f@email.com", "Accenture", "Lactosa", "", ""),
+        ("Javier", "López Torres", "667890123", "", "", "", "", "Terraza"),
+        ("Carmen", "Ruiz Navarro", "678901234", "carmen.ruiz@email.com", "", "Vegetariana", "Agua con gas", ""),
+        ("Miguel", "Torres Romero", "689012345", "", "Eventos Sol S.L.", "", "", "Salón privado"),
+        ("Lucía", "Moreno Gil", "690123456", "lucia.m@email.com", "", "", "", ""),
+        ("David", "Jiménez Molina", "601234567", "david.j@email.com", "", "Marisco", "Cocktails", ""),
+        ("Sofía", "Navarro Serrano", "612345098", "", "", "", "", "Interior"),
+        ("Pablo", "Romero Blanco", "623450987", "pablo.r@email.com", "Telefónica", "", "", ""),
+        ("Elena", "Díaz Vázquez", "634509876", "", "", "Vegana", "Zumos naturales", ""),
+        ("Sergio", "Muñoz Ramos", "645098765", "sergio.m@email.com", "", "", "", ""),
+        ("Teresa", "Alonso Ibáñez", "656098754", "teresa.a@email.com", "", "Frutos rojos", "", ""),
+        ("Raúl", "Gutiérrez Cano", "667098543", "", "", "", "", "Mesa alta"),
+        ("Isabel", "Herrera Prieto", "678098432", "isabel.h@email.com", "Banco Santander", "", "Champagne", ""),
+        ("Alejandro", "Castro Méndez", "689098321", "", "", "Gluten", "", ""),
+    ];
+    let mut ids = Vec::with_capacity(datos.len());
+    for &(nombre, apellidos, tel, email, empresa, alergias, pref_beb, pref_ubi) in datos {
+        let id: Uuid = sqlx::query_scalar(
+            "INSERT INTO clientes (user_id, nombre, apellidos, telefono, email, empresa, \
+             alergias, preferencias_bebida, preferencias_ubicacion) \
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id",
+        )
+        .bind(user_id)
+        .bind(nombre)
+        .bind(apellidos)
+        .bind(tel)
+        .bind(email)
+        .bind(empresa)
+        .bind(alergias)
+        .bind(pref_beb)
+        .bind(pref_ubi)
+        .fetch_one(pool)
+        .await
+        .expect("Error al insertar cliente");
+        ids.push(id);
+    }
+    println!("  {} clientes insertados.", ids.len());
+    ids
+}
+
 async fn seed_ventas(pool: &PgPool, user_id: Uuid, desde: NaiveDate, hasta: NaiveDate) {
     let turnos = ["manana", "mediodia", "noche"];
     let canales = ["comedor", "barra", "terraza", "delivery", "just_eat", "eventos"];
-    let metodos = ["efectivo", "tarjeta", "transferencia"];
+    let metodos = ["efectivo", "tarjeta", "transferencia", "otros"];
     let descripciones = [
         "Menu del dia", "Cena grupo", "Pedido delivery", "Evento privado",
         "Comida rapida barra", "Menu ejecutivo", "Cena romantica",
@@ -121,7 +220,7 @@ async fn seed_gastos(pool: &PgPool, user_id: Uuid, desde: NaiveDate, hasta: Naiv
         .unwrap_or_default();
 
     let tipos = ["factura", "albaran", "ticket"];
-    let metodos = ["efectivo", "tarjeta", "transferencia"];
+    let metodos = ["efectivo", "tarjeta", "transferencia", "otros"];
     let proveedores = [
         "Distribuciones Lopez", "Carnes Ibericas S.L.", "Pescados del Norte",
         "Cervecera Nacional", "Verduras Eco", "Limpieza Total",
@@ -174,18 +273,29 @@ async fn seed_gastos(pool: &PgPool, user_id: Uuid, desde: NaiveDate, hasta: Naiv
     println!("  {count} gastos insertados.");
 }
 
-async fn seed_reservas(pool: &PgPool, user_id: Uuid, hoy: NaiveDate) {
+#[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss, clippy::cast_possible_wrap, clippy::too_many_lines)]
+async fn seed_reservas(
+    pool: &PgPool,
+    user_id: Uuid,
+    hoy: NaiveDate,
+    canal_ids: &[Uuid],
+    cliente_ids: &[Uuid],
+) {
     let nombres = [
-        "Maria Garcia", "Carlos Rodriguez", "Ana Martinez", "Pedro Sanchez",
-        "Laura Fernandez", "Javier Lopez", "Carmen Ruiz", "Miguel Torres",
-        "Lucia Moreno", "David Jimenez", "Sofia Navarro", "Pablo Romero",
-        "Elena Diaz", "Sergio Munoz", "Teresa Alonso", "Raul Gutierrez",
+        "María", "Carlos", "Ana", "Pedro", "Laura", "Javier", "Carmen",
+        "Miguel", "Lucía", "David", "Sofía", "Pablo", "Elena", "Sergio",
+        "Teresa", "Raúl",
     ];
-    let estados = ["pendiente", "confirmada", "confirmada", "cancelada"];
+    let apellidos = [
+        "García", "Rodríguez", "Martínez", "Sánchez", "Fernández", "López",
+        "Ruiz", "Torres", "Moreno", "Jiménez", "Navarro", "Romero",
+        "Díaz", "Muñoz", "Alonso", "Gutiérrez",
+    ];
     let horas = [
         NaiveTime::from_hms_opt(13, 0, 0).unwrap_or_default(),
         NaiveTime::from_hms_opt(13, 30, 0).unwrap_or_default(),
         NaiveTime::from_hms_opt(14, 0, 0).unwrap_or_default(),
+        NaiveTime::from_hms_opt(14, 30, 0).unwrap_or_default(),
         NaiveTime::from_hms_opt(20, 0, 0).unwrap_or_default(),
         NaiveTime::from_hms_opt(20, 30, 0).unwrap_or_default(),
         NaiveTime::from_hms_opt(21, 0, 0).unwrap_or_default(),
@@ -194,34 +304,218 @@ async fn seed_reservas(pool: &PgPool, user_id: Uuid, hoy: NaiveDate) {
 
     let mut count: u32 = 0;
 
-    /* Reservas para hoy y los proximos 14 dias */
-    for dia in 0_u32..15 {
-        let fecha = hoy + Duration::days(i64::from(dia));
-        let num_reservas = 3 + (dia as usize % 5);
+    /* Reservas pasadas: ultimos 30 dias (para estadisticas de no-shows) */
+    for dia in (1_u32..=30).rev() {
+        let fecha = hoy - Duration::days(i64::from(dia));
+        let num_reservas = 3 + ((30 - dia) as usize % 6);
+        let dia_u = dia as usize;
 
         for i in 0..num_reservas {
-            let idx = (dia as usize * 7 + i) % nombres.len();
+            let idx = (dia_u * 7 + i) % nombres.len();
             let personas = 2 + i % 6;
+
+            /* Distribucion: ~70% completada, ~15% no_show, ~15% cancelada */
+            let (estado, no_show) = match (dia_u + i) % 20 {
+                0 | 5 | 10 => ("no_show", true),
+                3 | 8 | 13 => ("cancelada", false),
+                _ => ("completada", false),
+            };
+
+            /* ~70% de reservas tienen canal asignado */
+            let canal_id = if (dia_u + i) % 10 < 7 {
+                Some(canal_ids[(dia_u + i) % canal_ids.len()])
+            } else {
+                None
+            };
+
+            /* ~40% vinculadas a un cliente del CRM */
+            let (cliente_id, nombre_cli, apellido_cli) = if (dia_u + i) % 5 < 2 {
+                let ci = (dia_u + i) % cliente_ids.len();
+                (Some(cliente_ids[ci]), nombres[ci % nombres.len()], apellidos[ci % apellidos.len()])
+            } else {
+                (None, nombres[idx], apellidos[idx])
+            };
+
+            let num_mesa: Option<i32> = if (dia_u + i).is_multiple_of(3) {
+                Some(1 + ((dia_u + i) % 15) as i32)
+            } else {
+                None
+            };
+
             let telefono = format!("6{:08}", 10_000_000 + count * 1234 + dia * 100);
 
             sqlx::query(
-                "INSERT INTO reservas (user_id, fecha, hora, nombre_cliente, num_personas, estado, notas, telefono) \
-                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)"
+                "INSERT INTO reservas (user_id, fecha, hora, nombre_cliente, apellidos_cliente, \
+                 num_personas, estado, notas, telefono, canal_id, cliente_id, no_show, num_mesa) \
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)",
             )
             .bind(user_id)
             .bind(fecha)
             .bind(horas[i % horas.len()])
-            .bind(nombres[idx])
+            .bind(nombre_cli)
+            .bind(apellido_cli)
             .bind(i32::try_from(personas).unwrap_or(2))
-            .bind(if dia == 0 && i < 2 { "confirmada" } else { estados[i % estados.len()] })
-            .bind(if i % 3 == 0 { "Mesa junto a ventana" } else { "" })
+            .bind(estado)
+            .bind(if i % 4 == 0 { "Mesa junto a ventana" } else { "" })
             .bind(&telefono)
+            .bind(canal_id)
+            .bind(cliente_id)
+            .bind(no_show)
+            .bind(num_mesa)
             .execute(pool)
             .await
-            .expect("Error al insertar reserva");
+            .expect("Error al insertar reserva pasada");
 
             count += 1;
         }
     }
-    println!("  {count} reservas insertadas.");
+
+    /* Reservas futuras: hoy + proximos 14 dias */
+    for dia in 0_u32..15 {
+        let fecha = hoy + Duration::days(i64::from(dia));
+        let num_reservas = 3 + (dia as usize % 5);
+        let dia_u = dia as usize;
+
+        for i in 0..num_reservas {
+            let idx = (dia_u * 7 + i) % nombres.len();
+            let personas = 2 + i % 6;
+
+            /* Futuras: ~60% confirmada, ~30% pendiente, ~10% lista_espera */
+            let estado = match (dia_u + i) % 10 {
+                0 => "lista_espera",
+                1 | 4 | 7 => "pendiente",
+                _ => "confirmada",
+            };
+
+            let canal_id = if (dia_u + i) % 10 < 7 {
+                Some(canal_ids[(dia_u + i) % canal_ids.len()])
+            } else {
+                None
+            };
+
+            let (cliente_id, nombre_cli, apellido_cli) = if (dia_u + i) % 5 < 2 {
+                let ci = (dia_u + i) % cliente_ids.len();
+                (Some(cliente_ids[ci]), nombres[ci % nombres.len()], apellidos[ci % apellidos.len()])
+            } else {
+                (None, nombres[idx], apellidos[idx])
+            };
+
+            let num_mesa: Option<i32> = if (dia_u + i).is_multiple_of(3) {
+                Some(1 + ((dia_u + i) % 15) as i32)
+            } else {
+                None
+            };
+
+            let telefono = format!("6{:08}", 10_000_000 + count * 1234 + dia * 100);
+
+            sqlx::query(
+                "INSERT INTO reservas (user_id, fecha, hora, nombre_cliente, apellidos_cliente, \
+                 num_personas, estado, notas, telefono, canal_id, cliente_id, no_show, num_mesa) \
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)",
+            )
+            .bind(user_id)
+            .bind(fecha)
+            .bind(horas[i % horas.len()])
+            .bind(nombre_cli)
+            .bind(apellido_cli)
+            .bind(i32::try_from(personas).unwrap_or(2))
+            .bind(estado)
+            .bind(if i % 3 == 0 { "Mesa junto a ventana" } else { "" })
+            .bind(&telefono)
+            .bind(canal_id)
+            .bind(cliente_id)
+            .bind(false)
+            .bind(num_mesa)
+            .execute(pool)
+            .await
+            .expect("Error al insertar reserva futura");
+
+            count += 1;
+        }
+    }
+    println!("  {count} reservas insertadas (pasadas + futuras).");
+}
+
+/* Asigna etiquetas del sistema a algunos clientes para probar el CRM */
+async fn seed_etiquetas_clientes(pool: &PgPool, user_id: Uuid, cliente_ids: &[Uuid]) {
+    /* Obtener etiquetas del sistema (es_sistema = TRUE, aplica_a = 'cliente') */
+    let etiquetas: Vec<(Uuid, String)> = sqlx::query_as(
+        "SELECT e.id, e.nombre FROM etiquetas e \
+         JOIN categorias_etiqueta ce ON ce.id = e.categoria_id \
+         WHERE e.es_sistema = TRUE AND ce.aplica_a = 'cliente' \
+         ORDER BY e.nombre",
+    )
+    .fetch_all(pool)
+    .await
+    .unwrap_or_default();
+
+    if etiquetas.is_empty() {
+        println!("  Sin etiquetas del sistema — omitiendo asignaciones.");
+        return;
+    }
+
+    let mut count: u32 = 0;
+
+    /* Asignar 1-3 etiquetas a cada cliente segun patron determinista */
+    for (ci, cliente_id) in cliente_ids.iter().enumerate() {
+        let num_tags = 1 + ci % 3;
+        for t in 0..num_tags {
+            let (etiqueta_id, _) = &etiquetas[(ci + t) % etiquetas.len()];
+
+            /* ON CONFLICT para evitar duplicados si se re-ejecuta */
+            let resultado = sqlx::query(
+                "INSERT INTO clientes_etiquetas (cliente_id, etiqueta_id) \
+                 VALUES ($1, $2) ON CONFLICT DO NOTHING",
+            )
+            .bind(cliente_id)
+            .bind(etiqueta_id)
+            .execute(pool)
+            .await;
+
+            if resultado.is_ok() {
+                count += 1;
+            }
+        }
+    }
+    println!("  {count} asignaciones cliente-etiqueta insertadas.");
+
+    /* Tambien verificar que las etiquetas del usuario existan.
+       Si no hay etiquetas propias, crear algunas del usuario demo
+       para que el frontend las muestre como disponibles. */
+    let user_tags: i64 = sqlx::query_scalar(
+        "SELECT COUNT(*) FROM etiquetas WHERE user_id = $1",
+    )
+    .bind(user_id)
+    .fetch_one(pool)
+    .await
+    .unwrap_or(0);
+
+    if user_tags == 0 {
+        /* Obtener categorias de sistema para usarlas como padre */
+        let cat_fidelizacion: Option<Uuid> = sqlx::query_scalar(
+            "SELECT id FROM categorias_etiqueta \
+             WHERE nombre = 'Fidelización' AND aplica_a = 'cliente' AND es_sistema = TRUE",
+        )
+        .fetch_optional(pool)
+        .await
+        .unwrap_or(None);
+
+        if let Some(cat_id) = cat_fidelizacion {
+            /* Crear etiquetas personalizadas del usuario sobre la categoria de sistema */
+            let custom = [("Habitual fin de semana", "#2196F3"), ("Amigo del chef", "#9C27B0")];
+            for (nombre, color) in &custom {
+                let _ = sqlx::query(
+                    "INSERT INTO etiquetas (user_id, categoria_id, nombre, color) \
+                     VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING",
+                )
+                .bind(user_id)
+                .bind(cat_id)
+                .bind(*nombre)
+                .bind(*color)
+                .execute(pool)
+                .await;
+            }
+            println!("  Etiquetas personalizadas del usuario creadas.");
+        }
+    }
 }

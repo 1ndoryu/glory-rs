@@ -200,14 +200,14 @@ pub async fn no_show_stats(
     auth: AuthUser,
     Query(params): Query<NoShowQuery>,
 ) -> Result<Json<NoShowStats>, AppError> {
-    let stats = ReservaService::no_show_stats(
+    let resultado = ReservaService::no_show_stats(
         &state.pool,
         auth.user_id,
         params.fecha_desde,
         params.fecha_hasta,
     )
     .await?;
-    Ok(Json(stats))
+    Ok(Json(resultado))
 }
 
 pub fn routes() -> Router<AppState> {
