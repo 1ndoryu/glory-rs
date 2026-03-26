@@ -26,11 +26,17 @@ RUN cargo build --release --bin glory-backend
 # --- Stage 2: Build frontend ---
 FROM node:20-slim AS frontend-builder
 
-WORKDIR /app/frontend
+# Instalar dependencias del submodulo Glory (tipos React)
+WORKDIR /app/glory-rs/frontend
+COPY glory-rs/frontend/package.json glory-rs/frontend/package-lock.json* ./
+RUN npm install --ignore-scripts
 
+# Instalar dependencias del frontend principal
+WORKDIR /app/frontend
 COPY frontend/package.json frontend/package-lock.json* ./
 RUN npm ci --ignore-scripts
 
+# Copiar fuentes y compilar
 COPY frontend/ ./
 COPY glory-rs/frontend/ /app/glory-rs/frontend/
 RUN npm run build
