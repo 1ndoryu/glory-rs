@@ -219,7 +219,7 @@ DELETE http://localhost:3000/api/ventas/de507550-2c03-4a42-8717-d6a547058825 405
 
 ~~27. Cambia el present de shandc a --preset bJfDQCym~~ → 263A-30
 
-28. el main necesita gap 
+~~28. el main necesita gap~~ → 263A-31
 
 29. Cambiar de white a dark o viceversa no funciona.
 
