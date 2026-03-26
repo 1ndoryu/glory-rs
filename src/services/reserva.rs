@@ -68,12 +68,17 @@ impl ReservaService {
         /* 263A-6: Mapear turno a rango horario */
         let (hora_desde, hora_hasta) = Self::turno_a_horas(turno);
 
+        /* [263A-20] Normalizar filtros vacíos a None.
+         * Orval puede enviar estado="" o turno="" como query param
+         * en vez de omitirlo, lo que causa que el SQL busque estado = '' */
+        let estado_normalizado = estado.filter(|s| !s.is_empty()).map(String::from);
+
         let filtros = FiltrosReserva {
             user_id,
             page,
             per_page,
             fecha,
-            estado: estado.map(String::from),
+            estado: estado_normalizado,
             hora_desde,
             hora_hasta,
         };
