@@ -45,6 +45,7 @@ pub struct Reserva {
     pub no_show: bool,
     pub num_mesa: Option<i32>,
     pub apellidos_cliente: String,
+    pub mesa_id: Option<Uuid>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -71,6 +72,7 @@ pub struct CrearReservaRequest {
     #[validate(length(max = 255))]
     pub apellidos_cliente: Option<String>,
     pub canal_id: Option<Uuid>,
+    pub mesa_id: Option<Uuid>,
 }
 
 /// Request para actualizar una reserva
@@ -91,6 +93,7 @@ pub struct ActualizarReservaRequest {
     #[validate(length(max = 255))]
     pub apellidos_cliente: Option<String>,
     pub canal_id: Option<Uuid>,
+    pub mesa_id: Option<Uuid>,
 }
 
 /// Conteo de reservas para el Home — mes y día actual

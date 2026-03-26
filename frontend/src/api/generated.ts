@@ -10,4 +10,5 @@ export * from './generated/clientes/clientes';
 export * from './generated/etiquetas/etiquetas';
 export * from './generated/canales/canales';
 export * from './generated/dashboard/dashboard';
+export * from './generated/plano-sala/plano-sala';
 export * from './generated/health/health';

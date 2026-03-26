@@ -21,6 +21,7 @@ pub struct NuevaReserva<'a> {
     pub num_mesa: Option<i32>,
     pub apellidos_cliente: &'a str,
     pub canal_id: Option<Uuid>,
+    pub mesa_id: Option<Uuid>,
 }
 
 /// Datos para actualizar parcialmente una reserva
@@ -37,6 +38,7 @@ pub struct ActualizarReservaData<'a> {
     pub num_mesa: Option<i32>,
     pub apellidos_cliente: Option<&'a str>,
     pub canal_id: Option<Uuid>,
+    pub mesa_id: Option<Uuid>,
 }
 
 /// Filtros para listar reservas (263A-6)
@@ -58,8 +60,8 @@ impl ReservaRepository {
         sqlx::query_as!(
             Reserva,
             "INSERT INTO reservas (id, user_id, fecha, hora, nombre_cliente, num_personas, \
-             estado, notas, telefono, num_mesa, apellidos_cliente, canal_id) \
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) \
+             estado, notas, telefono, num_mesa, apellidos_cliente, canal_id, mesa_id) \
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) \
              RETURNING *",
             id,
             data.user_id,
@@ -72,7 +74,8 @@ impl ReservaRepository {
             data.telefono,
             data.num_mesa,
             data.apellidos_cliente,
-            data.canal_id
+            data.canal_id,
+            data.mesa_id
         )
         .fetch_one(pool)
         .await
@@ -153,6 +156,7 @@ impl ReservaRepository {
              num_mesa = COALESCE($10, num_mesa), \
              apellidos_cliente = COALESCE($11, apellidos_cliente), \
              canal_id = COALESCE($12, canal_id), \
+             mesa_id = COALESCE($13, mesa_id), \
              updated_at = NOW() \
              WHERE id = $1 AND user_id = $2 \
              RETURNING *",
@@ -167,7 +171,8 @@ impl ReservaRepository {
             data.telefono,
             data.num_mesa,
             data.apellidos_cliente,
-            data.canal_id
+            data.canal_id,
+            data.mesa_id
         )
         .fetch_optional(pool)
         .await

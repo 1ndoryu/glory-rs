@@ -1,0 +1,237 @@
+/* [263A-14] Estilos del constructor de plano de sala.
+ * Canvas con mesas arrastrables, panel de zonas, configuración de mesa. */
+
+.planoSala {
+  max-width: 1400px;
+}
+
+/* === Barra de herramientas superior === */
+.planoBarraHerramientas {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+/* === Pestañas de zona === */
+.planoZonas {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--colorBorde);
+  margin-bottom: 1rem;
+  align-items: center;
+  overflow-x: auto;
+}
+
+.planoZonaTab {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: var(--colorTextoSecundario);
+  font-size: 0.85rem;
+  font-weight: 500;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+
+.planoZonaTab:hover {
+  color: var(--colorTexto);
+}
+
+.planoZonaTab.activa {
+  color: var(--colorPrimario);
+  border-bottom-color: var(--colorPrimario);
+}
+
+.planoZonaTabNueva {
+  color: var(--colorPrimario);
+  font-weight: 600;
+  opacity: 0.7;
+}
+
+.planoZonaTabNueva:hover {
+  opacity: 1;
+}
+
+/* === Canvas del plano === */
+.planoCanvas {
+  position: relative;
+  background: var(--colorFondoPanel);
+  border: 1px solid var(--colorBorde);
+  border-radius: var(--radio);
+  overflow: hidden;
+  min-height: 400px;
+  /* Fondo cuadriculado sutil */
+  background-image:
+    linear-gradient(var(--colorBorde) 1px, transparent 1px),
+    linear-gradient(90deg, var(--colorBorde) 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: -1px -1px;
+}
+
+.planoCanvasVacio {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--colorTextoSecundario);
+  font-size: 0.95rem;
+  padding: 3rem;
+}
+
+/* === Mesa individual en el canvas === */
+.planoMesa {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--colorFondo);
+  border: 2px solid var(--colorBorde);
+  border-radius: var(--radio);
+  cursor: grab;
+  user-select: none;
+  transition: box-shadow 0.15s, border-color 0.15s;
+  font-size: 0.75rem;
+  z-index: 1;
+}
+
+.planoMesa:hover {
+  border-color: var(--colorPrimario);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  z-index: 10;
+}
+
+.planoMesa.arrastrando {
+  opacity: 0.7;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  z-index: 100;
+  cursor: grabbing;
+}
+
+.planoMesa.seleccionada {
+  border-color: var(--colorPrimario);
+  box-shadow: 0 0 0 2px var(--colorPrimario);
+}
+
+.planoMesa.redonda {
+  border-radius: 50%;
+}
+
+.planoMesa.inactiva {
+  opacity: 0.4;
+  border-style: dashed;
+}
+
+.planoMesaNumero {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--colorTexto);
+}
+
+.planoMesaCapacidad {
+  color: var(--colorTextoSecundario);
+  font-size: 0.65rem;
+}
+
+/* === Panel lateral de configuración === */
+.planoConfigPanel {
+  position: fixed;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 320px;
+  background: var(--colorFondoPanel);
+  border-left: 1px solid var(--colorBorde);
+  padding: 1.5rem;
+  overflow-y: auto;
+  z-index: 200;
+  box-shadow: -4px 0 12px rgba(0, 0, 0, 0.08);
+}
+
+.planoConfigPanel h3 {
+  margin: 0 0 1rem;
+  font-size: 1rem;
+}
+
+.planoConfigCampo {
+  margin-bottom: 0.75rem;
+}
+
+.planoConfigCampo label {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--colorTextoSecundario);
+  margin-bottom: 0.25rem;
+}
+
+.planoConfigAcciones {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+/* === Info de zona === */
+.planoZonaInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.85rem;
+  color: var(--colorTextoSecundario);
+}
+
+/* === Combinaciones === */
+.planoCombinaciones {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--colorBorde);
+}
+
+.planoCombinacionItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  background: var(--colorFondoPanel);
+  border: 1px solid var(--colorBorde);
+  border-radius: var(--radio);
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.planoCombinacionMesas {
+  color: var(--colorTextoSecundario);
+  font-size: 0.75rem;
+}
+
+/* === Responsive === */
+@media (max-width: 768px) {
+  .planoConfigPanel {
+    width: 100%;
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    height: 50vh;
+    border-left: none;
+    border-top: 1px solid var(--colorBorde);
+  }
+
+  .planoBarraHerramientas {
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .planoZonas {
+    gap: 0;
+  }
+
+  .planoZonaTab {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.8rem;
+  }
+}

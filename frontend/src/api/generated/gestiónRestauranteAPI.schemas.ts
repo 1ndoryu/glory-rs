@@ -39,6 +39,37 @@ export interface ActualizarClienteRequest {
   telefono?: string | null;
 }
 
+export interface ActualizarMesaRequest {
+  /** @nullable */
+  activa?: boolean | null;
+  /** @nullable */
+  alto?: number | null;
+  /** @nullable */
+  ancho?: number | null;
+  /** @nullable */
+  forma?: string | null;
+  /** @nullable */
+  max_personas?: number | null;
+  /** @nullable */
+  min_personas?: number | null;
+  /** @nullable */
+  numero?: number | null;
+  /** @nullable */
+  pos_x?: number | null;
+  /** @nullable */
+  pos_y?: number | null;
+}
+
+export interface PosicionMesa {
+  id: string;
+  pos_x: number;
+  pos_y: number;
+}
+
+export interface ActualizarPosicionesRequest {
+  posiciones: PosicionMesa[];
+}
+
 /**
  * Estados posibles de una reserva
  */
@@ -68,6 +99,8 @@ export interface ActualizarReservaRequest {
   /** @nullable */
   hora?: string | null;
   /** @nullable */
+  mesa_id?: string | null;
+  /** @nullable */
   nombre_cliente?: string | null;
   /** @nullable */
   notas?: string | null;
@@ -77,6 +110,17 @@ export interface ActualizarReservaRequest {
   num_personas?: number | null;
   /** @nullable */
   telefono?: string | null;
+}
+
+export interface ActualizarZonaRequest {
+  /** @nullable */
+  alto?: number | null;
+  /** @nullable */
+  ancho?: number | null;
+  /** @nullable */
+  nombre?: string | null;
+  /** @nullable */
+  orden?: number | null;
 }
 
 /**
@@ -225,6 +269,42 @@ export interface ClientesPaginados {
   total: number;
 }
 
+export interface CombinacionMesas {
+  created_at: string;
+  id: string;
+  max_personas: number;
+  min_personas: number;
+  nombre: string;
+  user_id: string;
+}
+
+export interface Mesa {
+  activa: boolean;
+  alto: number;
+  ancho: number;
+  created_at: string;
+  forma: string;
+  id: string;
+  max_personas: number;
+  min_personas: number;
+  numero: number;
+  pos_x: number;
+  pos_y: number;
+  updated_at: string;
+  zona_id: string;
+}
+
+export type CombinacionConMesas = CombinacionMesas & {
+  mesas: Mesa[];
+};
+
+export interface CombinacionExport {
+  max_personas: number;
+  mesas_ref: string[];
+  min_personas: number;
+  nombre: string;
+}
+
 /**
  * Request para crear un canal de reserva
  */
@@ -272,6 +352,14 @@ export interface CrearClienteRequest {
   prefijo_telefono?: string | null;
   /** @nullable */
   telefono?: string | null;
+}
+
+export interface CrearCombinacionRequest {
+  max_personas: number;
+  mesa_ids: string[];
+  /** @nullable */
+  min_personas?: number | null;
+  nombre: string;
 }
 
 /**
@@ -328,6 +416,25 @@ export interface CrearGastoRequest {
   tipo_documento: TipoDocumento;
 }
 
+export interface CrearMesaRequest {
+  /** @nullable */
+  alto?: number | null;
+  /** @nullable */
+  ancho?: number | null;
+  /** @nullable */
+  forma?: string | null;
+  /** @nullable */
+  max_personas?: number | null;
+  /** @nullable */
+  min_personas?: number | null;
+  numero: number;
+  /** @nullable */
+  pos_x?: number | null;
+  /** @nullable */
+  pos_y?: number | null;
+  zona_id: string;
+}
+
 /**
  * Request para crear una reserva
  */
@@ -339,6 +446,8 @@ export interface CrearReservaRequest {
   estado?: EstadoReserva | null;
   fecha: string;
   hora: string;
+  /** @nullable */
+  mesa_id?: string | null;
   nombre_cliente: string;
   /** @nullable */
   notas?: string | null;
@@ -376,6 +485,16 @@ export interface CrearVentaRequest {
   iva_porcentaje: string;
   metodo_pago: MetodoPago;
   turno: Turno;
+}
+
+export interface CrearZonaRequest {
+  /** @nullable */
+  alto?: number | null;
+  /** @nullable */
+  ancho?: number | null;
+  nombre: string;
+  /** @nullable */
+  orden?: number | null;
 }
 
 /**
@@ -495,6 +614,18 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface MesaExport {
+  activa: boolean;
+  alto: number;
+  ancho: number;
+  forma: string;
+  max_personas: number;
+  min_personas: number;
+  numero: number;
+  pos_x: number;
+  pos_y: number;
+}
+
 /**
  * No-shows desglosados por canal
  */
@@ -514,6 +645,40 @@ export interface NoShowStats {
   ratio_porcentaje: number;
   total_no_shows: number;
   total_reservas: number;
+}
+
+export interface ZonaExport {
+  alto: number;
+  ancho: number;
+  mesas: MesaExport[];
+  nombre: string;
+  orden: number;
+}
+
+export interface PlanoExport {
+  combinaciones: CombinacionExport[];
+  version: string;
+  zonas: ZonaExport[];
+}
+
+export interface ZonaSala {
+  alto: number;
+  ancho: number;
+  created_at: string;
+  id: string;
+  nombre: string;
+  orden: number;
+  updated_at: string;
+  user_id: string;
+}
+
+export type ZonaConMesas = ZonaSala & {
+  mesas: Mesa[];
+};
+
+export interface PlanoSala {
+  combinaciones: CombinacionConMesas[];
+  zonas: ZonaConMesas[];
 }
 
 /**
@@ -538,6 +703,8 @@ export interface Reserva {
   fecha: string;
   hora: string;
   id: string;
+  /** @nullable */
+  mesa_id?: string | null;
   no_show: boolean;
   nombre_cliente: string;
   notas: string;

@@ -7,6 +7,7 @@ mod dashboard;
 mod etiquetas;
 mod gastos;
 mod health;
+mod plano_sala;
 mod reservas;
 mod ventas;
 
@@ -83,6 +84,18 @@ impl utoipa::Modify for SecurityAddon {
         canales_reserva::eliminar_canal,
         dashboard::resumen,
         dashboard::dashboard_reservas,
+        plano_sala::obtener_plano,
+        plano_sala::crear_zona,
+        plano_sala::actualizar_zona,
+        plano_sala::eliminar_zona,
+        plano_sala::crear_mesa,
+        plano_sala::actualizar_mesa,
+        plano_sala::eliminar_mesa,
+        plano_sala::actualizar_posiciones,
+        plano_sala::crear_combinacion,
+        plano_sala::eliminar_combinacion,
+        plano_sala::exportar_plano,
+        plano_sala::importar_plano,
     ),
     components(schemas(
         health::HealthResponse,
@@ -126,6 +139,23 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::AgrupacionCanal,
         crate::models::AgrupacionHora,
         crate::models::AgrupacionTurno,
+        crate::models::ZonaSala,
+        crate::models::Mesa,
+        crate::models::CombinacionMesas,
+        crate::models::PlanoSala,
+        crate::models::ZonaConMesas,
+        crate::models::CombinacionConMesas,
+        crate::models::CrearZonaRequest,
+        crate::models::ActualizarZonaRequest,
+        crate::models::CrearMesaRequest,
+        crate::models::ActualizarMesaRequest,
+        crate::models::ActualizarPosicionesRequest,
+        crate::models::PosicionMesa,
+        crate::models::CrearCombinacionRequest,
+        crate::models::PlanoExport,
+        crate::models::ZonaExport,
+        crate::models::MesaExport,
+        crate::models::CombinacionExport,
         crate::models::Turno,
         crate::models::CanalVenta,
         crate::models::MetodoPago,
@@ -175,4 +205,5 @@ fn api_routes() -> Router<AppState> {
         .merge(etiquetas::routes())
         .merge(canales_reserva::routes())
         .merge(dashboard::routes())
+        .merge(plano_sala::routes())
 }

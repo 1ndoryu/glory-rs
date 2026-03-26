@@ -1,0 +1,328 @@
+/* [263A-14] Repositorio del plano de sala: zonas, mesas, combinaciones.
+ * Queries para CRUD, batch update posiciones, plano completo, export/import. */
+
+use sqlx::PgPool;
+use uuid::Uuid;
+
+use crate::models::{ActualizarMesaRequest, CombinacionMesas, CrearMesaRequest, Mesa, ZonaSala};
+
+pub struct PlanoSalaRepository;
+
+impl PlanoSalaRepository {
+    /* ========== Zonas ========== */
+
+    pub async fn listar_zonas(pool: &PgPool, user_id: Uuid) -> Result<Vec<ZonaSala>, sqlx::Error> {
+        sqlx::query_as!(
+            ZonaSala,
+            "SELECT * FROM zonas_sala WHERE user_id = $1 ORDER BY orden, nombre",
+            user_id
+        )
+        .fetch_all(pool)
+        .await
+    }
+
+    pub async fn crear_zona(
+        pool: &PgPool,
+        user_id: Uuid,
+        nombre: &str,
+        orden: i32,
+        ancho: i32,
+        alto: i32,
+    ) -> Result<ZonaSala, sqlx::Error> {
+        let id = Uuid::new_v4();
+        sqlx::query_as!(
+            ZonaSala,
+            r#"INSERT INTO zonas_sala (id, user_id, nombre, orden, ancho, alto)
+               VALUES ($1, $2, $3, $4, $5, $6) RETURNING *"#,
+            id,
+            user_id,
+            nombre,
+            orden,
+            ancho,
+            alto
+        )
+        .fetch_one(pool)
+        .await
+    }
+
+    pub async fn actualizar_zona(
+        pool: &PgPool,
+        id: Uuid,
+        user_id: Uuid,
+        nombre: Option<&str>,
+        orden: Option<i32>,
+        ancho: Option<i32>,
+        alto: Option<i32>,
+    ) -> Result<ZonaSala, sqlx::Error> {
+        sqlx::query_as!(
+            ZonaSala,
+            r#"UPDATE zonas_sala SET
+                nombre = COALESCE($3, nombre),
+                orden = COALESCE($4, orden),
+                ancho = COALESCE($5, ancho),
+                alto = COALESCE($6, alto),
+                updated_at = NOW()
+               WHERE id = $1 AND user_id = $2 RETURNING *"#,
+            id,
+            user_id,
+            nombre,
+            orden,
+            ancho,
+            alto
+        )
+        .fetch_one(pool)
+        .await
+    }
+
+    pub async fn eliminar_zona(
+        pool: &PgPool,
+        id: Uuid,
+        user_id: Uuid,
+    ) -> Result<bool, sqlx::Error> {
+        let result = sqlx::query!(
+            "DELETE FROM zonas_sala WHERE id = $1 AND user_id = $2",
+            id,
+            user_id
+        )
+        .execute(pool)
+        .await?;
+        Ok(result.rows_affected() > 0)
+    }
+
+    /* ========== Mesas ========== */
+
+    pub async fn listar_mesas_zona(
+        pool: &PgPool,
+        zona_id: Uuid,
+    ) -> Result<Vec<Mesa>, sqlx::Error> {
+        sqlx::query_as!(
+            Mesa,
+            "SELECT * FROM mesas WHERE zona_id = $1 ORDER BY numero",
+            zona_id
+        )
+        .fetch_all(pool)
+        .await
+    }
+
+    pub async fn crear_mesa(
+        pool: &PgPool,
+        req: &CrearMesaRequest,
+    ) -> Result<Mesa, sqlx::Error> {
+        let id = Uuid::new_v4();
+        sqlx::query_as!(
+            Mesa,
+            r#"INSERT INTO mesas (id, zona_id, numero, pos_x, pos_y, ancho, alto, forma, min_personas, max_personas)
+               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *"#,
+            id,
+            req.zona_id,
+            req.numero,
+            req.pos_x.unwrap_or(0),
+            req.pos_y.unwrap_or(0),
+            req.ancho.unwrap_or(80),
+            req.alto.unwrap_or(80),
+            req.forma.as_deref().unwrap_or("cuadrada"),
+            req.min_personas.unwrap_or(1),
+            req.max_personas.unwrap_or(4)
+        )
+        .fetch_one(pool)
+        .await
+    }
+
+    pub async fn actualizar_mesa(
+        pool: &PgPool,
+        id: Uuid,
+        req: &ActualizarMesaRequest,
+    ) -> Result<Mesa, sqlx::Error> {
+        sqlx::query_as!(
+            Mesa,
+            r#"UPDATE mesas SET
+                numero = COALESCE($2, numero),
+                pos_x = COALESCE($3, pos_x),
+                pos_y = COALESCE($4, pos_y),
+                ancho = COALESCE($5, ancho),
+                alto = COALESCE($6, alto),
+                forma = COALESCE($7, forma),
+                min_personas = COALESCE($8, min_personas),
+                max_personas = COALESCE($9, max_personas),
+                activa = COALESCE($10, activa),
+                updated_at = NOW()
+               WHERE id = $1 RETURNING *"#,
+            id,
+            req.numero,
+            req.pos_x,
+            req.pos_y,
+            req.ancho,
+            req.alto,
+            req.forma.as_deref(),
+            req.min_personas,
+            req.max_personas,
+            req.activa
+        )
+        .fetch_one(pool)
+        .await
+    }
+
+    pub async fn eliminar_mesa(pool: &PgPool, id: Uuid) -> Result<bool, sqlx::Error> {
+        let result = sqlx::query!("DELETE FROM mesas WHERE id = $1", id)
+            .execute(pool)
+            .await?;
+        Ok(result.rows_affected() > 0)
+    }
+
+    /* Batch update de posiciones — drag-and-drop save */
+    pub async fn actualizar_posiciones(
+        pool: &PgPool,
+        posiciones: &[(Uuid, i32, i32)],
+    ) -> Result<u64, sqlx::Error> {
+        let mut total = 0u64;
+        for (id, x, y) in posiciones {
+            let result = sqlx::query!(
+                "UPDATE mesas SET pos_x = $2, pos_y = $3, updated_at = NOW() WHERE id = $1",
+                id,
+                x,
+                y
+            )
+            .execute(pool)
+            .await?;
+            total += result.rows_affected();
+        }
+        Ok(total)
+    }
+
+    /* ========== Combinaciones ========== */
+
+    pub async fn listar_combinaciones(
+        pool: &PgPool,
+        user_id: Uuid,
+    ) -> Result<Vec<CombinacionMesas>, sqlx::Error> {
+        sqlx::query_as!(
+            CombinacionMesas,
+            "SELECT * FROM combinaciones_mesas WHERE user_id = $1 ORDER BY nombre",
+            user_id
+        )
+        .fetch_all(pool)
+        .await
+    }
+
+    pub async fn mesas_de_combinacion(
+        pool: &PgPool,
+        combinacion_id: Uuid,
+    ) -> Result<Vec<Mesa>, sqlx::Error> {
+        sqlx::query_as!(
+            Mesa,
+            r#"SELECT m.* FROM mesas m
+               INNER JOIN combinacion_mesa_items ci ON ci.mesa_id = m.id
+               WHERE ci.combinacion_id = $1
+               ORDER BY m.numero"#,
+            combinacion_id
+        )
+        .fetch_all(pool)
+        .await
+    }
+
+    pub async fn crear_combinacion(
+        pool: &PgPool,
+        user_id: Uuid,
+        nombre: &str,
+        min_personas: i32,
+        max_personas: i32,
+        mesa_ids: &[Uuid],
+    ) -> Result<CombinacionMesas, sqlx::Error> {
+        let id = Uuid::new_v4();
+        let combo = sqlx::query_as!(
+            CombinacionMesas,
+            r#"INSERT INTO combinaciones_mesas (id, user_id, nombre, min_personas, max_personas)
+               VALUES ($1, $2, $3, $4, $5) RETURNING *"#,
+            id,
+            user_id,
+            nombre,
+            min_personas,
+            max_personas
+        )
+        .fetch_one(pool)
+        .await?;
+
+        for mesa_id in mesa_ids {
+            sqlx::query!(
+                "INSERT INTO combinacion_mesa_items (combinacion_id, mesa_id) VALUES ($1, $2)",
+                id,
+                mesa_id
+            )
+            .execute(pool)
+            .await?;
+        }
+
+        Ok(combo)
+    }
+
+    pub async fn eliminar_combinacion(
+        pool: &PgPool,
+        id: Uuid,
+        user_id: Uuid,
+    ) -> Result<bool, sqlx::Error> {
+        let result = sqlx::query!(
+            "DELETE FROM combinaciones_mesas WHERE id = $1 AND user_id = $2",
+            id,
+            user_id
+        )
+        .execute(pool)
+        .await?;
+        Ok(result.rows_affected() > 0)
+    }
+
+    /* ========== Plano completo ========== */
+
+    pub async fn obtener_mesa(pool: &PgPool, id: Uuid) -> Result<Mesa, sqlx::Error> {
+        sqlx::query_as!(Mesa, "SELECT * FROM mesas WHERE id = $1", id)
+            .fetch_one(pool)
+            .await
+    }
+
+    /* Obtiene el nombre de la zona de una mesa */
+    pub async fn nombre_zona(pool: &PgPool, zona_id: Uuid) -> Result<String, sqlx::Error> {
+        let row = sqlx::query_scalar!("SELECT nombre FROM zonas_sala WHERE id = $1", zona_id)
+            .fetch_one(pool)
+            .await?;
+        Ok(row)
+    }
+
+    /* Busca mesa por zona_nombre + numero (para import) */
+    pub async fn buscar_mesa_por_zona_numero(
+        pool: &PgPool,
+        user_id: Uuid,
+        zona_nombre: &str,
+        numero: i32,
+    ) -> Result<Option<Mesa>, sqlx::Error> {
+        sqlx::query_as!(
+            Mesa,
+            r#"SELECT m.* FROM mesas m
+               INNER JOIN zonas_sala z ON z.id = m.zona_id
+               WHERE z.user_id = $1 AND z.nombre = $2 AND m.numero = $3"#,
+            user_id,
+            zona_nombre,
+            numero
+        )
+        .fetch_optional(pool)
+        .await
+    }
+
+    /* Elimina todo el plano de un usuario (para import limpio) */
+    pub async fn eliminar_plano_completo(
+        pool: &PgPool,
+        user_id: Uuid,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query!(
+            "DELETE FROM combinaciones_mesas WHERE user_id = $1",
+            user_id
+        )
+        .execute(pool)
+        .await?;
+        sqlx::query!(
+            "DELETE FROM zonas_sala WHERE user_id = $1",
+            user_id
+        )
+        .execute(pool)
+        .await?;
+        Ok(())
+    }
+}

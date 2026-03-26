@@ -5,6 +5,7 @@ mod dashboard;
 mod dashboard_reservas;
 mod etiqueta;
 mod gasto;
+mod plano_sala;
 mod reserva;
 mod user;
 mod venta;
@@ -33,4 +34,10 @@ pub use reserva::{
 pub use user::{AuthResponse, LoginRequest, RegisterRequest, User, UserResponse};
 pub use venta::{
     CanalVenta, CrearVentaRequest, MetodoPago, Turno, Venta, VentasPaginadas, VentasQuery,
+};
+pub use plano_sala::{
+    ActualizarMesaRequest, ActualizarPosicionesRequest, ActualizarZonaRequest,
+    CombinacionConMesas, CombinacionExport, CombinacionMesas, CrearCombinacionRequest,
+    CrearMesaRequest, CrearZonaRequest, Mesa, MesaExport, PlanoExport, PlanoSala,
+    PosicionMesa, ZonaConMesas, ZonaExport, ZonaSala,
 };

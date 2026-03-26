@@ -15,6 +15,7 @@ import ListaClientes from './componentes/ListaClientes';
 import ListaCanales from './componentes/ListaCanales';
 import EstadisticasNoShows from './componentes/EstadisticasNoShows';
 import DashboardReservas from './componentes/DashboardReservas';
+import PlanoSala from './componentes/PlanoSala';
 import './estilos/global.css';
 
 const queryClient = new QueryClient({
@@ -44,6 +45,7 @@ function App() {
           <Route path="/canales" element={<ListaCanales />} />
           <Route path="/reservas/no-shows" element={<EstadisticasNoShows />} />
           <Route path="/reservas/dashboard" element={<DashboardReservas />} />
+          <Route path="/plano-sala" element={<PlanoSala />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

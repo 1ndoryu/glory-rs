@@ -43,6 +43,7 @@ impl ReservaService {
             num_mesa: req.num_mesa,
             apellidos_cliente: req.apellidos_cliente.as_deref().unwrap_or(""),
             canal_id: req.canal_id,
+            mesa_id: req.mesa_id,
         };
 
         let reserva = ReservaRepository::create(pool, &data).await?;
@@ -130,6 +131,7 @@ impl ReservaService {
             num_mesa: req.num_mesa,
             apellidos_cliente: req.apellidos_cliente.as_deref(),
             canal_id: req.canal_id,
+            mesa_id: req.mesa_id,
         };
 
         ReservaRepository::update(pool, &data)
