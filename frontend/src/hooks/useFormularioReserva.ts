@@ -1,5 +1,5 @@
-/* 253A-10: Hook para FormularioReserva — reduce 8 useState a 2 (regla usestate-excesivo)
-   253A-14: acepta onExito para uso en modales */
+/* 253A-10: Hook para FormularioReserva
+   263A-6: Añade num_mesa y apellidos_cliente */
 
 import { useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -9,7 +9,9 @@ interface CamposReserva {
   fecha: string;
   hora: string;
   nombreCliente: string;
+  apellidosCliente: string;
   numPersonas: string;
+  numMesa: string;
   telefono: string;
   notas: string;
   estado: EstadoReserva;
@@ -22,7 +24,9 @@ function useFormularioReserva(onExito?: () => void) {
     fecha: new Date().toISOString().split('T')[0],
     hora: '20:00',
     nombreCliente: '',
+    apellidosCliente: '',
     numPersonas: '2',
+    numMesa: '',
     telefono: '',
     notas: '',
     estado: EstadoReserva.pendiente,
@@ -60,6 +64,8 @@ function useFormularioReserva(onExito?: () => void) {
         telefono: campos.telefono || null,
         notas: campos.notas || null,
         estado: campos.estado,
+        num_mesa: campos.numMesa ? parseInt(campos.numMesa, 10) : null,
+        apellidos_cliente: campos.apellidosCliente || null,
       },
     });
   };

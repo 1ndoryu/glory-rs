@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT * FROM reservas WHERE user_id = $1 AND ($4::DATE IS NULL OR fecha = $4) ORDER BY fecha ASC, hora ASC LIMIT $2 OFFSET $3",
+  "query": "SELECT * FROM reservas WHERE user_id = $1 AND ($4::DATE IS NULL OR fecha = $4) AND ($5::VARCHAR IS NULL OR estado = $5) AND ($6::TIME IS NULL OR hora >= $6) AND ($7::TIME IS NULL OR hora < $7) ORDER BY fecha ASC, hora ASC LIMIT $2 OFFSET $3",
   "describe": {
     "columns": [
       {
@@ -72,6 +72,16 @@
         "ordinal": 13,
         "name": "no_show",
         "type_info": "Bool"
+      },
+      {
+        "ordinal": 14,
+        "name": "num_mesa",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 15,
+        "name": "apellidos_cliente",
+        "type_info": "Varchar"
       }
     ],
     "parameters": {
@@ -79,7 +89,10 @@
         "Uuid",
         "Int8",
         "Int8",
-        "Date"
+        "Date",
+        "Varchar",
+        "Time",
+        "Time"
       ]
     },
     "nullable": [
@@ -96,8 +109,10 @@
       false,
       true,
       true,
+      false,
+      true,
       false
     ]
   },
-  "hash": "0c4f050a9eead65bfd8fbfba31b44aa4de07bea228a9623886d1a4e869591597"
+  "hash": "2a40dc7d8427777aef91c2a170a8c33139a8a7f960dc96e1642db667d0361942"
 }

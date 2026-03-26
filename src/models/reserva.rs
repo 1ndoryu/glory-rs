@@ -24,6 +24,8 @@ pub enum EstadoReserva {
     Completada,
     #[sqlx(rename = "no_show")]
     NoShow,
+    #[sqlx(rename = "lista_espera")]
+    ListaEspera,
 }
 
 /// Reserva del restaurante
@@ -41,6 +43,8 @@ pub struct Reserva {
     pub cliente_id: Option<Uuid>,
     pub canal_id: Option<Uuid>,
     pub no_show: bool,
+    pub num_mesa: Option<i32>,
+    pub apellidos_cliente: String,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -63,6 +67,9 @@ pub struct CrearReservaRequest {
     pub notas: Option<String>,
     #[validate(length(max = 20))]
     pub telefono: Option<String>,
+    pub num_mesa: Option<i32>,
+    #[validate(length(max = 255))]
+    pub apellidos_cliente: Option<String>,
 }
 
 /// Request para actualizar una reserva
@@ -79,6 +86,9 @@ pub struct ActualizarReservaRequest {
     pub notas: Option<String>,
     #[validate(length(max = 20))]
     pub telefono: Option<String>,
+    pub num_mesa: Option<i32>,
+    #[validate(length(max = 255))]
+    pub apellidos_cliente: Option<String>,
 }
 
 /// Conteo de reservas para el Home — mes y día actual
@@ -105,6 +115,23 @@ pub struct ReservasQuery {
     #[serde(default = "default_per_page")]
     pub per_page: i64,
     pub fecha: Option<NaiveDate>,
+    pub estado: Option<String>,
+    pub turno: Option<String>,
+}
+
+/// Resumen diario de reservas — para la vista mes
+#[derive(Debug, Serialize, FromRow, ToSchema)]
+pub struct ResumenDiario {
+    pub fecha: NaiveDate,
+    pub total_reservas: i64,
+    pub total_personas: i64,
+}
+
+/// Query para resumen mensual
+#[derive(Debug, Deserialize, IntoParams)]
+pub struct ResumenMesQuery {
+    pub anio: i32,
+    pub mes: i32,
 }
 
 fn default_page() -> i64 {

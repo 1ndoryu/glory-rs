@@ -71,12 +71,15 @@ export const EstadoReserva = {
   cancelada: 'cancelada',
   completada: 'completada',
   no_show: 'no_show',
+  lista_espera: 'lista_espera',
 } as const;
 
 /**
  * Request para actualizar una reserva
  */
 export interface ActualizarReservaRequest {
+  /** @nullable */
+  apellidos_cliente?: string | null;
   estado?: EstadoReserva | null;
   /** @nullable */
   fecha?: string | null;
@@ -86,6 +89,8 @@ export interface ActualizarReservaRequest {
   nombre_cliente?: string | null;
   /** @nullable */
   notas?: string | null;
+  /** @nullable */
+  num_mesa?: number | null;
   /** @nullable */
   num_personas?: number | null;
   /** @nullable */
@@ -272,12 +277,16 @@ export interface CrearGastoRequest {
  * Request para crear una reserva
  */
 export interface CrearReservaRequest {
+  /** @nullable */
+  apellidos_cliente?: string | null;
   estado?: EstadoReserva | null;
   fecha: string;
   hora: string;
   nombre_cliente: string;
   /** @nullable */
   notas?: string | null;
+  /** @nullable */
+  num_mesa?: number | null;
   num_personas: number;
   /** @nullable */
   telefono?: string | null;
@@ -406,6 +415,7 @@ export interface RegisterRequest {
  * Reserva del restaurante
  */
 export interface Reserva {
+  apellidos_cliente: string;
   /** @nullable */
   canal_id?: string | null;
   /** @nullable */
@@ -418,6 +428,8 @@ export interface Reserva {
   no_show: boolean;
   nombre_cliente: string;
   notas: string;
+  /** @nullable */
+  num_mesa?: number | null;
   num_personas: number;
   telefono: string;
   updated_at: string;
@@ -440,6 +452,15 @@ export interface ReservasPaginadas {
   page: number;
   per_page: number;
   total: number;
+}
+
+/**
+ * Resumen diario de reservas — para la vista mes
+ */
+export interface ResumenDiario {
+  fecha: string;
+  total_personas: number;
+  total_reservas: number;
 }
 
 /**
@@ -544,6 +565,19 @@ per_page?: number;
  * @nullable
  */
 fecha?: string | null;
+/**
+ * @nullable
+ */
+estado?: string | null;
+/**
+ * @nullable
+ */
+turno?: string | null;
+};
+
+export type ResumenMensualParams = {
+anio: number;
+mes: number;
 };
 
 export type ListarVentasParams = {
@@ -3109,6 +3143,131 @@ export function useConteoReservas<TData = Awaited<ReturnType<typeof conteoReserv
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getConteoReservasQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+/**
+ * @summary Resumen diario de un mes — para la vista calendario
+ */
+export type resumenMensualResponse200 = {
+  data: ResumenDiario[]
+  status: 200
+}
+
+export type resumenMensualResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type resumenMensualResponseSuccess = (resumenMensualResponse200) & {
+  headers: Headers;
+};
+export type resumenMensualResponseError = (resumenMensualResponse401) & {
+  headers: Headers;
+};
+
+export type resumenMensualResponse = (resumenMensualResponseSuccess | resumenMensualResponseError)
+
+export const getResumenMensualUrl = (params: ResumenMensualParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/reservas/resumen-mes?${stringifiedParams}` : `/api/reservas/resumen-mes`
+}
+
+export const resumenMensual = async (params: ResumenMensualParams, options?: RequestInit): Promise<resumenMensualResponse> => {
+
+  return customInstance<resumenMensualResponse>(getResumenMensualUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getResumenMensualQueryKey = (params?: ResumenMensualParams,) => {
+    return [
+    `/api/reservas/resumen-mes`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getResumenMensualQueryOptions = <TData = Awaited<ReturnType<typeof resumenMensual>>, TError = ErrorResponse>(params: ResumenMensualParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resumenMensual>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getResumenMensualQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof resumenMensual>>> = ({ signal }) => resumenMensual(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof resumenMensual>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ResumenMensualQueryResult = NonNullable<Awaited<ReturnType<typeof resumenMensual>>>
+export type ResumenMensualQueryError = ErrorResponse
+
+
+export function useResumenMensual<TData = Awaited<ReturnType<typeof resumenMensual>>, TError = ErrorResponse>(
+ params: ResumenMensualParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof resumenMensual>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof resumenMensual>>,
+          TError,
+          Awaited<ReturnType<typeof resumenMensual>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useResumenMensual<TData = Awaited<ReturnType<typeof resumenMensual>>, TError = ErrorResponse>(
+ params: ResumenMensualParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resumenMensual>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof resumenMensual>>,
+          TError,
+          Awaited<ReturnType<typeof resumenMensual>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useResumenMensual<TData = Awaited<ReturnType<typeof resumenMensual>>, TError = ErrorResponse>(
+ params: ResumenMensualParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resumenMensual>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Resumen diario de un mes — para la vista calendario
+ */
+
+export function useResumenMensual<TData = Awaited<ReturnType<typeof resumenMensual>>, TError = ErrorResponse>(
+ params: ResumenMensualParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resumenMensual>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getResumenMensualQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

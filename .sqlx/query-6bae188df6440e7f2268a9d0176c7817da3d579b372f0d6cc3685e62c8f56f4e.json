@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COUNT(*) as total FROM reservas WHERE user_id = $1 AND ($2::DATE IS NULL OR fecha = $2) AND ($3::VARCHAR IS NULL OR estado = $3) AND ($4::TIME IS NULL OR hora >= $4) AND ($5::TIME IS NULL OR hora < $5)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "total",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Date",
+        "Varchar",
+        "Time",
+        "Time"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "6bae188df6440e7f2268a9d0176c7817da3d579b372f0d6cc3685e62c8f56f4e"
+}

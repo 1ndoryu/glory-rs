@@ -1,6 +1,5 @@
 /* 253A-7: Formulario para crear una nueva reserva
-   253A-10: hook useFormularioReserva + componentes UI atomicos
-   253A-14: acepta onExito para uso en modales */
+   263A-6: Añade num_mesa, apellidos_cliente, estado lista_espera/no_show */
 
 import { EstadoReserva } from '../api/generated';
 import useFormularioReserva from '../hooks/useFormularioReserva';
@@ -39,12 +38,23 @@ function FormularioReserva({ onExito }: Props) {
 
         <div className="filaFormulario">
           <div className="grupoFormulario">
-            <label className="etiquetaFormulario" htmlFor="nombreCliente">Nombre del cliente</label>
-            <Input id="nombreCliente" type="text" value={campos.nombreCliente} onChange={(e) => cambiarCampo('nombreCliente', e.target.value)} placeholder="Nombre completo" />
+            <label className="etiquetaFormulario" htmlFor="nombreCliente">Nombre</label>
+            <Input id="nombreCliente" type="text" value={campos.nombreCliente} onChange={(e) => cambiarCampo('nombreCliente', e.target.value)} placeholder="Nombre" />
           </div>
+          <div className="grupoFormulario">
+            <label className="etiquetaFormulario" htmlFor="apellidosCliente">Apellidos</label>
+            <Input id="apellidosCliente" type="text" value={campos.apellidosCliente} onChange={(e) => cambiarCampo('apellidosCliente', e.target.value)} placeholder="Apellidos" />
+          </div>
+        </div>
+
+        <div className="filaFormulario">
           <div className="grupoFormulario">
             <label className="etiquetaFormulario" htmlFor="numPersonas">Personas</label>
             <Input id="numPersonas" type="number" min="1" value={campos.numPersonas} onChange={(e) => cambiarCampo('numPersonas', e.target.value)} />
+          </div>
+          <div className="grupoFormulario">
+            <label className="etiquetaFormulario" htmlFor="numMesa">Nº Mesa</label>
+            <Input id="numMesa" type="number" min="1" value={campos.numMesa} onChange={(e) => cambiarCampo('numMesa', e.target.value)} placeholder="Opcional" />
           </div>
         </div>
 
@@ -58,6 +68,7 @@ function FormularioReserva({ onExito }: Props) {
             <Select id="estado" value={campos.estado} onChange={(e) => cambiarCampo('estado', e.target.value as EstadoReserva)}>
               <option value={EstadoReserva.pendiente}>Pendiente</option>
               <option value={EstadoReserva.confirmada}>Confirmada</option>
+              <option value={EstadoReserva.lista_espera}>Lista de espera</option>
               <option value={EstadoReserva.cancelada}>Cancelada</option>
             </Select>
           </div>

@@ -72,6 +72,16 @@
         "ordinal": 13,
         "name": "no_show",
         "type_info": "Bool"
+      },
+      {
+        "ordinal": 14,
+        "name": "num_mesa",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 15,
+        "name": "apellidos_cliente",
+        "type_info": "Varchar"
       }
     ],
     "parameters": {
@@ -93,6 +103,8 @@
       false,
       false,
       true,
+      true,
+      false,
       true,
       false
     ]

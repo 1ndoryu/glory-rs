@@ -1,9 +1,10 @@
-/* 253A-5: Repositorio de reservas */
+/* 253A-5: Repositorio de reservas
+   263A-6: Filtros turno/estado, num_mesa, apellidos_cliente, resumen mensual */
 
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::models::Reserva;
+use crate::models::{Reserva, ResumenDiario};
 
 /// Datos para crear una reserva
 pub struct NuevaReserva<'a> {
@@ -15,6 +16,8 @@ pub struct NuevaReserva<'a> {
     pub estado: &'a str,
     pub notas: &'a str,
     pub telefono: &'a str,
+    pub num_mesa: Option<i32>,
+    pub apellidos_cliente: &'a str,
 }
 
 /// Datos para actualizar parcialmente una reserva
@@ -28,6 +31,19 @@ pub struct ActualizarReservaData<'a> {
     pub estado: Option<&'a str>,
     pub notas: Option<&'a str>,
     pub telefono: Option<&'a str>,
+    pub num_mesa: Option<i32>,
+    pub apellidos_cliente: Option<&'a str>,
+}
+
+/// Filtros para listar reservas (263A-6)
+pub struct FiltrosReserva {
+    pub user_id: Uuid,
+    pub page: i64,
+    pub per_page: i64,
+    pub fecha: Option<chrono::NaiveDate>,
+    pub estado: Option<String>,
+    pub hora_desde: Option<chrono::NaiveTime>,
+    pub hora_hasta: Option<chrono::NaiveTime>,
 }
 
 pub struct ReservaRepository;
@@ -38,8 +54,8 @@ impl ReservaRepository {
         sqlx::query_as!(
             Reserva,
             "INSERT INTO reservas (id, user_id, fecha, hora, nombre_cliente, num_personas, \
-             estado, notas, telefono) \
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) \
+             estado, notas, telefono, num_mesa, apellidos_cliente) \
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) \
              RETURNING *",
             id,
             data.user_id,
@@ -49,7 +65,9 @@ impl ReservaRepository {
             data.num_personas,
             data.estado,
             data.notas,
-            data.telefono
+            data.telefono,
+            data.num_mesa,
+            data.apellidos_cliente
         )
         .fetch_one(pool)
         .await
@@ -72,31 +90,40 @@ impl ReservaRepository {
 
     pub async fn list(
         pool: &PgPool,
-        user_id: Uuid,
-        page: i64,
-        per_page: i64,
-        fecha: Option<chrono::NaiveDate>,
+        filtros: &FiltrosReserva,
     ) -> Result<(Vec<Reserva>, i64), sqlx::Error> {
-        let offset = (page - 1) * per_page;
+        let offset = (filtros.page - 1) * filtros.per_page;
 
         let items = sqlx::query_as!(
             Reserva,
             "SELECT * FROM reservas WHERE user_id = $1 \
              AND ($4::DATE IS NULL OR fecha = $4) \
+             AND ($5::VARCHAR IS NULL OR estado = $5) \
+             AND ($6::TIME IS NULL OR hora >= $6) \
+             AND ($7::TIME IS NULL OR hora < $7) \
              ORDER BY fecha ASC, hora ASC LIMIT $2 OFFSET $3",
-            user_id,
-            per_page,
+            filtros.user_id,
+            filtros.per_page,
             offset,
-            fecha
+            filtros.fecha,
+            filtros.estado,
+            filtros.hora_desde,
+            filtros.hora_hasta
         )
         .fetch_all(pool)
         .await?;
 
         let rec = sqlx::query!(
             "SELECT COUNT(*) as total FROM reservas WHERE user_id = $1 \
-             AND ($2::DATE IS NULL OR fecha = $2)",
-            user_id,
-            fecha
+             AND ($2::DATE IS NULL OR fecha = $2) \
+             AND ($3::VARCHAR IS NULL OR estado = $3) \
+             AND ($4::TIME IS NULL OR hora >= $4) \
+             AND ($5::TIME IS NULL OR hora < $5)",
+            filtros.user_id,
+            filtros.fecha,
+            filtros.estado,
+            filtros.hora_desde,
+            filtros.hora_hasta
         )
         .fetch_one(pool)
         .await?;
@@ -118,6 +145,8 @@ impl ReservaRepository {
              estado = COALESCE($7, estado), \
              notas = COALESCE($8, notas), \
              telefono = COALESCE($9, telefono), \
+             num_mesa = COALESCE($10, num_mesa), \
+             apellidos_cliente = COALESCE($11, apellidos_cliente), \
              updated_at = NOW() \
              WHERE id = $1 AND user_id = $2 \
              RETURNING *",
@@ -129,7 +158,9 @@ impl ReservaRepository {
             data.num_personas,
             data.estado,
             data.notas,
-            data.telefono
+            data.telefono,
+            data.num_mesa,
+            data.apellidos_cliente
         )
         .fetch_optional(pool)
         .await
@@ -168,5 +199,31 @@ impl ReservaRepository {
         .await?;
 
         Ok((rec_mes.total.unwrap_or(0), rec_hoy.total.unwrap_or(0)))
+    }
+
+    /// Resumen diario para un mes completo — vista calendario (263A-7)
+    pub async fn resumen_mensual(
+        pool: &PgPool,
+        user_id: Uuid,
+        anio: i32,
+        mes: i32,
+    ) -> Result<Vec<ResumenDiario>, sqlx::Error> {
+        sqlx::query_as!(
+            ResumenDiario,
+            "SELECT fecha, \
+             COUNT(*)::BIGINT as \"total_reservas!\", \
+             COALESCE(SUM(num_personas), 0)::BIGINT as \"total_personas!\" \
+             FROM reservas \
+             WHERE user_id = $1 \
+             AND fecha >= make_date($2, $3, 1) \
+             AND fecha < (make_date($2, $3, 1) + INTERVAL '1 month') \
+             AND estado NOT IN ('cancelada') \
+             GROUP BY fecha ORDER BY fecha",
+            user_id,
+            anio,
+            mes
+        )
+        .fetch_all(pool)
+        .await
     }
 }

@@ -97,8 +97,6 @@ Puedes ajustar los pendientes. Si puedes analizar todo el contenido y sacar el t
 
 ### Fase 1 — Core
 
-- Vista de reservas por día: filtrar por desayuno/comida/cena/día completo. Mostrar nº mesa, hora, nombre, apellidos, personas, estado, teléfono. Filtros por estado: confirmadas, pendientes, lista de espera.
-- Vista de reservas por mes: cuadrícula calendario, personas + mesas ocupadas por día, totales mensuales. Click en día → vista día.
 - No-shows: tracking de reservas no presentadas, ratio por día/mes (porcentaje), filtro por canal (WhatsApp, Instagram, teléfono).
 - Canales de reserva: definir canales por donde entran reservas (WhatsApp, Instagram, teléfono, web, etc.) para estadísticas.
 

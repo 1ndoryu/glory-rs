@@ -20,7 +20,7 @@ pub use gasto::{
 };
 pub use reserva::{
     ActualizarReservaRequest, CrearReservaRequest, EstadoReserva, Reserva, ReservasConteo,
-    ReservasPaginadas, ReservasQuery,
+    ReservasPaginadas, ReservasQuery, ResumenDiario, ResumenMesQuery,
 };
 pub use user::{AuthResponse, LoginRequest, RegisterRequest, User, UserResponse};
 pub use venta::{

@@ -1,4 +1,5 @@
-/* 253A-5: Handlers de reservas — CRUD + conteo para Home */
+/* 253A-5: Handlers de reservas — CRUD + conteo para Home
+   263A-6: Filtros turno/estado para vista día, resumen mensual para vista mes */
 
 use axum::extract::{Path, Query, State};
 use axum::http::StatusCode;
@@ -11,7 +12,7 @@ use crate::errors::AppError;
 use crate::middleware::AuthUser;
 use crate::models::{
     ActualizarReservaRequest, CrearReservaRequest, Reserva, ReservasConteo, ReservasPaginadas,
-    ReservasQuery,
+    ReservasQuery, ResumenDiario, ResumenMesQuery,
 };
 use crate::services::ReservaService;
 use crate::AppState;
@@ -82,6 +83,8 @@ pub async fn listar_reservas(
         params.page,
         params.per_page,
         params.fecha,
+        params.estado.as_deref(),
+        params.turno.as_deref(),
     )
     .await?;
     Ok(Json(reservas))
@@ -151,9 +154,32 @@ pub async fn conteo_reservas(
     Ok(Json(conteo))
 }
 
+/// Resumen diario de un mes — para la vista calendario
+#[utoipa::path(
+    get,
+    path = "/api/reservas/resumen-mes",
+    params(ResumenMesQuery),
+    responses(
+        (status = 200, description = "Resumen mensual", body = Vec<ResumenDiario>),
+        (status = 401, description = "No autorizado", body = ErrorResponse)
+    ),
+    security(("bearer_auth" = []))
+)]
+pub async fn resumen_mensual(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    Query(params): Query<ResumenMesQuery>,
+) -> Result<Json<Vec<ResumenDiario>>, AppError> {
+    let resumen =
+        ReservaService::resumen_mensual(&state.pool, auth.user_id, params.anio, params.mes)
+            .await?;
+    Ok(Json(resumen))
+}
+
 pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/reservas/conteo", get(conteo_reservas))
+        .route("/reservas/resumen-mes", get(resumen_mensual))
         .route("/reservas", post(crear_reserva).get(listar_reservas))
         .route(
             "/reservas/{id}",

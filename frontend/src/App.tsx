@@ -10,6 +10,7 @@ import Inicio from './componentes/Inicio';
 import ListaVentas from './componentes/ListaVentas';
 import ListaGastos from './componentes/ListaGastos';
 import ListaReservas from './componentes/ListaReservas';
+import CalendarioReservas from './componentes/CalendarioReservas';
 import ListaClientes from './componentes/ListaClientes';
 import './estilos/global.css';
 
@@ -35,6 +36,7 @@ function App() {
           <Route path="/ventas" element={<ListaVentas />} />
           <Route path="/gastos" element={<ListaGastos />} />
           <Route path="/reservas" element={<ListaReservas />} />
+          <Route path="/reservas/calendario" element={<CalendarioReservas />} />
           <Route path="/clientes" element={<ListaClientes />} />
         </Route>
 

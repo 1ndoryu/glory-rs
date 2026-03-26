@@ -1,13 +1,16 @@
-/* 253A-5: Servicio de reservas */
+/* 253A-5: Servicio de reservas
+   263A-6: Filtros turno/estado, num_mesa, apellidos_cliente, resumen mensual */
 
+use chrono::NaiveTime;
 use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::errors::AppError;
 use crate::models::{
     ActualizarReservaRequest, CrearReservaRequest, Reserva, ReservasConteo, ReservasPaginadas,
+    ResumenDiario,
 };
-use crate::repositories::reserva::{ActualizarReservaData, NuevaReserva};
+use crate::repositories::reserva::{ActualizarReservaData, FiltrosReserva, NuevaReserva};
 use crate::repositories::ReservaRepository;
 
 pub struct ReservaService;
@@ -37,6 +40,8 @@ impl ReservaService {
             estado: &estado,
             notas: req.notas.as_deref().unwrap_or(""),
             telefono: req.telefono.as_deref().unwrap_or(""),
+            num_mesa: req.num_mesa,
+            apellidos_cliente: req.apellidos_cliente.as_deref().unwrap_or(""),
         };
 
         let reserva = ReservaRepository::create(pool, &data).await?;
@@ -55,14 +60,48 @@ impl ReservaService {
         page: i64,
         per_page: i64,
         fecha: Option<chrono::NaiveDate>,
+        estado: Option<&str>,
+        turno: Option<&str>,
     ) -> Result<ReservasPaginadas, AppError> {
-        let (items, total) = ReservaRepository::list(pool, user_id, page, per_page, fecha).await?;
+        /* 263A-6: Mapear turno a rango horario */
+        let (hora_desde, hora_hasta) = Self::turno_a_horas(turno);
+
+        let filtros = FiltrosReserva {
+            user_id,
+            page,
+            per_page,
+            fecha,
+            estado: estado.map(String::from),
+            hora_desde,
+            hora_hasta,
+        };
+
+        let (items, total) = ReservaRepository::list(pool, &filtros).await?;
         Ok(ReservasPaginadas {
             items,
             total,
             page,
             per_page,
         })
+    }
+
+    /// Convierte un turno de reserva a un rango horario
+    fn turno_a_horas(turno: Option<&str>) -> (Option<NaiveTime>, Option<NaiveTime>) {
+        match turno {
+            Some("desayuno") => (
+                Some(NaiveTime::from_hms_opt(7, 0, 0).expect("hora válida")),
+                Some(NaiveTime::from_hms_opt(12, 0, 0).expect("hora válida")),
+            ),
+            Some("comida") => (
+                Some(NaiveTime::from_hms_opt(12, 0, 0).expect("hora válida")),
+                Some(NaiveTime::from_hms_opt(18, 0, 0).expect("hora válida")),
+            ),
+            Some("cena") => (
+                Some(NaiveTime::from_hms_opt(18, 0, 0).expect("hora válida")),
+                Some(NaiveTime::from_hms_opt(23, 59, 0).expect("hora válida")),
+            ),
+            _ => (None, None),
+        }
     }
 
     pub async fn update(
@@ -87,6 +126,8 @@ impl ReservaService {
             estado: estado_str.as_deref(),
             notas: req.notas.as_deref(),
             telefono: req.telefono.as_deref(),
+            num_mesa: req.num_mesa,
+            apellidos_cliente: req.apellidos_cliente.as_deref(),
         };
 
         ReservaRepository::update(pool, &data)
@@ -108,5 +149,16 @@ impl ReservaService {
             total_mes,
             total_hoy,
         })
+    }
+
+    /// Resumen diario de un mes — para la vista calendario (263A-7)
+    pub async fn resumen_mensual(
+        pool: &PgPool,
+        user_id: Uuid,
+        anio: i32,
+        mes: i32,
+    ) -> Result<Vec<ResumenDiario>, AppError> {
+        let datos = ReservaRepository::resumen_mensual(pool, user_id, anio, mes).await?;
+        Ok(datos)
     }
 }
