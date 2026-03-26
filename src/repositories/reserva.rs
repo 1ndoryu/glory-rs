@@ -1,10 +1,12 @@
 /* 253A-5: Repositorio de reservas
-   263A-6: Filtros turno/estado, num_mesa, apellidos_cliente, resumen mensual */
+   263A-6: Filtros turno/estado, num_mesa, apellidos_cliente, resumen mensual
+   263A-8: Estadísticas de no-shows por canal */
 
+use chrono::NaiveDate;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::models::{Reserva, ResumenDiario};
+use crate::models::{NoShowPorCanal, Reserva, ResumenDiario};
 
 /// Datos para crear una reserva
 pub struct NuevaReserva<'a> {
@@ -18,6 +20,7 @@ pub struct NuevaReserva<'a> {
     pub telefono: &'a str,
     pub num_mesa: Option<i32>,
     pub apellidos_cliente: &'a str,
+    pub canal_id: Option<Uuid>,
 }
 
 /// Datos para actualizar parcialmente una reserva
@@ -33,6 +36,7 @@ pub struct ActualizarReservaData<'a> {
     pub telefono: Option<&'a str>,
     pub num_mesa: Option<i32>,
     pub apellidos_cliente: Option<&'a str>,
+    pub canal_id: Option<Uuid>,
 }
 
 /// Filtros para listar reservas (263A-6)
@@ -54,8 +58,8 @@ impl ReservaRepository {
         sqlx::query_as!(
             Reserva,
             "INSERT INTO reservas (id, user_id, fecha, hora, nombre_cliente, num_personas, \
-             estado, notas, telefono, num_mesa, apellidos_cliente) \
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) \
+             estado, notas, telefono, num_mesa, apellidos_cliente, canal_id) \
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) \
              RETURNING *",
             id,
             data.user_id,
@@ -67,7 +71,8 @@ impl ReservaRepository {
             data.notas,
             data.telefono,
             data.num_mesa,
-            data.apellidos_cliente
+            data.apellidos_cliente,
+            data.canal_id
         )
         .fetch_one(pool)
         .await
@@ -147,6 +152,7 @@ impl ReservaRepository {
              telefono = COALESCE($9, telefono), \
              num_mesa = COALESCE($10, num_mesa), \
              apellidos_cliente = COALESCE($11, apellidos_cliente), \
+             canal_id = COALESCE($12, canal_id), \
              updated_at = NOW() \
              WHERE id = $1 AND user_id = $2 \
              RETURNING *",
@@ -160,7 +166,8 @@ impl ReservaRepository {
             data.notas,
             data.telefono,
             data.num_mesa,
-            data.apellidos_cliente
+            data.apellidos_cliente,
+            data.canal_id
         )
         .fetch_optional(pool)
         .await
@@ -222,6 +229,61 @@ impl ReservaRepository {
             user_id,
             anio,
             mes
+        )
+        .fetch_all(pool)
+        .await
+    }
+
+    /// Totales de no-show en un rango de fechas (263A-8)
+    pub async fn no_show_totales(
+        pool: &PgPool,
+        user_id: Uuid,
+        fecha_desde: Option<NaiveDate>,
+        fecha_hasta: Option<NaiveDate>,
+    ) -> Result<(i64, i64), sqlx::Error> {
+        let rec = sqlx::query!(
+            "SELECT \
+             COUNT(*) FILTER (WHERE estado != 'cancelada')::BIGINT as \"total!\", \
+             COUNT(*) FILTER (WHERE estado = 'no_show')::BIGINT as \"no_shows!\" \
+             FROM reservas WHERE user_id = $1 \
+             AND ($2::DATE IS NULL OR fecha >= $2) \
+             AND ($3::DATE IS NULL OR fecha <= $3)",
+            user_id,
+            fecha_desde,
+            fecha_hasta
+        )
+        .fetch_one(pool)
+        .await?;
+        Ok((rec.total, rec.no_shows))
+    }
+
+    /// No-shows desglosados por canal (263A-8)
+    pub async fn no_show_por_canal(
+        pool: &PgPool,
+        user_id: Uuid,
+        fecha_desde: Option<NaiveDate>,
+        fecha_hasta: Option<NaiveDate>,
+    ) -> Result<Vec<NoShowPorCanal>, sqlx::Error> {
+        sqlx::query_as!(
+            NoShowPorCanal,
+            "SELECT \
+             cr.nombre as canal_nombre, \
+             COUNT(*) FILTER (WHERE r.estado != 'cancelada')::BIGINT as \"total_reservas!\", \
+             COUNT(*) FILTER (WHERE r.estado = 'no_show')::BIGINT as \"no_shows!\", \
+             CASE WHEN COUNT(*) FILTER (WHERE r.estado != 'cancelada') > 0 \
+               THEN ROUND(COUNT(*) FILTER (WHERE r.estado = 'no_show')::NUMERIC * 100.0 \
+                    / COUNT(*) FILTER (WHERE r.estado != 'cancelada'), 1) \
+               ELSE 0 END::FLOAT8 as \"ratio_porcentaje!\" \
+             FROM reservas r \
+             LEFT JOIN canales_reserva cr ON cr.id = r.canal_id \
+             WHERE r.user_id = $1 \
+             AND ($2::DATE IS NULL OR r.fecha >= $2) \
+             AND ($3::DATE IS NULL OR r.fecha <= $3) \
+             GROUP BY cr.nombre \
+             ORDER BY \"no_shows!\" DESC",
+            user_id,
+            fecha_desde,
+            fecha_hasta
         )
         .fetch_all(pool)
         .await

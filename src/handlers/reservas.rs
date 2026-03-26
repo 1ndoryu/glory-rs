@@ -11,8 +11,8 @@ use validator::Validate;
 use crate::errors::AppError;
 use crate::middleware::AuthUser;
 use crate::models::{
-    ActualizarReservaRequest, CrearReservaRequest, Reserva, ReservasConteo, ReservasPaginadas,
-    ReservasQuery, ResumenDiario, ResumenMesQuery,
+    ActualizarReservaRequest, CrearReservaRequest, NoShowQuery, NoShowStats, Reserva,
+    ReservasConteo, ReservasPaginadas, ReservasQuery, ResumenDiario, ResumenMesQuery,
 };
 use crate::services::ReservaService;
 use crate::AppState;
@@ -21,6 +21,7 @@ use crate::AppState;
 #[utoipa::path(
     post,
     path = "/api/reservas",
+    tag = "Reservas",
     request_body = CrearReservaRequest,
     responses(
         (status = 201, description = "Reserva creada", body = Reserva),
@@ -44,6 +45,7 @@ pub async fn crear_reserva(
 #[utoipa::path(
     get,
     path = "/api/reservas/{id}",
+    tag = "Reservas",
     params(("id" = Uuid, Path, description = "ID de la reserva")),
     responses(
         (status = 200, description = "Reserva encontrada", body = Reserva),
@@ -65,6 +67,7 @@ pub async fn obtener_reserva(
 #[utoipa::path(
     get,
     path = "/api/reservas",
+    tag = "Reservas",
     params(ReservasQuery),
     responses(
         (status = 200, description = "Lista de reservas", body = ReservasPaginadas),
@@ -94,6 +97,7 @@ pub async fn listar_reservas(
 #[utoipa::path(
     put,
     path = "/api/reservas/{id}",
+    tag = "Reservas",
     params(("id" = Uuid, Path, description = "ID de la reserva")),
     request_body = ActualizarReservaRequest,
     responses(
@@ -119,6 +123,7 @@ pub async fn actualizar_reserva(
 #[utoipa::path(
     delete,
     path = "/api/reservas/{id}",
+    tag = "Reservas",
     params(("id" = Uuid, Path, description = "ID de la reserva")),
     responses(
         (status = 204, description = "Reserva eliminada"),
@@ -140,6 +145,7 @@ pub async fn eliminar_reserva(
 #[utoipa::path(
     get,
     path = "/api/reservas/conteo",
+    tag = "Reservas",
     responses(
         (status = 200, description = "Conteo de reservas", body = ReservasConteo),
         (status = 401, description = "No autorizado", body = ErrorResponse)
@@ -158,6 +164,7 @@ pub async fn conteo_reservas(
 #[utoipa::path(
     get,
     path = "/api/reservas/resumen-mes",
+    tag = "Reservas",
     params(ResumenMesQuery),
     responses(
         (status = 200, description = "Resumen mensual", body = Vec<ResumenDiario>),
@@ -176,10 +183,38 @@ pub async fn resumen_mensual(
     Ok(Json(resumen))
 }
 
+/// Estadísticas de no-shows con desglose por canal (263A-8)
+#[utoipa::path(
+    get,
+    path = "/api/reservas/no-shows",
+    tag = "Reservas",
+    params(NoShowQuery),
+    responses(
+        (status = 200, description = "Estadísticas de no-shows", body = NoShowStats),
+        (status = 401, description = "No autorizado", body = ErrorResponse)
+    ),
+    security(("bearer_auth" = []))
+)]
+pub async fn no_show_stats(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    Query(params): Query<NoShowQuery>,
+) -> Result<Json<NoShowStats>, AppError> {
+    let stats = ReservaService::no_show_stats(
+        &state.pool,
+        auth.user_id,
+        params.fecha_desde,
+        params.fecha_hasta,
+    )
+    .await?;
+    Ok(Json(stats))
+}
+
 pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/reservas/conteo", get(conteo_reservas))
         .route("/reservas/resumen-mes", get(resumen_mensual))
+        .route("/reservas/no-shows", get(no_show_stats))
         .route("/reservas", post(crear_reserva).get(listar_reservas))
         .route(
             "/reservas/{id}",

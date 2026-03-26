@@ -7,8 +7,8 @@ use uuid::Uuid;
 
 use crate::errors::AppError;
 use crate::models::{
-    ActualizarReservaRequest, CrearReservaRequest, Reserva, ReservasConteo, ReservasPaginadas,
-    ResumenDiario,
+    ActualizarReservaRequest, CrearReservaRequest, NoShowStats, Reserva, ReservasConteo,
+    ReservasPaginadas, ResumenDiario,
 };
 use crate::repositories::reserva::{ActualizarReservaData, FiltrosReserva, NuevaReserva};
 use crate::repositories::ReservaRepository;
@@ -42,6 +42,7 @@ impl ReservaService {
             telefono: req.telefono.as_deref().unwrap_or(""),
             num_mesa: req.num_mesa,
             apellidos_cliente: req.apellidos_cliente.as_deref().unwrap_or(""),
+            canal_id: req.canal_id,
         };
 
         let reserva = ReservaRepository::create(pool, &data).await?;
@@ -128,6 +129,7 @@ impl ReservaService {
             telefono: req.telefono.as_deref(),
             num_mesa: req.num_mesa,
             apellidos_cliente: req.apellidos_cliente.as_deref(),
+            canal_id: req.canal_id,
         };
 
         ReservaRepository::update(pool, &data)
@@ -160,5 +162,33 @@ impl ReservaService {
     ) -> Result<Vec<ResumenDiario>, AppError> {
         let datos = ReservaRepository::resumen_mensual(pool, user_id, anio, mes).await?;
         Ok(datos)
+    }
+
+    /// Estadísticas de no-shows con desglose por canal (263A-8)
+    pub async fn no_show_stats(
+        pool: &PgPool,
+        user_id: Uuid,
+        fecha_desde: Option<chrono::NaiveDate>,
+        fecha_hasta: Option<chrono::NaiveDate>,
+    ) -> Result<NoShowStats, AppError> {
+        let (total_reservas, total_no_shows) =
+            ReservaRepository::no_show_totales(pool, user_id, fecha_desde, fecha_hasta).await?;
+
+        let ratio_porcentaje = if total_reservas > 0 {
+            #[allow(clippy::cast_precision_loss)] // conteos de reservas nunca excederán 2^52
+            { (total_no_shows as f64 / total_reservas as f64) * 100.0 }
+        } else {
+            0.0
+        };
+
+        let por_canal =
+            ReservaRepository::no_show_por_canal(pool, user_id, fecha_desde, fecha_hasta).await?;
+
+        Ok(NoShowStats {
+            total_reservas,
+            total_no_shows,
+            ratio_porcentaje,
+            por_canal,
+        })
     }
 }

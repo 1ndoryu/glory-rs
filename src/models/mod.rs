@@ -1,4 +1,5 @@
 pub mod common;
+mod canal_reserva;
 mod cliente;
 mod dashboard;
 mod etiqueta;
@@ -7,6 +8,7 @@ mod reserva;
 mod user;
 mod venta;
 
+pub use canal_reserva::{CanalReserva, CrearCanalReservaRequest};
 pub use cliente::{
     ActualizarClienteRequest, Cliente, ClientesPaginados, ClientesQuery, CrearClienteRequest,
 };
@@ -19,8 +21,9 @@ pub use gasto::{
     CategoriaGasto, CrearGastoRequest, Gasto, GastosPaginados, GastosQuery, TipoDocumento,
 };
 pub use reserva::{
-    ActualizarReservaRequest, CrearReservaRequest, EstadoReserva, Reserva, ReservasConteo,
-    ReservasPaginadas, ReservasQuery, ResumenDiario, ResumenMesQuery,
+    ActualizarReservaRequest, CrearReservaRequest, EstadoReserva, NoShowPorCanal, NoShowQuery,
+    NoShowStats, Reserva, ReservasConteo, ReservasPaginadas, ReservasQuery, ResumenDiario,
+    ResumenMesQuery,
 };
 pub use user::{AuthResponse, LoginRequest, RegisterRequest, User, UserResponse};
 pub use venta::{

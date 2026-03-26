@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "INSERT INTO reservas (id, user_id, fecha, hora, nombre_cliente, num_personas, estado, notas, telefono, num_mesa, apellidos_cliente) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *",
+  "query": "UPDATE reservas SET fecha = COALESCE($3, fecha), hora = COALESCE($4, hora), nombre_cliente = COALESCE($5, nombre_cliente), num_personas = COALESCE($6, num_personas), estado = COALESCE($7, estado), notas = COALESCE($8, notas), telefono = COALESCE($9, telefono), num_mesa = COALESCE($10, num_mesa), apellidos_cliente = COALESCE($11, apellidos_cliente), canal_id = COALESCE($12, canal_id), updated_at = NOW() WHERE id = $1 AND user_id = $2 RETURNING *",
   "describe": {
     "columns": [
       {
@@ -96,7 +96,8 @@
         "Text",
         "Varchar",
         "Int4",
-        "Varchar"
+        "Varchar",
+        "Uuid"
       ]
     },
     "nullable": [
@@ -118,5 +119,5 @@
       false
     ]
   },
-  "hash": "1af7a69354ce8890c2a467bfbfc6a05223ac8e8b82c17b75137ab8e203e033c0"
+  "hash": "63cb2efcfbb084a024314690618599afbf26bf0a04e6479659bcd496d95171c7"
 }

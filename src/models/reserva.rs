@@ -70,6 +70,7 @@ pub struct CrearReservaRequest {
     pub num_mesa: Option<i32>,
     #[validate(length(max = 255))]
     pub apellidos_cliente: Option<String>,
+    pub canal_id: Option<Uuid>,
 }
 
 /// Request para actualizar una reserva
@@ -89,6 +90,7 @@ pub struct ActualizarReservaRequest {
     pub num_mesa: Option<i32>,
     #[validate(length(max = 255))]
     pub apellidos_cliente: Option<String>,
+    pub canal_id: Option<Uuid>,
 }
 
 /// Conteo de reservas para el Home — mes y día actual
@@ -139,4 +141,29 @@ fn default_page() -> i64 {
 }
 fn default_per_page() -> i64 {
     20
+}
+
+/// Estadísticas de no-shows — 263A-8
+#[derive(Debug, Serialize, ToSchema)]
+pub struct NoShowStats {
+    pub total_reservas: i64,
+    pub total_no_shows: i64,
+    pub ratio_porcentaje: f64,
+    pub por_canal: Vec<NoShowPorCanal>,
+}
+
+/// No-shows desglosados por canal
+#[derive(Debug, Serialize, FromRow, ToSchema)]
+pub struct NoShowPorCanal {
+    pub canal_nombre: Option<String>,
+    pub total_reservas: i64,
+    pub no_shows: i64,
+    pub ratio_porcentaje: f64,
+}
+
+/// Query para estadísticas de no-show
+#[derive(Debug, Deserialize, IntoParams)]
+pub struct NoShowQuery {
+    pub fecha_desde: Option<NaiveDate>,
+    pub fecha_hasta: Option<NaiveDate>,
 }

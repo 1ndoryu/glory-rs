@@ -1,6 +1,7 @@
 #![allow(clippy::needless_for_each)] // Generado por utoipa OpenApi derive
 
 mod auth;
+mod canales_reserva;
 mod clientes;
 mod dashboard;
 mod etiquetas;
@@ -60,6 +61,7 @@ impl utoipa::Modify for SecurityAddon {
         reservas::eliminar_reserva,
         reservas::conteo_reservas,
         reservas::resumen_mensual,
+        reservas::no_show_stats,
         clientes::crear_cliente,
         clientes::obtener_cliente,
         clientes::listar_clientes,
@@ -76,6 +78,9 @@ impl utoipa::Modify for SecurityAddon {
         etiquetas::asignar_etiqueta_reserva,
         etiquetas::desasignar_etiqueta_reserva,
         etiquetas::obtener_etiquetas_reserva,
+        canales_reserva::listar_canales,
+        canales_reserva::crear_canal,
+        canales_reserva::eliminar_canal,
         dashboard::resumen,
     ),
     components(schemas(
@@ -96,6 +101,10 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::ReservasPaginadas,
         crate::models::ReservasConteo,
         crate::models::ResumenDiario,
+        crate::models::NoShowStats,
+        crate::models::NoShowPorCanal,
+        crate::models::CanalReserva,
+        crate::models::CrearCanalReservaRequest,
         crate::models::Cliente,
         crate::models::CrearClienteRequest,
         crate::models::ActualizarClienteRequest,
@@ -154,5 +163,6 @@ fn api_routes() -> Router<AppState> {
         .merge(reservas::routes())
         .merge(clientes::routes())
         .merge(etiquetas::routes())
+        .merge(canales_reserva::routes())
         .merge(dashboard::routes())
 }
