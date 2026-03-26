@@ -803,6 +803,23 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface MergeClientesRequest {
+  /** ID del cliente que sobrevive */
+  destino_id: string;
+  /** ID del cliente que se absorbe (se eliminar├í) */
+  origen_id: string;
+}
+
+/**
+ * Resultado de la operaci├│n de merge
+ */
+export interface MergeClientesResponse {
+  campanas_migradas: number;
+  cliente: Cliente;
+  etiquetas_migradas: number;
+  reservas_migradas: number;
+}
+
 export interface MesaExport {
   activa: boolean;
   alto: number;

@@ -195,4 +195,118 @@ impl ClienteRepository {
         .await?;
         Ok(result.rows_affected() > 0)
     }
+
+    /* [263A-26] Merge atómico de dos clientes en una sola transacción.
+     * 1. Migra reservas, etiquetas y campañas del origen → destino.
+     * 2. Rellena campos vacíos del destino con los del origen.
+     * 3. Elimina el cliente origen.
+     * Retorna (cliente_destino_actualizado, reservas_migradas, etiquetas_migradas, campanas_migradas). */
+    pub async fn merge(
+        pool: &PgPool,
+        origen_id: Uuid,
+        destino_id: Uuid,
+        user_id: Uuid,
+    ) -> Result<(Cliente, i64, i64, i64), sqlx::Error> {
+        let mut tx = pool.begin().await?;
+
+        /* 1. Migrar reservas: origen → destino */
+        let reservas = sqlx::query!(
+            "UPDATE reservas SET cliente_id = $1 WHERE cliente_id = $2 AND user_id = $3",
+            destino_id,
+            origen_id,
+            user_id
+        )
+        .execute(&mut *tx)
+        .await?;
+
+        /* 2. Migrar etiquetas: ON CONFLICT ignora duplicados (misma etiqueta ya asignada al destino) */
+        let etiquetas = sqlx::query!(
+            "UPDATE clientes_etiquetas SET cliente_id = $1 \
+             WHERE cliente_id = $2 \
+             AND etiqueta_id NOT IN (SELECT etiqueta_id FROM clientes_etiquetas WHERE cliente_id = $1)",
+            destino_id,
+            origen_id
+        )
+        .execute(&mut *tx)
+        .await?;
+
+        /* Limpiar etiquetas duplicadas que NO se migraron */
+        sqlx::query!(
+            "DELETE FROM clientes_etiquetas WHERE cliente_id = $1",
+            origen_id
+        )
+        .execute(&mut *tx)
+        .await?;
+
+        /* 3. Migrar destinatarios de campañas: evitar duplicados (misma campaña+destino) */
+        let campanas = sqlx::query!(
+            "UPDATE campana_destinatarios SET cliente_id = $1 \
+             WHERE cliente_id = $2 \
+             AND campana_id NOT IN (SELECT campana_id FROM campana_destinatarios WHERE cliente_id = $1)",
+            destino_id,
+            origen_id
+        )
+        .execute(&mut *tx)
+        .await?;
+
+        /* Limpiar destinatarios duplicados que NO se migraron */
+        sqlx::query!(
+            "DELETE FROM campana_destinatarios WHERE cliente_id = $1",
+            origen_id
+        )
+        .execute(&mut *tx)
+        .await?;
+
+        /* 4. Combinar campos: si el destino tiene campo vacío, rellenar con el del origen.
+         * Para booleanos, usar OR (si alguno tiene consentimiento, mantenerlo). */
+        let cliente = sqlx::query_as!(
+            Cliente,
+            "WITH origen AS (SELECT * FROM clientes WHERE id = $2 AND user_id = $3) \
+             UPDATE clientes SET \
+               apellidos = CASE WHEN clientes.apellidos = '' THEN (SELECT apellidos FROM origen) ELSE clientes.apellidos END, \
+               telefono = CASE WHEN clientes.telefono = '' THEN (SELECT telefono FROM origen) ELSE clientes.telefono END, \
+               prefijo_telefono = CASE WHEN clientes.prefijo_telefono = '+34' AND (SELECT prefijo_telefono FROM origen) <> '+34' \
+                 THEN (SELECT prefijo_telefono FROM origen) ELSE clientes.prefijo_telefono END, \
+               email = CASE WHEN clientes.email = '' THEN (SELECT email FROM origen) ELSE clientes.email END, \
+               empresa = CASE WHEN clientes.empresa = '' THEN (SELECT empresa FROM origen) ELSE clientes.empresa END, \
+               notas = CASE WHEN clientes.notas = '' THEN (SELECT notas FROM origen) \
+                 WHEN (SELECT notas FROM origen) <> '' THEN clientes.notas || E'\\n---\\n' || (SELECT notas FROM origen) \
+                 ELSE clientes.notas END, \
+               foto_url = CASE WHEN clientes.foto_url = '' THEN (SELECT foto_url FROM origen) ELSE clientes.foto_url END, \
+               consentimiento_comercial_email = clientes.consentimiento_comercial_email OR (SELECT consentimiento_comercial_email FROM origen), \
+               consentimiento_comercial_sms = clientes.consentimiento_comercial_sms OR (SELECT consentimiento_comercial_sms FROM origen), \
+               enviar_encuestas = clientes.enviar_encuestas OR (SELECT enviar_encuestas FROM origen), \
+               alergias = CASE WHEN clientes.alergias = '' THEN (SELECT alergias FROM origen) \
+                 WHEN (SELECT alergias FROM origen) <> '' THEN clientes.alergias || ', ' || (SELECT alergias FROM origen) \
+                 ELSE clientes.alergias END, \
+               preferencias_bebida = CASE WHEN clientes.preferencias_bebida = '' THEN (SELECT preferencias_bebida FROM origen) ELSE clientes.preferencias_bebida END, \
+               preferencias_ubicacion = CASE WHEN clientes.preferencias_ubicacion = '' THEN (SELECT preferencias_ubicacion FROM origen) ELSE clientes.preferencias_ubicacion END, \
+               updated_at = NOW() \
+             WHERE clientes.id = $1 AND clientes.user_id = $3 \
+             RETURNING clientes.*",
+            destino_id,
+            origen_id,
+            user_id
+        )
+        .fetch_one(&mut *tx)
+        .await?;
+
+        /* 5. Eliminar cliente origen */
+        sqlx::query!(
+            "DELETE FROM clientes WHERE id = $1 AND user_id = $2",
+            origen_id,
+            user_id
+        )
+        .execute(&mut *tx)
+        .await?;
+
+        tx.commit().await?;
+
+        Ok((
+            cliente,
+            reservas.rows_affected().cast_signed(),
+            etiquetas.rows_affected().cast_signed(),
+            campanas.rows_affected().cast_signed(),
+        ))
+    }
 }

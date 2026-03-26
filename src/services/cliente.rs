@@ -6,7 +6,7 @@ use uuid::Uuid;
 use crate::errors::AppError;
 use crate::models::{
     ActualizarClienteRequest, ClientesPaginados, ClientesQuery, CrearClienteRequest,
-    Cliente,
+    Cliente, MergeClientesRequest, MergeClientesResponse,
 };
 use crate::repositories::cliente::{ActualizarClienteData, NuevoCliente};
 use crate::repositories::ClienteRepository;
@@ -100,5 +100,38 @@ impl ClienteService {
             return Err(AppError::NotFound("Cliente no encontrado".into()));
         }
         Ok(())
+    }
+
+    /* [263A-26] Merge: absorbe origen en destino.
+     * Valida que ambos existan y sean distintos antes de delegar al repo. */
+    pub async fn merge(
+        pool: &PgPool,
+        user_id: Uuid,
+        req: MergeClientesRequest,
+    ) -> Result<MergeClientesResponse, AppError> {
+        if req.origen_id == req.destino_id {
+            return Err(AppError::Validation(
+                "El cliente origen y destino no pueden ser el mismo".into(),
+            ));
+        }
+
+        /* Verificar que ambos existen antes de intentar merge */
+        ClienteRepository::find_by_id(pool, req.origen_id, user_id)
+            .await?
+            .ok_or_else(|| AppError::NotFound("Cliente origen no encontrado".into()))?;
+
+        ClienteRepository::find_by_id(pool, req.destino_id, user_id)
+            .await?
+            .ok_or_else(|| AppError::NotFound("Cliente destino no encontrado".into()))?;
+
+        let (cliente, reservas_migradas, etiquetas_migradas, campanas_migradas) =
+            ClienteRepository::merge(pool, req.origen_id, req.destino_id, user_id).await?;
+
+        Ok(MergeClientesResponse {
+            cliente,
+            reservas_migradas,
+            etiquetas_migradas,
+            campanas_migradas,
+        })
     }
 }

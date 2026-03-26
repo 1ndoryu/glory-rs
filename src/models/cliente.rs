@@ -112,3 +112,23 @@ fn default_page() -> i64 {
 fn default_per_page() -> i64 {
     20
 }
+
+/* [263A-26] Request para merge de clientes duplicados.
+ * origen_id = cliente que se absorbe (se elimina al final).
+ * destino_id = cliente que sobrevive y hereda relaciones + campos vacíos. */
+#[derive(Debug, Deserialize, Validate, ToSchema)]
+pub struct MergeClientesRequest {
+    /// ID del cliente que se absorbe (se eliminará)
+    pub origen_id: Uuid,
+    /// ID del cliente que sobrevive
+    pub destino_id: Uuid,
+}
+
+/// Resultado de la operación de merge
+#[derive(Debug, Serialize, ToSchema)]
+pub struct MergeClientesResponse {
+    pub cliente: Cliente,
+    pub reservas_migradas: i64,
+    pub etiquetas_migradas: i64,
+    pub campanas_migradas: i64,
+}

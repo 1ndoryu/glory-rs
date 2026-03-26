@@ -11,6 +11,7 @@ use crate::errors::AppError;
 use crate::middleware::AuthUser;
 use crate::models::{
     ActualizarClienteRequest, Cliente, ClientesPaginados, ClientesQuery, CrearClienteRequest,
+    MergeClientesRequest, MergeClientesResponse,
 };
 use crate::services::ClienteService;
 use crate::AppState;
@@ -133,10 +134,40 @@ pub async fn eliminar_cliente(
 pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/clientes", post(crear_cliente).get(listar_clientes))
+        .route("/clientes/merge", post(merge_clientes))
         .route(
             "/clientes/:id",
             get(obtener_cliente)
                 .put(actualizar_cliente)
                 .delete(eliminar_cliente),
         )
+}
+
+/* [263A-26] Merge de dos clientes duplicados.
+ * Absorbe origen en destino: migra reservas, etiquetas, campañas,
+ * rellena campos vacíos y elimina el origen. Operación atómica en transacción. */
+/// Fusionar dos clientes duplicados
+#[utoipa::path(
+    post,
+    path = "/api/clientes/merge",
+    tag = "Clientes",
+    request_body = MergeClientesRequest,
+    responses(
+        (status = 200, description = "Clientes fusionados", body = MergeClientesResponse),
+        (status = 401, description = "No autorizado", body = ErrorResponse),
+        (status = 404, description = "Cliente no encontrado", body = ErrorResponse),
+        (status = 422, description = "Error de validación", body = ErrorResponse)
+    ),
+    security(("bearer_auth" = []))
+)]
+pub async fn merge_clientes(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    Json(req): Json<MergeClientesRequest>,
+) -> Result<Json<MergeClientesResponse>, AppError> {
+    req.validate()
+        .map_err(|e| AppError::Validation(e.to_string()))?;
+
+    let resp = ClienteService::merge(&state.pool, auth.user_id, req).await?;
+    Ok(Json(resp))
 }

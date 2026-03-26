@@ -30,7 +30,9 @@ import type {
   ClientesPaginados,
   CrearClienteRequest,
   ErrorResponse,
-  ListarClientesParams
+  ListarClientesParams,
+  MergeClientesRequest,
+  MergeClientesResponse
 } from '../gestiNRestauranteAPI.schemas';
 
 import { customInstance } from '../../axios-instance';
@@ -257,6 +259,105 @@ export const useCrearCliente = <TError = ErrorResponse,
         TContext
       > => {
       return useMutation(getCrearClienteMutationOptions(options), queryClient);
+    }
+    /**
+ * @summary Fusionar dos clientes duplicados
+ */
+export type mergeClientesResponse200 = {
+  data: MergeClientesResponse
+  status: 200
+}
+
+export type mergeClientesResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type mergeClientesResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type mergeClientesResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type mergeClientesResponseSuccess = (mergeClientesResponse200) & {
+  headers: Headers;
+};
+export type mergeClientesResponseError = (mergeClientesResponse401 | mergeClientesResponse404 | mergeClientesResponse422) & {
+  headers: Headers;
+};
+
+export type mergeClientesResponse = (mergeClientesResponseSuccess | mergeClientesResponseError)
+
+export const getMergeClientesUrl = () => {
+
+
+
+
+  return `/api/clientes/merge`
+}
+
+export const mergeClientes = async (mergeClientesRequest: MergeClientesRequest, options?: RequestInit): Promise<mergeClientesResponse> => {
+
+  return customInstance<mergeClientesResponse>(getMergeClientesUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      mergeClientesRequest,)
+  }
+);}
+
+
+
+
+export const getMergeClientesMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof mergeClientes>>, TError,{data: MergeClientesRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof mergeClientes>>, TError,{data: MergeClientesRequest}, TContext> => {
+
+const mutationKey = ['mergeClientes'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof mergeClientes>>, {data: MergeClientesRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  mergeClientes(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type MergeClientesMutationResult = NonNullable<Awaited<ReturnType<typeof mergeClientes>>>
+    export type MergeClientesMutationBody = MergeClientesRequest
+    export type MergeClientesMutationError = ErrorResponse
+
+    /**
+ * @summary Fusionar dos clientes duplicados
+ */
+export const useMergeClientes = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof mergeClientes>>, TError,{data: MergeClientesRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof mergeClientes>>,
+        TError,
+        {data: MergeClientesRequest},
+        TContext
+      > => {
+      return useMutation(getMergeClientesMutationOptions(options), queryClient);
     }
     /**
  * @summary Obtener un cliente por ID

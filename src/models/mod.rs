@@ -21,6 +21,7 @@ pub use campana::{
 pub use canal_reserva::{CanalReserva, CrearCanalReservaRequest};
 pub use cliente::{
     ActualizarClienteRequest, Cliente, ClientesPaginados, ClientesQuery, CrearClienteRequest,
+    MergeClientesRequest, MergeClientesResponse,
 };
 pub use configuracion::{ActualizarConfiguracionRequest, ConfiguracionRestaurante};
 pub use dashboard::ResumenEconomico;
