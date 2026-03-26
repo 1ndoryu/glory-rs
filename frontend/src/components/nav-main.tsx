@@ -35,7 +35,7 @@ export function NavMain({
             >
               <Link to="/ventas?nueva=1">
                 <CirclePlusIcon />
-                <span>Nueva Venta</span>
+                <span>Venta</span>
               </Link>
             </SidebarMenuButton>
             <SidebarMenuButton
@@ -45,7 +45,7 @@ export function NavMain({
             >
               <Link to="/gastos?nuevo=1">
                 <ReceiptIcon />
-                <span>Nuevo Gasto</span>
+                <span>Gasto</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
