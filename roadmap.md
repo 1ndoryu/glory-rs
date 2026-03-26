@@ -175,7 +175,7 @@ Puedes ajustar los pendientes. Si puedes analizar todo el contenido y sacar el t
 
 ~~11. Implementar Módulo de Marketing — Fase 4a (campañas manuales: backend + frontend)~~ → 263A-23
 
-12. Implementar Módulo de Marketing — Fase 4b (plantillas WhatsApp / Meta Business API)
+~~12. Implementar Módulo de Marketing — Fase 4b (plantillas WhatsApp / Meta Business API)~~ → 263A-24
 
 13. Implementar Módulo de Marketing — Fase 4c (recordatorios automáticos de reservas)
 
