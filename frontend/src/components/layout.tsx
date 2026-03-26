@@ -19,7 +19,7 @@ export default function Layout() {
       <AppSidebar />
       <SidebarInset>
         <SiteHeader />
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+        <div className="flex flex-1 flex-col gap-4 p-4">
           <Outlet />
         </div>
       </SidebarInset>
