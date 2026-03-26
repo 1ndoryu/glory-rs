@@ -1,8 +1,9 @@
 ﻿# [253A-12] Script de auto-verificacion de cumplimiento del protocolo v5.0.
 # [253A-15] Anadida regla 18 (proactividad).
+# [263A-18] Unificado con npm run verify — ejecuta validacion automatica antes del checklist.
 # Se ejecuta como ultimo paso antes de cerrar una tarea.
-# Imprime un checklist de todas las reglas y el agente debe confirmar cada una.
-# Las reglas marcadas [CONDICIONAL] solo aplican si la tarea toco ese dominio.
+# Fase 1: ejecuta npm run verify (cargo check + clippy + test + type-check).
+# Fase 2: imprime checklist de reglas para confirmacion del agente.
 
 param(
     [string]$TareaId = ""
@@ -49,7 +50,55 @@ if ($TareaId) {
 Write-Host $sep -ForegroundColor Cyan
 Write-Host ""
 
-Write-Host "--- REGLAS ABSOLUTAS ---" -ForegroundColor Green
+# --- Fase 1: Validacion automatica ---
+Write-Host "--- FASE 1: VALIDACION AUTOMATICA (npm run verify) ---" -ForegroundColor Magenta
+Write-Host ""
+
+$verifyExitCode = 0
+
+# Detectar stack del proyecto: si existe Cargo.toml, ejecutar cargo checks
+if (Test-Path "Cargo.toml") {
+    Write-Host "  [Rust] cargo check..." -ForegroundColor Cyan
+    cargo check 2>&1 | Out-Null
+    if ($LASTEXITCODE -ne 0) { Write-Host "    FALLO cargo check" -ForegroundColor Red; $verifyExitCode = 1 }
+    else { Write-Host "    OK" -ForegroundColor Green }
+
+    Write-Host "  [Rust] cargo clippy -- -D warnings..." -ForegroundColor Cyan
+    cargo clippy -- -D warnings 2>&1 | Out-Null
+    if ($LASTEXITCODE -ne 0) { Write-Host "    FALLO cargo clippy" -ForegroundColor Red; $verifyExitCode = 1 }
+    else { Write-Host "    OK" -ForegroundColor Green }
+
+    Write-Host "  [Rust] cargo test..." -ForegroundColor Cyan
+    cargo test 2>&1 | Out-Null
+    if ($LASTEXITCODE -ne 0) { Write-Host "    FALLO cargo test" -ForegroundColor Red; $verifyExitCode = 1 }
+    else { Write-Host "    OK" -ForegroundColor Green }
+}
+
+# Detectar frontend: si existe frontend/package.json, ejecutar type-check
+if (Test-Path "frontend/package.json") {
+    Write-Host "  [Frontend] npx tsc --noEmit..." -ForegroundColor Cyan
+    Push-Location frontend
+    npx tsc --noEmit 2>&1 | Out-Null
+    if ($LASTEXITCODE -ne 0) { Write-Host "    FALLO type-check" -ForegroundColor Red; $verifyExitCode = 1 }
+    else { Write-Host "    OK" -ForegroundColor Green }
+    Pop-Location
+}
+
+# Detectar PHP: si existe wp-content o composer.json
+if ((Test-Path "composer.json") -or (Test-Path "style.css")) {
+    Write-Host "  [PHP] Stack PHP detectado — validacion manual requerida" -ForegroundColor Yellow
+}
+
+Write-Host ""
+if ($verifyExitCode -ne 0) {
+    Write-Host "  RESULTADO: HAY ERRORES — corregir antes de continuar" -ForegroundColor Red
+} else {
+    Write-Host "  RESULTADO: Todo OK" -ForegroundColor Green
+}
+Write-Host ""
+
+# --- Fase 2: Checklist manual ---
+Write-Host "--- FASE 2: CHECKLIST DE REGLAS ---" -ForegroundColor Green
 foreach ($r in $reglas) {
     if ($r.cond) {
         $tag = "[CONDICIONAL]"

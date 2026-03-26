@@ -70,6 +70,7 @@ Sin este anuncio, no se inicia ninguna tarea. Esta regla existe para que el agen
   - CSS: nombres en espanol y `camelCase` (`.contenedorPrincipal`). Todo en archivos `.css` separados. Prohibido CSS inline. Variables obligatorias para colores/espaciados/tipografia.
   - Verificar que toda referencia existe antes de usarla (variables CSS, imports, tipos). Si lo creas, conectalo.
   - UI atomica: todo elemento reutilizable es su propio componente. Zustand para estado global.
+  - Codegen API (Orval): siempre usar modo `tags-split` para que cada tag OpenAPI genere su propio archivo. Prohibido tener un unico `generated.ts` monolitico — si se detecta, dividirlo inmediatamente.
 
 **10. Comentarios = memoria del proyecto.**
   - Formato: bloques `/* ... */` explicando el "por que". Prohibido barras decorativas (`====`).
@@ -79,10 +80,11 @@ Sin este anuncio, no se inicia ninguna tarea. Esta regla existe para que el agen
 
 **11. Validacion obligatoria — errores ajenos incluidos.**
   - Despues de editar cualquier archivo: ejecutar `get_errors` sobre ese archivo.
-  - Despues de editar `.ts`/`.tsx`: ejecutar `npm run type-check`.
+  - Despues de editar `.ts`/`.tsx`: ejecutar `npx tsc --noEmit` (en la carpeta frontend si aplica).
+  - Despues de editar `.rs`: ejecutar `cargo check` + `cargo clippy -- -D warnings`.
   - Despues de editar `.css`: ejecutar VarSense (`cssVarsValidator.scanAllDiagnostics`).
   - Generacion masiva (>3 archivos): ejecutar Code Sentinel (`codeSentinel.analyzeWorkspace`).
-  - Antes de cada commit: `npm run type-check` como minimo.
+  - Antes de cada commit: ejecutar validaciones del stack correspondiente (ver seccion V).
   - **Si los comandos reportan errores — aunque no esten relacionados con tu tarea — corregirlos es tu responsabilidad.** No se avanza ni se commitea con errores pendientes. Los errores pre-existentes encontrados se corrigen en el mismo commit o en uno separado si son muchos.
 
 **12. Commits.**
@@ -283,14 +285,22 @@ Completada (movida a Agente/completados/tareas-YYYY-MM-DD.md):
 
 ## V. COMANDOS DE REVISION
 
+### Deteccion automatica de stack
+Los comandos de validacion dependen del stack del proyecto. El script `npm run self-check` (o `scripts/self-check.ps1`) detecta automaticamente que validaciones ejecutar:
+- **Rust** (si existe `Cargo.toml`): `cargo check`, `cargo clippy -- -D warnings`, `cargo test`
+- **Frontend** (si existe `frontend/package.json`): `npx tsc --noEmit`
+- **PHP** (si existe `composer.json` o `style.css`): validacion manual
+- **Node** (si existe `package.json` en raiz sin Cargo.toml): `npm test`, `npm run lint`
+
 ### Validacion de codigo
 | Cuando | Comando |
 |--------|---------|
 | Editar `.rs` | `cargo check && cargo clippy` + `get_errors` |
-| Editar `.ts`/`.tsx` | `npm run type-check` + `get_errors` |
+| Editar `.ts`/`.tsx` | `npx tsc --noEmit` (en carpeta frontend) + `get_errors` |
+| Editar `.php` | `get_errors` + revision manual |
 | Editar `.css` | VarSense: `cssVarsValidator.scanAllDiagnostics` (si disponible) |
 | Generacion masiva | Code Sentinel: `codeSentinel.analyzeWorkspace` |
-| Antes de commit | `npm run verify` (cargo check + clippy + test + type-check + Sentinel) |
+| Antes de commit | `npm run self-check -- -TareaId {ID}` (ejecuta verify automatico + checklist reglas) |
 | Lint + types integrado | `codeSentinel.runExternalTools` |
 
 ### Deploy (solo si el roadmap indica que aplica)
