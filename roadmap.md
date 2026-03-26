@@ -211,3 +211,5 @@ DELETE http://localhost:3000/api/ventas/de507550-2c03-4a42-8717-d6a547058825 405
 
 24. ~~Me parece que tailwind no esta funcionando, pues todo se ve muy diferente a como es shadcn en en realidad.~~ → 263A-16
 
+~~25. Cambia el preset de shadcn a --preset b0, cambiar de white a dark mode no funciona, revisa si tailwind esta funcionando correctamente~~ → 263A-25
+
