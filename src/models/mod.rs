@@ -41,6 +41,7 @@ pub use venta::{
 pub use plano_sala::{
     ActualizarMesaRequest, ActualizarPosicionesRequest, ActualizarZonaRequest,
     CombinacionConMesas, CombinacionExport, CombinacionMesas, CrearCombinacionRequest,
-    CrearMesaRequest, CrearZonaRequest, Mesa, MesaExport, PlanoExport, PlanoSala,
-    PosicionMesa, ZonaConMesas, ZonaExport, ZonaSala,
+    CrearMesaRequest, CrearZonaRequest, Mesa, MesaExport, MesaOcupacion, PlanoExport,
+    PlanoOcupacion, PlanoOcupacionQuery, PlanoSala, PosicionMesa, ReservaMesa, ZonaConMesas,
+    ZonaExport, ZonaOcupacion, ZonaSala,
 };

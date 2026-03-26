@@ -1,7 +1,7 @@
 /* [263A-14] Handlers del plano de sala — CRUD zonas/mesas/combinaciones + export/import.
  * Tag OpenAPI: "PlanoSala" */
 
-use axum::extract::{Path, State};
+use axum::extract::{Path, Query, State};
 use axum::http::StatusCode;
 use axum::routing::{delete, get, patch, post};
 use axum::{Json, Router};
@@ -13,7 +13,7 @@ use crate::middleware::AuthUser;
 use crate::models::{
     ActualizarMesaRequest, ActualizarPosicionesRequest, ActualizarZonaRequest,
     CombinacionMesas, CrearCombinacionRequest, CrearMesaRequest, CrearZonaRequest,
-    Mesa, PlanoExport, PlanoSala, ZonaSala,
+    Mesa, PlanoExport, PlanoOcupacion, PlanoOcupacionQuery, PlanoSala, ZonaSala,
 };
 use crate::services::PlanoSalaService;
 use crate::AppState;
@@ -296,11 +296,66 @@ pub async fn importar_plano(
     Ok(Json(plano))
 }
 
+/* ========== Ocupación (263A-16) ========== */
+
+/// Turno a rango horario (reutilizado de reservas handler)
+fn turno_a_rango(turno: &str) -> (Option<chrono::NaiveTime>, Option<chrono::NaiveTime>) {
+    use chrono::NaiveTime;
+    match turno {
+        "desayuno" => (
+            Some(NaiveTime::from_hms_opt(7, 0, 0).unwrap()),
+            Some(NaiveTime::from_hms_opt(12, 0, 0).unwrap()),
+        ),
+        "comida" => (
+            Some(NaiveTime::from_hms_opt(12, 0, 0).unwrap()),
+            Some(NaiveTime::from_hms_opt(18, 0, 0).unwrap()),
+        ),
+        "cena" => (
+            Some(NaiveTime::from_hms_opt(18, 0, 0).unwrap()),
+            Some(NaiveTime::from_hms_opt(23, 59, 59).unwrap()),
+        ),
+        _ => (None, None),
+    }
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/plano-sala/ocupacion",
+    tag = "PlanoSala",
+    params(PlanoOcupacionQuery),
+    responses(
+        (status = 200, description = "Plano con ocupación de mesas", body = PlanoOcupacion),
+        (status = 401, description = "No autorizado", body = ErrorResponse)
+    ),
+    security(("bearer_auth" = []))
+)]
+pub async fn obtener_ocupacion(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    Query(query): Query<PlanoOcupacionQuery>,
+) -> Result<Json<PlanoOcupacion>, AppError> {
+    let (hora_desde, hora_hasta) = query
+        .turno
+        .as_deref()
+        .map_or((None, None), turno_a_rango);
+
+    let plano = PlanoSalaService::plano_ocupacion(
+        &state.pool,
+        auth.user_id,
+        query.fecha,
+        hora_desde,
+        hora_hasta,
+    )
+    .await?;
+    Ok(Json(plano))
+}
+
 /* ========== Router ========== */
 
 pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/plano-sala", get(obtener_plano))
+        .route("/plano-sala/ocupacion", get(obtener_ocupacion))
         .route("/plano-sala/zonas", post(crear_zona))
         .route(
             "/plano-sala/zonas/{id}",

@@ -1,9 +1,11 @@
 /* 253A-7: Lista paginada de reservas
    263A-6: Vista de reservas por día con filtros turno/estado/fecha.
+   263A-16: Integración plano de ocupación en vista día.
    Muestra: nº mesa, hora, nombre, apellidos, personas, estado, teléfono. */
 
 import { Boton, Modal, Input, Select } from '@glory/componentes/ui';
 import FormularioReserva from './FormularioReserva';
+import PlanoOcupacion from './PlanoOcupacion';
 import useVistaReservas from '../hooks/useVistaReservas';
 import '../estilos/Formularios.css';
 
@@ -134,6 +136,9 @@ function ListaReservas() {
           <p className="sinDatos">No hay reservas para esta fecha</p>
         )}
       </div>
+
+      {/* [263A-16] Plano de ocupación visual — muestra mesas coloreadas */}
+      <PlanoOcupacion fecha={filtros.fecha} turno={filtros.turno} />
     </div>
   );
 }

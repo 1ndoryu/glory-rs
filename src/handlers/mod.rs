@@ -98,6 +98,7 @@ impl utoipa::Modify for SecurityAddon {
         plano_sala::eliminar_combinacion,
         plano_sala::exportar_plano,
         plano_sala::importar_plano,
+        plano_sala::obtener_ocupacion,
     ),
     components(schemas(
         health::HealthResponse,
@@ -161,6 +162,10 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::ZonaExport,
         crate::models::MesaExport,
         crate::models::CombinacionExport,
+        crate::models::PlanoOcupacion,
+        crate::models::ZonaOcupacion,
+        crate::models::MesaOcupacion,
+        crate::models::ReservaMesa,
         crate::models::Turno,
         crate::models::CanalVenta,
         crate::models::MetodoPago,

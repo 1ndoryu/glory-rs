@@ -4,7 +4,7 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
-use utoipa::ToSchema;
+use utoipa::{IntoParams, ToSchema};
 use uuid::Uuid;
 use validator::Validate;
 
@@ -198,4 +198,48 @@ pub struct CombinacionExport {
     pub max_personas: i32,
     /* Números de mesa referenciados (zona_nombre:numero) para remap al importar */
     pub mesas_ref: Vec<String>,
+}
+
+/* ========== Ocupación de mesas (vista día) — 263A-16 ========== */
+
+/// Reserva asociada a una mesa para la vista de ocupación
+#[derive(Debug, Clone, Serialize, ToSchema)]
+pub struct ReservaMesa {
+    pub reserva_id: Uuid,
+    pub hora: chrono::NaiveTime,
+    pub nombre_cliente: String,
+    pub apellidos_cliente: String,
+    pub num_personas: i32,
+    pub estado: String,
+    pub telefono: String,
+}
+
+/// Mesa con sus reservas del día para la vista de ocupación
+#[derive(Debug, Clone, Serialize, ToSchema)]
+pub struct MesaOcupacion {
+    #[serde(flatten)]
+    pub mesa: Mesa,
+    pub reservas: Vec<ReservaMesa>,
+}
+
+/// Zona con mesas y su estado de ocupación
+#[derive(Debug, Serialize, ToSchema)]
+pub struct ZonaOcupacion {
+    #[serde(flatten)]
+    pub zona: ZonaSala,
+    pub mesas: Vec<MesaOcupacion>,
+}
+
+/// Plano de sala con ocupación — respuesta del endpoint
+#[derive(Debug, Serialize, ToSchema)]
+pub struct PlanoOcupacion {
+    pub fecha: chrono::NaiveDate,
+    pub zonas: Vec<ZonaOcupacion>,
+}
+
+/// Query para la ocupación del plano
+#[derive(Debug, Deserialize, IntoParams)]
+pub struct PlanoOcupacionQuery {
+    pub fecha: chrono::NaiveDate,
+    pub turno: Option<String>,
 }

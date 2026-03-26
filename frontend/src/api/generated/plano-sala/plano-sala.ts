@@ -34,7 +34,9 @@ import type {
   CrearZonaRequest,
   ErrorResponse,
   Mesa,
+  ObtenerOcupacionParams,
   PlanoExport,
+  PlanoOcupacion,
   PlanoSala,
   ZonaSala
 } from '../gestiónRestauranteAPI.schemas';
@@ -873,7 +875,125 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getActualizarMesaMutationOptions(options), queryClient);
     }
-    export type crearZonaResponse201 = {
+    export type obtenerOcupacionResponse200 = {
+  data: PlanoOcupacion
+  status: 200
+}
+
+export type obtenerOcupacionResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type obtenerOcupacionResponseSuccess = (obtenerOcupacionResponse200) & {
+  headers: Headers;
+};
+export type obtenerOcupacionResponseError = (obtenerOcupacionResponse401) & {
+  headers: Headers;
+};
+
+export type obtenerOcupacionResponse = (obtenerOcupacionResponseSuccess | obtenerOcupacionResponseError)
+
+export const getObtenerOcupacionUrl = (params: ObtenerOcupacionParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/plano-sala/ocupacion?${stringifiedParams}` : `/api/plano-sala/ocupacion`
+}
+
+export const obtenerOcupacion = async (params: ObtenerOcupacionParams, options?: RequestInit): Promise<obtenerOcupacionResponse> => {
+
+  return customInstance<obtenerOcupacionResponse>(getObtenerOcupacionUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getObtenerOcupacionQueryKey = (params?: ObtenerOcupacionParams,) => {
+    return [
+    `/api/plano-sala/ocupacion`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getObtenerOcupacionQueryOptions = <TData = Awaited<ReturnType<typeof obtenerOcupacion>>, TError = ErrorResponse>(params: ObtenerOcupacionParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerOcupacion>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getObtenerOcupacionQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof obtenerOcupacion>>> = ({ signal }) => obtenerOcupacion(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof obtenerOcupacion>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ObtenerOcupacionQueryResult = NonNullable<Awaited<ReturnType<typeof obtenerOcupacion>>>
+export type ObtenerOcupacionQueryError = ErrorResponse
+
+
+export function useObtenerOcupacion<TData = Awaited<ReturnType<typeof obtenerOcupacion>>, TError = ErrorResponse>(
+ params: ObtenerOcupacionParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerOcupacion>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof obtenerOcupacion>>,
+          TError,
+          Awaited<ReturnType<typeof obtenerOcupacion>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useObtenerOcupacion<TData = Awaited<ReturnType<typeof obtenerOcupacion>>, TError = ErrorResponse>(
+ params: ObtenerOcupacionParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerOcupacion>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof obtenerOcupacion>>,
+          TError,
+          Awaited<ReturnType<typeof obtenerOcupacion>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useObtenerOcupacion<TData = Awaited<ReturnType<typeof obtenerOcupacion>>, TError = ErrorResponse>(
+ params: ObtenerOcupacionParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerOcupacion>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useObtenerOcupacion<TData = Awaited<ReturnType<typeof obtenerOcupacion>>, TError = ErrorResponse>(
+ params: ObtenerOcupacionParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerOcupacion>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getObtenerOcupacionQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+export type crearZonaResponse201 = {
   data: ZonaSala
   status: 201
 }

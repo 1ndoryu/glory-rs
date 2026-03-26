@@ -6,6 +6,19 @@ use uuid::Uuid;
 
 use crate::models::{ActualizarMesaRequest, CombinacionMesas, CrearMesaRequest, Mesa, ZonaSala};
 
+/* [263A-16] Struct auxiliar para las reservas asociadas a mesas (query raw) */
+#[derive(Debug, sqlx::FromRow)]
+pub struct ReservaMesaRow {
+    pub reserva_id: uuid::Uuid,
+    pub mesa_id: uuid::Uuid,
+    pub hora: chrono::NaiveTime,
+    pub nombre_cliente: String,
+    pub apellidos_cliente: String,
+    pub num_personas: i32,
+    pub estado: String,
+    pub telefono: String,
+}
+
 pub struct PlanoSalaRepository;
 
 impl PlanoSalaRepository {
@@ -324,5 +337,37 @@ impl PlanoSalaRepository {
         .execute(pool)
         .await?;
         Ok(())
+    }
+
+    /* ========== Ocupación (263A-16) ========== */
+
+    /// Reservas del día asociadas a mesas (por `mesa_id`), opcionalmente filtradas por turno.
+    pub async fn reservas_por_mesa(
+        pool: &PgPool,
+        user_id: Uuid,
+        fecha: chrono::NaiveDate,
+        hora_desde: Option<chrono::NaiveTime>,
+        hora_hasta: Option<chrono::NaiveTime>,
+    ) -> Result<Vec<ReservaMesaRow>, sqlx::Error> {
+        sqlx::query_as!(
+            ReservaMesaRow,
+            r#"SELECT r.id as reserva_id, r.mesa_id as "mesa_id!", r.hora,
+                      r.nombre_cliente, r.apellidos_cliente, r.num_personas,
+                      r.estado, r.telefono
+               FROM reservas r
+               WHERE r.user_id = $1
+                 AND r.fecha = $2
+                 AND r.mesa_id IS NOT NULL
+                 AND r.estado NOT IN ('cancelada')
+                 AND ($3::TIME IS NULL OR r.hora >= $3)
+                 AND ($4::TIME IS NULL OR r.hora < $4)
+               ORDER BY r.hora ASC"#,
+            user_id,
+            fecha,
+            hora_desde,
+            hora_hasta
+        )
+        .fetch_all(pool)
+        .await
     }
 }

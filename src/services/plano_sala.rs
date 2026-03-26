@@ -8,7 +8,8 @@ use crate::errors::AppError;
 use crate::models::{
     ActualizarMesaRequest, ActualizarZonaRequest, CombinacionConMesas, CombinacionExport,
     CombinacionMesas, CrearCombinacionRequest, CrearMesaRequest, CrearZonaRequest, Mesa,
-    MesaExport, PlanoExport, PlanoSala, ZonaConMesas, ZonaExport, ZonaSala,
+    MesaExport, MesaOcupacion, PlanoExport, PlanoOcupacion, PlanoSala, ReservaMesa,
+    ZonaConMesas, ZonaExport, ZonaOcupacion, ZonaSala,
 };
 use crate::repositories::PlanoSalaRepository;
 
@@ -290,5 +291,59 @@ impl PlanoSalaService {
 
         /* Retornar plano recién importado */
         Self::plano_completo(pool, user_id).await
+    }
+
+    /* ========== Ocupación (263A-16) ========== */
+
+    /// Devuelve el plano con ocupación de mesas para una fecha y turno opcionales.
+    pub async fn plano_ocupacion(
+        pool: &PgPool,
+        user_id: Uuid,
+        fecha: chrono::NaiveDate,
+        hora_desde: Option<chrono::NaiveTime>,
+        hora_hasta: Option<chrono::NaiveTime>,
+    ) -> Result<PlanoOcupacion, AppError> {
+        let zonas = Repo::listar_zonas(pool, user_id).await?;
+        let reservas_rows =
+            Repo::reservas_por_mesa(pool, user_id, fecha, hora_desde, hora_hasta).await?;
+
+        /* Indexar reservas por mesa_id para O(1) lookup */
+        let mut reservas_por_mesa: std::collections::HashMap<Uuid, Vec<ReservaMesa>> =
+            std::collections::HashMap::new();
+        for r in reservas_rows {
+            reservas_por_mesa
+                .entry(r.mesa_id)
+                .or_default()
+                .push(ReservaMesa {
+                    reserva_id: r.reserva_id,
+                    hora: r.hora,
+                    nombre_cliente: r.nombre_cliente,
+                    apellidos_cliente: r.apellidos_cliente,
+                    num_personas: r.num_personas,
+                    estado: r.estado,
+                    telefono: r.telefono,
+                });
+        }
+
+        let mut zonas_ocupacion = Vec::with_capacity(zonas.len());
+        for zona in zonas {
+            let mesas = Repo::listar_mesas_zona(pool, zona.id).await?;
+            let mesas_ocupacion = mesas
+                .into_iter()
+                .map(|mesa| {
+                    let reservas = reservas_por_mesa.remove(&mesa.id).unwrap_or_default();
+                    MesaOcupacion { mesa, reservas }
+                })
+                .collect();
+            zonas_ocupacion.push(ZonaOcupacion {
+                zona,
+                mesas: mesas_ocupacion,
+            });
+        }
+
+        Ok(PlanoOcupacion {
+            fecha,
+            zonas: zonas_ocupacion,
+        })
     }
 }

@@ -634,6 +634,26 @@ export interface MesaExport {
 }
 
 /**
+ * Reserva asociada a una mesa para la vista de ocupación
+ */
+export interface ReservaMesa {
+  apellidos_cliente: string;
+  estado: string;
+  hora: string;
+  nombre_cliente: string;
+  num_personas: number;
+  reserva_id: string;
+  telefono: string;
+}
+
+/**
+ * Mesa con sus reservas del día para la vista de ocupación
+ */
+export type MesaOcupacion = Mesa & {
+  reservas: ReservaMesa[];
+};
+
+/**
  * Response genérico para operaciones que solo confirman éxito
  */
 export interface MessageResponse {
@@ -684,6 +704,21 @@ export interface ZonaSala {
   orden: number;
   updated_at: string;
   user_id: string;
+}
+
+/**
+ * Zona con mesas y su estado de ocupación
+ */
+export type ZonaOcupacion = ZonaSala & {
+  mesas: MesaOcupacion[];
+};
+
+/**
+ * Plano de sala con ocupación — respuesta del endpoint
+ */
+export interface PlanoOcupacion {
+  fecha: string;
+  zonas: ZonaOcupacion[];
 }
 
 export type ZonaConMesas = ZonaSala & {
@@ -870,6 +905,14 @@ hasta?: string | null;
  * @nullable
  */
 categoria_id?: string | null;
+};
+
+export type ObtenerOcupacionParams = {
+fecha: string;
+/**
+ * @nullable
+ */
+turno?: string | null;
 };
 
 export type ListarReservasParams = {
