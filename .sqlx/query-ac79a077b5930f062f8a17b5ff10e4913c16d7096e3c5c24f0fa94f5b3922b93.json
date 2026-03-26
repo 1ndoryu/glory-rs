@@ -1,0 +1,94 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT * FROM mesas WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "zona_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "numero",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "pos_x",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "pos_y",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 5,
+        "name": "ancho",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 6,
+        "name": "alto",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 7,
+        "name": "forma",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 8,
+        "name": "min_personas",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 9,
+        "name": "max_personas",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 10,
+        "name": "activa",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 11,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 12,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "ac79a077b5930f062f8a17b5ff10e4913c16d7096e3c5c24f0fa94f5b3922b93"
+}

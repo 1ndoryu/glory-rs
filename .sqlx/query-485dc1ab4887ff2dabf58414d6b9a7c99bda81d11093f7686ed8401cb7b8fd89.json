@@ -1,0 +1,56 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO combinaciones_mesas (id, user_id, nombre, min_personas, max_personas)\n               VALUES ($1, $2, $3, $4, $5) RETURNING *",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "nombre",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "min_personas",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "max_personas",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 5,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Varchar",
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "485dc1ab4887ff2dabf58414d6b9a7c99bda81d11093f7686ed8401cb7b8fd89"
+}

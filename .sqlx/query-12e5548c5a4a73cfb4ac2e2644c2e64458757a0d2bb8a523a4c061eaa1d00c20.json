@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "UPDATE reservas SET fecha = COALESCE($3, fecha), hora = COALESCE($4, hora), nombre_cliente = COALESCE($5, nombre_cliente), num_personas = COALESCE($6, num_personas), estado = COALESCE($7, estado), notas = COALESCE($8, notas), telefono = COALESCE($9, telefono), num_mesa = COALESCE($10, num_mesa), apellidos_cliente = COALESCE($11, apellidos_cliente), canal_id = COALESCE($12, canal_id), updated_at = NOW() WHERE id = $1 AND user_id = $2 RETURNING *",
+  "query": "UPDATE reservas SET fecha = COALESCE($3, fecha), hora = COALESCE($4, hora), nombre_cliente = COALESCE($5, nombre_cliente), num_personas = COALESCE($6, num_personas), estado = COALESCE($7, estado), notas = COALESCE($8, notas), telefono = COALESCE($9, telefono), num_mesa = COALESCE($10, num_mesa), apellidos_cliente = COALESCE($11, apellidos_cliente), canal_id = COALESCE($12, canal_id), mesa_id = COALESCE($13, mesa_id), updated_at = NOW() WHERE id = $1 AND user_id = $2 RETURNING *",
   "describe": {
     "columns": [
       {
@@ -82,6 +82,11 @@
         "ordinal": 15,
         "name": "apellidos_cliente",
         "type_info": "Varchar"
+      },
+      {
+        "ordinal": 16,
+        "name": "mesa_id",
+        "type_info": "Uuid"
       }
     ],
     "parameters": {
@@ -97,6 +102,7 @@
         "Varchar",
         "Int4",
         "Varchar",
+        "Uuid",
         "Uuid"
       ]
     },
@@ -116,8 +122,9 @@
       true,
       false,
       true,
-      false
+      false,
+      true
     ]
   },
-  "hash": "63cb2efcfbb084a024314690618599afbf26bf0a04e6479659bcd496d95171c7"
+  "hash": "12e5548c5a4a73cfb4ac2e2644c2e64458757a0d2bb8a523a4c061eaa1d00c20"
 }

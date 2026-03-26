@@ -1,0 +1,96 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT m.* FROM mesas m\n               INNER JOIN zonas_sala z ON z.id = m.zona_id\n               WHERE z.user_id = $1 AND z.nombre = $2 AND m.numero = $3",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "zona_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "numero",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "pos_x",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "pos_y",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 5,
+        "name": "ancho",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 6,
+        "name": "alto",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 7,
+        "name": "forma",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 8,
+        "name": "min_personas",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 9,
+        "name": "max_personas",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 10,
+        "name": "activa",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 11,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 12,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "ae8f758e603ffcec1b2fc8ce3cce7beaaf3d1c9387f52c53aac1f8c4d56c27cd"
+}

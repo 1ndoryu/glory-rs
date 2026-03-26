@@ -82,6 +82,11 @@
         "ordinal": 15,
         "name": "apellidos_cliente",
         "type_info": "Varchar"
+      },
+      {
+        "ordinal": 16,
+        "name": "mesa_id",
+        "type_info": "Uuid"
       }
     ],
     "parameters": {
@@ -111,7 +116,8 @@
       true,
       false,
       true,
-      false
+      false,
+      true
     ]
   },
   "hash": "2a40dc7d8427777aef91c2a170a8c33139a8a7f960dc96e1642db667d0361942"

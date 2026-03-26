@@ -1,0 +1,77 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO configuracion_restaurante (id, user_id)\n               VALUES ($1, $2) RETURNING *",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "reserva_email_obligatorio",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 3,
+        "name": "reserva_telefono_obligatorio",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 4,
+        "name": "reserva_nombre_obligatorio",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 5,
+        "name": "reserva_apellidos_obligatorio",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 6,
+        "name": "iva_por_defecto",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 7,
+        "name": "nombre_restaurante",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 8,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 9,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "d2e1de8499803f0d4eca16c0f41ffbb92c5ebd2772500491295f3ab6b8370130"
+}

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "INSERT INTO reservas (id, user_id, fecha, hora, nombre_cliente, num_personas, estado, notas, telefono, num_mesa, apellidos_cliente, canal_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *",
+  "query": "INSERT INTO reservas (id, user_id, fecha, hora, nombre_cliente, num_personas, estado, notas, telefono, num_mesa, apellidos_cliente, canal_id, mesa_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *",
   "describe": {
     "columns": [
       {
@@ -82,6 +82,11 @@
         "ordinal": 15,
         "name": "apellidos_cliente",
         "type_info": "Varchar"
+      },
+      {
+        "ordinal": 16,
+        "name": "mesa_id",
+        "type_info": "Uuid"
       }
     ],
     "parameters": {
@@ -97,6 +102,7 @@
         "Varchar",
         "Int4",
         "Varchar",
+        "Uuid",
         "Uuid"
       ]
     },
@@ -116,8 +122,9 @@
       true,
       false,
       true,
-      false
+      false,
+      true
     ]
   },
-  "hash": "47f0f240a5851d2d484996c3931c8772b2e671c5f4a70dc3f50182c73cbdb017"
+  "hash": "936b9c723275b46cd2a8b4ca441551ecea623d16ece23f2301057f3f63eb8f6d"
 }

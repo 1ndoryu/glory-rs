@@ -1,0 +1,67 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT r.id as reserva_id, r.mesa_id as \"mesa_id!\", r.hora,\n                      r.nombre_cliente, r.apellidos_cliente, r.num_personas,\n                      r.estado, r.telefono\n               FROM reservas r\n               WHERE r.user_id = $1\n                 AND r.fecha = $2\n                 AND r.mesa_id IS NOT NULL\n                 AND r.estado NOT IN ('cancelada')\n                 AND ($3::TIME IS NULL OR r.hora >= $3)\n                 AND ($4::TIME IS NULL OR r.hora < $4)\n               ORDER BY r.hora ASC",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "reserva_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "mesa_id!",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "hora",
+        "type_info": "Time"
+      },
+      {
+        "ordinal": 3,
+        "name": "nombre_cliente",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "apellidos_cliente",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "num_personas",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 6,
+        "name": "estado",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 7,
+        "name": "telefono",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Date",
+        "Time",
+        "Time"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "dab9ce0ced80f6ad11a27e27a5d0ed6dd4dfb59325793383978c3e832616d570"
+}

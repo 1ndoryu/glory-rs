@@ -1,0 +1,52 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT * FROM combinaciones_mesas WHERE user_id = $1 ORDER BY nombre",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "nombre",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "min_personas",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "max_personas",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 5,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "45af276d58a2e48306e79ab9e97765f2d90f87d10828fba709bfd7cc92d4989b"
+}

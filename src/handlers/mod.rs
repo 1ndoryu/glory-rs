@@ -14,6 +14,7 @@ mod ventas;
 
 use axum::Router;
 use tower_http::cors::{Any, CorsLayer};
+use tower_http::services::{ServeDir, ServeFile};
 use tower_http::trace::TraceLayer;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
@@ -202,9 +203,15 @@ pub fn create_router(pool: sqlx::PgPool, config: crate::config::AppConfig) -> Ro
         .allow_methods(Any)
         .allow_headers(Any);
 
+    /* [263A-20] En produccion, servir el frontend SPA desde ./static.
+     * El fallback_service reenvía rutas no-API al index.html para client-side routing. */
+    let spa_dir = std::env::var("STATIC_DIR").unwrap_or_else(|_| "static".to_string());
+    let spa_fallback = ServeDir::new(&spa_dir).fallback(ServeFile::new(format!("{spa_dir}/index.html")));
+
     Router::new()
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
         .nest("/api", api_routes())
+        .fallback_service(spa_fallback)
         .layer(TraceLayer::new_for_http())
         .layer(cors)
         .with_state(state)
