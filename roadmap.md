@@ -126,9 +126,9 @@ Puedes ajustar los pendientes. Si puedes analizar todo el contenido y sacar el t
 - ~~Configuración de datos obligatorios al reservar (email, teléfono, nombre, apellidos).~~
 - ~~IVA por defecto del establecimiento.~~
 
-6. deberia unificarse npm run verify y self-check.ps1 para reducir la alucinacion, supongo que esto implica ajustar las instrucciones .github\instructions\test.instructions.md, tambien presiento que hay cosas que necesitan ser mas genericas en .github\instructions\test.instructions.md, por ejemplo cuando dice  `npm run verify` (cargo check + clippy + test + type-check + Sentinel) no aclara que en proyecto actual puede que no se este usando cargo por que no es rust, o 
+6. ~~deberia unificarse npm run verify y self-check.ps1 para reducir la alucinacion, supongo que esto implica ajustar las instrucciones .github\instructions\test.instructions.md, tambien presiento que hay cosas que necesitan ser mas genericas en .github\instructions\test.instructions.md, por ejemplo cuando dice  `npm run verify` (cargo check + clippy + test + type-check + Sentinel) no aclara que en proyecto actual puede que no se este usando cargo por que no es rust, o~~ → 263A-18
 
-7. Agregar una regla de que frontend\src\api\generated.ts siempre tiene que estar dividido 
+7. ~~Agregar una regla de que frontend\src\api\generated.ts siempre tiene que estar dividido~~ → 263A-19
 
 8. Cuando todo este listo desplegar con coolify-manager-rs, ajustar lo que sea necesario, la url sera temporal. 
 
