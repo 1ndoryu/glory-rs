@@ -95,10 +95,13 @@ Puedes ajustar los pendientes. Si puedes analizar todo el contenido y sacar el t
 
 > Referencia visual: Cover Manager. Documentación completa en `Agente/documentacion/reservas/analisis-data-ii-2026-03-26.md`
 
-### Fase 1 — Core
+### Fase 1 — Core (COMPLETADA)
 
-- No-shows: tracking de reservas no presentadas, ratio por día/mes (porcentaje), filtro por canal (WhatsApp, Instagram, teléfono).
-- Canales de reserva: definir canales por donde entran reservas (WhatsApp, Instagram, teléfono, web, etc.) para estadísticas.
+- ~~No-shows: tracking de reservas no presentadas, ratio por día/mes (porcentaje), filtro por canal.~~ → 263A-8
+- ~~Canales de reserva: definir canales por donde entran reservas para estadísticas.~~ → 263A-9
+- ~~CRM clientes + Etiquetas~~ → 263A-5
+- ~~Vista reservas día + mes~~ → 263A-6+263A-7
+- ~~OpenAPI tags + Orval tags-split~~ → 263A-10
 
 ### Fase 2 — Dashboard y visualización
 
@@ -123,4 +126,10 @@ Puedes ajustar los pendientes. Si puedes analizar todo el contenido y sacar el t
 - Configuración de datos obligatorios al reservar (email, teléfono, nombre, apellidos).
 - IVA por defecto del establecimiento. 
 
-4. ~~Esta es una tarea de prueba para ver si lees el roadmap al fianl de completar todo, marca con un ok esto para saber que lo leiste.~~ ✅ OK — Leído al final del ciclo, 2026-03-26.
+5. Supongo que hay que adaptar npm run seed a las nuevas fases y borrar todos los datos anteriores para generar datos de prueba nuevos con reservas, clientes, canales, etiquetas, etc. para poder probar las nuevas funcionalidades. 
+
+6. deberia unificarse npm run verify y self-check.ps1 para reducir la alucinacion, supongo que esto implica ajustar las instrucciones .github\instructions\test.instructions.md, tambien presiento que hay cosas que necesitan ser mas genericas en .github\instructions\test.instructions.md, por ejemplo cuando dice  `npm run verify` (cargo check + clippy + test + type-check + Sentinel) no aclara que en proyecto actual puede que no se este usando cargo por que no es rust, o 
+
+7. Agregar una regla de que frontend\src\api\generated.ts siempre tiene que estar dividido 
+
+8. Cuando todo este listo desplegar con coolify-manager-rs, ajustar lo que sea necesario, la url sera temporal. 
