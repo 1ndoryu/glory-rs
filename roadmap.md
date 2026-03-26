@@ -89,7 +89,7 @@ Puedes ajustar los pendientes. Si puedes analizar todo el contenido y sacar el t
 
 ## Gaps de la revisión (features activos que faltan)
 
-- Recuperación de contraseña ("olvidé mi contraseña") — envía enlace al email para resetear. Pedido en Audio 1 original.
+- ~~Recuperación de contraseña ("olvidé mi contraseña") — envía enlace al email para resetear. Pedido en Audio 1 original.~~ → 263A-15
 
 ## Módulo de Reservas — Expansión (Data II, basado en Cover Manager)
 
