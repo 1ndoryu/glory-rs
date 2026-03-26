@@ -109,12 +109,12 @@ Puedes ajustar los pendientes. Si puedes analizar todo el contenido y sacar el t
 - ~~Dashboard reservas — Panel ocupación: media personas/reserva, media reservas/día, total reservas, gráfico por hora, por día semana, ocupación %, por turno, reservas con antelación, distribución por procedencia.~~ → 263A-13
 - ~~Dashboard reservas — Panel análisis: reservas efectivas (sin cancelaciones/no-shows), total comensales efectivos, comensales/reserva, ticket medio por reserva y por persona.~~ → 263A-13
 
-### Fase 3 — Plano de sala
+### Fase 3 — Plano de sala (COMPLETADA)
 
-- Constructor de plano: el dueño construye su plano arrastrando mesas. Configurar cada mesa: número, zona, mín/máx personas. Múltiples plantas/zonas (barra, restaurante, terraza).
-- Combinación de mesas: seleccionar mesas combinables, definir máx/mín personas en combinación.
-- Exportar/importar plano de sala para backup.
-- Mostrar plano con mesas ocupadas en la vista de reservas por día.
+- ~~Constructor de plano: el dueño construye su plano arrastrando mesas. Configurar cada mesa: número, zona, mín/máx personas. Múltiples plantas/zonas (barra, restaurante, terraza).~~ → 263A-14
+- ~~Combinación de mesas: seleccionar mesas combinables, definir máx/mín personas en combinación.~~ → 263A-14
+- ~~Exportar/importar plano de sala para backup.~~ → 263A-14
+- Mostrar plano con mesas ocupadas en la vista de reservas por día. → PENDIENTE (integración Fase 3b)
 
 ### Fase 4 — Pendiente de detalle del cliente
 
