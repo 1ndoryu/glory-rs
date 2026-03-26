@@ -130,5 +130,5 @@ Puedes ajustar los pendientes. Si puedes analizar todo el contenido y sacar el t
 
 7. ~~Agregar una regla de que frontend\src\api\generated.ts siempre tiene que estar dividido~~ → 263A-19
 
-8. Cuando todo este listo desplegar con coolify-manager-rs, ajustar lo que sea necesario, la url sera temporal. 
+8. ~~Cuando todo este listo desplegar con coolify-manager-rs, ajustar lo que sea necesario, la url sera temporal.~~ → 263A-20 (Fase 1: Dockerfile + static serving. Fase 2 pendiente: configurar servicio en Coolify UI)
 
