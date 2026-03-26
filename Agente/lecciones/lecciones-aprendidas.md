@@ -47,3 +47,32 @@ Cada lección debe ser concisa y accionable.
 **Problema:** Componentes TSX en un submódulo no resuelven `react` types. Errores como "Property 'children' does not exist on BotonProps" aunque extends `ButtonHTMLAttributes`.
 **Causa raíz:** TypeScript busca `node_modules` ascendiendo desde la ubicación del archivo. El submódulo no tiene `node_modules` y el del proyecto consumidor está en `frontend/node_modules`, no en la raíz.
 **Solución:** El submódulo necesita su propio `package.json` con devDependencies (react, @types/react, lucide-react) y `npm install`. También necesita `server.fs.allow: ['..']` en Vite.
+
+## 2026-03-26 — validator range() incompatible con rust_decimal::Decimal
+
+**Problema:** `#[validate(range(min=0.0, max=100.0))]` no compila con `rust_decimal::Decimal` — no implementa `ValidateRangeType`.
+**Causa raíz:** El crate `validator` solo soporta tipos numéricos primitivos para `range()`.
+**Solución:** Crear función de validación custom (`validar_iva(&rust_decimal::Decimal) -> Result<(), ValidationError>`). OJO: el derive de `Validate` con `Option<Decimal>` pasa `&&Decimal`, no `&Option<Decimal>`.
+
+## 2026-03-26 — PowerShell Out-File genera UTF-8 BOM que Orval no parsea
+
+**Problema:** `cargo run --bin dump_openapi | Out-File openapi.json` genera archivo con BOM (byte order mark). Orval falla al parsearlo.
+**Causa raíz:** PowerShell 5 usa UTF-8 BOM por defecto con `Out-File` y `>`.
+**Solución:** Usar `[System.IO.File]::WriteAllText($path, $output, [System.Text.UTF8Encoding]::new($false))` para escribir sin BOM.
+
+## 2026-03-26 — dump_openapi usa stdout, no argumentos
+
+**Problema:** El binario `dump_openapi` usa `print!` para escribir el JSON, no acepta path como argumento CLI.
+**Solución:** Capturar stdout y redirigir manualmente: `$output = cargo run --bin dump_openapi 2>$null; [System.IO.File]::WriteAllText(...)`.
+
+## 2026-03-26 — Orval encoding: ó se corrompe en nombre de archivo schemas
+
+**Problema:** Al regenerar con Orval, `gestiónRestauranteAPI.schemas.ts` se convierte en `gestiNRestauranteAPI.schemas.ts` (ó → N por encoding).
+**Causa raíz:** El título del OpenAPI spec tiene `ó` que se corrompe en el filesystem dependiendo del encoding del pipe.
+**Solución:** Actualizar el barrel `generated.ts` para importar desde el nombre real del archivo generado. No intentar forzar el nombre — aceptar el que Orval genera.
+
+## 2026-03-26 — TypeScript union types en respuestas Orval requieren narrowing
+
+**Problema:** Hooks Orval retornan `ConfiguracionRestaurante | ErrorResponse`. Acceder a campos de datos sin narrowing causa error TS.
+**Causa raíz:** Orval genera tipos union para cubrir respuestas 200 y errores. TypeScript no permite acceder a campos específicos sin discriminar.
+**Solución:** Usar `datos.status === 200` como discriminante antes de acceder a campos de datos.
