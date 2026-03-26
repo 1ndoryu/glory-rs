@@ -199,7 +199,7 @@ DELETE http://localhost:3000/api/ventas/de507550-2c03-4a42-8717-d6a547058825 405
 
 ~~18. .menuGasto debería display flex column y esta usando emojis en vez de icono lo cual es una violacion~~ → 263A-16
 
-19. Creo que inicio y dashboard deberían convinarse en una sola cosa al menos que claro que el cliente lo haya pedido por separado pero no croe.
+~~19. Creo que inicio y dashboard deberían convinarse en una sola cosa al menos que claro que el cliente lo haya pedido por separado pero no croe.~~ → 263A-27
 
 ~~20. Siempre dice No hay reservas para esta fecha pero en calendario sale que si. (Datos de prueba) Pero ya vi que es porque "todos los estados" en realidad no muestran todos los estados.~~ → 263A-20
 
