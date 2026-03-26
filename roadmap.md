@@ -103,11 +103,11 @@ Puedes ajustar los pendientes. Si puedes analizar todo el contenido y sacar el t
 - ~~Vista reservas día + mes~~ → 263A-6+263A-7
 - ~~OpenAPI tags + Orval tags-split~~ → 263A-10
 
-### Fase 2 — Dashboard y visualización
+### Fase 2 — Dashboard y visualización (COMPLETADA)
 
-- Dashboard reservas — Panel resumen: total reservas + comparativa mes anterior, reservas por día, por día de semana, distribución por canal, clientes nuevos, ocupación % (personas y mesas).
-- Dashboard reservas — Panel ocupación: media personas/reserva, media reservas/día, total reservas, gráfico por hora, por día semana, ocupación %, por turno, reservas con antelación, distribución por procedencia.
-- Dashboard reservas — Panel análisis: reservas efectivas (sin cancelaciones/no-shows), total comensales efectivos, comensales/reserva, ticket medio por reserva y por persona.
+- ~~Dashboard reservas — Panel resumen: total reservas + comparativa mes anterior, reservas por día, por día de semana, distribución por canal, clientes nuevos, ocupación % (personas y mesas).~~ → 263A-13
+- ~~Dashboard reservas — Panel ocupación: media personas/reserva, media reservas/día, total reservas, gráfico por hora, por día semana, ocupación %, por turno, reservas con antelación, distribución por procedencia.~~ → 263A-13
+- ~~Dashboard reservas — Panel análisis: reservas efectivas (sin cancelaciones/no-shows), total comensales efectivos, comensales/reserva, ticket medio por reserva y por persona.~~ → 263A-13
 
 ### Fase 3 — Plano de sala
 
