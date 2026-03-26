@@ -179,7 +179,7 @@ Puedes ajustar los pendientes. Si puedes analizar todo el contenido y sacar el t
 
 ~~13. Implementar Módulo de Marketing — Fase 4c (recordatorios automáticos de reservas)~~ → 263A-25
 
-14. Merge de clientes duplicados — Fase 4d
+~~14. Merge de clientes duplicados — Fase 4d~~ → 263A-26
 
 ~~15. Veo algunos problemas como
 
@@ -216,4 +216,8 @@ DELETE http://localhost:3000/api/ventas/de507550-2c03-4a42-8717-d6a547058825 405
 25. La forma en la que se construye el plano de la sala, por ajemplo abre alertas en vez de modales, no tiene iconos, deberia poder arrastrarse primero y despues colocar el nombre, cosas basicas que mejoran la experiencia de usuario, tambien veo que los estados no se conservan al mover las mesas. (no se arreglo a pesar de shadcn, hace falta mejorar la ui ux), por ejemplo las alertas deberian ser dialogos (componente de shadcn)
 
 26. LOs botones en el panel lateral de navegación no tienen gap, y los botones de crear venta y gasto en el panel lateral la palabra "nueva es redudante"
+
+27. Cambia el present de shandc a --preset bJfDQCym
+
+28. el main necesita gap 
 
