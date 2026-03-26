@@ -20,6 +20,7 @@ const titulos: Record<string, string> = {
   "/marketing/campanas/nueva": "Nueva Campaña",
   "/marketing/plantillas": "Plantillas WhatsApp",
   "/marketing/plantillas/nueva": "Nueva Plantilla",
+  "/marketing/recordatorios": "Recordatorios",
 }
 
 export function SiteHeader() {

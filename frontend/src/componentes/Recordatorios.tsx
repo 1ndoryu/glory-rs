@@ -1,0 +1,368 @@
+/* [263A-25] Gestión de recordatorios automáticos de reservas.
+ * Permite configurar reglas (horas antes, canal, mensaje) y ver historial.
+ * Las reglas se pueden activar/desactivar con un switch. */
+
+import { useState } from 'react';
+import { useRecordatorios } from '../hooks/useRecordatorios';
+import { useHistorialRecordatorios } from '../api/generated';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Plus, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import type { ReglaRecordatorio } from '../api/generated/gestiNRestauranteAPI.schemas';
+
+const ETIQUETAS_CANAL: Record<string, string> = {
+  sms: 'SMS',
+  email: 'Email',
+  whatsapp: 'WhatsApp',
+};
+
+function badgeCanal(canal: string) {
+  switch (canal) {
+    case 'email':
+      return <Badge variant="default">{ETIQUETAS_CANAL[canal] || canal}</Badge>;
+    case 'whatsapp':
+      return <Badge className="bg-green-600 hover:bg-green-700 text-white">{ETIQUETAS_CANAL[canal] || canal}</Badge>;
+    default:
+      return <Badge variant="secondary">{ETIQUETAS_CANAL[canal] || canal}</Badge>;
+  }
+}
+
+function formatHoras(horas: number) {
+  if (horas >= 24) {
+    const dias = Math.floor(horas / 24);
+    const rest = horas % 24;
+    return rest > 0 ? `${dias}d ${rest}h antes` : `${dias}d antes`;
+  }
+  return `${horas}h antes`;
+}
+
+function NuevaReglaDialog({ onCrear }: { onCrear: (data: { data: { nombre: string; horas_antes: number; canal: string; mensaje_plantilla?: string } }) => Promise<unknown> }) {
+  const [open, setOpen] = useState(false);
+  const [nombre, setNombre] = useState('');
+  const [horasAntes, setHorasAntes] = useState('24');
+  const [canal, setCanal] = useState('sms');
+  const [mensaje, setMensaje] = useState('');
+  const [enviando, setEnviando] = useState(false);
+
+  const handleCrear = async () => {
+    if (!nombre.trim() || enviando) return;
+    setEnviando(true);
+    try {
+      await onCrear({
+        data: {
+          nombre: nombre.trim(),
+          horas_antes: parseInt(horasAntes, 10) || 24,
+          canal,
+          mensaje_plantilla: mensaje.trim() || undefined,
+        },
+      });
+      setOpen(false);
+      setNombre('');
+      setHorasAntes('24');
+      setCanal('sms');
+      setMensaje('');
+    } finally {
+      setEnviando(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button><Plus className="mr-1 size-4" /> Nueva Regla</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Nueva Regla de Recordatorio</DialogTitle>
+          <DialogDescription>
+            Define cuándo y cómo enviar recordatorios automáticos
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4 py-2">
+          <div className="space-y-2">
+            <Label htmlFor="nombre">Nombre de la regla *</Label>
+            <Input
+              id="nombre"
+              value={nombre}
+              onChange={e => setNombre(e.target.value)}
+              placeholder="Ej: Recordatorio 24h antes"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Horas antes</Label>
+              <Input
+                type="number"
+                min={1}
+                value={horasAntes}
+                onChange={e => setHorasAntes(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Canal</Label>
+              <Select value={canal} onValueChange={setCanal}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="sms">SMS</SelectItem>
+                  <SelectItem value="email">Email</SelectItem>
+                  <SelectItem value="whatsapp">WhatsApp</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="mensaje">Mensaje (opcional)</Label>
+            <Textarea
+              id="mensaje"
+              value={mensaje}
+              onChange={e => setMensaje(e.target.value)}
+              placeholder="Hola {nombre}, te recordamos tu reserva para el {fecha} a las {hora}..."
+              rows={3}
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+          <Button onClick={handleCrear} disabled={!nombre.trim() || enviando}>
+            {enviando ? 'Creando...' : 'Crear Regla'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function TablaReglas() {
+  const {
+    reglas,
+    total,
+    page,
+    totalPages,
+    isLoading,
+    setPage,
+    crearRegla,
+    eliminarRegla,
+    toggleActiva,
+  } = useRecordatorios();
+
+  const handleEliminar = async (id: string) => {
+    await eliminarRegla({ id });
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <span className="text-sm text-muted-foreground">{total} regla(s)</span>
+        <NuevaReglaDialog onCrear={crearRegla} />
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Reglas de Recordatorio</CardTitle>
+          <CardDescription>
+            Cada regla define cuándo enviar un recordatorio automático antes de la reserva
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <p className="text-muted-foreground py-8 text-center">Cargando...</p>
+          ) : reglas.length === 0 ? (
+            <p className="text-muted-foreground py-8 text-center">
+              No hay reglas configuradas. Crea tu primera regla de recordatorio.
+            </p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nombre</TableHead>
+                  <TableHead>Tiempo</TableHead>
+                  <TableHead>Canal</TableHead>
+                  <TableHead>Activa</TableHead>
+                  <TableHead className="w-16" />
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {reglas.map((r: ReglaRecordatorio) => (
+                  <TableRow key={r.id}>
+                    <TableCell className="font-medium">
+                      <div>
+                        <span>{r.nombre}</span>
+                        {r.mensaje_plantilla && (
+                          <p className="text-muted-foreground text-xs mt-0.5 line-clamp-1">
+                            {r.mensaje_plantilla}
+                          </p>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>{formatHoras(r.horas_antes)}</TableCell>
+                    <TableCell>{badgeCanal(r.canal)}</TableCell>
+                    <TableCell>
+                      <Switch
+                        checked={r.activa}
+                        onCheckedChange={() => toggleActiva(r.id, r.activa)}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title="Eliminar"
+                        onClick={() => handleEliminar(r.id)}
+                      >
+                        <Trash2 className="size-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 pt-4">
+              <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(page - 1)}>
+                <ChevronLeft className="size-4" />
+              </Button>
+              <span className="text-sm">{page} / {totalPages}</span>
+              <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(page + 1)}>
+                <ChevronRight className="size-4" />
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function TablaHistorial() {
+  const [page, setPage] = useState(1);
+  const { data, isLoading } = useHistorialRecordatorios(
+    { page, per_page: 20 },
+    { query: { queryKey: ['recordatorios-historial', page] } },
+  );
+
+  const items = data?.data?.items ?? [];
+  const total = data?.data?.total ?? 0;
+  const totalPages = Math.ceil(total / 20);
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Historial de Envíos</CardTitle>
+        <CardDescription>
+          Registro de recordatorios enviados automáticamente
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <p className="text-muted-foreground py-8 text-center">Cargando...</p>
+        ) : items.length === 0 ? (
+          <p className="text-muted-foreground py-8 text-center">
+            Aún no se han enviado recordatorios.
+          </p>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Cliente</TableHead>
+                <TableHead>Reserva</TableHead>
+                <TableHead>Regla</TableHead>
+                <TableHead>Canal</TableHead>
+                <TableHead>Estado</TableHead>
+                <TableHead>Enviado</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {items.map(r => (
+                <TableRow key={r.id}>
+                  <TableCell className="font-medium">{r.nombre_cliente}</TableCell>
+                  <TableCell className="text-sm">
+                    {new Date(r.fecha_reserva).toLocaleDateString('es-ES')} {r.hora_reserva?.toString().slice(0, 5)}
+                  </TableCell>
+                  <TableCell className="text-sm">{r.regla_nombre}</TableCell>
+                  <TableCell>{badgeCanal(r.canal)}</TableCell>
+                  <TableCell>
+                    <Badge variant={r.estado === 'enviado' ? 'default' : 'destructive'}>
+                      {r.estado}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-muted-foreground text-sm">
+                    {new Date(r.enviado_at).toLocaleString('es-ES')}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-2 pt-4">
+            <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(page - 1)}>
+              <ChevronLeft className="size-4" />
+            </Button>
+            <span className="text-sm">{page} / {totalPages}</span>
+            <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(page + 1)}>
+              <ChevronRight className="size-4" />
+            </Button>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+export default function Recordatorios() {
+  return (
+    <Tabs defaultValue="reglas" className="space-y-4">
+      <TabsList>
+        <TabsTrigger value="reglas">Reglas</TabsTrigger>
+        <TabsTrigger value="historial">Historial</TabsTrigger>
+      </TabsList>
+      <TabsContent value="reglas">
+        <TablaReglas />
+      </TabsContent>
+      <TabsContent value="historial">
+        <TablaHistorial />
+      </TabsContent>
+    </Tabs>
+  );
+}

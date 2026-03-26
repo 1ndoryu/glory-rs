@@ -20,6 +20,8 @@ pub use etiqueta::EtiquetaRepository;
 pub use gasto::{CategoriaGastoRepository, GastoRepository};
 pub use plano_sala::PlanoSalaRepository;
 pub use plantilla_whatsapp::PlantillaRepository;
+pub mod recordatorio;
+pub use recordatorio::RecordatorioRepository;
 pub use reserva::ReservaRepository;
 pub use user::UserRepository;
 pub use venta::VentaRepository;

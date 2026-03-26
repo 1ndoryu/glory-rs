@@ -124,6 +124,19 @@ export interface ActualizarPosicionesRequest {
   posiciones: PosicionMesa[];
 }
 
+export interface ActualizarReglaRequest {
+  /** @nullable */
+  activa?: boolean | null;
+  /** @nullable */
+  canal?: string | null;
+  /** @nullable */
+  horas_antes?: number | null;
+  /** @nullable */
+  mensaje_plantilla?: string | null;
+  /** @nullable */
+  nombre?: string | null;
+}
+
 /**
  * Estados posibles de una reserva
  */
@@ -574,6 +587,14 @@ export interface CrearPlantillaRequest {
   pie_texto?: string | null;
 }
 
+export interface CrearReglaRequest {
+  canal: string;
+  horas_antes: number;
+  /** @nullable */
+  mensaje_plantilla?: string | null;
+  nombre: string;
+}
+
 /**
  * Request para crear una reserva
  */
@@ -752,6 +773,28 @@ export interface HealthResponse {
   version: string;
 }
 
+export interface RecordatorioEnviadoDetalle {
+  canal: string;
+  enviado_at: string;
+  /** @nullable */
+  error_mensaje?: string | null;
+  estado: string;
+  fecha_reserva: string;
+  hora_reserva: string;
+  id: string;
+  nombre_cliente: string;
+  regla_id: string;
+  regla_nombre: string;
+  reserva_id: string;
+}
+
+export interface HistorialRecordatorios {
+  items: RecordatorioEnviadoDetalle[];
+  page: number;
+  per_page: number;
+  total: number;
+}
+
 /**
  * Request body para iniciar sesi├│n
  */
@@ -910,6 +953,25 @@ export interface PlantillasPaginadas {
 export interface RegisterRequest {
   email: string;
   password: string;
+}
+
+export interface ReglaRecordatorio {
+  activa: boolean;
+  canal: string;
+  created_at: string;
+  horas_antes: number;
+  id: string;
+  mensaje_plantilla: string;
+  nombre: string;
+  updated_at: string;
+  user_id: string;
+}
+
+export interface ReglasPaginadas {
+  items: ReglaRecordatorio[];
+  page: number;
+  per_page: number;
+  total: number;
 }
 
 /**
@@ -1124,6 +1186,28 @@ per_page?: number | null;
  * @nullable
  */
 estado?: string | null;
+};
+
+export type HistorialRecordatoriosParams = {
+/**
+ * @nullable
+ */
+page?: number | null;
+/**
+ * @nullable
+ */
+per_page?: number | null;
+};
+
+export type ListarReglasParams = {
+/**
+ * @nullable
+ */
+page?: number | null;
+/**
+ * @nullable
+ */
+per_page?: number | null;
 };
 
 export type ListarReservasParams = {

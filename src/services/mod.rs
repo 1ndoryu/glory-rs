@@ -9,6 +9,7 @@ mod etiqueta;
 mod gasto;
 mod plano_sala;
 mod plantilla_whatsapp;
+mod recordatorio;
 mod reserva;
 mod venta;
 
@@ -22,5 +23,6 @@ pub use etiqueta::EtiquetaService;
 pub use gasto::GastoService;
 pub use plano_sala::PlanoSalaService;
 pub use plantilla_whatsapp::PlantillaService;
+pub use recordatorio::RecordatorioService;
 pub use reserva::ReservaService;
 pub use venta::VentaService;

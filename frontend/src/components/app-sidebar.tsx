@@ -32,6 +32,7 @@ import {
   Megaphone,
   LayoutDashboard,
   MessageSquare,
+  Bell,
 } from "lucide-react"
 
 const navPrincipal = [
@@ -47,6 +48,7 @@ const navPrincipal = [
   { title: "Plano de Sala", url: "/plano-sala", icon: <Map /> },
   { title: "Campañas", url: "/marketing/campanas", icon: <Megaphone /> },
   { title: "Plantillas WA", url: "/marketing/plantillas", icon: <MessageSquare /> },
+  { title: "Recordatorios", url: "/marketing/recordatorios", icon: <Bell /> },
 ]
 
 const navSecundario = [

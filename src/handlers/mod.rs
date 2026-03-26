@@ -11,6 +11,7 @@ mod gastos;
 mod health;
 mod plano_sala;
 mod plantillas_whatsapp;
+mod recordatorios;
 mod reservas;
 mod ventas;
 
@@ -118,6 +119,12 @@ impl utoipa::Modify for SecurityAddon {
         plantillas_whatsapp::actualizar_plantilla,
         plantillas_whatsapp::eliminar_plantilla,
         plantillas_whatsapp::enviar_a_meta,
+        recordatorios::crear_regla,
+        recordatorios::listar_reglas,
+        recordatorios::obtener_regla,
+        recordatorios::actualizar_regla,
+        recordatorios::eliminar_regla,
+        recordatorios::historial_recordatorios,
     ),
     components(schemas(
         health::HealthResponse,
@@ -197,6 +204,12 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::CrearPlantillaRequest,
         crate::models::ActualizarPlantillaRequest,
         crate::models::PlantillasPaginadas,
+        crate::models::ReglaRecordatorio,
+        crate::models::CrearReglaRequest,
+        crate::models::ActualizarReglaRequest,
+        crate::models::ReglasPaginadas,
+        crate::models::RecordatorioEnviadoDetalle,
+        crate::models::HistorialRecordatorios,
         crate::models::Turno,
         crate::models::CanalVenta,
         crate::models::MetodoPago,
@@ -257,4 +270,5 @@ fn api_routes() -> Router<AppState> {
         .merge(configuracion::routes())
         .merge(campanas::routes())
         .merge(plantillas_whatsapp::routes())
+        .merge(recordatorios::routes())
 }

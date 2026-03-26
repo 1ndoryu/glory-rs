@@ -65,6 +65,7 @@ async fn main() {
     seed_etiquetas_clientes(&pool, user_id, &cliente_ids).await;
     seed_campanas(&pool, user_id).await;
     seed_plantillas_whatsapp(&pool, user_id).await;
+    seed_reglas_recordatorio(&pool, user_id).await;
 
     println!("\nSeed completado exitosamente.");
 }
@@ -77,6 +78,8 @@ fn primer_dia_mes(d: NaiveDate) -> NaiveDate {
 async fn limpiar_datos(pool: &PgPool, user_id: Uuid) {
     let sentencias = [
         "DELETE FROM campana_destinatarios WHERE campana_id IN (SELECT id FROM campanas WHERE user_id = $1)",
+        "DELETE FROM recordatorios_enviados WHERE regla_id IN (SELECT id FROM reglas_recordatorio WHERE user_id = $1)",
+        "DELETE FROM reglas_recordatorio WHERE user_id = $1",
         "DELETE FROM campanas WHERE user_id = $1",
         "DELETE FROM plantillas_whatsapp WHERE user_id = $1",
         "DELETE FROM clientes_etiquetas WHERE cliente_id IN (SELECT id FROM clientes WHERE user_id = $1)",
@@ -636,4 +639,50 @@ async fn seed_plantillas_whatsapp(pool: &PgPool, user_id: Uuid) {
         .expect("Error al insertar plantilla WhatsApp de prueba");
     }
     println!("  {} plantillas WhatsApp insertadas.", plantillas.len());
+}
+
+/* [263A-25] Reglas de recordatorio de reservas para demo.
+ * 3 reglas: SMS 24h antes, WhatsApp 1h antes, Email 24h (inactiva). */
+async fn seed_reglas_recordatorio(pool: &PgPool, user_id: Uuid) {
+    /* (nombre, horas_antes, canal, mensaje_plantilla, activa) */
+    let reglas: Vec<(&str, i32, &str, &str, bool)> = vec![
+        (
+            "Recordatorio 24h antes por SMS",
+            24,
+            "sms",
+            "Hola {nombre}, te recordamos tu reserva mañana a las {hora}. ¡Te esperamos!",
+            true,
+        ),
+        (
+            "Recordatorio 1h antes por WhatsApp",
+            1,
+            "whatsapp",
+            "Hola {nombre}, tu reserva es en 1 hora ({hora}). ¿Sigues confirmado/a?",
+            true,
+        ),
+        (
+            "Email día anterior",
+            24,
+            "email",
+            "Estimado/a {nombre}, le recordamos que tiene una reserva programada para mañana a las {hora}. Si necesita cancelar o modificar, responda a este email.",
+            false,
+        ),
+    ];
+
+    for (nombre, horas_antes, canal, mensaje, activa) in &reglas {
+        sqlx::query(
+            "INSERT INTO reglas_recordatorio (user_id, nombre, horas_antes, canal, mensaje_plantilla, activa) \
+             VALUES ($1, $2, $3, $4, $5, $6)",
+        )
+        .bind(user_id)
+        .bind(*nombre)
+        .bind(*horas_antes)
+        .bind(*canal)
+        .bind(*mensaje)
+        .bind(*activa)
+        .execute(pool)
+        .await
+        .expect("Error al insertar regla de recordatorio de prueba");
+    }
+    println!("  {} reglas de recordatorio insertadas.", reglas.len());
 }

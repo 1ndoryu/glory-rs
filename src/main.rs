@@ -1,5 +1,6 @@
 use glory_backend::config::AppConfig;
 use glory_backend::handlers;
+use glory_backend::services::RecordatorioService;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -27,7 +28,23 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing::info!("Servidor iniciando en {addr}");
     tracing::info!("Swagger UI disponible en http://{addr}/swagger-ui/");
 
-    let app = handlers::create_router(pool, config);
+    let app = handlers::create_router(pool.clone(), config);
+
+    /* [263A-25] Background scheduler: verifica recordatorios pendientes cada 60s.
+     * El ciclo busca reservas que coincidan con reglas activas y registra envíos. */
+    let scheduler_pool = pool.clone();
+    tokio::spawn(async move {
+        let mut interval = tokio::time::interval(std::time::Duration::from_secs(60));
+        loop {
+            interval.tick().await;
+            match RecordatorioService::ejecutar_ciclo(&scheduler_pool).await {
+                Ok(n) if n > 0 => tracing::debug!("Scheduler: {n} recordatorios procesados"),
+                Err(e) => tracing::warn!("Scheduler error: {e}"),
+                _ => {}
+            }
+        }
+    });
+
     let listener = tokio::net::TcpListener::bind(&addr).await?;
     axum::serve(listener, app).await?;
 

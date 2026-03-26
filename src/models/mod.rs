@@ -58,3 +58,9 @@ pub use plantilla_whatsapp::{
     ActualizarPlantillaRequest, CrearPlantillaRequest, PlantillaWhatsapp,
     PlantillasPaginadas, PlantillasQuery, CATEGORIAS_PLANTILLA,
 };
+mod recordatorio;
+pub use recordatorio::{
+    ActualizarReglaRequest, CrearReglaRequest, HistorialRecordatorios, RecordatorioEnviado,
+    RecordatorioEnviadoDetalle, ReglaRecordatorio, ReglasPaginadas, ReglasQuery,
+    CANALES_RECORDATORIO,
+};
