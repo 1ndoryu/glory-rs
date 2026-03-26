@@ -121,10 +121,10 @@ Puedes ajustar los pendientes. Si puedes analizar todo el contenido y sacar el t
 - Marketing: el cliente indicó que dará detalles más adelante.
 - Merge de clientes duplicados: unificar 2 clientes que son la misma persona.
 
-## Configuración del restaurante
+## ~~Configuración del restaurante~~ → 263A-17
 
-- Configuración de datos obligatorios al reservar (email, teléfono, nombre, apellidos).
-- IVA por defecto del establecimiento. 
+- ~~Configuración de datos obligatorios al reservar (email, teléfono, nombre, apellidos).~~
+- ~~IVA por defecto del establecimiento.~~
 
 6. deberia unificarse npm run verify y self-check.ps1 para reducir la alucinacion, supongo que esto implica ajustar las instrucciones .github\instructions\test.instructions.md, tambien presiento que hay cosas que necesitan ser mas genericas en .github\instructions\test.instructions.md, por ejemplo cuando dice  `npm run verify` (cargo check + clippy + test + type-check + Sentinel) no aclara que en proyecto actual puede que no se este usando cargo por que no es rust, o 
 
