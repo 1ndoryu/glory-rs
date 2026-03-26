@@ -1,0 +1,90 @@
+/* [263A-11] Estilos para la vista de no-shows */
+
+.filtrosNoShows {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+  margin-bottom: 1.5rem;
+}
+
+.filtroFecha {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.filtroFecha label {
+  font-size: 0.8rem;
+  color: var(--color-texto-secundario);
+}
+
+.panelResumenNoShows {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.tarjetaNoShow {
+  background: var(--color-fondo-tarjeta, #fff);
+  border: 1px solid var(--color-borde, #e2e8f0);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tarjetaNoShowPeligro {
+  border-color: var(--color-peligro, #e53e3e);
+  background: #fff5f5;
+}
+
+.tarjetaNoShowValor {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-texto, #1a202c);
+}
+
+.tarjetaNoShowPeligro .tarjetaNoShowValor {
+  color: var(--color-peligro, #e53e3e);
+}
+
+.tarjetaNoShowLabel {
+  font-size: 0.85rem;
+  color: var(--color-texto-secundario, #718096);
+}
+
+.subtituloSeccion {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--color-texto, #1a202c);
+}
+
+.ratioAlto {
+  color: var(--color-peligro, #e53e3e);
+  font-weight: 600;
+}
+
+.ratioMedio {
+  color: #dd6b20;
+  font-weight: 600;
+}
+
+.ratioBajo {
+  color: var(--color-exito, #38a169);
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .panelResumenNoShows {
+    grid-template-columns: 1fr;
+  }
+
+  .filtrosNoShows {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

@@ -2,7 +2,7 @@
    253A-14: SVGs manuales reemplazados por lucide-react, icono logout */
 
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Home, DollarSign, BarChart3, ClipboardList, Calendar, Users, LogOut } from 'lucide-react';
+import { Home, DollarSign, BarChart3, ClipboardList, Calendar, Users, Radio, UserX, LogOut } from 'lucide-react';
 import { useAuthStore } from '../stores/authStore';
 import { Boton } from '@glory/componentes/ui';
 import '../estilos/BarraLateral.css';
@@ -38,6 +38,12 @@ function BarraLateral() {
         </NavLink>
         <NavLink to="/clientes" className={({ isActive }) => `enlaceLateral ${isActive ? 'activo' : ''}`}>
           <Users size={18} /> Clientes
+        </NavLink>
+        <NavLink to="/canales" className={({ isActive }) => `enlaceLateral ${isActive ? 'activo' : ''}`}>
+          <Radio size={18} /> Canales
+        </NavLink>
+        <NavLink to="/reservas/no-shows" className={({ isActive }) => `enlaceLateral ${isActive ? 'activo' : ''}`}>
+          <UserX size={18} /> No-Shows
         </NavLink>
       </nav>
 
