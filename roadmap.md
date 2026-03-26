@@ -217,7 +217,7 @@ DELETE http://localhost:3000/api/ventas/de507550-2c03-4a42-8717-d6a547058825 405
 
 ~~26. LOs botones en el panel lateral de navegación no tienen gap, y los botones de crear venta y gasto en el panel lateral la palabra "nueva es redudante"~~ → 263A-29
 
-27. Cambia el present de shandc a --preset bJfDQCym
+~~27. Cambia el present de shandc a --preset bJfDQCym~~ → 263A-30
 
 28. el main necesita gap 
 
