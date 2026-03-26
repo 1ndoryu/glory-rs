@@ -191,22 +191,22 @@ Failed to load resource: net::ERR_CONNECTION_REFUSEDComprende este error
 DELETE http://localhost:3000/api/ventas/de507550-2c03-4a42-8717-d6a547058825 405 (Method Not Allowed)~~ → 263A-15
 
 
-16. me di cuenta qeu son muchos problemas de diseño que lo mejor en este caso es usar https://ui.shadcn.com, rehacer toda la interfaz en https://ui.shadcn.com, tambien seria bueno preparar el white y black mode, usar es block "npx shadcn@latest add dashboard-01" shadcn tambien tiene Charts & Graphs, usaremos esos, he creado este present para este proyecto --preset bKGlrC2C (https://ui.shadcn.com/docs/installation)
+16. ~~me di cuenta qeu son muchos problemas de diseño que lo mejor en este caso es usar https://ui.shadcn.com, rehacer toda la interfaz en https://ui.shadcn.com, tambien seria bueno preparar el white y black mode, usar es block "npx shadcn@latest add dashboard-01" shadcn tambien tiene Charts & Graphs, usaremos esos, he creado este present para este proyecto --preset bKGlrC2C (https://ui.shadcn.com/docs/installation)~~ → 263A-16
 
 (todo lo siguiente fue planificado antes de 16, no tomar tanto en cuenta si se refiere al diseño pues, shadcn solucionara alguans cosas)
 
-17. los botoenes de eliminar deberian ser iconos en vez de texto, 
+~~17. los botoenes de eliminar deberian ser iconos en vez de texto,~~ → 263A-16
 
-18. .menuGasto debería display flex column y esta usando emojis en vez de icono lo cual es una violacion
+~~18. .menuGasto debería display flex column y esta usando emojis en vez de icono lo cual es una violacion~~ → 263A-16
 
 19. Creo que inicio y dashboard deberían convinarse en una sola cosa al menos que claro que el cliente lo haya pedido por separado pero no croe.
 
 ~~20. Siempre dice No hay reservas para esta fecha pero en calendario sale que si. (Datos de prueba) Pero ya vi que es porque "todos los estados" en realidad no muestran todos los estados.~~ → 263A-20
 
-21. En pieBarraLateral las letras son oscuras y el fondo tambien.
+21. ~~En pieBarraLateral las letras son oscuras y el fondo tambien.~~ → 263A-16
 
-22. La barra lateral debería poder encogerse a solo iconos y expandirse, el estado debe perdurar aunque se recargue la pestaña.
+22. ~~La barra lateral debería poder encogerse a solo iconos y expandirse, el estado debe perdurar aunque se recargue la pestaña.~~ → 263A-16
 
-23. La forma en la que se construye el plano de la sala, por ajemplo abre alertas en vez de modales, no tiene iconos, deberia poder arrastrarse primero y despues colocar el nombre, cosas basicas que mejoran la experiencia de usuario, tambien veo que los estados no se conservan al mover las mesas.
+23. ~~La forma en la que se construye el plano de la sala, por ajemplo abre alertas en vez de modales, no tiene iconos, deberia poder arrastrarse primero y despues colocar el nombre, cosas basicas que mejoran la experiencia de usuario, tambien veo que los estados no se conservan al mover las mesas.~~ → 263A-16 (parcial: UI mejorada con shadcn, estados de mesas requiere revisión adicional)
 
-24. Me parece que tailwind no esta funcionando, pues todo se ve muy diferente a como es shadcn en en realidad.
+24. ~~Me parece que tailwind no esta funcionando, pues todo se ve muy diferente a como es shadcn en en realidad.~~ → 263A-16
