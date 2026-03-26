@@ -358,18 +358,18 @@ pub fn routes() -> Router<AppState> {
         .route("/plano-sala/ocupacion", get(obtener_ocupacion))
         .route("/plano-sala/zonas", post(crear_zona))
         .route(
-            "/plano-sala/zonas/{id}",
+            "/plano-sala/zonas/:id",
             patch(actualizar_zona).delete(eliminar_zona),
         )
         .route("/plano-sala/mesas", post(crear_mesa))
         .route("/plano-sala/mesas/posiciones", patch(actualizar_posiciones))
         .route(
-            "/plano-sala/mesas/{id}",
+            "/plano-sala/mesas/:id",
             patch(actualizar_mesa).delete(eliminar_mesa),
         )
         .route("/plano-sala/combinaciones", post(crear_combinacion))
         .route(
-            "/plano-sala/combinaciones/{id}",
+            "/plano-sala/combinaciones/:id",
             delete(eliminar_combinacion),
         )
         .route("/plano-sala/export", get(exportar_plano))

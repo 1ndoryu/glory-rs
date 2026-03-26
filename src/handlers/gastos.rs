@@ -131,5 +131,5 @@ pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/gastos/categorias", get(listar_categorias))
         .route("/gastos", post(crear_gasto).get(listar_gastos))
-        .route("/gastos/{id}", get(obtener_gasto).delete(eliminar_gasto))
+        .route("/gastos/:id", get(obtener_gasto).delete(eliminar_gasto))
 }

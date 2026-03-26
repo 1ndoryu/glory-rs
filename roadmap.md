@@ -181,14 +181,14 @@ Puedes ajustar los pendientes. Si puedes analizar todo el contenido y sacar el t
 
 14. Merge de clientes duplicados — Fase 4d
 
-15. Veo algunos problemas como
+~~15. Veo algunos problemas como
 
 Failed to load resource: net::ERR_CONNECTION_REFUSEDComprende este error
 :3000/api/auth/login:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)Comprende este error
 :3000/api/reservas/no-shows:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)Comprende este error
 :3000/api/reservas/no-shows:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)Comprende este error
 :3000/api/reservas/no-shows:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)
-DELETE http://localhost:3000/api/ventas/de507550-2c03-4a42-8717-d6a547058825 405 (Method Not Allowed)
+DELETE http://localhost:3000/api/ventas/de507550-2c03-4a42-8717-d6a547058825 405 (Method Not Allowed)~~ → 263A-15
 
 
 16. me di cuenta qeu son muchos problemas de diseño que lo mejor en este caso es usar https://ui.shadcn.com, rehacer toda la interfaz en https://ui.shadcn.com, tambien seria bueno preparar el white y black mode, usar es block "npx shadcn@latest add dashboard-01" shadcn tambien tiene Charts & Graphs, usaremos esos, he creado este present para este proyecto --preset bKGlrC2C (https://ui.shadcn.com/docs/installation)

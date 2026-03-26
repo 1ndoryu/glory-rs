@@ -1,0 +1,42 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COALESCE(cr.nombre, 'Sin canal') as canal_nombre, COUNT(*) FILTER (WHERE r.estado != 'cancelada')::BIGINT as \"total_reservas!\", COUNT(*) FILTER (WHERE r.estado = 'no_show')::BIGINT as \"no_shows!\", CASE WHEN COUNT(*) FILTER (WHERE r.estado != 'cancelada') > 0 THEN ROUND(COUNT(*) FILTER (WHERE r.estado = 'no_show')::NUMERIC * 100.0 / COUNT(*) FILTER (WHERE r.estado != 'cancelada'), 1) ELSE 0 END::FLOAT8 as \"ratio_porcentaje!\" FROM reservas r LEFT JOIN canales_reserva cr ON cr.id = r.canal_id WHERE r.user_id = $1 AND ($2::DATE IS NULL OR r.fecha >= $2) AND ($3::DATE IS NULL OR r.fecha <= $3) GROUP BY cr.id, cr.nombre ORDER BY \"no_shows!\" DESC",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "canal_nombre",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 1,
+        "name": "total_reservas!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 2,
+        "name": "no_shows!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 3,
+        "name": "ratio_porcentaje!",
+        "type_info": "Float8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Date",
+        "Date"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "07a50a8e24f451a7dde9ffb0c0f1851206acfebcb81e6376cd1bde3956f0dfec"
+}

@@ -84,5 +84,5 @@ pub fn routes() -> Router<AppState> {
             "/canales-reserva",
             get(listar_canales).post(crear_canal),
         )
-        .route("/canales-reserva/{id}", axum::routing::delete(eliminar_canal))
+        .route("/canales-reserva/:id", axum::routing::delete(eliminar_canal))
 }

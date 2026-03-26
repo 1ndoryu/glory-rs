@@ -106,3 +106,17 @@ Cada lección debe ser concisa y accionable.
 
 **Problema:** PATCH al campo `docker_compose` retorna 422 "This field is not allowed". El campo correcto es `docker_compose_raw` pero debe ser base64-encoded.
 **Solución:** Usar `docker_compose_raw` con el YAML codificado en base64. PATCH envs via `/envs` sin UUID en la ruta.
+
+## 2026-03-26 — Axum 0.7 path params: :param vs {param}
+
+**Problema:** TODAS las rutas con path params devolvían 405 (DELETE) o 404 (GET) porque usaban sintaxis `{id}` en `.route()`.
+**Causa raíz:** Axum 0.7.x usa matchit 0.7.x, que solo soporta `:param`. La sintaxis `{param}` es de matchit 0.8+ / Axum 0.8+. Las rutas con `{id}` eran tratadas como paths literales y caían al fallback SPA.
+**Solución:** Cambiar `{id}` a `:id` en todas las llamadas `.route()`. Las anotaciones `#[utoipa::path]` mantienen `{id}` (sintaxis OpenAPI).
+**Prevención:** No copiar la sintaxis de utoipa a los `.route()`. Agregar test que haga GET/DELETE por ID en CI.
+
+## 2026-03-26 — LEFT JOIN + NULL en SQLx: unexpected null
+
+**Problema:** Query con LEFT JOIN producía `cr.nombre = NULL` para filas sin relación, causando 500 "unexpected null; try decoding as an Option" en SQLx.
+**Causa raíz:** `canal_nombre` en la query no tenía `?` override y el struct tenía `Option<String>`, pero la cache `.sqlx` marcaba la columna como `nullable: false` (heredado de la definición de tabla, no del JOIN). En runtime con datos reales, NULL causaba error de decodificación.
+**Solución:** `COALESCE(cr.nombre, 'Sin canal')` garantiza non-null. También agregar todos los campos no-agregados al GROUP BY.
+**Prevención:** Siempre usar COALESCE en LEFT JOINs o el override `as "col?"` en SQLx para columnas que pueden ser NULL.

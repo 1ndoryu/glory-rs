@@ -110,8 +110,11 @@ pub async fn eliminar_venta(
     Ok(StatusCode::NO_CONTENT)
 }
 
+/* [263A-15] Axum 0.7 (matchit 0.7.x) usa :param, no {param}.
+ * Todas las rutas con path params corregidas de {id} a :id.
+ * Las anotaciones #[utoipa::path] mantienen {id} (sintaxis OpenAPI, no afecta routing). */
 pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/ventas", post(crear_venta).get(listar_ventas))
-        .route("/ventas/{id}", get(obtener_venta).delete(eliminar_venta))
+        .route("/ventas/:id", get(obtener_venta).delete(eliminar_venta))
 }

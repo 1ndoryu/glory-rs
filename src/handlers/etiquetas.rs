@@ -289,23 +289,23 @@ pub fn routes() -> Router<AppState> {
             get(listar_categorias).post(crear_categoria),
         )
         .route("/etiquetas", get(listar_etiquetas).post(crear_etiqueta))
-        .route("/etiquetas/{id}", axum::routing::delete(eliminar_etiqueta))
+        .route("/etiquetas/:id", axum::routing::delete(eliminar_etiqueta))
         /* Asignaciones a clientes */
         .route(
-            "/clientes/{id}/etiquetas",
+            "/clientes/:id/etiquetas",
             get(obtener_etiquetas_cliente).post(asignar_etiqueta_cliente),
         )
         .route(
-            "/clientes/{cliente_id}/etiquetas/{etiqueta_id}",
+            "/clientes/:cliente_id/etiquetas/:etiqueta_id",
             axum::routing::delete(desasignar_etiqueta_cliente),
         )
         /* Asignaciones a reservas */
         .route(
-            "/reservas/{id}/etiquetas",
+            "/reservas/:id/etiquetas",
             get(obtener_etiquetas_reserva).post(asignar_etiqueta_reserva),
         )
         .route(
-            "/reservas/{reserva_id}/etiquetas/{etiqueta_id}",
+            "/reservas/:reserva_id/etiquetas/:etiqueta_id",
             axum::routing::delete(desasignar_etiqueta_reserva),
         )
 }

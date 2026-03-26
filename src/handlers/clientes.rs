@@ -134,7 +134,7 @@ pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/clientes", post(crear_cliente).get(listar_clientes))
         .route(
-            "/clientes/{id}",
+            "/clientes/:id",
             get(obtener_cliente)
                 .put(actualizar_cliente)
                 .delete(eliminar_cliente),

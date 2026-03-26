@@ -217,7 +217,7 @@ pub fn routes() -> Router<AppState> {
         .route("/reservas/no-shows", get(no_show_stats))
         .route("/reservas", post(crear_reserva).get(listar_reservas))
         .route(
-            "/reservas/{id}",
+            "/reservas/:id",
             get(obtener_reserva)
                 .put(actualizar_reserva)
                 .delete(eliminar_reserva),

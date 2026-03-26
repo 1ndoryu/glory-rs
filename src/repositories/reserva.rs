@@ -262,6 +262,10 @@ impl ReservaRepository {
         Ok((rec.total, rec.no_shows))
     }
 
+    /* [263A-15] Fix 500 en /api/reservas/no-shows:
+     * 1. COALESCE(cr.nombre, 'Sin canal') — reservas sin canal_id producían NULL
+     *    en el LEFT JOIN, causando "unexpected null; try decoding as an Option".
+     * 2. GROUP BY cr.id, cr.nombre — previene mezclar canales con nombre duplicado. */
     /// No-shows desglosados por canal (263A-8)
     pub async fn no_show_por_canal(
         pool: &PgPool,
@@ -272,7 +276,7 @@ impl ReservaRepository {
         sqlx::query_as!(
             NoShowPorCanal,
             "SELECT \
-             cr.nombre as canal_nombre, \
+             COALESCE(cr.nombre, 'Sin canal') as canal_nombre, \
              COUNT(*) FILTER (WHERE r.estado != 'cancelada')::BIGINT as \"total_reservas!\", \
              COUNT(*) FILTER (WHERE r.estado = 'no_show')::BIGINT as \"no_shows!\", \
              CASE WHEN COUNT(*) FILTER (WHERE r.estado != 'cancelada') > 0 \
@@ -284,7 +288,7 @@ impl ReservaRepository {
              WHERE r.user_id = $1 \
              AND ($2::DATE IS NULL OR r.fecha >= $2) \
              AND ($3::DATE IS NULL OR r.fecha <= $3) \
-             GROUP BY cr.nombre \
+             GROUP BY cr.id, cr.nombre \
              ORDER BY \"no_shows!\" DESC",
             user_id,
             fecha_desde,
