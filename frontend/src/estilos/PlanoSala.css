@@ -169,7 +169,7 @@
 .planoConfigCampo label {
   display: block;
   font-size: 0.8rem;
-  color: var(--colorTextoSecundario);
+  color: hsl(var(--muted-foreground));
   margin-bottom: 0.25rem;
 }
 

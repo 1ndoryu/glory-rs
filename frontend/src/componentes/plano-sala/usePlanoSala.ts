@@ -1,8 +1,10 @@
 /* [263A-14] Hook con lógica de negocio del plano de sala.
- * Maneja zona activa, mesa seleccionada, CRUD, drag-and-drop y export/import. */
+ * [263A-28] Reemplazados prompt/confirm/alert nativos por estado React + toast.
+ * Los diálogos se renderizan en PlanoSala.tsx usando shadcn Dialog. */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
+import { toast } from 'sonner';
 import {
   useObtenerPlano,
   ActualizarMesaRequest,
@@ -25,6 +27,23 @@ import {
   importarPlano,
 } from '../../api/generated';
 
+/* Tipos de diálogo para reemplazar prompt/confirm nativos */
+export interface DialogoEntrada {
+  titulo: string;
+  label: string;
+  valorInicial: string;
+  tipo?: 'text' | 'number';
+  onConfirmar: (valor: string) => void;
+}
+export interface DialogoConfirmar {
+  titulo: string;
+  mensaje: string;
+  onConfirmar: () => void;
+}
+export interface DialogoCombinacion {
+  onConfirmar: (nombre: string, maxPersonas: number) => void;
+}
+
 export function usePlanoSala() {
   const { data, refetch } = useObtenerPlano();
   const plano = data?.status === 200 ? data.data : null;
@@ -36,10 +55,16 @@ export function usePlanoSala() {
     Record<string, { x: number; y: number }>
   >({});
 
+  /* Estado de diálogos — reemplazan prompt/confirm/alert nativos */
+  const [dialogoEntrada, setDialogoEntrada] = useState<DialogoEntrada | null>(null);
+  const [dialogoConfirmar, setDialogoConfirmar] = useState<DialogoConfirmar | null>(null);
+  const [dialogoCombinacion, setDialogoCombinacion] = useState<DialogoCombinacion | null>(null);
+  /* Ref para archivo importado pendiente de confirmación */
+  const archivoImportRef = useRef<PlanoExport | null>(null);
+
   const zonaData = plano?.zonas.find((z) => z.id === zonaActiva);
   const mesasZona = zonaData?.mesas ?? [];
 
-  /* Auto-seleccionar primera zona */
   if (plano && plano.zonas.length > 0 && !zonaActiva) {
     setZonaActiva(plano.zonas[0].id);
   }
@@ -50,37 +75,52 @@ export function usePlanoSala() {
     setPosicionesLocales({});
   };
 
-  const handleCrearZona = async () => {
-    const nombre = prompt('Nombre de la zona:');
-    if (!nombre) return;
-    await crearZona({ nombre } as CrearZonaRequest);
-    refetch();
+  const handleCrearZona = () => {
+    setDialogoEntrada({
+      titulo: 'Nueva zona', label: 'Nombre de la zona', valorInicial: '', tipo: 'text',
+      onConfirmar: async (nombre) => {
+        await crearZona({ nombre } as CrearZonaRequest);
+        refetch();
+      },
+    });
   };
 
-  const handleEliminarZona = async () => {
-    if (!zonaActiva || !confirm('¿Eliminar esta zona y todas sus mesas?')) return;
-    await eliminarZona(zonaActiva);
-    setZonaActiva(null);
-    setMesaSeleccionada(null);
-    refetch();
-  };
-
-  const handleEditarZona = async () => {
-    if (!zonaActiva || !zonaData) return;
-    const nombre = prompt('Nuevo nombre:', zonaData.nombre);
-    if (!nombre) return;
-    await actualizarZonaApi(zonaActiva, { nombre } as ActualizarZonaRequest);
-    refetch();
-  };
-
-  const handleCrearMesa = async () => {
+  const handleEliminarZona = () => {
     if (!zonaActiva) return;
-    const numStr = prompt('Número de mesa:');
-    if (!numStr) return;
-    const numero = Number(numStr);
-    if (Number.isNaN(numero) || numero < 1) return;
-    await crearMesa({ zona_id: zonaActiva, numero, pos_x: 50, pos_y: 50 } as CrearMesaRequest);
-    refetch();
+    setDialogoConfirmar({
+      titulo: 'Eliminar zona',
+      mensaje: '¿Eliminar esta zona y todas sus mesas?',
+      onConfirmar: async () => {
+        await eliminarZona(zonaActiva);
+        setZonaActiva(null);
+        setMesaSeleccionada(null);
+        refetch();
+      },
+    });
+  };
+
+  const handleEditarZona = () => {
+    if (!zonaActiva || !zonaData) return;
+    setDialogoEntrada({
+      titulo: 'Renombrar zona', label: 'Nuevo nombre', valorInicial: zonaData.nombre, tipo: 'text',
+      onConfirmar: async (nombre) => {
+        await actualizarZonaApi(zonaActiva, { nombre } as ActualizarZonaRequest);
+        refetch();
+      },
+    });
+  };
+
+  const handleCrearMesa = () => {
+    if (!zonaActiva) return;
+    setDialogoEntrada({
+      titulo: 'Nueva mesa', label: 'Número de mesa', valorInicial: '', tipo: 'number',
+      onConfirmar: async (val) => {
+        const numero = Number(val);
+        if (Number.isNaN(numero) || numero < 1) return;
+        await crearMesa({ zona_id: zonaActiva, numero, pos_x: 50, pos_y: 50 } as CrearMesaRequest);
+        refetch();
+      },
+    });
   };
 
   const handleGuardarMesa = async (id: string, req: ActualizarMesaRequest) => {
@@ -89,11 +129,16 @@ export function usePlanoSala() {
     refetch();
   };
 
-  const handleEliminarMesa = async (id: string) => {
-    if (!confirm('¿Eliminar esta mesa?')) return;
-    await eliminarMesaApi(id);
-    setMesaSeleccionada(null);
-    refetch();
+  const handleEliminarMesa = (id: string) => {
+    setDialogoConfirmar({
+      titulo: 'Eliminar mesa',
+      mensaje: '¿Eliminar esta mesa?',
+      onConfirmar: async () => {
+        await eliminarMesaApi(id);
+        setMesaSeleccionada(null);
+        refetch();
+      },
+    });
   };
 
   const handleDragStart = (event: DragStartEvent) => setArrastrando(String(event.active.id));
@@ -126,7 +171,7 @@ export function usePlanoSala() {
       a.download = 'plano-sala.json';
       a.click();
       URL.revokeObjectURL(url);
-    } catch { alert('Error al exportar'); }
+    } catch { toast.error('Error al exportar'); }
   };
 
   const handleImportar = () => {
@@ -139,29 +184,42 @@ export function usePlanoSala() {
       try {
         const text = await file.text();
         const d: PlanoExport = JSON.parse(text);
-        if (!confirm('Esto reemplazará todo el plano actual. ¿Continuar?')) return;
-        await importarPlano(d);
-        setZonaActiva(null);
-        setMesaSeleccionada(null);
-        refetch();
-      } catch { alert('Error al importar: archivo inválido'); }
+        archivoImportRef.current = d;
+        setDialogoConfirmar({
+          titulo: 'Importar plano',
+          mensaje: 'Esto reemplazará todo el plano actual. ¿Continuar?',
+          onConfirmar: async () => {
+            if (!archivoImportRef.current) return;
+            await importarPlano(archivoImportRef.current);
+            archivoImportRef.current = null;
+            setZonaActiva(null);
+            setMesaSeleccionada(null);
+            refetch();
+          },
+        });
+      } catch { toast.error('Error al importar: archivo inválido'); }
     };
     input.click();
   };
 
-  const handleCrearCombinacion = async () => {
-    const nombre = prompt('Nombre de la combinación:');
-    if (!nombre) return;
-    const maxStr = prompt('Máx personas en combinación:');
-    if (!maxStr) return;
-    await crearCombinacion({ nombre, max_personas: Number(maxStr), mesa_ids: [] } as CrearCombinacionRequest);
-    refetch();
+  const handleCrearCombinacion = () => {
+    setDialogoCombinacion({
+      onConfirmar: async (nombre, maxPersonas) => {
+        await crearCombinacion({ nombre, max_personas: maxPersonas, mesa_ids: [] } as CrearCombinacionRequest);
+        refetch();
+      },
+    });
   };
 
-  const handleEliminarCombinacion = async (id: string) => {
-    if (!confirm('¿Eliminar esta combinación?')) return;
-    await eliminarCombinacion(id);
-    refetch();
+  const handleEliminarCombinacion = (id: string) => {
+    setDialogoConfirmar({
+      titulo: 'Eliminar combinación',
+      mensaje: '¿Eliminar esta combinación?',
+      onConfirmar: async () => {
+        await eliminarCombinacion(id);
+        refetch();
+      },
+    });
   };
 
   return {
@@ -172,5 +230,8 @@ export function usePlanoSala() {
     handleDragStart, handleDragEnd,
     handleExportar, handleImportar,
     handleCrearCombinacion, handleEliminarCombinacion,
+    dialogoEntrada, setDialogoEntrada,
+    dialogoConfirmar, setDialogoConfirmar,
+    dialogoCombinacion, setDialogoCombinacion,
   };
 }

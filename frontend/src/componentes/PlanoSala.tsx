@@ -1,10 +1,14 @@
 ﻿/* [263A-16] PlanoSala — Constructor visual de plano de sala con drag-and-drop.
- * Reescrito imports a shadcn Button. Mantiene PlanoSala.css para canvas/mesas.
+ * [263A-28] Diálogos nativos reemplazados por shadcn Dialog + toast.
  * Lógica en usePlanoSala, mesa arrastrable en MesaDraggable, config en PanelConfigMesa. */
 
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
+import { Plus, Pencil, Trash2, Download, Upload, Combine } from 'lucide-react';
 import MesaDraggable from './plano-sala/MesaDraggable';
 import PanelConfigMesa from './plano-sala/PanelConfigMesa';
 import { usePlanoSala } from './plano-sala/usePlanoSala';
@@ -19,7 +23,20 @@ function PlanoSala() {
     handleDragStart, handleDragEnd,
     handleExportar, handleImportar,
     handleCrearCombinacion, handleEliminarCombinacion,
+    dialogoEntrada, setDialogoEntrada,
+    dialogoConfirmar, setDialogoConfirmar,
+    dialogoCombinacion, setDialogoCombinacion,
   } = usePlanoSala();
+
+  /* Estado local para inputs de los diálogos */
+  const [entradaValor, setEntradaValor] = useState('');
+  const [combNombre, setCombNombre] = useState('');
+  const [combMaxP, setCombMaxP] = useState('');
+
+  /* Sincronizar valor inicial al abrir diálogo de entrada */
+  useEffect(() => {
+    if (dialogoEntrada) setEntradaValor(dialogoEntrada.valorInicial);
+  }, [dialogoEntrada]);
 
   const canvasRef = useRef<HTMLDivElement>(null);
   const sensors = useSensors(
@@ -30,16 +47,16 @@ function PlanoSala() {
     <div className="flex flex-col gap-4">
       {/* Barra de herramientas */}
       <div className="flex items-center gap-2 flex-wrap">
-        <Button size="sm" onClick={handleCrearMesa} disabled={!zonaActiva}>+ Mesa</Button>
+        <Button size="sm" onClick={handleCrearMesa} disabled={!zonaActiva}><Plus className="size-4 mr-1" />Mesa</Button>
         {zonaActiva && (
           <>
-            <Button size="sm" variant="ghost" onClick={handleEditarZona}>Renombrar zona</Button>
-            <Button size="sm" variant="destructive" onClick={handleEliminarZona}>Eliminar zona</Button>
+            <Button size="sm" variant="ghost" onClick={handleEditarZona}><Pencil className="size-4 mr-1" />Renombrar</Button>
+            <Button size="sm" variant="destructive" onClick={handleEliminarZona}><Trash2 className="size-4 mr-1" />Zona</Button>
           </>
         )}
         <div className="ml-auto flex gap-2">
-          <Button size="sm" variant="ghost" onClick={handleExportar}>Exportar</Button>
-          <Button size="sm" variant="ghost" onClick={handleImportar}>Importar</Button>
+          <Button size="sm" variant="ghost" onClick={handleExportar}><Download className="size-4 mr-1" />Exportar</Button>
+          <Button size="sm" variant="ghost" onClick={handleImportar}><Upload className="size-4 mr-1" />Importar</Button>
         </div>
       </div>
 
@@ -123,13 +140,104 @@ function PlanoSala() {
                 </p>
               </div>
               <Button size="sm" variant="destructive" onClick={() => handleEliminarCombinacion(c.id)}>
-                &times;
+                <Trash2 className="size-4" />
               </Button>
             </div>
           ))}
         </div>
       )}
-      <Button size="sm" variant="ghost" onClick={handleCrearCombinacion}>+ Combinación de mesas</Button>
+      <Button size="sm" variant="ghost" onClick={handleCrearCombinacion}><Combine className="size-4 mr-1" />Combinación</Button>
+
+      {/* Diálogo de entrada (reemplaza prompt nativo) */}
+      <Dialog
+        open={!!dialogoEntrada}
+        onOpenChange={(open) => { if (!open) setDialogoEntrada(null); }}
+      >
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>{dialogoEntrada?.titulo}</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-2">
+            <Label>{dialogoEntrada?.label}</Label>
+            <Input
+              type={dialogoEntrada?.tipo ?? 'text'}
+              value={entradaValor}
+              onChange={e => setEntradaValor(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === 'Enter' && entradaValor.trim()) {
+                  dialogoEntrada?.onConfirmar(entradaValor.trim());
+                  setDialogoEntrada(null);
+                  setEntradaValor('');
+                }
+              }}
+              autoFocus
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => { setDialogoEntrada(null); setEntradaValor(''); }}>Cancelar</Button>
+            <Button onClick={() => {
+              if (entradaValor.trim()) {
+                dialogoEntrada?.onConfirmar(entradaValor.trim());
+                setDialogoEntrada(null);
+                setEntradaValor('');
+              }
+            }}>Aceptar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Diálogo de confirmación (reemplaza confirm nativo) */}
+      <Dialog
+        open={!!dialogoConfirmar}
+        onOpenChange={(open) => { if (!open) setDialogoConfirmar(null); }}
+      >
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>{dialogoConfirmar?.titulo}</DialogTitle>
+            <DialogDescription>{dialogoConfirmar?.mensaje}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setDialogoConfirmar(null)}>Cancelar</Button>
+            <Button variant="destructive" onClick={() => {
+              dialogoConfirmar?.onConfirmar();
+              setDialogoConfirmar(null);
+            }}>Confirmar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Diálogo para crear combinación (2 campos) */}
+      <Dialog
+        open={!!dialogoCombinacion}
+        onOpenChange={(open) => { if (!open) { setDialogoCombinacion(null); setCombNombre(''); setCombMaxP(''); } }}
+      >
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Nueva combinación de mesas</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-2">
+              <Label>Nombre</Label>
+              <Input value={combNombre} onChange={e => setCombNombre(e.target.value)} autoFocus />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label>Máx personas</Label>
+              <Input type="number" value={combMaxP} onChange={e => setCombMaxP(e.target.value)} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => { setDialogoCombinacion(null); setCombNombre(''); setCombMaxP(''); }}>Cancelar</Button>
+            <Button onClick={() => {
+              if (combNombre.trim() && combMaxP) {
+                dialogoCombinacion?.onConfirmar(combNombre.trim(), Number(combMaxP));
+                setDialogoCombinacion(null);
+                setCombNombre('');
+                setCombMaxP('');
+              }
+            }}>Crear</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
