@@ -64,6 +64,7 @@ async fn main() {
     seed_reservas(&pool, user_id, hoy, &canal_ids, &cliente_ids).await;
     seed_etiquetas_clientes(&pool, user_id, &cliente_ids).await;
     seed_campanas(&pool, user_id).await;
+    seed_plantillas_whatsapp(&pool, user_id).await;
 
     println!("\nSeed completado exitosamente.");
 }
@@ -77,6 +78,7 @@ async fn limpiar_datos(pool: &PgPool, user_id: Uuid) {
     let sentencias = [
         "DELETE FROM campana_destinatarios WHERE campana_id IN (SELECT id FROM campanas WHERE user_id = $1)",
         "DELETE FROM campanas WHERE user_id = $1",
+        "DELETE FROM plantillas_whatsapp WHERE user_id = $1",
         "DELETE FROM clientes_etiquetas WHERE cliente_id IN (SELECT id FROM clientes WHERE user_id = $1)",
         "DELETE FROM reservas_etiquetas WHERE reserva_id IN (SELECT id FROM reservas WHERE user_id = $1)",
         "DELETE FROM reservas WHERE user_id = $1",
@@ -524,6 +526,7 @@ async fn seed_etiquetas_clientes(pool: &PgPool, user_id: Uuid, cliente_ids: &[Uu
 }
 
 /* [263A-23] Campañas de marketing de prueba — 3 en distintos estados */
+#[allow(clippy::type_complexity)]
 async fn seed_campanas(pool: &PgPool, user_id: Uuid) {
     let campanas: Vec<(&str, &str, &[&str], &str, &str, &str)> = vec![
         (
@@ -578,4 +581,59 @@ async fn seed_campanas(pool: &PgPool, user_id: Uuid) {
         .expect("Error al insertar campaña de prueba");
     }
     println!("  {} campañas de marketing insertadas.", campanas.len());
+}
+
+/* [263A-24] Plantillas WhatsApp de prueba — 3 en distintos estados */
+#[allow(clippy::type_complexity)]
+async fn seed_plantillas_whatsapp(pool: &PgPool, user_id: Uuid) {
+    /* (nombre, categoria, idioma, cuerpo, estado, meta_template_id, meta_razon_rechazo) */
+    let plantillas: Vec<(&str, &str, &str, &str, &str, Option<&str>, Option<&str>)> = vec![
+        (
+            "promocion_verano",
+            "MARKETING",
+            "es",
+            "¡Hola {{1}}! Este verano disfruta de un 15% de descuento en tu próxima reserva. Te esperamos. Reserva ya en {{2}}.",
+            "aprobada",
+            Some("tpl_abc123"),
+            None,
+        ),
+        (
+            "confirmacion_reserva",
+            "UTILITY",
+            "es",
+            "Hola {{1}}, tu reserva para {{2}} personas el {{3}} a las {{4}} está confirmada. ¡Te esperamos!",
+            "borrador",
+            None,
+            None,
+        ),
+        (
+            "oferta_navidad",
+            "MARKETING",
+            "es",
+            "¡Felices fiestas {{1}}! Celebra la Navidad con nuestro menú especial por 45€/persona. Reserva: {{2}}",
+            "rechazada",
+            Some("tpl_xyz789"),
+            Some("El contenido promocional no cumple la política de precios de Meta."),
+        ),
+    ];
+
+    for (nombre, categoria, idioma, cuerpo, estado, meta_id, razon) in &plantillas {
+        sqlx::query(
+            "INSERT INTO plantillas_whatsapp (user_id, nombre, categoria, idioma, cuerpo_mensaje, \
+             estado, meta_template_id, meta_razon_rechazo) \
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
+        )
+        .bind(user_id)
+        .bind(*nombre)
+        .bind(*categoria)
+        .bind(*idioma)
+        .bind(*cuerpo)
+        .bind(*estado)
+        .bind(*meta_id)
+        .bind(*razon)
+        .execute(pool)
+        .await
+        .expect("Error al insertar plantilla WhatsApp de prueba");
+    }
+    println!("  {} plantillas WhatsApp insertadas.", plantillas.len());
 }

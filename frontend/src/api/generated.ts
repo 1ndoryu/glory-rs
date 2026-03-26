@@ -14,3 +14,4 @@ export * from './generated/plano-sala/plano-sala';
 export * from './generated/health/health';
 export * from './generated/configuracion/configuracion';
 export * from './generated/campañas/campañas';
+export * from './generated/plantillas-whatsapp/plantillas-whatsapp';

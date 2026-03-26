@@ -24,6 +24,8 @@ import ForgotPassword from './componentes/ForgotPassword';
 import ResetPassword from './componentes/ResetPassword';
 import ListaCampanas from './componentes/ListaCampanas';
 import FormularioCampana from './componentes/FormularioCampana';
+import ListaPlantillas from './componentes/ListaPlantillas';
+import FormularioPlantilla from './componentes/FormularioPlantilla';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -60,6 +62,8 @@ function App() {
               <Route path="/configuracion" element={<Configuracion />} />
               <Route path="/marketing/campanas" element={<ListaCampanas />} />
               <Route path="/marketing/campanas/nueva" element={<FormularioCampana />} />
+              <Route path="/marketing/plantillas" element={<ListaPlantillas />} />
+              <Route path="/marketing/plantillas/nueva" element={<FormularioPlantilla />} />
             </Route>
 
             <Route path="*" element={<Navigate to="/" replace />} />

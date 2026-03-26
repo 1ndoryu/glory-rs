@@ -18,6 +18,8 @@ const titulos: Record<string, string> = {
   "/configuracion": "Configuración",
   "/marketing/campanas": "Campañas de Marketing",
   "/marketing/campanas/nueva": "Nueva Campaña",
+  "/marketing/plantillas": "Plantillas WhatsApp",
+  "/marketing/plantillas/nueva": "Nueva Plantilla",
 }
 
 export function SiteHeader() {

@@ -3,24 +3,24 @@
 
 .planoOcupacion {
   margin-top: 1.5rem;
-  background: var(--colorFondoPanel);
-  border-radius: var(--radio);
+  background: var(--card);
+  border-radius: var(--radius);
   padding: 1rem;
-  border: 1px solid var(--colorBorde);
+  border: 1px solid var(--border);
 }
 
 .planoOcupacionTitulo {
   font-size: 1rem;
   font-weight: 600;
   margin-bottom: 0.75rem;
-  color: var(--colorTexto);
+  color: var(--foreground);
 }
 
 /* Zonas tabs */
 .planoOcupacionZonas {
   display: flex;
   gap: 0;
-  border-bottom: 2px solid var(--colorBorde);
+  border-bottom: 2px solid var(--border);
   margin-bottom: 0.75rem;
   overflow-x: auto;
 }
@@ -29,15 +29,15 @@
   padding: 0.4rem 0.8rem;
   font-size: 0.8rem;
   font-weight: 500;
-  color: var(--colorTextoSecundario);
+  color: var(--muted-foreground);
   border-bottom: 2px solid transparent;
   margin-bottom: -2px;
   white-space: nowrap;
 }
 
 .planoOcupacionZonaTab.activa {
-  color: var(--colorPrimario);
-  border-bottom-color: var(--colorPrimario);
+  color: var(--primary);
+  border-bottom-color: var(--primary);
 }
 
 /* Leyenda */
@@ -53,7 +53,7 @@
   align-items: center;
   gap: 0.35rem;
   font-size: 0.75rem;
-  color: var(--colorTextoSecundario);
+  color: var(--muted-foreground);
 }
 
 .indicador {
@@ -64,28 +64,28 @@
 }
 
 .indicador.libre {
-  background: var(--colorTextoSecundario);
+  background: var(--muted-foreground);
   opacity: 0.3;
 }
 
 .indicador.ocupada {
-  background: var(--colorExito);
+  background: oklch(0.7 0.2 142);
 }
 
 .indicador.no_show {
-  background: var(--colorPeligro);
+  background: var(--destructive);
 }
 
 .indicador.inactiva {
-  background: var(--colorBorde);
+  background: var(--border);
 }
 
 /* Canvas */
 .planoOcupacionCanvas {
   position: relative;
-  background: var(--colorFondo);
-  border: 1px solid var(--colorBorde);
-  border-radius: var(--radio);
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   overflow: auto;
   min-height: 200px;
 }
@@ -112,23 +112,23 @@
 
 /* Estados de mesa */
 .mesaOcupacion.libre {
-  background: var(--colorFondo);
-  border-color: var(--colorBorde);
+  background: var(--background);
+  border-color: var(--border);
   opacity: 0.6;
 }
 
 .mesaOcupacion.ocupada {
-  background: color-mix(in srgb, var(--colorExito) 20%, transparent);
-  border-color: var(--colorExito);
+  background: color-mix(in srgb, oklch(0.7 0.2 142) 20%, transparent);
+  border-color: oklch(0.7 0.2 142);
 }
 
 .mesaOcupacion.no_show {
-  background: color-mix(in srgb, var(--colorPeligro) 20%, transparent);
-  border-color: var(--colorPeligro);
+  background: color-mix(in srgb, var(--destructive) 20%, transparent);
+  border-color: var(--destructive);
 }
 
 .mesaOcupacion.inactiva {
-  background: var(--colorBorde);
+  background: var(--border);
   opacity: 0.35;
 }
 
@@ -141,7 +141,7 @@
 .mesaOcupacionNumero {
   font-size: 0.85rem;
   font-weight: 700;
-  color: var(--colorTexto);
+  color: var(--foreground);
 }
 
 /* Tooltip */
@@ -150,9 +150,9 @@
   bottom: calc(100% + 8px);
   left: 50%;
   transform: translateX(-50%);
-  background: var(--colorFondoPanel);
-  border: 1px solid var(--colorBorde);
-  border-radius: var(--radio);
+  background: var(--popover);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   padding: 0.5rem;
   min-width: 180px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -162,9 +162,9 @@
 
 .mesaOcupacionReserva {
   font-size: 0.75rem;
-  color: var(--colorTexto);
+  color: var(--popover-foreground);
   padding: 0.15rem 0;
-  border-bottom: 1px solid var(--colorBorde);
+  border-bottom: 1px solid var(--border);
 }
 
 .mesaOcupacionReserva:last-child {
@@ -172,7 +172,7 @@
 }
 
 .mesaOcupacionPersonas {
-  color: var(--colorTextoSecundario);
+  color: var(--muted-foreground);
   margin-left: 0.35rem;
   font-size: 0.7rem;
 }

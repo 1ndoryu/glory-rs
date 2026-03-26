@@ -31,6 +31,7 @@ import {
   UtensilsCrossed,
   Megaphone,
   LayoutDashboard,
+  MessageSquare,
 } from "lucide-react"
 
 const navPrincipal = [
@@ -45,6 +46,7 @@ const navPrincipal = [
   { title: "No-Shows", url: "/reservas/no-shows", icon: <UserX /> },
   { title: "Plano de Sala", url: "/plano-sala", icon: <Map /> },
   { title: "Campañas", url: "/marketing/campanas", icon: <Megaphone /> },
+  { title: "Plantillas WA", url: "/marketing/plantillas", icon: <MessageSquare /> },
 ]
 
 const navSecundario = [

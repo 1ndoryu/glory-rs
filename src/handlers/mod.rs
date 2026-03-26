@@ -10,6 +10,7 @@ mod etiquetas;
 mod gastos;
 mod health;
 mod plano_sala;
+mod plantillas_whatsapp;
 mod reservas;
 mod ventas;
 
@@ -111,6 +112,12 @@ impl utoipa::Modify for SecurityAddon {
         campanas::eliminar_campana,
         campanas::preview_segmento,
         campanas::enviar_campana,
+        plantillas_whatsapp::crear_plantilla,
+        plantillas_whatsapp::listar_plantillas,
+        plantillas_whatsapp::obtener_plantilla,
+        plantillas_whatsapp::actualizar_plantilla,
+        plantillas_whatsapp::eliminar_plantilla,
+        plantillas_whatsapp::enviar_a_meta,
     ),
     components(schemas(
         health::HealthResponse,
@@ -186,6 +193,10 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::CampanasPaginadas,
         crate::models::CampanaDestinatario,
         crate::models::SegmentoPreview,
+        crate::models::PlantillaWhatsapp,
+        crate::models::CrearPlantillaRequest,
+        crate::models::ActualizarPlantillaRequest,
+        crate::models::PlantillasPaginadas,
         crate::models::Turno,
         crate::models::CanalVenta,
         crate::models::MetodoPago,
@@ -245,4 +256,5 @@ fn api_routes() -> Router<AppState> {
         .merge(plano_sala::routes())
         .merge(configuracion::routes())
         .merge(campanas::routes())
+        .merge(plantillas_whatsapp::routes())
 }

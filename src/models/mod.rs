@@ -8,6 +8,7 @@ mod dashboard_reservas;
 mod etiqueta;
 mod gasto;
 mod plano_sala;
+mod plantilla_whatsapp;
 mod reserva;
 mod user;
 mod venta;
@@ -52,4 +53,8 @@ pub use plano_sala::{
     CrearMesaRequest, CrearZonaRequest, Mesa, MesaExport, MesaOcupacion, PlanoExport,
     PlanoOcupacion, PlanoOcupacionQuery, PlanoSala, PosicionMesa, ReservaMesa, ZonaConMesas,
     ZonaExport, ZonaOcupacion, ZonaSala,
+};
+pub use plantilla_whatsapp::{
+    ActualizarPlantillaRequest, CrearPlantillaRequest, PlantillaWhatsapp,
+    PlantillasPaginadas, PlantillasQuery, CATEGORIAS_PLANTILLA,
 };

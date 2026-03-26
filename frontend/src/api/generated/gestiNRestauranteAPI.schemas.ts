@@ -5,6 +5,23 @@
  * API para gesti├│n de restaurantes ÔÇö Ventas, Gastos, Reservas, Dashboard
  * OpenAPI spec version: 0.1.0
  */
+export interface ActualizarCampanaRequest {
+  /** @nullable */
+  canales?: string[] | null;
+  /** @nullable */
+  cuerpo_mensaje?: string | null;
+  /** @nullable */
+  descripcion_interna?: string | null;
+  /** @nullable */
+  incluir_baja?: boolean | null;
+  /** @nullable */
+  nombre?: string | null;
+  /** @nullable */
+  segmento?: string | null;
+  /** @nullable */
+  telefono_baja?: string | null;
+}
+
 /**
  * Request para actualizar un cliente
  */
@@ -76,6 +93,25 @@ export interface ActualizarMesaRequest {
   pos_x?: number | null;
   /** @nullable */
   pos_y?: number | null;
+}
+
+export interface ActualizarPlantillaRequest {
+  /** @nullable */
+  cabecera_media_tipo?: string | null;
+  /** @nullable */
+  cabecera_media_url?: string | null;
+  /** @nullable */
+  cabecera_texto?: string | null;
+  /** @nullable */
+  categoria?: string | null;
+  /** @nullable */
+  cuerpo_mensaje?: string | null;
+  /** @nullable */
+  idioma?: string | null;
+  /** @nullable */
+  nombre?: string | null;
+  /** @nullable */
+  pie_texto?: string | null;
 }
 
 export interface PosicionMesa {
@@ -203,6 +239,42 @@ export interface AnalisisReservas {
 export interface AuthResponse {
   token: string;
   user_id: string;
+}
+
+export interface Campana {
+  canales: string[];
+  created_at: string;
+  cuerpo_mensaje: string;
+  descripcion_interna: string;
+  estado: string;
+  id: string;
+  incluir_baja: boolean;
+  nombre: string;
+  segmento: string;
+  telefono_baja: string;
+  total_destinatarios: number;
+  total_enviados: number;
+  total_fallidos: number;
+  updated_at: string;
+  user_id: string;
+}
+
+export interface CampanaDestinatario {
+  campana_id: string;
+  canal: string;
+  cliente_id: string;
+  created_at: string;
+  /** @nullable */
+  enviado_at?: string | null;
+  estado: string;
+  id: string;
+}
+
+export interface CampanasPaginadas {
+  items: Campana[];
+  page: number;
+  per_page: number;
+  total: number;
 }
 
 /**
@@ -339,6 +411,21 @@ export interface ConfiguracionRestaurante {
   user_id: string;
 }
 
+export interface CrearCampanaRequest {
+  canales: string[];
+  /** @nullable */
+  cuerpo_mensaje?: string | null;
+  /** @nullable */
+  descripcion_interna?: string | null;
+  /** @nullable */
+  incluir_baja?: boolean | null;
+  nombre: string;
+  /** @nullable */
+  segmento?: string | null;
+  /** @nullable */
+  telefono_baja?: string | null;
+}
+
 /**
  * Request para crear un canal de reserva
  */
@@ -467,6 +554,24 @@ export interface CrearMesaRequest {
   /** @nullable */
   pos_y?: number | null;
   zona_id: string;
+}
+
+export interface CrearPlantillaRequest {
+  /** @nullable */
+  cabecera_media_tipo?: string | null;
+  /** @nullable */
+  cabecera_media_url?: string | null;
+  /** @nullable */
+  cabecera_texto?: string | null;
+  /** @nullable */
+  categoria?: string | null;
+  /** @nullable */
+  cuerpo_mensaje?: string | null;
+  /** @nullable */
+  idioma?: string | null;
+  nombre: string;
+  /** @nullable */
+  pie_texto?: string | null;
 }
 
 /**
@@ -764,6 +869,41 @@ export interface PlanoSala {
   zonas: ZonaConMesas[];
 }
 
+export interface PlantillaWhatsapp {
+  /** @nullable */
+  cabecera_media_tipo?: string | null;
+  /** @nullable */
+  cabecera_media_url?: string | null;
+  /** @nullable */
+  cabecera_texto?: string | null;
+  categoria: string;
+  created_at: string;
+  cuerpo_mensaje: string;
+  estado: string;
+  id: string;
+  idioma: string;
+  /** @nullable */
+  meta_enviada_at?: string | null;
+  /** @nullable */
+  meta_razon_rechazo?: string | null;
+  /** @nullable */
+  meta_respondida_at?: string | null;
+  /** @nullable */
+  meta_template_id?: string | null;
+  nombre: string;
+  /** @nullable */
+  pie_texto?: string | null;
+  updated_at: string;
+  user_id: string;
+}
+
+export interface PlantillasPaginadas {
+  items: PlantillaWhatsapp[];
+  page: number;
+  per_page: number;
+  total: number;
+}
+
 /**
  * Request body para registrar un nuevo usuario
  */
@@ -845,6 +985,15 @@ export interface ResumenEconomico {
   total_ventas: string;
 }
 
+export interface SegmentoPreview {
+  con_consentimiento_email: number;
+  con_consentimiento_sms: number;
+  con_email: number;
+  con_telefono: number;
+  segmento: string;
+  total_clientes: number;
+}
+
 /**
  * Body para asignar/desasignar etiqueta
  */
@@ -881,6 +1030,19 @@ export interface VentasPaginadas {
   per_page: number;
   total: number;
 }
+
+export type ListarCampanasParams = {
+page?: number;
+per_page?: number;
+/**
+ * @nullable
+ */
+estado?: string | null;
+};
+
+export type PreviewSegmentoParams = {
+segmento: string;
+};
 
 export type ListarClientesParams = {
 page?: number;
@@ -947,6 +1109,21 @@ fecha: string;
  * @nullable
  */
 turno?: string | null;
+};
+
+export type ListarPlantillasParams = {
+/**
+ * @nullable
+ */
+page?: number | null;
+/**
+ * @nullable
+ */
+per_page?: number | null;
+/**
+ * @nullable
+ */
+estado?: string | null;
 };
 
 export type ListarReservasParams = {
