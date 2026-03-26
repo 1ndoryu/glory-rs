@@ -4,7 +4,7 @@
 # Stage 3: imagen final mínima con binario + assets estáticos
 
 # --- Stage 1: Build backend ---
-FROM rust:1.83-bookworm AS backend-builder
+FROM rust:1.85-bookworm AS backend-builder
 
 WORKDIR /app
 
