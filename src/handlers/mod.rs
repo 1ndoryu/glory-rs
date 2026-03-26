@@ -3,6 +3,7 @@
 mod auth;
 mod canales_reserva;
 mod clientes;
+mod configuracion;
 mod dashboard;
 mod etiquetas;
 mod gastos;
@@ -99,6 +100,8 @@ impl utoipa::Modify for SecurityAddon {
         plano_sala::exportar_plano,
         plano_sala::importar_plano,
         plano_sala::obtener_ocupacion,
+        configuracion::obtener_configuracion,
+        configuracion::actualizar_configuracion,
     ),
     components(schemas(
         health::HealthResponse,
@@ -166,6 +169,8 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::ZonaOcupacion,
         crate::models::MesaOcupacion,
         crate::models::ReservaMesa,
+        crate::models::ConfiguracionRestaurante,
+        crate::models::ActualizarConfiguracionRequest,
         crate::models::Turno,
         crate::models::CanalVenta,
         crate::models::MetodoPago,
@@ -217,4 +222,5 @@ fn api_routes() -> Router<AppState> {
         .merge(canales_reserva::routes())
         .merge(dashboard::routes())
         .merge(plano_sala::routes())
+        .merge(configuracion::routes())
 }

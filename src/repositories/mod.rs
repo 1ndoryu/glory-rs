@@ -1,5 +1,6 @@
 pub mod canal_reserva;
 pub mod cliente;
+mod configuracion;
 pub mod dashboard_reservas;
 pub mod etiqueta;
 pub mod gasto;
@@ -10,6 +11,7 @@ pub mod venta;
 
 pub use canal_reserva::CanalReservaRepository;
 pub use cliente::ClienteRepository;
+pub use configuracion::ConfiguracionRepository;
 pub use dashboard_reservas::DashboardReservasRepository;
 pub use etiqueta::EtiquetaRepository;
 pub use gasto::{CategoriaGastoRepository, GastoRepository};

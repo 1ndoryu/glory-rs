@@ -1,6 +1,7 @@
 pub mod common;
 mod canal_reserva;
 mod cliente;
+mod configuracion;
 mod dashboard;
 mod dashboard_reservas;
 mod etiqueta;
@@ -14,6 +15,7 @@ pub use canal_reserva::{CanalReserva, CrearCanalReservaRequest};
 pub use cliente::{
     ActualizarClienteRequest, Cliente, ClientesPaginados, ClientesQuery, CrearClienteRequest,
 };
+pub use configuracion::{ActualizarConfiguracionRequest, ConfiguracionRestaurante};
 pub use dashboard::ResumenEconomico;
 pub use dashboard_reservas::{
     AgrupacionCanal, AgrupacionDiaSemana, AgrupacionFecha, AgrupacionHora, AgrupacionTurno,

@@ -16,6 +16,7 @@ import ListaCanales from './componentes/ListaCanales';
 import EstadisticasNoShows from './componentes/EstadisticasNoShows';
 import DashboardReservas from './componentes/DashboardReservas';
 import PlanoSala from './componentes/PlanoSala';
+import Configuracion from './componentes/Configuracion';
 import ForgotPassword from './componentes/ForgotPassword';
 import ResetPassword from './componentes/ResetPassword';
 import './estilos/global.css';
@@ -50,6 +51,7 @@ function App() {
           <Route path="/reservas/no-shows" element={<EstadisticasNoShows />} />
           <Route path="/reservas/dashboard" element={<DashboardReservas />} />
           <Route path="/plano-sala" element={<PlanoSala />} />
+          <Route path="/configuracion" element={<Configuracion />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />
