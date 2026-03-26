@@ -55,3 +55,26 @@ pub struct AuthResponse {
     pub token: String,
     pub user_id: Uuid,
 }
+
+/* [263A-15] Structs para recuperación de contraseña */
+
+/// Request para solicitar un enlace de recuperación
+#[derive(Debug, Deserialize, Validate, ToSchema)]
+pub struct ForgotPasswordRequest {
+    #[validate(email(message = "Formato de email inválido"))]
+    pub email: String,
+}
+
+/// Request para establecer nueva contraseña con token
+#[derive(Debug, Deserialize, Validate, ToSchema)]
+pub struct ResetPasswordRequest {
+    pub token: String,
+    #[validate(length(min = 8, message = "La contraseña debe tener al menos 8 caracteres"))]
+    pub new_password: String,
+}
+
+/// Response genérico para operaciones que solo confirman éxito
+#[derive(Debug, Serialize, ToSchema)]
+pub struct MessageResponse {
+    pub message: String,
+}

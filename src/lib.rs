@@ -14,9 +14,12 @@ pub mod services;
 
 use sqlx::PgPool;
 
+use crate::config::AppConfig;
+
 /// Estado compartido de la aplicación — accesible desde handlers y middleware
 #[derive(Clone)]
 pub struct AppState {
     pub pool: PgPool,
     pub jwt_secret: String,
+    pub config: AppConfig,
 }

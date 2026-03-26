@@ -572,6 +572,13 @@ export interface EtiquetaConCategoria {
 }
 
 /**
+ * Request para solicitar un enlace de recuperación
+ */
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+/**
  * Gasto registrado en el restaurante
  */
 export interface Gasto {
@@ -624,6 +631,13 @@ export interface MesaExport {
   numero: number;
   pos_x: number;
   pos_y: number;
+}
+
+/**
+ * Response genérico para operaciones que solo confirman éxito
+ */
+export interface MessageResponse {
+  message: string;
 }
 
 /**
@@ -732,6 +746,14 @@ export interface ReservasPaginadas {
   page: number;
   per_page: number;
   total: number;
+}
+
+/**
+ * Request para establecer nueva contraseña con token
+ */
+export interface ResetPasswordRequest {
+  new_password: string;
+  token: string;
 }
 
 /**

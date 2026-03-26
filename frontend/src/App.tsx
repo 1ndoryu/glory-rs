@@ -16,6 +16,8 @@ import ListaCanales from './componentes/ListaCanales';
 import EstadisticasNoShows from './componentes/EstadisticasNoShows';
 import DashboardReservas from './componentes/DashboardReservas';
 import PlanoSala from './componentes/PlanoSala';
+import ForgotPassword from './componentes/ForgotPassword';
+import ResetPassword from './componentes/ResetPassword';
 import './estilos/global.css';
 
 const queryClient = new QueryClient({
@@ -34,6 +36,8 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Routes>
         <Route path="/login" element={autenticado ? <Navigate to="/" replace /> : <Login />} />
+        <Route path="/forgot-password" element={autenticado ? <Navigate to="/" replace /> : <ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
         <Route element={<Layout />}>
           <Route path="/" element={<Inicio />} />

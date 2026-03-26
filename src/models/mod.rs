@@ -31,7 +31,10 @@ pub use reserva::{
     NoShowStats, Reserva, ReservasConteo, ReservasPaginadas, ReservasQuery, ResumenDiario,
     ResumenMesQuery,
 };
-pub use user::{AuthResponse, LoginRequest, RegisterRequest, User, UserResponse};
+pub use user::{
+    AuthResponse, ForgotPasswordRequest, LoginRequest, MessageResponse, RegisterRequest,
+    ResetPasswordRequest, User, UserResponse,
+};
 pub use venta::{
     CanalVenta, CrearVentaRequest, MetodoPago, Turno, Venta, VentasPaginadas, VentasQuery,
 };

@@ -1,6 +1,7 @@
 /* 253A-7: Login — formulario de autenticación
    253A-10: hook useLoginForm + componentes UI atómicos */
 
+import { Link } from 'react-router-dom';
 import useLoginForm from '../hooks/useLoginForm';
 import { Input, Boton } from '@glory/componentes/ui';
 import '../estilos/Login.css';
@@ -46,6 +47,12 @@ function Login() {
           <Boton variante="primario" ancho type="submit" cargando={cargando}>
             {modoRegistro ? 'Crear cuenta' : 'Entrar'}
           </Boton>
+
+          {!modoRegistro && (
+            <p className="enlaceRegistro">
+              <Link to="/forgot-password">¿Olvidaste tu contraseña?</Link>
+            </p>
+          )}
         </form>
 
         <p className="enlaceRegistro">

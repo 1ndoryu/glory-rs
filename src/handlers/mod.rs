@@ -46,6 +46,8 @@ impl utoipa::Modify for SecurityAddon {
         health::health_check,
         auth::register,
         auth::login,
+        auth::forgot_password,
+        auth::reset_password,
         ventas::crear_venta,
         ventas::obtener_venta,
         ventas::listar_ventas,
@@ -102,6 +104,9 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::RegisterRequest,
         crate::models::LoginRequest,
         crate::models::AuthResponse,
+        crate::models::ForgotPasswordRequest,
+        crate::models::ResetPasswordRequest,
+        crate::models::MessageResponse,
         crate::models::Venta,
         crate::models::CrearVentaRequest,
         crate::models::VentasPaginadas,
@@ -177,7 +182,8 @@ pub struct ApiDoc;
 pub fn create_router(pool: sqlx::PgPool, config: crate::config::AppConfig) -> Router {
     let state = AppState {
         pool,
-        jwt_secret: config.jwt_secret,
+        jwt_secret: config.jwt_secret.clone(),
+        config,
     };
 
     /* CORS: en desarrollo se permite todo. En producción, restringir orígenes */

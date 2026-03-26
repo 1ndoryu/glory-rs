@@ -10,6 +10,8 @@ use uuid::Uuid;
 use crate::errors::AppError;
 use crate::models::{AuthResponse, LoginRequest, RegisterRequest};
 use crate::repositories::UserRepository;
+use crate::services::email::EmailService;
+use crate::config::AppConfig;
 
 /// Claims del JWT — `sub` es el `user_id`, `exp` la expiración Unix
 #[derive(Debug, Serialize, Deserialize)]
@@ -102,5 +104,68 @@ impl AuthService {
         )
         .map(|data| data.claims)
         .map_err(|_| AppError::Unauthorized)
+    }
+
+    /* [263A-15] Forgot/reset password */
+
+    /// Genera token de reset, lo guarda en BD y envía email.
+    /// Siempre retorna Ok para no revelar si el email existe.
+    pub async fn forgot_password(
+        pool: &PgPool,
+        email: &str,
+        config: &AppConfig,
+    ) -> Result<(), AppError> {
+        let user = UserRepository::find_by_email(pool, email).await?;
+        if user.is_none() {
+            /* No revelamos si el email existe — retornamos Ok silenciosamente */
+            return Ok(());
+        }
+
+        let token = Self::generate_reset_token();
+        let expires_at = chrono::Utc::now() + chrono::Duration::hours(1);
+
+        UserRepository::set_reset_token(pool, email, &token, expires_at).await?;
+
+        let enlace = format!("{}/reset-password?token={}", config.app_url, token);
+        EmailService::enviar_reset_password(config.smtp.as_ref(), email, &enlace)
+            .await
+            .map_err(|e| AppError::Internal(format!("Error enviando email: {e}")))?;
+
+        Ok(())
+    }
+
+    /// Valida el token de reset y actualiza la contraseña
+    pub async fn reset_password(
+        pool: &PgPool,
+        token: &str,
+        new_password: &str,
+    ) -> Result<(), AppError> {
+        let user = UserRepository::find_by_reset_token(pool, token)
+            .await?
+            .ok_or(AppError::BadRequest(
+                "Token inválido o expirado".into(),
+            ))?;
+
+        let salt = SaltString::generate(&mut OsRng);
+        let new_hash = Argon2::default()
+            .hash_password(new_password.as_bytes(), &salt)
+            .map_err(|e| AppError::Internal(format!("Error al hashear contraseña: {e}")))?
+            .to_string();
+
+        UserRepository::update_password(pool, user.id, &new_hash).await?;
+
+        Ok(())
+    }
+
+    /// Genera un token hexadecimal seguro de 32 bytes (64 chars)
+    fn generate_reset_token() -> String {
+        use rand::Rng;
+        use std::fmt::Write;
+        let bytes: [u8; 32] = rand::thread_rng().gen();
+        let mut hex = String::with_capacity(64);
+        for b in bytes {
+            let _ = write!(hex, "{b:02x}");
+        }
+        hex
     }
 }

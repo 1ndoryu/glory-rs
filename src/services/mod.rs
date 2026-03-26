@@ -2,6 +2,7 @@ mod auth;
 mod canal_reserva;
 mod cliente;
 mod dashboard;
+pub mod email;
 mod etiqueta;
 mod gasto;
 mod plano_sala;

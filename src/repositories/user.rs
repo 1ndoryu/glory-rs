@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 use sqlx::PgPool;
 use uuid::Uuid;
 
@@ -46,5 +47,56 @@ impl UserRepository {
         )
         .fetch_optional(pool)
         .await
+    }
+
+    /* [263A-15] Métodos para recuperación de contraseña */
+
+    /// Guarda un token de reset con expiración
+    pub async fn set_reset_token(
+        pool: &PgPool,
+        email: &str,
+        token: &str,
+        expires_at: DateTime<Utc>,
+    ) -> Result<bool, sqlx::Error> {
+        let result = sqlx::query!(
+            "UPDATE users SET reset_token = $1, reset_token_expires_at = $2 WHERE email = $3",
+            token,
+            expires_at,
+            email
+        )
+        .execute(pool)
+        .await?;
+        Ok(result.rows_affected() > 0)
+    }
+
+    /// Busca un usuario por token de reset válido (no expirado)
+    pub async fn find_by_reset_token(
+        pool: &PgPool,
+        token: &str,
+    ) -> Result<Option<User>, sqlx::Error> {
+        sqlx::query_as!(
+            User,
+            "SELECT id, email, password_hash, created_at FROM users \
+             WHERE reset_token = $1 AND reset_token_expires_at > NOW()",
+            token
+        )
+        .fetch_optional(pool)
+        .await
+    }
+
+    /// Actualiza la contraseña y limpia el token de reset
+    pub async fn update_password(
+        pool: &PgPool,
+        id: Uuid,
+        new_hash: &str,
+    ) -> Result<bool, sqlx::Error> {
+        let result = sqlx::query!(
+            "UPDATE users SET password_hash = $1, reset_token = NULL, reset_token_expires_at = NULL WHERE id = $2",
+            new_hash,
+            id
+        )
+        .execute(pool)
+        .await?;
+        Ok(result.rows_affected() > 0)
     }
 }
