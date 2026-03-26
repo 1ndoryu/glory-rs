@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM reservas_etiquetas WHERE reserva_id = $1 AND etiqueta_id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "44222f16813474cf0c650ee634fce0c8c6384231b95395a1007bca5eec47c03c"
+}

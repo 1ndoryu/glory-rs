@@ -1,7 +1,9 @@
 #![allow(clippy::needless_for_each)] // Generado por utoipa OpenApi derive
 
 mod auth;
+mod clientes;
 mod dashboard;
+mod etiquetas;
 mod gastos;
 mod health;
 mod reservas;
@@ -57,6 +59,22 @@ impl utoipa::Modify for SecurityAddon {
         reservas::actualizar_reserva,
         reservas::eliminar_reserva,
         reservas::conteo_reservas,
+        clientes::crear_cliente,
+        clientes::obtener_cliente,
+        clientes::listar_clientes,
+        clientes::actualizar_cliente,
+        clientes::eliminar_cliente,
+        etiquetas::listar_categorias,
+        etiquetas::crear_categoria,
+        etiquetas::listar_etiquetas,
+        etiquetas::crear_etiqueta,
+        etiquetas::eliminar_etiqueta,
+        etiquetas::asignar_etiqueta_cliente,
+        etiquetas::desasignar_etiqueta_cliente,
+        etiquetas::obtener_etiquetas_cliente,
+        etiquetas::asignar_etiqueta_reserva,
+        etiquetas::desasignar_etiqueta_reserva,
+        etiquetas::obtener_etiquetas_reserva,
         dashboard::resumen,
     ),
     components(schemas(
@@ -76,6 +94,16 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::ActualizarReservaRequest,
         crate::models::ReservasPaginadas,
         crate::models::ReservasConteo,
+        crate::models::Cliente,
+        crate::models::CrearClienteRequest,
+        crate::models::ActualizarClienteRequest,
+        crate::models::ClientesPaginados,
+        crate::models::CategoriaEtiqueta,
+        crate::models::Etiqueta,
+        crate::models::EtiquetaConCategoria,
+        crate::models::CrearEtiquetaRequest,
+        crate::models::CrearCategoriaEtiquetaRequest,
+        etiquetas::TagAssignBody,
         crate::models::ResumenEconomico,
         crate::models::Turno,
         crate::models::CanalVenta,
@@ -122,5 +150,7 @@ fn api_routes() -> Router<AppState> {
         .merge(ventas::routes())
         .merge(gastos::routes())
         .merge(reservas::routes())
+        .merge(clientes::routes())
+        .merge(etiquetas::routes())
         .merge(dashboard::routes())
 }

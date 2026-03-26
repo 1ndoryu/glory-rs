@@ -1,0 +1,62 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO etiquetas (id, user_id, nombre, color, categoria_id, es_sistema) VALUES ($1, $2, $3, $4, $5, FALSE) RETURNING *",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "categoria_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "nombre",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "color",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "es_sistema",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 6,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Varchar",
+        "Varchar",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "01538aa3cbf54bce174455d3b66dc7014d2cdf33d7f249ba1a7f20fdb94c5b9a"
+}

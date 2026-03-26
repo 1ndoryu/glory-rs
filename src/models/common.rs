@@ -16,4 +16,6 @@ pub enum MetodoPago {
     Tarjeta,
     #[sqlx(rename = "transferencia")]
     Transferencia,
+    #[sqlx(rename = "otros")]
+    Otros,
 }

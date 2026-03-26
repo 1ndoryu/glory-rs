@@ -124,6 +124,7 @@ function FormularioGasto({ onExito }: Props) {
               <option value={MetodoPago.efectivo}>Efectivo</option>
               <option value={MetodoPago.tarjeta}>Tarjeta</option>
               <option value={MetodoPago.transferencia}>Transferencia</option>
+              <option value={MetodoPago.otros}>Otros</option>
             </Select>
           </div>
           <div className="grupoFormulario">

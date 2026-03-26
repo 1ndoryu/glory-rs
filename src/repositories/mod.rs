@@ -1,8 +1,12 @@
+pub mod cliente;
+pub mod etiqueta;
 pub mod gasto;
 pub mod reserva;
 mod user;
 pub mod venta;
 
+pub use cliente::ClienteRepository;
+pub use etiqueta::EtiquetaRepository;
 pub use gasto::{CategoriaGastoRepository, GastoRepository};
 pub use reserva::ReservaRepository;
 pub use user::UserRepository;

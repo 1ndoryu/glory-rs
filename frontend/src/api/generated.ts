@@ -26,6 +26,40 @@ import type {
 
 import { customInstance } from './axios-instance';
 /**
+ * Request para actualizar un cliente
+ */
+export interface ActualizarClienteRequest {
+  /** @nullable */
+  alergias?: string | null;
+  /** @nullable */
+  apellidos?: string | null;
+  /** @nullable */
+  consentimiento_comercial_email?: boolean | null;
+  /** @nullable */
+  consentimiento_comercial_sms?: boolean | null;
+  /** @nullable */
+  email?: string | null;
+  /** @nullable */
+  empresa?: string | null;
+  /** @nullable */
+  enviar_encuestas?: boolean | null;
+  /** @nullable */
+  foto_url?: string | null;
+  /** @nullable */
+  nombre?: string | null;
+  /** @nullable */
+  notas?: string | null;
+  /** @nullable */
+  preferencias_bebida?: string | null;
+  /** @nullable */
+  preferencias_ubicacion?: string | null;
+  /** @nullable */
+  prefijo_telefono?: string | null;
+  /** @nullable */
+  telefono?: string | null;
+}
+
+/**
  * Estados posibles de una reserva
  */
 export type EstadoReserva = typeof EstadoReserva[keyof typeof EstadoReserva];
@@ -36,6 +70,7 @@ export const EstadoReserva = {
   confirmada: 'confirmada',
   cancelada: 'cancelada',
   completada: 'completada',
+  no_show: 'no_show',
 } as const;
 
 /**
@@ -81,12 +116,111 @@ export const CanalVenta = {
 } as const;
 
 /**
+ * Categoría de etiqueta (agrupa etiquetas por tipo)
+ */
+export interface CategoriaEtiqueta {
+  aplica_a: string;
+  created_at: string;
+  es_sistema: boolean;
+  id: string;
+  nombre: string;
+  /** @nullable */
+  user_id?: string | null;
+}
+
+/**
  * Categoría de gasto — precargada en BD
  */
 export interface CategoriaGasto {
   color: string;
   created_at: string;
   id: string;
+  nombre: string;
+}
+
+/**
+ * Cliente del restaurante
+ */
+export interface Cliente {
+  alergias: string;
+  apellidos: string;
+  consentimiento_comercial_email: boolean;
+  consentimiento_comercial_sms: boolean;
+  created_at: string;
+  email: string;
+  empresa: string;
+  enviar_encuestas: boolean;
+  foto_url: string;
+  id: string;
+  nombre: string;
+  notas: string;
+  preferencias_bebida: string;
+  preferencias_ubicacion: string;
+  prefijo_telefono: string;
+  telefono: string;
+  updated_at: string;
+  user_id: string;
+}
+
+/**
+ * Response paginada de clientes
+ */
+export interface ClientesPaginados {
+  items: Cliente[];
+  page: number;
+  per_page: number;
+  total: number;
+}
+
+/**
+ * Request para crear una categoría de etiquetas
+ */
+export interface CrearCategoriaEtiquetaRequest {
+  /** "cliente" o "reserva" */
+  aplica_a: string;
+  nombre: string;
+}
+
+/**
+ * Request para crear un cliente
+ */
+export interface CrearClienteRequest {
+  /** @nullable */
+  alergias?: string | null;
+  /** @nullable */
+  apellidos?: string | null;
+  /** @nullable */
+  consentimiento_comercial_email?: boolean | null;
+  /** @nullable */
+  consentimiento_comercial_sms?: boolean | null;
+  /** @nullable */
+  email?: string | null;
+  /** @nullable */
+  empresa?: string | null;
+  /** @nullable */
+  enviar_encuestas?: boolean | null;
+  /** @nullable */
+  foto_url?: string | null;
+  nombre: string;
+  /** @nullable */
+  notas?: string | null;
+  /** @nullable */
+  preferencias_bebida?: string | null;
+  /** @nullable */
+  preferencias_ubicacion?: string | null;
+  /** @nullable */
+  prefijo_telefono?: string | null;
+  /** @nullable */
+  telefono?: string | null;
+}
+
+/**
+ * Request para crear una etiqueta
+ */
+export interface CrearEtiquetaRequest {
+  categoria_id: string;
+  /** @nullable */
+  color?: string | null;
   nombre: string;
 }
 
@@ -100,6 +234,7 @@ export const MetodoPago = {
   efectivo: 'efectivo',
   tarjeta: 'tarjeta',
   transferencia: 'transferencia',
+  otros: 'otros',
 } as const;
 
 /**
@@ -123,7 +258,6 @@ export interface CrearGastoRequest {
   fecha: string;
   importe_base: string;
   importe_iva: string;
-  /** @nullable — campo opcional según plataforma Haddock (253A-21) */
   metodo_pago?: MetodoPago | null;
   /** @nullable */
   numero_documento?: string | null;
@@ -189,6 +323,35 @@ export interface ErrorResponse {
 }
 
 /**
+ * Etiqueta individual
+ */
+export interface Etiqueta {
+  categoria_id: string;
+  color: string;
+  created_at: string;
+  es_sistema: boolean;
+  id: string;
+  nombre: string;
+  /** @nullable */
+  user_id?: string | null;
+}
+
+/**
+ * Etiqueta con nombre de categoría incluido (para listados)
+ */
+export interface EtiquetaConCategoria {
+  categoria_id: string;
+  categoria_nombre: string;
+  color: string;
+  created_at: string;
+  es_sistema: boolean;
+  id: string;
+  nombre: string;
+  /** @nullable */
+  user_id?: string | null;
+}
+
+/**
  * Gasto registrado en el restaurante
  */
 export interface Gasto {
@@ -243,11 +406,16 @@ export interface RegisterRequest {
  * Reserva del restaurante
  */
 export interface Reserva {
+  /** @nullable */
+  canal_id?: string | null;
+  /** @nullable */
+  cliente_id?: string | null;
   created_at: string;
   estado: string;
   fecha: string;
   hora: string;
   id: string;
+  no_show: boolean;
   nombre_cliente: string;
   notas: string;
   num_personas: number;
@@ -286,6 +454,13 @@ export interface ResumenEconomico {
 }
 
 /**
+ * Body para asignar/desasignar etiqueta
+ */
+export interface TagAssignBody {
+  etiqueta_id: string;
+}
+
+/**
  * Venta registrada en el restaurante
  */
 export interface Venta {
@@ -315,6 +490,16 @@ export interface VentasPaginadas {
   total: number;
 }
 
+export type ListarClientesParams = {
+page?: number;
+per_page?: number;
+/**
+ * Búsqueda por nombre, apellidos, teléfono o email
+ * @nullable
+ */
+busqueda?: string | null;
+};
+
 export type ResumenParams = {
 /**
  * Año (ej: 2026)
@@ -325,6 +510,14 @@ year: number;
  * @minimum 0
  */
 month: number;
+};
+
+export type ListarEtiquetasParams = {
+/**
+ * Filtrar por categoría
+ * @nullable
+ */
+categoria_id?: string | null;
 };
 
 export type ListarGastosParams = {
@@ -367,6 +560,10 @@ desde?: string | null;
  */
 hasta?: string | null;
 };
+
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
+
 
 /**
  * @summary Iniciar sesión
@@ -414,15 +611,15 @@ export const login = async (loginRequest: LoginRequest, options?: RequestInit): 
 
 
 export const getLoginMutationOptions = <TError = ErrorResponse,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof login>>, TError,{data: LoginRequest}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof login>>, TError,{data: LoginRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof login>>, TError,{data: LoginRequest}, TContext> => {
 
 const mutationKey = ['login'];
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -430,7 +627,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof login>>, {data: LoginRequest}> = (props) => {
           const {data} = props ?? {};
 
-          return  login(data,)
+          return  login(data,requestOptions)
         }
 
 
@@ -448,7 +645,7 @@ const {mutation: mutationOptions} = options ?
  * @summary Iniciar sesión
  */
 export const useLogin = <TError = ErrorResponse,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof login>>, TError,{data: LoginRequest}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof login>>, TError,{data: LoginRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof login>>,
         TError,
@@ -509,15 +706,15 @@ export const register = async (registerRequest: RegisterRequest, options?: Reque
 
 
 export const getRegisterMutationOptions = <TError = ErrorResponse,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof register>>, TError,{data: RegisterRequest}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof register>>, TError,{data: RegisterRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof register>>, TError,{data: RegisterRequest}, TContext> => {
 
 const mutationKey = ['register'];
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -525,7 +722,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof register>>, {data: RegisterRequest}> = (props) => {
           const {data} = props ?? {};
 
-          return  register(data,)
+          return  register(data,requestOptions)
         }
 
 
@@ -543,7 +740,7 @@ const {mutation: mutationOptions} = options ?
  * @summary Registrar nuevo usuario
  */
 export const useRegister = <TError = ErrorResponse,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof register>>, TError,{data: RegisterRequest}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof register>>, TError,{data: RegisterRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof register>>,
         TError,
@@ -551,6 +748,844 @@ export const useRegister = <TError = ErrorResponse,
         TContext
       > => {
       return useMutation(getRegisterMutationOptions(options), queryClient);
+    }
+
+/**
+ * @summary Listar clientes con paginación y búsqueda
+ */
+export type listarClientesResponse200 = {
+  data: ClientesPaginados
+  status: 200
+}
+
+export type listarClientesResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type listarClientesResponseSuccess = (listarClientesResponse200) & {
+  headers: Headers;
+};
+export type listarClientesResponseError = (listarClientesResponse401) & {
+  headers: Headers;
+};
+
+export type listarClientesResponse = (listarClientesResponseSuccess | listarClientesResponseError)
+
+export const getListarClientesUrl = (params?: ListarClientesParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/clientes?${stringifiedParams}` : `/api/clientes`
+}
+
+export const listarClientes = async (params?: ListarClientesParams, options?: RequestInit): Promise<listarClientesResponse> => {
+
+  return customInstance<listarClientesResponse>(getListarClientesUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListarClientesQueryKey = (params?: ListarClientesParams,) => {
+    return [
+    `/api/clientes`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListarClientesQueryOptions = <TData = Awaited<ReturnType<typeof listarClientes>>, TError = ErrorResponse>(params?: ListarClientesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarClientes>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListarClientesQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listarClientes>>> = ({ signal }) => listarClientes(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listarClientes>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListarClientesQueryResult = NonNullable<Awaited<ReturnType<typeof listarClientes>>>
+export type ListarClientesQueryError = ErrorResponse
+
+
+export function useListarClientes<TData = Awaited<ReturnType<typeof listarClientes>>, TError = ErrorResponse>(
+ params: undefined |  ListarClientesParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarClientes>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listarClientes>>,
+          TError,
+          Awaited<ReturnType<typeof listarClientes>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListarClientes<TData = Awaited<ReturnType<typeof listarClientes>>, TError = ErrorResponse>(
+ params?: ListarClientesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarClientes>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listarClientes>>,
+          TError,
+          Awaited<ReturnType<typeof listarClientes>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListarClientes<TData = Awaited<ReturnType<typeof listarClientes>>, TError = ErrorResponse>(
+ params?: ListarClientesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarClientes>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Listar clientes con paginación y búsqueda
+ */
+
+export function useListarClientes<TData = Awaited<ReturnType<typeof listarClientes>>, TError = ErrorResponse>(
+ params?: ListarClientesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarClientes>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListarClientesQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+/**
+ * @summary Crear un cliente
+ */
+export type crearClienteResponse201 = {
+  data: Cliente
+  status: 201
+}
+
+export type crearClienteResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type crearClienteResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type crearClienteResponseSuccess = (crearClienteResponse201) & {
+  headers: Headers;
+};
+export type crearClienteResponseError = (crearClienteResponse401 | crearClienteResponse422) & {
+  headers: Headers;
+};
+
+export type crearClienteResponse = (crearClienteResponseSuccess | crearClienteResponseError)
+
+export const getCrearClienteUrl = () => {
+
+
+
+
+  return `/api/clientes`
+}
+
+export const crearCliente = async (crearClienteRequest: CrearClienteRequest, options?: RequestInit): Promise<crearClienteResponse> => {
+
+  return customInstance<crearClienteResponse>(getCrearClienteUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      crearClienteRequest,)
+  }
+);}
+
+
+
+
+export const getCrearClienteMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof crearCliente>>, TError,{data: CrearClienteRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof crearCliente>>, TError,{data: CrearClienteRequest}, TContext> => {
+
+const mutationKey = ['crearCliente'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof crearCliente>>, {data: CrearClienteRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  crearCliente(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CrearClienteMutationResult = NonNullable<Awaited<ReturnType<typeof crearCliente>>>
+    export type CrearClienteMutationBody = CrearClienteRequest
+    export type CrearClienteMutationError = ErrorResponse
+
+    /**
+ * @summary Crear un cliente
+ */
+export const useCrearCliente = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof crearCliente>>, TError,{data: CrearClienteRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof crearCliente>>,
+        TError,
+        {data: CrearClienteRequest},
+        TContext
+      > => {
+      return useMutation(getCrearClienteMutationOptions(options), queryClient);
+    }
+
+/**
+ * @summary Desasignar etiqueta de un cliente
+ */
+export type desasignarEtiquetaClienteResponse204 = {
+  data: void
+  status: 204
+}
+
+export type desasignarEtiquetaClienteResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type desasignarEtiquetaClienteResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type desasignarEtiquetaClienteResponseSuccess = (desasignarEtiquetaClienteResponse204) & {
+  headers: Headers;
+};
+export type desasignarEtiquetaClienteResponseError = (desasignarEtiquetaClienteResponse401 | desasignarEtiquetaClienteResponse404) & {
+  headers: Headers;
+};
+
+export type desasignarEtiquetaClienteResponse = (desasignarEtiquetaClienteResponseSuccess | desasignarEtiquetaClienteResponseError)
+
+export const getDesasignarEtiquetaClienteUrl = (clienteId: string,
+    etiquetaId: string,) => {
+
+
+
+
+  return `/api/clientes/${clienteId}/etiquetas/${etiquetaId}`
+}
+
+export const desasignarEtiquetaCliente = async (clienteId: string,
+    etiquetaId: string, options?: RequestInit): Promise<desasignarEtiquetaClienteResponse> => {
+
+  return customInstance<desasignarEtiquetaClienteResponse>(getDesasignarEtiquetaClienteUrl(clienteId,etiquetaId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDesasignarEtiquetaClienteMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof desasignarEtiquetaCliente>>, TError,{clienteId: string;etiquetaId: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof desasignarEtiquetaCliente>>, TError,{clienteId: string;etiquetaId: string}, TContext> => {
+
+const mutationKey = ['desasignarEtiquetaCliente'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof desasignarEtiquetaCliente>>, {clienteId: string;etiquetaId: string}> = (props) => {
+          const {clienteId,etiquetaId} = props ?? {};
+
+          return  desasignarEtiquetaCliente(clienteId,etiquetaId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DesasignarEtiquetaClienteMutationResult = NonNullable<Awaited<ReturnType<typeof desasignarEtiquetaCliente>>>
+
+    export type DesasignarEtiquetaClienteMutationError = ErrorResponse
+
+    /**
+ * @summary Desasignar etiqueta de un cliente
+ */
+export const useDesasignarEtiquetaCliente = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof desasignarEtiquetaCliente>>, TError,{clienteId: string;etiquetaId: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof desasignarEtiquetaCliente>>,
+        TError,
+        {clienteId: string;etiquetaId: string},
+        TContext
+      > => {
+      return useMutation(getDesasignarEtiquetaClienteMutationOptions(options), queryClient);
+    }
+
+/**
+ * @summary Obtener un cliente por ID
+ */
+export type obtenerClienteResponse200 = {
+  data: Cliente
+  status: 200
+}
+
+export type obtenerClienteResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type obtenerClienteResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type obtenerClienteResponseSuccess = (obtenerClienteResponse200) & {
+  headers: Headers;
+};
+export type obtenerClienteResponseError = (obtenerClienteResponse401 | obtenerClienteResponse404) & {
+  headers: Headers;
+};
+
+export type obtenerClienteResponse = (obtenerClienteResponseSuccess | obtenerClienteResponseError)
+
+export const getObtenerClienteUrl = (id: string,) => {
+
+
+
+
+  return `/api/clientes/${id}`
+}
+
+export const obtenerCliente = async (id: string, options?: RequestInit): Promise<obtenerClienteResponse> => {
+
+  return customInstance<obtenerClienteResponse>(getObtenerClienteUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getObtenerClienteQueryKey = (id: string,) => {
+    return [
+    `/api/clientes/${id}`
+    ] as const;
+    }
+
+
+export const getObtenerClienteQueryOptions = <TData = Awaited<ReturnType<typeof obtenerCliente>>, TError = ErrorResponse>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerCliente>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getObtenerClienteQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof obtenerCliente>>> = ({ signal }) => obtenerCliente(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof obtenerCliente>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ObtenerClienteQueryResult = NonNullable<Awaited<ReturnType<typeof obtenerCliente>>>
+export type ObtenerClienteQueryError = ErrorResponse
+
+
+export function useObtenerCliente<TData = Awaited<ReturnType<typeof obtenerCliente>>, TError = ErrorResponse>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerCliente>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof obtenerCliente>>,
+          TError,
+          Awaited<ReturnType<typeof obtenerCliente>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useObtenerCliente<TData = Awaited<ReturnType<typeof obtenerCliente>>, TError = ErrorResponse>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerCliente>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof obtenerCliente>>,
+          TError,
+          Awaited<ReturnType<typeof obtenerCliente>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useObtenerCliente<TData = Awaited<ReturnType<typeof obtenerCliente>>, TError = ErrorResponse>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerCliente>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Obtener un cliente por ID
+ */
+
+export function useObtenerCliente<TData = Awaited<ReturnType<typeof obtenerCliente>>, TError = ErrorResponse>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerCliente>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getObtenerClienteQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+/**
+ * @summary Actualizar un cliente
+ */
+export type actualizarClienteResponse200 = {
+  data: Cliente
+  status: 200
+}
+
+export type actualizarClienteResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type actualizarClienteResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type actualizarClienteResponseSuccess = (actualizarClienteResponse200) & {
+  headers: Headers;
+};
+export type actualizarClienteResponseError = (actualizarClienteResponse401 | actualizarClienteResponse404) & {
+  headers: Headers;
+};
+
+export type actualizarClienteResponse = (actualizarClienteResponseSuccess | actualizarClienteResponseError)
+
+export const getActualizarClienteUrl = (id: string,) => {
+
+
+
+
+  return `/api/clientes/${id}`
+}
+
+export const actualizarCliente = async (id: string,
+    actualizarClienteRequest: ActualizarClienteRequest, options?: RequestInit): Promise<actualizarClienteResponse> => {
+
+  return customInstance<actualizarClienteResponse>(getActualizarClienteUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      actualizarClienteRequest,)
+  }
+);}
+
+
+
+
+export const getActualizarClienteMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof actualizarCliente>>, TError,{id: string;data: ActualizarClienteRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof actualizarCliente>>, TError,{id: string;data: ActualizarClienteRequest}, TContext> => {
+
+const mutationKey = ['actualizarCliente'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof actualizarCliente>>, {id: string;data: ActualizarClienteRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  actualizarCliente(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ActualizarClienteMutationResult = NonNullable<Awaited<ReturnType<typeof actualizarCliente>>>
+    export type ActualizarClienteMutationBody = ActualizarClienteRequest
+    export type ActualizarClienteMutationError = ErrorResponse
+
+    /**
+ * @summary Actualizar un cliente
+ */
+export const useActualizarCliente = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof actualizarCliente>>, TError,{id: string;data: ActualizarClienteRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof actualizarCliente>>,
+        TError,
+        {id: string;data: ActualizarClienteRequest},
+        TContext
+      > => {
+      return useMutation(getActualizarClienteMutationOptions(options), queryClient);
+    }
+
+/**
+ * @summary Eliminar un cliente
+ */
+export type eliminarClienteResponse204 = {
+  data: void
+  status: 204
+}
+
+export type eliminarClienteResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type eliminarClienteResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type eliminarClienteResponseSuccess = (eliminarClienteResponse204) & {
+  headers: Headers;
+};
+export type eliminarClienteResponseError = (eliminarClienteResponse401 | eliminarClienteResponse404) & {
+  headers: Headers;
+};
+
+export type eliminarClienteResponse = (eliminarClienteResponseSuccess | eliminarClienteResponseError)
+
+export const getEliminarClienteUrl = (id: string,) => {
+
+
+
+
+  return `/api/clientes/${id}`
+}
+
+export const eliminarCliente = async (id: string, options?: RequestInit): Promise<eliminarClienteResponse> => {
+
+  return customInstance<eliminarClienteResponse>(getEliminarClienteUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getEliminarClienteMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof eliminarCliente>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof eliminarCliente>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['eliminarCliente'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof eliminarCliente>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  eliminarCliente(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type EliminarClienteMutationResult = NonNullable<Awaited<ReturnType<typeof eliminarCliente>>>
+
+    export type EliminarClienteMutationError = ErrorResponse
+
+    /**
+ * @summary Eliminar un cliente
+ */
+export const useEliminarCliente = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof eliminarCliente>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof eliminarCliente>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+      return useMutation(getEliminarClienteMutationOptions(options), queryClient);
+    }
+
+/**
+ * @summary Obtener etiquetas de un cliente
+ */
+export type obtenerEtiquetasClienteResponse200 = {
+  data: EtiquetaConCategoria[]
+  status: 200
+}
+
+export type obtenerEtiquetasClienteResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type obtenerEtiquetasClienteResponseSuccess = (obtenerEtiquetasClienteResponse200) & {
+  headers: Headers;
+};
+export type obtenerEtiquetasClienteResponseError = (obtenerEtiquetasClienteResponse401) & {
+  headers: Headers;
+};
+
+export type obtenerEtiquetasClienteResponse = (obtenerEtiquetasClienteResponseSuccess | obtenerEtiquetasClienteResponseError)
+
+export const getObtenerEtiquetasClienteUrl = (id: string,) => {
+
+
+
+
+  return `/api/clientes/${id}/etiquetas`
+}
+
+export const obtenerEtiquetasCliente = async (id: string, options?: RequestInit): Promise<obtenerEtiquetasClienteResponse> => {
+
+  return customInstance<obtenerEtiquetasClienteResponse>(getObtenerEtiquetasClienteUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getObtenerEtiquetasClienteQueryKey = (id: string,) => {
+    return [
+    `/api/clientes/${id}/etiquetas`
+    ] as const;
+    }
+
+
+export const getObtenerEtiquetasClienteQueryOptions = <TData = Awaited<ReturnType<typeof obtenerEtiquetasCliente>>, TError = ErrorResponse>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerEtiquetasCliente>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getObtenerEtiquetasClienteQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof obtenerEtiquetasCliente>>> = ({ signal }) => obtenerEtiquetasCliente(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof obtenerEtiquetasCliente>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ObtenerEtiquetasClienteQueryResult = NonNullable<Awaited<ReturnType<typeof obtenerEtiquetasCliente>>>
+export type ObtenerEtiquetasClienteQueryError = ErrorResponse
+
+
+export function useObtenerEtiquetasCliente<TData = Awaited<ReturnType<typeof obtenerEtiquetasCliente>>, TError = ErrorResponse>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerEtiquetasCliente>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof obtenerEtiquetasCliente>>,
+          TError,
+          Awaited<ReturnType<typeof obtenerEtiquetasCliente>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useObtenerEtiquetasCliente<TData = Awaited<ReturnType<typeof obtenerEtiquetasCliente>>, TError = ErrorResponse>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerEtiquetasCliente>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof obtenerEtiquetasCliente>>,
+          TError,
+          Awaited<ReturnType<typeof obtenerEtiquetasCliente>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useObtenerEtiquetasCliente<TData = Awaited<ReturnType<typeof obtenerEtiquetasCliente>>, TError = ErrorResponse>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerEtiquetasCliente>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Obtener etiquetas de un cliente
+ */
+
+export function useObtenerEtiquetasCliente<TData = Awaited<ReturnType<typeof obtenerEtiquetasCliente>>, TError = ErrorResponse>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerEtiquetasCliente>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getObtenerEtiquetasClienteQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+/**
+ * @summary Asignar etiqueta a un cliente
+ */
+export type asignarEtiquetaClienteResponse204 = {
+  data: void
+  status: 204
+}
+
+export type asignarEtiquetaClienteResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type asignarEtiquetaClienteResponseSuccess = (asignarEtiquetaClienteResponse204) & {
+  headers: Headers;
+};
+export type asignarEtiquetaClienteResponseError = (asignarEtiquetaClienteResponse401) & {
+  headers: Headers;
+};
+
+export type asignarEtiquetaClienteResponse = (asignarEtiquetaClienteResponseSuccess | asignarEtiquetaClienteResponseError)
+
+export const getAsignarEtiquetaClienteUrl = (id: string,) => {
+
+
+
+
+  return `/api/clientes/${id}/etiquetas`
+}
+
+export const asignarEtiquetaCliente = async (id: string,
+    tagAssignBody: TagAssignBody, options?: RequestInit): Promise<asignarEtiquetaClienteResponse> => {
+
+  return customInstance<asignarEtiquetaClienteResponse>(getAsignarEtiquetaClienteUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      tagAssignBody,)
+  }
+);}
+
+
+
+
+export const getAsignarEtiquetaClienteMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof asignarEtiquetaCliente>>, TError,{id: string;data: TagAssignBody}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof asignarEtiquetaCliente>>, TError,{id: string;data: TagAssignBody}, TContext> => {
+
+const mutationKey = ['asignarEtiquetaCliente'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof asignarEtiquetaCliente>>, {id: string;data: TagAssignBody}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  asignarEtiquetaCliente(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AsignarEtiquetaClienteMutationResult = NonNullable<Awaited<ReturnType<typeof asignarEtiquetaCliente>>>
+    export type AsignarEtiquetaClienteMutationBody = TagAssignBody
+    export type AsignarEtiquetaClienteMutationError = ErrorResponse
+
+    /**
+ * @summary Asignar etiqueta a un cliente
+ */
+export const useAsignarEtiquetaCliente = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof asignarEtiquetaCliente>>, TError,{id: string;data: TagAssignBody}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof asignarEtiquetaCliente>>,
+        TError,
+        {id: string;data: TagAssignBody},
+        TContext
+      > => {
+      return useMutation(getAsignarEtiquetaClienteMutationOptions(options), queryClient);
     }
 
 /**
@@ -612,16 +1647,16 @@ export const getResumenQueryKey = (params?: ResumenParams,) => {
     }
 
 
-export const getResumenQueryOptions = <TData = Awaited<ReturnType<typeof resumen>>, TError = ErrorResponse>(params: ResumenParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resumen>>, TError, TData>>, }
+export const getResumenQueryOptions = <TData = Awaited<ReturnType<typeof resumen>>, TError = ErrorResponse>(params: ResumenParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resumen>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getResumenQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof resumen>>> = ({ signal }) => resumen(params, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof resumen>>> = ({ signal }) => resumen(params, { signal, ...requestOptions });
 
 
 
@@ -641,7 +1676,7 @@ export function useResumen<TData = Awaited<ReturnType<typeof resumen>>, TError =
           TError,
           Awaited<ReturnType<typeof resumen>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useResumen<TData = Awaited<ReturnType<typeof resumen>>, TError = ErrorResponse>(
@@ -651,11 +1686,11 @@ export function useResumen<TData = Awaited<ReturnType<typeof resumen>>, TError =
           TError,
           Awaited<ReturnType<typeof resumen>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useResumen<TData = Awaited<ReturnType<typeof resumen>>, TError = ErrorResponse>(
- params: ResumenParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resumen>>, TError, TData>>, }
+ params: ResumenParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resumen>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -663,7 +1698,7 @@ export function useResumen<TData = Awaited<ReturnType<typeof resumen>>, TError =
  */
 
 export function useResumen<TData = Awaited<ReturnType<typeof resumen>>, TError = ErrorResponse>(
- params: ResumenParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resumen>>, TError, TData>>, }
+ params: ResumenParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof resumen>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -677,6 +1712,526 @@ export function useResumen<TData = Awaited<ReturnType<typeof resumen>>, TError =
 
 
 
+
+/**
+ * @summary Listar etiquetas (con filtro opcional por categoría)
+ */
+export type listarEtiquetasResponse200 = {
+  data: EtiquetaConCategoria[]
+  status: 200
+}
+
+export type listarEtiquetasResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type listarEtiquetasResponseSuccess = (listarEtiquetasResponse200) & {
+  headers: Headers;
+};
+export type listarEtiquetasResponseError = (listarEtiquetasResponse401) & {
+  headers: Headers;
+};
+
+export type listarEtiquetasResponse = (listarEtiquetasResponseSuccess | listarEtiquetasResponseError)
+
+export const getListarEtiquetasUrl = (params?: ListarEtiquetasParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/etiquetas?${stringifiedParams}` : `/api/etiquetas`
+}
+
+export const listarEtiquetas = async (params?: ListarEtiquetasParams, options?: RequestInit): Promise<listarEtiquetasResponse> => {
+
+  return customInstance<listarEtiquetasResponse>(getListarEtiquetasUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListarEtiquetasQueryKey = (params?: ListarEtiquetasParams,) => {
+    return [
+    `/api/etiquetas`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListarEtiquetasQueryOptions = <TData = Awaited<ReturnType<typeof listarEtiquetas>>, TError = ErrorResponse>(params?: ListarEtiquetasParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarEtiquetas>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListarEtiquetasQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listarEtiquetas>>> = ({ signal }) => listarEtiquetas(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listarEtiquetas>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListarEtiquetasQueryResult = NonNullable<Awaited<ReturnType<typeof listarEtiquetas>>>
+export type ListarEtiquetasQueryError = ErrorResponse
+
+
+export function useListarEtiquetas<TData = Awaited<ReturnType<typeof listarEtiquetas>>, TError = ErrorResponse>(
+ params: undefined |  ListarEtiquetasParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarEtiquetas>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listarEtiquetas>>,
+          TError,
+          Awaited<ReturnType<typeof listarEtiquetas>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListarEtiquetas<TData = Awaited<ReturnType<typeof listarEtiquetas>>, TError = ErrorResponse>(
+ params?: ListarEtiquetasParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarEtiquetas>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listarEtiquetas>>,
+          TError,
+          Awaited<ReturnType<typeof listarEtiquetas>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListarEtiquetas<TData = Awaited<ReturnType<typeof listarEtiquetas>>, TError = ErrorResponse>(
+ params?: ListarEtiquetasParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarEtiquetas>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Listar etiquetas (con filtro opcional por categoría)
+ */
+
+export function useListarEtiquetas<TData = Awaited<ReturnType<typeof listarEtiquetas>>, TError = ErrorResponse>(
+ params?: ListarEtiquetasParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarEtiquetas>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListarEtiquetasQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+/**
+ * @summary Crear una etiqueta
+ */
+export type crearEtiquetaResponse201 = {
+  data: EtiquetaConCategoria
+  status: 201
+}
+
+export type crearEtiquetaResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type crearEtiquetaResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type crearEtiquetaResponseSuccess = (crearEtiquetaResponse201) & {
+  headers: Headers;
+};
+export type crearEtiquetaResponseError = (crearEtiquetaResponse401 | crearEtiquetaResponse422) & {
+  headers: Headers;
+};
+
+export type crearEtiquetaResponse = (crearEtiquetaResponseSuccess | crearEtiquetaResponseError)
+
+export const getCrearEtiquetaUrl = () => {
+
+
+
+
+  return `/api/etiquetas`
+}
+
+export const crearEtiqueta = async (crearEtiquetaRequest: CrearEtiquetaRequest, options?: RequestInit): Promise<crearEtiquetaResponse> => {
+
+  return customInstance<crearEtiquetaResponse>(getCrearEtiquetaUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      crearEtiquetaRequest,)
+  }
+);}
+
+
+
+
+export const getCrearEtiquetaMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof crearEtiqueta>>, TError,{data: CrearEtiquetaRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof crearEtiqueta>>, TError,{data: CrearEtiquetaRequest}, TContext> => {
+
+const mutationKey = ['crearEtiqueta'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof crearEtiqueta>>, {data: CrearEtiquetaRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  crearEtiqueta(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CrearEtiquetaMutationResult = NonNullable<Awaited<ReturnType<typeof crearEtiqueta>>>
+    export type CrearEtiquetaMutationBody = CrearEtiquetaRequest
+    export type CrearEtiquetaMutationError = ErrorResponse
+
+    /**
+ * @summary Crear una etiqueta
+ */
+export const useCrearEtiqueta = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof crearEtiqueta>>, TError,{data: CrearEtiquetaRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof crearEtiqueta>>,
+        TError,
+        {data: CrearEtiquetaRequest},
+        TContext
+      > => {
+      return useMutation(getCrearEtiquetaMutationOptions(options), queryClient);
+    }
+
+/**
+ * @summary Listar categorías de gasto — endpoint público
+ */
+export type listarCategoriasResponse200 = {
+  data: CategoriaGasto[]
+  status: 200
+}
+
+export type listarCategoriasResponseSuccess = (listarCategoriasResponse200) & {
+  headers: Headers;
+};
+;
+
+export type listarCategoriasResponse = (listarCategoriasResponseSuccess)
+
+export const getListarCategoriasUrl = () => {
+
+
+
+
+  return `/api/gastos/categorias`
+}
+
+export const listarCategorias = async ( options?: RequestInit): Promise<listarCategoriasResponse> => {
+
+  return customInstance<listarCategoriasResponse>(getListarCategoriasUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListarCategoriasQueryKey = () => {
+    return [
+    `/api/gastos/categorias`
+    ] as const;
+    }
+
+
+export const getListarCategoriasQueryOptions = <TData = Awaited<ReturnType<typeof listarCategorias>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarCategorias>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListarCategoriasQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listarCategorias>>> = ({ signal }) => listarCategorias({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listarCategorias>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListarCategoriasQueryResult = NonNullable<Awaited<ReturnType<typeof listarCategorias>>>
+export type ListarCategoriasQueryError = unknown
+
+
+export function useListarCategorias<TData = Awaited<ReturnType<typeof listarCategorias>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarCategorias>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listarCategorias>>,
+          TError,
+          Awaited<ReturnType<typeof listarCategorias>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListarCategorias<TData = Awaited<ReturnType<typeof listarCategorias>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarCategorias>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listarCategorias>>,
+          TError,
+          Awaited<ReturnType<typeof listarCategorias>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListarCategorias<TData = Awaited<ReturnType<typeof listarCategorias>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarCategorias>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Listar categorías de gasto — endpoint público
+ */
+
+export function useListarCategorias<TData = Awaited<ReturnType<typeof listarCategorias>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarCategorias>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListarCategoriasQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+/**
+ * @summary Crear una categoría de etiquetas
+ */
+export type crearCategoriaResponse201 = {
+  data: CategoriaEtiqueta
+  status: 201
+}
+
+export type crearCategoriaResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type crearCategoriaResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type crearCategoriaResponseSuccess = (crearCategoriaResponse201) & {
+  headers: Headers;
+};
+export type crearCategoriaResponseError = (crearCategoriaResponse401 | crearCategoriaResponse422) & {
+  headers: Headers;
+};
+
+export type crearCategoriaResponse = (crearCategoriaResponseSuccess | crearCategoriaResponseError)
+
+export const getCrearCategoriaUrl = () => {
+
+
+
+
+  return `/api/etiquetas/categorias`
+}
+
+export const crearCategoria = async (crearCategoriaEtiquetaRequest: CrearCategoriaEtiquetaRequest, options?: RequestInit): Promise<crearCategoriaResponse> => {
+
+  return customInstance<crearCategoriaResponse>(getCrearCategoriaUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      crearCategoriaEtiquetaRequest,)
+  }
+);}
+
+
+
+
+export const getCrearCategoriaMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof crearCategoria>>, TError,{data: CrearCategoriaEtiquetaRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof crearCategoria>>, TError,{data: CrearCategoriaEtiquetaRequest}, TContext> => {
+
+const mutationKey = ['crearCategoria'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof crearCategoria>>, {data: CrearCategoriaEtiquetaRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  crearCategoria(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CrearCategoriaMutationResult = NonNullable<Awaited<ReturnType<typeof crearCategoria>>>
+    export type CrearCategoriaMutationBody = CrearCategoriaEtiquetaRequest
+    export type CrearCategoriaMutationError = ErrorResponse
+
+    /**
+ * @summary Crear una categoría de etiquetas
+ */
+export const useCrearCategoria = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof crearCategoria>>, TError,{data: CrearCategoriaEtiquetaRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof crearCategoria>>,
+        TError,
+        {data: CrearCategoriaEtiquetaRequest},
+        TContext
+      > => {
+      return useMutation(getCrearCategoriaMutationOptions(options), queryClient);
+    }
+
+/**
+ * @summary Eliminar una etiqueta
+ */
+export type eliminarEtiquetaResponse204 = {
+  data: void
+  status: 204
+}
+
+export type eliminarEtiquetaResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type eliminarEtiquetaResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type eliminarEtiquetaResponseSuccess = (eliminarEtiquetaResponse204) & {
+  headers: Headers;
+};
+export type eliminarEtiquetaResponseError = (eliminarEtiquetaResponse401 | eliminarEtiquetaResponse404) & {
+  headers: Headers;
+};
+
+export type eliminarEtiquetaResponse = (eliminarEtiquetaResponseSuccess | eliminarEtiquetaResponseError)
+
+export const getEliminarEtiquetaUrl = (id: string,) => {
+
+
+
+
+  return `/api/etiquetas/${id}`
+}
+
+export const eliminarEtiqueta = async (id: string, options?: RequestInit): Promise<eliminarEtiquetaResponse> => {
+
+  return customInstance<eliminarEtiquetaResponse>(getEliminarEtiquetaUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getEliminarEtiquetaMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof eliminarEtiqueta>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof eliminarEtiqueta>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['eliminarEtiqueta'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof eliminarEtiqueta>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  eliminarEtiqueta(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type EliminarEtiquetaMutationResult = NonNullable<Awaited<ReturnType<typeof eliminarEtiqueta>>>
+
+    export type EliminarEtiquetaMutationError = ErrorResponse
+
+    /**
+ * @summary Eliminar una etiqueta
+ */
+export const useEliminarEtiqueta = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof eliminarEtiqueta>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof eliminarEtiqueta>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+      return useMutation(getEliminarEtiquetaMutationOptions(options), queryClient);
+    }
 
 /**
  * @summary Listar gastos con paginación y filtros
@@ -737,16 +2292,16 @@ export const getListarGastosQueryKey = (params?: ListarGastosParams,) => {
     }
 
 
-export const getListarGastosQueryOptions = <TData = Awaited<ReturnType<typeof listarGastos>>, TError = ErrorResponse>(params?: ListarGastosParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarGastos>>, TError, TData>>, }
+export const getListarGastosQueryOptions = <TData = Awaited<ReturnType<typeof listarGastos>>, TError = ErrorResponse>(params?: ListarGastosParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarGastos>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getListarGastosQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listarGastos>>> = ({ signal }) => listarGastos(params, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listarGastos>>> = ({ signal }) => listarGastos(params, { signal, ...requestOptions });
 
 
 
@@ -766,7 +2321,7 @@ export function useListarGastos<TData = Awaited<ReturnType<typeof listarGastos>>
           TError,
           Awaited<ReturnType<typeof listarGastos>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useListarGastos<TData = Awaited<ReturnType<typeof listarGastos>>, TError = ErrorResponse>(
@@ -776,11 +2331,11 @@ export function useListarGastos<TData = Awaited<ReturnType<typeof listarGastos>>
           TError,
           Awaited<ReturnType<typeof listarGastos>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useListarGastos<TData = Awaited<ReturnType<typeof listarGastos>>, TError = ErrorResponse>(
- params?: ListarGastosParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarGastos>>, TError, TData>>, }
+ params?: ListarGastosParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarGastos>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -788,7 +2343,7 @@ export function useListarGastos<TData = Awaited<ReturnType<typeof listarGastos>>
  */
 
 export function useListarGastos<TData = Awaited<ReturnType<typeof listarGastos>>, TError = ErrorResponse>(
- params?: ListarGastosParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarGastos>>, TError, TData>>, }
+ params?: ListarGastosParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarGastos>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -854,15 +2409,15 @@ export const crearGasto = async (crearGastoRequest: CrearGastoRequest, options?:
 
 
 export const getCrearGastoMutationOptions = <TError = ErrorResponse,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof crearGasto>>, TError,{data: CrearGastoRequest}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof crearGasto>>, TError,{data: CrearGastoRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof crearGasto>>, TError,{data: CrearGastoRequest}, TContext> => {
 
 const mutationKey = ['crearGasto'];
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -870,7 +2425,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof crearGasto>>, {data: CrearGastoRequest}> = (props) => {
           const {data} = props ?? {};
 
-          return  crearGasto(data,)
+          return  crearGasto(data,requestOptions)
         }
 
 
@@ -888,7 +2443,7 @@ const {mutation: mutationOptions} = options ?
  * @summary Crear un gasto
  */
 export const useCrearGasto = <TError = ErrorResponse,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof crearGasto>>, TError,{data: CrearGastoRequest}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof crearGasto>>, TError,{data: CrearGastoRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof crearGasto>>,
         TError,
@@ -897,117 +2452,6 @@ export const useCrearGasto = <TError = ErrorResponse,
       > => {
       return useMutation(getCrearGastoMutationOptions(options), queryClient);
     }
-
-/**
- * @summary Listar categorías de gasto — endpoint público
- */
-export type listarCategoriasResponse200 = {
-  data: CategoriaGasto[]
-  status: 200
-}
-
-export type listarCategoriasResponseSuccess = (listarCategoriasResponse200) & {
-  headers: Headers;
-};
-;
-
-export type listarCategoriasResponse = (listarCategoriasResponseSuccess)
-
-export const getListarCategoriasUrl = () => {
-
-
-
-
-  return `/api/gastos/categorias`
-}
-
-export const listarCategorias = async ( options?: RequestInit): Promise<listarCategoriasResponse> => {
-
-  return customInstance<listarCategoriasResponse>(getListarCategoriasUrl(),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getListarCategoriasQueryKey = () => {
-    return [
-    `/api/gastos/categorias`
-    ] as const;
-    }
-
-
-export const getListarCategoriasQueryOptions = <TData = Awaited<ReturnType<typeof listarCategorias>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarCategorias>>, TError, TData>>, }
-) => {
-
-const {query: queryOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getListarCategoriasQueryKey();
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listarCategorias>>> = ({ signal }) => listarCategorias({ signal });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listarCategorias>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type ListarCategoriasQueryResult = NonNullable<Awaited<ReturnType<typeof listarCategorias>>>
-export type ListarCategoriasQueryError = unknown
-
-
-export function useListarCategorias<TData = Awaited<ReturnType<typeof listarCategorias>>, TError = unknown>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarCategorias>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof listarCategorias>>,
-          TError,
-          Awaited<ReturnType<typeof listarCategorias>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListarCategorias<TData = Awaited<ReturnType<typeof listarCategorias>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarCategorias>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof listarCategorias>>,
-          TError,
-          Awaited<ReturnType<typeof listarCategorias>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListarCategorias<TData = Awaited<ReturnType<typeof listarCategorias>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarCategorias>>, TError, TData>>, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-/**
- * @summary Listar categorías de gasto — endpoint público
- */
-
-export function useListarCategorias<TData = Awaited<ReturnType<typeof listarCategorias>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarCategorias>>, TError, TData>>, }
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getListarCategoriasQueryOptions(options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-
 
 /**
  * @summary Obtener un gasto por ID
@@ -1066,16 +2510,16 @@ export const getObtenerGastoQueryKey = (id: string,) => {
     }
 
 
-export const getObtenerGastoQueryOptions = <TData = Awaited<ReturnType<typeof obtenerGasto>>, TError = ErrorResponse>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerGasto>>, TError, TData>>, }
+export const getObtenerGastoQueryOptions = <TData = Awaited<ReturnType<typeof obtenerGasto>>, TError = ErrorResponse>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerGasto>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getObtenerGastoQueryKey(id);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof obtenerGasto>>> = ({ signal }) => obtenerGasto(id, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof obtenerGasto>>> = ({ signal }) => obtenerGasto(id, { signal, ...requestOptions });
 
 
 
@@ -1095,7 +2539,7 @@ export function useObtenerGasto<TData = Awaited<ReturnType<typeof obtenerGasto>>
           TError,
           Awaited<ReturnType<typeof obtenerGasto>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useObtenerGasto<TData = Awaited<ReturnType<typeof obtenerGasto>>, TError = ErrorResponse>(
@@ -1105,11 +2549,11 @@ export function useObtenerGasto<TData = Awaited<ReturnType<typeof obtenerGasto>>
           TError,
           Awaited<ReturnType<typeof obtenerGasto>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useObtenerGasto<TData = Awaited<ReturnType<typeof obtenerGasto>>, TError = ErrorResponse>(
- id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerGasto>>, TError, TData>>, }
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerGasto>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -1117,7 +2561,7 @@ export function useObtenerGasto<TData = Awaited<ReturnType<typeof obtenerGasto>>
  */
 
 export function useObtenerGasto<TData = Awaited<ReturnType<typeof obtenerGasto>>, TError = ErrorResponse>(
- id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerGasto>>, TError, TData>>, }
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerGasto>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -1182,15 +2626,15 @@ export const eliminarGasto = async (id: string, options?: RequestInit): Promise<
 
 
 export const getEliminarGastoMutationOptions = <TError = ErrorResponse,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof eliminarGasto>>, TError,{id: string}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof eliminarGasto>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof eliminarGasto>>, TError,{id: string}, TContext> => {
 
 const mutationKey = ['eliminarGasto'];
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -1198,7 +2642,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof eliminarGasto>>, {id: string}> = (props) => {
           const {id} = props ?? {};
 
-          return  eliminarGasto(id,)
+          return  eliminarGasto(id,requestOptions)
         }
 
 
@@ -1216,7 +2660,7 @@ const {mutation: mutationOptions} = options ?
  * @summary Eliminar un gasto
  */
 export const useEliminarGasto = <TError = ErrorResponse,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof eliminarGasto>>, TError,{id: string}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof eliminarGasto>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof eliminarGasto>>,
         TError,
@@ -1271,16 +2715,16 @@ export const getHealthCheckQueryKey = () => {
     }
 
 
-export const getHealthCheckQueryOptions = <TData = Awaited<ReturnType<typeof healthCheck>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthCheck>>, TError, TData>>, }
+export const getHealthCheckQueryOptions = <TData = Awaited<ReturnType<typeof healthCheck>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthCheck>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getHealthCheckQueryKey();
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof healthCheck>>> = ({ signal }) => healthCheck({ signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof healthCheck>>> = ({ signal }) => healthCheck({ signal, ...requestOptions });
 
 
 
@@ -1300,7 +2744,7 @@ export function useHealthCheck<TData = Awaited<ReturnType<typeof healthCheck>>, 
           TError,
           Awaited<ReturnType<typeof healthCheck>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useHealthCheck<TData = Awaited<ReturnType<typeof healthCheck>>, TError = unknown>(
@@ -1310,11 +2754,11 @@ export function useHealthCheck<TData = Awaited<ReturnType<typeof healthCheck>>, 
           TError,
           Awaited<ReturnType<typeof healthCheck>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useHealthCheck<TData = Awaited<ReturnType<typeof healthCheck>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthCheck>>, TError, TData>>, }
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthCheck>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -1322,7 +2766,7 @@ export function useHealthCheck<TData = Awaited<ReturnType<typeof healthCheck>>, 
  */
 
 export function useHealthCheck<TData = Awaited<ReturnType<typeof healthCheck>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthCheck>>, TError, TData>>, }
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthCheck>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -1396,16 +2840,16 @@ export const getListarReservasQueryKey = (params?: ListarReservasParams,) => {
     }
 
 
-export const getListarReservasQueryOptions = <TData = Awaited<ReturnType<typeof listarReservas>>, TError = ErrorResponse>(params?: ListarReservasParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarReservas>>, TError, TData>>, }
+export const getListarReservasQueryOptions = <TData = Awaited<ReturnType<typeof listarReservas>>, TError = ErrorResponse>(params?: ListarReservasParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarReservas>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getListarReservasQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listarReservas>>> = ({ signal }) => listarReservas(params, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listarReservas>>> = ({ signal }) => listarReservas(params, { signal, ...requestOptions });
 
 
 
@@ -1425,7 +2869,7 @@ export function useListarReservas<TData = Awaited<ReturnType<typeof listarReserv
           TError,
           Awaited<ReturnType<typeof listarReservas>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useListarReservas<TData = Awaited<ReturnType<typeof listarReservas>>, TError = ErrorResponse>(
@@ -1435,11 +2879,11 @@ export function useListarReservas<TData = Awaited<ReturnType<typeof listarReserv
           TError,
           Awaited<ReturnType<typeof listarReservas>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useListarReservas<TData = Awaited<ReturnType<typeof listarReservas>>, TError = ErrorResponse>(
- params?: ListarReservasParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarReservas>>, TError, TData>>, }
+ params?: ListarReservasParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarReservas>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -1447,7 +2891,7 @@ export function useListarReservas<TData = Awaited<ReturnType<typeof listarReserv
  */
 
 export function useListarReservas<TData = Awaited<ReturnType<typeof listarReservas>>, TError = ErrorResponse>(
- params?: ListarReservasParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarReservas>>, TError, TData>>, }
+ params?: ListarReservasParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarReservas>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -1513,15 +2957,15 @@ export const crearReserva = async (crearReservaRequest: CrearReservaRequest, opt
 
 
 export const getCrearReservaMutationOptions = <TError = ErrorResponse,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof crearReserva>>, TError,{data: CrearReservaRequest}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof crearReserva>>, TError,{data: CrearReservaRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof crearReserva>>, TError,{data: CrearReservaRequest}, TContext> => {
 
 const mutationKey = ['crearReserva'];
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -1529,7 +2973,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof crearReserva>>, {data: CrearReservaRequest}> = (props) => {
           const {data} = props ?? {};
 
-          return  crearReserva(data,)
+          return  crearReserva(data,requestOptions)
         }
 
 
@@ -1547,7 +2991,7 @@ const {mutation: mutationOptions} = options ?
  * @summary Crear una reserva
  */
 export const useCrearReserva = <TError = ErrorResponse,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof crearReserva>>, TError,{data: CrearReservaRequest}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof crearReserva>>, TError,{data: CrearReservaRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof crearReserva>>,
         TError,
@@ -1609,16 +3053,16 @@ export const getConteoReservasQueryKey = () => {
     }
 
 
-export const getConteoReservasQueryOptions = <TData = Awaited<ReturnType<typeof conteoReservas>>, TError = ErrorResponse>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof conteoReservas>>, TError, TData>>, }
+export const getConteoReservasQueryOptions = <TData = Awaited<ReturnType<typeof conteoReservas>>, TError = ErrorResponse>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof conteoReservas>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getConteoReservasQueryKey();
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof conteoReservas>>> = ({ signal }) => conteoReservas({ signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof conteoReservas>>> = ({ signal }) => conteoReservas({ signal, ...requestOptions });
 
 
 
@@ -1638,7 +3082,7 @@ export function useConteoReservas<TData = Awaited<ReturnType<typeof conteoReserv
           TError,
           Awaited<ReturnType<typeof conteoReservas>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useConteoReservas<TData = Awaited<ReturnType<typeof conteoReservas>>, TError = ErrorResponse>(
@@ -1648,11 +3092,11 @@ export function useConteoReservas<TData = Awaited<ReturnType<typeof conteoReserv
           TError,
           Awaited<ReturnType<typeof conteoReservas>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useConteoReservas<TData = Awaited<ReturnType<typeof conteoReservas>>, TError = ErrorResponse>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof conteoReservas>>, TError, TData>>, }
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof conteoReservas>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -1660,7 +3104,7 @@ export function useConteoReservas<TData = Awaited<ReturnType<typeof conteoReserv
  */
 
 export function useConteoReservas<TData = Awaited<ReturnType<typeof conteoReservas>>, TError = ErrorResponse>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof conteoReservas>>, TError, TData>>, }
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof conteoReservas>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -1732,16 +3176,16 @@ export const getObtenerReservaQueryKey = (id: string,) => {
     }
 
 
-export const getObtenerReservaQueryOptions = <TData = Awaited<ReturnType<typeof obtenerReserva>>, TError = ErrorResponse>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerReserva>>, TError, TData>>, }
+export const getObtenerReservaQueryOptions = <TData = Awaited<ReturnType<typeof obtenerReserva>>, TError = ErrorResponse>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerReserva>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getObtenerReservaQueryKey(id);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof obtenerReserva>>> = ({ signal }) => obtenerReserva(id, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof obtenerReserva>>> = ({ signal }) => obtenerReserva(id, { signal, ...requestOptions });
 
 
 
@@ -1761,7 +3205,7 @@ export function useObtenerReserva<TData = Awaited<ReturnType<typeof obtenerReser
           TError,
           Awaited<ReturnType<typeof obtenerReserva>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useObtenerReserva<TData = Awaited<ReturnType<typeof obtenerReserva>>, TError = ErrorResponse>(
@@ -1771,11 +3215,11 @@ export function useObtenerReserva<TData = Awaited<ReturnType<typeof obtenerReser
           TError,
           Awaited<ReturnType<typeof obtenerReserva>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useObtenerReserva<TData = Awaited<ReturnType<typeof obtenerReserva>>, TError = ErrorResponse>(
- id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerReserva>>, TError, TData>>, }
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerReserva>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -1783,7 +3227,7 @@ export function useObtenerReserva<TData = Awaited<ReturnType<typeof obtenerReser
  */
 
 export function useObtenerReserva<TData = Awaited<ReturnType<typeof obtenerReserva>>, TError = ErrorResponse>(
- id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerReserva>>, TError, TData>>, }
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerReserva>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -1850,15 +3294,15 @@ export const actualizarReserva = async (id: string,
 
 
 export const getActualizarReservaMutationOptions = <TError = ErrorResponse,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof actualizarReserva>>, TError,{id: string;data: ActualizarReservaRequest}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof actualizarReserva>>, TError,{id: string;data: ActualizarReservaRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof actualizarReserva>>, TError,{id: string;data: ActualizarReservaRequest}, TContext> => {
 
 const mutationKey = ['actualizarReserva'];
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -1866,7 +3310,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof actualizarReserva>>, {id: string;data: ActualizarReservaRequest}> = (props) => {
           const {id,data} = props ?? {};
 
-          return  actualizarReserva(id,data,)
+          return  actualizarReserva(id,data,requestOptions)
         }
 
 
@@ -1884,7 +3328,7 @@ const {mutation: mutationOptions} = options ?
  * @summary Actualizar una reserva
  */
 export const useActualizarReserva = <TError = ErrorResponse,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof actualizarReserva>>, TError,{id: string;data: ActualizarReservaRequest}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof actualizarReserva>>, TError,{id: string;data: ActualizarReservaRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof actualizarReserva>>,
         TError,
@@ -1944,15 +3388,15 @@ export const eliminarReserva = async (id: string, options?: RequestInit): Promis
 
 
 export const getEliminarReservaMutationOptions = <TError = ErrorResponse,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof eliminarReserva>>, TError,{id: string}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof eliminarReserva>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof eliminarReserva>>, TError,{id: string}, TContext> => {
 
 const mutationKey = ['eliminarReserva'];
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -1960,7 +3404,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof eliminarReserva>>, {id: string}> = (props) => {
           const {id} = props ?? {};
 
-          return  eliminarReserva(id,)
+          return  eliminarReserva(id,requestOptions)
         }
 
 
@@ -1978,7 +3422,7 @@ const {mutation: mutationOptions} = options ?
  * @summary Eliminar una reserva
  */
 export const useEliminarReserva = <TError = ErrorResponse,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof eliminarReserva>>, TError,{id: string}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof eliminarReserva>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof eliminarReserva>>,
         TError,
@@ -1986,6 +3430,311 @@ export const useEliminarReserva = <TError = ErrorResponse,
         TContext
       > => {
       return useMutation(getEliminarReservaMutationOptions(options), queryClient);
+    }
+
+/**
+ * @summary Obtener etiquetas de una reserva
+ */
+export type obtenerEtiquetasReservaResponse200 = {
+  data: EtiquetaConCategoria[]
+  status: 200
+}
+
+export type obtenerEtiquetasReservaResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type obtenerEtiquetasReservaResponseSuccess = (obtenerEtiquetasReservaResponse200) & {
+  headers: Headers;
+};
+export type obtenerEtiquetasReservaResponseError = (obtenerEtiquetasReservaResponse401) & {
+  headers: Headers;
+};
+
+export type obtenerEtiquetasReservaResponse = (obtenerEtiquetasReservaResponseSuccess | obtenerEtiquetasReservaResponseError)
+
+export const getObtenerEtiquetasReservaUrl = (id: string,) => {
+
+
+
+
+  return `/api/reservas/${id}/etiquetas`
+}
+
+export const obtenerEtiquetasReserva = async (id: string, options?: RequestInit): Promise<obtenerEtiquetasReservaResponse> => {
+
+  return customInstance<obtenerEtiquetasReservaResponse>(getObtenerEtiquetasReservaUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getObtenerEtiquetasReservaQueryKey = (id: string,) => {
+    return [
+    `/api/reservas/${id}/etiquetas`
+    ] as const;
+    }
+
+
+export const getObtenerEtiquetasReservaQueryOptions = <TData = Awaited<ReturnType<typeof obtenerEtiquetasReserva>>, TError = ErrorResponse>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerEtiquetasReserva>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getObtenerEtiquetasReservaQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof obtenerEtiquetasReserva>>> = ({ signal }) => obtenerEtiquetasReserva(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof obtenerEtiquetasReserva>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ObtenerEtiquetasReservaQueryResult = NonNullable<Awaited<ReturnType<typeof obtenerEtiquetasReserva>>>
+export type ObtenerEtiquetasReservaQueryError = ErrorResponse
+
+
+export function useObtenerEtiquetasReserva<TData = Awaited<ReturnType<typeof obtenerEtiquetasReserva>>, TError = ErrorResponse>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerEtiquetasReserva>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof obtenerEtiquetasReserva>>,
+          TError,
+          Awaited<ReturnType<typeof obtenerEtiquetasReserva>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useObtenerEtiquetasReserva<TData = Awaited<ReturnType<typeof obtenerEtiquetasReserva>>, TError = ErrorResponse>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerEtiquetasReserva>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof obtenerEtiquetasReserva>>,
+          TError,
+          Awaited<ReturnType<typeof obtenerEtiquetasReserva>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useObtenerEtiquetasReserva<TData = Awaited<ReturnType<typeof obtenerEtiquetasReserva>>, TError = ErrorResponse>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerEtiquetasReserva>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Obtener etiquetas de una reserva
+ */
+
+export function useObtenerEtiquetasReserva<TData = Awaited<ReturnType<typeof obtenerEtiquetasReserva>>, TError = ErrorResponse>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerEtiquetasReserva>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getObtenerEtiquetasReservaQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+/**
+ * @summary Asignar etiqueta a una reserva
+ */
+export type asignarEtiquetaReservaResponse204 = {
+  data: void
+  status: 204
+}
+
+export type asignarEtiquetaReservaResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type asignarEtiquetaReservaResponseSuccess = (asignarEtiquetaReservaResponse204) & {
+  headers: Headers;
+};
+export type asignarEtiquetaReservaResponseError = (asignarEtiquetaReservaResponse401) & {
+  headers: Headers;
+};
+
+export type asignarEtiquetaReservaResponse = (asignarEtiquetaReservaResponseSuccess | asignarEtiquetaReservaResponseError)
+
+export const getAsignarEtiquetaReservaUrl = (id: string,) => {
+
+
+
+
+  return `/api/reservas/${id}/etiquetas`
+}
+
+export const asignarEtiquetaReserva = async (id: string,
+    tagAssignBody: TagAssignBody, options?: RequestInit): Promise<asignarEtiquetaReservaResponse> => {
+
+  return customInstance<asignarEtiquetaReservaResponse>(getAsignarEtiquetaReservaUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      tagAssignBody,)
+  }
+);}
+
+
+
+
+export const getAsignarEtiquetaReservaMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof asignarEtiquetaReserva>>, TError,{id: string;data: TagAssignBody}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof asignarEtiquetaReserva>>, TError,{id: string;data: TagAssignBody}, TContext> => {
+
+const mutationKey = ['asignarEtiquetaReserva'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof asignarEtiquetaReserva>>, {id: string;data: TagAssignBody}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  asignarEtiquetaReserva(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AsignarEtiquetaReservaMutationResult = NonNullable<Awaited<ReturnType<typeof asignarEtiquetaReserva>>>
+    export type AsignarEtiquetaReservaMutationBody = TagAssignBody
+    export type AsignarEtiquetaReservaMutationError = ErrorResponse
+
+    /**
+ * @summary Asignar etiqueta a una reserva
+ */
+export const useAsignarEtiquetaReserva = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof asignarEtiquetaReserva>>, TError,{id: string;data: TagAssignBody}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof asignarEtiquetaReserva>>,
+        TError,
+        {id: string;data: TagAssignBody},
+        TContext
+      > => {
+      return useMutation(getAsignarEtiquetaReservaMutationOptions(options), queryClient);
+    }
+
+/**
+ * @summary Desasignar etiqueta de una reserva
+ */
+export type desasignarEtiquetaReservaResponse204 = {
+  data: void
+  status: 204
+}
+
+export type desasignarEtiquetaReservaResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type desasignarEtiquetaReservaResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type desasignarEtiquetaReservaResponseSuccess = (desasignarEtiquetaReservaResponse204) & {
+  headers: Headers;
+};
+export type desasignarEtiquetaReservaResponseError = (desasignarEtiquetaReservaResponse401 | desasignarEtiquetaReservaResponse404) & {
+  headers: Headers;
+};
+
+export type desasignarEtiquetaReservaResponse = (desasignarEtiquetaReservaResponseSuccess | desasignarEtiquetaReservaResponseError)
+
+export const getDesasignarEtiquetaReservaUrl = (reservaId: string,
+    etiquetaId: string,) => {
+
+
+
+
+  return `/api/reservas/${reservaId}/etiquetas/${etiquetaId}`
+}
+
+export const desasignarEtiquetaReserva = async (reservaId: string,
+    etiquetaId: string, options?: RequestInit): Promise<desasignarEtiquetaReservaResponse> => {
+
+  return customInstance<desasignarEtiquetaReservaResponse>(getDesasignarEtiquetaReservaUrl(reservaId,etiquetaId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDesasignarEtiquetaReservaMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof desasignarEtiquetaReserva>>, TError,{reservaId: string;etiquetaId: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof desasignarEtiquetaReserva>>, TError,{reservaId: string;etiquetaId: string}, TContext> => {
+
+const mutationKey = ['desasignarEtiquetaReserva'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof desasignarEtiquetaReserva>>, {reservaId: string;etiquetaId: string}> = (props) => {
+          const {reservaId,etiquetaId} = props ?? {};
+
+          return  desasignarEtiquetaReserva(reservaId,etiquetaId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DesasignarEtiquetaReservaMutationResult = NonNullable<Awaited<ReturnType<typeof desasignarEtiquetaReserva>>>
+
+    export type DesasignarEtiquetaReservaMutationError = ErrorResponse
+
+    /**
+ * @summary Desasignar etiqueta de una reserva
+ */
+export const useDesasignarEtiquetaReserva = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof desasignarEtiquetaReserva>>, TError,{reservaId: string;etiquetaId: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof desasignarEtiquetaReserva>>,
+        TError,
+        {reservaId: string;etiquetaId: string},
+        TContext
+      > => {
+      return useMutation(getDesasignarEtiquetaReservaMutationOptions(options), queryClient);
     }
 
 /**
@@ -2047,16 +3796,16 @@ export const getListarVentasQueryKey = (params?: ListarVentasParams,) => {
     }
 
 
-export const getListarVentasQueryOptions = <TData = Awaited<ReturnType<typeof listarVentas>>, TError = ErrorResponse>(params?: ListarVentasParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarVentas>>, TError, TData>>, }
+export const getListarVentasQueryOptions = <TData = Awaited<ReturnType<typeof listarVentas>>, TError = ErrorResponse>(params?: ListarVentasParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarVentas>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getListarVentasQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listarVentas>>> = ({ signal }) => listarVentas(params, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listarVentas>>> = ({ signal }) => listarVentas(params, { signal, ...requestOptions });
 
 
 
@@ -2076,7 +3825,7 @@ export function useListarVentas<TData = Awaited<ReturnType<typeof listarVentas>>
           TError,
           Awaited<ReturnType<typeof listarVentas>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useListarVentas<TData = Awaited<ReturnType<typeof listarVentas>>, TError = ErrorResponse>(
@@ -2086,11 +3835,11 @@ export function useListarVentas<TData = Awaited<ReturnType<typeof listarVentas>>
           TError,
           Awaited<ReturnType<typeof listarVentas>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useListarVentas<TData = Awaited<ReturnType<typeof listarVentas>>, TError = ErrorResponse>(
- params?: ListarVentasParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarVentas>>, TError, TData>>, }
+ params?: ListarVentasParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarVentas>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -2098,7 +3847,7 @@ export function useListarVentas<TData = Awaited<ReturnType<typeof listarVentas>>
  */
 
 export function useListarVentas<TData = Awaited<ReturnType<typeof listarVentas>>, TError = ErrorResponse>(
- params?: ListarVentasParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarVentas>>, TError, TData>>, }
+ params?: ListarVentasParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarVentas>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -2164,15 +3913,15 @@ export const crearVenta = async (crearVentaRequest: CrearVentaRequest, options?:
 
 
 export const getCrearVentaMutationOptions = <TError = ErrorResponse,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof crearVenta>>, TError,{data: CrearVentaRequest}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof crearVenta>>, TError,{data: CrearVentaRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof crearVenta>>, TError,{data: CrearVentaRequest}, TContext> => {
 
 const mutationKey = ['crearVenta'];
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -2180,7 +3929,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof crearVenta>>, {data: CrearVentaRequest}> = (props) => {
           const {data} = props ?? {};
 
-          return  crearVenta(data,)
+          return  crearVenta(data,requestOptions)
         }
 
 
@@ -2198,7 +3947,7 @@ const {mutation: mutationOptions} = options ?
  * @summary Crear una venta
  */
 export const useCrearVenta = <TError = ErrorResponse,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof crearVenta>>, TError,{data: CrearVentaRequest}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof crearVenta>>, TError,{data: CrearVentaRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof crearVenta>>,
         TError,
@@ -2265,16 +4014,16 @@ export const getObtenerVentaQueryKey = (id: string,) => {
     }
 
 
-export const getObtenerVentaQueryOptions = <TData = Awaited<ReturnType<typeof obtenerVenta>>, TError = ErrorResponse>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerVenta>>, TError, TData>>, }
+export const getObtenerVentaQueryOptions = <TData = Awaited<ReturnType<typeof obtenerVenta>>, TError = ErrorResponse>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerVenta>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getObtenerVentaQueryKey(id);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof obtenerVenta>>> = ({ signal }) => obtenerVenta(id, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof obtenerVenta>>> = ({ signal }) => obtenerVenta(id, { signal, ...requestOptions });
 
 
 
@@ -2294,7 +4043,7 @@ export function useObtenerVenta<TData = Awaited<ReturnType<typeof obtenerVenta>>
           TError,
           Awaited<ReturnType<typeof obtenerVenta>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useObtenerVenta<TData = Awaited<ReturnType<typeof obtenerVenta>>, TError = ErrorResponse>(
@@ -2304,11 +4053,11 @@ export function useObtenerVenta<TData = Awaited<ReturnType<typeof obtenerVenta>>
           TError,
           Awaited<ReturnType<typeof obtenerVenta>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useObtenerVenta<TData = Awaited<ReturnType<typeof obtenerVenta>>, TError = ErrorResponse>(
- id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerVenta>>, TError, TData>>, }
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerVenta>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -2316,7 +4065,7 @@ export function useObtenerVenta<TData = Awaited<ReturnType<typeof obtenerVenta>>
  */
 
 export function useObtenerVenta<TData = Awaited<ReturnType<typeof obtenerVenta>>, TError = ErrorResponse>(
- id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerVenta>>, TError, TData>>, }
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerVenta>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -2381,15 +4130,15 @@ export const eliminarVenta = async (id: string, options?: RequestInit): Promise<
 
 
 export const getEliminarVentaMutationOptions = <TError = ErrorResponse,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof eliminarVenta>>, TError,{id: string}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof eliminarVenta>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof eliminarVenta>>, TError,{id: string}, TContext> => {
 
 const mutationKey = ['eliminarVenta'];
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -2397,7 +4146,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof eliminarVenta>>, {id: string}> = (props) => {
           const {id} = props ?? {};
 
-          return  eliminarVenta(id,)
+          return  eliminarVenta(id,requestOptions)
         }
 
 
@@ -2415,7 +4164,7 @@ const {mutation: mutationOptions} = options ?
  * @summary Eliminar una venta
  */
 export const useEliminarVenta = <TError = ErrorResponse,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof eliminarVenta>>, TError,{id: string}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof eliminarVenta>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof eliminarVenta>>,
         TError,

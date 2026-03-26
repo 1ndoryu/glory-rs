@@ -10,6 +10,7 @@ import Inicio from './componentes/Inicio';
 import ListaVentas from './componentes/ListaVentas';
 import ListaGastos from './componentes/ListaGastos';
 import ListaReservas from './componentes/ListaReservas';
+import ListaClientes from './componentes/ListaClientes';
 import './estilos/global.css';
 
 const queryClient = new QueryClient({
@@ -34,6 +35,7 @@ function App() {
           <Route path="/ventas" element={<ListaVentas />} />
           <Route path="/gastos" element={<ListaGastos />} />
           <Route path="/reservas" element={<ListaReservas />} />
+          <Route path="/clientes" element={<ListaClientes />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

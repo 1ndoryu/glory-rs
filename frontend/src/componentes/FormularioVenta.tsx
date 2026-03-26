@@ -104,6 +104,7 @@ function FormularioVenta({ onExito }: Props) {
                                     <option value="efectivo">Efectivo</option>
                                     <option value="tarjeta">Tarjeta</option>
                                     <option value="transferencia">Transferencia</option>
+                                    <option value="otros">Otros</option>
                                 </Select>
                             </div>
                         </div>

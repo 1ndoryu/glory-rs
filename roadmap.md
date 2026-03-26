@@ -90,7 +90,6 @@ Puedes ajustar los pendientes. Si puedes analizar todo el contenido y sacar el t
 ## Gaps de la revisión (features activos que faltan)
 
 - Recuperación de contraseña ("olvidé mi contraseña") — envía enlace al email para resetear. Pedido en Audio 1 original.
-- Agregar opción "otros" en método de pago del formulario de ventas (actualmente solo efectivo/tarjeta/transferencia).
 
 ## Módulo de Reservas — Expansión (Data II, basado en Cover Manager)
 
@@ -98,8 +97,6 @@ Puedes ajustar los pendientes. Si puedes analizar todo el contenido y sacar el t
 
 ### Fase 1 — Core
 
-- CRM de clientes: listado paginado (debe manejar 43,000+ clientes), campos: nombre, apellidos, teléfono, email, empresa, etiquetas, notas. Buscar por nombre/apellidos/teléfono/correo. Crear/editar/eliminar cliente manual con foto opcional, teléfono con prefijo, consentimiento comercial, info adicional (alergias, preferencias bebida/ubicación).
-- Gestor de etiquetas: etiquetas para clientes (VIP, no paga, fidelización, alergias, preferencias) y para reservas (eventos, cumpleaños, peticiones especiales). Preestablecidas del sistema + custom creadas por el dueño. Categorías: alimentarias, bebida, ubicación.
 - Vista de reservas por día: filtrar por desayuno/comida/cena/día completo. Mostrar nº mesa, hora, nombre, apellidos, personas, estado, teléfono. Filtros por estado: confirmadas, pendientes, lista de espera.
 - Vista de reservas por mes: cuadrícula calendario, personas + mesas ocupadas por día, totales mensuales. Click en día → vista día.
 - No-shows: tracking de reservas no presentadas, ratio por día/mes (porcentaje), filtro por canal (WhatsApp, Instagram, teléfono).

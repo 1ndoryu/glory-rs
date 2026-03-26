@@ -1,0 +1,114 @@
+/* 263A-1: Modelo de cliente para el CRM.
+   Basado en Data II (Video 9): listado paginado, búsqueda, campos completos.
+   El restaurante maneja ~43k clientes, la paginación es crítica. */
+
+use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
+use utoipa::{IntoParams, ToSchema};
+use uuid::Uuid;
+use validator::Validate;
+
+/// Cliente del restaurante
+#[derive(Debug, Clone, FromRow, Serialize, ToSchema)]
+pub struct Cliente {
+    pub id: Uuid,
+    pub user_id: Uuid,
+    pub nombre: String,
+    pub apellidos: String,
+    pub telefono: String,
+    pub prefijo_telefono: String,
+    pub email: String,
+    pub empresa: String,
+    pub notas: String,
+    pub foto_url: String,
+    pub consentimiento_comercial_email: bool,
+    pub consentimiento_comercial_sms: bool,
+    pub enviar_encuestas: bool,
+    pub alergias: String,
+    pub preferencias_bebida: String,
+    pub preferencias_ubicacion: String,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+}
+
+/// Request para crear un cliente
+#[derive(Debug, Deserialize, Validate, ToSchema)]
+pub struct CrearClienteRequest {
+    #[validate(length(
+        min = 1,
+        max = 255,
+        message = "El nombre es obligatorio y no debe exceder 255 caracteres"
+    ))]
+    pub nombre: String,
+    #[validate(length(max = 255))]
+    pub apellidos: Option<String>,
+    #[validate(length(max = 30))]
+    pub telefono: Option<String>,
+    #[validate(length(max = 10))]
+    pub prefijo_telefono: Option<String>,
+    #[validate(length(max = 255), email)]
+    pub email: Option<String>,
+    #[validate(length(max = 255))]
+    pub empresa: Option<String>,
+    pub notas: Option<String>,
+    pub foto_url: Option<String>,
+    pub consentimiento_comercial_email: Option<bool>,
+    pub consentimiento_comercial_sms: Option<bool>,
+    pub enviar_encuestas: Option<bool>,
+    pub alergias: Option<String>,
+    pub preferencias_bebida: Option<String>,
+    pub preferencias_ubicacion: Option<String>,
+}
+
+/// Request para actualizar un cliente
+#[derive(Debug, Deserialize, Validate, ToSchema)]
+pub struct ActualizarClienteRequest {
+    #[validate(length(min = 1, max = 255))]
+    pub nombre: Option<String>,
+    #[validate(length(max = 255))]
+    pub apellidos: Option<String>,
+    #[validate(length(max = 30))]
+    pub telefono: Option<String>,
+    #[validate(length(max = 10))]
+    pub prefijo_telefono: Option<String>,
+    #[validate(length(max = 255))]
+    pub email: Option<String>,
+    #[validate(length(max = 255))]
+    pub empresa: Option<String>,
+    pub notas: Option<String>,
+    pub foto_url: Option<String>,
+    pub consentimiento_comercial_email: Option<bool>,
+    pub consentimiento_comercial_sms: Option<bool>,
+    pub enviar_encuestas: Option<bool>,
+    pub alergias: Option<String>,
+    pub preferencias_bebida: Option<String>,
+    pub preferencias_ubicacion: Option<String>,
+}
+
+/// Response paginada de clientes
+#[derive(Debug, Serialize, ToSchema)]
+pub struct ClientesPaginados {
+    pub items: Vec<Cliente>,
+    pub total: i64,
+    pub page: i64,
+    pub per_page: i64,
+}
+
+/// Query para listar/buscar clientes
+#[derive(Debug, Deserialize, IntoParams)]
+pub struct ClientesQuery {
+    #[serde(default = "default_page")]
+    pub page: i64,
+    #[serde(default = "default_per_page")]
+    pub per_page: i64,
+    /// Búsqueda por nombre, apellidos, teléfono o email
+    pub busqueda: Option<String>,
+}
+
+fn default_page() -> i64 {
+    1
+}
+fn default_per_page() -> i64 {
+    20
+}

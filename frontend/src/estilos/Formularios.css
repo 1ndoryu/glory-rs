@@ -442,3 +442,22 @@ details[open] .resumenAvanzado::before {
   width: auto;
   margin-bottom: 0.1rem;
 }
+
+/* 263A-1: Estilos para CRM clientes */
+.filtroBusqueda {
+  margin-bottom: 1rem;
+  max-width: 400px;
+}
+
+.textoTruncado {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.accionesTabla {
+  display: flex;
+  gap: 0.4rem;
+  white-space: nowrap;
+}

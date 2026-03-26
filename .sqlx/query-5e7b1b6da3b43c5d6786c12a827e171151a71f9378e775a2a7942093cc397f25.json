@@ -57,6 +57,21 @@
         "ordinal": 10,
         "name": "updated_at",
         "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 11,
+        "name": "cliente_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 12,
+        "name": "canal_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 13,
+        "name": "no_show",
+        "type_info": "Bool"
       }
     ],
     "parameters": {
@@ -83,6 +98,9 @@
       false,
       false,
       false,
+      false,
+      true,
+      true,
       false
     ]
   },

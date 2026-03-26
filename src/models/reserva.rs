@@ -22,6 +22,8 @@ pub enum EstadoReserva {
     Cancelada,
     #[sqlx(rename = "completada")]
     Completada,
+    #[sqlx(rename = "no_show")]
+    NoShow,
 }
 
 /// Reserva del restaurante
@@ -36,6 +38,9 @@ pub struct Reserva {
     pub estado: String,
     pub notas: String,
     pub telefono: String,
+    pub cliente_id: Option<Uuid>,
+    pub canal_id: Option<Uuid>,
+    pub no_show: bool,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
