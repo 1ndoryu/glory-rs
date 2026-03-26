@@ -1,6 +1,6 @@
 /* [263A-16] DashboardReservas — reescrito con shadcn Card + Button + Tailwind.
  * 3 paneles con tabs: Resumen, Ocupación, Análisis.
- * Usa recharts para gráficos y el endpoint GET /api/dashboard/reservas. */
+ * [263A-25] Gráficos migrados a ChartContainer de shadcn — colores adaptativos dark/light. */
 
 import { useState } from 'react';
 import { useDashboardReservas, ResumenReservas, OcupacionReservas, AnalisisReservas, AgrupacionCanal } from '../api/generated';
@@ -8,12 +8,16 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, Legend
-} from 'recharts';
+import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, PieChart, Pie, Cell } from 'recharts';
 
-const COLORES = ['#4A90D9', '#50E3C2', '#F5A623', '#E91E63', '#7B61FF', '#4CAF50', '#FF5722', '#9C27B0'];
+/* CSS vars del tema — se adaptan automáticamente a dark/light mode */
+const PIE_COLORS = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)'];
+const CONFIG_SIMPLE: ChartConfig = { total: { label: 'Reservas', color: 'var(--chart-1)' } };
+const CONFIG_TURNO: ChartConfig = {
+  total: { label: 'Reservas', color: 'var(--chart-1)' },
+  personas: { label: 'Personas', color: 'var(--chart-2)' },
+};
 
 function DashboardReservas() {
   const ahora = new Date();
@@ -98,30 +102,30 @@ function PanelResumen({ data }: { data: ResumenReservas }) {
         <Card>
           <CardHeader><CardTitle className="text-sm">Reservas por día</CardTitle></CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={250}>
+            <ChartContainer config={CONFIG_SIMPLE} className="h-[220px]">
               <BarChart data={data.por_dia.map((d: { fecha: string; total: number }) => ({ ...d, fecha: d.fecha.slice(5) }))}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="fecha" fontSize={11} />
-                <YAxis allowDecimals={false} />
-                <Tooltip />
-                <Bar dataKey="total" fill="hsl(var(--primary))" name="Reservas" />
+                <CartesianGrid vertical={false} />
+                <XAxis dataKey="fecha" tickLine={false} axisLine={false} fontSize={11} />
+                <YAxis allowDecimals={false} tickLine={false} axisLine={false} />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <Bar dataKey="total" fill="var(--color-total)" radius={4} />
               </BarChart>
-            </ResponsiveContainer>
+            </ChartContainer>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader><CardTitle className="text-sm">Por día de semana</CardTitle></CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={250}>
+            <ChartContainer config={CONFIG_SIMPLE} className="h-[220px]">
               <BarChart data={data.por_dia_semana}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="dia" fontSize={11} />
-                <YAxis allowDecimals={false} />
-                <Tooltip />
-                <Bar dataKey="total" fill="#50E3C2" name="Reservas" />
+                <CartesianGrid vertical={false} />
+                <XAxis dataKey="dia" tickLine={false} axisLine={false} fontSize={11} />
+                <YAxis allowDecimals={false} tickLine={false} axisLine={false} />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <Bar dataKey="total" fill="var(--color-total)" radius={4} />
               </BarChart>
-            </ResponsiveContainer>
+            </ChartContainer>
           </CardContent>
         </Card>
 
@@ -129,19 +133,18 @@ function PanelResumen({ data }: { data: ResumenReservas }) {
           <CardHeader><CardTitle className="text-sm">Distribución por canal</CardTitle></CardHeader>
           <CardContent>
             {data.por_canal.length > 0 ? (
-              <ResponsiveContainer width="100%" height={250}>
+              <ChartContainer config={CONFIG_SIMPLE} className="h-[220px]">
                 <PieChart>
-                  <Pie data={data.por_canal} dataKey="total" nameKey="canal" cx="50%" cy="50%" outerRadius={90} label={({ name, value }: { name?: string; value?: number }) => `${name ?? ''} (${value ?? 0})`}>
+                  <Pie data={data.por_canal} dataKey="total" nameKey="canal" cx="50%" cy="50%" outerRadius={80}>
                     {data.por_canal.map((_: AgrupacionCanal, i: number) => (
-                      <Cell key={i} fill={COLORES[i % COLORES.length]} />
+                      <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip />
-                  <Legend />
+                  <ChartTooltip content={<ChartTooltipContent />} />
                 </PieChart>
-              </ResponsiveContainer>
+              </ChartContainer>
             ) : (
-              <p className="text-sm text-muted-foreground text-center">Sin datos de canales</p>
+              <p className="text-sm text-muted-foreground text-center py-8">Sin datos de canales</p>
             )}
           </CardContent>
         </Card>
@@ -176,31 +179,31 @@ function PanelOcupacion({ data }: { data: OcupacionReservas }) {
         <Card>
           <CardHeader><CardTitle className="text-sm">Distribución por hora</CardTitle></CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={250}>
+            <ChartContainer config={CONFIG_SIMPLE} className="h-[220px]">
               <BarChart data={data.por_hora}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="hora" fontSize={11} />
-                <YAxis allowDecimals={false} />
-                <Tooltip />
-                <Bar dataKey="total" fill="#7B61FF" name="Reservas" />
+                <CartesianGrid vertical={false} />
+                <XAxis dataKey="hora" tickLine={false} axisLine={false} fontSize={11} />
+                <YAxis allowDecimals={false} tickLine={false} axisLine={false} />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <Bar dataKey="total" fill="var(--color-total)" radius={4} />
               </BarChart>
-            </ResponsiveContainer>
+            </ChartContainer>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader><CardTitle className="text-sm">Por turno</CardTitle></CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={250}>
+            <ChartContainer config={CONFIG_TURNO} className="h-[220px]">
               <BarChart data={data.por_turno}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="turno" fontSize={11} />
-                <YAxis allowDecimals={false} />
-                <Tooltip />
-                <Bar dataKey="total" fill="#F5A623" name="Reservas" />
-                <Bar dataKey="personas" fill="#4CAF50" name="Personas" />
+                <CartesianGrid vertical={false} />
+                <XAxis dataKey="turno" tickLine={false} axisLine={false} fontSize={11} />
+                <YAxis allowDecimals={false} tickLine={false} axisLine={false} />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <Bar dataKey="total" fill="var(--color-total)" radius={4} />
+                <Bar dataKey="personas" fill="var(--color-personas)" radius={4} />
               </BarChart>
-            </ResponsiveContainer>
+            </ChartContainer>
           </CardContent>
         </Card>
 
