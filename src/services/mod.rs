@@ -1,4 +1,5 @@
 mod auth;
+mod campana;
 mod canal_reserva;
 mod cliente;
 mod configuracion;
@@ -11,6 +12,7 @@ mod reserva;
 mod venta;
 
 pub use auth::AuthService;
+pub use campana::CampanaService;
 pub use canal_reserva::CanalReservaService;
 pub use cliente::ClienteService;
 pub use configuracion::ConfiguracionService;

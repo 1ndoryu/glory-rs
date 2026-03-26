@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COUNT(*) as total FROM campanas WHERE user_id = $1 AND ($2::TEXT IS NULL OR estado = $2)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "total",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "5952d00ecef6b15b0505e7d0fe32782f19ed5befd02c70f54c22ecaba1ec8195"
+}

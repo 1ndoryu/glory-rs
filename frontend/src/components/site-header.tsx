@@ -16,6 +16,8 @@ const titulos: Record<string, string> = {
   "/reservas/dashboard": "Dashboard Reservas",
   "/plano-sala": "Plano de Sala",
   "/configuracion": "Configuración",
+  "/marketing/campanas": "Campañas de Marketing",
+  "/marketing/campanas/nueva": "Nueva Campaña",
 }
 
 export function SiteHeader() {

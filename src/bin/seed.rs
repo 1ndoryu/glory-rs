@@ -63,6 +63,7 @@ async fn main() {
     seed_gastos(&pool, user_id, inicio, hoy).await;
     seed_reservas(&pool, user_id, hoy, &canal_ids, &cliente_ids).await;
     seed_etiquetas_clientes(&pool, user_id, &cliente_ids).await;
+    seed_campanas(&pool, user_id).await;
 
     println!("\nSeed completado exitosamente.");
 }
@@ -74,6 +75,8 @@ fn primer_dia_mes(d: NaiveDate) -> NaiveDate {
 /* Limpia todos los datos del usuario demo respetando FKs */
 async fn limpiar_datos(pool: &PgPool, user_id: Uuid) {
     let sentencias = [
+        "DELETE FROM campana_destinatarios WHERE campana_id IN (SELECT id FROM campanas WHERE user_id = $1)",
+        "DELETE FROM campanas WHERE user_id = $1",
         "DELETE FROM clientes_etiquetas WHERE cliente_id IN (SELECT id FROM clientes WHERE user_id = $1)",
         "DELETE FROM reservas_etiquetas WHERE reserva_id IN (SELECT id FROM reservas WHERE user_id = $1)",
         "DELETE FROM reservas WHERE user_id = $1",
@@ -518,4 +521,61 @@ async fn seed_etiquetas_clientes(pool: &PgPool, user_id: Uuid, cliente_ids: &[Uu
             println!("  Etiquetas personalizadas del usuario creadas.");
         }
     }
+}
+
+/* [263A-23] Campañas de marketing de prueba — 3 en distintos estados */
+async fn seed_campanas(pool: &PgPool, user_id: Uuid) {
+    let campanas: Vec<(&str, &str, &[&str], &str, &str, &str)> = vec![
+        (
+            "Promoción verano 2026",
+            "Campaña para recuperar clientes inactivos",
+            &["sms", "email"],
+            "sin_3m",
+            "¡Te echamos de menos! Vuelve este verano y disfruta de un 15% de descuento en tu próxima reserva. Reserva ya.",
+            "borrador",
+        ),
+        (
+            "Menú degustación mayo",
+            "Promoción nuevo menú degustación primavera",
+            &["email"],
+            "habitual",
+            "Hola, hemos preparado un nuevo menú degustación de temporada. Como cliente habitual, tienes acceso prioritario. Reserva tu mesa.",
+            "enviada",
+        ),
+        (
+            "Recordatorio San Valentín",
+            "Campaña cancelada — se planificó tarde",
+            &["sms", "whatsapp"],
+            "todos",
+            "Celebra San Valentín con nosotros. Menú especial para 2 por 65€. Reservas: 912345678",
+            "cancelada",
+        ),
+    ];
+
+    for (nombre, desc, canales, segmento, mensaje, estado) in &campanas {
+        let canales_arr: Vec<String> = canales.iter().map(|c| (*c).to_string()).collect();
+        let total_dest: i32 = if *estado == "enviada" { 42 } else { 0 };
+        let total_env: i32 = if *estado == "enviada" { 38 } else { 0 };
+        let total_fall: i32 = if *estado == "enviada" { 4 } else { 0 };
+
+        sqlx::query(
+            "INSERT INTO campanas (user_id, nombre, descripcion_interna, cuerpo_mensaje, \
+             canales, segmento, estado, total_destinatarios, total_enviados, total_fallidos) \
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
+        )
+        .bind(user_id)
+        .bind(*nombre)
+        .bind(*desc)
+        .bind(*mensaje)
+        .bind(&canales_arr)
+        .bind(*segmento)
+        .bind(*estado)
+        .bind(total_dest)
+        .bind(total_env)
+        .bind(total_fall)
+        .execute(pool)
+        .await
+        .expect("Error al insertar campaña de prueba");
+    }
+    println!("  {} campañas de marketing insertadas.", campanas.len());
 }

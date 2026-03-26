@@ -1,3 +1,4 @@
+pub mod campana;
 pub mod canal_reserva;
 pub mod cliente;
 mod configuracion;
@@ -9,6 +10,7 @@ pub mod reserva;
 mod user;
 pub mod venta;
 
+pub use campana::CampanaRepository;
 pub use canal_reserva::CanalReservaRepository;
 pub use cliente::ClienteRepository;
 pub use configuracion::ConfiguracionRepository;

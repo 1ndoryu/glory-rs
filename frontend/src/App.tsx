@@ -22,6 +22,8 @@ import PlanoSala from './componentes/PlanoSala';
 import Configuracion from './componentes/Configuracion';
 import ForgotPassword from './componentes/ForgotPassword';
 import ResetPassword from './componentes/ResetPassword';
+import ListaCampanas from './componentes/ListaCampanas';
+import FormularioCampana from './componentes/FormularioCampana';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -56,6 +58,8 @@ function App() {
               <Route path="/reservas/dashboard" element={<DashboardReservas />} />
               <Route path="/plano-sala" element={<PlanoSala />} />
               <Route path="/configuracion" element={<Configuracion />} />
+              <Route path="/marketing/campanas" element={<ListaCampanas />} />
+              <Route path="/marketing/campanas/nueva" element={<FormularioCampana />} />
             </Route>
 
             <Route path="*" element={<Navigate to="/" replace />} />

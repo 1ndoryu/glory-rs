@@ -1,6 +1,7 @@
 #![allow(clippy::needless_for_each)] // Generado por utoipa OpenApi derive
 
 mod auth;
+mod campanas;
 mod canales_reserva;
 mod clientes;
 mod configuracion;
@@ -103,6 +104,13 @@ impl utoipa::Modify for SecurityAddon {
         plano_sala::obtener_ocupacion,
         configuracion::obtener_configuracion,
         configuracion::actualizar_configuracion,
+        campanas::crear_campana,
+        campanas::obtener_campana,
+        campanas::listar_campanas,
+        campanas::actualizar_campana,
+        campanas::eliminar_campana,
+        campanas::preview_segmento,
+        campanas::enviar_campana,
     ),
     components(schemas(
         health::HealthResponse,
@@ -172,6 +180,12 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::ReservaMesa,
         crate::models::ConfiguracionRestaurante,
         crate::models::ActualizarConfiguracionRequest,
+        crate::models::Campana,
+        crate::models::CrearCampanaRequest,
+        crate::models::ActualizarCampanaRequest,
+        crate::models::CampanasPaginadas,
+        crate::models::CampanaDestinatario,
+        crate::models::SegmentoPreview,
         crate::models::Turno,
         crate::models::CanalVenta,
         crate::models::MetodoPago,
@@ -230,4 +244,5 @@ fn api_routes() -> Router<AppState> {
         .merge(dashboard::routes())
         .merge(plano_sala::routes())
         .merge(configuracion::routes())
+        .merge(campanas::routes())
 }

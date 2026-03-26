@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO campana_destinatarios (id, campana_id, cliente_id, canal) VALUES ($1, $2, $3, $4)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Varchar"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "205e8f9a5c09d1fcbbe5e7d3ea371f9ea11265f94ad44fb6ef266f38f0fb29ab"
+}

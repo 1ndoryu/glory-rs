@@ -1,0 +1,57 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH ultima_reserva AS (\n                SELECT r.cliente_id, MAX(r.fecha) as ultima_fecha\n                FROM reservas r\n                WHERE r.user_id = $1\n                  AND r.estado IN ('completada', 'confirmada')\n                  AND r.cliente_id IS NOT NULL\n                GROUP BY r.cliente_id\n            )\n            SELECT\n                c.id,\n                c.email,\n                c.telefono,\n                c.prefijo_telefono,\n                c.consentimiento_comercial_email,\n                c.consentimiento_comercial_sms\n            FROM clientes c\n            LEFT JOIN ultima_reserva ur ON ur.cliente_id = c.id\n            WHERE c.user_id = $1\n              AND (\n                  ($2::INT IS NULL AND $3::INT IS NULL)\n                  OR (\n                      $2 IS NOT NULL AND $3 IS NOT NULL\n                      AND ur.ultima_fecha IS NOT NULL\n                      AND (CURRENT_DATE - ur.ultima_fecha::date) >= $2\n                      AND (CURRENT_DATE - ur.ultima_fecha::date) < $3\n                  )\n                  OR (\n                      $2 IS NOT NULL AND $3 IS NULL\n                      AND (\n                          ur.ultima_fecha IS NULL\n                          OR (CURRENT_DATE - ur.ultima_fecha::date) >= $2\n                      )\n                  )\n              )\n              AND (\n                  ($4 = true AND c.consentimiento_comercial_sms = true AND c.telefono <> '')\n                  OR ($5 = true AND c.consentimiento_comercial_email = true AND c.email <> '')\n                  OR ($6 = true AND c.consentimiento_comercial_sms = true AND c.telefono <> '')\n              )",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "email",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "telefono",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "prefijo_telefono",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "consentimiento_comercial_email",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 5,
+        "name": "consentimiento_comercial_sms",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int4",
+        "Int4",
+        "Bool",
+        "Bool",
+        "Bool"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "55a100736ddd76e7edecec9d6cd0bec98cd5f93ee08f69a9a630edd22986ca30"
+}

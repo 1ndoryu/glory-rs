@@ -1,0 +1,48 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH ultima_reserva AS (\n                SELECT r.cliente_id, MAX(r.fecha) as ultima_fecha\n                FROM reservas r\n                WHERE r.user_id = $1\n                  AND r.estado IN ('completada', 'confirmada')\n                  AND r.cliente_id IS NOT NULL\n                GROUP BY r.cliente_id\n            )\n            SELECT\n                COUNT(*) as \"total_clientes!\",\n                COUNT(*) FILTER (WHERE c.email <> '') as \"con_email!\",\n                COUNT(*) FILTER (WHERE c.telefono <> '') as \"con_telefono!\",\n                COUNT(*) FILTER (WHERE c.consentimiento_comercial_email = true) as \"con_consentimiento_email!\",\n                COUNT(*) FILTER (WHERE c.consentimiento_comercial_sms = true) as \"con_consentimiento_sms!\"\n            FROM clientes c\n            LEFT JOIN ultima_reserva ur ON ur.cliente_id = c.id\n            WHERE c.user_id = $1\n              AND (\n                  /* todos: sin filtro de actividad */\n                  ($2::INT IS NULL AND $3::INT IS NULL)\n                  /* segmentos con rango: días desde última reserva entre min y max */\n                  OR (\n                      $2 IS NOT NULL AND $3 IS NOT NULL\n                      AND ur.ultima_fecha IS NOT NULL\n                      AND (CURRENT_DATE - ur.ultima_fecha::date) >= $2\n                      AND (CURRENT_DATE - ur.ultima_fecha::date) < $3\n                  )\n                  /* sin_mas_1a: solo mínimo, sin máximo */\n                  OR (\n                      $2 IS NOT NULL AND $3 IS NULL\n                      AND (\n                          ur.ultima_fecha IS NULL\n                          OR (CURRENT_DATE - ur.ultima_fecha::date) >= $2\n                      )\n                  )\n              )",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "total_clientes!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "con_email!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 2,
+        "name": "con_telefono!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 3,
+        "name": "con_consentimiento_email!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 4,
+        "name": "con_consentimiento_sms!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "7ea8156da8a5c92da37f6e3b33cfecf14d4991dfae4af2f1fc67f311c5f02e59"
+}

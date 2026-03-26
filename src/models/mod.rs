@@ -1,4 +1,5 @@
 pub mod common;
+mod campana;
 mod canal_reserva;
 mod cliente;
 mod configuracion;
@@ -11,6 +12,11 @@ mod reserva;
 mod user;
 mod venta;
 
+pub use campana::{
+    ActualizarCampanaRequest, Campana, CampanaDestinatario, CampanasPaginadas, CampanasQuery,
+    CrearCampanaRequest, SegmentoPreview, SegmentoPreviewQuery, CANALES_VALIDOS,
+    SEGMENTOS_VALIDOS,
+};
 pub use canal_reserva::{CanalReserva, CrearCanalReservaRequest};
 pub use cliente::{
     ActualizarClienteRequest, Cliente, ClientesPaginados, ClientesQuery, CrearClienteRequest,

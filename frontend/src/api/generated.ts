@@ -13,3 +13,4 @@ export * from './generated/dashboard/dashboard';
 export * from './generated/plano-sala/plano-sala';
 export * from './generated/health/health';
 export * from './generated/configuracion/configuracion';
+export * from './generated/campañas/campañas';

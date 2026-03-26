@@ -29,6 +29,8 @@ import {
   Map,
   Settings,
   UtensilsCrossed,
+  Megaphone,
+  LayoutDashboard,
 } from "lucide-react"
 
 const navPrincipal = [
@@ -37,10 +39,12 @@ const navPrincipal = [
   { title: "Gastos", url: "/gastos", icon: <BarChart3 /> },
   { title: "Reservas", url: "/reservas", icon: <ClipboardList /> },
   { title: "Calendario", url: "/reservas/calendario", icon: <Calendar /> },
+  { title: "Dashboard", url: "/reservas/dashboard", icon: <LayoutDashboard /> },
   { title: "Clientes", url: "/clientes", icon: <Users /> },
   { title: "Canales", url: "/canales", icon: <Radio /> },
   { title: "No-Shows", url: "/reservas/no-shows", icon: <UserX /> },
   { title: "Plano de Sala", url: "/plano-sala", icon: <Map /> },
+  { title: "Campañas", url: "/marketing/campanas", icon: <Megaphone /> },
 ]
 
 const navSecundario = [
