@@ -128,4 +128,4 @@ Puedes ajustar los pendientes. Si puedes analizar todo el contenido y sacar el t
 - Configuración de datos obligatorios al reservar (email, teléfono, nombre, apellidos).
 - IVA por defecto del establecimiento. 
 
-4. Esta es una tarea de prueba para ver si lees el roadmap al fianl de completar todo, marca con un ok esto para saber que lo leiste. 
+4. ~~Esta es una tarea de prueba para ver si lees el roadmap al fianl de completar todo, marca con un ok esto para saber que lo leiste.~~ ✅ OK — Leído al final del ciclo, 2026-03-26.
