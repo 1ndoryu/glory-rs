@@ -85,8 +85,47 @@ Puedes ajustar los pendientes. Si puedes analizar todo el contenido y sacar el t
 - Tres columnas de estado: Nuevas, En curso (estudiándose) y Resueltas.
 - Ficha de incidencia con: Estado, proveedor, prioridad (baja, media, alta), motivo, documento vinculado y un botón de "Contactar proveedor" para enviar el reporte directamente.
 
-# Pendientes.
+# Pendientes
 
-(Sin tareas pendientes)
+## Gaps de la revisión (features activos que faltan)
 
-1. Por favor haz una revision todas las indicaciones del cliente y revisa si falta hacer algo de lo que pidio (no me refiero a lo que se omitio a ultima hora)
+- Recuperación de contraseña ("olvidé mi contraseña") — envía enlace al email para resetear. Pedido en Audio 1 original.
+- Agregar opción "otros" en método de pago del formulario de ventas (actualmente solo efectivo/tarjeta/transferencia).
+
+## Módulo de Reservas — Expansión (Data II, basado en Cover Manager)
+
+> Referencia visual: Cover Manager. Documentación completa en `Agente/documentacion/reservas/analisis-data-ii-2026-03-26.md`
+
+### Fase 1 — Core
+
+- CRM de clientes: listado paginado (debe manejar 43,000+ clientes), campos: nombre, apellidos, teléfono, email, empresa, etiquetas, notas. Buscar por nombre/apellidos/teléfono/correo. Crear/editar/eliminar cliente manual con foto opcional, teléfono con prefijo, consentimiento comercial, info adicional (alergias, preferencias bebida/ubicación).
+- Gestor de etiquetas: etiquetas para clientes (VIP, no paga, fidelización, alergias, preferencias) y para reservas (eventos, cumpleaños, peticiones especiales). Preestablecidas del sistema + custom creadas por el dueño. Categorías: alimentarias, bebida, ubicación.
+- Vista de reservas por día: filtrar por desayuno/comida/cena/día completo. Mostrar nº mesa, hora, nombre, apellidos, personas, estado, teléfono. Filtros por estado: confirmadas, pendientes, lista de espera.
+- Vista de reservas por mes: cuadrícula calendario, personas + mesas ocupadas por día, totales mensuales. Click en día → vista día.
+- No-shows: tracking de reservas no presentadas, ratio por día/mes (porcentaje), filtro por canal (WhatsApp, Instagram, teléfono).
+- Canales de reserva: definir canales por donde entran reservas (WhatsApp, Instagram, teléfono, web, etc.) para estadísticas.
+
+### Fase 2 — Dashboard y visualización
+
+- Dashboard reservas — Panel resumen: total reservas + comparativa mes anterior, reservas por día, por día de semana, distribución por canal, clientes nuevos, ocupación % (personas y mesas).
+- Dashboard reservas — Panel ocupación: media personas/reserva, media reservas/día, total reservas, gráfico por hora, por día semana, ocupación %, por turno, reservas con antelación, distribución por procedencia.
+- Dashboard reservas — Panel análisis: reservas efectivas (sin cancelaciones/no-shows), total comensales efectivos, comensales/reserva, ticket medio por reserva y por persona.
+
+### Fase 3 — Plano de sala
+
+- Constructor de plano: el dueño construye su plano arrastrando mesas. Configurar cada mesa: número, zona, mín/máx personas. Múltiples plantas/zonas (barra, restaurante, terraza).
+- Combinación de mesas: seleccionar mesas combinables, definir máx/mín personas en combinación.
+- Exportar/importar plano de sala para backup.
+- Mostrar plano con mesas ocupadas en la vista de reservas por día.
+
+### Fase 4 — Pendiente de detalle del cliente
+
+- Marketing: el cliente indicó que dará detalles más adelante.
+- Merge de clientes duplicados: unificar 2 clientes que son la misma persona.
+
+## Configuración del restaurante
+
+- Configuración de datos obligatorios al reservar (email, teléfono, nombre, apellidos).
+- IVA por defecto del establecimiento. 
+
+4. Esta es una tarea de prueba para ver si lees el roadmap al fianl de completar todo, marca con un ok esto para saber que lo leiste. 
