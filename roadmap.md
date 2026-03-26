@@ -173,7 +173,7 @@ Puedes ajustar los pendientes. Si puedes analizar todo el contenido y sacar el t
 
 ~~10. Crear template `rust-stack.yaml` en coolify-manager-rs y desplegar automáticamente con `new --name`~~ → 263A-22
 
-11. Implementar Módulo de Marketing — Fase 4a (campañas manuales: backend + frontend)
+~~11. Implementar Módulo de Marketing — Fase 4a (campañas manuales: backend + frontend)~~ → 263A-23
 
 12. Implementar Módulo de Marketing — Fase 4b (plantillas WhatsApp / Meta Business API)
 
@@ -210,3 +210,4 @@ DELETE http://localhost:3000/api/ventas/de507550-2c03-4a42-8717-d6a547058825 405
 23. ~~La forma en la que se construye el plano de la sala, por ajemplo abre alertas en vez de modales, no tiene iconos, deberia poder arrastrarse primero y despues colocar el nombre, cosas basicas que mejoran la experiencia de usuario, tambien veo que los estados no se conservan al mover las mesas.~~ → 263A-16 (parcial: UI mejorada con shadcn, estados de mesas requiere revisión adicional)
 
 24. ~~Me parece que tailwind no esta funcionando, pues todo se ve muy diferente a como es shadcn en en realidad.~~ → 263A-16
+
