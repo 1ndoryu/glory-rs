@@ -7,6 +7,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from './stores/authStore';
 import { ThemeProvider } from '@/components/theme-provider';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { Toaster } from '@/components/ui/sonner';
 import Layout from '@/components/layout';
 import Login from './componentes/Login';
 import ListaVentas from './componentes/ListaVentas';
@@ -68,6 +69,7 @@ function App() {
 
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          <Toaster />
         </QueryClientProvider>
       </TooltipProvider>
     </ThemeProvider>
