@@ -21,7 +21,7 @@ RUN rm -rf src
 COPY src/ src/
 COPY migrations/ migrations/
 ENV SQLX_OFFLINE=true
-RUN cargo build --release --bin glory-backend
+RUN cargo build --release --bin glory-backend --bin seed
 
 # --- Stage 2: Build frontend ---
 FROM node:20-slim AS frontend-builder
@@ -52,6 +52,7 @@ WORKDIR /app
 
 # Binario backend
 COPY --from=backend-builder /app/target/release/glory-backend /app/glory-backend
+COPY --from=backend-builder /app/target/release/seed /app/seed
 
 # Assets frontend (Vite genera dist/)
 COPY --from=frontend-builder /app/frontend/dist /app/static

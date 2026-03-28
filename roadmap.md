@@ -93,9 +93,9 @@ Es un error que se puede evitar de nuevo con alguna regla en sentinel, pero si n
 
 25. ~~Las tablas todas deberían tener para filtrar y ordenar. En gastos no hay para filtrar por fecha.~~ → 283A-34
 
-26. Asegurate que en el servidor esten los datos de prueba.
+26. ~~Asegurate que en el servidor esten los datos de prueba.~~ → 283A-35
 
-27. Vi que te costo el despliegue, asegurate de que sea sencillo y facil la proxima vez.
+27. ~~Vi que te costo el despliegue, asegurate de que sea sencillo y facil la proxima vez.~~ → 283A-35
 
 28. ~~Los graficos siguen teniendo un espacio a la izquierda inncesario y Distribución por canal debe mostrar las leyenda.~~ → 283A-34
 

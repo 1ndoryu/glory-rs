@@ -13,7 +13,7 @@ services:
         RUN apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
         RUN git clone --branch glory-rs-rest --depth 1 --recurse-submodules https://github.com/1ndoryu/glory-rs.git .
         ENV SQLX_OFFLINE=true
-        RUN cargo build --release --bin glory-backend
+        RUN cargo build --release --bin glory-backend --bin seed
         FROM node:20-slim AS frontend-builder
         WORKDIR /app
         RUN apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
@@ -27,6 +27,7 @@ services:
         RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl && rm -rf /var/lib/apt/lists/*
         WORKDIR /app
         COPY --from=backend-builder /app/target/release/glory-backend /app/glory-backend
+        COPY --from=backend-builder /app/target/release/seed /app/seed
         COPY --from=frontend-builder /app/frontend/dist /app/static
         COPY --from=backend-builder /app/migrations/ /app/migrations/
         ENV HOST=0.0.0.0
