@@ -229,12 +229,18 @@ DELETE http://localhost:3000/api/ventas/de507550-2c03-4a42-8717-d6a547058825 405
 
 ~~32. El cliente comento que se necesita una api para que un chatbot de ia se pueda comunicar, sus palabras exactas son "Perdona Wan que no te lo comenté pero este sistema tienenq eu tener apis disponibles para conectar un chatbot externo que atienda a los clientes y pueda ver toda la info de las reservas para cuando hay hueco y que pueda registyrar las reservas en la base de datos", solo dice esto pero asumimos que necesita hacer mas cosas.~~ → 283A-2
 
-33. El cliente tambien comento, sus palabras exactas "otro apunte también que, bueno, no sé si te influye en algo o no, pero te lo digo por si acaso. O sea, esta página web no es para que se registren un montón de propietarios de restaurantes. Es para que cada propietario entre ahí y registre los restaurantes que tiene, que normalmente será uno, porque es raro el caso de que haya una misma persona que tenga más de un restaurante.
+33. ~~El cliente tambien comento, sus palabras exactas "otro apunte también que, bueno, no sé si te influye en algo o no, pero te lo digo por si acaso. O sea, esta página web no es para que se registren un montón de propietarios de restaurantes. Es para que cada propietario entre ahí y registre los restaurantes que tiene, que normalmente será uno, porque es raro el caso de que haya una misma persona que tenga más de un restaurante.
 
 Pero la idea es que, si vamos consiguiendo más negocios, creamos esta misma página web para cada propietario individual, o sea, una por restaurante, vamos, una por propietario. Entonces por eso te digo que no sé si te ayuda o no, pero te lo digo por si acaso.
 
 También por si tienes algo... yo no entiendo de hacer páginas web, pero por si tienes algo así tipo plantilla que puedas guardar el diseño o algo para luego no tener que hacerlo desde cero, que lo guardes, ¿sabes? Y eso." 
 
-Es decir, asumo que hay que hacer una revisión de todo para ver que partes, que cosas podemos mover al glory-rs para poder reutilizar en futuros proyectos para facilitar el desarrollo de futuras plataformas, no hablo solo de logica de restaurante, si todo lo que sea posible sin afectar el proyecto actual, logica de email, logica de formulario, lo que sea, todo debe ir muy bien organizado, con una arquitectura muy buena y eficiente. Esto requiere una planificacion y revision detallada de varios pasos supongo.
+Es decir, asumo que hay que hacer una revisión de todo para ver que partes, que cosas podemos mover al glory-rs para poder reutilizar en futuros proyectos para facilitar el desarrollo de futuras plataformas, no hablo solo de logica de restaurante, si todo lo que sea posible sin afectar el proyecto actual, logica de email, logica de formulario, lo que sea, todo debe ir muy bien organizado, con una arquitectura muy buena y eficiente. Esto requiere una planificacion y revision detallada de varios pasos supongo.~~ → 283A-3
 
 ~~34. Vi que pusiste en español nombre de carpetas, las carpetas deben ir siempre en ingles.~~ → 283A-1 (regla agregada en test.instructions.md, renombrado omitido por riesgo)
+
+34. ¿El sistema ya es inteligente para que las reservas no chocen entre ellas? Ya sea en el panel o cuando el chatbot haga reservas, esto tiene que estar pulido. 
+
+35. Falta una documetacion de la api para el chatbot. 
+
+36. Falta crear una documentacion completa y detallada de framework glory-rs, tambien hay un choque, he creado https://github.com/1ndoryu/glory-rs pero alli puse el template, y la carpeta /glory-rs entonces no que nombre ponerle al repositorio, lo que voy hacer es crear glory-rs-template, y alli ponemos el template, te cuidado con la perdida de de datos, recuerda que estamos en una rama, main es donde va el template y esta rama donde usamos el template para el proyecto de restaurante. Entonces el resultado final debe ser https://github.com/1ndoryu/glory-rs el framework y https://github.com/1ndoryu/glory-rs-template el template (ten cuidado con la perdida de datos por favor, que no se pierda nada)
