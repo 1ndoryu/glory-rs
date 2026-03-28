@@ -43,7 +43,7 @@
 
 ~~37.1. Las acciones rápidas están mal posicionadas, deberían ir en la esquina arriba a la misma altura de elegir la fecha, pero a la derecha.~~ → 283A-7
 
-37.2 Los botones siguiente y anterior del calendario se ven mal.
+~~37.2 Los botones siguiente y anterior del calendario se ven mal.~~ → 283A-11
 
 ~~39. Warning: Function components cannot be given refs (forwardRef) en SidebarMenuButton y Button — cuando entro al panel hay warnings de consola. Además los 401 Unauthorized son porque el backend no estaba corriendo, pero los warnings de forwardRef deben corregirse.~~ → 283A-6
 
@@ -51,9 +51,9 @@
 
 ~~41. Cambiar dark mode a white sigue sin funcionar.~~ → 283A-6
 
-42. El titulo de la pestaña en el navegador dice Glory RS, ajustar esto en todos lados para que diga cosas coherente
+~~42. El titulo de la pestaña en el navegador dice Glory RS, ajustar esto en todos lados para que diga cosas coherente~~ → 283A-11
 
-43. El modal de Nuevo Gasto debe ser un poco mas grande.
+~~43. El modal de Nuevo Gasto debe ser un poco mas grande.~~ → 283A-11
 
 ~~44. Lo de "Funcionalidad de digitalización próximamente disponible" usemos groq IA, y que la api se pueda configurar en configuración, investiga cual IA de groq es la mejor para esto para que funcione bien, como adicional, cualquier herramienta adicional que no sea ia que se pueda complementar usarl~~ → 283A-8a para comparar resultados y mejorar precisión.
 
@@ -83,8 +83,8 @@ Logs guardados en: logs\dev_2026-03-28_0305.log
 [BACK] 2026-03-28T07:05:56.413062Z DEBUG request{method=GET uri=/api/clientes?page=1&per_page=25 version=HTTP/1.1}: tower_http::trace::on_request: started processing request
 [BACK] 2026-03-28T07:05:56.426904Z DEBUG request{method=GET uri=/api/clientes?page=1&per_page=25 version=HTTP/1.1}: tower_http::trace::on_response: finished processing request latency=17 ms status=401
 
-46. Las fechas futuras en el dashboard no deberían de ser selecionables o aparecer, 
+~~46. Las fechas futuras en el dashboard no deberían de ser seleccionables o aparecer~~ → 283A-12
 
 47. Veo que hay planes en Agente\planes, haz todo lo que este pendiente, mueve lo que esta pendiete a completadados
 
-48. Una revision de todas las solicitudes del cliente vs comporacion de lo que se hizo y lo que falta y hacerse todo.
+~~48. Una revisión de todas las solicitudes del cliente vs comparación de lo que se hizo y lo que falta y hacerse todo.~~ → 283A-13

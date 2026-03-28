@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useResumenMensual } from '../api/generated';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const NOMBRES_MES = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -52,17 +53,24 @@ function CalendarioReservas() {
     return celdas;
   }, [anio, mes]);
 
+  /* [283A-11] Restringir navegación a meses no futuros (tarea 46) */
+  const esMesFuturo = anio > hoy.getFullYear() || (anio === hoy.getFullYear() && mes >= hoy.getMonth() + 1);
+
   const mesAnterior = () => {
     if (mes === 1) { setMes(12); setAnio(anio - 1); }
     else setMes(mes - 1);
   };
 
   const mesSiguiente = () => {
+    if (esMesFuturo) return;
     if (mes === 12) { setMes(1); setAnio(anio + 1); }
     else setMes(mes + 1);
   };
 
   const irADia = (dia: number) => {
+    /* [283A-12] No navegar a fechas futuras (tarea 46) */
+    const fecha = new Date(anio, mes - 1, dia);
+    if (fecha > hoy) return;
     const fechaStr = `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
     navigate(`/reservas?fecha=${fechaStr}`);
   };
@@ -70,16 +78,26 @@ function CalendarioReservas() {
   const esHoy = (dia: number) =>
     anio === hoy.getFullYear() && mes === hoy.getMonth() + 1 && dia === hoy.getDate();
 
+  const esFuturo = (dia: number) => {
+    const fecha = new Date(anio, mes - 1, dia);
+    return fecha > hoy;
+  };
+
   return (
     <div className="flex flex-col gap-4">
       <p className="text-sm text-muted-foreground">
         {totales.reservas} reservas · {totales.personas} personas en {NOMBRES_MES[mes - 1]}
       </p>
 
+      {/* [283A-11] Botones mejorados con iconos Lucide + outline (tarea 37.2) */}
       <div className="flex items-center justify-between">
-        <Button variant="ghost" size="sm" onClick={mesAnterior}>← Anterior</Button>
-        <span className="font-medium">{NOMBRES_MES[mes - 1]} {anio}</span>
-        <Button variant="ghost" size="sm" onClick={mesSiguiente}>Siguiente →</Button>
+        <Button variant="outline" size="icon" onClick={mesAnterior}>
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <span className="font-medium text-lg">{NOMBRES_MES[mes - 1]} {anio}</span>
+        <Button variant="outline" size="icon" onClick={mesSiguiente} disabled={esMesFuturo}>
+          <ChevronRight className="h-4 w-4" />
+        </Button>
       </div>
 
       {isLoading ? (
@@ -93,14 +111,15 @@ function CalendarioReservas() {
             if (dia === null) return <div key={`v-${i}`} />;
             const fechaKey = `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
             const datos = mapaFechas.get(fechaKey);
+            const futuro = esFuturo(dia);
             return (
               <Card
                 key={dia}
-                className={`cursor-pointer transition-colors hover:border-primary ${esHoy(dia) ? 'border-primary bg-primary/5' : ''} ${datos ? 'bg-accent/30' : ''}`}
-                onClick={() => irADia(dia)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={e => e.key === 'Enter' && irADia(dia)}
+                className={`transition-colors ${futuro ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:border-primary'} ${esHoy(dia) ? 'border-primary bg-primary/5' : ''} ${datos && !futuro ? 'bg-accent/30' : ''}`}
+                onClick={() => !futuro && irADia(dia)}
+                role={futuro ? undefined : "button"}
+                tabIndex={futuro ? -1 : 0}
+                onKeyDown={e => !futuro && e.key === 'Enter' && irADia(dia)}
               >
                 <CardContent className="p-2 text-center">
                   <span className={`text-sm ${esHoy(dia) ? 'font-bold text-primary' : ''}`}>{dia}</span>

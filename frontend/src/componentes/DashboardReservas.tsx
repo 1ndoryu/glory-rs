@@ -52,7 +52,7 @@ function AccionesRapidas() {
                 </DialogContent>
             </Dialog>
             <Dialog open={modalGasto} onOpenChange={setModalGasto}>
-                <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader><DialogTitle>Nuevo Gasto</DialogTitle></DialogHeader>
                     <FormularioGasto onExito={() => setModalGasto(false)} />
                 </DialogContent>
@@ -78,6 +78,11 @@ function DashboardReservas() {
 
     const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
+    /* [283A-12] Filtrar meses/años futuros — tarea 46 */
+    const anioActual = ahora.getFullYear();
+    const mesActual = ahora.getMonth() + 1;
+    const aniosDisponibles = [anio - 1, anio, anio + 1].filter(a => a <= anioActual);
+
     return (
         <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between gap-3">
@@ -87,19 +92,26 @@ function DashboardReservas() {
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                            {meses.map((nombre, i) => (
-                                <SelectItem key={i + 1} value={String(i + 1)}>
-                                    {nombre}
-                                </SelectItem>
-                            ))}
+                            {meses.map((nombre, i) => {
+                                const mesFuturo = anio === anioActual && (i + 1) > mesActual;
+                                return (
+                                    <SelectItem key={i + 1} value={String(i + 1)} disabled={mesFuturo}>
+                                        {nombre}
+                                    </SelectItem>
+                                );
+                            })}
                         </SelectContent>
                     </Select>
-                    <Select value={String(anio)} onValueChange={v => setAnio(Number(v))}>
+                    <Select value={String(anio)} onValueChange={v => {
+                        const nuevoAnio = Number(v);
+                        setAnio(nuevoAnio);
+                        if (nuevoAnio === anioActual && mes > mesActual) setMes(mesActual);
+                    }}>
                         <SelectTrigger className="w-24">
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                            {[anio - 1, anio, anio + 1].map(a => (
+                            {aniosDisponibles.map(a => (
                                 <SelectItem key={a} value={String(a)}>
                                     {a}
                                 </SelectItem>

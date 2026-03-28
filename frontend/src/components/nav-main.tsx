@@ -83,7 +83,7 @@ export function NavMain({
       </Dialog>
 
       <Dialog open={modalGasto} onOpenChange={setModalGasto}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Nuevo Gasto</DialogTitle>
           </DialogHeader>

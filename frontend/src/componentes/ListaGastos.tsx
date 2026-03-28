@@ -40,7 +40,7 @@ function ListaGastos() {
       </div>
 
       <Dialog open={modalAbierto} onOpenChange={setModalAbierto}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Nuevo Gasto</DialogTitle>
           </DialogHeader>
