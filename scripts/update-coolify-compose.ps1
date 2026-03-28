@@ -1,4 +1,4 @@
-# Script para actualizar el compose del servicio glory-rest en Coolify
+# [283A-33] Script para actualizar el compose del servicio glory-rest en Coolify
 $envFile = "c:\Users\Owner\OneDrive\Documentos\WP\app\public\wp-content\themes\glorytemplate\.agent\coolify-manager-rs\.env"
 $token = ((Get-Content $envFile | Where-Object { $_ -match '^COOLIFY_VPS1_API_TOKEN=' }) -replace 'COOLIFY_VPS1_API_TOKEN=','').Trim()
 
@@ -8,16 +8,18 @@ services:
     build:
       context: .
       dockerfile_inline: |
-        FROM rust:1.83-bookworm AS backend-builder
+        FROM rust:1-bookworm AS backend-builder
         WORKDIR /app
         RUN apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
-        RUN git clone --branch glory-rs-rest --depth 1 https://github.com/1ndoryu/glory-rs.git .
+        RUN git clone --branch glory-rs-rest --depth 1 --recurse-submodules https://github.com/1ndoryu/glory-rs.git .
         ENV SQLX_OFFLINE=true
         RUN cargo build --release --bin glory-backend
         FROM node:20-slim AS frontend-builder
         WORKDIR /app
         RUN apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
-        RUN git clone --branch glory-rs-rest --depth 1 https://github.com/1ndoryu/glory-rs.git .
+        RUN git clone --branch glory-rs-rest --depth 1 --recurse-submodules https://github.com/1ndoryu/glory-rs.git .
+        WORKDIR /app/glory-rs
+        RUN npm install --ignore-scripts
         WORKDIR /app/frontend
         RUN npm ci --ignore-scripts
         RUN npm run build
@@ -37,7 +39,8 @@ services:
       HOST: '0.0.0.0'
       PORT: '3000'
       STATIC_DIR: /app/static
-      SERVICE_FQDN_APP_3000: 'https://glory-rest.66.94.100.241.sslip.io'
+      APP_URL: 'http://app-b8s0cks444o0sogo8kg8wcgw.66.94.100.241.sslip.io'
+      SERVICE_FQDN_APP_3000: 'http://app-b8s0cks444o0sogo8kg8wcgw.66.94.100.241.sslip.io'
     depends_on:
       postgres:
         condition: service_healthy

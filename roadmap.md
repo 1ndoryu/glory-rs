@@ -91,4 +91,12 @@ Es un error que se puede evitar de nuevo con alguna regla en sentinel, pero si n
 
 24. ~~En ventas no aparece todas las ventas cuando en realidad y ventas.~~ → 283A-31
 
-Tarea Final. Actualiza el despliege con coolify-manager-rs
+25. Las tablas todas deberían tener para filtrar y ordenar. En gastos no hay para filtrar por fecha. 
+
+26. Asegurate que en el servidor esten los datos de prueba.
+
+27. Vi que te costo el despliegue, asegurate de que sea sencillo y facil la proxima vez.
+
+28. Los graficos siguen teniendo un espacio a la izquierda inncesario y Distribución por canal debe mostrar las leyenda. 
+
+Tarea Final. ~~Actualiza el despliege con coolify-manager-rs~~ → 283A-33
