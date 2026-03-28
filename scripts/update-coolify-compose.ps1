@@ -40,8 +40,8 @@ services:
       HOST: '0.0.0.0'
       PORT: '3000'
       STATIC_DIR: /app/static
-      APP_URL: 'http://app-b8s0cks444o0sogo8kg8wcgw.66.94.100.241.sslip.io'
-      SERVICE_FQDN_APP_3000: 'http://app-b8s0cks444o0sogo8kg8wcgw.66.94.100.241.sslip.io'
+      APP_URL: 'http://restaurante.wandori.us'
+      SERVICE_FQDN_APP_3000: 'restaurante.wandori.us'
     depends_on:
       postgres:
         condition: service_healthy
