@@ -133,3 +133,10 @@ Tarea Final. ~~Actualiza el despliege con coolify-manager-rs~~ → 283A-33
 ~~34. El zoom en reservas solo cambia el tamaño de las letras no el cuadro en el plano.~~ → 283A-41
 
 ~~35. Despues de las ultimas tareas actualizar el despliegue con los cambios.~~ → 283A-42
+
+~~283A-43: PlanoOcupacion aspect-ratio fijo + drag no guarda + zoom inconsistente plano/reservas~~ → completada
+~~283A-44: Optimizar build Docker (deploy lento)~~ → completada
+~~283A-45: Ancho formulario plantilla/campaña = 322px → normal~~ → completada
+~~283A-46: Select.Item value="" en nueva reserva~~ → completada
+~~283A-47: "manana" en vez de "mañana" en turnos~~ → completada
+283A-48: Despliegue final
