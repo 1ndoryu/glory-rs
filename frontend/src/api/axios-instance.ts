@@ -13,6 +13,28 @@ instance.interceptors.request.use((config) => {
   return config;
 });
 
+/* [283A-9] Interceptor de respuesta: maneja 401 (token expirado/inválido).
+ * Limpia localStorage y redirige al login para que el usuario se re-autentique.
+ * Ignora 401 en rutas de auth (login, register, forgot-password) porque son esperados. */
+instance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      const url = error.config?.url || '';
+      const rutasAuth = ['/auth/login', '/auth/register', '/auth/forgot-password', '/auth/reset-password'];
+      const esRutaAuth = rutasAuth.some((ruta) => url.includes(ruta));
+      if (!esRutaAuth) {
+        localStorage.removeItem('token');
+        /* Redirigir solo si no estamos ya en login */
+        if (!window.location.pathname.includes('/login')) {
+          window.location.href = '/login';
+        }
+      }
+    }
+    return Promise.reject(error);
+  },
+);
+
 /**
  * 253A-7: Mutator para Orval v8 — la firma cambió a (url, config) en v8.
  * Orval genera tipos con forma { data, status, headers }, así que el mutator

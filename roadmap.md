@@ -57,7 +57,7 @@
 
 ~~44. Lo de "Funcionalidad de digitalización próximamente disponible" usemos groq IA, y que la api se pueda configurar en configuración, investiga cual IA de groq es la mejor para esto para que funcione bien, como adicional, cualquier herramienta adicional que no sea ia que se pueda complementar usarl~~ → 283A-8a para comparar resultados y mejorar precisión.
 
-45. Esta es urgente:
+~~45. Esta es urgente:
 
 Si dice que el backen no corre porque no lo corre el comando ./dev.ps1 y si lo corre porque da 401 aún? 
 PS C:\Users\Owner\OneDrive\Documentos\glory-rust-template> .\dev.ps1
@@ -77,7 +77,7 @@ Logs guardados en: logs\dev_2026-03-28_0305.log
 [BACK] 2026-03-28T07:05:38.234310Z  INFO glory_backend: Swagger UI disponible en http://127.0.0.1:3000/swagger-ui/
 [FRONT] 
 [FRONT]   VITE v5.4.21  ready in 1728 ms
-[FRONT] 
+[FRONT]~~ → 283A-9 
 [FRONT]   Ô×£  Local:   http://localhost:5173/
 [FRONT]   Ô×£  Network: use --host to expose
 [BACK] 2026-03-28T07:05:56.413062Z DEBUG request{method=GET uri=/api/clientes?page=1&per_page=25 version=HTTP/1.1}: tower_http::trace::on_request: started processing request
