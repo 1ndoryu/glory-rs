@@ -49,9 +49,9 @@
 
 ~~5. Debería poder editarse los gastos y ventas por si se comente un error, creo.~~ → 283A-22
 
-6. En la parte de recordatorio (y creo que esto sucede en el resto de paginas una similar estructura) <p class="text-muted-foreground text-xs mt-0.5 line-clamp-1">Estimado/a {nombre}, le recordamos que tiene una reserva programada para mañana a las {hora}. Si necesita cancelar o modificar, responda a este email.</p> cuando es muy largo hace que la pagina supere el ancho y se ve mal. 
+6. ~~En la parte de recordatorio (y creo que esto sucede en el resto de paginas una similar estructura) <p class="text-muted-foreground text-xs mt-0.5 line-clamp-1">Estimado/a {nombre}, le recordamos que tiene una reserva programada para mañana a las {hora}. Si necesita cancelar o modificar, responda a este email.</p> cuando es muy largo hace que la pagina supere el ancho y se ve mal.~~ → 283A-30
 
-7. Cuando un dia tiene reservas en el calendario se ve mal, se ve gris y como el fondo es blanco no constrasta bien. 
+7. ~~Cuando un dia tiene reservas en el calendario se ve mal, se ve gris y como el fondo es blanco no constrasta bien.~~ → 283A-30
 
 8. ~~No veo configuraciones para la api de chatbot, donde se genera la api para conectarse, tambien deberia haber un enlace para la documentacion, configuraciones, etc.~~ → 283A-27
 
@@ -75,13 +75,13 @@ Es un error que se puede evitar de nuevo con alguna regla en sentinel, pero si n
 
 ~~17. No, el modal de "nuevo gasto" no cambio, no cambia. No importa que agregues un valor nuevo, sigue igual. y estoy viendo en modo dev.~~ → 283A-19
 
-18. Ok ya cambio el tamaño pero como se intento varias veces ahora el tamaño es muy grande, reducelo un poco, a 512 como el resto de modales.
+18. ~~Ok ya cambio el tamaño pero como se intento varias veces ahora el tamaño es muy grande, reducelo un poco, a 512 como el resto de modales.~~ → 283A-30
 
 19. ~~Vi que hiciste la auditoria de marketing, haz lo que falta.~~ → 283A-23
 
 ~~20. Las mesas no deberían salirse del plano, tambien veo que las mesas ahora no se actualizan en reserva y que el mensae de error al crear una mesa con un numero usado es "ocurrio un error en la base de datos"~~ → 283A-24
 
-21. Los cuadros de meses deberian tener un icono de mesa.
+21. ~~Los cuadros de meses deberian tener un icono de mesa.~~ → 283A-30
 
 22. ~~Agregar una opcion para reportar errores, los erores llegan a mi correo andoryyu@gmail.com~~ → 283A-26
 
