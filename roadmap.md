@@ -79,6 +79,8 @@ Es un error que se puede evitar de nuevo con alguna regla en sentinel, pero si n
 
 19. Vi que hiciste la auditoria de marketing, haz lo que falta.
 
-20. Las mesas no deberían salirse del plano, tambien veo que las mesas ahora no se actualizan en reserva y que el mensae de error al crear una mesa con un numero usado es "ocurrio un error en la base de datos"
+~~20. Las mesas no deberían salirse del plano, tambien veo que las mesas ahora no se actualizan en reserva y que el mensae de error al crear una mesa con un numero usado es "ocurrio un error en la base de datos"~~ → 283A-24
+
+21. Los cuadros de meses deberian tener un icono de mesa
 
 Tarea Final. Actualiza el despliege con coolify-manager-rs

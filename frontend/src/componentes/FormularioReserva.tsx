@@ -13,7 +13,7 @@ interface Props {
 }
 
 function FormularioReserva({ onExito }: Props) {
-  const { campos, cambiarCampo, error, manejarEnvio, cargando } = useFormularioReserva(onExito);
+  const { campos, cambiarCampo, error, manejarEnvio, cargando, mesasDisponibles } = useFormularioReserva(onExito);
 
   return (
     <div>
@@ -50,8 +50,16 @@ function FormularioReserva({ onExito }: Props) {
             <Input id="numPersonas" type="number" min="1" value={campos.numPersonas} onChange={e => cambiarCampo('numPersonas', e.target.value)} />
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="numMesa">Nº Mesa</Label>
-            <Input id="numMesa" type="number" min="1" value={campos.numMesa} onChange={e => cambiarCampo('numMesa', e.target.value)} placeholder="Opcional" />
+            <Label htmlFor="mesaId">Mesa</Label>
+            <Select value={campos.mesaId} onValueChange={v => cambiarCampo('mesaId', v)}>
+              <SelectTrigger id="mesaId"><SelectValue placeholder="Sin mesa" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Sin mesa</SelectItem>
+                {mesasDisponibles.map(m => (
+                  <SelectItem key={m.id} value={m.id}>Mesa {m.numero} — {m.zona}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 

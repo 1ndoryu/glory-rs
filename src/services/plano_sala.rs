@@ -101,11 +101,15 @@ impl PlanoSalaService {
         pool: &PgPool,
         req: CrearMesaRequest,
     ) -> Result<Mesa, AppError> {
-        /* [283A-17] Catch unique constraint (zona_id, numero) para devolver
-         * Conflict en vez de 500 cuando el número de mesa ya existe en la zona. */
+        /* [283A-17+283A-24] Catch unique constraint (zona_id, numero) para devolver
+         * Conflict en vez de 500 cuando el número de mesa ya existe en la zona.
+         * Se chequea code 23505 + fallback por mensaje para robustez ante diferencias de driver. */
         Repo::crear_mesa(pool, &req).await.map_err(|e| {
             if let sqlx::Error::Database(ref db_err) = e {
-                if db_err.code().as_deref() == Some("23505") {
+                let is_unique = db_err.code().as_deref() == Some("23505")
+                    || db_err.message().contains("duplicate key")
+                    || db_err.message().contains("unique constraint");
+                if is_unique {
                     return AppError::Conflict(format!(
                         "Ya existe una mesa con el número {} en esta zona",
                         req.numero

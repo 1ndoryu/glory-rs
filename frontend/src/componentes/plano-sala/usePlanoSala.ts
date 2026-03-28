@@ -150,20 +150,24 @@ export function usePlanoSala() {
 
   const handleDragStart = (event: DragStartEvent) => setArrastrando(String(event.active.id));
 
+  /* [283A-24] Clamp para que las mesas no salgan del canvas.
+   * Límite inferior = 0, límite superior = dimensión zona - dimensión mesa. */
   const handleDragEnd = useCallback(async (event: DragEndEvent) => {
     setArrastrando(null);
     const mesaId = String(event.active.id);
     const mesa = mesasZona.find((m) => m.id === mesaId);
     if (!mesa) return;
     const prev = posicionesLocales[mesaId];
-    const nuevoX = Math.max(0, (prev?.x ?? mesa.pos_x) + event.delta.x);
-    const nuevoY = Math.max(0, (prev?.y ?? mesa.pos_y) + event.delta.y);
+    const maxX = (zonaData?.ancho ?? 800) - mesa.ancho;
+    const maxY = (zonaData?.alto ?? 600) - mesa.alto;
+    const nuevoX = Math.min(maxX, Math.max(0, (prev?.x ?? mesa.pos_x) + event.delta.x));
+    const nuevoY = Math.min(maxY, Math.max(0, (prev?.y ?? mesa.pos_y) + event.delta.y));
     setPosicionesLocales((p) => ({ ...p, [mesaId]: { x: nuevoX, y: nuevoY } }));
     const req: ActualizarPosicionesRequest = {
       posiciones: [{ id: mesaId, pos_x: Math.round(nuevoX), pos_y: Math.round(nuevoY) }],
     };
     await actualizarPosiciones(req);
-  }, [mesasZona, posicionesLocales]);
+  }, [mesasZona, posicionesLocales, zonaData]);
 
   const handleExportar = async () => {
     try {

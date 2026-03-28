@@ -538,6 +538,11 @@ export type crearMesaResponse401 = {
   status: 401
 }
 
+export type crearMesaResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
 export type crearMesaResponse422 = {
   data: ErrorResponse
   status: 422
@@ -546,7 +551,7 @@ export type crearMesaResponse422 = {
 export type crearMesaResponseSuccess = (crearMesaResponse201) & {
   headers: Headers;
 };
-export type crearMesaResponseError = (crearMesaResponse401 | crearMesaResponse422) & {
+export type crearMesaResponseError = (crearMesaResponse401 | crearMesaResponse409 | crearMesaResponse422) & {
   headers: Headers;
 };
 

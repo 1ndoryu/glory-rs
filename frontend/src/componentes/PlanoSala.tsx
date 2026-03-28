@@ -58,11 +58,14 @@ function PlanoSala() {
   const onDragEnd = (event: DragEndEvent) => {
     const id = String(event.active.id);
     if (id === 'new-mesa-template') {
-      if (!canvasRef.current || !zonaActiva) return;
+      if (!canvasRef.current || !zonaActiva || !zonaData) return;
       const rect = canvasRef.current.getBoundingClientRect();
       const pe = event.activatorEvent as PointerEvent;
-      const x = Math.max(0, Math.round(pe.clientX + event.delta.x - rect.left));
-      const y = Math.max(0, Math.round(pe.clientY + event.delta.y - rect.top));
+      /* [283A-24] Clamp para que la mesa nueva no caiga fuera del canvas */
+      const rawX = Math.round(pe.clientX + event.delta.x - rect.left);
+      const rawY = Math.round(pe.clientY + event.delta.y - rect.top);
+      const x = Math.min(zonaData.ancho - 80, Math.max(0, rawX));
+      const y = Math.min(zonaData.alto - 80, Math.max(0, rawY));
       handleCrearMesa({ x, y });
     } else {
       handleDragEnd(event);
