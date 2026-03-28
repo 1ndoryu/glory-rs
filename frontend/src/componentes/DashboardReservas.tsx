@@ -243,14 +243,14 @@ function PanelResumen({data}: {data: ResumenReservas}) {
                 </Card>
             </div>
 
-            {/* [283A-18] Charts en columna única (1 por fila) con margin left=0 */}
-            <div className="grid gap-4">
+            {/* [283A-29] Charts en grid de 2 columnas */}
+            <div className="grid gap-4 lg:grid-cols-2">
                 <Card>
                     <CardHeader>
                         <CardTitle className="text-sm">Reservas por día</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <ChartContainer config={CONFIG_SIMPLE} className="h-[220px]">
+                        <ChartContainer config={CONFIG_SIMPLE} className="h-[220px] w-full">
                             <BarChart data={data.por_dia.map((d: {fecha: string; total: number}) => ({...d, fecha: d.fecha.slice(5)}))} margin={{left: 0, right: 0}}>
                                 <CartesianGrid vertical={false} />
                                 <XAxis dataKey="fecha" tickLine={false} axisLine={false} fontSize={11} />
@@ -267,7 +267,7 @@ function PanelResumen({data}: {data: ResumenReservas}) {
                         <CardTitle className="text-sm">Por día de semana</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <ChartContainer config={CONFIG_SIMPLE} className="h-[220px]">
+                        <ChartContainer config={CONFIG_SIMPLE} className="h-[220px] w-full">
                             <BarChart data={data.por_dia_semana} margin={{left: 0, right: 0}}>
                                 <CartesianGrid vertical={false} />
                                 <XAxis dataKey="dia" tickLine={false} axisLine={false} fontSize={11} />
@@ -285,7 +285,7 @@ function PanelResumen({data}: {data: ResumenReservas}) {
                     </CardHeader>
                     <CardContent>
                         {data.por_canal.length > 0 ? (
-                            <ChartContainer config={CONFIG_SIMPLE} className="h-[220px]">
+                            <ChartContainer config={CONFIG_SIMPLE} className="h-[220px] w-full">
                                 <PieChart margin={{left: 0, right: 0}}>
                                     <Pie data={data.por_canal} dataKey="total" nameKey="canal" cx="50%" cy="50%" outerRadius={80}>
                                         {data.por_canal.map((_: AgrupacionCanal, i: number) => (
@@ -298,6 +298,24 @@ function PanelResumen({data}: {data: ResumenReservas}) {
                         ) : (
                             <p className="text-sm text-muted-foreground text-center py-8">Sin datos de canales</p>
                         )}
+                    </CardContent>
+                </Card>
+
+                {/* [283A-29] Nuevo gráfico: comparación con mes anterior */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-sm">Comparación mensual</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <ChartContainer config={{total: {label: 'Reservas', color: 'var(--chart-1)'}}} className="h-[220px] w-full">
+                            <BarChart data={[{periodo: 'Mes anterior', total: data.total_mes_anterior}, {periodo: 'Este mes', total: data.total_reservas}]} margin={{left: 0, right: 0}}>
+                                <CartesianGrid vertical={false} />
+                                <XAxis dataKey="periodo" tickLine={false} axisLine={false} fontSize={11} />
+                                <YAxis allowDecimals={false} tickLine={false} axisLine={false} />
+                                <ChartTooltip content={<ChartTooltipContent />} />
+                                <Bar dataKey="total" fill="var(--color-total)" radius={4} />
+                            </BarChart>
+                        </ChartContainer>
                     </CardContent>
                 </Card>
             </div>
@@ -350,7 +368,7 @@ function PanelOcupacion({data}: {data: OcupacionReservas}) {
                         <CardTitle className="text-sm">Distribución por hora</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <ChartContainer config={CONFIG_SIMPLE} className="h-[220px]">
+                        <ChartContainer config={CONFIG_SIMPLE} className="h-[220px] w-full">
                             <BarChart data={data.por_hora} margin={{left: 0, right: 0}}>
                                 <CartesianGrid vertical={false} />
                                 <XAxis dataKey="hora" tickLine={false} axisLine={false} fontSize={11} />
@@ -367,7 +385,7 @@ function PanelOcupacion({data}: {data: OcupacionReservas}) {
                         <CardTitle className="text-sm">Por turno</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <ChartContainer config={CONFIG_TURNO} className="h-[220px]">
+                        <ChartContainer config={CONFIG_TURNO} className="h-[220px] w-full">
                             <BarChart data={data.por_turno} margin={{left: 0, right: 0}}>
                                 <CartesianGrid vertical={false} />
                                 <XAxis dataKey="turno" tickLine={false} axisLine={false} fontSize={11} />

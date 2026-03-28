@@ -89,4 +89,6 @@ Es un error que se puede evitar de nuevo con alguna regla en sentinel, pero si n
 
 23.1 ~~Creo que podemos evitar problemas futuros en donde haya espacio para mesas agregando la funcionalidad de zoom, esto para que la funcionalidad anterior no quede inutil sería simplemnente reducir el tamaño de las mesas o agrandar segun el zoom.~~ → 283A-25
 
+24. En ventas no aparece todas las ventas cuando en realidad y ventas.
+
 Tarea Final. Actualiza el despliege con coolify-manager-rs
