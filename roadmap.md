@@ -67,9 +67,9 @@ Es un error que se puede evitar de nuevo con alguna regla en sentinel, pero si n
 
 ~~13. El cliente no lo pidio pero estaría bien que hayan notificaciones en el panel en tiempo real para cosas como nuevas reservas, o lo que sea que se haga mediante el chat bot, porque ajam si se reciben cosas externamente, pues, deberían haber notifaciones en tiempo real.~~ → 283A-20
 
-14. Los graficos no estan ocupando el ancho completo del bloque en donde estan.
+14. ~~Los graficos no estan ocupando el ancho completo del bloque en donde estan.~~ → 283A-29
 
-15. Los graficos en la la pestaña de General ponlos en grid de 2 columnas, y agrega otro grafico, no se cual, cualquier cosa que se pueda agregar en un grafico.
+15. ~~Los graficos en la la pestaña de General ponlos en grid de 2 columnas, y agrega otro grafico, no se cual, cualquier cosa que se pueda agregar en un grafico.~~ → 283A-29
 
 ~~16. El modal de gastos no cambio de tamaño.~~ → 283A-19
 
