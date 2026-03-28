@@ -39,9 +39,9 @@
 
 36. Falta crear una documentación completa y detallada del framework glory-rs. También hay que reorganizar repos: https://github.com/1ndoryu/glory-rs para el framework y https://github.com/1ndoryu/glory-rs-template para el template. Cuidado con la pérdida de datos — estamos en rama glory-rs-rest (proyecto restaurante), main es donde va el template.
 
-37. Dentro del contenido de las tabs no hay gap en el dashboard, todo se ve pegado, debería haber.
+~~37. Dentro del contenido de las tabs no hay gap en el dashboard, todo se ve pegado, debería haber.~~ → 283A-7
 
-37.1. Las acciones rápidas están mal posicionadas, deberían ir en la esquina arriba a la misma altura de elegir la fecha, pero a la derecha.
+~~37.1. Las acciones rápidas están mal posicionadas, deberían ir en la esquina arriba a la misma altura de elegir la fecha, pero a la derecha.~~ → 283A-7
 
 37.2 Los botones siguiente y anterior del calendario se ven mal.
 
@@ -52,3 +52,7 @@
 ~~41. Cambiar dark mode a white sigue sin funcionar.~~ → 283A-6
 
 42. El titulo de la pestaña en el navegador dice Glory RS, ajustar esto en todos lados para que diga cosas coherente
+
+43. El modal de Nuevo Gasto debe ser un poco mas grande.
+
+44. Lo de "Funcionalidad de digitalización próximamente disponible" usemos groq IA, y que la api se pueda configurar en configuración, investiga cual IA de groq es la mejor para esto para que funcione bien, como adicional, cualquier herramienta adicional que no sea ia que se pueda complementar usarla para comparar resultados y mejorar precisión.
