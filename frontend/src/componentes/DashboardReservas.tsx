@@ -46,19 +46,20 @@ function AccionesRapidas() {
                 </Button>
             </div>
             <Dialog open={modalVenta} onOpenChange={setModalVenta}>
-                <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+                <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
                     <DialogHeader><DialogTitle>Nueva Venta</DialogTitle></DialogHeader>
                     <FormularioVenta onExito={() => setModalVenta(false)} />
                 </DialogContent>
             </Dialog>
             <Dialog open={modalGasto} onOpenChange={setModalGasto}>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                {/* [283A-19] sm:max-w-4xl para sobreescribir sm:max-w-sm del DialogContent base */}
+                <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader><DialogTitle>Nuevo Gasto</DialogTitle></DialogHeader>
                     <FormularioGasto onExito={() => setModalGasto(false)} />
                 </DialogContent>
             </Dialog>
             <Dialog open={modalReserva} onOpenChange={setModalReserva}>
-                <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+                <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
                     <DialogHeader><DialogTitle>Nueva Reserva</DialogTitle></DialogHeader>
                     <FormularioReserva onExito={() => setModalReserva(false)} />
                 </DialogContent>

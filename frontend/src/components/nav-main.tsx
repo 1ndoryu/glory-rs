@@ -83,7 +83,10 @@ export function NavMain({
       </Dialog>
 
       <Dialog open={modalGasto} onOpenChange={setModalGasto}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        {/* [283A-19] Modal gasto ampliado a sm:max-w-4xl (tareas 9+16+17).
+         * DialogContent base usa sm:max-w-sm, hay que sobreescribir con el mismo
+         * breakpoint sm: para que twMerge resuelva correctamente. */}
+        <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Nuevo Gasto</DialogTitle>
           </DialogHeader>

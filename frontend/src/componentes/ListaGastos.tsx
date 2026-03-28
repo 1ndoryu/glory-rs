@@ -40,7 +40,8 @@ function ListaGastos() {
       </div>
 
       <Dialog open={modalAbierto} onOpenChange={setModalAbierto}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        {/* [283A-19] sm:max-w-4xl para sobreescribir sm:max-w-sm del DialogContent base */}
+        <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Nuevo Gasto</DialogTitle>
           </DialogHeader>

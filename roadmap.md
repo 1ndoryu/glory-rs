@@ -55,7 +55,7 @@
 
 8. No veo configuraciones para la api de chatbot, donde se genera la api para conectarse, tambien deberia haber un enlace para la documentacion, configuraciones, etc. 
 
-9. Ya lo habia dicho antes, el modal de Nuevo Gasto debe ser mas grande, un poco. 
+~~9. Ya lo habia dicho antes, el modal de Nuevo Gasto debe ser mas grande, un poco.~~ → 283A-19
 
 10. Cumple con # Plan: Glory-RS como Framework Reutilizable. 
 
@@ -63,12 +63,16 @@
          * Conflict en vez de 500 cuando el número de mesa ya existe en la zona. */ 
 Es un error que se puede evitar de nuevo con alguna regla en sentinel, pero si no, ignorar por ahora.
 
-Final. Actualiza el despliege con coolify-manager-rs
-
 12. Las cosas de marketing y campaña como se conectan? o sea, cuales son las configuraciones que hay que hacer para conectarlas? Veo que todo esta, pero ajam presiento que falta un monton de cosas, revisa que falta, que configuraciones hay que hacer, para que todo funcione, esto es general, se requiere revision de todo porque si hay un hueco aca, nada quita que haya en otros lados. 
 
 13. El cliente no lo pidio pero estaría bien que hayan notificaciones en el panel en tiempo real para cosas como nuevas reservas, o lo que sea que se haga mediante el chat bot, porque ajam si se reciben cosas externamente, pues, deberían haber notifaciones en tiempo real. 
 
 14. Los graficos no estan ocupando el ancho completo del bloque en donde estan.
 
-15. Los graficos en la 
+15. Los graficos en la la pestaña de General ponlos en grid de 2 columnas, y agrega otro grafico, no se cual, cualquier cosa que se pueda agregar en un grafico.
+
+~~16. El modal de gastos no cambio de tamaño.~~ → 283A-19
+
+~~17. No, el modal de "nuevo gasto" no cambio, no cambia. No importa que agregues un valor nuevo, sigue igual. y estoy viendo en modo dev.~~ → 283A-19
+
+Tarea Final. Actualiza el despliege con coolify-manager-rs

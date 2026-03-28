@@ -76,7 +76,7 @@ function ListaClientes() {
       />
 
       <Dialog open={modalCrear} onOpenChange={setModalCrear}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Nuevo Cliente</DialogTitle>
           </DialogHeader>
@@ -85,7 +85,7 @@ function ListaClientes() {
       </Dialog>
 
       <Dialog open={!!clienteEditar} onOpenChange={(open) => { if (!open) setClienteEditar(null); }}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Editar Cliente</DialogTitle>
           </DialogHeader>
@@ -158,7 +158,7 @@ function ListaClientes() {
 
       {/* [263A-26] Diálogo de merge: el usuario elige cuál de los 2 sobrevive */}
       <Dialog open={modalMerge} onOpenChange={(open) => { if (!open) { setModalMerge(false); } }}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Fusionar clientes</DialogTitle>
             <DialogDescription>
