@@ -7,7 +7,7 @@ import axios from '@/api/axios-instance';
 import { toast } from 'sonner';
 import { useNotificacionStore, type Notificacion } from '@/stores/notificacionStore';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_BASE = import.meta.env.VITE_API_URL || '';
 
 export function useNotificaciones() {
     const { setItems, setNoLeidas, agregarNotificacion } = useNotificacionStore();

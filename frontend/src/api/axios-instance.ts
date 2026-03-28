@@ -1,7 +1,10 @@
 import axios from 'axios';
 
+/* [283A-49] baseURL vacía = URLs relativas al origen actual.
+ * Funciona en local (vite proxy redirige /api → localhost:3000) y en producción
+ * (backend sirve el frontend desde el mismo origen). No hardcodear localhost. */
 const instance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
+  baseURL: import.meta.env.VITE_API_URL || '',
 });
 
 /* Interceptor: agrega el token JWT a cada request si existe */
