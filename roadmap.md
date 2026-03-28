@@ -43,7 +43,7 @@
 
 ~~2. Resumen y General combinados, gráficos en 1 sola fila, padding de gráficos eliminado.~~ → 283A-18
 
-3. En ventas, reservas, clientes, faltan filtros, filtrar por fecha, falta un buscador en tiempo real.
+3. ~~En ventas, reservas, clientes, faltan filtros, filtrar por fecha, falta un buscador en tiempo real.~~ → 283A-28
 
 ~~4. Distribución por hora y Por turno en grid de 2, Procedencia (canal) abajo en bloque propio.~~ → 283A-18
 
