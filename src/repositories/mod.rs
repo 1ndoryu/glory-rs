@@ -1,3 +1,4 @@
+pub mod api_key;
 pub mod campana;
 pub mod canal_reserva;
 pub mod cliente;
@@ -11,6 +12,7 @@ pub mod reserva;
 mod user;
 pub mod venta;
 
+pub use api_key::ApiKeyRepository;
 pub use campana::CampanaRepository;
 pub use canal_reserva::CanalReservaRepository;
 pub use cliente::ClienteRepository;

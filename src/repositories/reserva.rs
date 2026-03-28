@@ -297,4 +297,42 @@ impl ReservaRepository {
         .fetch_all(pool)
         .await
     }
+
+    /* [283A-2] Métodos para el chatbot — usan queries runtime porque
+     * las entradas de cache offline .sqlx/ se generan con cargo sqlx prepare. */
+
+    /// Lista reservas activas (no canceladas) para una fecha dada
+    pub async fn listar_por_fecha(
+        pool: &PgPool,
+        user_id: Uuid,
+        fecha: NaiveDate,
+    ) -> Result<Vec<Reserva>, sqlx::Error> {
+        sqlx::query_as::<_, Reserva>(
+            "SELECT * FROM reservas \
+             WHERE user_id = $1 AND fecha = $2 AND estado != 'cancelada' \
+             ORDER BY hora ASC",
+        )
+        .bind(user_id)
+        .bind(fecha)
+        .fetch_all(pool)
+        .await
+    }
+
+    /// Cancela una reserva (cambia estado a 'cancelada')
+    pub async fn cancelar(
+        pool: &PgPool,
+        id: Uuid,
+        user_id: Uuid,
+    ) -> Result<bool, sqlx::Error> {
+        let result = sqlx::query(
+            "UPDATE reservas SET estado = 'cancelada', updated_at = NOW() \
+             WHERE id = $1 AND user_id = $2",
+        )
+        .bind(id)
+        .bind(user_id)
+        .execute(pool)
+        .await?;
+
+        Ok(result.rows_affected() > 0)
+    }
 }

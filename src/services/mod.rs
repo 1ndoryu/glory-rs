@@ -1,6 +1,8 @@
 mod auth;
+mod api_key;
 mod campana;
 mod canal_reserva;
+mod chatbot;
 mod cliente;
 mod configuracion;
 mod dashboard;
@@ -14,8 +16,10 @@ mod reserva;
 mod venta;
 
 pub use auth::AuthService;
+pub use api_key::ApiKeyService;
 pub use campana::CampanaService;
 pub use canal_reserva::CanalReservaService;
+pub use chatbot::ChatbotService;
 pub use cliente::ClienteService;
 pub use configuracion::ConfiguracionService;
 pub use dashboard::DashboardService;

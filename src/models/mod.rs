@@ -1,4 +1,5 @@
 pub mod common;
+mod api_key;
 mod campana;
 mod canal_reserva;
 mod cliente;
@@ -64,4 +65,10 @@ pub use recordatorio::{
     ActualizarReglaRequest, CrearReglaRequest, HistorialRecordatorios, RecordatorioEnviado,
     RecordatorioEnviadoDetalle, ReglaRecordatorio, ReglasPaginadas, ReglasQuery,
     CANALES_RECORDATORIO,
+};
+pub use api_key::{
+    ApiKey, ApiKeyCreatedResponse, ApiKeyResponse, CamposObligatorios,
+    ChatbotBuscarReservasQuery, ChatbotCrearReservaRequest, ChatbotReservaResponse,
+    CrearApiKeyRequest, DisponibilidadResponse, FranjaDisponibilidad, RestauranteInfoResponse,
+    ZonaResumen,
 };

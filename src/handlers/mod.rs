@@ -1,8 +1,10 @@
 #![allow(clippy::needless_for_each)] // Generado por utoipa OpenApi derive
 
+mod api_keys;
 mod auth;
 mod campanas;
 mod canales_reserva;
+mod chatbot;
 mod clientes;
 mod configuracion;
 mod dashboard;
@@ -38,6 +40,15 @@ impl utoipa::Modify for SecurityAddon {
                 utoipa::openapi::security::SecurityScheme::Http(
                     utoipa::openapi::security::Http::new(
                         utoipa::openapi::security::HttpAuthScheme::Bearer,
+                    ),
+                ),
+            );
+            /* [283A-2] Esquema de seguridad para API keys de chatbot */
+            components.add_security_scheme(
+                "api_key_auth",
+                utoipa::openapi::security::SecurityScheme::ApiKey(
+                    utoipa::openapi::security::ApiKey::Header(
+                        utoipa::openapi::security::ApiKeyValue::new("X-API-Key"),
                     ),
                 ),
             );
@@ -126,6 +137,15 @@ impl utoipa::Modify for SecurityAddon {
         recordatorios::actualizar_regla,
         recordatorios::eliminar_regla,
         recordatorios::historial_recordatorios,
+        chatbot::disponibilidad,
+        chatbot::restaurante_info,
+        chatbot::crear_reserva,
+        chatbot::buscar_reservas,
+        chatbot::obtener_reserva,
+        chatbot::cancelar_reserva,
+        api_keys::crear_api_key,
+        api_keys::listar_api_keys,
+        api_keys::revocar_api_key,
     ),
     components(schemas(
         health::HealthResponse,
@@ -218,6 +238,17 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::MetodoPago,
         crate::models::TipoDocumento,
         crate::models::EstadoReserva,
+        crate::models::ApiKeyResponse,
+        crate::models::ApiKeyCreatedResponse,
+        crate::models::CrearApiKeyRequest,
+        crate::models::DisponibilidadResponse,
+        crate::models::FranjaDisponibilidad,
+        crate::models::RestauranteInfoResponse,
+        crate::models::CamposObligatorios,
+        crate::models::ZonaResumen,
+        crate::models::ChatbotCrearReservaRequest,
+        crate::models::ChatbotReservaResponse,
+        crate::models::ChatbotBuscarReservasQuery,
         ErrorResponse,
     )),
     modifiers(&SecurityAddon),
@@ -274,4 +305,6 @@ fn api_routes() -> Router<AppState> {
         .merge(campanas::routes())
         .merge(plantillas_whatsapp::routes())
         .merge(recordatorios::routes())
+        .merge(chatbot::routes())
+        .merge(api_keys::routes())
 }

@@ -46,6 +46,9 @@ argon2 = "0.5"
 lettre = { version = "0.11", default-features = false, features = ["tokio1-rustls-tls", "builder", "smtp-transport"] }
 rand = "0.8"
 
+# Crypto
+sha2 = "0.10"
+
 # Utils
 uuid = { version = "1", features = ["serde", "v4"] }
 chrono = { version = "0.4", features = ["serde"] }
