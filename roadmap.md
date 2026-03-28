@@ -140,3 +140,4 @@ Tarea Final. ~~Actualiza el despliege con coolify-manager-rs~~ → 283A-33
 ~~283A-46: Select.Item value="" en nueva reserva~~ → completada
 ~~283A-47: "manana" en vez de "mañana" en turnos~~ → completada
 ~~283A-48: Despliegue final~~ → completada
+~~283A-49: baseURL localhost:3000 hardcodeada en frontend producción~~ → completada
