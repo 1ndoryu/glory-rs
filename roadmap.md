@@ -35,7 +35,7 @@
 
 ## Tareas pendientes
 
-35. Falta una documentación de la API para el chatbot.
+~~35. Falta una documentación de la API para el chatbot.~~ → 283A-15
 
 36. Falta crear una documentación completa y detallada del framework glory-rs. También hay que reorganizar repos: https://github.com/1ndoryu/glory-rs para el framework y https://github.com/1ndoryu/glory-rs-template para el template. Cuidado con la pérdida de datos — estamos en rama glory-rs-rest (proyecto restaurante), main es donde va el template.
 
