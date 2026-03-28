@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, PieChart, Pie, Cell } from 'recharts';
 import { DollarSign, TrendingDown, TrendingUp, CalendarDays } from 'lucide-react';
 import FormularioVenta from './FormularioVenta';
@@ -28,7 +29,7 @@ function DashboardReservas() {
   const ahora = new Date();
   const [anio, setAnio] = useState(ahora.getFullYear());
   const [mes, setMes] = useState(ahora.getMonth() + 1);
-  const [pestana, setPestana] = useState<'general' | 'resumen' | 'ocupacion' | 'analisis'>('general');
+  const [pestana, setPestana] = useState<string>('general');
 
   const { data, isLoading } = useDashboardReservas({ year: anio, month: mes });
   const dashboard = data?.status === 200 ? data.data : null;
@@ -59,26 +60,30 @@ function DashboardReservas() {
         </Select>
       </div>
 
-      <div className="flex gap-1 border-b">
-        {(['general', 'resumen', 'ocupacion', 'analisis'] as const).map(tab => (
-          <Button
-            key={tab}
-            variant="ghost"
-            size="sm"
-            className={`rounded-b-none ${pestana === tab ? 'border-b-2 border-primary font-semibold' : ''}`}
-            onClick={() => setPestana(tab)}
-          >
-            {tab === 'general' ? 'General' : tab === 'resumen' ? 'Resumen' : tab === 'ocupacion' ? 'Ocupación' : 'Análisis'}
-          </Button>
-        ))}
-      </div>
+      <Tabs value={pestana} onValueChange={setPestana}>
+        <TabsList variant="line">
+          <TabsTrigger value="general">General</TabsTrigger>
+          <TabsTrigger value="resumen">Resumen</TabsTrigger>
+          <TabsTrigger value="ocupacion">Ocupación</TabsTrigger>
+          <TabsTrigger value="analisis">Análisis</TabsTrigger>
+        </TabsList>
 
-      {isLoading && pestana !== 'general' && <p className="text-sm text-muted-foreground text-center py-8">Cargando dashboard...</p>}
-
-      {pestana === 'general' && <PanelGeneral anio={anio} mes={mes} />}
-      {dashboard && pestana === 'resumen' && <PanelResumen data={dashboard.resumen} />}
-      {dashboard && pestana === 'ocupacion' && <PanelOcupacion data={dashboard.ocupacion} />}
-      {dashboard && pestana === 'analisis' && <PanelAnalisis data={dashboard.analisis} />}
+        <TabsContent value="general">
+          <PanelGeneral anio={anio} mes={mes} />
+        </TabsContent>
+        <TabsContent value="resumen">
+          {isLoading ? <p className="text-sm text-muted-foreground text-center py-8">Cargando dashboard...</p>
+            : dashboard && <PanelResumen data={dashboard.resumen} />}
+        </TabsContent>
+        <TabsContent value="ocupacion">
+          {isLoading ? <p className="text-sm text-muted-foreground text-center py-8">Cargando dashboard...</p>
+            : dashboard && <PanelOcupacion data={dashboard.ocupacion} />}
+        </TabsContent>
+        <TabsContent value="analisis">
+          {isLoading ? <p className="text-sm text-muted-foreground text-center py-8">Cargando dashboard...</p>
+            : dashboard && <PanelAnalisis data={dashboard.analisis} />}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

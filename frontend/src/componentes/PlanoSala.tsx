@@ -61,21 +61,24 @@ function PlanoSala() {
       </div>
 
       {/* Zonas (tabs) */}
-      <div className="flex gap-1 flex-wrap border-b">
+      <div className="flex gap-1 flex-wrap items-center border-b border-border">
         {plano?.zonas.map(z => (
-          <Button
+          <button
             key={z.id}
-            variant="ghost"
-            size="sm"
-            className={`rounded-b-none ${z.id === zonaActiva ? 'border-b-2 border-primary font-semibold' : ''}`}
+            type="button"
+            className={`relative inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors rounded-t-md ${z.id === zonaActiva ? 'text-foreground after:absolute after:inset-x-0 after:bottom-[-1px] after:h-0.5 after:bg-foreground' : 'text-muted-foreground hover:text-foreground'}`}
             onClick={() => cambiarZona(z.id)}
           >
             {z.nombre} ({z.mesas.length})
-          </Button>
+          </button>
         ))}
-        <Button variant="ghost" size="sm" className="rounded-b-none text-muted-foreground" onClick={handleCrearZona}>
+        <button
+          type="button"
+          className="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-t-md"
+          onClick={handleCrearZona}
+        >
           + Zona
-        </Button>
+        </button>
       </div>
 
       {/* Info de zona */}
