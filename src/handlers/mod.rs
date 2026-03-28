@@ -1,5 +1,6 @@
 #![allow(clippy::needless_for_each)] // Generado por utoipa OpenApi derive
 
+mod admin;
 mod api_keys;
 mod auth;
 mod campanas;
@@ -159,6 +160,10 @@ impl utoipa::Modify for SecurityAddon {
         notificaciones::marcar_todas_leidas,
         notificaciones::stream_notificaciones,
         errores::reportar_error,
+        admin::ejecutar_seed,
+        admin::eliminar_datos,
+        admin::ejecutar_seed,
+        admin::eliminar_datos,
     ),
     components(schemas(
         health::HealthResponse,
@@ -272,6 +277,7 @@ impl utoipa::Modify for SecurityAddon {
         notificaciones::ConteoNoLeidas,
         errores::ReportarErrorRequest,
         errores::ReportarErrorResponse,
+        admin::AdminResult,
         ErrorResponse,
     )),
     modifiers(&SecurityAddon),
@@ -336,4 +342,5 @@ fn api_routes() -> Router<AppState> {
         .merge(api_keys::routes())
         .merge(notificaciones::routes())
         .merge(errores::routes())
+        .merge(admin::routes())
 }

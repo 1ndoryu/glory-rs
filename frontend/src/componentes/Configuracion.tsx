@@ -2,8 +2,10 @@
  * Campos obligatorios al reservar, IVA por defecto, nombre del restaurante.
  * [283A-8] Sección de API key de Groq para digitalización de documentos.
  * [283A-23] Pestañas: General + Integraciones Marketing.
- * [283A-27] Pestaña Chatbot con gestión de API Keys. */
+ * [283A-27] Pestaña Chatbot con gestión de API Keys.
+ * [283A-39] Card de datos de prueba: botón seed y botón reset. */
 
+import { useState } from 'react';
 import { useConfiguracion } from '../hooks/useConfiguracion';
 import IntegracionesMarketing from './IntegracionesMarketing';
 import ConfigChatbot from './ConfigChatbot';
@@ -13,9 +15,29 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { toast } from 'sonner';
 
 function Configuracion() {
   const { config, cambiarCampo, guardar, mensaje, cargando, guardando } = useConfiguracion();
+  const [operandoSeed, setOperandoSeed] = useState(false);
+
+  async function ejecutarOperacion(endpoint: string, descripcion: string) {
+    setOperandoSeed(true);
+    try {
+      const token = localStorage.getItem('token');
+      const resp = await fetch(`/api/${endpoint}`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
+      const data = await resp.json();
+      if (resp.ok) {
+        toast.success(descripcion, { description: data.mensaje });
+      } else {
+        toast.error('Error', { description: data.message ?? 'Error desconocido' });
+      }
+    } catch {
+      toast.error('Error', { description: 'No se pudo conectar con el servidor' });
+    } finally {
+      setOperandoSeed(false);
+    }
+  }
 
   if (cargando) return <p className="text-sm text-muted-foreground">Cargando configuración...</p>;
 
@@ -128,6 +150,34 @@ function Configuracion() {
               Obtén tu API key en <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer" className="underline">console.groq.com/keys</a>. Es gratuita.
             </p>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Datos de prueba</CardTitle>
+          <CardDescription>Cargar o eliminar los datos de demostración del sistema</CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-3">
+          <div className="flex gap-3 flex-wrap">
+            <Button
+              variant="outline"
+              disabled={operandoSeed}
+              onClick={() => ejecutarOperacion('admin/seed', 'Datos de prueba cargados')}
+            >
+              {operandoSeed ? 'Procesando...' : 'Recargar datos de prueba'}
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={operandoSeed}
+              onClick={() => ejecutarOperacion('admin/reset', 'Datos eliminados')}
+            >
+              Eliminar datos de prueba
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            "Recargar" restablece todos los datos demo. "Eliminar" borra todos los datos pero mantiene la cuenta.
+          </p>
         </CardContent>
       </Card>
 

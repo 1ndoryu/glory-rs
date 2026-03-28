@@ -125,3 +125,11 @@ Example: http://app.coolify.io:3000
 31. ~~primero, es que debajo de 50% se ve mal, limitarlo hasta ahi, que el salto sea de 10 en 10, tambien espero que el zoom se aplique con reservas, tiene que estar sincronizado, no solo por pagina sino tambie en general para todos los usuarios que usen la misma cuenta porque sino se puede ver diferente para un usuario y otro.~~ → 283A-36
 
 Tarea Final. ~~Actualiza el despliege con coolify-manager-rs~~ → 283A-33
+
+~~32. demo@restaurante.com demo1234 no funciona, dice "Credenciales incorrectas" los datos de prueba tienen que estar desplegados y un boton para eliminar los datos de prueba y tambien para volver a desplegar los datos de prueba.~~ → 283A-39
+
+33. Antes habiamos dicho que /glory-rs en https://github.com/1ndoryu/glory-rs y el proyecto en si en https://github.com/1ndoryu/glory-rs-template en la rama glory-rs-rest, aun no veo github actualizado, esto implica actualizar como se actualiza el despliegue supongo.
+
+34. El zoom en reservas solo cambia el tamaño de las letras no el cuadro en el plano.
+
+35. Despues de las ultimas tareas actualizar el despliegue con los cambios. 

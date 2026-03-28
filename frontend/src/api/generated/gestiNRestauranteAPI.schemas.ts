@@ -311,6 +311,11 @@ export interface ActualizarZonaRequest {
   orden?: number | null;
 }
 
+export interface AdminResult {
+  mensaje: string;
+  ok: boolean;
+}
+
 /**
  * Reservas agrupadas por canal de reserva
  */
