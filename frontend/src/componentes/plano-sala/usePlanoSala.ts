@@ -158,7 +158,9 @@ export function usePlanoSala(
 
   /* [283A-25] Clamp usa el ancho real del canvas (DOM) dividido por zoom en vez
    * de zonaData.ancho para que las mesas ocupen todo el ancho visible.
-   * Deltas divididos por zoom para mantener coordenadas canónicas. */
+   * Deltas divididos por zoom para mantener coordenadas canónicas.
+   * [283A-43] try/catch + refetch: si falla el PATCH, revierte posición local
+   * y muestra toast error. Sin esto el drag parecía no guardar. */
   const handleDragEnd = useCallback(async (event: DragEndEvent) => {
     setArrastrando(null);
     const mesaId = String(event.active.id);
@@ -176,8 +178,14 @@ export function usePlanoSala(
     const req: ActualizarPosicionesRequest = {
       posiciones: [{ id: mesaId, pos_x: Math.round(nuevoX), pos_y: Math.round(nuevoY) }],
     };
-    await actualizarPosiciones(req);
-  }, [mesasZona, posicionesLocales, zonaData, canvasRef, zoom]);
+    try {
+      await actualizarPosiciones(req);
+      refetch();
+    } catch {
+      setPosicionesLocales((p) => ({ ...p, [mesaId]: { x: prev?.x ?? mesa.pos_x, y: prev?.y ?? mesa.pos_y } }));
+      toast.error('No se pudo guardar la posición');
+    }
+  }, [mesasZona, posicionesLocales, zonaData, canvasRef, zoom, refetch]);
 
   const handleExportar = async () => {
     try {

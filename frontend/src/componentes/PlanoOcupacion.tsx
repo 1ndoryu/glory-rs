@@ -76,20 +76,13 @@ function PlanoOcupacion({ fecha, turno }: Props) {
         <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-sm bg-muted-foreground/30" /> Inactiva</span>
       </div>
 
-      {/* [283A-25] Canvas 100% ancho con aspect-ratio proporcional a la zona.
-         * [283A-39] Zoom: el canvas se expande a zoom*100% de ancho y el contenedor
-         * permite scroll horizontal. Los % de posición/tamaño de mesas escalan solos.
-         * Sin transform: scale() — era solo visual y no cambiaba el tamaño real de los cuadros. */}
+      {/* [283A-43] Canvas con px absolutos × zoom — idéntico a PlanoSala
+         * para que el tamaño de los cuadros de mesas sea consistente entre ambas vistas.
+         * Antes usaba aspect-ratio + % que producía cuadros de tamaño distinto. */}
       {zonaData && (
-        <div style={{ overflow: 'auto', width: '100%' }}>
-          <div
-            className="planoOcupacionCanvas"
-            style={{
-              aspectRatio: `${zonaData.ancho} / ${zonaData.alto}`,
-              width: `${zoom * 100}%`,
-              overflow: 'visible',
-            }}
-          >
+        <div className="planoOcupacionCanvas"
+          style={{ height: zonaData.alto * zoom, position: 'relative' }}
+        >
           {zonaData.mesas.map((mesa: MesaOcupacion) => {
             const estado = estadoMesa(mesa);
             const esHover = mesaHover === mesa.id;
@@ -99,10 +92,10 @@ function PlanoOcupacion({ fecha, turno }: Props) {
                 key={mesa.id}
                 className={`mesaOcupacion ${estado} ${mesa.forma} ${esHover ? 'hover' : ''}`}
                 style={{
-                  left: `${(mesa.pos_x / zonaData.ancho) * 100}%`,
-                  top: `${(mesa.pos_y / zonaData.alto) * 100}%`,
-                  width: `${(mesa.ancho / zonaData.ancho) * 100}%`,
-                  height: `${(mesa.alto / zonaData.alto) * 100}%`,
+                  left: mesa.pos_x * zoom,
+                  top: mesa.pos_y * zoom,
+                  width: mesa.ancho * zoom,
+                  height: mesa.alto * zoom,
                 }}
                 onMouseEnter={() => setMesaHover(mesa.id)}
                 onMouseLeave={() => setMesaHover(null)}
@@ -123,7 +116,6 @@ function PlanoOcupacion({ fecha, turno }: Props) {
               </div>
             );
           })}
-        </div>
         </div>
       )}
     </div>
