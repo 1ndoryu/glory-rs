@@ -126,16 +126,15 @@ function DashboardReservas() {
             <Tabs value={pestana} onValueChange={setPestana}>
                 <TabsList variant="line">
                     <TabsTrigger value="general">General</TabsTrigger>
-                    <TabsTrigger value="resumen">Resumen</TabsTrigger>
                     <TabsTrigger value="ocupacion">Ocupación</TabsTrigger>
                     <TabsTrigger value="analisis">Análisis</TabsTrigger>
                 </TabsList>
 
-                {/* [283A-7] gap-6 en tabs content para separar secciones */}
+                {/* [283A-18] General + Resumen combinados en un solo tab */}
                 <TabsContent value="general" className="space-y-6">
                     <PanelGeneral anio={anio} mes={mes} />
+                    {isLoading ? <p className="text-sm text-muted-foreground text-center py-8">Cargando dashboard...</p> : dashboard && <PanelResumen data={dashboard.resumen} />}
                 </TabsContent>
-                <TabsContent value="resumen" className="space-y-6">{isLoading ? <p className="text-sm text-muted-foreground text-center py-8">Cargando dashboard...</p> : dashboard && <PanelResumen data={dashboard.resumen} />}</TabsContent>
                 <TabsContent value="ocupacion" className="space-y-6">{isLoading ? <p className="text-sm text-muted-foreground text-center py-8">Cargando dashboard...</p> : dashboard && <PanelOcupacion data={dashboard.ocupacion} />}</TabsContent>
                 <TabsContent value="analisis" className="space-y-6">{isLoading ? <p className="text-sm text-muted-foreground text-center py-8">Cargando dashboard...</p> : dashboard && <PanelAnalisis data={dashboard.analisis} />}</TabsContent>
             </Tabs>
@@ -243,14 +242,15 @@ function PanelResumen({data}: {data: ResumenReservas}) {
                 </Card>
             </div>
 
-            <div className="grid gap-4 lg:grid-cols-3">
+            {/* [283A-18] Charts en columna única (1 por fila) con margin left=0 */}
+            <div className="grid gap-4">
                 <Card>
                     <CardHeader>
                         <CardTitle className="text-sm">Reservas por día</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <ChartContainer config={CONFIG_SIMPLE} className="h-[220px]">
-                            <BarChart data={data.por_dia.map((d: {fecha: string; total: number}) => ({...d, fecha: d.fecha.slice(5)}))}>
+                            <BarChart data={data.por_dia.map((d: {fecha: string; total: number}) => ({...d, fecha: d.fecha.slice(5)}))} margin={{left: 0, right: 0}}>
                                 <CartesianGrid vertical={false} />
                                 <XAxis dataKey="fecha" tickLine={false} axisLine={false} fontSize={11} />
                                 <YAxis allowDecimals={false} tickLine={false} axisLine={false} />
@@ -267,7 +267,7 @@ function PanelResumen({data}: {data: ResumenReservas}) {
                     </CardHeader>
                     <CardContent>
                         <ChartContainer config={CONFIG_SIMPLE} className="h-[220px]">
-                            <BarChart data={data.por_dia_semana}>
+                            <BarChart data={data.por_dia_semana} margin={{left: 0, right: 0}}>
                                 <CartesianGrid vertical={false} />
                                 <XAxis dataKey="dia" tickLine={false} axisLine={false} fontSize={11} />
                                 <YAxis allowDecimals={false} tickLine={false} axisLine={false} />
@@ -285,7 +285,7 @@ function PanelResumen({data}: {data: ResumenReservas}) {
                     <CardContent>
                         {data.por_canal.length > 0 ? (
                             <ChartContainer config={CONFIG_SIMPLE} className="h-[220px]">
-                                <PieChart>
+                                <PieChart margin={{left: 0, right: 0}}>
                                     <Pie data={data.por_canal} dataKey="total" nameKey="canal" cx="50%" cy="50%" outerRadius={80}>
                                         {data.por_canal.map((_: AgrupacionCanal, i: number) => (
                                             <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
@@ -342,14 +342,15 @@ function PanelOcupacion({data}: {data: OcupacionReservas}) {
                 </Card>
             </div>
 
-            <div className="grid gap-4 lg:grid-cols-3">
+            {/* [283A-18] Hora + Turno en grid de 2, Procedencia abajo en bloque propio */}
+            <div className="grid gap-4 lg:grid-cols-2">
                 <Card>
                     <CardHeader>
                         <CardTitle className="text-sm">Distribución por hora</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <ChartContainer config={CONFIG_SIMPLE} className="h-[220px]">
-                            <BarChart data={data.por_hora}>
+                            <BarChart data={data.por_hora} margin={{left: 0, right: 0}}>
                                 <CartesianGrid vertical={false} />
                                 <XAxis dataKey="hora" tickLine={false} axisLine={false} fontSize={11} />
                                 <YAxis allowDecimals={false} tickLine={false} axisLine={false} />
@@ -366,7 +367,7 @@ function PanelOcupacion({data}: {data: OcupacionReservas}) {
                     </CardHeader>
                     <CardContent>
                         <ChartContainer config={CONFIG_TURNO} className="h-[220px]">
-                            <BarChart data={data.por_turno}>
+                            <BarChart data={data.por_turno} margin={{left: 0, right: 0}}>
                                 <CartesianGrid vertical={false} />
                                 <XAxis dataKey="turno" tickLine={false} axisLine={false} fontSize={11} />
                                 <YAxis allowDecimals={false} tickLine={false} axisLine={false} />
@@ -377,41 +378,41 @@ function PanelOcupacion({data}: {data: OcupacionReservas}) {
                         </ChartContainer>
                     </CardContent>
                 </Card>
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="text-sm">Procedencia (canal)</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="rounded-md border">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Canal</TableHead>
-                                        <TableHead className="text-right">Reservas</TableHead>
-                                        <TableHead className="text-right">%</TableHead>
-                                        <TableHead></TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {data.por_procedencia.map((c: AgrupacionCanal) => (
-                                        <TableRow key={c.canal}>
-                                            <TableCell>{c.canal}</TableCell>
-                                            <TableCell className="text-right">{c.total}</TableCell>
-                                            <TableCell className="text-right">{c.porcentaje}%</TableCell>
-                                            <TableCell>
-                                                <div className="h-2 w-full max-w-[100px] rounded-full bg-muted">
-                                                    <div className="h-2 rounded-full bg-primary" style={{width: `${Math.min(c.porcentaje, 100)}%`}} />
-                                                </div>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </div>
-                    </CardContent>
-                </Card>
             </div>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle className="text-sm">Procedencia (canal)</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="rounded-md border">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Canal</TableHead>
+                                    <TableHead className="text-right">Reservas</TableHead>
+                                    <TableHead className="text-right">%</TableHead>
+                                    <TableHead></TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {data.por_procedencia.map((c: AgrupacionCanal) => (
+                                    <TableRow key={c.canal}>
+                                        <TableCell>{c.canal}</TableCell>
+                                        <TableCell className="text-right">{c.total}</TableCell>
+                                        <TableCell className="text-right">{c.porcentaje}%</TableCell>
+                                        <TableCell>
+                                            <div className="h-2 w-full max-w-[100px] rounded-full bg-muted">
+                                                <div className="h-2 rounded-full bg-primary" style={{width: `${Math.min(c.porcentaje, 100)}%`}} />
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
+                </CardContent>
+            </Card>
         </>
     );
 }

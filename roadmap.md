@@ -41,11 +41,11 @@
 ~~1.3 Combinación arreglada + botón al toolbar~~ → 283A-17
 ~~1.4 Error 500 por mesa duplicada → ahora devuelve Conflict con toast~~ → 283A-17
 
-2. Lo de resumen y general deberia convinarse, y los graficos no poderlos en un grid de 3, dejar cada uno en una 1 sola fila, los graficos todos tienen un padding a la izquierda que hace que tengan un espacio innecesario.  
+~~2. Resumen y General combinados, gráficos en 1 sola fila, padding de gráficos eliminado.~~ → 283A-18
 
 3. En ventas, reservas, clientes, faltan filtros, filtrar por fecha, falta un buscador en tiempo real.
 
-4. Distribución por hora y Por turno solos en grid de 2, no 3, haciendo que Procedencia (canal) este abajo en un solo bloque.
+~~4. Distribución por hora y Por turno en grid de 2, Procedencia (canal) abajo en bloque propio.~~ → 283A-18
 
 5. Debería poder editarse los gastos y ventas por si se comente un error, creo. 
 
@@ -68,3 +68,7 @@ Final. Actualiza el despliege con coolify-manager-rs
 12. Las cosas de marketing y campaña como se conectan? o sea, cuales son las configuraciones que hay que hacer para conectarlas? Veo que todo esta, pero ajam presiento que falta un monton de cosas, revisa que falta, que configuraciones hay que hacer, para que todo funcione, esto es general, se requiere revision de todo porque si hay un hueco aca, nada quita que haya en otros lados. 
 
 13. El cliente no lo pidio pero estaría bien que hayan notificaciones en el panel en tiempo real para cosas como nuevas reservas, o lo que sea que se haga mediante el chat bot, porque ajam si se reciben cosas externamente, pues, deberían haber notifaciones en tiempo real. 
+
+14. Los graficos no estan ocupando el ancho completo del bloque en donde estan.
+
+15. Los graficos en la 
