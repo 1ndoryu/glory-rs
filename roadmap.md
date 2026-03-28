@@ -53,7 +53,7 @@
 
 7. Cuando un dia tiene reservas en el calendario se ve mal, se ve gris y como el fondo es blanco no constrasta bien. 
 
-8. No veo configuraciones para la api de chatbot, donde se genera la api para conectarse, tambien deberia haber un enlace para la documentacion, configuraciones, etc. 
+8. ~~No veo configuraciones para la api de chatbot, donde se genera la api para conectarse, tambien deberia haber un enlace para la documentacion, configuraciones, etc.~~ → 283A-27
 
 ~~9. Ya lo habia dicho antes, el modal de Nuevo Gasto debe ser mas grande, un poco.~~ → 283A-19
 
