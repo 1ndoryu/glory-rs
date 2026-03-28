@@ -2,24 +2,24 @@
  * [263A-28] Diálogos nativos reemplazados por shadcn Dialog + toast.
  * Lógica en usePlanoSala, mesa arrastrable en MesaDraggable, config en PanelConfigMesa. */
 
-import { useRef, useState, useEffect } from 'react';
+import { useRef } from 'react';
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
-import { Pencil, Trash2, Download, Upload, Combine } from 'lucide-react';
+import { Pencil, Trash2, Download, Upload, Combine, ZoomIn, ZoomOut } from 'lucide-react';
 import MesaDraggable from './plano-sala/MesaDraggable';
 import MesaTemplate from './plano-sala/MesaTemplate';
 import PanelConfigMesa from './plano-sala/PanelConfigMesa';
+import PlanoDialogs from './plano-sala/PlanoDialogs';
 import { usePlanoSala } from './plano-sala/usePlanoSala';
 import '../estilos/PlanoSala.css';
 
 function PlanoSala() {
+  const canvasRef = useRef<HTMLDivElement>(null);
+
   const {
     plano, zonaActiva, zonaData, mesasZona, mesaSeleccionada, arrastrando,
-    posicionesLocales, setMesaSeleccionada, cambiarZona,
+    posicionesLocales, setMesaSeleccionada, cambiarZona, zoom, setZoom,
     handleCrearZona, handleEliminarZona, handleEditarZona,
     handleCrearMesa, handleGuardarMesa, handleEliminarMesa,
     handleDragStart, handleDragEnd,
@@ -28,23 +28,8 @@ function PlanoSala() {
     dialogoEntrada, setDialogoEntrada,
     dialogoConfirmar, setDialogoConfirmar,
     dialogoCombinacion, setDialogoCombinacion,
-  } = usePlanoSala();
+  } = usePlanoSala(canvasRef);
 
-  /* Estado local para inputs de los diálogos — combForm agrupa nombre, maxP y mesas
-   * para mantener max 3 useState (regla SRP). dragActivo se reutiliza via arrastrando del hook. */
-  const [entradaValor, setEntradaValor] = useState('');
-  const [combForm, setCombForm] = useState({ nombre: '', maxP: '', mesas: new Set<string>() });
-
-  /* Sincronizar valor inicial al abrir diálogo de entrada */
-  useEffect(() => {
-    if (dialogoEntrada) setEntradaValor(dialogoEntrada.valorInicial);
-  }, [dialogoEntrada]);
-
-  useEffect(() => {
-    if (dialogoCombinacion) setCombForm({ nombre: '', maxP: '', mesas: new Set() });
-  }, [dialogoCombinacion]);
-
-  const canvasRef = useRef<HTMLDivElement>(null);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   );
@@ -61,24 +46,17 @@ function PlanoSala() {
       if (!canvasRef.current || !zonaActiva || !zonaData) return;
       const rect = canvasRef.current.getBoundingClientRect();
       const pe = event.activatorEvent as PointerEvent;
-      /* [283A-24] Clamp para que la mesa nueva no caiga fuera del canvas */
-      const rawX = Math.round(pe.clientX + event.delta.x - rect.left);
-      const rawY = Math.round(pe.clientY + event.delta.y - rect.top);
-      const x = Math.min(zonaData.ancho - 80, Math.max(0, rawX));
+      /* [283A-25] Coordenadas de pantalla → canónicas dividiendo por zoom.
+       * Bounds usan ancho real del canvas / zoom. */
+      const rawX = Math.round((pe.clientX + event.delta.x - rect.left) / zoom);
+      const rawY = Math.round((pe.clientY + event.delta.y - rect.top) / zoom);
+      const canvasWidth = canvasRef.current.clientWidth;
+      const x = Math.min(canvasWidth / zoom - 80, Math.max(0, rawX));
       const y = Math.min(zonaData.alto - 80, Math.max(0, rawY));
       handleCrearMesa({ x, y });
     } else {
       handleDragEnd(event);
     }
-  };
-
-  const toggleCombMesa = (id: string) => {
-    setCombForm(prev => {
-      const next = new Set(prev.mesas);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return { ...prev, mesas: next };
-    });
   };
 
   return (
@@ -99,6 +77,12 @@ function PlanoSala() {
         <div className="ml-auto flex gap-2">
           <Button size="sm" variant="ghost" onClick={handleExportar}><Download className="size-4 mr-1" />Exportar</Button>
           <Button size="sm" variant="ghost" onClick={handleImportar}><Upload className="size-4 mr-1" />Importar</Button>
+        </div>
+        {/* [283A-25] Controles de zoom para escalar el canvas visualmente */}
+        <div className="flex items-center gap-1">
+          <Button size="sm" variant="outline" onClick={() => setZoom(z => Math.max(0.25, +(z - 0.25).toFixed(2)))}><ZoomOut className="size-4" /></Button>
+          <span className="text-xs w-12 text-center tabular-nums">{Math.round(zoom * 100)}%</span>
+          <Button size="sm" variant="outline" onClick={() => setZoom(z => Math.min(2, +(z + 0.25).toFixed(2)))}><ZoomIn className="size-4" /></Button>
         </div>
       </div>
 
@@ -130,16 +114,25 @@ function PlanoSala() {
             <div
               ref={canvasRef}
               className="planoCanvas"
-              style={{ height: zonaData.alto }}
+              style={{ height: zonaData.alto * zoom }}
               onClick={() => setMesaSeleccionada(null)}
             >
               {mesasZona.map(mesa => {
                 const pos = posicionesLocales[mesa.id];
-                const mesaConPos = pos ? { ...mesa, pos_x: pos.x, pos_y: pos.y } : mesa;
+                const base = pos ? { ...mesa, pos_x: pos.x, pos_y: pos.y } : mesa;
+                /* [283A-25] Escalar posiciones y tamaños por zoom para render visual.
+                 * Las coordenadas canónicas (sin zoom) se mantienen en posicionesLocales. */
+                const mesaZoom = zoom === 1 ? base : {
+                  ...base,
+                  pos_x: base.pos_x * zoom,
+                  pos_y: base.pos_y * zoom,
+                  ancho: base.ancho * zoom,
+                  alto: base.alto * zoom,
+                };
                 return (
                   <MesaDraggable
                     key={mesa.id}
-                    mesa={mesaConPos}
+                    mesa={mesaZoom}
                     seleccionada={mesaSeleccionada?.id === mesa.id}
                     arrastrando={arrastrando === mesa.id}
                     onClick={() => setMesaSeleccionada(mesa)}
@@ -187,113 +180,13 @@ function PlanoSala() {
           ))}
         </div>
       )}
-      {/* Diálogo de entrada (reemplaza prompt nativo) */}
-      <Dialog
-        open={!!dialogoEntrada}
-        onOpenChange={(open) => { if (!open) setDialogoEntrada(null); }}
-      >
-        <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle>{dialogoEntrada?.titulo}</DialogTitle>
-          </DialogHeader>
-          <div className="flex flex-col gap-2">
-            <Label>{dialogoEntrada?.label}</Label>
-            <Input
-              type={dialogoEntrada?.tipo ?? 'text'}
-              value={entradaValor}
-              onChange={e => setEntradaValor(e.target.value)}
-              onKeyDown={e => {
-                if (e.key === 'Enter' && entradaValor.trim()) {
-                  dialogoEntrada?.onConfirmar(entradaValor.trim());
-                  setDialogoEntrada(null);
-                  setEntradaValor('');
-                }
-              }}
-              autoFocus
-            />
-          </div>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => { setDialogoEntrada(null); setEntradaValor(''); }}>Cancelar</Button>
-            <Button onClick={() => {
-              if (entradaValor.trim()) {
-                dialogoEntrada?.onConfirmar(entradaValor.trim());
-                setDialogoEntrada(null);
-                setEntradaValor('');
-              }
-            }}>Aceptar</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Diálogo de confirmación (reemplaza confirm nativo) */}
-      <Dialog
-        open={!!dialogoConfirmar}
-        onOpenChange={(open) => { if (!open) setDialogoConfirmar(null); }}
-      >
-        <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle>{dialogoConfirmar?.titulo}</DialogTitle>
-            <DialogDescription>{dialogoConfirmar?.mensaje}</DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setDialogoConfirmar(null)}>Cancelar</Button>
-            <Button variant="destructive" onClick={() => {
-              dialogoConfirmar?.onConfirmar();
-              setDialogoConfirmar(null);
-            }}>Confirmar</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* [283A-17] Diálogo de combinación con selección visual de mesas */}
-      <Dialog
-        open={!!dialogoCombinacion}
-        onOpenChange={(open) => { if (!open) { setDialogoCombinacion(null); setCombForm({ nombre: '', maxP: '', mesas: new Set() }); } }}
-      >
-        <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle>Nueva combinación de mesas</DialogTitle>
-          </DialogHeader>
-          <div className="flex flex-col gap-3">
-            <div className="flex flex-col gap-2">
-              <Label>Nombre</Label>
-              <Input value={combForm.nombre} onChange={e => setCombForm(p => ({ ...p, nombre: e.target.value }))} autoFocus />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label>Máx personas</Label>
-              <Input type="number" value={combForm.maxP} onChange={e => setCombForm(p => ({ ...p, maxP: e.target.value }))} />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label>Mesas a combinar</Label>
-              <div className="flex flex-wrap gap-1.5">
-                {mesasZona.map(m => (
-                  <Button
-                    key={m.id}
-                    size="sm"
-                    variant={combForm.mesas.has(m.id) ? 'default' : 'outline'}
-                    onClick={() => toggleCombMesa(m.id)}
-                  >
-                    Mesa {m.numero}
-                  </Button>
-                ))}
-              </div>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => { setDialogoCombinacion(null); setCombForm({ nombre: '', maxP: '', mesas: new Set() }); }}>Cancelar</Button>
-            <Button
-              disabled={combForm.mesas.size < 2 || !combForm.nombre.trim() || !combForm.maxP}
-              onClick={() => {
-                if (combForm.nombre.trim() && combForm.maxP && combForm.mesas.size >= 2) {
-                  dialogoCombinacion?.onConfirmar(combForm.nombre.trim(), Number(combForm.maxP), Array.from(combForm.mesas));
-                  setDialogoCombinacion(null);
-                  setCombForm({ nombre: '', maxP: '', mesas: new Set() });
-                }
-              }}
-            >Crear</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* [283A-25] Diálogos extraídos a PlanoDialogs para mantener < 300 líneas */}
+      <PlanoDialogs
+        dialogoEntrada={dialogoEntrada} setDialogoEntrada={setDialogoEntrada}
+        dialogoConfirmar={dialogoConfirmar} setDialogoConfirmar={setDialogoConfirmar}
+        dialogoCombinacion={dialogoCombinacion} setDialogoCombinacion={setDialogoCombinacion}
+        mesasZona={mesasZona}
+      />
     </div>
     {/* [283A-17] DragOverlay: preview visual mientras se arrastra la mesa template */}
     <DragOverlay>

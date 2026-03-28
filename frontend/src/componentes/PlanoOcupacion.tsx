@@ -65,11 +65,12 @@ function PlanoOcupacion({ fecha, turno }: Props) {
         <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-sm bg-muted-foreground/30" /> Inactiva</span>
       </div>
 
-      {/* Canvas */}
+      {/* [283A-25] Canvas 100% ancho con aspect-ratio proporcional a la zona.
+         * Mesas posicionadas en porcentajes para escalar automáticamente. */}
       {zonaData && (
         <div
           className="planoOcupacionCanvas"
-          style={{ width: zonaData.ancho, height: zonaData.alto }}
+          style={{ aspectRatio: `${zonaData.ancho} / ${zonaData.alto}` }}
         >
           {zonaData.mesas.map((mesa: MesaOcupacion) => {
             const estado = estadoMesa(mesa);
@@ -80,10 +81,10 @@ function PlanoOcupacion({ fecha, turno }: Props) {
                 key={mesa.id}
                 className={`mesaOcupacion ${estado} ${mesa.forma} ${esHover ? 'hover' : ''}`}
                 style={{
-                  left: mesa.pos_x,
-                  top: mesa.pos_y,
-                  width: mesa.ancho,
-                  height: mesa.alto,
+                  left: `${(mesa.pos_x / zonaData.ancho) * 100}%`,
+                  top: `${(mesa.pos_y / zonaData.alto) * 100}%`,
+                  width: `${(mesa.ancho / zonaData.ancho) * 100}%`,
+                  height: `${(mesa.alto / zonaData.alto) * 100}%`,
                 }}
                 onMouseEnter={() => setMesaHover(mesa.id)}
                 onMouseLeave={() => setMesaHover(null)}

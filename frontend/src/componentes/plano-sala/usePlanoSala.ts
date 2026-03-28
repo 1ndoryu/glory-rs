@@ -2,7 +2,7 @@
  * [263A-28] Reemplazados prompt/confirm/alert nativos por estado React + toast.
  * Los diálogos se renderizan en PlanoSala.tsx usando shadcn Dialog. */
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, type RefObject } from 'react';
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import { toast } from 'sonner';
 import {
@@ -44,7 +44,11 @@ export interface DialogoCombinacion {
   onConfirmar: (nombre: string, maxPersonas: number, mesaIds: string[]) => void;
 }
 
-export function usePlanoSala() {
+/* [283A-25] Recibe canvasRef para que los clamps de drag usen el ancho real
+ * del DOM. Zoom vive aquí para centralizar lógica de escalado. */
+export function usePlanoSala(
+  canvasRef: RefObject<HTMLDivElement | null>,
+) {
   const { data, refetch } = useObtenerPlano();
   const plano = data?.status === 200 ? data.data : null;
 
@@ -54,6 +58,7 @@ export function usePlanoSala() {
   const [posicionesLocales, setPosicionesLocales] = useState<
     Record<string, { x: number; y: number }>
   >({});
+  const [zoom, setZoom] = useState(1);
 
   /* Estado de diálogos — reemplazan prompt/confirm/alert nativos */
   const [dialogoEntrada, setDialogoEntrada] = useState<DialogoEntrada | null>(null);
@@ -150,24 +155,28 @@ export function usePlanoSala() {
 
   const handleDragStart = (event: DragStartEvent) => setArrastrando(String(event.active.id));
 
-  /* [283A-24] Clamp para que las mesas no salgan del canvas.
-   * Límite inferior = 0, límite superior = dimensión zona - dimensión mesa. */
+  /* [283A-25] Clamp usa el ancho real del canvas (DOM) dividido por zoom en vez
+   * de zonaData.ancho para que las mesas ocupen todo el ancho visible.
+   * Deltas divididos por zoom para mantener coordenadas canónicas. */
   const handleDragEnd = useCallback(async (event: DragEndEvent) => {
     setArrastrando(null);
     const mesaId = String(event.active.id);
     const mesa = mesasZona.find((m) => m.id === mesaId);
     if (!mesa) return;
     const prev = posicionesLocales[mesaId];
-    const maxX = (zonaData?.ancho ?? 800) - mesa.ancho;
+    const canvasWidth = canvasRef.current?.clientWidth ?? 800;
+    const maxX = canvasWidth / zoom - mesa.ancho;
     const maxY = (zonaData?.alto ?? 600) - mesa.alto;
-    const nuevoX = Math.min(maxX, Math.max(0, (prev?.x ?? mesa.pos_x) + event.delta.x));
-    const nuevoY = Math.min(maxY, Math.max(0, (prev?.y ?? mesa.pos_y) + event.delta.y));
+    const dx = event.delta.x / zoom;
+    const dy = event.delta.y / zoom;
+    const nuevoX = Math.min(maxX, Math.max(0, (prev?.x ?? mesa.pos_x) + dx));
+    const nuevoY = Math.min(maxY, Math.max(0, (prev?.y ?? mesa.pos_y) + dy));
     setPosicionesLocales((p) => ({ ...p, [mesaId]: { x: nuevoX, y: nuevoY } }));
     const req: ActualizarPosicionesRequest = {
       posiciones: [{ id: mesaId, pos_x: Math.round(nuevoX), pos_y: Math.round(nuevoY) }],
     };
     await actualizarPosiciones(req);
-  }, [mesasZona, posicionesLocales, zonaData]);
+  }, [mesasZona, posicionesLocales, zonaData, canvasRef, zoom]);
 
   const handleExportar = async () => {
     try {
@@ -240,7 +249,7 @@ export function usePlanoSala() {
 
   return {
     plano, zonaActiva, zonaData, mesasZona, mesaSeleccionada, arrastrando,
-    posicionesLocales, setMesaSeleccionada, cambiarZona,
+    posicionesLocales, setMesaSeleccionada, cambiarZona, zoom, setZoom,
     handleCrearZona, handleEliminarZona, handleEditarZona,
     handleCrearMesa, handleGuardarMesa, handleEliminarMesa,
     handleDragStart, handleDragEnd,
