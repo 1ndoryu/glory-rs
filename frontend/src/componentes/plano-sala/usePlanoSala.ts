@@ -41,7 +41,7 @@ export interface DialogoConfirmar {
   onConfirmar: () => void;
 }
 export interface DialogoCombinacion {
-  onConfirmar: (nombre: string, maxPersonas: number) => void;
+  onConfirmar: (nombre: string, maxPersonas: number, mesaIds: string[]) => void;
 }
 
 export function usePlanoSala() {
@@ -110,15 +110,22 @@ export function usePlanoSala() {
     });
   };
 
-  const handleCrearMesa = () => {
+  /* [283A-17] Acepta posición opcional para drag-to-create. Try-catch para
+   * mostrar toast si el backend retorna Conflict (número duplicado). */
+  const handleCrearMesa = (pos?: { x: number; y: number }) => {
     if (!zonaActiva) return;
     setDialogoEntrada({
       titulo: 'Nueva mesa', label: 'Número de mesa', valorInicial: '', tipo: 'number',
       onConfirmar: async (val) => {
         const numero = Number(val);
         if (Number.isNaN(numero) || numero < 1) return;
-        await crearMesa({ zona_id: zonaActiva, numero, pos_x: 50, pos_y: 50 } as CrearMesaRequest);
-        refetch();
+        try {
+          await crearMesa({ zona_id: zonaActiva, numero, pos_x: pos?.x ?? 50, pos_y: pos?.y ?? 50 } as CrearMesaRequest);
+          refetch();
+        } catch (err: unknown) {
+          const axiosErr = err as { response?: { data?: { message?: string } } };
+          toast.error(axiosErr?.response?.data?.message || 'Error al crear mesa');
+        }
       },
     });
   };
@@ -202,11 +209,16 @@ export function usePlanoSala() {
     input.click();
   };
 
+  /* [283A-17] Ahora recibe mesa_ids desde el diálogo (selección visual de mesas). */
   const handleCrearCombinacion = () => {
     setDialogoCombinacion({
-      onConfirmar: async (nombre, maxPersonas) => {
-        await crearCombinacion({ nombre, max_personas: maxPersonas, mesa_ids: [] } as CrearCombinacionRequest);
-        refetch();
+      onConfirmar: async (nombre, maxPersonas, mesaIds) => {
+        try {
+          await crearCombinacion({ nombre, max_personas: maxPersonas, mesa_ids: mesaIds } as CrearCombinacionRequest);
+          refetch();
+        } catch {
+          toast.error('Error al crear combinación');
+        }
       },
     });
   };

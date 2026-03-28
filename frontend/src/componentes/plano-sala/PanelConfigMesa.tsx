@@ -42,7 +42,7 @@ function PanelConfigMesa({ mesa, onGuardar, onEliminar, onCerrar }: PanelConfigM
   };
 
   return (
-    <div className="rounded-lg border bg-card p-4 flex flex-col gap-3 max-w-xs">
+    <div className="rounded-lg border bg-card p-4 flex flex-col gap-3 sticky top-4">
       <h3 className="font-semibold">Mesa {mesa.numero}</h3>
       <div className="flex flex-col gap-2">
         <Label htmlFor="cfg-numero">Número</Label>

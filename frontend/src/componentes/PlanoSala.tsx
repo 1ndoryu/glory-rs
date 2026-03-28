@@ -3,13 +3,15 @@
  * Lógica en usePlanoSala, mesa arrastrable en MesaDraggable, config en PanelConfigMesa. */
 
 import { useRef, useState, useEffect } from 'react';
-import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
-import { Plus, Pencil, Trash2, Download, Upload, Combine } from 'lucide-react';
+import { Pencil, Trash2, Download, Upload, Combine } from 'lucide-react';
 import MesaDraggable from './plano-sala/MesaDraggable';
+import MesaTemplate from './plano-sala/MesaTemplate';
 import PanelConfigMesa from './plano-sala/PanelConfigMesa';
 import { usePlanoSala } from './plano-sala/usePlanoSala';
 import '../estilos/PlanoSala.css';
@@ -28,32 +30,69 @@ function PlanoSala() {
     dialogoCombinacion, setDialogoCombinacion,
   } = usePlanoSala();
 
-  /* Estado local para inputs de los diálogos */
+  /* Estado local para inputs de los diálogos — combForm agrupa nombre, maxP y mesas
+   * para mantener max 3 useState (regla SRP). dragActivo se reutiliza via arrastrando del hook. */
   const [entradaValor, setEntradaValor] = useState('');
-  const [combNombre, setCombNombre] = useState('');
-  const [combMaxP, setCombMaxP] = useState('');
+  const [combForm, setCombForm] = useState({ nombre: '', maxP: '', mesas: new Set<string>() });
 
   /* Sincronizar valor inicial al abrir diálogo de entrada */
   useEffect(() => {
     if (dialogoEntrada) setEntradaValor(dialogoEntrada.valorInicial);
   }, [dialogoEntrada]);
 
+  useEffect(() => {
+    if (dialogoCombinacion) setCombForm({ nombre: '', maxP: '', mesas: new Set() });
+  }, [dialogoCombinacion]);
+
   const canvasRef = useRef<HTMLDivElement>(null);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   );
 
+  /* [283A-17] Handler unificado de drag: distingue mesa template vs mesa existente.
+   * Siempre llama handleDragStart para que 'arrastrando' (del hook) se setee. */
+  const onDragStart = (event: DragStartEvent) => {
+    handleDragStart(event);
+  };
+
+  const onDragEnd = (event: DragEndEvent) => {
+    const id = String(event.active.id);
+    if (id === 'new-mesa-template') {
+      if (!canvasRef.current || !zonaActiva) return;
+      const rect = canvasRef.current.getBoundingClientRect();
+      const pe = event.activatorEvent as PointerEvent;
+      const x = Math.max(0, Math.round(pe.clientX + event.delta.x - rect.left));
+      const y = Math.max(0, Math.round(pe.clientY + event.delta.y - rect.top));
+      handleCrearMesa({ x, y });
+    } else {
+      handleDragEnd(event);
+    }
+  };
+
+  const toggleCombMesa = (id: string) => {
+    setCombForm(prev => {
+      const next = new Set(prev.mesas);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return { ...prev, mesas: next };
+    });
+  };
+
   return (
+    <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd}>
     <div className="flex flex-col gap-4">
-      {/* Barra de herramientas */}
+      {/* [283A-17] Toolbar: Mesa draggable + acciones zona + Combinación + Export/Import */}
       <div className="flex items-center gap-2 flex-wrap">
-        <Button size="sm" onClick={handleCrearMesa} disabled={!zonaActiva}><Plus className="size-4 mr-1" />Mesa</Button>
+        <MesaTemplate disabled={!zonaActiva} />
         {zonaActiva && (
           <>
             <Button size="sm" variant="ghost" onClick={handleEditarZona}><Pencil className="size-4 mr-1" />Renombrar</Button>
             <Button size="sm" variant="destructive" onClick={handleEliminarZona}><Trash2 className="size-4 mr-1" />Zona</Button>
           </>
         )}
+        <Button size="sm" variant="ghost" onClick={handleCrearCombinacion} disabled={!zonaActiva || mesasZona.length < 2}>
+          <Combine className="size-4 mr-1" />Combinación
+        </Button>
         <div className="ml-auto flex gap-2">
           <Button size="sm" variant="ghost" onClick={handleExportar}><Download className="size-4 mr-1" />Exportar</Button>
           <Button size="sm" variant="ghost" onClick={handleImportar}><Upload className="size-4 mr-1" />Importar</Button>
@@ -81,54 +120,50 @@ function PlanoSala() {
         </button>
       </div>
 
-      {/* Info de zona */}
-      {zonaData && (
-        <p className="text-sm text-muted-foreground">
-          {zonaData.nombre} — {mesasZona.length} mesas — {zonaData.ancho}&times;{zonaData.alto}px
-        </p>
-      )}
-
-      {/* Canvas con mesas */}
-      {zonaData ? (
-        <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-          <div
-            ref={canvasRef}
-            className="planoCanvas"
-            style={{ width: zonaData.ancho, height: zonaData.alto }}
-            onClick={() => setMesaSeleccionada(null)}
-          >
-            {mesasZona.map(mesa => {
-              const pos = posicionesLocales[mesa.id];
-              const mesaConPos = pos ? { ...mesa, pos_x: pos.x, pos_y: pos.y } : mesa;
-              return (
-                <MesaDraggable
-                  key={mesa.id}
-                  mesa={mesaConPos}
-                  seleccionada={mesaSeleccionada?.id === mesa.id}
-                  arrastrando={arrastrando === mesa.id}
-                  onClick={() => setMesaSeleccionada(mesa)}
-                />
-              );
-            })}
-          </div>
-        </DndContext>
-      ) : (
-        <div className="planoCanvas planoCanvasVacio">
-          {plano && plano.zonas.length === 0
-            ? 'Crea tu primera zona para empezar a diseñar el plano'
-            : 'Selecciona una zona'}
+      {/* [283A-17] Canvas 100% ancho + Panel lateral derecho */}
+      <div className="flex gap-4">
+        <div className="flex-1 min-w-0">
+          {zonaData ? (
+            <div
+              ref={canvasRef}
+              className="planoCanvas"
+              style={{ height: zonaData.alto }}
+              onClick={() => setMesaSeleccionada(null)}
+            >
+              {mesasZona.map(mesa => {
+                const pos = posicionesLocales[mesa.id];
+                const mesaConPos = pos ? { ...mesa, pos_x: pos.x, pos_y: pos.y } : mesa;
+                return (
+                  <MesaDraggable
+                    key={mesa.id}
+                    mesa={mesaConPos}
+                    seleccionada={mesaSeleccionada?.id === mesa.id}
+                    arrastrando={arrastrando === mesa.id}
+                    onClick={() => setMesaSeleccionada(mesa)}
+                  />
+                );
+              })}
+            </div>
+          ) : (
+            <div className="planoCanvas planoCanvasVacio">
+              {plano && plano.zonas.length === 0
+                ? 'Crea tu primera zona para empezar a diseñar el plano'
+                : 'Selecciona una zona'}
+            </div>
+          )}
         </div>
-      )}
-
-      {/* Panel de configuración de mesa seleccionada */}
-      {mesaSeleccionada && (
-        <PanelConfigMesa
-          mesa={mesaSeleccionada}
-          onGuardar={handleGuardarMesa}
-          onEliminar={handleEliminarMesa}
-          onCerrar={() => setMesaSeleccionada(null)}
-        />
-      )}
+        {/* [283A-17] Panel lateral derecho: config de mesa seleccionada */}
+        {mesaSeleccionada && (
+          <div className="w-72 shrink-0">
+            <PanelConfigMesa
+              mesa={mesaSeleccionada}
+              onGuardar={handleGuardarMesa}
+              onEliminar={handleEliminarMesa}
+              onCerrar={() => setMesaSeleccionada(null)}
+            />
+          </div>
+        )}
+      </div>
 
       {/* Combinaciones */}
       {plano && plano.combinaciones.length > 0 && (
@@ -149,8 +184,6 @@ function PlanoSala() {
           ))}
         </div>
       )}
-      <Button size="sm" variant="ghost" onClick={handleCrearCombinacion}><Combine className="size-4 mr-1" />Combinación</Button>
-
       {/* Diálogo de entrada (reemplaza prompt nativo) */}
       <Dialog
         open={!!dialogoEntrada}
@@ -209,10 +242,10 @@ function PlanoSala() {
         </DialogContent>
       </Dialog>
 
-      {/* Diálogo para crear combinación (2 campos) */}
+      {/* [283A-17] Diálogo de combinación con selección visual de mesas */}
       <Dialog
         open={!!dialogoCombinacion}
-        onOpenChange={(open) => { if (!open) { setDialogoCombinacion(null); setCombNombre(''); setCombMaxP(''); } }}
+        onOpenChange={(open) => { if (!open) { setDialogoCombinacion(null); setCombForm({ nombre: '', maxP: '', mesas: new Set() }); } }}
       >
         <DialogContent className="max-w-sm">
           <DialogHeader>
@@ -221,27 +254,53 @@ function PlanoSala() {
           <div className="flex flex-col gap-3">
             <div className="flex flex-col gap-2">
               <Label>Nombre</Label>
-              <Input value={combNombre} onChange={e => setCombNombre(e.target.value)} autoFocus />
+              <Input value={combForm.nombre} onChange={e => setCombForm(p => ({ ...p, nombre: e.target.value }))} autoFocus />
             </div>
             <div className="flex flex-col gap-2">
               <Label>Máx personas</Label>
-              <Input type="number" value={combMaxP} onChange={e => setCombMaxP(e.target.value)} />
+              <Input type="number" value={combForm.maxP} onChange={e => setCombForm(p => ({ ...p, maxP: e.target.value }))} />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label>Mesas a combinar</Label>
+              <div className="flex flex-wrap gap-1.5">
+                {mesasZona.map(m => (
+                  <Button
+                    key={m.id}
+                    size="sm"
+                    variant={combForm.mesas.has(m.id) ? 'default' : 'outline'}
+                    onClick={() => toggleCombMesa(m.id)}
+                  >
+                    Mesa {m.numero}
+                  </Button>
+                ))}
+              </div>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => { setDialogoCombinacion(null); setCombNombre(''); setCombMaxP(''); }}>Cancelar</Button>
-            <Button onClick={() => {
-              if (combNombre.trim() && combMaxP) {
-                dialogoCombinacion?.onConfirmar(combNombre.trim(), Number(combMaxP));
-                setDialogoCombinacion(null);
-                setCombNombre('');
-                setCombMaxP('');
-              }
-            }}>Crear</Button>
+            <Button variant="ghost" onClick={() => { setDialogoCombinacion(null); setCombForm({ nombre: '', maxP: '', mesas: new Set() }); }}>Cancelar</Button>
+            <Button
+              disabled={combForm.mesas.size < 2 || !combForm.nombre.trim() || !combForm.maxP}
+              onClick={() => {
+                if (combForm.nombre.trim() && combForm.maxP && combForm.mesas.size >= 2) {
+                  dialogoCombinacion?.onConfirmar(combForm.nombre.trim(), Number(combForm.maxP), Array.from(combForm.mesas));
+                  setDialogoCombinacion(null);
+                  setCombForm({ nombre: '', maxP: '', mesas: new Set() });
+                }
+              }}
+            >Crear</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
+    {/* [283A-17] DragOverlay: preview visual mientras se arrastra la mesa template */}
+    <DragOverlay>
+      {arrastrando === 'new-mesa-template' && (
+        <div className="planoMesa" style={{ width: 80, height: 80, position: 'relative' }}>
+          <span className="planoMesaNumero">?</span>
+        </div>
+      )}
+    </DragOverlay>
+    </DndContext>
   );
 }
 

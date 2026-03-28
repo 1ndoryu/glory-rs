@@ -35,56 +35,36 @@
 
 ## Tareas pendientes
 
-~~35. Falta una documentación de la API para el chatbot.~~ → 283A-15
+~~1. Canvas plano de sala 800×600 → 100% ancho, panel lateral derecho, mesa draggable, combo al toolbar, validación duplicados.~~ → 283A-17
+~~1.1 Panel config mesa al lado derecho~~ → 283A-17
+~~1.2 Crear mesas arrastrando~~ → 283A-17
+~~1.3 Combinación arreglada + botón al toolbar~~ → 283A-17
+~~1.4 Error 500 por mesa duplicada → ahora devuelve Conflict con toast~~ → 283A-17
 
-~~36. Falta crear una documentación completa y detallada del framework glory-rs.~~ → 283A-16 (documentación creada). **Pendiente:** reorganizar repos (glory-rs para framework, glory-rs-template para template). Esta parte requiere operaciones git destructivas entre repos remotos — ver plan en `Agente/planes/plan-glory-rs-template-2026-03-28.md`.
+2. Lo de resumen y general deberia convinarse, y los graficos no poderlos en un grid de 3, dejar cada uno en una 1 sola fila, los graficos todos tienen un padding a la izquierda que hace que tengan un espacio innecesario.  
 
-~~37. Dentro del contenido de las tabs no hay gap en el dashboard, todo se ve pegado, debería haber.~~ → 283A-7
+3. En ventas, reservas, clientes, faltan filtros, filtrar por fecha, falta un buscador en tiempo real.
 
-~~37.1. Las acciones rápidas están mal posicionadas, deberían ir en la esquina arriba a la misma altura de elegir la fecha, pero a la derecha.~~ → 283A-7
+4. Distribución por hora y Por turno solos en grid de 2, no 3, haciendo que Procedencia (canal) este abajo en un solo bloque.
 
-~~37.2 Los botones siguiente y anterior del calendario se ven mal.~~ → 283A-11
+5. Debería poder editarse los gastos y ventas por si se comente un error, creo. 
 
-~~39. Warning: Function components cannot be given refs (forwardRef) en SidebarMenuButton y Button — cuando entro al panel hay warnings de consola. Además los 401 Unauthorized son porque el backend no estaba corriendo, pero los warnings de forwardRef deben corregirse.~~ → 283A-6
+6. En la parte de recordatorio (y creo que esto sucede en el resto de paginas una similar estructura) <p class="text-muted-foreground text-xs mt-0.5 line-clamp-1">Estimado/a {nombre}, le recordamos que tiene una reserva programada para mañana a las {hora}. Si necesita cancelar o modificar, responda a este email.</p> cuando es muy largo hace que la pagina supere el ancho y se ve mal. 
 
-~~40. Los botones de venta y gasto en el panel lateral deberían abrir el modal de crear venta o gasto en vez de ir a la página, ya hay botones para eso.~~ → 283A-10
+7. Cuando un dia tiene reservas en el calendario se ve mal, se ve gris y como el fondo es blanco no constrasta bien. 
 
-~~41. Cambiar dark mode a white sigue sin funcionar.~~ → 283A-6
+8. No veo configuraciones para la api de chatbot, donde se genera la api para conectarse, tambien deberia haber un enlace para la documentacion, configuraciones, etc. 
 
-~~42. El titulo de la pestaña en el navegador dice Glory RS, ajustar esto en todos lados para que diga cosas coherente~~ → 283A-11
+9. Ya lo habia dicho antes, el modal de Nuevo Gasto debe ser mas grande, un poco. 
 
-~~43. El modal de Nuevo Gasto debe ser un poco mas grande.~~ → 283A-11
+10. Cumple con # Plan: Glory-RS como Framework Reutilizable. 
 
-~~44. Lo de "Funcionalidad de digitalización próximamente disponible" usemos groq IA, y que la api se pueda configurar en configuración, investiga cual IA de groq es la mejor para esto para que funcione bien, como adicional, cualquier herramienta adicional que no sea ia que se pueda complementar usarl~~ → 283A-8a para comparar resultados y mejorar precisión.
+11. Supongo que lo de  /* [283A-17] Catch unique constraint (zona_id, numero) para devolver
+         * Conflict en vez de 500 cuando el número de mesa ya existe en la zona. */ 
+Es un error que se puede evitar de nuevo con alguna regla en sentinel, pero si no, ignorar por ahora.
 
-~~45. Esta es urgente:
+Final. Actualiza el despliege con coolify-manager-rs
 
-Si dice que el backen no corre porque no lo corre el comando ./dev.ps1 y si lo corre porque da 401 aún? 
-PS C:\Users\Owner\OneDrive\Documentos\glory-rust-template> .\dev.ps1
-Iniciando modo dev...
-Logs guardados en: logs\dev_2026-03-28_0305.log
+12. Las cosas de marketing y campaña como se conectan? o sea, cuales son las configuraciones que hay que hacer para conectarlas? Veo que todo esta, pero ajam presiento que falta un monton de cosas, revisa que falta, que configuraciones hay que hacer, para que todo funcione, esto es general, se requiere revision de todo porque si hay un hueco aca, nada quita que haya en otros lados. 
 
-> dev
-> concurrently --names BACK,FRONT --prefix-colors blue,green "cargo run --bin glory-backend" "npm --prefix frontend run dev"
-
-[FRONT] 
-[FRONT] > glory-frontend@0.1.0 dev
-[FRONT] > vite
-[FRONT] 
-[BACK]     Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.15s
-[BACK]      Running `target\debug\glory-backend.exe`
-[BACK] 2026-03-28T07:05:38.234240Z  INFO glory_backend: Servidor iniciando en 127.0.0.1:3000
-[BACK] 2026-03-28T07:05:38.234310Z  INFO glory_backend: Swagger UI disponible en http://127.0.0.1:3000/swagger-ui/
-[FRONT] 
-[FRONT]   VITE v5.4.21  ready in 1728 ms
-[FRONT]~~ → 283A-9 
-[FRONT]   Ô×£  Local:   http://localhost:5173/
-[FRONT]   Ô×£  Network: use --host to expose
-[BACK] 2026-03-28T07:05:56.413062Z DEBUG request{method=GET uri=/api/clientes?page=1&per_page=25 version=HTTP/1.1}: tower_http::trace::on_request: started processing request
-[BACK] 2026-03-28T07:05:56.426904Z DEBUG request{method=GET uri=/api/clientes?page=1&per_page=25 version=HTTP/1.1}: tower_http::trace::on_response: finished processing request latency=17 ms status=401
-
-~~46. Las fechas futuras en el dashboard no deberían de ser seleccionables o aparecer~~ → 283A-12
-
-~~47. Veo que hay planes en Agente\planes, haz todo lo que este pendiente, mueve lo que esta pendiente a completados~~ → 283A-14
-
-~~48. Una revisión de todas las solicitudes del cliente vs comparación de lo que se hizo y lo que falta y hacerse todo.~~ → 283A-13
+13. El cliente no lo pidio pero estaría bien que hayan notificaciones en el panel en tiempo real para cosas como nuevas reservas, o lo que sea que se haga mediante el chat bot, porque ajam si se reciben cosas externamente, pues, deberían haber notifaciones en tiempo real. 
