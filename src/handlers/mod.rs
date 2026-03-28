@@ -8,6 +8,7 @@ mod chatbot;
 mod clientes;
 mod configuracion;
 mod dashboard;
+mod errores;
 mod etiquetas;
 mod gastos;
 mod health;
@@ -157,6 +158,7 @@ impl utoipa::Modify for SecurityAddon {
         notificaciones::marcar_leida,
         notificaciones::marcar_todas_leidas,
         notificaciones::stream_notificaciones,
+        errores::reportar_error,
     ),
     components(schemas(
         health::HealthResponse,
@@ -268,6 +270,8 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::DatosDocumentoExtraidos,
         crate::models::Notificacion,
         notificaciones::ConteoNoLeidas,
+        errores::ReportarErrorRequest,
+        errores::ReportarErrorResponse,
         ErrorResponse,
     )),
     modifiers(&SecurityAddon),
@@ -331,4 +335,5 @@ fn api_routes() -> Router<AppState> {
         .merge(chatbot::routes())
         .merge(api_keys::routes())
         .merge(notificaciones::routes())
+        .merge(errores::routes())
 }

@@ -77,6 +77,25 @@ impl EmailService {
         enviar_smtp(&params, destinatario, asunto, cuerpo_html).await?;
         Ok(true)
     }
+
+    /// Envía un email genérico usando la configuración SMTP del servidor.
+    /// Usado por el reporte de errores y otros envíos administrativos.
+    pub async fn enviar_generico(
+        smtp: &SmtpConfig,
+        destinatario: &str,
+        asunto: &str,
+        cuerpo_html: &str,
+    ) -> Result<(), EmailError> {
+        let params = SmtpParams {
+            host: &smtp.host,
+            port: smtp.port,
+            user: &smtp.user,
+            password: &smtp.password,
+            from_email: &smtp.from_email,
+            from_name: &smtp.from_name,
+        };
+        enviar_smtp(&params, destinatario, asunto, cuerpo_html).await
+    }
 }
 
 /// Envío SMTP centralizado — función libre para evitar demasiadas líneas en `impl`

@@ -16,3 +16,7 @@ export * from './generated/configuracion/configuracion';
 export * from './generated/campañas/campañas';
 export * from './generated/plantillas-whatsapp/plantillas-whatsapp';
 export * from './generated/recordatorios/recordatorios';
+export * from './generated/chatbot/chatbot';
+export * from './generated/api-keys/api-keys';
+export * from './generated/notificaciones/notificaciones';
+export * from './generated/errores/errores';

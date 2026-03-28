@@ -1,6 +1,7 @@
 /* [263A-16] App principal — reescrito con ThemeProvider + nuevo Layout shadcn.
  * El viejo Layout con BarraLateral se reemplaza por components/layout.tsx (SidebarProvider).
- * Se eliminó el import de global.css — Tailwind maneja todos los estilos ahora. */
+ * Se eliminó el import de global.css — Tailwind maneja todos los estilos ahora.
+ * [283A-26] ErrorBoundary global para capturar errores y reportarlos por email. */
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Routes, Route, Navigate } from 'react-router-dom';
@@ -9,6 +10,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Toaster } from '@/components/ui/sonner';
 import Layout from '@/components/layout';
+import ErrorBoundary from './componentes/ErrorBoundary';
 import Login from './componentes/Login';
 import ListaVentas from './componentes/ListaVentas';
 import ListaGastos from './componentes/ListaGastos';
@@ -41,6 +43,7 @@ function App() {
   const autenticado = useAuthStore((s) => s.estaAutenticado)();
 
   return (
+    <ErrorBoundary>
     <ThemeProvider>
       <TooltipProvider>
         <QueryClientProvider client={queryClient}>
@@ -73,6 +76,7 @@ function App() {
         </QueryClientProvider>
       </TooltipProvider>
     </ThemeProvider>
+    </ErrorBoundary>
   );
 }
 

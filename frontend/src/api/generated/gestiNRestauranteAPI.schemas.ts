@@ -1236,6 +1236,25 @@ export interface ReglasPaginadas {
   total: number;
 }
 
+export interface ReportarErrorRequest {
+  /** Mensaje de error o descripci├│n del problema */
+  mensaje: string;
+  /** User-Agent del navegador */
+  navegador: string;
+  /**
+     * Stack trace (si disponible)
+     * @nullable
+     */
+  stack?: string | null;
+  /** URL donde ocurri├│ el error */
+  url: string;
+}
+
+export interface ReportarErrorResponse {
+  /** Siempre true ÔÇö si SMTP no est├í configurado se loguea pero no falla */
+  ok: boolean;
+}
+
 /**
  * Reserva del restaurante
  */

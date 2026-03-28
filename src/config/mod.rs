@@ -17,6 +17,8 @@ pub struct AppConfig {
     pub port: u16,
     pub smtp: Option<SmtpConfig>,
     pub app_url: String,
+    /// Email de destino para reportes de errores (opcional)
+    pub error_report_email: Option<String>,
 }
 
 /* [263A-15] Configuración SMTP para envío de emails (recuperación de contraseña).
@@ -48,6 +50,7 @@ impl AppConfig {
                 .parse()?,
             smtp,
             app_url: std::env::var("APP_URL").unwrap_or_else(|_| "http://localhost:5173".to_string()),
+            error_report_email: std::env::var("ERROR_REPORT_EMAIL").ok(),
         })
     }
 
