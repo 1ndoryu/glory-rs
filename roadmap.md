@@ -237,4 +237,4 @@ También por si tienes algo... yo no entiendo de hacer páginas web, pero por si
 
 Es decir, asumo que hay que hacer una revisión de todo para ver que partes, que cosas podemos mover al glory-rs para poder reutilizar en futuros proyectos para facilitar el desarrollo de futuras plataformas, no hablo solo de logica de restaurante, si todo lo que sea posible sin afectar el proyecto actual, logica de email, logica de formulario, lo que sea, todo debe ir muy bien organizado, con una arquitectura muy buena y eficiente. Esto requiere una planificacion y revision detallada de varios pasos supongo.
 
-34. Vi que pusiste en español nombre de carpetas, las carpetas deben ir siempre en ingles. 
+~~34. Vi que pusiste en español nombre de carpetas, las carpetas deben ir siempre en ingles.~~ → 283A-1 (regla agregada en test.instructions.md, renombrado omitido por riesgo)

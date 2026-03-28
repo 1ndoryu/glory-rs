@@ -71,6 +71,7 @@ Sin este anuncio, no se inicia ninguna tarea. Esta regla existe para que el agen
   - Verificar que toda referencia existe antes de usarla (variables CSS, imports, tipos). Si lo creas, conectalo.
   - UI atomica: todo elemento reutilizable es su propio componente. Zustand para estado global.
   - Codegen API (Orval): siempre usar modo `tags-split` para que cada tag OpenAPI genere su propio archivo. Prohibido tener un unico `generated.ts` monolitico — si se detecta, dividirlo inmediatamente.
+  - **Nombres de carpetas y archivos siempre en ingles.** Prohibido crear directorios o archivos con nombres en español (ej: `componentes/`, `estilos/`, `servicios/`). Usar equivalentes en ingles (`components/`, `styles/`, `services/`). Esto aplica a codigo fuente, no a documentacion del agente (`Agente/`, `completados/`, etc.).
 
 **10. Comentarios = memoria del proyecto.**
   - Formato: bloques `/* ... */` explicando el "por que". Prohibido barras decorativas (`====`).
