@@ -85,8 +85,8 @@ Es un error que se puede evitar de nuevo con alguna regla en sentinel, pero si n
 
 22. Agregar una opcion para reportar errores, los erores llegan a mi correo andoryyu@gmail.com
 
-23. 283A-24, si bien las mesas ya no se salen, recuerda que habiamos dicho que el plano ahora debería expandirse el 100% de ancho pero ajam, parece que no puedo mover mas alla de 600px de ancho, y en reservas el plano no esta ocupando el 100% del ancho, revisa eso.
+23. ~~283A-24, si bien las mesas ya no se salen, recuerda que habiamos dicho que el plano ahora debería expandirse el 100% de ancho pero ajam, parece que no puedo mover mas alla de 600px de ancho, y en reservas el plano no esta ocupando el 100% del ancho, revisa eso.~~ → 283A-25
 
-23.1 Creo que podemos evitar problemas futuros en donde haya espacio para mesas agregando la funcionalidad de zoom, esto para que la funcionalidad anterior no quede inutil sería simplemnente reducir el tamaño de las mesas o agrandar segun el zoom. 
+23.1 ~~Creo que podemos evitar problemas futuros en donde haya espacio para mesas agregando la funcionalidad de zoom, esto para que la funcionalidad anterior no quede inutil sería simplemnente reducir el tamaño de las mesas o agrandar segun el zoom.~~ → 283A-25
 
 Tarea Final. Actualiza el despliege con coolify-manager-rs
