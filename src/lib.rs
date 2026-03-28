@@ -13,8 +13,10 @@ pub mod repositories;
 pub mod services;
 
 use sqlx::PgPool;
+use tokio::sync::broadcast;
 
 use crate::config::AppConfig;
+use crate::models::NotificacionEvent;
 
 /// Estado compartido de la aplicación — accesible desde handlers y middleware
 #[derive(Clone)]
@@ -22,4 +24,6 @@ pub struct AppState {
     pub pool: PgPool,
     pub jwt_secret: String,
     pub config: AppConfig,
+    /// Canal broadcast para notificaciones SSE en tiempo real
+    pub notif_tx: broadcast::Sender<NotificacionEvent>,
 }

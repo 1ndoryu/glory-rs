@@ -15,7 +15,7 @@ use crate::models::{
     ChatbotBuscarReservasQuery, ChatbotCrearReservaRequest, ChatbotReservaResponse,
     DisponibilidadResponse, RestauranteInfoResponse,
 };
-use crate::services::ChatbotService;
+use crate::services::{ChatbotService, NotificacionService};
 use crate::AppState;
 
 /// Query param para el endpoint de disponibilidad
@@ -83,6 +83,20 @@ pub async fn crear_reserva(
         .map_err(|e| AppError::Validation(e.to_string()))?;
 
     let reserva = ChatbotService::crear_reserva(&state.pool, auth.user_id, req).await?;
+
+    /* [283A-20] Notificación en tiempo real al panel del usuario */
+    let _ = NotificacionService::emitir(
+        &state.pool,
+        &state.notif_tx,
+        auth.user_id,
+        "reserva_nueva",
+        "Nueva reserva via chatbot",
+        &format!(
+            "{} — {} persona(s) el {} a las {}",
+            reserva.nombre_cliente, reserva.num_personas, reserva.fecha, reserva.hora
+        ),
+    )
+    .await;
 
     let resp = ChatbotReservaResponse {
         id: reserva.id,
@@ -169,7 +183,24 @@ pub async fn cancelar_reserva(
     auth: ApiKeyAuth,
     Path(id): Path<Uuid>,
 ) -> Result<Json<serde_json::Value>, AppError> {
+    /* [283A-20] Obtener datos de la reserva antes de cancelar para la notificación */
+    let reserva = ChatbotService::obtener_reserva(&state.pool, id, auth.user_id).await?;
+
     ChatbotService::cancelar_reserva(&state.pool, id, auth.user_id).await?;
+
+    let _ = NotificacionService::emitir(
+        &state.pool,
+        &state.notif_tx,
+        auth.user_id,
+        "reserva_cancelada",
+        "Reserva cancelada via chatbot",
+        &format!(
+            "{} — reserva del {} cancelada",
+            reserva.nombre_cliente, reserva.fecha
+        ),
+    )
+    .await;
+
     Ok(Json(serde_json::json!({ "ok": true, "message": "Reserva cancelada" })))
 }
 

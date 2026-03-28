@@ -9,6 +9,7 @@ mod dashboard_reservas;
 mod digitalizacion;
 mod etiqueta;
 mod gasto;
+mod notificacion;
 mod plano_sala;
 mod plantilla_whatsapp;
 mod reserva;
@@ -74,3 +75,4 @@ pub use api_key::{
     ZonaResumen,
 };
 pub use digitalizacion::{DatosDocumentoExtraidos, DigitalizarDocumentoRequest};
+pub use notificacion::{Notificacion, NotificacionEvent};

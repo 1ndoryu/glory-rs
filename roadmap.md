@@ -65,7 +65,7 @@ Es un error que se puede evitar de nuevo con alguna regla en sentinel, pero si n
 
 12. Las cosas de marketing y campaña como se conectan? o sea, cuales son las configuraciones que hay que hacer para conectarlas? Veo que todo esta, pero ajam presiento que falta un monton de cosas, revisa que falta, que configuraciones hay que hacer, para que todo funcione, esto es general, se requiere revision de todo porque si hay un hueco aca, nada quita que haya en otros lados. 
 
-13. El cliente no lo pidio pero estaría bien que hayan notificaciones en el panel en tiempo real para cosas como nuevas reservas, o lo que sea que se haga mediante el chat bot, porque ajam si se reciben cosas externamente, pues, deberían haber notifaciones en tiempo real. 
+~~13. El cliente no lo pidio pero estaría bien que hayan notificaciones en el panel en tiempo real para cosas como nuevas reservas, o lo que sea que se haga mediante el chat bot, porque ajam si se reciben cosas externamente, pues, deberían haber notifaciones en tiempo real.~~ → 283A-20
 
 14. Los graficos no estan ocupando el ancho completo del bloque en donde estan.
 
@@ -74,5 +74,7 @@ Es un error que se puede evitar de nuevo con alguna regla en sentinel, pero si n
 ~~16. El modal de gastos no cambio de tamaño.~~ → 283A-19
 
 ~~17. No, el modal de "nuevo gasto" no cambio, no cambia. No importa que agregues un valor nuevo, sigue igual. y estoy viendo en modo dev.~~ → 283A-19
+
+18. Ok ya cambio el tamaño pero como se intento varias veces ahora el tamaño es muy grande, reducelo un poco, a 512 como el resto de modales.
 
 Tarea Final. Actualiza el despliege con coolify-manager-rs

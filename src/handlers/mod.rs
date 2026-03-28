@@ -11,6 +11,7 @@ mod dashboard;
 mod etiquetas;
 mod gastos;
 mod health;
+mod notificaciones;
 mod plano_sala;
 mod plantillas_whatsapp;
 mod recordatorios;
@@ -147,6 +148,11 @@ impl utoipa::Modify for SecurityAddon {
         api_keys::crear_api_key,
         api_keys::listar_api_keys,
         api_keys::revocar_api_key,
+        notificaciones::listar_notificaciones,
+        notificaciones::contar_no_leidas,
+        notificaciones::marcar_leida,
+        notificaciones::marcar_todas_leidas,
+        notificaciones::stream_notificaciones,
     ),
     components(schemas(
         health::HealthResponse,
@@ -252,6 +258,8 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::ChatbotBuscarReservasQuery,
         crate::models::DigitalizarDocumentoRequest,
         crate::models::DatosDocumentoExtraidos,
+        crate::models::Notificacion,
+        notificaciones::ConteoNoLeidas,
         ErrorResponse,
     )),
     modifiers(&SecurityAddon),
@@ -266,10 +274,14 @@ pub struct ApiDoc;
 
 /// Crea el router principal con CORS, tracing, Swagger UI y todas las rutas
 pub fn create_router(pool: sqlx::PgPool, config: crate::config::AppConfig) -> Router {
+    /* [283A-20] Canal broadcast para notificaciones SSE — 256 mensajes en buffer */
+    let (notif_tx, _) = tokio::sync::broadcast::channel(256);
+
     let state = AppState {
         pool,
         jwt_secret: config.jwt_secret.clone(),
         config,
+        notif_tx,
     };
 
     /* CORS: en desarrollo se permite todo. En producción, restringir orígenes */
@@ -310,4 +322,5 @@ fn api_routes() -> Router<AppState> {
         .merge(recordatorios::routes())
         .merge(chatbot::routes())
         .merge(api_keys::routes())
+        .merge(notificaciones::routes())
 }
