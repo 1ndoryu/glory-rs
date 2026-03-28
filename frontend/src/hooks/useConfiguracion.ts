@@ -1,5 +1,6 @@
 /* [263A-17] Hook para el formulario de configuración del restaurante.
- * Gestiona estado local, carga inicial y guardado vía API. */
+ * Gestiona estado local, carga inicial y guardado vía API.
+ * [283A-8] Añadido groq_api_key para digitalización de documentos. */
 
 import { useState, useEffect, useCallback } from 'react';
 import {
@@ -15,6 +16,7 @@ interface EstadoConfiguracion {
   reserva_apellidos_obligatorio: boolean;
   iva_por_defecto: number;
   nombre_restaurante: string;
+  groq_api_key: string;
 }
 
 const DEFAULTS: EstadoConfiguracion = {
@@ -24,6 +26,7 @@ const DEFAULTS: EstadoConfiguracion = {
   reserva_apellidos_obligatorio: false,
   iva_por_defecto: 10,
   nombre_restaurante: '',
+  groq_api_key: '',
 };
 
 export function useConfiguracion() {
@@ -44,8 +47,12 @@ export function useConfiguracion() {
         reserva_apellidos_obligatorio: d.reserva_apellidos_obligatorio,
         iva_por_defecto: Number(d.iva_por_defecto),
         nombre_restaurante: d.nombre_restaurante,
+        /* [283A-8] groq_api_key no viene en la respuesta (skip_serializing),
+         * mantener valor local si ya fue editado */
+        groq_api_key: config.groq_api_key || '',
       });
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [datos]);
 
   const cambiarCampo = useCallback(
@@ -64,6 +71,8 @@ export function useConfiguracion() {
       reserva_apellidos_obligatorio: config.reserva_apellidos_obligatorio,
       iva_por_defecto: String(config.iva_por_defecto),
       nombre_restaurante: config.nombre_restaurante,
+      /* [283A-8] Solo enviar groq_api_key si el usuario la ha editado */
+      ...(config.groq_api_key ? { groq_api_key: config.groq_api_key } : {}),
     };
     try {
       await mutacion.mutateAsync({ data: body });

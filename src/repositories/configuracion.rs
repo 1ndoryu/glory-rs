@@ -1,5 +1,7 @@
 /* [263A-17] Repositorio de configuración del restaurante.
- * Upsert: si no existe, crea con defaults; si existe, actualiza parcialmente. */
+ * Upsert: si no existe, crea con defaults; si existe, actualiza parcialmente.
+ * [283A-8] Queries convertidas a runtime (no macro) porque groq_api_key no existe
+ * en la cache offline .sqlx/ hasta ejecutar migración + cargo sqlx prepare. */
 
 use sqlx::PgPool;
 use uuid::Uuid;
@@ -14,11 +16,10 @@ impl ConfiguracionRepository {
         pool: &PgPool,
         user_id: Uuid,
     ) -> Result<ConfiguracionRestaurante, sqlx::Error> {
-        let existente = sqlx::query_as!(
-            ConfiguracionRestaurante,
+        let existente = sqlx::query_as::<_, ConfiguracionRestaurante>(
             "SELECT * FROM configuracion_restaurante WHERE user_id = $1",
-            user_id
         )
+        .bind(user_id)
         .fetch_optional(pool)
         .await?;
 
@@ -28,13 +29,11 @@ impl ConfiguracionRepository {
 
         /* Crear con defaults */
         let id = Uuid::new_v4();
-        sqlx::query_as!(
-            ConfiguracionRestaurante,
-            r#"INSERT INTO configuracion_restaurante (id, user_id)
-               VALUES ($1, $2) RETURNING *"#,
-            id,
-            user_id
+        sqlx::query_as::<_, ConfiguracionRestaurante>(
+            "INSERT INTO configuracion_restaurante (id, user_id) VALUES ($1, $2) RETURNING *",
         )
+        .bind(id)
+        .bind(user_id)
         .fetch_one(pool)
         .await
     }
@@ -45,25 +44,26 @@ impl ConfiguracionRepository {
         user_id: Uuid,
         req: &ActualizarConfiguracionRequest,
     ) -> Result<ConfiguracionRestaurante, sqlx::Error> {
-        sqlx::query_as!(
-            ConfiguracionRestaurante,
-            r#"UPDATE configuracion_restaurante SET
+        sqlx::query_as::<_, ConfiguracionRestaurante>(
+            r"UPDATE configuracion_restaurante SET
                 reserva_email_obligatorio = COALESCE($2, reserva_email_obligatorio),
                 reserva_telefono_obligatorio = COALESCE($3, reserva_telefono_obligatorio),
                 reserva_nombre_obligatorio = COALESCE($4, reserva_nombre_obligatorio),
                 reserva_apellidos_obligatorio = COALESCE($5, reserva_apellidos_obligatorio),
                 iva_por_defecto = COALESCE($6, iva_por_defecto),
                 nombre_restaurante = COALESCE($7, nombre_restaurante),
+                groq_api_key = COALESCE($8, groq_api_key),
                 updated_at = NOW()
-               WHERE user_id = $1 RETURNING *"#,
-            user_id,
-            req.reserva_email_obligatorio,
-            req.reserva_telefono_obligatorio,
-            req.reserva_nombre_obligatorio,
-            req.reserva_apellidos_obligatorio,
-            req.iva_por_defecto,
-            req.nombre_restaurante.as_deref()
+               WHERE user_id = $1 RETURNING *",
         )
+        .bind(user_id)
+        .bind(req.reserva_email_obligatorio)
+        .bind(req.reserva_telefono_obligatorio)
+        .bind(req.reserva_nombre_obligatorio)
+        .bind(req.reserva_apellidos_obligatorio)
+        .bind(req.iva_por_defecto)
+        .bind(req.nombre_restaurante.as_deref())
+        .bind(req.groq_api_key.as_deref())
         .fetch_one(pool)
         .await
     }

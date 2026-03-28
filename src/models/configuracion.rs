@@ -20,6 +20,11 @@ pub struct ConfiguracionRestaurante {
     pub reserva_apellidos_obligatorio: bool,
     pub iva_por_defecto: rust_decimal::Decimal,
     pub nombre_restaurante: String,
+    /* [283A-8] API key de Groq para digitalización de documentos.
+     * Se almacena en texto plano porque el backend la necesita en claro para llamar a Groq.
+     * Se oculta en la respuesta JSON: solo se muestra si existe o no. */
+    #[serde(skip_serializing)]
+    pub groq_api_key: Option<String>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -35,6 +40,9 @@ pub struct ActualizarConfiguracionRequest {
     pub iva_por_defecto: Option<rust_decimal::Decimal>,
     #[validate(length(max = 255))]
     pub nombre_restaurante: Option<String>,
+    /* [283A-8] API key de Groq — se valida longitud máxima para evitar payloads enormes */
+    #[validate(length(max = 200))]
+    pub groq_api_key: Option<String>,
 }
 
 fn validar_iva(valor: &rust_decimal::Decimal) -> Result<(), validator::ValidationError> {

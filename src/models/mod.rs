@@ -6,6 +6,7 @@ mod cliente;
 mod configuracion;
 mod dashboard;
 mod dashboard_reservas;
+mod digitalizacion;
 mod etiqueta;
 mod gasto;
 mod plano_sala;
@@ -72,3 +73,4 @@ pub use api_key::{
     CrearApiKeyRequest, DisponibilidadResponse, FranjaDisponibilidad, RestauranteInfoResponse,
     ZonaResumen,
 };
+pub use digitalizacion::{DatosDocumentoExtraidos, DigitalizarDocumentoRequest};

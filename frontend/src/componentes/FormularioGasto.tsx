@@ -1,18 +1,19 @@
 /* [263A-16] Formulario de gasto — reescrito con shadcn Button + Input + Label + Switch.
  * Menú 3 opciones (manual / digitalizar / por correo).
  * "Por correo" descartado por el cliente — deshabilitado.
- * "Digitalizar" es placeholder hasta soporte OCR. */
+ * [283A-8] "Digitalizar" implementado con Groq IA (Llama 4 Scout) — extrae datos de imagen. */
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { MetodoPago, TipoDocumento } from '../api/generated';
 import useFormularioGasto from '../hooks/useFormularioGasto';
+import { useDigitalizacion } from '../hooks/useDigitalizacion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ClipboardList, Camera, Mail } from 'lucide-react';
+import { ClipboardList, Camera, Mail, Upload, Loader2, CheckCircle } from 'lucide-react';
 
 type ModoGasto = 'menu' | 'manual' | 'digitalizar';
 
@@ -23,6 +24,9 @@ interface Props {
 function FormularioGasto({ onExito }: Props) {
   const [modo, setModo] = useState<ModoGasto>('menu');
   const { campos, cambiarCampo, error, manejarEnvio, cargando, categorias } = useFormularioGasto(onExito);
+  const digitalizacion = useDigitalizacion();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [preview, setPreview] = useState<string | null>(null);
 
   if (modo === 'menu') {
     return (
@@ -59,12 +63,86 @@ function FormularioGasto({ onExito }: Props) {
   }
 
   if (modo === 'digitalizar') {
+    /* [283A-8] Subida de imagen + extracción de datos con Groq IA */
+    const manejarArchivo = async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const archivo = e.target.files?.[0];
+      if (!archivo) return;
+      setPreview(URL.createObjectURL(archivo));
+      const datos = await digitalizacion.digitalizar(archivo);
+      if (datos) {
+        /* Pre-rellenar campos del formulario manual con los datos extraídos */
+        if (datos.fecha) cambiarCampo('fecha', datos.fecha);
+        if (datos.proveedor) cambiarCampo('proveedor', datos.proveedor);
+        if (datos.numero_documento) cambiarCampo('numeroDocumento', datos.numero_documento);
+        if (datos.importe_base) cambiarCampo('importeBase', datos.importe_base);
+        if (datos.importe_iva) cambiarCampo('importeIva', datos.importe_iva);
+        if (datos.tipo_documento) {
+          const tipoMap: Record<string, TipoDocumento> = {
+            factura: TipoDocumento.factura,
+            albaran: TipoDocumento.albaran,
+            ticket: TipoDocumento.ticket,
+          };
+          const tipo = tipoMap[datos.tipo_documento];
+          if (tipo) cambiarCampo('tipoDocumento', tipo);
+        }
+      }
+    };
+
+    /* Si la IA extrajo datos, pasar automáticamente al formulario manual para revisión */
+    if (digitalizacion.datos) {
+      return (
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-2 rounded-md bg-green-100 p-3 text-sm text-green-800 dark:bg-green-900/30 dark:text-green-300">
+            <CheckCircle className="size-4" />
+            <span>Datos extraídos (confianza: {Math.round(digitalizacion.datos.confianza * 100)}%). Revisa y ajusta antes de guardar.</span>
+          </div>
+          {digitalizacion.datos.notas && (
+            <p className="text-xs text-muted-foreground">{digitalizacion.datos.notas}</p>
+          )}
+          <Button variant="outline" size="sm" onClick={() => { digitalizacion.limpiar(); setPreview(null); setModo('manual'); }}>
+            Revisar y completar manualmente
+          </Button>
+        </div>
+      );
+    }
+
     return (
       <div className="flex flex-col items-center gap-6 py-8">
-        <Camera className="size-12 text-muted-foreground" />
-        <p className="text-muted-foreground text-center">Funcionalidad de digitalización próximamente disponible</p>
-        <p className="text-sm text-muted-foreground text-center">Pronto podrás subir una foto de tu factura o albarán y los datos se extraerán automáticamente.</p>
-        <Button variant="outline" onClick={() => setModo('menu')}>Volver</Button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/gif"
+          className="hidden"
+          onChange={manejarArchivo}
+        />
+
+        {preview ? (
+          <img src={preview} alt="Preview del documento" className="max-h-48 rounded-md border object-contain" />
+        ) : (
+          <Camera className="size-12 text-muted-foreground" />
+        )}
+
+        {digitalizacion.cargando ? (
+          <div className="flex flex-col items-center gap-3">
+            <Loader2 className="size-8 animate-spin text-primary" />
+            <p className="text-sm text-muted-foreground">Analizando documento con IA...</p>
+          </div>
+        ) : (
+          <>
+            <p className="text-muted-foreground text-center">Sube una foto de tu factura, albarán o ticket</p>
+            <p className="text-sm text-muted-foreground text-center">La IA extraerá automáticamente la fecha, proveedor, importes y más.</p>
+            <Button onClick={() => fileInputRef.current?.click()}>
+              <Upload className="mr-2 size-4" />
+              Seleccionar imagen
+            </Button>
+          </>
+        )}
+
+        {digitalizacion.error && (
+          <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{digitalizacion.error}</div>
+        )}
+
+        <Button variant="outline" onClick={() => { digitalizacion.limpiar(); setPreview(null); setModo('menu'); }}>Volver</Button>
       </div>
     );
   }

@@ -1,4 +1,5 @@
-/* 253A-5: Handlers de gastos — CRUD + categorías */
+/* 253A-5: Handlers de gastos — CRUD + categorías
+   283A-8: + digitalización de documentos vía Groq IA */
 
 use axum::extract::{Path, Query, State};
 use axum::http::StatusCode;
@@ -9,8 +10,11 @@ use validator::Validate;
 
 use crate::errors::AppError;
 use crate::middleware::AuthUser;
-use crate::models::{CategoriaGasto, CrearGastoRequest, Gasto, GastosPaginados, GastosQuery};
-use crate::services::GastoService;
+use crate::models::{
+    CategoriaGasto, CrearGastoRequest, DatosDocumentoExtraidos, DigitalizarDocumentoRequest,
+    Gasto, GastosPaginados, GastosQuery,
+};
+use crate::services::{DigitalizacionService, GastoService};
 use crate::AppState;
 
 /// Crear un gasto
@@ -127,9 +131,41 @@ pub async fn listar_categorias(
     Ok(Json(cats))
 }
 
+/// Digitalizar un documento de gasto (factura, albarán, ticket) usando Groq IA
+#[utoipa::path(
+    post,
+    path = "/api/gastos/digitalizar",
+    tag = "Gastos",
+    request_body = DigitalizarDocumentoRequest,
+    responses(
+        (status = 200, description = "Datos extraídos del documento", body = DatosDocumentoExtraidos),
+        (status = 400, description = "Error de validación o API key faltante", body = ErrorResponse),
+        (status = 401, description = "No autorizado", body = ErrorResponse),
+        (status = 500, description = "Error interno o del servicio de IA", body = ErrorResponse)
+    ),
+    security(("bearer_auth" = []))
+)]
+pub async fn digitalizar_documento(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    Json(req): Json<DigitalizarDocumentoRequest>,
+) -> Result<Json<DatosDocumentoExtraidos>, AppError> {
+    req.validate()
+        .map_err(|e| AppError::Validation(e.to_string()))?;
+    let datos = DigitalizacionService::digitalizar(
+        &state.pool,
+        auth.user_id,
+        &req.imagen_base64,
+        &req.mime_type,
+    )
+    .await?;
+    Ok(Json(datos))
+}
+
 pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/gastos/categorias", get(listar_categorias))
+        .route("/gastos/digitalizar", post(digitalizar_documento))
         .route("/gastos", post(crear_gasto).get(listar_gastos))
         .route("/gastos/:id", get(obtener_gasto).delete(eliminar_gasto))
 }

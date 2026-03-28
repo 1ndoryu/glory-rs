@@ -1,5 +1,6 @@
 /* [263A-16] Configuración — reescrita con shadcn Card + Switch + Input.
- * Campos obligatorios al reservar, IVA por defecto, nombre del restaurante. */
+ * Campos obligatorios al reservar, IVA por defecto, nombre del restaurante.
+ * [283A-8] Sección de API key de Groq para digitalización de documentos. */
 
 import { useConfiguracion } from '../hooks/useConfiguracion';
 import { Button } from '@/components/ui/button';
@@ -92,6 +93,28 @@ function Configuracion() {
               onChange={(e) => cambiarCampo('iva_por_defecto', Number(e.target.value))}
               className="max-w-32"
             />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Digitalización con IA</CardTitle>
+          <CardDescription>Configura tu API key de Groq para digitalizar facturas, albaranes y tickets automáticamente</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="groq-api-key">API Key de Groq</Label>
+            <Input
+              id="groq-api-key"
+              type="password"
+              value={config.groq_api_key}
+              onChange={(e) => cambiarCampo('groq_api_key', e.target.value)}
+              placeholder="gsk_..."
+            />
+            <p className="text-xs text-muted-foreground">
+              Obtén tu API key en <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer" className="underline">console.groq.com/keys</a>. Es gratuita.
+            </p>
           </div>
         </CardContent>
       </Card>
