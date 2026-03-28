@@ -132,4 +132,4 @@ Tarea Final. ~~Actualiza el despliege con coolify-manager-rs~~ → 283A-33
 
 ~~34. El zoom en reservas solo cambia el tamaño de las letras no el cuadro en el plano.~~ → 283A-41
 
-35. Despues de las ultimas tareas actualizar el despliegue con los cambios. 
+~~35. Despues de las ultimas tareas actualizar el despliegue con los cambios.~~ → 283A-42
