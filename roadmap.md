@@ -37,7 +37,7 @@
 
 ~~35. Falta una documentación de la API para el chatbot.~~ → 283A-15
 
-36. Falta crear una documentación completa y detallada del framework glory-rs. También hay que reorganizar repos: https://github.com/1ndoryu/glory-rs para el framework y https://github.com/1ndoryu/glory-rs-template para el template. Cuidado con la pérdida de datos — estamos en rama glory-rs-rest (proyecto restaurante), main es donde va el template.
+~~36. Falta crear una documentación completa y detallada del framework glory-rs.~~ → 283A-16 (documentación creada). **Pendiente:** reorganizar repos (glory-rs para framework, glory-rs-template para template). Esta parte requiere operaciones git destructivas entre repos remotos — ver plan en `Agente/planes/plan-glory-rs-template-2026-03-28.md`.
 
 ~~37. Dentro del contenido de las tabs no hay gap en el dashboard, todo se ve pegado, debería haber.~~ → 283A-7
 
