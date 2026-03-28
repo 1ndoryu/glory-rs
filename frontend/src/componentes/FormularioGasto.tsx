@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ClipboardList, Camera, Mail } from 'lucide-react';
 
 type ModoGasto = 'menu' | 'manual' | 'digitalizar';
 
@@ -25,26 +26,32 @@ function FormularioGasto({ onExito }: Props) {
 
   if (modo === 'menu') {
     return (
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="flex flex-col gap-3">
         <Card className="cursor-pointer hover:border-primary transition-colors" onClick={() => setModo('manual')}>
-          <CardHeader className="items-center text-center">
-            <span className="text-3xl">📋</span>
-            <CardTitle className="text-base">Gasto manual</CardTitle>
-            <CardDescription>Introduce los datos a mano</CardDescription>
+          <CardHeader className="flex flex-row items-center gap-4">
+            <ClipboardList className="size-6 text-muted-foreground" />
+            <div>
+              <CardTitle className="text-base">Gasto manual</CardTitle>
+              <CardDescription>Introduce los datos a mano</CardDescription>
+            </div>
           </CardHeader>
         </Card>
         <Card className="cursor-pointer hover:border-primary transition-colors" onClick={() => setModo('digitalizar')}>
-          <CardHeader className="items-center text-center">
-            <span className="text-3xl">📷</span>
-            <CardTitle className="text-base">Digitalizar archivos</CardTitle>
-            <CardDescription>Sube una foto del documento</CardDescription>
+          <CardHeader className="flex flex-row items-center gap-4">
+            <Camera className="size-6 text-muted-foreground" />
+            <div>
+              <CardTitle className="text-base">Digitalizar archivos</CardTitle>
+              <CardDescription>Sube una foto del documento</CardDescription>
+            </div>
           </CardHeader>
         </Card>
         <Card className="opacity-50 cursor-not-allowed" title="Funcionalidad no disponible en esta versión">
-          <CardHeader className="items-center text-center">
-            <span className="text-3xl">✉️</span>
-            <CardTitle className="text-base">Por correo</CardTitle>
-            <CardDescription>Próximamente</CardDescription>
+          <CardHeader className="flex flex-row items-center gap-4">
+            <Mail className="size-6 text-muted-foreground" />
+            <div>
+              <CardTitle className="text-base">Por correo</CardTitle>
+              <CardDescription>Próximamente</CardDescription>
+            </div>
           </CardHeader>
         </Card>
       </div>
@@ -54,7 +61,7 @@ function FormularioGasto({ onExito }: Props) {
   if (modo === 'digitalizar') {
     return (
       <div className="flex flex-col items-center gap-6 py-8">
-        <span className="text-5xl">📷</span>
+        <Camera className="size-12 text-muted-foreground" />
         <p className="text-muted-foreground text-center">Funcionalidad de digitalización próximamente disponible</p>
         <p className="text-sm text-muted-foreground text-center">Pronto podrás subir una foto de tu factura o albarán y los datos se extraerán automáticamente.</p>
         <Button variant="outline" onClick={() => setModo('menu')}>Volver</Button>
