@@ -85,6 +85,6 @@ Logs guardados en: logs\dev_2026-03-28_0305.log
 
 ~~46. Las fechas futuras en el dashboard no deberían de ser seleccionables o aparecer~~ → 283A-12
 
-47. Veo que hay planes en Agente\planes, haz todo lo que este pendiente, mueve lo que esta pendiete a completadados
+~~47. Veo que hay planes en Agente\planes, haz todo lo que este pendiente, mueve lo que esta pendiente a completados~~ → 283A-14
 
 ~~48. Una revisión de todas las solicitudes del cliente vs comparación de lo que se hizo y lo que falta y hacerse todo.~~ → 283A-13
