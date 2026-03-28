@@ -52,8 +52,8 @@ function AccionesRapidas() {
                 </DialogContent>
             </Dialog>
             <Dialog open={modalGasto} onOpenChange={setModalGasto}>
-                {/* [283A-19] sm:max-w-4xl para sobreescribir sm:max-w-sm del DialogContent base */}
-                <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
+                {/* [283A-30] sm:max-w-lg = 512px (tarea 18) */}
+                <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
                     <DialogHeader><DialogTitle>Nuevo Gasto</DialogTitle></DialogHeader>
                     <FormularioGasto onExito={() => setModalGasto(false)} />
                 </DialogContent>

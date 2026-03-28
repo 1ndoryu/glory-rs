@@ -222,11 +222,11 @@ function TablaReglas() {
               <TableBody>
                 {reglas.map((r: ReglaRecordatorio) => (
                   <TableRow key={r.id}>
-                    <TableCell className="font-medium">
-                      <div>
+                    <TableCell className="font-medium max-w-xs">
+                      <div className="overflow-hidden">
                         <span>{r.nombre}</span>
                         {r.mensaje_plantilla && (
-                          <p className="text-muted-foreground text-xs mt-0.5 line-clamp-1">
+                          <p className="text-muted-foreground text-xs mt-0.5 truncate">
                             {r.mensaje_plantilla}
                           </p>
                         )}

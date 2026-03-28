@@ -47,8 +47,8 @@ function ListaGastos() {
       </div>
 
       <Dialog open={modalAbierto} onOpenChange={setModalAbierto}>
-        {/* [283A-19] sm:max-w-4xl para sobreescribir sm:max-w-sm del DialogContent base */}
-        <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
+        {/* [283A-30] sm:max-w-lg = 512px (tarea 18) */}
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Nuevo Gasto</DialogTitle>
           </DialogHeader>
@@ -58,7 +58,7 @@ function ListaGastos() {
 
       {/* [283A-22] Dialog de edición — reutiliza FormularioGasto con gasto pre-cargado */}
       <Dialog open={!!gastoEditando} onOpenChange={(open) => { if (!open) setGastoEditando(null); }}>
-        <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Editar Gasto</DialogTitle>
           </DialogHeader>

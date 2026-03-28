@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useResumenMensual } from '../api/generated';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, UtensilsCrossed } from 'lucide-react';
 
 const NOMBRES_MES = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -115,7 +115,7 @@ function CalendarioReservas() {
             return (
               <Card
                 key={dia}
-                className={`transition-colors ${futuro ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:border-primary'} ${esHoy(dia) ? 'border-primary bg-primary/5' : ''} ${datos && !futuro ? 'bg-accent/30' : ''}`}
+                className={`transition-colors ${futuro ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:border-primary'} ${esHoy(dia) ? 'border-primary bg-primary/5' : ''} ${datos && !futuro ? 'bg-primary/10 border-primary/30' : ''}`}
                 onClick={() => !futuro && irADia(dia)}
                 role={futuro ? undefined : "button"}
                 tabIndex={futuro ? -1 : 0}
@@ -124,7 +124,8 @@ function CalendarioReservas() {
                 <CardContent className="p-2 text-center">
                   <span className={`text-sm ${esHoy(dia) ? 'font-bold text-primary' : ''}`}>{dia}</span>
                   {datos && (
-                    <div className="mt-1 flex flex-col text-[10px] text-muted-foreground">
+                    <div className="mt-1 flex flex-col items-center text-[10px] text-muted-foreground">
+                      <UtensilsCrossed className="size-3 mb-0.5" />
                       <span>{datos.reservas} res.</span>
                       <span>{datos.personas} pers.</span>
                     </div>
