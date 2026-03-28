@@ -83,7 +83,7 @@ Es un error que se puede evitar de nuevo con alguna regla en sentinel, pero si n
 
 21. Los cuadros de meses deberian tener un icono de mesa.
 
-22. Agregar una opcion para reportar errores, los erores llegan a mi correo andoryyu@gmail.com
+22. ~~Agregar una opcion para reportar errores, los erores llegan a mi correo andoryyu@gmail.com~~ → 283A-26
 
 23. ~~283A-24, si bien las mesas ya no se salen, recuerda que habiamos dicho que el plano ahora debería expandirse el 100% de ancho pero ajam, parece que no puedo mover mas alla de 600px de ancho, y en reservas el plano no esta ocupando el 100% del ancho, revisa eso.~~ → 283A-25
 
