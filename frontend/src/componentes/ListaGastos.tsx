@@ -1,47 +1,45 @@
 /* [263A-16] Lista de gastos — reescrita con shadcn Table + Dialog + Button.
  * Iconos para eliminar (tarea 17). Columnas en flex (tarea 18).
- * [283A-22] Botón de edición con Dialog reutilizando FormularioGasto. */
+ * [283A-22] Botón de edición con Dialog reutilizando FormularioGasto.
+ * [283A-34] Filtros de fecha (desde/hasta) via hook useListaGastos. */
 
-import { useState } from 'react';
-import { useListarGastos, useEliminarGasto, Gasto } from '../api/generated';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Trash2, Pencil } from 'lucide-react';
 import FormularioGasto from './FormularioGasto';
+import useListaGastos from '@/hooks/useListaGastos';
 
 function formatearMoneda(valor: string): string {
   return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(parseFloat(valor));
 }
 
 function ListaGastos() {
-  const [pagina, setPagina] = useState(1);
-  const [modalAbierto, setModalAbierto] = useState(false);
-  const [gastoEditando, setGastoEditando] = useState<Gasto | null>(null);
-  const porPagina = 15;
-
-  const { data, isLoading, refetch } = useListarGastos({ page: pagina, per_page: porPagina });
-  const eliminarMutation = useEliminarGasto({
-    mutation: { onSuccess: () => { refetch(); } },
-  });
-
-  const gastos = data?.status === 200 ? data.data : null;
-
-  const cerrarModalYRefrescar = () => {
-    setModalAbierto(false);
-    refetch();
-  };
-
-  const cerrarEdicionYRefrescar = () => {
-    setGastoEditando(null);
-    refetch();
-  };
+  const {
+    filtros, cambiarFiltro,
+    modalAbierto, setModalAbierto,
+    gastoEditando, setGastoEditando,
+    porPagina, gastos, isLoading,
+    eliminarMutation,
+    cerrarModalYRefrescar,
+    cerrarEdicionYRefrescar,
+  } = useListaGastos();
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm text-muted-foreground">{gastos ? `${gastos.total} registros` : ''}</p>
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="flex flex-wrap items-end gap-3">
+          <div>
+            <Label htmlFor="gasto-desde" className="text-xs mb-1">Desde</Label>
+            <Input id="gasto-desde" type="date" className="w-40" value={filtros.desde} onChange={e => cambiarFiltro('desde', e.target.value)} />
+          </div>
+          <div>
+            <Label htmlFor="gasto-hasta" className="text-xs mb-1">Hasta</Label>
+            <Input id="gasto-hasta" type="date" className="w-40" value={filtros.hasta} onChange={e => cambiarFiltro('hasta', e.target.value)} />
+          </div>
+          <p className="text-sm text-muted-foreground pb-1">{gastos ? `${gastos.total} registros` : ''}</p>
         </div>
         <Button onClick={() => setModalAbierto(true)}>+ Nuevo Gasto</Button>
       </div>
@@ -124,9 +122,9 @@ function ListaGastos() {
           </div>
 
           <div className="flex items-center justify-between">
-            <Button variant="outline" size="sm" disabled={pagina <= 1} onClick={() => setPagina(pagina - 1)}>Anterior</Button>
-            <span className="text-sm text-muted-foreground">Página {pagina} de {Math.ceil(gastos.total / porPagina)}</span>
-            <Button variant="outline" size="sm" disabled={pagina * porPagina >= gastos.total} onClick={() => setPagina(pagina + 1)}>Siguiente</Button>
+            <Button variant="outline" size="sm" disabled={filtros.pagina <= 1} onClick={() => cambiarFiltro('pagina', filtros.pagina - 1)}>Anterior</Button>
+            <span className="text-sm text-muted-foreground">Página {filtros.pagina} de {Math.ceil(gastos.total / porPagina)}</span>
+            <Button variant="outline" size="sm" disabled={filtros.pagina * porPagina >= gastos.total} onClick={() => cambiarFiltro('pagina', filtros.pagina + 1)}>Siguiente</Button>
           </div>
         </>
       ) : (

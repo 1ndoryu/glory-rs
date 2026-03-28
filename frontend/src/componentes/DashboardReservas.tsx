@@ -11,7 +11,7 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/c
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from '@/components/ui/dialog';
 import {ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig} from '@/components/ui/chart';
 import {Tabs, TabsList, TabsTrigger, TabsContent} from '@/components/ui/tabs';
-import {BarChart, Bar, XAxis, YAxis, CartesianGrid, PieChart, Pie, Cell} from 'recharts';
+import {BarChart, Bar, XAxis, YAxis, CartesianGrid, PieChart, Pie, Cell, Legend} from 'recharts';
 import {DollarSign, TrendingDown, TrendingUp, CalendarDays} from 'lucide-react';
 import FormularioVenta from './FormularioVenta';
 import FormularioGasto from './FormularioGasto';
@@ -254,7 +254,7 @@ function PanelResumen({data}: {data: ResumenReservas}) {
                             <BarChart data={data.por_dia.map((d: {fecha: string; total: number}) => ({...d, fecha: d.fecha.slice(5)}))} margin={{left: 0, right: 0}}>
                                 <CartesianGrid vertical={false} />
                                 <XAxis dataKey="fecha" tickLine={false} axisLine={false} fontSize={11} />
-                                <YAxis allowDecimals={false} tickLine={false} axisLine={false} />
+                                <YAxis allowDecimals={false} tickLine={false} axisLine={false} width={30} />
                                 <ChartTooltip content={<ChartTooltipContent />} />
                                 <Bar dataKey="total" fill="var(--color-total)" radius={4} />
                             </BarChart>
@@ -271,7 +271,7 @@ function PanelResumen({data}: {data: ResumenReservas}) {
                             <BarChart data={data.por_dia_semana} margin={{left: 0, right: 0}}>
                                 <CartesianGrid vertical={false} />
                                 <XAxis dataKey="dia" tickLine={false} axisLine={false} fontSize={11} />
-                                <YAxis allowDecimals={false} tickLine={false} axisLine={false} />
+                                <YAxis allowDecimals={false} tickLine={false} axisLine={false} width={30} />
                                 <ChartTooltip content={<ChartTooltipContent />} />
                                 <Bar dataKey="total" fill="var(--color-total)" radius={4} />
                             </BarChart>
@@ -293,6 +293,7 @@ function PanelResumen({data}: {data: ResumenReservas}) {
                                         ))}
                                     </Pie>
                                     <ChartTooltip content={<ChartTooltipContent />} />
+                                    <Legend />
                                 </PieChart>
                             </ChartContainer>
                         ) : (
@@ -311,7 +312,7 @@ function PanelResumen({data}: {data: ResumenReservas}) {
                             <BarChart data={[{periodo: 'Mes anterior', total: data.total_mes_anterior}, {periodo: 'Este mes', total: data.total_reservas}]} margin={{left: 0, right: 0}}>
                                 <CartesianGrid vertical={false} />
                                 <XAxis dataKey="periodo" tickLine={false} axisLine={false} fontSize={11} />
-                                <YAxis allowDecimals={false} tickLine={false} axisLine={false} />
+                                <YAxis allowDecimals={false} tickLine={false} axisLine={false} width={30} />
                                 <ChartTooltip content={<ChartTooltipContent />} />
                                 <Bar dataKey="total" fill="var(--color-total)" radius={4} />
                             </BarChart>
@@ -372,7 +373,7 @@ function PanelOcupacion({data}: {data: OcupacionReservas}) {
                             <BarChart data={data.por_hora} margin={{left: 0, right: 0}}>
                                 <CartesianGrid vertical={false} />
                                 <XAxis dataKey="hora" tickLine={false} axisLine={false} fontSize={11} />
-                                <YAxis allowDecimals={false} tickLine={false} axisLine={false} />
+                                <YAxis allowDecimals={false} tickLine={false} axisLine={false} width={30} />
                                 <ChartTooltip content={<ChartTooltipContent />} />
                                 <Bar dataKey="total" fill="var(--color-total)" radius={4} />
                             </BarChart>
@@ -389,7 +390,7 @@ function PanelOcupacion({data}: {data: OcupacionReservas}) {
                             <BarChart data={data.por_turno} margin={{left: 0, right: 0}}>
                                 <CartesianGrid vertical={false} />
                                 <XAxis dataKey="turno" tickLine={false} axisLine={false} fontSize={11} />
-                                <YAxis allowDecimals={false} tickLine={false} axisLine={false} />
+                                <YAxis allowDecimals={false} tickLine={false} axisLine={false} width={30} />
                                 <ChartTooltip content={<ChartTooltipContent />} />
                                 <Bar dataKey="total" fill="var(--color-total)" radius={4} />
                                 <Bar dataKey="personas" fill="var(--color-personas)" radius={4} />

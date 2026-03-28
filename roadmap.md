@@ -91,12 +91,35 @@ Es un error que se puede evitar de nuevo con alguna regla en sentinel, pero si n
 
 24. ~~En ventas no aparece todas las ventas cuando en realidad y ventas.~~ → 283A-31
 
-25. Las tablas todas deberían tener para filtrar y ordenar. En gastos no hay para filtrar por fecha. 
+25. ~~Las tablas todas deberían tener para filtrar y ordenar. En gastos no hay para filtrar por fecha.~~ → 283A-34
 
 26. Asegurate que en el servidor esten los datos de prueba.
 
 27. Vi que te costo el despliegue, asegurate de que sea sencillo y facil la proxima vez.
 
-28. Los graficos siguen teniendo un espacio a la izquierda inncesario y Distribución por canal debe mostrar las leyenda. 
+28. ~~Los graficos siguen teniendo un espacio a la izquierda inncesario y Distribución por canal debe mostrar las leyenda.~~ → 283A-34
+
+29. En coolify veo
+
+Rust App ()
+restaurante.wandori.us
+Exited
+Settings
+App ()
+http://app-b8s0cks444o0sogo8kg8wcgw.66.94.100.241.sslip.io:3...
+Exited
+Postgres (postgres:16-alpine)
+Exited
+
+tambien veo que en App dice
+
+Required Port: 3000
+This service requires port 3000 to function correctly. All domains must include this port number (or any other port if you know what you're doing).
+
+Example: http://app.coolify.io:3000
+
+2 app, puse en la Rust App la url que voy a usar pero veo otra que dice App, 
+
+30. No veo la opcion de reportar errores en ningún lado
 
 Tarea Final. ~~Actualiza el despliege con coolify-manager-rs~~ → 283A-33
