@@ -47,7 +47,7 @@
 
 ~~39. Warning: Function components cannot be given refs (forwardRef) en SidebarMenuButton y Button — cuando entro al panel hay warnings de consola. Además los 401 Unauthorized son porque el backend no estaba corriendo, pero los warnings de forwardRef deben corregirse.~~ → 283A-6
 
-40. Los botones de venta y gasto en el panel lateral deberían abrir el modal de crear venta o gasto en vez de ir a la página, ya hay botones para eso.
+~~40. Los botones de venta y gasto en el panel lateral deberían abrir el modal de crear venta o gasto en vez de ir a la página, ya hay botones para eso.~~ → 283A-10
 
 ~~41. Cambiar dark mode a white sigue sin funcionar.~~ → 283A-6
 

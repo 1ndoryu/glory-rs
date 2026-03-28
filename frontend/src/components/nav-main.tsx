@@ -1,7 +1,9 @@
 /* [263A-16] Navegación principal del sidebar.
  * Usa react-router-dom Link para SPA navigation. Incluye botones de acción rápida
- * "Nueva Venta" y "Nuevo Gasto" como pide el roadmap (sección 3). */
+ * "Nueva Venta" y "Nuevo Gasto" como pide el roadmap (sección 3).
+ * [283A-10] Los botones de acción abren modales en vez de navegar. */
 
+import { useState } from "react"
 import { Link, useLocation } from "react-router-dom"
 import {
   SidebarGroup,
@@ -10,7 +12,10 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { CirclePlusIcon, ReceiptIcon } from "lucide-react"
+import FormularioVenta from "@/componentes/FormularioVenta"
+import FormularioGasto from "@/componentes/FormularioGasto"
 
 export function NavMain({
   items,
@@ -22,6 +27,8 @@ export function NavMain({
   }[]
 }) {
   const location = useLocation()
+  const [modalVenta, setModalVenta] = useState(false)
+  const [modalGasto, setModalGasto] = useState(false)
 
   return (
     <SidebarGroup>
@@ -29,24 +36,20 @@ export function NavMain({
         <SidebarMenu>
           <SidebarMenuItem className="flex items-center gap-2">
             <SidebarMenuButton
-              asChild
               tooltip="Nueva Venta"
               className="min-w-8 bg-primary text-primary-foreground duration-200 ease-linear hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground"
+              onClick={() => setModalVenta(true)}
             >
-              <Link to="/ventas?nueva=1">
-                <CirclePlusIcon />
-                <span>Venta</span>
-              </Link>
+              <CirclePlusIcon />
+              <span>Venta</span>
             </SidebarMenuButton>
             <SidebarMenuButton
-              asChild
               tooltip="Nuevo Gasto"
               className="min-w-8 bg-secondary text-secondary-foreground duration-200 ease-linear hover:bg-secondary/80 group-data-[collapsible=icon]:opacity-0"
+              onClick={() => setModalGasto(true)}
             >
-              <Link to="/gastos?nuevo=1">
-                <ReceiptIcon />
-                <span>Gasto</span>
-              </Link>
+              <ReceiptIcon />
+              <span>Gasto</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -69,6 +72,24 @@ export function NavMain({
           })}
         </SidebarMenu>
       </SidebarGroupContent>
+
+      <Dialog open={modalVenta} onOpenChange={setModalVenta}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Nueva Venta</DialogTitle>
+          </DialogHeader>
+          <FormularioVenta onExito={() => setModalVenta(false)} />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={modalGasto} onOpenChange={setModalGasto}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Nuevo Gasto</DialogTitle>
+          </DialogHeader>
+          <FormularioGasto onExito={() => setModalGasto(false)} />
+        </DialogContent>
+      </Dialog>
     </SidebarGroup>
   )
 }
