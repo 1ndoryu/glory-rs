@@ -46,6 +46,222 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 /**
+ * @summary Crear una reserva
+ */
+export type crearReservaResponse201 = {
+  data: Reserva
+  status: 201
+}
+
+export type crearReservaResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type crearReservaResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type crearReservaResponseSuccess = (crearReservaResponse201) & {
+  headers: Headers;
+};
+export type crearReservaResponseError = (crearReservaResponse401 | crearReservaResponse422) & {
+  headers: Headers;
+};
+
+export type crearReservaResponse = (crearReservaResponseSuccess | crearReservaResponseError)
+
+export const getCrearReservaUrl = () => {
+
+
+
+
+  return `/api/reservas`
+}
+
+export const crearReserva = async (crearReservaRequest: CrearReservaRequest, options?: RequestInit): Promise<crearReservaResponse> => {
+
+  return customInstance<crearReservaResponse>(getCrearReservaUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      crearReservaRequest,)
+  }
+);}
+
+
+
+
+export const getCrearReservaMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof crearReserva>>, TError,{data: CrearReservaRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof crearReserva>>, TError,{data: CrearReservaRequest}, TContext> => {
+
+const mutationKey = ['crearReserva'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof crearReserva>>, {data: CrearReservaRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  crearReserva(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CrearReservaMutationResult = NonNullable<Awaited<ReturnType<typeof crearReserva>>>
+    export type CrearReservaMutationBody = CrearReservaRequest
+    export type CrearReservaMutationError = ErrorResponse
+
+    /**
+ * @summary Crear una reserva
+ */
+export const useCrearReserva = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof crearReserva>>, TError,{data: CrearReservaRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof crearReserva>>,
+        TError,
+        {data: CrearReservaRequest},
+        TContext
+      > => {
+      return useMutation(getCrearReservaMutationOptions(options), queryClient);
+    }
+    /**
+ * @summary Obtener una reserva por ID
+ */
+export type obtenerReservaResponse200 = {
+  data: Reserva
+  status: 200
+}
+
+export type obtenerReservaResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type obtenerReservaResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type obtenerReservaResponseSuccess = (obtenerReservaResponse200) & {
+  headers: Headers;
+};
+export type obtenerReservaResponseError = (obtenerReservaResponse401 | obtenerReservaResponse404) & {
+  headers: Headers;
+};
+
+export type obtenerReservaResponse = (obtenerReservaResponseSuccess | obtenerReservaResponseError)
+
+export const getObtenerReservaUrl = (id: string,) => {
+
+
+
+
+  return `/api/reservas/${id}`
+}
+
+export const obtenerReserva = async (id: string, options?: RequestInit): Promise<obtenerReservaResponse> => {
+
+  return customInstance<obtenerReservaResponse>(getObtenerReservaUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getObtenerReservaQueryKey = (id: string,) => {
+    return [
+    `/api/reservas/${id}`
+    ] as const;
+    }
+
+
+export const getObtenerReservaQueryOptions = <TData = Awaited<ReturnType<typeof obtenerReserva>>, TError = ErrorResponse>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerReserva>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getObtenerReservaQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof obtenerReserva>>> = ({ signal }) => obtenerReserva(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof obtenerReserva>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ObtenerReservaQueryResult = NonNullable<Awaited<ReturnType<typeof obtenerReserva>>>
+export type ObtenerReservaQueryError = ErrorResponse
+
+
+export function useObtenerReserva<TData = Awaited<ReturnType<typeof obtenerReserva>>, TError = ErrorResponse>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerReserva>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof obtenerReserva>>,
+          TError,
+          Awaited<ReturnType<typeof obtenerReserva>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useObtenerReserva<TData = Awaited<ReturnType<typeof obtenerReserva>>, TError = ErrorResponse>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerReserva>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof obtenerReserva>>,
+          TError,
+          Awaited<ReturnType<typeof obtenerReserva>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useObtenerReserva<TData = Awaited<ReturnType<typeof obtenerReserva>>, TError = ErrorResponse>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerReserva>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Obtener una reserva por ID
+ */
+
+export function useObtenerReserva<TData = Awaited<ReturnType<typeof obtenerReserva>>, TError = ErrorResponse>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerReserva>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getObtenerReservaQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+/**
  * @summary Listar reservas con paginaci├│n y filtro por fecha
  */
 export type listarReservasResponse200 = {
@@ -170,100 +386,6 @@ export function useListarReservas<TData = Awaited<ReturnType<typeof listarReserv
 
 
 /**
- * @summary Crear una reserva
- */
-export type crearReservaResponse201 = {
-  data: Reserva
-  status: 201
-}
-
-export type crearReservaResponse401 = {
-  data: ErrorResponse
-  status: 401
-}
-
-export type crearReservaResponse422 = {
-  data: ErrorResponse
-  status: 422
-}
-
-export type crearReservaResponseSuccess = (crearReservaResponse201) & {
-  headers: Headers;
-};
-export type crearReservaResponseError = (crearReservaResponse401 | crearReservaResponse422) & {
-  headers: Headers;
-};
-
-export type crearReservaResponse = (crearReservaResponseSuccess | crearReservaResponseError)
-
-export const getCrearReservaUrl = () => {
-
-
-
-
-  return `/api/reservas`
-}
-
-export const crearReserva = async (crearReservaRequest: CrearReservaRequest, options?: RequestInit): Promise<crearReservaResponse> => {
-
-  return customInstance<crearReservaResponse>(getCrearReservaUrl(),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      crearReservaRequest,)
-  }
-);}
-
-
-
-
-export const getCrearReservaMutationOptions = <TError = ErrorResponse,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof crearReserva>>, TError,{data: CrearReservaRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof crearReserva>>, TError,{data: CrearReservaRequest}, TContext> => {
-
-const mutationKey = ['crearReserva'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof crearReserva>>, {data: CrearReservaRequest}> = (props) => {
-          const {data} = props ?? {};
-
-          return  crearReserva(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type CrearReservaMutationResult = NonNullable<Awaited<ReturnType<typeof crearReserva>>>
-    export type CrearReservaMutationBody = CrearReservaRequest
-    export type CrearReservaMutationError = ErrorResponse
-
-    /**
- * @summary Crear una reserva
- */
-export const useCrearReserva = <TError = ErrorResponse,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof crearReserva>>, TError,{data: CrearReservaRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof crearReserva>>,
-        TError,
-        {data: CrearReservaRequest},
-        TContext
-      > => {
-      return useMutation(getCrearReservaMutationOptions(options), queryClient);
-    }
-    /**
  * @summary Conteo de reservas del mes y d├¡a actual ÔÇö para el widget de Home
  */
 export type conteoReservasResponse200 = {
@@ -619,128 +741,6 @@ export function useResumenMensual<TData = Awaited<ReturnType<typeof resumenMensu
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getResumenMensualQueryOptions(params,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-
-/**
- * @summary Obtener una reserva por ID
- */
-export type obtenerReservaResponse200 = {
-  data: Reserva
-  status: 200
-}
-
-export type obtenerReservaResponse401 = {
-  data: ErrorResponse
-  status: 401
-}
-
-export type obtenerReservaResponse404 = {
-  data: ErrorResponse
-  status: 404
-}
-
-export type obtenerReservaResponseSuccess = (obtenerReservaResponse200) & {
-  headers: Headers;
-};
-export type obtenerReservaResponseError = (obtenerReservaResponse401 | obtenerReservaResponse404) & {
-  headers: Headers;
-};
-
-export type obtenerReservaResponse = (obtenerReservaResponseSuccess | obtenerReservaResponseError)
-
-export const getObtenerReservaUrl = (id: string,) => {
-
-
-
-
-  return `/api/reservas/${id}`
-}
-
-export const obtenerReserva = async (id: string, options?: RequestInit): Promise<obtenerReservaResponse> => {
-
-  return customInstance<obtenerReservaResponse>(getObtenerReservaUrl(id),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getObtenerReservaQueryKey = (id: string,) => {
-    return [
-    `/api/reservas/${id}`
-    ] as const;
-    }
-
-
-export const getObtenerReservaQueryOptions = <TData = Awaited<ReturnType<typeof obtenerReserva>>, TError = ErrorResponse>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerReserva>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getObtenerReservaQueryKey(id);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof obtenerReserva>>> = ({ signal }) => obtenerReserva(id, { signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof obtenerReserva>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type ObtenerReservaQueryResult = NonNullable<Awaited<ReturnType<typeof obtenerReserva>>>
-export type ObtenerReservaQueryError = ErrorResponse
-
-
-export function useObtenerReserva<TData = Awaited<ReturnType<typeof obtenerReserva>>, TError = ErrorResponse>(
- id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerReserva>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof obtenerReserva>>,
-          TError,
-          Awaited<ReturnType<typeof obtenerReserva>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useObtenerReserva<TData = Awaited<ReturnType<typeof obtenerReserva>>, TError = ErrorResponse>(
- id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerReserva>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof obtenerReserva>>,
-          TError,
-          Awaited<ReturnType<typeof obtenerReserva>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useObtenerReserva<TData = Awaited<ReturnType<typeof obtenerReserva>>, TError = ErrorResponse>(
- id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerReserva>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-/**
- * @summary Obtener una reserva por ID
- */
-
-export function useObtenerReserva<TData = Awaited<ReturnType<typeof obtenerReserva>>, TError = ErrorResponse>(
- id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerReserva>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getObtenerReservaQueryOptions(id,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

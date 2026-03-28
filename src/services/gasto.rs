@@ -4,8 +4,8 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::errors::AppError;
-use crate::models::{CategoriaGasto, CrearGastoRequest, Gasto, GastosPaginados};
-use crate::repositories::gasto::NuevoGasto;
+use crate::models::{ActualizarGastoRequest, CategoriaGasto, CrearGastoRequest, Gasto, GastosPaginados};
+use crate::repositories::gasto::{ActualizarGastoData, NuevoGasto};
 use crate::repositories::{CategoriaGastoRepository, GastoRepository};
 
 pub struct GastoService;
@@ -70,6 +70,44 @@ impl GastoService {
             page,
             per_page,
         })
+    }
+
+    /* [283A-22] Actualizar parcialmente un gasto.
+     * Convierte enums a string igual que en create para mantener consistencia. */
+    pub async fn update(
+        pool: &PgPool,
+        id: Uuid,
+        user_id: Uuid,
+        req: ActualizarGastoRequest,
+    ) -> Result<Gasto, AppError> {
+        let tipo_doc = req.tipo_documento.as_ref().and_then(|t| {
+            serde_json::to_value(t)
+                .ok()
+                .and_then(|v| v.as_str().map(String::from))
+        });
+        let metodo = req.metodo_pago.as_ref().and_then(|m| {
+            serde_json::to_value(m)
+                .ok()
+                .and_then(|v| v.as_str().map(String::from))
+        });
+
+        let data = ActualizarGastoData {
+            id,
+            user_id,
+            fecha: req.fecha,
+            proveedor: req.proveedor.as_deref(),
+            categoria_id: req.categoria_id,
+            tipo_documento: tipo_doc.as_deref(),
+            metodo_pago: metodo.as_deref(),
+            numero_documento: req.numero_documento.as_deref(),
+            recurrente: req.recurrente,
+            importe_base: req.importe_base,
+            importe_iva: req.importe_iva,
+        };
+
+        GastoRepository::update(pool, &data)
+            .await?
+            .ok_or_else(|| AppError::NotFound("Gasto no encontrado".into()))
     }
 
     pub async fn delete(pool: &PgPool, id: Uuid, user_id: Uuid) -> Result<(), AppError> {

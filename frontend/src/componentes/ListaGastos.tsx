@@ -1,12 +1,13 @@
 /* [263A-16] Lista de gastos — reescrita con shadcn Table + Dialog + Button.
- * Iconos para eliminar (tarea 17). Columnas en flex (tarea 18). */
+ * Iconos para eliminar (tarea 17). Columnas en flex (tarea 18).
+ * [283A-22] Botón de edición con Dialog reutilizando FormularioGasto. */
 
 import { useState } from 'react';
-import { useListarGastos, useEliminarGasto } from '../api/generated';
+import { useListarGastos, useEliminarGasto, Gasto } from '../api/generated';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Pencil } from 'lucide-react';
 import FormularioGasto from './FormularioGasto';
 
 function formatearMoneda(valor: string): string {
@@ -16,6 +17,7 @@ function formatearMoneda(valor: string): string {
 function ListaGastos() {
   const [pagina, setPagina] = useState(1);
   const [modalAbierto, setModalAbierto] = useState(false);
+  const [gastoEditando, setGastoEditando] = useState<Gasto | null>(null);
   const porPagina = 15;
 
   const { data, isLoading, refetch } = useListarGastos({ page: pagina, per_page: porPagina });
@@ -27,6 +29,11 @@ function ListaGastos() {
 
   const cerrarModalYRefrescar = () => {
     setModalAbierto(false);
+    refetch();
+  };
+
+  const cerrarEdicionYRefrescar = () => {
+    setGastoEditando(null);
     refetch();
   };
 
@@ -49,6 +56,18 @@ function ListaGastos() {
         </DialogContent>
       </Dialog>
 
+      {/* [283A-22] Dialog de edición — reutiliza FormularioGasto con gasto pre-cargado */}
+      <Dialog open={!!gastoEditando} onOpenChange={(open) => { if (!open) setGastoEditando(null); }}>
+        <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Editar Gasto</DialogTitle>
+          </DialogHeader>
+          {gastoEditando && (
+            <FormularioGasto onExito={cerrarEdicionYRefrescar} gasto={gastoEditando} />
+          )}
+        </DialogContent>
+      </Dialog>
+
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Cargando...</p>
       ) : gastos && gastos.items.length > 0 ? (
@@ -64,7 +83,7 @@ function ListaGastos() {
                   <TableHead className="text-right">Base</TableHead>
                   <TableHead className="text-right">IVA</TableHead>
                   <TableHead className="text-right">Total</TableHead>
-                  <TableHead className="w-10"></TableHead>
+                  <TableHead className="w-20"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -78,14 +97,25 @@ function ListaGastos() {
                     <TableCell className="text-right">{formatearMoneda(g.importe_iva)}</TableCell>
                     <TableCell className="text-right font-medium">{formatearMoneda((parseFloat(g.importe_base) + parseFloat(g.importe_iva)).toFixed(2))}</TableCell>
                     <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => eliminarMutation.mutate({ id: g.id })}
-                        disabled={eliminarMutation.isPending}
-                      >
-                        <Trash2 className="size-4 text-destructive" />
-                      </Button>
+                      <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setGastoEditando(g)}
+                          title="Editar"
+                        >
+                          <Pencil className="size-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => eliminarMutation.mutate({ id: g.id })}
+                          disabled={eliminarMutation.isPending}
+                          title="Eliminar"
+                        >
+                          <Trash2 className="size-4 text-destructive" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

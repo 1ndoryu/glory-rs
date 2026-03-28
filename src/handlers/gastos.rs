@@ -11,8 +11,8 @@ use validator::Validate;
 use crate::errors::AppError;
 use crate::middleware::AuthUser;
 use crate::models::{
-    CategoriaGasto, CrearGastoRequest, DatosDocumentoExtraidos, DigitalizarDocumentoRequest,
-    Gasto, GastosPaginados, GastosQuery,
+    ActualizarGastoRequest, CategoriaGasto, CrearGastoRequest, DatosDocumentoExtraidos,
+    DigitalizarDocumentoRequest, Gasto, GastosPaginados, GastosQuery,
 };
 use crate::services::{DigitalizacionService, GastoService};
 use crate::AppState;
@@ -93,6 +93,33 @@ pub async fn listar_gastos(
     Ok(Json(gastos))
 }
 
+/// Actualizar un gasto
+#[utoipa::path(
+    put,
+    path = "/api/gastos/{id}",
+    tag = "Gastos",
+    params(("id" = Uuid, Path, description = "ID del gasto")),
+    request_body = ActualizarGastoRequest,
+    responses(
+        (status = 200, description = "Gasto actualizado", body = Gasto),
+        (status = 404, description = "Gasto no encontrado", body = ErrorResponse),
+        (status = 401, description = "No autorizado", body = ErrorResponse),
+        (status = 422, description = "Error de validación", body = ErrorResponse)
+    ),
+    security(("bearer_auth" = []))
+)]
+pub async fn actualizar_gasto(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    Path(id): Path<Uuid>,
+    Json(req): Json<ActualizarGastoRequest>,
+) -> Result<Json<Gasto>, AppError> {
+    req.validate()
+        .map_err(|e| AppError::Validation(e.to_string()))?;
+    let gasto = GastoService::update(&state.pool, id, auth.user_id, req).await?;
+    Ok(Json(gasto))
+}
+
 /// Eliminar un gasto
 #[utoipa::path(
     delete,
@@ -167,5 +194,5 @@ pub fn routes() -> Router<AppState> {
         .route("/gastos/categorias", get(listar_categorias))
         .route("/gastos/digitalizar", post(digitalizar_documento))
         .route("/gastos", post(crear_gasto).get(listar_gastos))
-        .route("/gastos/:id", get(obtener_gasto).delete(eliminar_gasto))
+        .route("/gastos/:id", get(obtener_gasto).put(actualizar_gasto).delete(eliminar_gasto))
 }

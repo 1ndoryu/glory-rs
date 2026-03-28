@@ -4,8 +4,8 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::errors::AppError;
-use crate::models::{CrearVentaRequest, Venta, VentasPaginadas};
-use crate::repositories::venta::NuevaVenta;
+use crate::models::{ActualizarVentaRequest, CrearVentaRequest, Venta, VentasPaginadas};
+use crate::repositories::venta::{ActualizarVentaData, NuevaVenta};
 use crate::repositories::VentaRepository;
 
 pub struct VentaService;
@@ -69,6 +69,49 @@ impl VentaService {
             page,
             per_page,
         })
+    }
+
+    /* [283A-22] Actualizar parcialmente una venta.
+     * Convierte enums a string igual que en create para mantener consistencia. */
+    pub async fn update(
+        pool: &PgPool,
+        id: Uuid,
+        user_id: Uuid,
+        req: ActualizarVentaRequest,
+    ) -> Result<Venta, AppError> {
+        let turno = req.turno.as_ref().and_then(|t| {
+            serde_json::to_value(t)
+                .ok()
+                .and_then(|v| v.as_str().map(String::from))
+        });
+        let canal = req.canal.as_ref().and_then(|c| {
+            serde_json::to_value(c)
+                .ok()
+                .and_then(|v| v.as_str().map(String::from))
+        });
+        let metodo = req.metodo_pago.as_ref().and_then(|m| {
+            serde_json::to_value(m)
+                .ok()
+                .and_then(|v| v.as_str().map(String::from))
+        });
+
+        let data = ActualizarVentaData {
+            id,
+            user_id,
+            fecha: req.fecha,
+            comensales: req.comensales,
+            descripcion: req.descripcion.as_deref(),
+            iva_porcentaje: req.iva_porcentaje,
+            turno: turno.as_deref(),
+            canal: canal.as_deref(),
+            metodo_pago: metodo.as_deref(),
+            importe_base: req.importe_base,
+            importe_iva: req.importe_iva,
+        };
+
+        VentaRepository::update(pool, &data)
+            .await?
+            .ok_or_else(|| AppError::NotFound("Venta no encontrada".into()))
     }
 
     pub async fn delete(pool: &PgPool, id: Uuid, user_id: Uuid) -> Result<(), AppError> {

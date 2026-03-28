@@ -37,7 +37,8 @@ pub use etiqueta::{
     EtiquetaConCategoria, EtiquetasQuery,
 };
 pub use gasto::{
-    CategoriaGasto, CrearGastoRequest, Gasto, GastosPaginados, GastosQuery, TipoDocumento,
+    ActualizarGastoRequest, CategoriaGasto, CrearGastoRequest, Gasto, GastosPaginados,
+    GastosQuery, TipoDocumento,
 };
 pub use reserva::{
     ActualizarReservaRequest, CrearReservaRequest, EstadoReserva, NoShowPorCanal, NoShowQuery,
@@ -49,7 +50,8 @@ pub use user::{
     ResetPasswordRequest, User, UserResponse,
 };
 pub use venta::{
-    CanalVenta, CrearVentaRequest, MetodoPago, Turno, Venta, VentasPaginadas, VentasQuery,
+    ActualizarVentaRequest, CanalVenta, CrearVentaRequest, MetodoPago, Turno, Venta,
+    VentasPaginadas, VentasQuery,
 };
 pub use plano_sala::{
     ActualizarMesaRequest, ActualizarPosicionesRequest, ActualizarZonaRequest,

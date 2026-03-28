@@ -19,6 +19,22 @@ pub struct NuevaVenta<'a> {
     pub importe_iva: rust_decimal::Decimal,
 }
 
+/* [283A-22] Datos para actualizar parcialmente una venta.
+ * Runtime query para no depender de .sqlx cache. */
+pub struct ActualizarVentaData<'a> {
+    pub id: Uuid,
+    pub user_id: Uuid,
+    pub fecha: Option<chrono::NaiveDate>,
+    pub comensales: Option<i32>,
+    pub descripcion: Option<&'a str>,
+    pub iva_porcentaje: Option<rust_decimal::Decimal>,
+    pub turno: Option<&'a str>,
+    pub canal: Option<&'a str>,
+    pub metodo_pago: Option<&'a str>,
+    pub importe_base: Option<rust_decimal::Decimal>,
+    pub importe_iva: Option<rust_decimal::Decimal>,
+}
+
 pub struct VentaRepository;
 
 impl VentaRepository {
@@ -109,6 +125,42 @@ impl VentaRepository {
         .execute(pool)
         .await?;
         Ok(result.rows_affected() > 0)
+    }
+
+    /* [283A-22] Actualizar parcialmente una venta — COALESCE mantiene valores existentes
+     * cuando el campo no se envía (None). Runtime query para no depender de .sqlx cache. */
+    pub async fn update(
+        pool: &PgPool,
+        data: &ActualizarVentaData<'_>,
+    ) -> Result<Option<Venta>, sqlx::Error> {
+        sqlx::query_as::<_, Venta>(
+            "UPDATE ventas SET \
+             fecha = COALESCE($3, fecha), \
+             comensales = COALESCE($4, comensales), \
+             descripcion = COALESCE($5, descripcion), \
+             iva_porcentaje = COALESCE($6, iva_porcentaje), \
+             turno = COALESCE($7, turno), \
+             canal = COALESCE($8, canal), \
+             metodo_pago = COALESCE($9, metodo_pago), \
+             importe_base = COALESCE($10, importe_base), \
+             importe_iva = COALESCE($11, importe_iva), \
+             updated_at = NOW() \
+             WHERE id = $1 AND user_id = $2 \
+             RETURNING *",
+        )
+        .bind(data.id)
+        .bind(data.user_id)
+        .bind(data.fecha)
+        .bind(data.comensales)
+        .bind(data.descripcion)
+        .bind(data.iva_porcentaje)
+        .bind(data.turno)
+        .bind(data.canal)
+        .bind(data.metodo_pago)
+        .bind(data.importe_base)
+        .bind(data.importe_iva)
+        .fetch_optional(pool)
+        .await
     }
 
     /// Suma de `importe_base` de ventas en un rango de fechas

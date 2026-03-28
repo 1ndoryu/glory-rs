@@ -76,6 +76,22 @@ pub struct CrearVentaRequest {
     pub importe_iva: rust_decimal::Decimal,
 }
 
+/* [283A-22] Request para actualizar una venta — todos los campos opcionales
+ * para soportar actualizaciones parciales. */
+#[derive(Debug, Deserialize, Validate, ToSchema)]
+pub struct ActualizarVentaRequest {
+    pub fecha: Option<NaiveDate>,
+    pub comensales: Option<i32>,
+    #[validate(length(max = 500, message = "La descripción no debe exceder 500 caracteres"))]
+    pub descripcion: Option<String>,
+    pub iva_porcentaje: Option<rust_decimal::Decimal>,
+    pub turno: Option<Turno>,
+    pub canal: Option<CanalVenta>,
+    pub metodo_pago: Option<MetodoPago>,
+    pub importe_base: Option<rust_decimal::Decimal>,
+    pub importe_iva: Option<rust_decimal::Decimal>,
+}
+
 /// Response paginada de ventas
 #[derive(Debug, Serialize, ToSchema)]
 pub struct VentasPaginadas {

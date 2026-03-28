@@ -19,6 +19,22 @@ pub struct NuevoGasto<'a> {
     pub importe_iva: rust_decimal::Decimal,
 }
 
+/* [283A-22] Datos para actualizar parcialmente un gasto.
+ * Usa runtime queries (query_as con bind) para no requerir actualizar el cache .sqlx. */
+pub struct ActualizarGastoData<'a> {
+    pub id: Uuid,
+    pub user_id: Uuid,
+    pub fecha: Option<chrono::NaiveDate>,
+    pub proveedor: Option<&'a str>,
+    pub categoria_id: Option<Uuid>,
+    pub tipo_documento: Option<&'a str>,
+    pub metodo_pago: Option<&'a str>,
+    pub numero_documento: Option<&'a str>,
+    pub recurrente: Option<bool>,
+    pub importe_base: Option<rust_decimal::Decimal>,
+    pub importe_iva: Option<rust_decimal::Decimal>,
+}
+
 pub struct GastoRepository;
 
 impl GastoRepository {
@@ -114,6 +130,42 @@ impl GastoRepository {
         .execute(pool)
         .await?;
         Ok(result.rows_affected() > 0)
+    }
+
+    /* [283A-22] Actualizar parcialmente un gasto — COALESCE mantiene valores existentes
+     * cuando el campo no se envía (None). Runtime query para no depender de .sqlx cache. */
+    pub async fn update(
+        pool: &PgPool,
+        data: &ActualizarGastoData<'_>,
+    ) -> Result<Option<Gasto>, sqlx::Error> {
+        sqlx::query_as::<_, Gasto>(
+            "UPDATE gastos SET \
+             fecha = COALESCE($3, fecha), \
+             proveedor = COALESCE($4, proveedor), \
+             categoria_id = COALESCE($5, categoria_id), \
+             tipo_documento = COALESCE($6, tipo_documento), \
+             metodo_pago = COALESCE($7, metodo_pago), \
+             numero_documento = COALESCE($8, numero_documento), \
+             recurrente = COALESCE($9, recurrente), \
+             importe_base = COALESCE($10, importe_base), \
+             importe_iva = COALESCE($11, importe_iva), \
+             updated_at = NOW() \
+             WHERE id = $1 AND user_id = $2 \
+             RETURNING *",
+        )
+        .bind(data.id)
+        .bind(data.user_id)
+        .bind(data.fecha)
+        .bind(data.proveedor)
+        .bind(data.categoria_id)
+        .bind(data.tipo_documento)
+        .bind(data.metodo_pago)
+        .bind(data.numero_documento)
+        .bind(data.recurrente)
+        .bind(data.importe_base)
+        .bind(data.importe_iva)
+        .fetch_optional(pool)
+        .await
     }
 
     /// Suma de `importe_base` de gastos en un período

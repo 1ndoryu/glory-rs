@@ -61,6 +61,8 @@ export interface ActualizarClienteRequest {
  */
 export interface ActualizarConfiguracionRequest {
   /** @nullable */
+  groq_api_key?: string | null;
+  /** @nullable */
   iva_por_defecto?: string | null;
   /** @nullable */
   nombre_restaurante?: string | null;
@@ -72,6 +74,50 @@ export interface ActualizarConfiguracionRequest {
   reserva_nombre_obligatorio?: boolean | null;
   /** @nullable */
   reserva_telefono_obligatorio?: boolean | null;
+}
+
+/**
+ * M├®todos de pago soportados ÔÇö compartido entre ventas y gastos
+ */
+export type MetodoPago = typeof MetodoPago[keyof typeof MetodoPago];
+
+
+export const MetodoPago = {
+  efectivo: 'efectivo',
+  tarjeta: 'tarjeta',
+  transferencia: 'transferencia',
+  otros: 'otros',
+} as const;
+
+/**
+ * Tipos de documento de gasto
+ */
+export type TipoDocumento = typeof TipoDocumento[keyof typeof TipoDocumento];
+
+
+export const TipoDocumento = {
+  factura: 'factura',
+  albaran: 'albaran',
+  ticket: 'ticket',
+} as const;
+
+export interface ActualizarGastoRequest {
+  /** @nullable */
+  categoria_id?: string | null;
+  /** @nullable */
+  fecha?: string | null;
+  /** @nullable */
+  importe_base?: string | null;
+  /** @nullable */
+  importe_iva?: string | null;
+  metodo_pago?: MetodoPago | null;
+  /** @nullable */
+  numero_documento?: string | null;
+  /** @nullable */
+  proveedor?: string | null;
+  /** @nullable */
+  recurrente?: boolean | null;
+  tipo_documento?: TipoDocumento | null;
 }
 
 export interface ActualizarMesaRequest {
@@ -179,6 +225,51 @@ export interface ActualizarReservaRequest {
   telefono?: string | null;
 }
 
+/**
+ * Canales de venta disponibles
+ */
+export type CanalVenta = typeof CanalVenta[keyof typeof CanalVenta];
+
+
+export const CanalVenta = {
+  comedor: 'comedor',
+  barra: 'barra',
+  terraza: 'terraza',
+  delivery: 'delivery',
+  just_eat: 'just_eat',
+  eventos: 'eventos',
+} as const;
+
+/**
+ * Turnos de servicio del restaurante
+ */
+export type Turno = typeof Turno[keyof typeof Turno];
+
+
+export const Turno = {
+  manana: 'manana',
+  mediodia: 'mediodia',
+  noche: 'noche',
+} as const;
+
+export interface ActualizarVentaRequest {
+  canal?: CanalVenta | null;
+  /** @nullable */
+  comensales?: number | null;
+  /** @nullable */
+  descripcion?: string | null;
+  /** @nullable */
+  fecha?: string | null;
+  /** @nullable */
+  importe_base?: string | null;
+  /** @nullable */
+  importe_iva?: string | null;
+  /** @nullable */
+  iva_porcentaje?: string | null;
+  metodo_pago?: MetodoPago | null;
+  turno?: Turno | null;
+}
+
 export interface ActualizarZonaRequest {
   /** @nullable */
   alto?: number | null;
@@ -247,6 +338,32 @@ export interface AnalisisReservas {
 }
 
 /**
+ * Respuesta al crear una key ÔÇö incluye la key completa (solo se muestra una vez)
+ */
+export interface ApiKeyCreatedResponse {
+  created_at: string;
+  id: string;
+  key: string;
+  key_prefix: string;
+  nombre: string;
+  permisos: unknown;
+}
+
+/**
+ * Respuesta p├║blica de API key (sin hash)
+ */
+export interface ApiKeyResponse {
+  activa: boolean;
+  created_at: string;
+  id: string;
+  key_prefix: string;
+  /** @nullable */
+  last_used_at?: string | null;
+  nombre: string;
+  permisos: unknown;
+}
+
+/**
  * Response con token JWT despu├®s de autenticarse
  */
 export interface AuthResponse {
@@ -290,6 +407,13 @@ export interface CampanasPaginadas {
   total: number;
 }
 
+export interface CamposObligatorios {
+  apellidos: boolean;
+  email: boolean;
+  nombre: boolean;
+  telefono: boolean;
+}
+
 /**
  * Canal de reserva del restaurante
  */
@@ -299,21 +423,6 @@ export interface CanalReserva {
   nombre: string;
   user_id: string;
 }
-
-/**
- * Canales de venta disponibles
- */
-export type CanalVenta = typeof CanalVenta[keyof typeof CanalVenta];
-
-
-export const CanalVenta = {
-  comedor: 'comedor',
-  barra: 'barra',
-  terraza: 'terraza',
-  delivery: 'delivery',
-  just_eat: 'just_eat',
-  eventos: 'eventos',
-} as const;
 
 /**
  * Categor├¡a de etiqueta (agrupa etiquetas por tipo)
@@ -336,6 +445,53 @@ export interface CategoriaGasto {
   created_at: string;
   id: string;
   nombre: string;
+}
+
+/**
+ * Request del chatbot para buscar reservas
+ */
+export interface ChatbotBuscarReservasQuery {
+  /** @nullable */
+  fecha?: string | null;
+  /** @nullable */
+  nombre?: string | null;
+  /** @nullable */
+  telefono?: string | null;
+}
+
+/**
+ * Request del chatbot para crear reserva (campos simplificados)
+ */
+export interface ChatbotCrearReservaRequest {
+  /** @nullable */
+  apellidos_cliente?: string | null;
+  /** @nullable */
+  email?: string | null;
+  fecha: string;
+  hora: string;
+  nombre_cliente: string;
+  /** @nullable */
+  notas?: string | null;
+  num_personas: number;
+  /** @nullable */
+  telefono?: string | null;
+}
+
+/**
+ * Reserva simplificada para el chatbot (sin IDs internos)
+ */
+export interface ChatbotReservaResponse {
+  apellidos_cliente: string;
+  estado: string;
+  fecha: string;
+  hora: string;
+  id: string;
+  /** @nullable */
+  mesa_numero?: number | null;
+  nombre_cliente: string;
+  notas: string;
+  num_personas: number;
+  telefono: string;
 }
 
 /**
@@ -424,6 +580,17 @@ export interface ConfiguracionRestaurante {
   user_id: string;
 }
 
+/**
+ * Respuesta del conteo de no le├¡das
+ */
+export interface ConteoNoLeidas {
+  count: number;
+}
+
+export interface CrearApiKeyRequest {
+  nombre: string;
+}
+
 export interface CrearCampanaRequest {
   canales: string[];
   /** @nullable */
@@ -505,31 +672,6 @@ export interface CrearEtiquetaRequest {
   color?: string | null;
   nombre: string;
 }
-
-/**
- * M├®todos de pago soportados ÔÇö compartido entre ventas y gastos
- */
-export type MetodoPago = typeof MetodoPago[keyof typeof MetodoPago];
-
-
-export const MetodoPago = {
-  efectivo: 'efectivo',
-  tarjeta: 'tarjeta',
-  transferencia: 'transferencia',
-  otros: 'otros',
-} as const;
-
-/**
- * Tipos de documento de gasto
- */
-export type TipoDocumento = typeof TipoDocumento[keyof typeof TipoDocumento];
-
-
-export const TipoDocumento = {
-  factura: 'factura',
-  albaran: 'albaran',
-  ticket: 'ticket',
-} as const;
 
 /**
  * Request para crear un gasto
@@ -619,18 +761,6 @@ export interface CrearReservaRequest {
 }
 
 /**
- * Turnos de servicio del restaurante
- */
-export type Turno = typeof Turno[keyof typeof Turno];
-
-
-export const Turno = {
-  manana: 'manana',
-  mediodia: 'mediodia',
-  noche: 'noche',
-} as const;
-
-/**
  * Request para crear una venta
  */
 export interface CrearVentaRequest {
@@ -690,6 +820,63 @@ export interface DashboardReservas {
   analisis: AnalisisReservas;
   ocupacion: OcupacionReservas;
   resumen: ResumenReservas;
+}
+
+/**
+ * Datos extra├¡dos del documento por la IA
+ */
+export interface DatosDocumentoExtraidos {
+  /** Confianza general de la extracci├│n (0.0 - 1.0) */
+  confianza: number;
+  /** @nullable */
+  fecha?: string | null;
+  /** @nullable */
+  importe_base?: string | null;
+  /** @nullable */
+  importe_iva?: string | null;
+  /** @nullable */
+  importe_total?: string | null;
+  /**
+     * Notas o advertencias sobre la extracci├│n
+     * @nullable
+     */
+  notas?: string | null;
+  /** @nullable */
+  numero_documento?: string | null;
+  /** @nullable */
+  proveedor?: string | null;
+  /**
+     * "factura", "albaran" o "ticket"
+     * @nullable
+     */
+  tipo_documento?: string | null;
+}
+
+/**
+ * Request para digitalizar un documento (factura, albar├ín, ticket)
+ */
+export interface DigitalizarDocumentoRequest {
+  /** Imagen codificada en base64 (JPEG, PNG, WebP) */
+  imagen_base64: string;
+  /** MIME type de la imagen (image/jpeg, image/png, image/webp) */
+  mime_type: string;
+}
+
+export interface FranjaDisponibilidad {
+  capacidad_disponible: number;
+  hora: string;
+  mesas_disponibles: number;
+  mesas_ocupadas: number;
+  personas_reservadas: number;
+}
+
+/**
+ * Modelos para el endpoint de disponibilidad del chatbot
+ */
+export interface DisponibilidadResponse {
+  capacidad_total: number;
+  fecha: string;
+  franjas: FranjaDisponibilidad[];
 }
 
 /**
@@ -880,6 +1067,16 @@ export interface NoShowStats {
   total_reservas: number;
 }
 
+export interface Notificacion {
+  created_at: string;
+  id: string;
+  leida: boolean;
+  mensaje: string;
+  tipo: string;
+  titulo: string;
+  user_id: string;
+}
+
 export interface ZonaExport {
   alto: number;
   ancho: number;
@@ -1044,6 +1241,23 @@ export interface ResetPasswordRequest {
   token: string;
 }
 
+export interface ZonaResumen {
+  capacidad_max: number;
+  capacidad_min: number;
+  mesas: number;
+  nombre: string;
+}
+
+/**
+ * Info p├║blica del restaurante para el chatbot
+ */
+export interface RestauranteInfoResponse {
+  campos_obligatorios: CamposObligatorios;
+  capacidad_total: number;
+  nombre: string;
+  zonas: ZonaResumen[];
+}
+
 /**
  * Resumen diario de reservas ÔÇö para la vista mes
  */
@@ -1123,6 +1337,28 @@ export type PreviewSegmentoParams = {
 segmento: string;
 };
 
+export type DisponibilidadParams = {
+fecha: string;
+};
+
+export type BuscarReservasParams = {
+/**
+ * Filtrar por tel├®fono
+ * @nullable
+ */
+telefono?: string | null;
+/**
+ * Filtrar por nombre/apellidos
+ * @nullable
+ */
+nombre?: string | null;
+/**
+ * Filtrar por fecha
+ * @nullable
+ */
+fecha?: string | null;
+};
+
 export type ListarClientesParams = {
 page?: number;
 per_page?: number;
@@ -1180,6 +1416,21 @@ hasta?: string | null;
  * @nullable
  */
 categoria_id?: string | null;
+};
+
+export type ListarNotificacionesParams = {
+/**
+ * M├íximo de notificaciones a devolver (default: 50)
+ * @nullable
+ */
+limite?: number | null;
+};
+
+export type StreamNotificacionesParams = {
+/**
+ * JWT token (EventSource no soporta headers)
+ */
+token: string;
 };
 
 export type ObtenerOcupacionParams = {

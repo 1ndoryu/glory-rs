@@ -4,7 +4,7 @@
  * [283A-8] "Digitalizar" implementado con Groq IA (Llama 4 Scout) — extrae datos de imagen. */
 
 import { useState, useRef } from 'react';
-import { MetodoPago, TipoDocumento } from '../api/generated';
+import { Gasto, MetodoPago, TipoDocumento } from '../api/generated';
 import useFormularioGasto from '../hooks/useFormularioGasto';
 import { useDigitalizacion } from '../hooks/useDigitalizacion';
 import { Button } from '@/components/ui/button';
@@ -19,11 +19,14 @@ type ModoGasto = 'menu' | 'manual' | 'digitalizar';
 
 interface Props {
   onExito?: () => void;
+  /* [283A-22] gasto opcional para modo edición — pre-rellena el formulario */
+  gasto?: Gasto;
 }
 
-function FormularioGasto({ onExito }: Props) {
-  const [modo, setModo] = useState<ModoGasto>('menu');
-  const { campos, cambiarCampo, error, manejarEnvio, cargando, categorias } = useFormularioGasto(onExito);
+function FormularioGasto({ onExito, gasto }: Props) {
+  /* En modo edición saltar directamente al formulario manual */
+  const [modo, setModo] = useState<ModoGasto>(gasto ? 'manual' : 'menu');
+  const { campos, cambiarCampo, error, manejarEnvio, cargando, categorias, esEdicion } = useFormularioGasto(onExito, gasto);
   const digitalizacion = useDigitalizacion();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -108,7 +111,7 @@ function FormularioGasto({ onExito }: Props) {
 
     return (
       <div className="flex flex-col items-center gap-6 py-8">
-        <input
+        <Input
           ref={fileInputRef}
           type="file"
           accept="image/jpeg,image/png,image/webp,image/gif"
@@ -228,8 +231,10 @@ function FormularioGasto({ onExito }: Props) {
         </div>
 
         <div className="flex gap-3">
-          <Button type="button" variant="outline" onClick={() => setModo('menu')}>Volver</Button>
-          <Button type="submit" disabled={cargando}>{cargando ? 'Registrando...' : 'Registrar Gasto'}</Button>
+          {!esEdicion && <Button type="button" variant="outline" onClick={() => setModo('menu')}>Volver</Button>}
+          <Button type="submit" disabled={cargando}>
+            {cargando ? (esEdicion ? 'Guardando...' : 'Registrando...') : (esEdicion ? 'Guardar cambios' : 'Registrar Gasto')}
+          </Button>
         </div>
       </form>
     </div>

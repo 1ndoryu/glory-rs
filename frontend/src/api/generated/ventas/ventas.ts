@@ -25,6 +25,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  ActualizarVentaRequest,
   CrearVentaRequest,
   ErrorResponse,
   ListarVentasParams,
@@ -380,6 +381,106 @@ export function useObtenerVenta<TData = Awaited<ReturnType<typeof obtenerVenta>>
 
 
 /**
+ * @summary Actualizar una venta
+ */
+export type actualizarVentaResponse200 = {
+  data: Venta
+  status: 200
+}
+
+export type actualizarVentaResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type actualizarVentaResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type actualizarVentaResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type actualizarVentaResponseSuccess = (actualizarVentaResponse200) & {
+  headers: Headers;
+};
+export type actualizarVentaResponseError = (actualizarVentaResponse401 | actualizarVentaResponse404 | actualizarVentaResponse422) & {
+  headers: Headers;
+};
+
+export type actualizarVentaResponse = (actualizarVentaResponseSuccess | actualizarVentaResponseError)
+
+export const getActualizarVentaUrl = (id: string,) => {
+
+
+
+
+  return `/api/ventas/${id}`
+}
+
+export const actualizarVenta = async (id: string,
+    actualizarVentaRequest: ActualizarVentaRequest, options?: RequestInit): Promise<actualizarVentaResponse> => {
+
+  return customInstance<actualizarVentaResponse>(getActualizarVentaUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      actualizarVentaRequest,)
+  }
+);}
+
+
+
+
+export const getActualizarVentaMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof actualizarVenta>>, TError,{id: string;data: ActualizarVentaRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof actualizarVenta>>, TError,{id: string;data: ActualizarVentaRequest}, TContext> => {
+
+const mutationKey = ['actualizarVenta'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof actualizarVenta>>, {id: string;data: ActualizarVentaRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  actualizarVenta(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ActualizarVentaMutationResult = NonNullable<Awaited<ReturnType<typeof actualizarVenta>>>
+    export type ActualizarVentaMutationBody = ActualizarVentaRequest
+    export type ActualizarVentaMutationError = ErrorResponse
+
+    /**
+ * @summary Actualizar una venta
+ */
+export const useActualizarVenta = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof actualizarVenta>>, TError,{id: string;data: ActualizarVentaRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof actualizarVenta>>,
+        TError,
+        {id: string;data: ActualizarVentaRequest},
+        TContext
+      > => {
+      return useMutation(getActualizarVentaMutationOptions(options), queryClient);
+    }
+    /**
  * @summary Eliminar una venta
  */
 export type eliminarVentaResponse204 = {

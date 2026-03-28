@@ -1,7 +1,8 @@
 /* [263A-16] Formulario de venta — reescrito con shadcn Input + Button + Label.
- * Multi-turno: cada turno seleccionado genera una venta independiente. */
+ * Multi-turno: cada turno seleccionado genera una venta independiente.
+ * [283A-22] Soporte edición — acepta venta opcional para pre-rellenar y usar PUT. */
 
-import { Turno, CanalVenta } from '../api/generated';
+import { Turno, CanalVenta, Venta } from '../api/generated';
 import useFormularioVenta, { calcularIva } from '../hooks/useFormularioVenta';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,10 +18,12 @@ const ETIQUETAS_TURNO: Record<Turno, string> = {
 
 interface Props {
     onExito?: () => void;
+    /* [283A-22] venta opcional para modo edición */
+    venta?: Venta;
 }
 
-function FormularioVenta({ onExito }: Props) {
-    const { campos, cambiarCampo, toggleTurno, cambiarDetalle, error, manejarEnvio, cargando } = useFormularioVenta(onExito);
+function FormularioVenta({ onExito, venta }: Props) {
+    const { campos, cambiarCampo, toggleTurno, cambiarDetalle, error, manejarEnvio, cargando, esEdicion } = useFormularioVenta(onExito, venta);
 
     return (
         <div>
@@ -126,7 +129,12 @@ function FormularioVenta({ onExito }: Props) {
                 </details>
 
                 <Button type="submit" className="w-full" disabled={cargando}>
-                    {cargando ? 'Registrando...' : `Registrar ${campos.turnos.length > 1 ? `${campos.turnos.length} ventas` : 'venta'}`}
+                    {cargando
+                        ? (esEdicion ? 'Guardando...' : 'Registrando...')
+                        : esEdicion
+                            ? 'Guardar cambios'
+                            : `Registrar ${campos.turnos.length > 1 ? `${campos.turnos.length} ventas` : 'venta'}`
+                    }
                 </Button>
             </form>
         </div>

@@ -1,12 +1,13 @@
 /* [263A-16] Lista de ventas — reescrita con shadcn Table + Dialog + Button.
- * Iconos para eliminar en vez de texto (tarea 17). */
+ * Iconos para eliminar en vez de texto (tarea 17).
+ * [283A-22] Botón de edición con Dialog reutilizando FormularioVenta. */
 
 import { useState } from 'react';
-import { useListarVentas, useEliminarVenta } from '../api/generated';
+import { useListarVentas, useEliminarVenta, Venta } from '../api/generated';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Pencil } from 'lucide-react';
 import FormularioVenta from './FormularioVenta';
 
 function formatearMoneda(valor: string): string {
@@ -16,6 +17,7 @@ function formatearMoneda(valor: string): string {
 function ListaVentas() {
   const [pagina, setPagina] = useState(1);
   const [modalAbierto, setModalAbierto] = useState(false);
+  const [ventaEditando, setVentaEditando] = useState<Venta | null>(null);
   const porPagina = 15;
 
   const { data, isLoading, refetch } = useListarVentas({ page: pagina, per_page: porPagina });
@@ -27,6 +29,11 @@ function ListaVentas() {
 
   const cerrarModalYRefrescar = () => {
     setModalAbierto(false);
+    refetch();
+  };
+
+  const cerrarEdicionYRefrescar = () => {
+    setVentaEditando(null);
     refetch();
   };
 
@@ -48,6 +55,18 @@ function ListaVentas() {
         </DialogContent>
       </Dialog>
 
+      {/* [283A-22] Dialog de edición — reutiliza FormularioVenta con venta pre-cargada */}
+      <Dialog open={!!ventaEditando} onOpenChange={(open) => { if (!open) setVentaEditando(null); }}>
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Editar Venta</DialogTitle>
+          </DialogHeader>
+          {ventaEditando && (
+            <FormularioVenta onExito={cerrarEdicionYRefrescar} venta={ventaEditando} />
+          )}
+        </DialogContent>
+      </Dialog>
+
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Cargando...</p>
       ) : ventas && ventas.items.length > 0 ? (
@@ -63,7 +82,7 @@ function ListaVentas() {
                   <TableHead className="text-right">Base</TableHead>
                   <TableHead className="text-right">IVA</TableHead>
                   <TableHead className="text-right">Total</TableHead>
-                  <TableHead className="w-10"></TableHead>
+                  <TableHead className="w-20"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -77,14 +96,25 @@ function ListaVentas() {
                     <TableCell className="text-right">{formatearMoneda(v.importe_iva)}</TableCell>
                     <TableCell className="text-right font-medium">{formatearMoneda((parseFloat(v.importe_base) + parseFloat(v.importe_iva)).toFixed(2))}</TableCell>
                     <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => eliminarMutation.mutate({ id: v.id })}
-                        disabled={eliminarMutation.isPending}
-                      >
-                        <Trash2 className="size-4 text-destructive" />
-                      </Button>
+                      <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setVentaEditando(v)}
+                          title="Editar"
+                        >
+                          <Pencil className="size-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => eliminarMutation.mutate({ id: v.id })}
+                          disabled={eliminarMutation.isPending}
+                          title="Eliminar"
+                        >
+                          <Trash2 className="size-4 text-destructive" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

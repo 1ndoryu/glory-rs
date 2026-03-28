@@ -25,8 +25,11 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  ActualizarGastoRequest,
   CategoriaGasto,
   CrearGastoRequest,
+  DatosDocumentoExtraidos,
+  DigitalizarDocumentoRequest,
   ErrorResponse,
   Gasto,
   GastosPaginados,
@@ -369,6 +372,105 @@ export const useCrearGasto = <TError = ErrorResponse,
       return useMutation(getCrearGastoMutationOptions(options), queryClient);
     }
     /**
+ * @summary Digitalizar un documento de gasto (factura, albar├ín, ticket) usando Groq IA
+ */
+export type digitalizarDocumentoResponse200 = {
+  data: DatosDocumentoExtraidos
+  status: 200
+}
+
+export type digitalizarDocumentoResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type digitalizarDocumentoResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type digitalizarDocumentoResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type digitalizarDocumentoResponseSuccess = (digitalizarDocumentoResponse200) & {
+  headers: Headers;
+};
+export type digitalizarDocumentoResponseError = (digitalizarDocumentoResponse400 | digitalizarDocumentoResponse401 | digitalizarDocumentoResponse500) & {
+  headers: Headers;
+};
+
+export type digitalizarDocumentoResponse = (digitalizarDocumentoResponseSuccess | digitalizarDocumentoResponseError)
+
+export const getDigitalizarDocumentoUrl = () => {
+
+
+
+
+  return `/api/gastos/digitalizar`
+}
+
+export const digitalizarDocumento = async (digitalizarDocumentoRequest: DigitalizarDocumentoRequest, options?: RequestInit): Promise<digitalizarDocumentoResponse> => {
+
+  return customInstance<digitalizarDocumentoResponse>(getDigitalizarDocumentoUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      digitalizarDocumentoRequest,)
+  }
+);}
+
+
+
+
+export const getDigitalizarDocumentoMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof digitalizarDocumento>>, TError,{data: DigitalizarDocumentoRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof digitalizarDocumento>>, TError,{data: DigitalizarDocumentoRequest}, TContext> => {
+
+const mutationKey = ['digitalizarDocumento'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof digitalizarDocumento>>, {data: DigitalizarDocumentoRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  digitalizarDocumento(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DigitalizarDocumentoMutationResult = NonNullable<Awaited<ReturnType<typeof digitalizarDocumento>>>
+    export type DigitalizarDocumentoMutationBody = DigitalizarDocumentoRequest
+    export type DigitalizarDocumentoMutationError = ErrorResponse
+
+    /**
+ * @summary Digitalizar un documento de gasto (factura, albar├ín, ticket) usando Groq IA
+ */
+export const useDigitalizarDocumento = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof digitalizarDocumento>>, TError,{data: DigitalizarDocumentoRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof digitalizarDocumento>>,
+        TError,
+        {data: DigitalizarDocumentoRequest},
+        TContext
+      > => {
+      return useMutation(getDigitalizarDocumentoMutationOptions(options), queryClient);
+    }
+    /**
  * @summary Obtener un gasto por ID
  */
 export type obtenerGastoResponse200 = {
@@ -491,6 +593,106 @@ export function useObtenerGasto<TData = Awaited<ReturnType<typeof obtenerGasto>>
 
 
 /**
+ * @summary Actualizar un gasto
+ */
+export type actualizarGastoResponse200 = {
+  data: Gasto
+  status: 200
+}
+
+export type actualizarGastoResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type actualizarGastoResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type actualizarGastoResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type actualizarGastoResponseSuccess = (actualizarGastoResponse200) & {
+  headers: Headers;
+};
+export type actualizarGastoResponseError = (actualizarGastoResponse401 | actualizarGastoResponse404 | actualizarGastoResponse422) & {
+  headers: Headers;
+};
+
+export type actualizarGastoResponse = (actualizarGastoResponseSuccess | actualizarGastoResponseError)
+
+export const getActualizarGastoUrl = (id: string,) => {
+
+
+
+
+  return `/api/gastos/${id}`
+}
+
+export const actualizarGasto = async (id: string,
+    actualizarGastoRequest: ActualizarGastoRequest, options?: RequestInit): Promise<actualizarGastoResponse> => {
+
+  return customInstance<actualizarGastoResponse>(getActualizarGastoUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      actualizarGastoRequest,)
+  }
+);}
+
+
+
+
+export const getActualizarGastoMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof actualizarGasto>>, TError,{id: string;data: ActualizarGastoRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof actualizarGasto>>, TError,{id: string;data: ActualizarGastoRequest}, TContext> => {
+
+const mutationKey = ['actualizarGasto'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof actualizarGasto>>, {id: string;data: ActualizarGastoRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  actualizarGasto(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ActualizarGastoMutationResult = NonNullable<Awaited<ReturnType<typeof actualizarGasto>>>
+    export type ActualizarGastoMutationBody = ActualizarGastoRequest
+    export type ActualizarGastoMutationError = ErrorResponse
+
+    /**
+ * @summary Actualizar un gasto
+ */
+export const useActualizarGasto = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof actualizarGasto>>, TError,{id: string;data: ActualizarGastoRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof actualizarGasto>>,
+        TError,
+        {id: string;data: ActualizarGastoRequest},
+        TContext
+      > => {
+      return useMutation(getActualizarGastoMutationOptions(options), queryClient);
+    }
+    /**
  * @summary Eliminar un gasto
  */
 export type eliminarGastoResponse204 = {

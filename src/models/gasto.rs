@@ -70,6 +70,26 @@ pub struct CrearGastoRequest {
     pub importe_iva: rust_decimal::Decimal,
 }
 
+/* [283A-22] Request para actualizar un gasto — todos los campos opcionales
+ * para soportar actualizaciones parciales (PATCH semántico via PUT). */
+#[derive(Debug, Deserialize, Validate, ToSchema)]
+pub struct ActualizarGastoRequest {
+    pub fecha: Option<NaiveDate>,
+    #[validate(length(max = 255, message = "El proveedor no debe exceder 255 caracteres"))]
+    pub proveedor: Option<String>,
+    pub categoria_id: Option<Uuid>,
+    pub tipo_documento: Option<TipoDocumento>,
+    pub metodo_pago: Option<MetodoPago>,
+    #[validate(length(
+        max = 100,
+        message = "El número de documento no debe exceder 100 caracteres"
+    ))]
+    pub numero_documento: Option<String>,
+    pub recurrente: Option<bool>,
+    pub importe_base: Option<rust_decimal::Decimal>,
+    pub importe_iva: Option<rust_decimal::Decimal>,
+}
+
 /// Response paginada de gastos
 #[derive(Debug, Serialize, ToSchema)]
 pub struct GastosPaginados {
