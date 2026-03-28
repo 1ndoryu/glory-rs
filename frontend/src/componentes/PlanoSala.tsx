@@ -80,9 +80,9 @@ function PlanoSala() {
         </div>
         {/* [283A-25] Controles de zoom para escalar el canvas visualmente */}
         <div className="flex items-center gap-1">
-          <Button size="sm" variant="outline" onClick={() => setZoom(z => Math.max(0.25, +(z - 0.25).toFixed(2)))}><ZoomOut className="size-4" /></Button>
+          <Button size="sm" variant="outline" onClick={() => setZoom(z => Math.max(0.5, +(z - 0.1).toFixed(2)))}><ZoomOut className="size-4" /></Button>
           <span className="text-xs w-12 text-center tabular-nums">{Math.round(zoom * 100)}%</span>
-          <Button size="sm" variant="outline" onClick={() => setZoom(z => Math.min(2, +(z + 0.25).toFixed(2)))}><ZoomIn className="size-4" /></Button>
+          <Button size="sm" variant="outline" onClick={() => setZoom(z => Math.min(2, +(z + 0.1).toFixed(2)))}><ZoomIn className="size-4" /></Button>
         </div>
       </div>
 

@@ -99,7 +99,7 @@ Es un error que se puede evitar de nuevo con alguna regla en sentinel, pero si n
 
 28. ~~Los graficos siguen teniendo un espacio a la izquierda inncesario y Distribución por canal debe mostrar las leyenda.~~ → 283A-34
 
-29. En coolify veo
+29. ~~En coolify veo
 
 Rust App ()
 restaurante.wandori.us
@@ -118,8 +118,10 @@ This service requires port 3000 to function correctly. All domains must include 
 
 Example: http://app.coolify.io:3000
 
-2 app, puse en la Rust App la url que voy a usar pero veo otra que dice App, 
+2 app, puse en la Rust App la url que voy a usar pero veo otra que dice App,~~ → 283A-36
 
-30. No veo la opcion de reportar errores en ningún lado
+30. ~~No veo la opcion de reportar errores en ningún lado~~ → 283A-36
+
+31. ~~primero, es que debajo de 50% se ve mal, limitarlo hasta ahi, que el salto sea de 10 en 10, tambien espero que el zoom se aplique con reservas, tiene que estar sincronizado, no solo por pagina sino tambie en general para todos los usuarios que usen la misma cuenta porque sino se puede ver diferente para un usuario y otro.~~ → 283A-36
 
 Tarea Final. ~~Actualiza el despliege con coolify-manager-rs~~ → 283A-33

@@ -5,6 +5,7 @@
 import { useState, useCallback, useRef, type RefObject } from 'react';
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import { toast } from 'sonner';
+import { useZoomStore } from '../../stores/zoomStore';
 import {
   useObtenerPlano,
   ActualizarMesaRequest,
@@ -58,7 +59,7 @@ export function usePlanoSala(
   const [posicionesLocales, setPosicionesLocales] = useState<
     Record<string, { x: number; y: number }>
   >({});
-  const [zoom, setZoom] = useState(1);
+  const { zoom, setZoom } = useZoomStore();
 
   /* Estado de diálogos — reemplazan prompt/confirm/alert nativos */
   const [dialogoEntrada, setDialogoEntrada] = useState<DialogoEntrada | null>(null);

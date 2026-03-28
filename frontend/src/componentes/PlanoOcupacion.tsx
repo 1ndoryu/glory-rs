@@ -1,11 +1,14 @@
 /* [263A-16] Vista de ocupación del plano de sala — solo lectura.
  * Reescrito imports a shadcn Button. Mantiene PlanoOcupacion.css para canvas/mesas.
  * Mesas coloreadas: libre (gris), ocupada (verde), no-show (rojo), inactiva.
- * Se integra dentro de ListaReservas. Click en mesa muestra reservas en tooltip. */
+ * Se integra dentro de ListaReservas. Click en mesa muestra reservas en tooltip.
+ * [283A-36] Zoom sincronizado con PlanoSala via zoomStore. */
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { ZoomIn, ZoomOut } from 'lucide-react';
 import { useObtenerOcupacion, MesaOcupacion, ZonaOcupacion } from '../api/generated';
+import { useZoomStore } from '../stores/zoomStore';
 import '../estilos/PlanoOcupacion.css';
 
 interface Props {
@@ -29,6 +32,7 @@ function PlanoOcupacion({ fecha, turno }: Props) {
   const plano = data?.status === 200 ? data.data : null;
   const [zonaActiva, setZonaActiva] = useState<string | null>(null);
   const [mesaHover, setMesaHover] = useState<string | null>(null);
+  const { zoom, zoomIn, zoomOut } = useZoomStore();
 
   if (plano && plano.zonas.length > 0 && !zonaActiva) {
     setZonaActiva(plano.zonas[0].id);
@@ -41,7 +45,14 @@ function PlanoOcupacion({ fecha, turno }: Props) {
 
   return (
     <div className="flex flex-col gap-3">
-      <h3 className="font-semibold text-sm">Plano de sala</h3>
+      <div className="flex items-center justify-between">
+        <h3 className="font-semibold text-sm">Plano de sala</h3>
+        <div className="flex items-center gap-1">
+          <Button size="sm" variant="outline" onClick={zoomOut}><ZoomOut className="size-4" /></Button>
+          <span className="text-xs w-12 text-center tabular-nums">{Math.round(zoom * 100)}%</span>
+          <Button size="sm" variant="outline" onClick={zoomIn}><ZoomIn className="size-4" /></Button>
+        </div>
+      </div>
 
       {/* Tabs de zonas */}
       <div className="flex gap-1 flex-wrap">
@@ -66,12 +77,18 @@ function PlanoOcupacion({ fecha, turno }: Props) {
       </div>
 
       {/* [283A-25] Canvas 100% ancho con aspect-ratio proporcional a la zona.
-         * Mesas posicionadas en porcentajes para escalar automáticamente. */}
+         * [283A-36] Zoom aplicado con transform: scale() desde zoomStore. */}
       {zonaData && (
-        <div
-          className="planoOcupacionCanvas"
-          style={{ aspectRatio: `${zonaData.ancho} / ${zonaData.alto}` }}
-        >
+        <div style={{ overflow: 'auto' }}>
+          <div
+            className="planoOcupacionCanvas"
+            style={{
+              aspectRatio: `${zonaData.ancho} / ${zonaData.alto}`,
+              transform: `scale(${zoom})`,
+              transformOrigin: 'top left',
+              width: `${100 / zoom}%`,
+            }}
+          >
           {zonaData.mesas.map((mesa: MesaOcupacion) => {
             const estado = estadoMesa(mesa);
             const esHover = mesaHover === mesa.id;
@@ -105,6 +122,7 @@ function PlanoOcupacion({ fecha, turno }: Props) {
               </div>
             );
           })}
+        </div>
         </div>
       )}
     </div>
