@@ -11,6 +11,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Trash2, Pencil } from 'lucide-react';
 import FormularioVenta from './FormularioVenta';
 
+/* [283A-47] Mapa de etiquetas para turnos — el enum backend usa ascii ("manana")
+ * pero la UI debe mostrar tildes ("Mañana"). */
+const ETIQUETAS_TURNO: Record<string, string> = {
+  manana: 'Mañana',
+  mediodia: 'Mediodía',
+  noche: 'Noche',
+};
+
 function formatearMoneda(valor: string): string {
   return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(parseFloat(valor));
 }
@@ -100,7 +108,7 @@ function ListaVentas() {
                 {ventas.items.map((v) => (
                   <TableRow key={v.id}>
                     <TableCell>{v.fecha}</TableCell>
-                    <TableCell className="capitalize">{v.turno}</TableCell>
+                    <TableCell>{ETIQUETAS_TURNO[v.turno] ?? v.turno}</TableCell>
                     <TableCell className="capitalize">{v.canal}</TableCell>
                     <TableCell className="capitalize">{v.metodo_pago}</TableCell>
                     <TableCell className="text-right">{formatearMoneda(v.importe_base)}</TableCell>
