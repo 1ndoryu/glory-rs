@@ -10,6 +10,7 @@ interface FiltrosReservas {
   fecha: string;
   turno: string;
   estado: string;
+  busqueda: string;
   pagina: number;
 }
 
@@ -23,6 +24,7 @@ function useVistaReservas() {
     fecha: fechaUrl || new Date().toISOString().split('T')[0],
     turno: '',
     estado: '',
+    busqueda: '',
     pagina: 1,
   });
   const [modalAbierto, setModalAbierto] = useState(false);
@@ -33,6 +35,7 @@ function useVistaReservas() {
     fecha: filtros.fecha || null,
     estado: filtros.estado || null,
     turno: filtros.turno || null,
+    busqueda: filtros.busqueda || null,
   });
 
   const eliminarMutation = useEliminarReserva({

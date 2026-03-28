@@ -50,6 +50,7 @@ pub struct FiltrosReserva {
     pub estado: Option<String>,
     pub hora_desde: Option<chrono::NaiveTime>,
     pub hora_hasta: Option<chrono::NaiveTime>,
+    pub busqueda: Option<String>,
 }
 
 pub struct ReservaRepository;
@@ -102,41 +103,55 @@ impl ReservaRepository {
     ) -> Result<(Vec<Reserva>, i64), sqlx::Error> {
         let offset = (filtros.page - 1) * filtros.per_page;
 
-        let items = sqlx::query_as!(
-            Reserva,
+        /* [283A-28] Búsqueda ILIKE por nombre_cliente/apellidos_cliente */
+        let patron = filtros.busqueda.as_deref()
+            .filter(|s| !s.is_empty())
+            .map(|b| format!("%{b}%"));
+
+        let items = sqlx::query_as::<_, Reserva>(
             "SELECT * FROM reservas WHERE user_id = $1 \
              AND ($4::DATE IS NULL OR fecha = $4) \
              AND ($5::VARCHAR IS NULL OR estado = $5) \
              AND ($6::TIME IS NULL OR hora >= $6) \
              AND ($7::TIME IS NULL OR hora < $7) \
+             AND ($8::TEXT IS NULL \
+                  OR nombre_cliente ILIKE $8 \
+                  OR apellidos_cliente ILIKE $8 \
+                  OR telefono ILIKE $8) \
              ORDER BY fecha ASC, hora ASC LIMIT $2 OFFSET $3",
-            filtros.user_id,
-            filtros.per_page,
-            offset,
-            filtros.fecha,
-            filtros.estado,
-            filtros.hora_desde,
-            filtros.hora_hasta
         )
+        .bind(filtros.user_id)
+        .bind(filtros.per_page)
+        .bind(offset)
+        .bind(filtros.fecha)
+        .bind(filtros.estado.as_deref())
+        .bind(filtros.hora_desde)
+        .bind(filtros.hora_hasta)
+        .bind(patron.as_deref())
         .fetch_all(pool)
         .await?;
 
-        let rec = sqlx::query!(
-            "SELECT COUNT(*) as total FROM reservas WHERE user_id = $1 \
+        let rec: (Option<i64>,) = sqlx::query_as(
+            "SELECT COUNT(*) FROM reservas WHERE user_id = $1 \
              AND ($2::DATE IS NULL OR fecha = $2) \
              AND ($3::VARCHAR IS NULL OR estado = $3) \
              AND ($4::TIME IS NULL OR hora >= $4) \
-             AND ($5::TIME IS NULL OR hora < $5)",
-            filtros.user_id,
-            filtros.fecha,
-            filtros.estado,
-            filtros.hora_desde,
-            filtros.hora_hasta
+             AND ($5::TIME IS NULL OR hora < $5) \
+             AND ($6::TEXT IS NULL \
+                  OR nombre_cliente ILIKE $6 \
+                  OR apellidos_cliente ILIKE $6 \
+                  OR telefono ILIKE $6)",
         )
+        .bind(filtros.user_id)
+        .bind(filtros.fecha)
+        .bind(filtros.estado.as_deref())
+        .bind(filtros.hora_desde)
+        .bind(filtros.hora_hasta)
+        .bind(patron.as_deref())
         .fetch_one(pool)
         .await?;
 
-        Ok((items, rec.total.unwrap_or(0)))
+        Ok((items, rec.0.unwrap_or(0)))
     }
 
     pub async fn update(

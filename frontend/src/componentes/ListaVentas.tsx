@@ -1,10 +1,11 @@
 /* [263A-16] Lista de ventas — reescrita con shadcn Table + Dialog + Button.
  * Iconos para eliminar en vez de texto (tarea 17).
- * [283A-22] Botón de edición con Dialog reutilizando FormularioVenta. */
+ * [283A-22] Botón de edición con Dialog reutilizando FormularioVenta.
+ * [283A-28] Filtros de fecha (desde/hasta) extraídos a useListaVentas hook. */
 
-import { useState } from 'react';
-import { useListarVentas, useEliminarVenta, Venta } from '../api/generated';
+import useListaVentas from '../hooks/useListaVentas';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Trash2, Pencil } from 'lucide-react';
@@ -15,27 +16,20 @@ function formatearMoneda(valor: string): string {
 }
 
 function ListaVentas() {
-  const [pagina, setPagina] = useState(1);
-  const [modalAbierto, setModalAbierto] = useState(false);
-  const [ventaEditando, setVentaEditando] = useState<Venta | null>(null);
-  const porPagina = 15;
-
-  const { data, isLoading, refetch } = useListarVentas({ page: pagina, per_page: porPagina });
-  const eliminarMutation = useEliminarVenta({
-    mutation: { onSuccess: () => { refetch(); } },
-  });
-
-  const ventas = data?.status === 200 ? data.data : null;
-
-  const cerrarModalYRefrescar = () => {
-    setModalAbierto(false);
-    refetch();
-  };
-
-  const cerrarEdicionYRefrescar = () => {
-    setVentaEditando(null);
-    refetch();
-  };
+  const {
+    filtros,
+    cambiarFiltro,
+    modalAbierto,
+    setModalAbierto,
+    ventaEditando,
+    setVentaEditando,
+    porPagina,
+    ventas,
+    isLoading,
+    eliminarMutation,
+    cerrarModalYRefrescar,
+    cerrarEdicionYRefrescar,
+  } = useListaVentas();
 
   return (
     <div className="flex flex-col gap-4">
@@ -44,6 +38,24 @@ function ListaVentas() {
           <p className="text-sm text-muted-foreground">{ventas ? `${ventas.total} registros` : ''}</p>
         </div>
         <Button onClick={() => setModalAbierto(true)}>+ Nueva Venta</Button>
+      </div>
+
+      {/* Filtros de fecha */}
+      <div className="flex flex-wrap gap-3 items-center">
+        <label className="text-sm text-muted-foreground">Desde</label>
+        <Input
+          type="date"
+          value={filtros.desde}
+          onChange={(e) => cambiarFiltro('desde', e.target.value)}
+          className="max-w-40"
+        />
+        <label className="text-sm text-muted-foreground">Hasta</label>
+        <Input
+          type="date"
+          value={filtros.hasta}
+          onChange={(e) => cambiarFiltro('hasta', e.target.value)}
+          className="max-w-40"
+        />
       </div>
 
       <Dialog open={modalAbierto} onOpenChange={setModalAbierto}>
@@ -55,7 +67,6 @@ function ListaVentas() {
         </DialogContent>
       </Dialog>
 
-      {/* [283A-22] Dialog de edición — reutiliza FormularioVenta con venta pre-cargada */}
       <Dialog open={!!ventaEditando} onOpenChange={(open) => { if (!open) setVentaEditando(null); }}>
         <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -123,9 +134,9 @@ function ListaVentas() {
           </div>
 
           <div className="flex items-center justify-between">
-            <Button variant="outline" size="sm" disabled={pagina <= 1} onClick={() => setPagina(pagina - 1)}>Anterior</Button>
-            <span className="text-sm text-muted-foreground">Página {pagina} de {Math.ceil(ventas.total / porPagina)}</span>
-            <Button variant="outline" size="sm" disabled={pagina * porPagina >= ventas.total} onClick={() => setPagina(pagina + 1)}>Siguiente</Button>
+            <Button variant="outline" size="sm" disabled={filtros.pagina <= 1} onClick={() => cambiarFiltro('pagina', filtros.pagina - 1)}>Anterior</Button>
+            <span className="text-sm text-muted-foreground">Página {filtros.pagina} de {Math.ceil(ventas.total / porPagina)}</span>
+            <Button variant="outline" size="sm" disabled={filtros.pagina * porPagina >= ventas.total} onClick={() => cambiarFiltro('pagina', filtros.pagina + 1)}>Siguiente</Button>
           </div>
         </>
       ) : (

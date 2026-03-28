@@ -1560,6 +1560,11 @@ estado?: string | null;
  * @nullable
  */
 turno?: string | null;
+/**
+ * B├║squeda por nombre o apellidos del cliente
+ * @nullable
+ */
+busqueda?: string | null;
 };
 
 export type NoShowStatsParams = {

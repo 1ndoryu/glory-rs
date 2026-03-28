@@ -80,16 +80,7 @@ pub async fn listar_reservas(
     auth: AuthUser,
     Query(params): Query<ReservasQuery>,
 ) -> Result<Json<ReservasPaginadas>, AppError> {
-    let reservas = ReservaService::list(
-        &state.pool,
-        auth.user_id,
-        params.page,
-        params.per_page,
-        params.fecha,
-        params.estado.as_deref(),
-        params.turno.as_deref(),
-    )
-    .await?;
+    let reservas = ReservaService::list(&state.pool, auth.user_id, &params).await?;
     Ok(Json(reservas))
 }
 

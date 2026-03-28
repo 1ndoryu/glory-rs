@@ -10,7 +10,7 @@ use uuid::Uuid;
 use crate::errors::AppError;
 use crate::models::{
     ActualizarReservaRequest, CrearReservaRequest, NoShowStats, Reserva, ReservasConteo,
-    ReservasPaginadas, ResumenDiario,
+    ReservasPaginadas, ReservasQuery, ResumenDiario,
 };
 use crate::repositories::reserva::{ActualizarReservaData, FiltrosReserva, NuevaReserva};
 use crate::repositories::{PlanoSalaRepository, ReservaRepository};
@@ -169,36 +169,38 @@ impl ReservaService {
     pub async fn list(
         pool: &PgPool,
         user_id: Uuid,
-        page: i64,
-        per_page: i64,
-        fecha: Option<chrono::NaiveDate>,
-        estado: Option<&str>,
-        turno: Option<&str>,
+        query: &ReservasQuery,
     ) -> Result<ReservasPaginadas, AppError> {
         /* 263A-6: Mapear turno a rango horario */
-        let (hora_desde, hora_hasta) = Self::turno_a_horas(turno);
+        let (hora_desde, hora_hasta) = Self::turno_a_horas(query.turno.as_deref());
 
         /* [263A-20] Normalizar filtros vacíos a None.
          * Orval puede enviar estado="" o turno="" como query param
          * en vez de omitirlo, lo que causa que el SQL busque estado = '' */
-        let estado_normalizado = estado.filter(|s| !s.is_empty()).map(String::from);
+        let estado_normalizado = query.estado.as_deref()
+            .filter(|s| !s.is_empty())
+            .map(String::from);
+        let busqueda_normalizada = query.busqueda.as_deref()
+            .filter(|s| !s.is_empty())
+            .map(String::from);
 
         let filtros = FiltrosReserva {
             user_id,
-            page,
-            per_page,
-            fecha,
+            page: query.page,
+            per_page: query.per_page,
+            fecha: query.fecha,
             estado: estado_normalizado,
             hora_desde,
             hora_hasta,
+            busqueda: busqueda_normalizada,
         };
 
         let (items, total) = ReservaRepository::list(pool, &filtros).await?;
         Ok(ReservasPaginadas {
             items,
             total,
-            page,
-            per_page,
+            page: query.page,
+            per_page: query.per_page,
         })
     }
 

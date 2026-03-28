@@ -187,6 +187,7 @@ impl ChatbotService {
             estado: None,
             hora_desde: None,
             hora_hasta: None,
+            busqueda: None,
         };
 
         let resultado = ReservaRepository::list(pool, &filtros).await?;

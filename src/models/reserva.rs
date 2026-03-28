@@ -122,6 +122,8 @@ pub struct ReservasQuery {
     pub fecha: Option<NaiveDate>,
     pub estado: Option<String>,
     pub turno: Option<String>,
+    /// Búsqueda por nombre o apellidos del cliente
+    pub busqueda: Option<String>,
 }
 
 /// Resumen diario de reservas — para la vista mes

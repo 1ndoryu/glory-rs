@@ -53,6 +53,13 @@ function ListaReservas() {
       {/* Filtros */}
       <div className="flex flex-wrap gap-3">
         <Input
+          type="search"
+          placeholder="Buscar por nombre, apellidos o teléfono..."
+          value={filtros.busqueda}
+          onChange={(e) => cambiarFiltro('busqueda', e.target.value)}
+          className="max-w-xs"
+        />
+        <Input
           type="date"
           value={filtros.fecha}
           onChange={(e) => cambiarFiltro('fecha', e.target.value)}
