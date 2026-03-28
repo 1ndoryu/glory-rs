@@ -57,7 +57,7 @@
 
 ~~9. Ya lo habia dicho antes, el modal de Nuevo Gasto debe ser mas grande, un poco.~~ → 283A-19
 
-10. Cumple con # Plan: Glory-RS como Framework Reutilizable. 
+10. ~~Cumple con # Plan: Glory-RS como Framework Reutilizable.~~ → 283A-32
 
 11. Supongo que lo de  /* [283A-17] Catch unique constraint (zona_id, numero) para devolver
          * Conflict en vez de 500 cuando el número de mesa ya existe en la zona. */ 
