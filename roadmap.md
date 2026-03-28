@@ -139,4 +139,4 @@ Tarea Final. ~~Actualiza el despliege con coolify-manager-rs~~ → 283A-33
 ~~283A-45: Ancho formulario plantilla/campaña = 322px → normal~~ → completada
 ~~283A-46: Select.Item value="" en nueva reserva~~ → completada
 ~~283A-47: "manana" en vez de "mañana" en turnos~~ → completada
-283A-48: Despliegue final
+~~283A-48: Despliegue final~~ → completada
