@@ -26,7 +26,7 @@ export default function FormularioPlantilla() {
   const f = useFormularioPlantilla();
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
+    <div className="mx-auto max-w-3xl w-full space-y-6">
       <Card>
         <CardHeader>
           <CardTitle>Nueva Plantilla WhatsApp</CardTitle>

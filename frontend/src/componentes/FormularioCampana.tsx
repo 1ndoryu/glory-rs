@@ -46,7 +46,7 @@ export default function FormularioCampana() {
   const f = useFormularioCampana();
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
+    <div className="mx-auto max-w-3xl w-full space-y-6">
       {/* Nombre y descripción */}
       <Card>
         <CardHeader>
