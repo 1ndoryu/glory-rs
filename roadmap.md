@@ -43,8 +43,12 @@
 
 37.1. Las acciones rápidas están mal posicionadas, deberían ir en la esquina arriba a la misma altura de elegir la fecha, pero a la derecha.
 
-39. Warning: Function components cannot be given refs (forwardRef) en SidebarMenuButton y Button — cuando entro al panel hay warnings de consola. Además los 401 Unauthorized son porque el backend no estaba corriendo, pero los warnings de forwardRef deben corregirse.
+37.2 Los botones siguiente y anterior del calendario se ven mal.
+
+~~39. Warning: Function components cannot be given refs (forwardRef) en SidebarMenuButton y Button — cuando entro al panel hay warnings de consola. Además los 401 Unauthorized son porque el backend no estaba corriendo, pero los warnings de forwardRef deben corregirse.~~ → 283A-6
 
 40. Los botones de venta y gasto en el panel lateral deberían abrir el modal de crear venta o gasto en vez de ir a la página, ya hay botones para eso.
 
-41. Cambiar dark mode a white sigue sin funcionar.
+~~41. Cambiar dark mode a white sigue sin funcionar.~~ → 283A-6
+
+42. El titulo de la pestaña en el navegador dice Glory RS, ajustar esto en todos lados para que diga cosas coherente

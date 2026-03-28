@@ -296,7 +296,15 @@ const sidebarMenuButtonVariants = cva('peer/menu-button group/menu-button flex w
     }
 });
 
-function SidebarMenuButton({
+/* [283A-6] forwardRef requerido en React 18 para que asChild de radix funcione */
+const SidebarMenuButton = React.forwardRef<
+    HTMLButtonElement,
+    React.ComponentProps<'button'> & {
+        asChild?: boolean;
+        isActive?: boolean;
+        tooltip?: string | React.ComponentProps<typeof TooltipContent>;
+    } & VariantProps<typeof sidebarMenuButtonVariants>
+>(({
     asChild = false,
     isActive = false,
     variant = 'default',
@@ -304,15 +312,11 @@ function SidebarMenuButton({
     tooltip,
     className,
     ...props
-}: React.ComponentProps<'button'> & {
-    asChild?: boolean;
-    isActive?: boolean;
-    tooltip?: string | React.ComponentProps<typeof TooltipContent>;
-} & VariantProps<typeof sidebarMenuButtonVariants>) {
+}, ref) => {
     const Comp = asChild ? Slot.Root : 'button';
     const {isMobile, state} = useSidebar();
 
-    const button = <Comp data-slot="sidebar-menu-button" data-sidebar="menu-button" data-size={size} data-active={isActive} className={cn(sidebarMenuButtonVariants({variant, size}), className)} {...props} />;
+    const button = <Comp data-slot="sidebar-menu-button" data-sidebar="menu-button" data-size={size} data-active={isActive} className={cn(sidebarMenuButtonVariants({variant, size}), className)} ref={ref} {...props} />;
 
     if (!tooltip) {
         return button;
@@ -330,7 +334,8 @@ function SidebarMenuButton({
             <TooltipContent side="right" align="center" hidden={state !== 'collapsed' || isMobile} {...tooltip} />
         </Tooltip>
     );
-}
+});
+SidebarMenuButton.displayName = 'SidebarMenuButton';
 
 function SidebarMenuAction({
     className,
