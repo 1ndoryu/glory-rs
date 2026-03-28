@@ -51,10 +51,10 @@ function FormularioReserva({ onExito }: Props) {
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="mesaId">Mesa</Label>
-            <Select value={campos.mesaId} onValueChange={v => cambiarCampo('mesaId', v)}>
+            <Select value={campos.mesaId || '__none__'} onValueChange={v => cambiarCampo('mesaId', v === '__none__' ? '' : v)}>
               <SelectTrigger id="mesaId"><SelectValue placeholder="Sin mesa" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Sin mesa</SelectItem>
+                <SelectItem value="__none__">Sin mesa</SelectItem>
                 {mesasDisponibles.map(m => (
                   <SelectItem key={m.id} value={m.id}>Mesa {m.numero} — {m.zona}</SelectItem>
                 ))}
