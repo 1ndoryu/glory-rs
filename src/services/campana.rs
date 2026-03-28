@@ -1,7 +1,7 @@
 /* [263A-23] Servicio de campañas de marketing.
  * Lógica de negocio: validación de canales/segmentos, segmentación,
- * generación de destinatarios y envío (stub por ahora — APIs externas pendientes).
- * El envío real de SMS/WhatsApp requiere integración con gateway externo. */
+ * generación de destinatarios y envío.
+ * [283A-23] Email real via SMTP (integraciones_marketing). SMS/WhatsApp pendientes. */
 
 use sqlx::PgPool;
 use uuid::Uuid;
@@ -12,9 +12,12 @@ use crate::models::{
     SegmentoPreview, CANALES_VALIDOS, SEGMENTOS_VALIDOS,
 };
 use crate::repositories::campana::{
-    ActualizarCampanaData, NuevaCampana, NuevoDestinatario,
+    ActualizarCampanaData, ClienteSegmentado, NuevaCampana, NuevoDestinatario,
 };
+use crate::models::IntegracionMarketing;
 use crate::repositories::CampanaRepository;
+use crate::repositories::IntegracionMarketingRepository;
+use crate::services::email::EmailService;
 
 pub struct CampanaService;
 
@@ -182,17 +185,11 @@ impl CampanaService {
         let total = i32::try_from(destinatarios.len()).unwrap_or(0);
         CampanaRepository::insertar_destinatarios(pool, id, &destinatarios).await?;
 
-        /* Stub de envío: logueamos en vez de enviar realmente.
-         * Cuando se configure SMS gateway / SMTP / WhatsApp Business API,
-         * aquí se iterarían los destinatarios y se enviaría por canal. */
-        tracing::info!(
-            "Campaña '{}' ({}) — {} destinatarios generados en {} canales. \
-             Envío real pendiente de integración con providers.",
-            campana.nombre,
-            id,
-            total,
-            campana.canales.join(", ")
-        );
+        /* [283A-23] Envío real delegado a función libre para cumplir límite de líneas */
+        let integ_mkt = IntegracionMarketingRepository::obtener_o_crear(pool, user_id).await?;
+        enviar_por_canales(&integ_mkt, &clientes, &campana).await;
+
+        tracing::info!("Campaña '{}' ({}) — {} destinatarios enviados", campana.nombre, id, total);
 
         let campana_actualizada =
             CampanaRepository::set_estado(pool, id, user_id, "enviada", total)
@@ -225,4 +222,55 @@ impl CampanaService {
         }
         Ok(())
     }
+}
+
+use crate::services::meta_whatsapp::MetaWhatsappService;
+use crate::services::twilio::TwilioService;
+
+/* [283A-23] Función libre que envía la campaña por cada canal configurado.
+ * Extraída de `enviar()` para cumplir el límite de líneas de clippy.
+ * Email via SMTP, SMS via Twilio, `WhatsApp` via Meta Cloud API. */
+async fn enviar_por_canales(
+    integ: &IntegracionMarketing,
+    clientes: &[ClienteSegmentado],
+    campana: &Campana,
+) {
+    let mut enviados = 0u32;
+    let mut errores = 0u32;
+
+    for cliente in clientes {
+        for canal in &campana.canales {
+            let resultado = match canal.as_str() {
+                "email" if cliente.consentimiento_comercial_email && !cliente.email.is_empty() => {
+                    EmailService::enviar_campana(integ, &cliente.email, &campana.nombre, &campana.cuerpo_mensaje)
+                        .await
+                        .map_err(|e| e.to_string())
+                }
+                "sms" if cliente.consentimiento_comercial_sms && !cliente.telefono.is_empty() => {
+                    let numero = format!("{}{}", cliente.prefijo_telefono, cliente.telefono);
+                    TwilioService::enviar_sms(integ, &numero, &campana.cuerpo_mensaje)
+                        .await
+                        .map_err(|e| e.to_string())
+                }
+                "whatsapp" if cliente.consentimiento_comercial_sms && !cliente.telefono.is_empty() => {
+                    let numero = format!("{}{}", cliente.prefijo_telefono, cliente.telefono);
+                    MetaWhatsappService::enviar_mensaje(integ, &numero, &campana.cuerpo_mensaje)
+                        .await
+                        .map_err(|e| e.to_string())
+                }
+                _ => continue,
+            };
+
+            match resultado {
+                Ok(true) => enviados += 1,
+                Ok(false) => {} /* no configurado — ya logueado en el servicio */
+                Err(e) => {
+                    tracing::error!("Error enviando {} a cliente {}: {}", canal, cliente.id, e);
+                    errores += 1;
+                }
+            }
+        }
+    }
+
+    tracing::info!("Envío completado: {} enviados, {} errores", enviados, errores);
 }

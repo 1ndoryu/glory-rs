@@ -78,3 +78,7 @@ pub use api_key::{
 };
 pub use digitalizacion::{DatosDocumentoExtraidos, DigitalizarDocumentoRequest};
 pub use notificacion::{Notificacion, NotificacionEvent};
+mod integracion_marketing;
+pub use integracion_marketing::{
+    ActualizarIntegracionesRequest, IntegracionMarketing, IntegracionMarketingPublica,
+};

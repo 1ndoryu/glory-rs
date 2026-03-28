@@ -28,4 +28,6 @@ pub mod recordatorio;
 pub use recordatorio::RecordatorioRepository;
 pub use reserva::ReservaRepository;
 pub use user::UserRepository;
+mod integracion_marketing;
+pub use integracion_marketing::IntegracionMarketingRepository;
 pub use venta::VentaRepository;

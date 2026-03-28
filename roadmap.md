@@ -77,10 +77,16 @@ Es un error que se puede evitar de nuevo con alguna regla en sentinel, pero si n
 
 18. Ok ya cambio el tamaño pero como se intento varias veces ahora el tamaño es muy grande, reducelo un poco, a 512 como el resto de modales.
 
-19. Vi que hiciste la auditoria de marketing, haz lo que falta.
+19. ~~Vi que hiciste la auditoria de marketing, haz lo que falta.~~ → 283A-23
 
 ~~20. Las mesas no deberían salirse del plano, tambien veo que las mesas ahora no se actualizan en reserva y que el mensae de error al crear una mesa con un numero usado es "ocurrio un error en la base de datos"~~ → 283A-24
 
-21. Los cuadros de meses deberian tener un icono de mesa
+21. Los cuadros de meses deberian tener un icono de mesa.
+
+22. Agregar una opcion para reportar errores, los erores llegan a mi correo andoryyu@gmail.com
+
+23. 283A-24, si bien las mesas ya no se salen, recuerda que habiamos dicho que el plano ahora debería expandirse el 100% de ancho pero ajam, parece que no puedo mover mas alla de 600px de ancho, y en reservas el plano no esta ocupando el 100% del ancho, revisa eso.
+
+23.1 Creo que podemos evitar problemas futuros en donde haya espacio para mesas agregando la funcionalidad de zoom, esto para que la funcionalidad anterior no quede inutil sería simplemnente reducir el tamaño de las mesas o agrandar segun el zoom. 
 
 Tarea Final. Actualiza el despliege con coolify-manager-rs

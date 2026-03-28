@@ -26,8 +26,10 @@ import type {
 
 import type {
   ActualizarConfiguracionRequest,
+  ActualizarIntegracionesRequest,
   ConfiguracionRestaurante,
-  ErrorResponse
+  ErrorResponse,
+  IntegracionMarketingPublica
 } from '../gestiNRestauranteAPI.schemas';
 
 import { customInstance } from '../../axios-instance';
@@ -247,4 +249,215 @@ export const useActualizarConfiguracion = <TError = ErrorResponse,
         TContext
       > => {
       return useMutation(getActualizarConfiguracionMutationOptions(options), queryClient);
+    }
+    /**
+ * @summary Obtener estado de integraciones (sin exponer credentials)
+ */
+export type obtenerIntegracionesResponse200 = {
+  data: IntegracionMarketingPublica
+  status: 200
+}
+
+export type obtenerIntegracionesResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type obtenerIntegracionesResponseSuccess = (obtenerIntegracionesResponse200) & {
+  headers: Headers;
+};
+export type obtenerIntegracionesResponseError = (obtenerIntegracionesResponse401) & {
+  headers: Headers;
+};
+
+export type obtenerIntegracionesResponse = (obtenerIntegracionesResponseSuccess | obtenerIntegracionesResponseError)
+
+export const getObtenerIntegracionesUrl = () => {
+
+
+
+
+  return `/api/configuracion/integraciones`
+}
+
+export const obtenerIntegraciones = async ( options?: RequestInit): Promise<obtenerIntegracionesResponse> => {
+
+  return customInstance<obtenerIntegracionesResponse>(getObtenerIntegracionesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getObtenerIntegracionesQueryKey = () => {
+    return [
+    `/api/configuracion/integraciones`
+    ] as const;
+    }
+
+
+export const getObtenerIntegracionesQueryOptions = <TData = Awaited<ReturnType<typeof obtenerIntegraciones>>, TError = ErrorResponse>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerIntegraciones>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getObtenerIntegracionesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof obtenerIntegraciones>>> = ({ signal }) => obtenerIntegraciones({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof obtenerIntegraciones>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ObtenerIntegracionesQueryResult = NonNullable<Awaited<ReturnType<typeof obtenerIntegraciones>>>
+export type ObtenerIntegracionesQueryError = ErrorResponse
+
+
+export function useObtenerIntegraciones<TData = Awaited<ReturnType<typeof obtenerIntegraciones>>, TError = ErrorResponse>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerIntegraciones>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof obtenerIntegraciones>>,
+          TError,
+          Awaited<ReturnType<typeof obtenerIntegraciones>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useObtenerIntegraciones<TData = Awaited<ReturnType<typeof obtenerIntegraciones>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerIntegraciones>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof obtenerIntegraciones>>,
+          TError,
+          Awaited<ReturnType<typeof obtenerIntegraciones>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useObtenerIntegraciones<TData = Awaited<ReturnType<typeof obtenerIntegraciones>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerIntegraciones>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Obtener estado de integraciones (sin exponer credentials)
+ */
+
+export function useObtenerIntegraciones<TData = Awaited<ReturnType<typeof obtenerIntegraciones>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenerIntegraciones>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getObtenerIntegracionesQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+/**
+ * @summary Actualizar credentials de integraciones de marketing
+ */
+export type actualizarIntegracionesResponse200 = {
+  data: IntegracionMarketingPublica
+  status: 200
+}
+
+export type actualizarIntegracionesResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type actualizarIntegracionesResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type actualizarIntegracionesResponseSuccess = (actualizarIntegracionesResponse200) & {
+  headers: Headers;
+};
+export type actualizarIntegracionesResponseError = (actualizarIntegracionesResponse401 | actualizarIntegracionesResponse422) & {
+  headers: Headers;
+};
+
+export type actualizarIntegracionesResponse = (actualizarIntegracionesResponseSuccess | actualizarIntegracionesResponseError)
+
+export const getActualizarIntegracionesUrl = () => {
+
+
+
+
+  return `/api/configuracion/integraciones`
+}
+
+export const actualizarIntegraciones = async (actualizarIntegracionesRequest: ActualizarIntegracionesRequest, options?: RequestInit): Promise<actualizarIntegracionesResponse> => {
+
+  return customInstance<actualizarIntegracionesResponse>(getActualizarIntegracionesUrl(),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      actualizarIntegracionesRequest,)
+  }
+);}
+
+
+
+
+export const getActualizarIntegracionesMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof actualizarIntegraciones>>, TError,{data: ActualizarIntegracionesRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof actualizarIntegraciones>>, TError,{data: ActualizarIntegracionesRequest}, TContext> => {
+
+const mutationKey = ['actualizarIntegraciones'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof actualizarIntegraciones>>, {data: ActualizarIntegracionesRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  actualizarIntegraciones(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ActualizarIntegracionesMutationResult = NonNullable<Awaited<ReturnType<typeof actualizarIntegraciones>>>
+    export type ActualizarIntegracionesMutationBody = ActualizarIntegracionesRequest
+    export type ActualizarIntegracionesMutationError = ErrorResponse
+
+    /**
+ * @summary Actualizar credentials de integraciones de marketing
+ */
+export const useActualizarIntegraciones = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof actualizarIntegraciones>>, TError,{data: ActualizarIntegracionesRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof actualizarIntegraciones>>,
+        TError,
+        {data: ActualizarIntegracionesRequest},
+        TContext
+      > => {
+      return useMutation(getActualizarIntegracionesMutationOptions(options), queryClient);
     }

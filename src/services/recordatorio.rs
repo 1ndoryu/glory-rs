@@ -1,6 +1,7 @@
 /* [263A-25] Servicio de recordatorios automáticos.
  * CRUD de reglas + lógica central del scheduler: buscar reservas pendientes,
- * enviar notificaciones (stub), registrar envíos. */
+ * enviar notificaciones, registrar envíos.
+ * [283A-23] Envío real de email via SMTP (integraciones_marketing). */
 
 use sqlx::PgPool;
 use uuid::Uuid;
@@ -11,6 +12,10 @@ use crate::models::{
     ReglasPaginadas, CANALES_RECORDATORIO,
 };
 use crate::repositories::recordatorio::{ActualizarReglaData, NuevaRegla, RecordatorioRepository};
+use crate::repositories::IntegracionMarketingRepository;
+use crate::services::email::EmailService;
+use crate::services::meta_whatsapp::MetaWhatsappService;
+use crate::services::twilio::TwilioService;
 
 pub struct RecordatorioService;
 
@@ -123,8 +128,8 @@ impl RecordatorioService {
         Ok(HistorialRecordatorios { items, total, page: p, per_page: pp })
     }
 
-    /* Ejecuta un ciclo del scheduler: busca reservas pendientes y envía recordatorios.
-     * Retorna cuántos recordatorios se procesaron. */
+    /* [283A-23] Ejecuta un ciclo del scheduler: busca reservas pendientes y envía recordatorios.
+     * Email se envía real via SMTP si está configurado. SMS/WhatsApp siguen como stub. */
     pub async fn ejecutar_ciclo(pool: &PgPool) -> Result<usize, AppError> {
         let pendientes = RecordatorioRepository::reservas_pendientes_recordatorio(pool)
             .await
@@ -132,8 +137,12 @@ impl RecordatorioService {
 
         let mut procesados = 0;
 
+        /* Cache de integraciones por user_id para evitar queries repetidas */
+        let mut cache_integ: std::collections::HashMap<Uuid, crate::models::IntegracionMarketing> =
+            std::collections::HashMap::new();
+
         for p in &pendientes {
-            let resultado = enviar_recordatorio(p).await;
+            let resultado = enviar_recordatorio(pool, p, &mut cache_integ).await;
 
             let (estado, error) = match resultado {
                 Ok(()) => ("enviado", None),
@@ -172,23 +181,65 @@ fn validar_canal(canal: &str) -> Result<(), AppError> {
     Ok(())
 }
 
-/* Stub de envío de recordatorio. Cuando se integre con proveedores reales
- * (Twilio SMS, SMTP email, Meta WhatsApp API), reemplazar esta función.
- * Por ahora solo loguea la intención. Se mantiene async porque la
- * implementación real será async (llamadas HTTP a Twilio/Meta). */
-#[allow(clippy::unused_async)]
+/* [283A-23] Envío real de recordatorio por canal.
+ * Email: SMTP. SMS: Twilio. `WhatsApp`: Meta Cloud API.
+ * Todos dependen de las credenciales en integraciones_marketing. */
 async fn enviar_recordatorio(
+    pool: &PgPool,
     p: &crate::repositories::recordatorio::ReservaPendienteRecordatorio,
+    cache: &mut std::collections::HashMap<Uuid, crate::models::IntegracionMarketing>,
 ) -> Result<(), String> {
-    tracing::info!(
-        canal = %p.canal,
-        reserva = %p.reserva_id,
-        cliente = %p.nombre_cliente,
-        fecha = %p.fecha,
-        hora = %p.hora,
-        "Enviando recordatorio de reserva"
-    );
+    /* Renderizar el mensaje con placeholders */
+    let mensaje = p
+        .mensaje_plantilla
+        .replace("{nombre}", &p.nombre_cliente)
+        .replace("{fecha}", &p.fecha.to_string())
+        .replace("{hora}", &p.hora.format("%H:%M").to_string());
 
-    /* Simulación: el envío siempre tiene éxito en el stub */
-    Ok(())
+    /* Obtener integraciones del usuario (con cache) */
+    let integ = if let Some(cached) = cache.get(&p.user_id) {
+        cached.clone()
+    } else {
+        let i = IntegracionMarketingRepository::obtener_o_crear(pool, p.user_id)
+            .await
+            .map_err(|e| format!("Error obteniendo integraciones: {e}"))?;
+        cache.insert(p.user_id, i.clone());
+        i
+    };
+
+    match p.canal.as_str() {
+        "email" => {
+            let email_dest = p.email_cliente.as_deref().unwrap_or("");
+            if email_dest.is_empty() {
+                return Err("Cliente sin email".to_string());
+            }
+            let asunto = format!("Recordatorio: reserva del {}", p.fecha);
+            match EmailService::enviar_campana(&integ, email_dest, &asunto, &mensaje).await {
+                Ok(true) => Ok(()),
+                Ok(false) => Err("SMTP no configurado".to_string()),
+                Err(e) => Err(format!("Error SMTP: {e}")),
+            }
+        }
+        "sms" => {
+            if p.telefono.is_empty() {
+                return Err("Cliente sin teléfono".to_string());
+            }
+            match TwilioService::enviar_sms(&integ, &p.telefono, &mensaje).await {
+                Ok(true) => Ok(()),
+                Ok(false) => Err("Twilio no configurado".to_string()),
+                Err(e) => Err(format!("Error Twilio: {e}")),
+            }
+        }
+        "whatsapp" => {
+            if p.telefono.is_empty() {
+                return Err("Cliente sin teléfono".to_string());
+            }
+            match MetaWhatsappService::enviar_mensaje(&integ, &p.telefono, &mensaje).await {
+                Ok(true) => Ok(()),
+                Ok(false) => Err("Meta WhatsApp no configurado".to_string()),
+                Err(e) => Err(format!("Error Meta: {e}")),
+            }
+        }
+        otro => Err(format!("Canal desconocido: {otro}")),
+    }
 }

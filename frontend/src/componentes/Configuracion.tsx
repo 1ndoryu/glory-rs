@@ -1,13 +1,16 @@
 /* [263A-16] Configuración — reescrita con shadcn Card + Switch + Input.
  * Campos obligatorios al reservar, IVA por defecto, nombre del restaurante.
- * [283A-8] Sección de API key de Groq para digitalización de documentos. */
+ * [283A-8] Sección de API key de Groq para digitalización de documentos.
+ * [283A-23] Pestañas: General + Integraciones Marketing. */
 
 import { useConfiguracion } from '../hooks/useConfiguracion';
+import IntegracionesMarketing from './IntegracionesMarketing';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 function Configuracion() {
   const { config, cambiarCampo, guardar, mensaje, cargando, guardando } = useConfiguracion();
@@ -15,7 +18,13 @@ function Configuracion() {
   if (cargando) return <p className="text-sm text-muted-foreground">Cargando configuración...</p>;
 
   return (
-    <div className="flex flex-col gap-6 max-w-2xl">
+    <Tabs defaultValue="general" className="max-w-2xl">
+      <TabsList>
+        <TabsTrigger value="general">General</TabsTrigger>
+        <TabsTrigger value="integraciones">Integraciones</TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="general" className="flex flex-col gap-6 mt-4">
       <Card>
         <CardHeader>
           <CardTitle>Datos del restaurante</CardTitle>
@@ -129,7 +138,12 @@ function Configuracion() {
           </span>
         )}
       </div>
-    </div>
+      </TabsContent>
+
+      <TabsContent value="integraciones" className="mt-4">
+        <IntegracionesMarketing />
+      </TabsContent>
+    </Tabs>
   );
 }
 

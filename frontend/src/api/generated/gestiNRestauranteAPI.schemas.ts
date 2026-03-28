@@ -120,6 +120,36 @@ export interface ActualizarGastoRequest {
   tipo_documento?: TipoDocumento | null;
 }
 
+/**
+ * Request para actualizar integraciones de marketing
+ */
+export interface ActualizarIntegracionesRequest {
+  /** @nullable */
+  meta_access_token?: string | null;
+  /** @nullable */
+  meta_business_app_id?: string | null;
+  /** @nullable */
+  meta_waba_id?: string | null;
+  /** @nullable */
+  smtp_from_email?: string | null;
+  /** @nullable */
+  smtp_from_name?: string | null;
+  /** @nullable */
+  smtp_host?: string | null;
+  /** @nullable */
+  smtp_password?: string | null;
+  /** @nullable */
+  smtp_port?: number | null;
+  /** @nullable */
+  smtp_user?: string | null;
+  /** @nullable */
+  twilio_account_sid?: string | null;
+  /** @nullable */
+  twilio_auth_token?: string | null;
+  /** @nullable */
+  twilio_from_number?: string | null;
+}
+
 export interface ActualizarMesaRequest {
   /** @nullable */
   activa?: boolean | null;
@@ -980,6 +1010,24 @@ export interface HistorialRecordatorios {
   page: number;
   per_page: number;
   total: number;
+}
+
+/**
+ * Vista p├║blica: muestra solo si cada integraci├│n est├í configurada, sin exponer credentials
+ */
+export interface IntegracionMarketingPublica {
+  id: string;
+  meta_configurado: boolean;
+  /** @nullable */
+  meta_waba_id?: string | null;
+  smtp_configurado: boolean;
+  /** @nullable */
+  smtp_from_email?: string | null;
+  /** @nullable */
+  smtp_from_name?: string | null;
+  twilio_configurado: boolean;
+  /** @nullable */
+  twilio_from_number?: string | null;
 }
 
 /**
