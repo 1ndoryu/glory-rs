@@ -24,8 +24,8 @@ function useListaVentas() {
   const { data, isLoading, refetch } = useListarVentas({
     page: filtros.pagina,
     per_page: POR_PAGINA,
-    desde: filtros.desde || null,
-    hasta: filtros.hasta || null,
+    desde: filtros.desde || undefined,
+    hasta: filtros.hasta || undefined,
   });
 
   const eliminarMutation = useEliminarVenta({

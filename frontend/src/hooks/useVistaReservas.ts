@@ -32,10 +32,10 @@ function useVistaReservas() {
   const { data, isLoading, refetch } = useListarReservas({
     page: filtros.pagina,
     per_page: POR_PAGINA,
-    fecha: filtros.fecha || null,
-    estado: filtros.estado || null,
-    turno: filtros.turno || null,
-    busqueda: filtros.busqueda || null,
+    fecha: filtros.fecha || undefined,
+    estado: filtros.estado || undefined,
+    turno: filtros.turno || undefined,
+    busqueda: filtros.busqueda || undefined,
   });
 
   const eliminarMutation = useEliminarReserva({
