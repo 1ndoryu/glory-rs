@@ -12,7 +12,7 @@ mod gasto;
 mod plano_sala;
 mod plantilla_whatsapp;
 mod recordatorio;
-mod reserva;
+pub(crate) mod reserva;
 mod venta;
 
 pub use auth::AuthService;

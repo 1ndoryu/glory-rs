@@ -1,7 +1,9 @@
 /* 253A-5: Servicio de reservas
-   263A-6: Filtros turno/estado, num_mesa, apellidos_cliente, resumen mensual */
+   263A-6: Filtros turno/estado, num_mesa, apellidos_cliente, resumen mensual
+   283A-4: Validación de colisiones — impide crear/actualizar reservas que excedan
+   capacidad (mesas/personas) o que dupliquen una mesa ya ocupada en la franja. */
 
-use chrono::NaiveTime;
+use chrono::{NaiveDate, NaiveTime, Timelike};
 use sqlx::PgPool;
 use uuid::Uuid;
 
@@ -11,16 +13,124 @@ use crate::models::{
     ReservasPaginadas, ResumenDiario,
 };
 use crate::repositories::reserva::{ActualizarReservaData, FiltrosReserva, NuevaReserva};
-use crate::repositories::ReservaRepository;
+use crate::repositories::{PlanoSalaRepository, ReservaRepository};
 
 pub struct ReservaService;
 
+/// Duración estimada de una reserva en minutos (para calcular solapamiento)
+const DURACION_RESERVA_MIN: i64 = 90;
+
 impl ReservaService {
+    /// Verifica que hay capacidad (mesas y personas) para la reserva propuesta.
+    /// Si `exclude_id` es Some, excluye esa reserva del cálculo (para updates).
+    /// Si `mesa_id` es Some, también verifica que esa mesa concreta está libre.
+    pub async fn validar_disponibilidad(
+        pool: &PgPool,
+        user_id: Uuid,
+        fecha: NaiveDate,
+        hora: NaiveTime,
+        num_personas: i32,
+        mesa_id: Option<Uuid>,
+        exclude_id: Option<Uuid>,
+    ) -> Result<(), AppError> {
+        /* Obtener mesas activas y calcular capacidad total */
+        let zonas = PlanoSalaRepository::listar_zonas(pool, user_id).await?;
+        let mut todas_mesas = Vec::new();
+        for zona in &zonas {
+            let mesas = PlanoSalaRepository::listar_mesas_zona(pool, zona.id).await?;
+            for mesa in mesas {
+                if mesa.activa {
+                    todas_mesas.push(mesa);
+                }
+            }
+        }
+
+        /* Si no hay mesas configuradas, no se puede validar capacidad — dejar pasar
+         * (el restaurante aún no configuró el plano de sala). */
+        if todas_mesas.is_empty() {
+            return Ok(());
+        }
+
+        let total_mesas: i32 = todas_mesas.len().try_into().unwrap_or(i32::MAX);
+        let capacidad_total: i32 = todas_mesas.iter().map(|m| m.max_personas).sum();
+
+        /* Obtener reservas activas del día */
+        let reservas = ReservaRepository::listar_por_fecha(pool, user_id, fecha)
+            .await
+            .unwrap_or_default();
+
+        /* Calcular ocupación en la franja de la nueva reserva */
+        let nueva_start = i64::from(hora.hour()) * 60 + i64::from(hora.minute());
+        let nueva_end = nueva_start + DURACION_RESERVA_MIN;
+
+        let mut personas_reservadas = 0i32;
+        let mut mesas_ocupadas = 0i32;
+
+        for r in &reservas {
+            /* Excluir la reserva que estamos actualizando */
+            if exclude_id.is_some_and(|eid| eid == r.id) {
+                continue;
+            }
+
+            let r_start = i64::from(r.hora.hour()) * 60 + i64::from(r.hora.minute());
+            let r_end = r_start + DURACION_RESERVA_MIN;
+
+            /* Dos reservas solapan si una empieza antes de que termine la otra */
+            if nueva_start < r_end && nueva_end > r_start {
+                personas_reservadas += r.num_personas;
+                mesas_ocupadas += 1;
+
+                /* Si se pide una mesa concreta y ya está ocupada en esa franja */
+                if let Some(pid) = mesa_id {
+                    if r.mesa_id.is_some_and(|mid| mid == pid) {
+                        return Err(AppError::Conflict(
+                            "La mesa seleccionada ya está ocupada en esa franja horaria".into(),
+                        ));
+                    }
+                }
+            }
+        }
+
+        /* Verificar capacidad global */
+        if mesas_ocupadas >= total_mesas {
+            return Err(AppError::Conflict(
+                format!(
+                    "No hay mesas disponibles en la franja de {hora}. \
+                     Todas las {total_mesas} mesas están ocupadas."
+                ),
+            ));
+        }
+
+        if personas_reservadas + num_personas > capacidad_total {
+            let disponible = capacidad_total - personas_reservadas;
+            return Err(AppError::Conflict(
+                format!(
+                    "Capacidad insuficiente en la franja de {hora}. \
+                     Disponible: {disponible} personas, solicitado: {num_personas}."
+                ),
+            ));
+        }
+
+        Ok(())
+    }
+
     pub async fn create(
         pool: &PgPool,
         user_id: Uuid,
         req: CrearReservaRequest,
     ) -> Result<Reserva, AppError> {
+        /* [283A-4] Validar disponibilidad antes de insertar */
+        Self::validar_disponibilidad(
+            pool,
+            user_id,
+            req.fecha,
+            req.hora,
+            req.num_personas,
+            req.mesa_id,
+            None,
+        )
+        .await?;
+
         let estado = req
             .estado
             .as_ref()
@@ -117,6 +227,24 @@ impl ReservaService {
         user_id: Uuid,
         req: ActualizarReservaRequest,
     ) -> Result<Reserva, AppError> {
+        /* [283A-4] Si cambian fecha, hora, num_personas o mesa_id,
+         * validar que no haya colisión con el nuevo horario. */
+        let necesita_validacion = req.fecha.is_some()
+            || req.hora.is_some()
+            || req.num_personas.is_some()
+            || req.mesa_id.is_some();
+
+        if necesita_validacion {
+            let actual = Self::get(pool, id, user_id).await?;
+            let fecha = req.fecha.unwrap_or(actual.fecha);
+            let hora = req.hora.unwrap_or(actual.hora);
+            let personas = req.num_personas.unwrap_or(actual.num_personas);
+            let mesa = req.mesa_id.or(actual.mesa_id);
+
+            Self::validar_disponibilidad(pool, user_id, fecha, hora, personas, mesa, Some(id))
+                .await?;
+        }
+
         let estado_str = req.estado.as_ref().and_then(|e| {
             serde_json::to_value(e)
                 .ok()

@@ -239,8 +239,369 @@ Es decir, asumo que hay que hacer una revisión de todo para ver que partes, que
 
 ~~34. Vi que pusiste en español nombre de carpetas, las carpetas deben ir siempre en ingles.~~ → 283A-1 (regla agregada en test.instructions.md, renombrado omitido por riesgo)
 
-34. ¿El sistema ya es inteligente para que las reservas no chocen entre ellas? Ya sea en el panel o cuando el chatbot haga reservas, esto tiene que estar pulido. 
+~~34. ¿El sistema ya es inteligente para que las reservas no choquen entre ellas? Ya sea en el panel o cuando el chatbot haga reservas, esto tiene que estar pulido.~~ → 283A-4
 
 35. Falta una documetacion de la api para el chatbot. 
 
 36. Falta crear una documentacion completa y detallada de framework glory-rs, tambien hay un choque, he creado https://github.com/1ndoryu/glory-rs pero alli puse el template, y la carpeta /glory-rs entonces no que nombre ponerle al repositorio, lo que voy hacer es crear glory-rs-template, y alli ponemos el template, te cuidado con la perdida de de datos, recuerda que estamos en una rama, main es donde va el template y esta rama donde usamos el template para el proyecto de restaurante. Entonces el resultado final debe ser https://github.com/1ndoryu/glory-rs el framework y https://github.com/1ndoryu/glory-rs-template el template (ten cuidado con la perdida de datos por favor, que no se pierda nada)
+
+37. dentro del contenido de las tabs no hay gap, debería. 
+
+38. Borra todas las tareas completadas ¿acaso las reglas no indican dejar el roadmap siempre limpio de lo que se completo? 
+
+39. borra esto despues de completar es un log largo, cuando entro al panel nada carga y dice
+
+chunk-RPCDYKBN.js?v=c0b546d5:521 Warning: Function components cannot be given refs. Attempts to access this ref will fail. Did you mean to use React.forwardRef()?
+
+Check the render method of `Primitive.button.SlotClone`.
+    at SidebarMenuButton (http://localhost:5173/src/components/ui/sidebar.tsx:413:3)
+    at http://localhost:5173/node_modules/.vite/deps/radix-ui.js?v=6992b2d2:118:13
+    at http://localhost:5173/node_modules/.vite/deps/radix-ui.js?v=6992b2d2:95:13
+    at http://localhost:5173/node_modules/.vite/deps/radix-ui.js?v=6992b2d2:208:13
+    at http://localhost:5173/node_modules/.vite/deps/radix-ui.js?v=6992b2d2:118:13
+    at http://localhost:5173/node_modules/.vite/deps/radix-ui.js?v=6992b2d2:95:13
+    at http://localhost:5173/node_modules/.vite/deps/radix-ui.js?v=6992b2d2:208:13
+    at http://localhost:5173/node_modules/.vite/deps/radix-ui.js?v=6992b2d2:5983:13
+    at http://localhost:5173/node_modules/.vite/deps/radix-ui.js?v=6992b2d2:6528:13
+    at http://localhost:5173/node_modules/.vite/deps/radix-ui.js?v=6992b2d2:7649:13
+    at DropdownMenuTrigger (http://localhost:5173/src/components/ui/dropdown-menu.tsx:41:6)
+    at Provider4 (http://localhost:5173/node_modules/.vite/deps/radix-ui.js?v=6992b2d2:316:15)
+    at Provider4 (http://localhost:5173/node_modules/.vite/deps/radix-ui.js?v=6992b2d2:316:15)
+    at Provider4 (http://localhost:5173/node_modules/.vite/deps/radix-ui.js?v=6992b2d2:316:15)
+    at Popper (http://localhost:5173/node_modules/.vite/deps/radix-ui.js?v=6992b2d2:5975:11)
+    at Menu (http://localhost:5173/node_modules/.vite/deps/radix-ui.js?v=6992b2d2:6482:11)
+    at Provider4 (http://localhost:5173/node_modules/.vite/deps/radix-ui.js?v=6992b2d2:316:15)
+    at DropdownMenu (http://localhost:5173/node_modules/.vite/deps/radix-ui.js?v=6992b2d2:7614:5)
+    at DropdownMenu (http://localhost:5173/src/components/ui/dropdown-menu.tsx:21:6)
+    at li
+    at SidebarMenuItem (http://localhost:5173/src/components/ui/sidebar.tsx:387:28)
+    at ul
+    at SidebarMenu (http://localhost:5173/src/components/ui/sidebar.tsx:379:24)
+    at NavUser (http://localhost:5173/src/components/nav-user.tsx:38:24)
+    at div
+    at SidebarFooter (http://localhost:5173/src/components/ui/sidebar.tsx:321:26)
+    at div
+    at div
+    at div
+    at Sidebar (http://localhost:5173/src/components/ui/sidebar.tsx:130:3)
+    at AppSidebar (http://localhost:5173/src/components/app-sidebar.tsx:115:33)
+    at div
+    at SidebarProvider (http://localhost:5173/src/components/ui/sidebar.tsx:47:3)
+    at Layout (http://localhost:5173/src/components/layout.tsx:25:23)
+    at RenderedRoute (http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=453c4986:4131:5)
+    at Routes (http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=453c4986:4601:5)
+    at QueryClientProvider (http://localhost:5173/node_modules/.vite/deps/@tanstack_react-query.js?v=2c5ee3ea:3194:3)
+    at Provider4 (http://localhost:5173/node_modules/.vite/deps/radix-ui.js?v=6992b2d2:316:15)
+    at TooltipProvider (http://localhost:5173/node_modules/.vite/deps/radix-ui.js?v=6992b2d2:15280:5)
+    at TooltipProvider (http://localhost:5173/src/components/ui/tooltip.tsx:20:3)
+    at ThemeProvider (http://localhost:5173/src/components/theme-provider.tsx:30:33)
+    at App (http://localhost:5173/src/App.tsx:53:23)
+    at Router (http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=453c4986:4544:15)
+    at BrowserRouter (http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=453c4986:5290:5)
+printWarning @ chunk-RPCDYKBN.js?v=c0b546d5:521
+error @ chunk-RPCDYKBN.js?v=c0b546d5:505
+validateFunctionComponentInDev @ chunk-RPCDYKBN.js?v=c0b546d5:15013
+mountIndeterminateComponent @ chunk-RPCDYKBN.js?v=c0b546d5:14988
+beginWork @ chunk-RPCDYKBN.js?v=c0b546d5:15914
+beginWork$1 @ chunk-RPCDYKBN.js?v=c0b546d5:19753
+performUnitOfWork @ chunk-RPCDYKBN.js?v=c0b546d5:19198
+workLoopSync @ chunk-RPCDYKBN.js?v=c0b546d5:19137
+renderRootSync @ chunk-RPCDYKBN.js?v=c0b546d5:19116
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=c0b546d5:18678
+workLoop @ chunk-RPCDYKBN.js?v=c0b546d5:197
+flushWork @ chunk-RPCDYKBN.js?v=c0b546d5:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=c0b546d5:384Comprende este error
+chunk-RPCDYKBN.js?v=c0b546d5:521 Warning: Function components cannot be given refs. Attempts to access this ref will fail. Did you mean to use React.forwardRef()?
+
+Check the render method of `Primitive.button.SlotClone`.
+    at Button (http://localhost:5173/src/components/ui/button.tsx:50:3)
+    at http://localhost:5173/node_modules/.vite/deps/radix-ui.js?v=6992b2d2:118:13
+    at http://localhost:5173/node_modules/.vite/deps/radix-ui.js?v=6992b2d2:95:13
+    at http://localhost:5173/node_modules/.vite/deps/radix-ui.js?v=6992b2d2:208:13
+    at http://localhost:5173/node_modules/.vite/deps/radix-ui.js?v=6992b2d2:118:13
+    at http://localhost:5173/node_modules/.vite/deps/radix-ui.js?v=6992b2d2:95:13
+    at http://localhost:5173/node_modules/.vite/deps/radix-ui.js?v=6992b2d2:208:13
+    at http://localhost:5173/node_modules/.vite/deps/radix-ui.js?v=6992b2d2:5983:13
+    at http://localhost:5173/node_modules/.vite/deps/radix-ui.js?v=6992b2d2:6528:13
+    at http://localhost:5173/node_modules/.vite/deps/radix-ui.js?v=6992b2d2:7649:13
+    at DropdownMenuTrigger (http://localhost:5173/src/components/ui/dropdown-menu.tsx:41:6)
+    at Provider4 (http://localhost:5173/node_modules/.vite/deps/radix-ui.js?v=6992b2d2:316:15)
+    at Provider4 (http://localhost:5173/node_modules/.vite/deps/radix-ui.js?v=6992b2d2:316:15)
+    at Provider4 (http://localhost:5173/node_modules/.vite/deps/radix-ui.js?v=6992b2d2:316:15)
+    at Popper (http://localhost:5173/node_modules/.vite/deps/radix-ui.js?v=6992b2d2:5975:11)
+    at Menu (http://localhost:5173/node_modules/.vite/deps/radix-ui.js?v=6992b2d2:6482:11)
+    at Provider4 (http://localhost:5173/node_modules/.vite/deps/radix-ui.js?v=6992b2d2:316:15)
+    at DropdownMenu (http://localhost:5173/node_modules/.vite/deps/radix-ui.js?v=6992b2d2:7614:5)
+    at DropdownMenu (http://localhost:5173/src/components/ui/dropdown-menu.tsx:21:6)
+    at ThemeToggle (http://localhost:5173/src/components/theme-toggle.tsx:29:24)
+    at li
+    at SidebarMenuItem (http://localhost:5173/src/components/ui/sidebar.tsx:387:28)
+    at ul
+    at SidebarMenu (http://localhost:5173/src/components/ui/sidebar.tsx:379:24)
+    at NavUser (http://localhost:5173/src/components/nav-user.tsx:38:24)
+    at div
+    at SidebarFooter (http://localhost:5173/src/components/ui/sidebar.tsx:321:26)
+    at div
+    at div
+    at div
+    at Sidebar (http://localhost:5173/src/components/ui/sidebar.tsx:130:3)
+    at AppSidebar (http://localhost:5173/src/components/app-sidebar.tsx:115:33)
+    at div
+    at SidebarProvider (http://localhost:5173/src/components/ui/sidebar.tsx:47:3)
+    at Layout (http://localhost:5173/src/components/layout.tsx:25:23)
+    at RenderedRoute (http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=453c4986:4131:5)
+    at Routes (http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=453c4986:4601:5)
+    at QueryClientProvider (http://localhost:5173/node_modules/.vite/deps/@tanstack_react-query.js?v=2c5ee3ea:3194:3)
+    at Provider4 (http://localhost:5173/node_modules/.vite/deps/radix-ui.js?v=6992b2d2:316:15)
+    at TooltipProvider (http://localhost:5173/node_modules/.vite/deps/radix-ui.js?v=6992b2d2:15280:5)
+    at TooltipProvider (http://localhost:5173/src/components/ui/tooltip.tsx:20:3)
+    at ThemeProvider (http://localhost:5173/src/components/theme-provider.tsx:30:33)
+    at App (http://localhost:5173/src/App.tsx:53:23)
+    at Router (http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=453c4986:4544:15)
+    at BrowserRouter (http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=453c4986:5290:5)
+printWarning @ chunk-RPCDYKBN.js?v=c0b546d5:521
+error @ chunk-RPCDYKBN.js?v=c0b546d5:505
+validateFunctionComponentInDev @ chunk-RPCDYKBN.js?v=c0b546d5:15013
+mountIndeterminateComponent @ chunk-RPCDYKBN.js?v=c0b546d5:14988
+beginWork @ chunk-RPCDYKBN.js?v=c0b546d5:15914
+beginWork$1 @ chunk-RPCDYKBN.js?v=c0b546d5:19753
+performUnitOfWork @ chunk-RPCDYKBN.js?v=c0b546d5:19198
+workLoopSync @ chunk-RPCDYKBN.js?v=c0b546d5:19137
+renderRootSync @ chunk-RPCDYKBN.js?v=c0b546d5:19116
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=c0b546d5:18678
+workLoop @ chunk-RPCDYKBN.js?v=c0b546d5:197
+flushWork @ chunk-RPCDYKBN.js?v=c0b546d5:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=c0b546d5:384Comprende este error
+react-router-dom.js?v=453c4986:4436 ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+warnOnce @ react-router-dom.js?v=453c4986:4436
+logDeprecation @ react-router-dom.js?v=453c4986:4439
+logV6DeprecationWarnings @ react-router-dom.js?v=453c4986:4442
+(anónimas) @ react-router-dom.js?v=453c4986:5314
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=c0b546d5:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=c0b546d5:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=c0b546d5:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=c0b546d5:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=c0b546d5:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=c0b546d5:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=c0b546d5:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=c0b546d5:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=c0b546d5:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=c0b546d5:19432
+commitRoot @ chunk-RPCDYKBN.js?v=c0b546d5:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=c0b546d5:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=c0b546d5:18718
+workLoop @ chunk-RPCDYKBN.js?v=c0b546d5:197
+flushWork @ chunk-RPCDYKBN.js?v=c0b546d5:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=c0b546d5:384Comprende esta advertencia
+react-router-dom.js?v=453c4986:4436 ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+warnOnce @ react-router-dom.js?v=453c4986:4436
+logDeprecation @ react-router-dom.js?v=453c4986:4439
+logV6DeprecationWarnings @ react-router-dom.js?v=453c4986:4445
+(anónimas) @ react-router-dom.js?v=453c4986:5314
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=c0b546d5:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=c0b546d5:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=c0b546d5:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=c0b546d5:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=c0b546d5:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=c0b546d5:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=c0b546d5:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=c0b546d5:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=c0b546d5:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=c0b546d5:19432
+commitRoot @ chunk-RPCDYKBN.js?v=c0b546d5:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=c0b546d5:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=c0b546d5:18718
+workLoop @ chunk-RPCDYKBN.js?v=c0b546d5:197
+flushWork @ chunk-RPCDYKBN.js?v=c0b546d5:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=c0b546d5:384Comprende esta advertencia
+axios-instance.ts:29  GET http://localhost:3000/api/dashboard/resumen?year=2026&month=3 401 (Unauthorized)
+dispatchXhrRequest @ axios.js?v=4808762d:1784
+xhr @ axios.js?v=4808762d:1649
+dispatchRequest @ axios.js?v=4808762d:2210
+Promise.then
+_request @ axios.js?v=4808762d:2428
+request @ axios.js?v=4808762d:2324
+wrap @ axios.js?v=4808762d:8
+customInstance @ axios-instance.ts:29
+resumen @ dashboard.ts:201
+queryFn @ dashboard.ts:230
+fetchFn @ @tanstack_react-query.js?v=2c5ee3ea:1149
+run @ @tanstack_react-query.js?v=2c5ee3ea:842
+start @ @tanstack_react-query.js?v=2c5ee3ea:885
+fetch @ @tanstack_react-query.js?v=2c5ee3ea:1196
+executeFetch_fn @ @tanstack_react-query.js?v=2c5ee3ea:1706
+onSubscribe @ @tanstack_react-query.js?v=2c5ee3ea:1397
+subscribe @ @tanstack_react-query.js?v=2c5ee3ea:24
+(anónimas) @ @tanstack_react-query.js?v=2c5ee3ea:3410
+subscribeToStore @ chunk-RPCDYKBN.js?v=c0b546d5:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=c0b546d5:16915
+invokePassiveEffectMountInDEV @ chunk-RPCDYKBN.js?v=c0b546d5:18324
+invokeEffectsInDev @ chunk-RPCDYKBN.js?v=c0b546d5:19701
+commitDoubleInvokeEffectsInDEV @ chunk-RPCDYKBN.js?v=c0b546d5:19686
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=c0b546d5:19503
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=c0b546d5:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=c0b546d5:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=c0b546d5:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=c0b546d5:19432
+commitRoot @ chunk-RPCDYKBN.js?v=c0b546d5:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=c0b546d5:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=c0b546d5:18718
+workLoop @ chunk-RPCDYKBN.js?v=c0b546d5:197
+flushWork @ chunk-RPCDYKBN.js?v=c0b546d5:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=c0b546d5:384Comprende este error
+axios-instance.ts:29  GET http://localhost:3000/api/dashboard/reservas?year=2026&month=3 401 (Unauthorized)
+dispatchXhrRequest @ axios.js?v=4808762d:1784
+xhr @ axios.js?v=4808762d:1649
+dispatchRequest @ axios.js?v=4808762d:2210
+Promise.then
+_request @ axios.js?v=4808762d:2428
+request @ axios.js?v=4808762d:2324
+wrap @ axios.js?v=4808762d:8
+customInstance @ axios-instance.ts:29
+dashboardReservas @ dashboard.ts:77
+queryFn @ dashboard.ts:106
+fetchFn @ @tanstack_react-query.js?v=2c5ee3ea:1149
+run @ @tanstack_react-query.js?v=2c5ee3ea:842
+start @ @tanstack_react-query.js?v=2c5ee3ea:885
+fetch @ @tanstack_react-query.js?v=2c5ee3ea:1196
+executeFetch_fn @ @tanstack_react-query.js?v=2c5ee3ea:1706
+onSubscribe @ @tanstack_react-query.js?v=2c5ee3ea:1397
+subscribe @ @tanstack_react-query.js?v=2c5ee3ea:24
+(anónimas) @ @tanstack_react-query.js?v=2c5ee3ea:3410
+subscribeToStore @ chunk-RPCDYKBN.js?v=c0b546d5:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=c0b546d5:16915
+invokePassiveEffectMountInDEV @ chunk-RPCDYKBN.js?v=c0b546d5:18324
+invokeEffectsInDev @ chunk-RPCDYKBN.js?v=c0b546d5:19701
+commitDoubleInvokeEffectsInDEV @ chunk-RPCDYKBN.js?v=c0b546d5:19686
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=c0b546d5:19503
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=c0b546d5:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=c0b546d5:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=c0b546d5:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=c0b546d5:19432
+commitRoot @ chunk-RPCDYKBN.js?v=c0b546d5:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=c0b546d5:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=c0b546d5:18718
+workLoop @ chunk-RPCDYKBN.js?v=c0b546d5:197
+flushWork @ chunk-RPCDYKBN.js?v=c0b546d5:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=c0b546d5:384Comprende este error
+axios-instance.ts:29  GET http://localhost:3000/api/reservas/conteo 401 (Unauthorized)
+dispatchXhrRequest @ axios.js?v=4808762d:1784
+xhr @ axios.js?v=4808762d:1649
+dispatchRequest @ axios.js?v=4808762d:2210
+Promise.then
+_request @ axios.js?v=4808762d:2428
+request @ axios.js?v=4808762d:2324
+wrap @ axios.js?v=4808762d:8
+customInstance @ axios-instance.ts:29
+conteoReservas @ reservas.ts:298
+queryFn @ reservas.ts:327
+fetchFn @ @tanstack_react-query.js?v=2c5ee3ea:1149
+run @ @tanstack_react-query.js?v=2c5ee3ea:842
+start @ @tanstack_react-query.js?v=2c5ee3ea:885
+fetch @ @tanstack_react-query.js?v=2c5ee3ea:1196
+executeFetch_fn @ @tanstack_react-query.js?v=2c5ee3ea:1706
+onSubscribe @ @tanstack_react-query.js?v=2c5ee3ea:1397
+subscribe @ @tanstack_react-query.js?v=2c5ee3ea:24
+(anónimas) @ @tanstack_react-query.js?v=2c5ee3ea:3410
+subscribeToStore @ chunk-RPCDYKBN.js?v=c0b546d5:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=c0b546d5:16915
+invokePassiveEffectMountInDEV @ chunk-RPCDYKBN.js?v=c0b546d5:18324
+invokeEffectsInDev @ chunk-RPCDYKBN.js?v=c0b546d5:19701
+commitDoubleInvokeEffectsInDEV @ chunk-RPCDYKBN.js?v=c0b546d5:19686
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=c0b546d5:19503
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=c0b546d5:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=c0b546d5:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=c0b546d5:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=c0b546d5:19432
+commitRoot @ chunk-RPCDYKBN.js?v=c0b546d5:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=c0b546d5:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=c0b546d5:18718
+workLoop @ chunk-RPCDYKBN.js?v=c0b546d5:197
+flushWork @ chunk-RPCDYKBN.js?v=c0b546d5:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=c0b546d5:384Comprende este error
+axios-instance.ts:29  GET http://localhost:3000/api/dashboard/resumen?year=2026&month=3 401 (Unauthorized)
+dispatchXhrRequest @ axios.js?v=4808762d:1784
+xhr @ axios.js?v=4808762d:1649
+dispatchRequest @ axios.js?v=4808762d:2210
+Promise.then
+_request @ axios.js?v=4808762d:2428
+request @ axios.js?v=4808762d:2324
+wrap @ axios.js?v=4808762d:8
+customInstance @ axios-instance.ts:29
+resumen @ dashboard.ts:201
+queryFn @ dashboard.ts:230
+fetchFn @ @tanstack_react-query.js?v=2c5ee3ea:1149
+run @ @tanstack_react-query.js?v=2c5ee3ea:842
+(anónimas) @ @tanstack_react-query.js?v=2c5ee3ea:867
+Promise.then
+(anónimas) @ @tanstack_react-query.js?v=2c5ee3ea:863
+Promise.catch
+run @ @tanstack_react-query.js?v=2c5ee3ea:846
+start @ @tanstack_react-query.js?v=2c5ee3ea:885
+fetch @ @tanstack_react-query.js?v=2c5ee3ea:1196
+executeFetch_fn @ @tanstack_react-query.js?v=2c5ee3ea:1706
+onSubscribe @ @tanstack_react-query.js?v=2c5ee3ea:1397
+subscribe @ @tanstack_react-query.js?v=2c5ee3ea:24
+(anónimas) @ @tanstack_react-query.js?v=2c5ee3ea:3410
+subscribeToStore @ chunk-RPCDYKBN.js?v=c0b546d5:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=c0b546d5:16915
+invokePassiveEffectMountInDEV @ chunk-RPCDYKBN.js?v=c0b546d5:18324
+invokeEffectsInDev @ chunk-RPCDYKBN.js?v=c0b546d5:19701
+commitDoubleInvokeEffectsInDEV @ chunk-RPCDYKBN.js?v=c0b546d5:19686
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=c0b546d5:19503
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=c0b546d5:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=c0b546d5:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=c0b546d5:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=c0b546d5:19432
+commitRoot @ chunk-RPCDYKBN.js?v=c0b546d5:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=c0b546d5:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=c0b546d5:18718
+workLoop @ chunk-RPCDYKBN.js?v=c0b546d5:197
+flushWork @ chunk-RPCDYKBN.js?v=c0b546d5:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=c0b546d5:384Comprende este error
+axios-instance.ts:29  GET http://localhost:3000/api/reservas/conteo 401 (Unauthorized)
+dispatchXhrRequest @ axios.js?v=4808762d:1784
+xhr @ axios.js?v=4808762d:1649
+dispatchRequest @ axios.js?v=4808762d:2210
+Promise.then
+_request @ axios.js?v=4808762d:2428
+request @ axios.js?v=4808762d:2324
+wrap @ axios.js?v=4808762d:8
+customInstance @ axios-instance.ts:29
+conteoReservas @ reservas.ts:298
+queryFn @ reservas.ts:327
+fetchFn @ @tanstack_react-query.js?v=2c5ee3ea:1149
+run @ @tanstack_react-query.js?v=2c5ee3ea:842
+(anónimas) @ @tanstack_react-query.js?v=2c5ee3ea:867
+Promise.then
+(anónimas) @ @tanstack_react-query.js?v=2c5ee3ea:863
+Promise.catch
+run @ @tanstack_react-query.js?v=2c5ee3ea:846
+start @ @tanstack_react-query.js?v=2c5ee3ea:885
+fetch @ @tanstack_react-query.js?v=2c5ee3ea:1196
+executeFetch_fn @ @tanstack_react-query.js?v=2c5ee3ea:1706
+onSubscribe @ @tanstack_react-query.js?v=2c5ee3ea:1397
+subscribe @ @tanstack_react-query.js?v=2c5ee3ea:24
+(anónimas) @ @tanstack_react-query.js?v=2c5ee3ea:3410
+subscribeToStore @ chunk-RPCDYKBN.js?v=c0b546d5:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=c0b546d5:16915
+invokePassiveEffectMountInDEV @ chunk-RPCDYKBN.js?v=c0b546d5:18324
+invokeEffectsInDev @ chunk-RPCDYKBN.js?v=c0b546d5:19701
+commitDoubleInvokeEffectsInDEV @ chunk-RPCDYKBN.js?v=c0b546d5:19686
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=c0b546d5:19503
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=c0b546d5:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=c0b546d5:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=c0b546d5:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=c0b546d5:19432
+commitRoot @ chunk-RPCDYKBN.js?v=c0b546d5:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=c0b546d5:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=c0b546d5:18718
+workLoop @ chunk-RPCDYKBN.js?v=c0b546d5:197
+flushWork @ chunk-RPCDYKBN.js?v=c0b546d5:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=c0b546d5:384Comprende este error
+axios-instance.ts:29  GET http://localhost:3000/api/dashboard/reservas?year=2026&month=3 401 (Unauthorized)
+
+40. Los botones de venta y gasto en el panel lateral deberia abrir el modal de crear venta o gasto en vez de ir la pagina, ya hay botones para eso. 
+
+41. Cambiar dark mode a white sigue sin funcionar!!!!!!!!!!!
+

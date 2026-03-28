@@ -13,6 +13,7 @@ use crate::models::{
 };
 use crate::repositories::reserva::{FiltrosReserva, NuevaReserva};
 use crate::repositories::{ConfiguracionRepository, PlanoSalaRepository, ReservaRepository};
+use crate::services::reserva::ReservaService;
 
 pub struct ChatbotService;
 
@@ -138,6 +139,18 @@ impl ChatbotService {
         user_id: Uuid,
         req: ChatbotCrearReservaRequest,
     ) -> Result<Reserva, AppError> {
+        /* [283A-4] Validar disponibilidad antes de insertar (misma lógica que el panel) */
+        ReservaService::validar_disponibilidad(
+            pool,
+            user_id,
+            req.fecha,
+            req.hora,
+            req.num_personas,
+            None, /* chatbot no asigna mesa concreta */
+            None,
+        )
+        .await?;
+
         let data = NuevaReserva {
             user_id,
             fecha: req.fecha,
