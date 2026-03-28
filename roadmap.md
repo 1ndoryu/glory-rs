@@ -227,7 +227,7 @@ DELETE http://localhost:3000/api/ventas/de507550-2c03-4a42-8717-d6a547058825 405
 
 ~~31. las tab son muy feas, usan un borde blanco que desentona con el resto de cosas, esto en dashboard, deberian ser tabs de shandc~~ → 263A-34
 
-32. El cliente comento que se necesita una api para que un chatbot de ia se pueda comunicar, sus palabras exactas son "Perdona Wan que no te lo comenté pero este sistema tienenq eu tener apis disponibles para conectar un chatbot externo que atienda a los clientes y pueda ver toda la info de las reservas para cuando hay hueco y que pueda registyrar las reservas en la base de datos", solo dice esto pero asumimos que necesita hacer mas cosas. 
+~~32. El cliente comento que se necesita una api para que un chatbot de ia se pueda comunicar, sus palabras exactas son "Perdona Wan que no te lo comenté pero este sistema tienenq eu tener apis disponibles para conectar un chatbot externo que atienda a los clientes y pueda ver toda la info de las reservas para cuando hay hueco y que pueda registyrar las reservas en la base de datos", solo dice esto pero asumimos que necesita hacer mas cosas.~~ → 283A-2
 
 33. El cliente tambien comento, sus palabras exactas "otro apunte también que, bueno, no sé si te influye en algo o no, pero te lo digo por si acaso. O sea, esta página web no es para que se registren un montón de propietarios de restaurantes. Es para que cada propietario entre ahí y registre los restaurantes que tiene, que normalmente será uno, porque es raro el caso de que haya una misma persona que tenga más de un restaurante.
 
