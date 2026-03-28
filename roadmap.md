@@ -128,8 +128,8 @@ Tarea Final. ~~Actualiza el despliege con coolify-manager-rs~~ → 283A-33
 
 ~~32. demo@restaurante.com demo1234 no funciona, dice "Credenciales incorrectas" los datos de prueba tienen que estar desplegados y un boton para eliminar los datos de prueba y tambien para volver a desplegar los datos de prueba.~~ → 283A-39
 
-33. Antes habiamos dicho que /glory-rs en https://github.com/1ndoryu/glory-rs y el proyecto en si en https://github.com/1ndoryu/glory-rs-template en la rama glory-rs-rest, aun no veo github actualizado, esto implica actualizar como se actualiza el despliegue supongo.
+~~33. Antes habiamos dicho que /glory-rs en https://github.com/1ndoryu/glory-rs y el proyecto en si en https://github.com/1ndoryu/glory-rs-template en la rama glory-rs-rest, aun no veo github actualizado, esto implica actualizar como se actualiza el despliegue supongo.~~ → 283A-40
 
-34. El zoom en reservas solo cambia el tamaño de las letras no el cuadro en el plano.
+~~34. El zoom en reservas solo cambia el tamaño de las letras no el cuadro en el plano.~~ → 283A-41
 
 35. Despues de las ultimas tareas actualizar el despliegue con los cambios. 

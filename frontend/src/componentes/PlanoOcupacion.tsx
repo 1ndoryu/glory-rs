@@ -77,16 +77,17 @@ function PlanoOcupacion({ fecha, turno }: Props) {
       </div>
 
       {/* [283A-25] Canvas 100% ancho con aspect-ratio proporcional a la zona.
-         * [283A-36] Zoom aplicado con transform: scale() desde zoomStore. */}
+         * [283A-39] Zoom: el canvas se expande a zoom*100% de ancho y el contenedor
+         * permite scroll horizontal. Los % de posición/tamaño de mesas escalan solos.
+         * Sin transform: scale() — era solo visual y no cambiaba el tamaño real de los cuadros. */}
       {zonaData && (
-        <div style={{ overflow: 'auto' }}>
+        <div style={{ overflow: 'auto', width: '100%' }}>
           <div
             className="planoOcupacionCanvas"
             style={{
               aspectRatio: `${zonaData.ancho} / ${zonaData.alto}`,
-              transform: `scale(${zoom})`,
-              transformOrigin: 'top left',
-              width: `${100 / zoom}%`,
+              width: `${zoom * 100}%`,
+              overflow: 'visible',
             }}
           >
           {zonaData.mesas.map((mesa: MesaOcupacion) => {
