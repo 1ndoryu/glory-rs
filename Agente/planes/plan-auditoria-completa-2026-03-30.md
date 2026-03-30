@@ -132,4 +132,16 @@ Revisión exhaustiva de backend, frontend, deploy, seguridad y UX. Anotar todos 
 
 ## Estado
 - [x] Investigación completada
-- [ ] Correcciones en progreso
+- [x] C1 — CORS restringido (CORS_ORIGINS env var)
+- [x] C2 — Roadmap URLs actualizadas
+- [x] A1 — Raw fetch → axios (4 archivos)
+- [x] A2 — Admin DEMO_MODE check
+- [x] A3 — Graceful shutdown + pool close
+- [x] M3 — SMTP timeout 30s
+- [x] M4 — Scheduler mutex anti-solapamiento
+- [x] M5 — usePlanoSala export usa axios (ya no necesita validar response.ok)
+- [x] M6 — SSE parse error logueado con console.warn
+- [x] B3 — unwrap → expect en turno_a_rango
+- [ ] M1 — Token SSE en query param (limitación EventSource, documentado)
+- [ ] M2 — Rate limiting login/forgot-password (pendiente)
+- [ ] B1/B2 — Renombrar carpetas españolas (deuda técnica, no prioritario)
