@@ -58,7 +58,14 @@ function useFormularioReserva(onExito?: () => void) {
           else navigate('/reservas');
         }
       },
-      onError: () => setError('Error al crear la reserva'),
+      /* [303A-5] Extraer mensaje real del backend (ej: "No hay mesas disponibles",
+       * "Capacidad insuficiente", "Mesa ya ocupada"). Axios guarda la respuesta
+       * en error.response.data.message. Sin esto, el 409 solo aparecía en consola. */
+      onError: (err: unknown) => {
+        const axiosErr = err as { response?: { data?: { message?: string } } };
+        const msg = axiosErr?.response?.data?.message;
+        setError(msg || 'Error al crear la reserva');
+      },
     },
   });
 
