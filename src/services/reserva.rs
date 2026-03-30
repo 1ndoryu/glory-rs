@@ -54,7 +54,8 @@ impl ReservaService {
         let total_mesas: i32 = todas_mesas.len().try_into().unwrap_or(i32::MAX);
         let capacidad_total: i32 = todas_mesas.iter().map(|m| m.max_personas).sum();
 
-        /* Obtener reservas activas del día */
+        /* [303A-3] Obtener reservas activas del día — solo estados que realmente
+         * ocupan mesa (confirmada, pendiente). no_show y completada no bloquean. */
         let reservas = ReservaRepository::listar_por_fecha(pool, user_id, fecha)
             .await
             .unwrap_or_default();
@@ -64,11 +65,17 @@ impl ReservaService {
         let nueva_end = nueva_start + DURACION_RESERVA_MIN;
 
         let mut personas_reservadas = 0i32;
-        let mut mesas_ocupadas = 0i32;
+        let mut mesas_asignadas = 0i32;
 
         for r in &reservas {
             /* Excluir la reserva que estamos actualizando */
             if exclude_id.is_some_and(|eid| eid == r.id) {
+                continue;
+            }
+
+            /* [303A-3] Solo contar reservas que realmente ocupan sitio.
+             * completada = ya comieron y se fueron, no_show = nunca llegaron. */
+            if r.estado == "completada" || r.estado == "no_show" {
                 continue;
             }
 
@@ -78,7 +85,12 @@ impl ReservaService {
             /* Dos reservas solapan si una empieza antes de que termine la otra */
             if nueva_start < r_end && nueva_end > r_start {
                 personas_reservadas += r.num_personas;
-                mesas_ocupadas += 1;
+
+                /* [303A-3] Solo contar como "mesa ocupada" si tiene mesa_id asignado.
+                 * Reservas sin mesa asignada solo cuentan para capacidad de personas. */
+                if r.mesa_id.is_some() {
+                    mesas_asignadas += 1;
+                }
 
                 /* Si se pide una mesa concreta y ya está ocupada en esa franja */
                 if let Some(pid) = mesa_id {
@@ -91,12 +103,12 @@ impl ReservaService {
             }
         }
 
-        /* Verificar capacidad global */
-        if mesas_ocupadas >= total_mesas {
+        /* Verificar disponibilidad de mesas físicas asignadas */
+        if mesas_asignadas >= total_mesas {
             return Err(AppError::Conflict(
                 format!(
                     "No hay mesas disponibles en la franja de {hora}. \
-                     Todas las {total_mesas} mesas están ocupadas."
+                     Todas las {total_mesas} mesas están asignadas a reservas."
                 ),
             ));
         }
