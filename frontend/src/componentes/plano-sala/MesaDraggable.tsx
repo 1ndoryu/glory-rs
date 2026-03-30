@@ -25,9 +25,11 @@ function MesaDraggable({ mesa, seleccionada, arrastrando, onClick }: MesaDraggab
       : undefined,
   };
 
+  /* [303A-10] Aplica la clase de forma directamente (cuadrada/redonda/rectangular)
+   * para que CSS diferencie cada tipo. Antes solo aplicaba 'redonda'. */
   const clases = [
     'planoMesa',
-    mesa.forma === 'redonda' ? 'redonda' : '',
+    mesa.forma,
     !mesa.activa ? 'inactiva' : '',
     seleccionada ? 'seleccionada' : '',
     arrastrando ? 'arrastrando' : '',

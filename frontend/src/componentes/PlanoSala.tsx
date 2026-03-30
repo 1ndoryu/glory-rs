@@ -1,8 +1,11 @@
 ﻿/* [263A-16] PlanoSala — Constructor visual de plano de sala con drag-and-drop.
  * [263A-28] Diálogos nativos reemplazados por shadcn Dialog + toast.
+ * [303A-11] Canvas con altura fija del store, overflow:auto.
+ * [303A-12] Pan (shift+drag), minimap, indicadores off-screen.
+ * [303A-13] Resize handle arrastrable en borde inferior.
  * Lógica en usePlanoSala, mesa arrastrable en MesaDraggable, config en PanelConfigMesa. */
 
-import { useRef } from 'react';
+import { useRef, useState, useCallback } from 'react';
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import { Button } from '@/components/ui/button';
@@ -11,15 +14,39 @@ import MesaDraggable from './plano-sala/MesaDraggable';
 import MesaTemplate from './plano-sala/MesaTemplate';
 import PanelConfigMesa from './plano-sala/PanelConfigMesa';
 import PlanoDialogs from './plano-sala/PlanoDialogs';
+import CanvasMinimap from './plano-sala/CanvasMinimap';
+import OffScreenIndicators from './plano-sala/OffScreenIndicators';
 import { usePlanoSala } from './plano-sala/usePlanoSala';
+import { useCanvasResize } from '../hooks/useCanvasResize';
+import { useCanvasPan } from '../hooks/useCanvasPan';
+import { useZoomStore } from '../stores/zoomStore';
 import '../estilos/PlanoSala.css';
 
 function PlanoSala() {
   const canvasRef = useRef<HTMLDivElement>(null);
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const setCanvasHeight = useZoomStore(s => s.setCanvasHeight);
+
+  /* [303A-12] Estado de scroll para minimap e indicadores off-screen */
+  const [canvasViewState, setCanvasViewState] = useState({
+    scrollLeft: 0, scrollTop: 0, w: 0, h: 0,
+  });
+
+  const onScroll = useCallback(() => {
+    const el = viewportRef.current;
+    if (!el) return;
+    setCanvasViewState({
+      scrollLeft: el.scrollLeft,
+      scrollTop: el.scrollTop,
+      w: el.clientWidth,
+      h: el.clientHeight,
+    });
+  }, []);
 
   const {
     plano, zonaActiva, zonaData, mesasZona, mesaSeleccionada, arrastrando,
     posicionesLocales, setMesaSeleccionada, cambiarZona, zoom, setZoom,
+    canvasHeight,
     handleCrearZona, handleEliminarZona, handleEditarZona,
     handleCrearMesa, handleGuardarMesa, handleEliminarMesa,
     handleDragStart, handleDragEnd,
@@ -29,6 +56,12 @@ function PlanoSala() {
     dialogoConfirmar, setDialogoConfirmar,
     dialogoCombinacion, setDialogoCombinacion,
   } = usePlanoSala(canvasRef);
+
+  /* [303A-13] Resize del canvas arrastrando el borde inferior */
+  const { resizing, onResizeStart } = useCanvasResize({ canvasHeight, setCanvasHeight });
+
+  /* [303A-12] Pan del canvas shift+drag o middle-click */
+  const { panning, onPanMouseDown } = useCanvasPan(viewportRef);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -108,50 +141,109 @@ function PlanoSala() {
       </div>
 
       {/* [283A-17] Canvas 100% ancho + Panel lateral derecho */}
+      {/* [303A-11] Canvas viewport con altura fija del store, overflow:auto.
+         * Inner div con minHeight = zonaData.alto * zoom para que el scroll
+         * funcione cuando el contenido zoom-in excede el viewport. */}
       <div className="flex gap-4">
         <div className="flex-1 min-w-0">
           {zonaData ? (
-            <div
-              ref={canvasRef}
-              className="planoCanvas"
-              style={{ height: zonaData.alto * zoom }}
-              onClick={() => setMesaSeleccionada(null)}
-            >
-              {mesasZona.map(mesa => {
-                const pos = posicionesLocales[mesa.id];
-                const base = pos ? { ...mesa, pos_x: pos.x, pos_y: pos.y } : mesa;
-                /* [283A-25] Escalar posiciones y tamaños por zoom para render visual.
-                 * Las coordenadas canónicas (sin zoom) se mantienen en posicionesLocales. */
-                const mesaZoom = zoom === 1 ? base : {
-                  ...base,
-                  pos_x: base.pos_x * zoom,
-                  pos_y: base.pos_y * zoom,
-                  ancho: base.ancho * zoom,
-                  alto: base.alto * zoom,
-                };
-                return (
-                  <MesaDraggable
-                    key={mesa.id}
-                    mesa={mesaZoom}
-                    seleccionada={mesaSeleccionada?.id === mesa.id}
-                    arrastrando={arrastrando === mesa.id}
-                    onClick={() => setMesaSeleccionada(mesa)}
-                  />
-                );
-              })}
+            <div style={{ position: 'relative' }}>
+              <div
+                ref={viewportRef}
+                className={`planoCanvas ${panning ? 'planoPanning' : ''}`}
+                style={{ height: canvasHeight }}
+                onClick={() => setMesaSeleccionada(null)}
+                onScroll={onScroll}
+                onMouseDown={onPanMouseDown}
+              >
+                <div
+                  ref={canvasRef}
+                  className="planoCanvasContent"
+                  style={{ minHeight: Math.max(canvasHeight, zonaData.alto * zoom) }}
+                >
+                  {mesasZona.map(mesa => {
+                    const pos = posicionesLocales[mesa.id];
+                    const base = pos ? { ...mesa, pos_x: pos.x, pos_y: pos.y } : mesa;
+                    const mesaZoom = zoom === 1 ? base : {
+                      ...base,
+                      pos_x: base.pos_x * zoom,
+                      pos_y: base.pos_y * zoom,
+                      ancho: base.ancho * zoom,
+                      alto: base.alto * zoom,
+                    };
+                    return (
+                      <MesaDraggable
+                        key={mesa.id}
+                        mesa={mesaZoom}
+                        seleccionada={mesaSeleccionada?.id === mesa.id}
+                        arrastrando={arrastrando === mesa.id}
+                        onClick={() => setMesaSeleccionada(mesa)}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+              {/* [303A-12] Minimap + indicadores off-screen */}
+              <CanvasMinimap
+                mesas={mesasZona.map(m => {
+                  const p = posicionesLocales[m.id];
+                  return {
+                    x: (p?.x ?? m.pos_x) * zoom,
+                    y: (p?.y ?? m.pos_y) * zoom,
+                    ancho: m.ancho * zoom,
+                    alto: m.alto * zoom,
+                  };
+                })}
+                contentWidth={canvasRef.current?.scrollWidth ?? 0}
+                contentHeight={canvasRef.current?.scrollHeight ?? 0}
+                viewportWidth={canvasViewState.w || (viewportRef.current?.clientWidth ?? 0)}
+                viewportHeight={canvasViewState.h || (viewportRef.current?.clientHeight ?? 0)}
+                scrollLeft={canvasViewState.scrollLeft}
+                scrollTop={canvasViewState.scrollTop}
+                onNavigate={(sl, st) => {
+                  if (viewportRef.current) {
+                    viewportRef.current.scrollLeft = sl;
+                    viewportRef.current.scrollTop = st;
+                  }
+                }}
+              />
+              <OffScreenIndicators
+                mesas={mesasZona.map(m => {
+                  const p = posicionesLocales[m.id];
+                  return {
+                    x: (p?.x ?? m.pos_x) * zoom,
+                    y: (p?.y ?? m.pos_y) * zoom,
+                    ancho: m.ancho * zoom,
+                    alto: m.alto * zoom,
+                  };
+                })}
+                viewportWidth={canvasViewState.w || (viewportRef.current?.clientWidth ?? 0)}
+                viewportHeight={canvasViewState.h || (viewportRef.current?.clientHeight ?? 0)}
+                scrollLeft={canvasViewState.scrollLeft}
+                scrollTop={canvasViewState.scrollTop}
+              />
             </div>
           ) : (
-            <div className="planoCanvas planoCanvasVacio">
+            <div className="planoCanvas planoCanvasVacio" style={{ height: canvasHeight }}>
               {plano && plano.zonas.length === 0
                 ? 'Crea tu primera zona para empezar a diseñar el plano'
                 : 'Selecciona una zona'}
             </div>
           )}
+          {/* [303A-13] Handle de resize — barra arrastrable debajo del canvas */}
+          <div
+            className={`planoResizeHandle ${resizing ? 'activo' : ''}`}
+            onMouseDown={onResizeStart}
+            title="Arrastrar para cambiar altura del plano"
+          />
         </div>
         {/* [283A-17] Panel lateral derecho: config de mesa seleccionada */}
+        {/* [303A-9] key={mesa.id} fuerza remount al cambiar de mesa, reseteando
+         * el useState interno para que min/max personas se actualicen. */}
         {mesaSeleccionada && (
           <div className="w-72 shrink-0">
             <PanelConfigMesa
+              key={mesaSeleccionada.id}
               mesa={mesaSeleccionada}
               onGuardar={handleGuardarMesa}
               onEliminar={handleEliminarMesa}

@@ -81,13 +81,23 @@
 }
 
 /* Canvas */
+/* [303A-11] overflow:auto ya estaba. Altura fija viene del store.
+ * Separado en viewport (.planoOcupacionCanvas) + contenido (.planoOcupacionContent). */
 .planoOcupacionCanvas {
-  position: relative;
-  background: var(--background);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: auto;
-  min-height: 200px;
+}
+
+/* [303A-12] Cursor pan cuando se hace shift+drag o middle-click */
+.planoOcupacionCanvas.planoPanning {
+  cursor: grabbing;
+  user-select: none;
+}
+
+.planoOcupacionContent {
+  position: relative;
+  background: var(--background);
 }
 
 /* Mesa individual */
@@ -108,6 +118,11 @@
 
 .mesaOcupacion.redonda {
   border-radius: 50%;
+}
+
+/* [303A-10] Rectangular: misma diferenciación que en PlanoSala */
+.mesaOcupacion.rectangular {
+  border-radius: 3px;
 }
 
 /* Estados de mesa */

@@ -26,8 +26,26 @@ function PanelConfigMesa({ mesa, onGuardar, onEliminar, onCerrar }: PanelConfigM
     activa: mesa.activa,
   });
 
+  /* [303A-10] Auto-ajuste de dimensiones al cambiar forma:
+   * - cuadrada: ancho = alto (cuadrado perfecto)
+   * - rectangular: ancho mínimo 1.5× alto
+   * - redonda: ancho = alto (círculo perfecto) */
   const set = (campo: string, valor: number | string | boolean) =>
-    setForm((prev) => ({ ...prev, [campo]: valor }));
+    setForm((prev) => {
+      const next = { ...prev, [campo]: valor };
+      if (campo === 'forma') {
+        if (valor === 'cuadrada') {
+          next.alto = next.ancho;
+        } else if (valor === 'rectangular') {
+          if (next.ancho <= next.alto) {
+            next.ancho = Math.round(next.alto * 1.5);
+          }
+        } else if (valor === 'redonda') {
+          next.alto = next.ancho;
+        }
+      }
+      return next;
+    });
 
   const guardar = () => {
     onGuardar(mesa.id, {

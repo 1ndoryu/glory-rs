@@ -60,7 +60,9 @@ export function usePlanoSala(
   const [posicionesLocales, setPosicionesLocales] = useState<
     Record<string, { x: number; y: number }>
   >({});
-  const { zoom, setZoom } = useZoomStore();
+  const zoom = useZoomStore(s => s.zoom);
+  const setZoom = useZoomStore(s => s.setZoom);
+  const canvasHeight = useZoomStore(s => s.canvasHeight);
 
   /* Estado de diálogos — reemplazan prompt/confirm/alert nativos */
   const [dialogoEntrada, setDialogoEntrada] = useState<DialogoEntrada | null>(null);
@@ -259,6 +261,7 @@ export function usePlanoSala(
   return {
     plano, zonaActiva, zonaData, mesasZona, mesaSeleccionada, arrastrando,
     posicionesLocales, setMesaSeleccionada, cambiarZona, zoom, setZoom,
+    canvasHeight,
     handleCrearZona, handleEliminarZona, handleEditarZona,
     handleCrearMesa, handleGuardarMesa, handleEliminarMesa,
     handleDragStart, handleDragEnd,
