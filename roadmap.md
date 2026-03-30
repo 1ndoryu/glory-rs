@@ -142,4 +142,4 @@ Tarea Final. ~~Actualiza el despliege con coolify-manager-rs~~ → 283A-33
 ~~283A-48: Despliegue final~~ → completada
 ~~283A-49: baseURL localhost:3000 hardcodeada en frontend producción~~ → completada
 
-303A-1: Revisión profunda del sistema de marketing/SMS/email/WhatsApp — corregir bugs críticos (ver Agente/planes/plan-revision-marketing-2026-03-30.md)
+~~303A-1: Revisión profunda del sistema de marketing/SMS/email/WhatsApp — corregir bugs críticos~~ → completada
