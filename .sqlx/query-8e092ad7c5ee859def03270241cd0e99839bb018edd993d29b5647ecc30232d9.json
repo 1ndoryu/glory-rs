@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE campana_destinatarios SET estado = $4, enviado_at = NOW() WHERE campana_id = $1 AND cliente_id = $2 AND canal = $3",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Varchar"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "8e092ad7c5ee859def03270241cd0e99839bb018edd993d29b5647ecc30232d9"
+}
