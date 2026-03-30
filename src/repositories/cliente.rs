@@ -94,8 +94,8 @@ impl ClienteRepository {
         .await
     }
 
-    /// Lista clientes con paginación y búsqueda fulltext por nombre/apellidos/teléfono/email.
-    /// Usa ILIKE para búsqueda case-insensitive, compatible con los índices creados.
+    /// [303A-6] Lista clientes con paginación y búsqueda fulltext.
+    /// Busca en nombre, apellidos, teléfono, email, empresa y notas.
     pub async fn list(
         pool: &PgPool,
         user_id: Uuid,
@@ -113,7 +113,9 @@ impl ClienteRepository {
                   OR nombre ILIKE $4 \
                   OR apellidos ILIKE $4 \
                   OR telefono ILIKE $4 \
-                  OR email ILIKE $4) \
+                  OR email ILIKE $4 \
+                  OR empresa ILIKE $4 \
+                  OR notas ILIKE $4) \
              ORDER BY apellidos ASC, nombre ASC \
              LIMIT $2 OFFSET $3",
             user_id,
@@ -130,7 +132,9 @@ impl ClienteRepository {
                   OR nombre ILIKE $2 \
                   OR apellidos ILIKE $2 \
                   OR telefono ILIKE $2 \
-                  OR email ILIKE $2)",
+                  OR email ILIKE $2 \
+                  OR empresa ILIKE $2 \
+                  OR notas ILIKE $2)",
             user_id,
             patron.as_deref()
         )

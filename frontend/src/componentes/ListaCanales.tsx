@@ -107,6 +107,11 @@ function ListaCanales() {
       ) : (
         <p className="text-sm text-muted-foreground">No hay canales configurados. Crea uno para clasificar por dónde llegan las reservas.</p>
       )}
+
+      {/* [303A-7] Aviso sobre integración con asistente inteligente */}
+      <div className="rounded-md border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-200">
+        <strong>Nota:</strong> Si añade un canal nuevo y desea que el asistente inteligente registre automáticamente las reservas que lleguen a través de ese canal, por favor notifíquenoslo para configurarlo.
+      </div>
     </div>
   );
 }
