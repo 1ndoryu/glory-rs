@@ -108,10 +108,13 @@ impl ReservaRepository {
             .filter(|s| !s.is_empty())
             .map(|b| format!("%{b}%"));
 
+        /* [303A-4] Cuando no hay filtro explícito de estado, excluir canceladas
+         * para que el conteo coincida con el calendario (resumen_mensual) y el
+         * conteo del Home. Si el usuario elige "cancelada" en el filtro, sí las ve. */
         let items = sqlx::query_as::<_, Reserva>(
             "SELECT * FROM reservas WHERE user_id = $1 \
              AND ($4::DATE IS NULL OR fecha = $4) \
-             AND ($5::VARCHAR IS NULL OR estado = $5) \
+             AND (($5::VARCHAR IS NULL AND estado != 'cancelada') OR estado = $5) \
              AND ($6::TIME IS NULL OR hora >= $6) \
              AND ($7::TIME IS NULL OR hora < $7) \
              AND ($8::TEXT IS NULL \
@@ -134,7 +137,7 @@ impl ReservaRepository {
         let rec: (Option<i64>,) = sqlx::query_as(
             "SELECT COUNT(*) FROM reservas WHERE user_id = $1 \
              AND ($2::DATE IS NULL OR fecha = $2) \
-             AND ($3::VARCHAR IS NULL OR estado = $3) \
+             AND (($3::VARCHAR IS NULL AND estado != 'cancelada') OR estado = $3) \
              AND ($4::TIME IS NULL OR hora >= $4) \
              AND ($5::TIME IS NULL OR hora < $5) \
              AND ($6::TEXT IS NULL \
@@ -316,7 +319,9 @@ impl ReservaRepository {
     /* [283A-2] Métodos para el chatbot — usan queries runtime porque
      * las entradas de cache offline .sqlx/ se generan con cargo sqlx prepare. */
 
-    /// Lista reservas activas (no canceladas) para una fecha dada
+    /// [303A-4] Lista reservas que ocupan sitio para una fecha dada.
+    /// Excluye canceladas, completadas y `no_show` — usada para disponibilidad
+    /// y resumen del chatbot.
     pub async fn listar_por_fecha(
         pool: &PgPool,
         user_id: Uuid,
@@ -324,7 +329,8 @@ impl ReservaRepository {
     ) -> Result<Vec<Reserva>, sqlx::Error> {
         sqlx::query_as::<_, Reserva>(
             "SELECT * FROM reservas \
-             WHERE user_id = $1 AND fecha = $2 AND estado != 'cancelada' \
+             WHERE user_id = $1 AND fecha = $2 \
+             AND estado NOT IN ('cancelada', 'completada', 'no_show') \
              ORDER BY hora ASC",
         )
         .bind(user_id)

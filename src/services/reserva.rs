@@ -73,11 +73,8 @@ impl ReservaService {
                 continue;
             }
 
-            /* [303A-3] Solo contar reservas que realmente ocupan sitio.
-             * completada = ya comieron y se fueron, no_show = nunca llegaron. */
-            if r.estado == "completada" || r.estado == "no_show" {
-                continue;
-            }
+            /* [303A-3+303A-4] completada/no_show ya se excluyen en listar_por_fecha SQL.
+             * Solo contar reservas que realmente ocupan sitio. */
 
             let r_start = i64::from(r.hora.hour()) * 60 + i64::from(r.hora.minute());
             let r_end = r_start + DURACION_RESERVA_MIN;
