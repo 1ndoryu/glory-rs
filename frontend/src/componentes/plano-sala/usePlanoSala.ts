@@ -5,6 +5,7 @@
 import { useState, useCallback, useRef, type RefObject } from 'react';
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import { toast } from 'sonner';
+import axios from '@/api/axios-instance';
 import { useZoomStore } from '../../stores/zoomStore';
 import {
   useObtenerPlano,
@@ -187,12 +188,11 @@ export function usePlanoSala(
     }
   }, [mesasZona, posicionesLocales, zonaData, canvasRef, zoom, refetch]);
 
+  /* [303A-2] Migrado de raw fetch a axios para usar interceptors JWT/401 */
   const handleExportar = async () => {
     try {
-      const resp = await fetch('/api/plano-sala/export', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token') ?? ''}` },
-      });
-      const json = await resp.json();
+      const resp = await axios.get('/api/plano-sala/export');
+      const json = resp.data;
       const blob = new Blob([JSON.stringify(json, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');

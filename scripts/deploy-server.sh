@@ -41,6 +41,8 @@ docker run -d \
   -e "HOST=0.0.0.0" \
   -e "PORT=3000" \
   -e "STATIC_DIR=/app/static" \
+  -e "DEMO_MODE=true" \
+  -e "CORS_ORIGINS=http://restaurante.wandori.us" \
   -l "traefik.enable=true" \
   -l "traefik.http.routers.http-0-${NETWORK}-app.entryPoints=http" \
   -l "traefik.http.routers.http-0-${NETWORK}-app.rule=Host(\`${DOMAIN}\`) && PathPrefix(\`/\`)" \

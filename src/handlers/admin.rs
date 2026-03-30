@@ -1,6 +1,7 @@
 /* [283A-39] Handlers de administración para datos de prueba.
  * POST /api/admin/seed  — ejecuta el seed (recarga todos los datos demo).
  * POST /api/admin/reset — elimina todos los datos del usuario (sin borrar cuenta).
+ * [303A-2] Requiere DEMO_MODE=true env var para estar habilitado.
  * Ambos requieren autenticación. Solo para entornos de demo. */
 
 use axum::extract::State;
@@ -19,6 +20,17 @@ pub struct AdminResult {
     pub mensaje: String,
 }
 
+/// Verificar que `DEMO_MODE` está habilitado
+fn verificar_demo_mode() -> Result<(), AppError> {
+    let demo = std::env::var("DEMO_MODE").unwrap_or_default();
+    if demo != "true" && demo != "1" {
+        return Err(AppError::BadRequest(
+            "Los endpoints de administración solo están disponibles en modo demo (DEMO_MODE=true)".to_string(),
+        ));
+    }
+    Ok(())
+}
+
 /// Ejecutar seed — recarga todos los datos de prueba del usuario demo
 #[utoipa::path(
     post,
@@ -34,6 +46,7 @@ pub async fn ejecutar_seed(
     State(_state): State<AppState>,
     _auth: AuthUser,
 ) -> Result<Json<AdminResult>, AppError> {
+    verificar_demo_mode()?;
     let output = std::process::Command::new("/app/seed")
         .output()
         .map_err(|e| AppError::Internal(format!("Error ejecutando seed: {e}")))?;
@@ -64,6 +77,7 @@ pub async fn eliminar_datos(
     State(state): State<AppState>,
     auth: AuthUser,
 ) -> Result<Json<AdminResult>, AppError> {
+    verificar_demo_mode()?;
     let sentencias = [
         "DELETE FROM campana_destinatarios WHERE campana_id IN (SELECT id FROM campanas WHERE user_id = $1)",
         "DELETE FROM recordatorios_enviados WHERE regla_id IN (SELECT id FROM reglas_recordatorio WHERE user_id = $1)",

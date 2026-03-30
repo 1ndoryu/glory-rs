@@ -4,6 +4,7 @@
 
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { toast } from 'sonner';
+import axios from '@/api/axios-instance';
 
 interface Props { children: ReactNode }
 interface State { hasError: boolean; error: Error | null }
@@ -22,26 +23,15 @@ class ErrorBoundary extends Component<Props, State> {
   handleReport = async () => {
     const { error } = this.state;
     if (!error) return;
+    /* [303A-2] Migrado de raw fetch a axios para usar interceptors JWT/401 */
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch('/api/reportar-error', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({
-          mensaje: error.message,
-          stack: error.stack ?? null,
-          url: window.location.href,
-          navegador: navigator.userAgent,
-        }),
+      await axios.post('/api/reportar-error', {
+        mensaje: error.message,
+        stack: error.stack ?? null,
+        url: window.location.href,
+        navegador: navigator.userAgent,
       });
-      if (res.ok) {
-        toast.success('Error reportado correctamente');
-      } else {
-        toast.error('No se pudo enviar el reporte');
-      }
+      toast.success('Error reportado correctamente');
     } catch {
       toast.error('No se pudo enviar el reporte');
     }

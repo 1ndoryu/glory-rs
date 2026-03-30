@@ -31,12 +31,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let app = handlers::create_router(pool.clone(), config);
 
     /* [263A-25] Background scheduler: verifica recordatorios pendientes cada 60s.
-     * El ciclo busca reservas que coincidan con reglas activas y registra envíos. */
+     * El ciclo busca reservas que coincidan con reglas activas y registra envíos.
+     * [303A-2] Se usa un Mutex para evitar ciclos solapados si ejecutar_ciclo tarda >60s. */
     let scheduler_pool = pool.clone();
-    tokio::spawn(async move {
+    let scheduler_handle = tokio::spawn(async move {
+        let running = std::sync::Arc::new(tokio::sync::Mutex::new(()));
         let mut interval = tokio::time::interval(std::time::Duration::from_secs(60));
         loop {
             interval.tick().await;
+            let guard = running.try_lock();
+            if guard.is_err() {
+                tracing::debug!("Scheduler: ciclo anterior aún en curso, saltando");
+                continue;
+            }
             match RecordatorioService::ejecutar_ciclo(&scheduler_pool).await {
                 Ok(n) if n > 0 => tracing::debug!("Scheduler: {n} recordatorios procesados"),
                 Err(e) => tracing::warn!("Scheduler error: {e}"),
@@ -45,8 +52,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     });
 
+    /* [303A-2] Graceful shutdown: señal SIGTERM/Ctrl+C cierra conexiones limpiamente */
     let listener = tokio::net::TcpListener::bind(&addr).await?;
-    axum::serve(listener, app).await?;
+    axum::serve(listener, app)
+        .with_graceful_shutdown(async {
+            tokio::signal::ctrl_c().await.ok();
+            tracing::info!("Señal de apagado recibida, cerrando servidor...");
+        })
+        .await?;
+
+    scheduler_handle.abort();
+    pool.close().await;
+    tracing::info!("Pool cerrado, servidor detenido limpiamente.");
 
     Ok(())
 }

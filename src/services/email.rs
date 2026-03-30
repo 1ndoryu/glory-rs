@@ -120,10 +120,12 @@ async fn enviar_smtp(
         .map_err(|e| EmailError::Build(e.to_string()))?;
 
     let creds = Credentials::new(p.user.to_string(), p.password.to_string());
+    /* [303A-2] Timeout de 30s para evitar que una conexión SMTP colgada bloquee indefinidamente */
     let mailer = AsyncSmtpTransport::<Tokio1Executor>::starttls_relay(p.host)
         .map_err(|e| EmailError::Transport(e.to_string()))?
         .port(p.port)
         .credentials(creds)
+        .timeout(Some(std::time::Duration::from_secs(30)))
         .build();
 
     mailer

@@ -44,8 +44,9 @@ export function useNotificaciones() {
                     const notif: Notificacion = JSON.parse(e.data);
                     agregarNotificacion(notif);
                     toast.info(notif.titulo, { description: notif.mensaje });
-                } catch {
-                    /* JSON inválido — ignorar */
+                } catch (parseErr) {
+                    /* [303A-2] Logear en vez de silenciar para diagnóstico */
+                    console.warn('Notificación SSE: JSON inválido', parseErr);
                 }
             });
 

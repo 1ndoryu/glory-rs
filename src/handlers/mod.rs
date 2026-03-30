@@ -21,7 +21,7 @@ mod reservas;
 mod ventas;
 
 use axum::Router;
-use tower_http::cors::{Any, CorsLayer};
+use tower_http::cors::{AllowOrigin, Any, CorsLayer};
 use tower_http::services::{ServeDir, ServeFile};
 use tower_http::trace::TraceLayer;
 use utoipa::OpenApi;
@@ -302,11 +302,26 @@ pub fn create_router(pool: sqlx::PgPool, config: crate::config::AppConfig) -> Ro
         notif_tx,
     };
 
-    /* CORS: en desarrollo se permite todo. En producción, restringir orígenes */
-    let cors = CorsLayer::new()
-        .allow_origin(Any)
-        .allow_methods(Any)
-        .allow_headers(Any);
+    /* [303A-2] CORS: restringir orígenes en producción.
+     * CORS_ORIGINS env var define orígenes permitidos separados por coma.
+     * Si no se define (dev local), se permite todo para no romper desarrollo.
+     * En producción, definir CORS_ORIGINS=http://restaurante.wandori.us */
+    let cors = match std::env::var("CORS_ORIGINS") {
+        Ok(origins) if !origins.is_empty() => {
+            let allowed: Vec<_> = origins
+                .split(',')
+                .filter_map(|o| o.trim().parse().ok())
+                .collect();
+            CorsLayer::new()
+                .allow_origin(AllowOrigin::list(allowed))
+                .allow_methods(Any)
+                .allow_headers(Any)
+        }
+        _ => CorsLayer::new()
+            .allow_origin(Any)
+            .allow_methods(Any)
+            .allow_headers(Any),
+    };
 
     /* [263A-20] En produccion, servir el frontend SPA desde ./static.
      * El fallback_service reenvía rutas no-API al index.html para client-side routing. */

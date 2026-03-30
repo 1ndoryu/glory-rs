@@ -26,6 +26,7 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
+import axios from "@/api/axios-instance"
 import {
   DollarSign,
   BarChart3,
@@ -68,31 +69,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [mensaje, setMensaje] = useState("")
   const [enviando, setEnviando] = useState(false)
 
+  /* [303A-2] Migrado de raw fetch a axios para usar interceptors JWT/401 */
   const enviarReporte = async () => {
     if (!mensaje.trim()) return
     setEnviando(true)
     try {
-      const token = localStorage.getItem("token")
-      const res = await fetch("/api/reportar-error", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({
-          mensaje: mensaje.trim(),
-          stack: null,
-          url: window.location.href,
-          navegador: navigator.userAgent,
-        }),
+      await axios.post("/api/reportar-error", {
+        mensaje: mensaje.trim(),
+        stack: null,
+        url: window.location.href,
+        navegador: navigator.userAgent,
       })
-      if (res.ok) {
-        toast.success("Reporte enviado correctamente")
-        setMensaje("")
-        setModalError(false)
-      } else {
-        toast.error("No se pudo enviar el reporte")
-      }
+      toast.success("Reporte enviado correctamente")
+      setMensaje("")
+      setModalError(false)
     } catch {
       toast.error("No se pudo enviar el reporte")
     } finally {

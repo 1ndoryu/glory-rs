@@ -12,7 +12,7 @@ $ErrorActionPreference = 'Stop'
 $envFile = "c:\Users\Owner\OneDrive\Documentos\WP\app\public\wp-content\themes\glorytemplate\.agent\coolify-manager-rs\.env"
 $serviceUuid = "b8s0cks444o0sogo8kg8wcgw"
 $baseApi = "http://66.94.100.241:8000"
-$healthUrl = "http://app-b8s0cks444o0sogo8kg8wcgw.66.94.100.241.sslip.io/swagger-ui/"
+$healthUrl = "http://restaurante.wandori.us/api/health"
 
 # --- 1. Cargar token ---
 $token = ((Get-Content $envFile | Where-Object { $_ -match '^COOLIFY_VPS1_API_TOKEN=' }) -replace 'COOLIFY_VPS1_API_TOKEN=','').Trim()

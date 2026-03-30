@@ -302,18 +302,19 @@ pub async fn importar_plano(
 /// Turno a rango horario (reutilizado de reservas handler)
 fn turno_a_rango(turno: &str) -> (Option<chrono::NaiveTime>, Option<chrono::NaiveTime>) {
     use chrono::NaiveTime;
+    /* [303A-2] expect ok: literales de hora siempre válidos */
     match turno {
         "desayuno" => (
-            Some(NaiveTime::from_hms_opt(7, 0, 0).unwrap()),
-            Some(NaiveTime::from_hms_opt(12, 0, 0).unwrap()),
+            Some(NaiveTime::from_hms_opt(7, 0, 0).expect("hora literal válida")),
+            Some(NaiveTime::from_hms_opt(12, 0, 0).expect("hora literal válida")),
         ),
         "comida" => (
-            Some(NaiveTime::from_hms_opt(12, 0, 0).unwrap()),
-            Some(NaiveTime::from_hms_opt(18, 0, 0).unwrap()),
+            Some(NaiveTime::from_hms_opt(12, 0, 0).expect("hora literal válida")),
+            Some(NaiveTime::from_hms_opt(18, 0, 0).expect("hora literal válida")),
         ),
         "cena" => (
-            Some(NaiveTime::from_hms_opt(18, 0, 0).unwrap()),
-            Some(NaiveTime::from_hms_opt(23, 59, 59).unwrap()),
+            Some(NaiveTime::from_hms_opt(18, 0, 0).expect("hora literal válida")),
+            Some(NaiveTime::from_hms_opt(23, 59, 59).expect("hora literal válida")),
         ),
         _ => (None, None),
     }

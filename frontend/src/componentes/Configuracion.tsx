@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { useConfiguracion } from '../hooks/useConfiguracion';
 import IntegracionesMarketing from './IntegracionesMarketing';
 import ConfigChatbot from './ConfigChatbot';
+import axios from '@/api/axios-instance';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,19 +22,15 @@ function Configuracion() {
   const { config, cambiarCampo, guardar, mensaje, cargando, guardando } = useConfiguracion();
   const [operandoSeed, setOperandoSeed] = useState(false);
 
+  /* [303A-2] Migrado de raw fetch a axios para usar interceptors JWT/401 */
   async function ejecutarOperacion(endpoint: string, descripcion: string) {
     setOperandoSeed(true);
     try {
-      const token = localStorage.getItem('token');
-      const resp = await fetch(`/api/${endpoint}`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
-      const data = await resp.json();
-      if (resp.ok) {
-        toast.success(descripcion, { description: data.mensaje });
-      } else {
-        toast.error('Error', { description: data.message ?? 'Error desconocido' });
-      }
-    } catch {
-      toast.error('Error', { description: 'No se pudo conectar con el servidor' });
+      const resp = await axios.post(`/api/${endpoint}`);
+      toast.success(descripcion, { description: resp.data.mensaje });
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { mensaje?: string } } })?.response?.data?.mensaje ?? 'No se pudo conectar con el servidor';
+      toast.error('Error', { description: msg });
     } finally {
       setOperandoSeed(false);
     }
