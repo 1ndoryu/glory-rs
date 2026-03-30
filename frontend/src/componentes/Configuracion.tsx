@@ -71,6 +71,17 @@ function Configuracion() {
           <CardDescription>Define qué datos se requieren para crear una reserva</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
+          {/* [303A-16] Fecha y hora siempre obligatorios — switches deshabilitados para
+           * que el dueño vea la lista completa. No son configurables porque una reserva
+           * sin fecha/hora no es válida a nivel de modelo. */}
+          <div className="flex items-center justify-between opacity-70">
+            <Label>Fecha</Label>
+            <Switch checked disabled />
+          </div>
+          <div className="flex items-center justify-between opacity-70">
+            <Label>Hora</Label>
+            <Switch checked disabled />
+          </div>
           <div className="flex items-center justify-between">
             <Label htmlFor="nombre-obligatorio">Nombre</Label>
             <Switch
