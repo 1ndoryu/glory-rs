@@ -177,6 +177,16 @@ function IntegracionesMarketing() {
               placeholder={metaConfigurado ? '••••••••' : 'Token de acceso'}
             />
           </div>
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="meta-phone-number-id">Phone Number ID</Label>
+            <Input
+              id="meta-phone-number-id"
+              value={form.meta_phone_number_id}
+              onChange={(e) => cambiarCampo('meta_phone_number_id', e.target.value)}
+              placeholder="ID del número de teléfono en Meta"
+            />
+            <p className="text-xs text-muted-foreground">Requerido para enviar mensajes. Se encuentra en Meta Business Suite &gt; WhatsApp &gt; Configuración del número.</p>
+          </div>
         </CardContent>
       </Card>
 

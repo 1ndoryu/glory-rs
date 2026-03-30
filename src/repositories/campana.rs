@@ -148,25 +148,52 @@ impl CampanaRepository {
         Ok(result.rows_affected() > 0)
     }
 
+    /* [303A-1] Actualizar estado + contadores reales de envío */
     pub async fn set_estado(
         pool: &PgPool,
         id: Uuid,
         user_id: Uuid,
         estado: &str,
         total_destinatarios: i32,
+        total_enviados: i32,
+        total_fallidos: i32,
     ) -> Result<Option<Campana>, sqlx::Error> {
         sqlx::query_as!(
             Campana,
-            "UPDATE campanas SET estado = $3, total_destinatarios = $4, updated_at = NOW() \
+            "UPDATE campanas SET estado = $3, total_destinatarios = $4, \
+             total_enviados = $5, total_fallidos = $6, updated_at = NOW() \
              WHERE id = $1 AND user_id = $2 \
              RETURNING *",
             id,
             user_id,
             estado,
-            total_destinatarios
+            total_destinatarios,
+            total_enviados,
+            total_fallidos
         )
         .fetch_optional(pool)
         .await
+    }
+
+    /* [303A-1] Actualizar estado de un destinatario individual después de envío */
+    pub async fn actualizar_estado_destinatario(
+        pool: &PgPool,
+        campana_id: Uuid,
+        cliente_id: Uuid,
+        canal: &str,
+        estado: &str,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query!(
+            "UPDATE campana_destinatarios SET estado = $4, enviado_at = NOW() \
+             WHERE campana_id = $1 AND cliente_id = $2 AND canal = $3",
+            campana_id,
+            cliente_id,
+            canal,
+            estado
+        )
+        .execute(pool)
+        .await?;
+        Ok(())
     }
 
     /* [263A-23] Segmentación de clientes por actividad.

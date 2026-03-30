@@ -22,6 +22,7 @@ interface EstadoIntegraciones {
   meta_waba_id: string;
   meta_business_app_id: string;
   meta_access_token: string;
+  meta_phone_number_id: string;
 }
 
 const DEFAULTS: EstadoIntegraciones = {
@@ -37,6 +38,7 @@ const DEFAULTS: EstadoIntegraciones = {
   meta_waba_id: '',
   meta_business_app_id: '',
   meta_access_token: '',
+  meta_phone_number_id: '',
 };
 
 export function useIntegraciones() {
@@ -61,6 +63,7 @@ export function useIntegraciones() {
         smtp_from_name: d.smtp_from_name ?? '',
         twilio_from_number: d.twilio_from_number ?? '',
         meta_waba_id: d.meta_waba_id ?? '',
+        meta_phone_number_id: d.meta_phone_number_id ?? '',
       }));
     }
   }, [datos]);
@@ -89,6 +92,7 @@ export function useIntegraciones() {
     if (form.meta_waba_id) payload.meta_waba_id = form.meta_waba_id;
     if (form.meta_business_app_id) payload.meta_business_app_id = form.meta_business_app_id;
     if (form.meta_access_token) payload.meta_access_token = form.meta_access_token;
+    if (form.meta_phone_number_id) payload.meta_phone_number_id = form.meta_phone_number_id;
 
     try {
       await mutacion.mutateAsync({ data: payload });

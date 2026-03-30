@@ -224,7 +224,9 @@ async fn enviar_recordatorio(
             if p.telefono.is_empty() {
                 return Err("Cliente sin teléfono".to_string());
             }
-            match TwilioService::enviar_sms(&integ, &p.telefono, &mensaje).await {
+            /* [303A-1] Componer número E.164 con prefijo del cliente */
+            let numero = format!("{}{}", p.prefijo_telefono, p.telefono);
+            match TwilioService::enviar_sms(&integ, &numero, &mensaje).await {
                 Ok(true) => Ok(()),
                 Ok(false) => Err("Twilio no configurado".to_string()),
                 Err(e) => Err(format!("Error Twilio: {e}")),
@@ -234,7 +236,9 @@ async fn enviar_recordatorio(
             if p.telefono.is_empty() {
                 return Err("Cliente sin teléfono".to_string());
             }
-            match MetaWhatsappService::enviar_mensaje(&integ, &p.telefono, &mensaje).await {
+            /* [303A-1] Componer número E.164 con prefijo del cliente */
+            let numero = format!("{}{}", p.prefijo_telefono, p.telefono);
+            match MetaWhatsappService::enviar_mensaje(&integ, &numero, &mensaje).await {
                 Ok(true) => Ok(()),
                 Ok(false) => Err("Meta WhatsApp no configurado".to_string()),
                 Err(e) => Err(format!("Error Meta: {e}")),

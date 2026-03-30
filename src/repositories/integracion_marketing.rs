@@ -56,6 +56,7 @@ impl IntegracionMarketingRepository {
                 meta_waba_id = COALESCE($11, meta_waba_id),
                 meta_business_app_id = COALESCE($12, meta_business_app_id),
                 meta_access_token = COALESCE($13, meta_access_token),
+                meta_phone_number_id = COALESCE($14, meta_phone_number_id),
                 updated_at = now()
             WHERE user_id = $1 RETURNING *",
         )
@@ -72,6 +73,7 @@ impl IntegracionMarketingRepository {
         .bind(&req.meta_waba_id)
         .bind(&req.meta_business_app_id)
         .bind(&req.meta_access_token)
+        .bind(&req.meta_phone_number_id)
         .fetch_one(pool)
         .await
     }

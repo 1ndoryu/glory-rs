@@ -34,6 +34,8 @@ pub struct ReservaPendienteRecordatorio {
     pub mensaje_plantilla: String,
     pub nombre_cliente: String,
     pub telefono: String,
+    /* [303A-1] Prefijo telefónico del cliente para componer número E.164 */
+    pub prefijo_telefono: String,
     pub fecha: chrono::NaiveDate,
     pub hora: chrono::NaiveTime,
     pub user_id: Uuid,
@@ -164,6 +166,7 @@ impl RecordatorioRepository {
                rr.mensaje_plantilla, \
                r.nombre_cliente, \
                r.telefono, \
+               COALESCE(c.prefijo_telefono, '+34') AS prefijo_telefono, \
                r.fecha, \
                r.hora, \
                r.user_id, \

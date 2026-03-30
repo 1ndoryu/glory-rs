@@ -1,6 +1,8 @@
-/* [283A-23] Servicio de WhatsApp via Meta Cloud API (Graph API v21.0).
+/* [283A-23] Servicio de WhatsApp via Meta Cloud API (Graph API v23.0).
  * Envía mensajes de texto libre usando las credenciales de integraciones_marketing.
- * Retorna Ok(false) si Meta no está configurado en la integración. */
+ * Retorna Ok(false) si Meta no está configurado en la integración.
+ * [303A-1] Corregido: el endpoint usa Phone-Number-ID, no WABA ID.
+ * POST /{Version}/{Phone-Number-ID}/messages */
 
 use crate::models::IntegracionMarketing;
 
@@ -27,13 +29,15 @@ impl MetaWhatsappService {
             return Ok(false);
         }
 
-        let waba_id = integ.meta_waba_id.as_deref().unwrap_or_default();
+        /* [303A-1] La API de mensajes usa Phone-Number-ID, no WABA ID.
+         * WABA ID se usa para gestión de templates (crear/listar/eliminar). */
+        let phone_number_id = integ.meta_phone_number_id.as_deref().unwrap_or_default();
         let access_token = integ.meta_access_token.as_deref().unwrap_or_default();
 
-        /* Meta Cloud API: enviar mensaje de texto libre */
-        let url = format!("https://graph.facebook.com/v21.0/{waba_id}/messages");
+        let url = format!("https://graph.facebook.com/v23.0/{phone_number_id}/messages");
         let payload = serde_json::json!({
             "messaging_product": "whatsapp",
+            "recipient_type": "individual",
             "to": destinatario,
             "type": "text",
             "text": { "body": cuerpo }

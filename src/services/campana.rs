@@ -122,8 +122,8 @@ impl CampanaService {
     }
 
     /* [263A-23] Enviar campaña: segmentar clientes, crear destinatarios, enviar.
-     * El envío real es un stub que loguea — las APIs (SMS gateway, SMTP, WhatsApp)
-     * se integrarán cuando se configuren las credenciales del proveedor. */
+     * [303A-1] Ahora actualiza contadores reales (total_enviados, total_fallidos)
+     * y el estado individual de cada destinatario. */
     pub async fn enviar(pool: &PgPool, id: Uuid, user_id: Uuid) -> Result<Campana, AppError> {
         let campana = Self::get(pool, id, user_id).await?;
 
@@ -185,14 +185,19 @@ impl CampanaService {
         let total = i32::try_from(destinatarios.len()).unwrap_or(0);
         CampanaRepository::insertar_destinatarios(pool, id, &destinatarios).await?;
 
-        /* [283A-23] Envío real delegado a función libre para cumplir límite de líneas */
+        /* [283A-23] Envío real delegado a función libre para cumplir límite de líneas.
+         * [303A-1] Ahora retorna contadores reales y actualiza cada destinatario. */
         let integ_mkt = IntegracionMarketingRepository::obtener_o_crear(pool, user_id).await?;
-        enviar_por_canales(&integ_mkt, &clientes, &campana).await;
+        let (enviados, fallidos) = enviar_por_canales(pool, id, &integ_mkt, &clientes, &campana).await;
 
-        tracing::info!("Campaña '{}' ({}) — {} destinatarios enviados", campana.nombre, id, total);
+        tracing::info!("Campaña '{}' ({}) — {} destinatarios, {} enviados, {} fallidos",
+            campana.nombre, id, total, enviados, fallidos);
+
+        let total_enviados = i32::try_from(enviados).unwrap_or(0);
+        let total_fallidos = i32::try_from(fallidos).unwrap_or(0);
 
         let campana_actualizada =
-            CampanaRepository::set_estado(pool, id, user_id, "enviada", total)
+            CampanaRepository::set_estado(pool, id, user_id, "enviada", total, total_enviados, total_fallidos)
                 .await?
                 .ok_or_else(|| AppError::NotFound("Error actualizando estado".into()))?;
 
@@ -229,12 +234,15 @@ use crate::services::twilio::TwilioService;
 
 /* [283A-23] Función libre que envía la campaña por cada canal configurado.
  * Extraída de `enviar()` para cumplir el límite de líneas de clippy.
- * Email via SMTP, SMS via Twilio, `WhatsApp` via Meta Cloud API. */
+ * Email via SMTP, SMS via Twilio, `WhatsApp` via Meta Cloud API.
+ * [303A-1] Retorna (enviados, fallidos) y actualiza estado de cada destinatario. */
 async fn enviar_por_canales(
+    pool: &PgPool,
+    campana_id: Uuid,
     integ: &IntegracionMarketing,
     clientes: &[ClienteSegmentado],
     campana: &Campana,
-) {
+) -> (u32, u32) {
     let mut enviados = 0u32;
     let mut errores = 0u32;
 
@@ -262,15 +270,26 @@ async fn enviar_por_canales(
             };
 
             match resultado {
-                Ok(true) => enviados += 1,
+                Ok(true) => {
+                    enviados += 1;
+                    /* [303A-1] Marcar destinatario como enviado */
+                    let _ = CampanaRepository::actualizar_estado_destinatario(
+                        pool, campana_id, cliente.id, canal, "enviado",
+                    ).await;
+                }
                 Ok(false) => {} /* no configurado — ya logueado en el servicio */
                 Err(e) => {
                     tracing::error!("Error enviando {} a cliente {}: {}", canal, cliente.id, e);
                     errores += 1;
+                    /* [303A-1] Marcar destinatario como fallido */
+                    let _ = CampanaRepository::actualizar_estado_destinatario(
+                        pool, campana_id, cliente.id, canal, "fallido",
+                    ).await;
                 }
             }
         }
     }
 
     tracing::info!("Envío completado: {} enviados, {} errores", enviados, errores);
+    (enviados, errores)
 }

@@ -45,6 +45,10 @@ pub struct IntegracionMarketing {
     pub meta_business_app_id: Option<String>,
     #[serde(skip_serializing)]
     pub meta_access_token: Option<String>,
+    /* [303A-1] Phone Number ID: requerido para enviar mensajes via Cloud API.
+     * POST /{Version}/{Phone-Number-ID}/messages */
+    #[serde(skip_serializing)]
+    pub meta_phone_number_id: Option<String>,
 
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
@@ -65,9 +69,19 @@ impl IntegracionMarketing {
             && self.twilio_from_number.is_some()
     }
 
-    /// Indica si Meta `WhatsApp` está configurado
+    /// Indica si Meta `WhatsApp` está configurado para enviar mensajes.
+    /// Requiere `waba_id` (para templates), `access_token` y `phone_number_id` (para mensajes).
     #[must_use]
     pub fn meta_configurado(&self) -> bool {
+        self.meta_waba_id.is_some()
+            && self.meta_access_token.is_some()
+            && self.meta_phone_number_id.is_some()
+    }
+
+    /// Indica si Meta está configurado al menos para enviar templates a aprobación.
+    /// Solo requiere `waba_id` + `access_token` (no necesita `phone_number_id`).
+    #[must_use]
+    pub fn meta_templates_configurado(&self) -> bool {
         self.meta_waba_id.is_some() && self.meta_access_token.is_some()
     }
 }
@@ -83,6 +97,8 @@ pub struct IntegracionMarketingPublica {
     pub twilio_from_number: Option<String>,
     pub meta_configurado: bool,
     pub meta_waba_id: Option<String>,
+    /* [303A-1] Indica si tiene phone_number_id para enviar mensajes */
+    pub meta_phone_number_id: Option<String>,
 }
 
 impl From<&IntegracionMarketing> for IntegracionMarketingPublica {
@@ -96,6 +112,7 @@ impl From<&IntegracionMarketing> for IntegracionMarketingPublica {
             twilio_from_number: i.twilio_from_number.clone(),
             meta_configurado: i.meta_configurado(),
             meta_waba_id: i.meta_waba_id.clone(),
+            meta_phone_number_id: i.meta_phone_number_id.clone(),
         }
     }
 }
@@ -127,4 +144,7 @@ pub struct ActualizarIntegracionesRequest {
     #[validate(length(max = 100))]
     pub meta_business_app_id: Option<String>,
     pub meta_access_token: Option<String>,
+    /* [303A-1] Phone Number ID de Meta — requerido para enviar mensajes */
+    #[validate(length(max = 100))]
+    pub meta_phone_number_id: Option<String>,
 }

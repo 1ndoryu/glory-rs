@@ -1,6 +1,7 @@
 /* [263A-24] Servicio de plantillas WhatsApp.
  * Orquesta CRUD y flujo de envío a Meta Business API.
- * La integración real con Meta se implementará cuando haya credenciales. */
+ * [303A-1] enviar_a_meta implementado con llamada real a Meta Graph API v23.0.
+ * POST /{WABA_ID}/message_templates (usa WABA ID, no Phone-Number-ID). */
 
 use sqlx::PgPool;
 use uuid::Uuid;
@@ -13,6 +14,7 @@ use crate::models::{
 use crate::repositories::plantilla_whatsapp::{
     ActualizarPlantillaData, NuevaPlantilla, PlantillaRepository,
 };
+use crate::repositories::IntegracionMarketingRepository;
 
 pub struct PlantillaService;
 
@@ -113,14 +115,14 @@ impl PlantillaService {
         Ok(())
     }
 
-    /* Enviar plantilla a Meta para aprobación.
-     * Por ahora genera un ID stub — integración real pendiente de credenciales Meta. */
+    /* [303A-1] Enviar plantilla a Meta Business API para aprobación.
+     * POST https://graph.facebook.com/v23.0/{WABA_ID}/message_templates
+     * Si Meta no está configurado, retorna error claro en vez de ID falso. */
     pub async fn enviar_a_meta(
         pool: &PgPool,
         id: Uuid,
         user_id: Uuid,
     ) -> Result<PlantillaWhatsapp, AppError> {
-        /* Verificar que existe y es borrador */
         let plantilla = Self::get(pool, id, user_id).await?;
         if plantilla.estado != "borrador" {
             return Err(AppError::Validation(
@@ -133,17 +135,23 @@ impl PlantillaService {
             ));
         }
 
-        /* Stub: en producción se llamaría a Meta Business API aquí.
-         * POST https://graph.facebook.com/v21.0/{WABA_ID}/message_templates
-         * El ID retornado se almacena como meta_template_id. */
-        let stub_meta_id = format!("meta_stub_{}", Uuid::new_v4());
-        tracing::info!(
-            plantilla_id = %id,
-            meta_id = %stub_meta_id,
-            "Plantilla enviada a Meta (stub — integración pendiente)"
-        );
+        let integ = IntegracionMarketingRepository::obtener_o_crear(pool, user_id).await
+            .map_err(AppError::Database)?;
 
-        PlantillaRepository::set_enviada(pool, id, user_id, &stub_meta_id)
+        if !integ.meta_templates_configurado() {
+            return Err(AppError::Validation(
+                "Meta WhatsApp no configurado. Configure WABA ID y Access Token en Configuración > Integraciones".into(),
+            ));
+        }
+
+        let waba_id = integ.meta_waba_id.as_deref().unwrap_or_default();
+        let access_token = integ.meta_access_token.as_deref().unwrap_or_default();
+
+        let meta_template_id = enviar_template_a_meta(
+            waba_id, access_token, &plantilla,
+        ).await?;
+
+        PlantillaRepository::set_enviada(pool, id, user_id, &meta_template_id)
             .await
             .map_err(AppError::Database)?
             .ok_or_else(|| AppError::Validation("No se pudo enviar: verificar estado".into()))
@@ -158,4 +166,85 @@ fn validar_categoria(cat: &str) -> Result<(), AppError> {
         )));
     }
     Ok(())
+}
+
+/* [303A-1] Envía la plantilla a Meta para aprobación via Graph API v23.0.
+ * POST https://graph.facebook.com/v23.0/{WABA_ID}/message_templates
+ * Retorna el template ID asignado por Meta. */
+async fn enviar_template_a_meta(
+    waba_id: &str,
+    access_token: &str,
+    plantilla: &PlantillaWhatsapp,
+) -> Result<String, AppError> {
+    let url = format!(
+        "https://graph.facebook.com/v23.0/{waba_id}/message_templates"
+    );
+
+    /* Construir componentes: al menos un BODY es obligatorio */
+    let mut components = vec![serde_json::json!({
+        "type": "BODY",
+        "text": plantilla.cuerpo_mensaje
+    })];
+
+    if let Some(ref cabecera) = plantilla.cabecera_texto {
+        if !cabecera.is_empty() {
+            components.push(serde_json::json!({
+                "type": "HEADER",
+                "format": "TEXT",
+                "text": cabecera
+            }));
+        }
+    }
+
+    if let Some(ref pie) = plantilla.pie_texto {
+        if !pie.is_empty() {
+            components.push(serde_json::json!({
+                "type": "FOOTER",
+                "text": pie
+            }));
+        }
+    }
+
+    let payload = serde_json::json!({
+        "name": plantilla.nombre.to_lowercase().replace(' ', "_"),
+        "category": plantilla.categoria,
+        "language": plantilla.idioma,
+        "components": components
+    });
+
+    let client = reqwest::Client::new();
+    let resp = client
+        .post(&url)
+        .bearer_auth(access_token)
+        .json(&payload)
+        .send()
+        .await
+        .map_err(|e| AppError::Internal(format!("Error HTTP Meta: {e}")))?;
+
+    let status = resp.status().as_u16();
+    let body = resp.text().await.unwrap_or_default();
+
+    if status >= 400 {
+        tracing::error!("Meta template API error {status}: {body}");
+        return Err(AppError::BadRequest(format!(
+            "Meta rechazó la plantilla ({status}): {body}"
+        )));
+    }
+
+    /* Parsear respuesta: { "id": "123456789", "status": "PENDING", "category": "..." } */
+    let parsed: serde_json::Value = serde_json::from_str(&body)
+        .map_err(|e| AppError::Internal(format!("Respuesta Meta no válida: {e}")))?;
+
+    let meta_id = parsed["id"]
+        .as_str()
+        .unwrap_or("unknown")
+        .to_string();
+
+    tracing::info!(
+        plantilla = %plantilla.nombre,
+        meta_id = %meta_id,
+        "Plantilla enviada a Meta para aprobación"
+    );
+
+    Ok(meta_id)
 }
