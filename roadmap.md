@@ -144,5 +144,6 @@ Tarea Final. ~~Actualiza el despliege con coolify-manager-rs~~ → 283A-33
 
 ~~303A-1: Revisión profunda del sistema de marketing/SMS/email/WhatsApp — corregir bugs críticos~~ → completada
 
-303A-16: Añadir fecha y hora a campos obligatorios al reservar (configuración)
-303A-17: MD aclaraciones para el cliente (dudas Data IV)
+## Tareas pendientes
+
+(Sin tareas pendientes)
