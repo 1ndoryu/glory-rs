@@ -20,7 +20,6 @@ interface CamposVenta {
   comensales: string;
   descripcion: string;
   ivaPorcentaje: string;
-  permitirDuplicados: boolean;
   turnos: Turno[];
   canal: CanalVenta;
   detalles: Record<Turno, DetalleTurno>;
@@ -36,7 +35,6 @@ function camposIniciales(ventaInicial?: Venta): CamposVenta {
       comensales: ventaInicial.comensales?.toString() || '',
       descripcion: ventaInicial.descripcion || '',
       ivaPorcentaje: ventaInicial.iva_porcentaje,
-      permitirDuplicados: false,
       turnos: [turno],
       canal: (ventaInicial.canal as CanalVenta) || CanalVenta.comedor,
       detalles: {
@@ -57,7 +55,6 @@ function camposIniciales(ventaInicial?: Venta): CamposVenta {
     comensales: '',
     descripcion: '',
     ivaPorcentaje: '10',
-    permitirDuplicados: false,
     turnos: [Turno.mediodia],
     canal: CanalVenta.comedor,
     detalles: {

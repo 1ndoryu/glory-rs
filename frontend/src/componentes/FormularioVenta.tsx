@@ -7,7 +7,6 @@ import useFormularioVenta, { calcularIva } from '../hooks/useFormularioVenta';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const ETIQUETAS_TURNO: Record<Turno, string> = {
@@ -120,10 +119,6 @@ function FormularioVenta({ onExito, venta }: Props) {
                         <div className="flex flex-col gap-2">
                             <Label htmlFor="ivaPorcentaje">IVA %</Label>
                             <Input id="ivaPorcentaje" type="number" step="0.01" value={campos.ivaPorcentaje} onChange={e => cambiarCampo('ivaPorcentaje', e.target.value)} className="max-w-24" />
-                        </div>
-                        <div className="flex items-center gap-2 pt-5">
-                            <Switch id="duplicados" checked={campos.permitirDuplicados} onCheckedChange={checked => cambiarCampo('permitirDuplicados', checked)} />
-                            <Label htmlFor="duplicados">Permitir duplicados</Label>
                         </div>
                     </div>
                 </details>
