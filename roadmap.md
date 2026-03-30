@@ -3,7 +3,7 @@
 > **URL producción:** http://restaurante.wandori.us (Swagger UI: /swagger-ui/)
 > **URL legacy (no funcional):** ~~http://app-b8s0cks444o0sogo8kg8wcgw.66.94.100.241.sslip.io~~
 > **Servidor:** 66.94.100.241 (Coolify, servicio UUID: b8s0cks444o0sogo8kg8wcgw)
-> **Deploy:** `scripts/deploy-server.sh` via SSH (requiere DB_PASSWORD y JWT_SECRET como env vars)
+> **Deploy:** `.\scripts\deploy.ps1` — zero-downtime via SSH (build + swap, sin Coolify restart)
 > **Repositorio:** 1ndoryu/glory-rs, rama glory-rs-rest
 
 ## Stack
