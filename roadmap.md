@@ -144,11 +144,5 @@ Tarea Final. ~~Actualiza el despliege con coolify-manager-rs~~ → 283A-33
 
 ~~303A-1: Revisión profunda del sistema de marketing/SMS/email/WhatsApp — corregir bugs críticos~~ → completada
 
-303A-9: PanelConfigMesa no actualiza min/max personas al cambiar mesa directamente
-303A-10: Cuadrada y rectangular se ven igual en el plano
-303A-11: Zoom no debe reducir altura del canvas + overflow:auto + altura fija
-303A-12: Pan con mouse, minimap, indicadores de mesas fuera de vista (ambos paneles)
-303A-13: Altura del canvas ajustable manualmente (arrastrar borde inferior) + sincronizada entre paneles
-303A-15: Filtro rango de fechas en reservas (fecha inicio + fin)
 303A-16: Añadir fecha y hora a campos obligatorios al reservar (configuración)
 303A-17: MD aclaraciones para el cliente (dudas Data IV)

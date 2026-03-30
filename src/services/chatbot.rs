@@ -184,6 +184,8 @@ impl ChatbotService {
             page: 1,
             per_page: 50,
             fecha,
+            fecha_desde: None,
+            fecha_hasta: None,
             estado: None,
             hora_desde: None,
             hora_hasta: None,

@@ -197,7 +197,15 @@ impl ReservaService {
             user_id,
             page: query.page,
             per_page: query.per_page,
-            fecha: query.fecha,
+            /* [303A-15] Si se envía rango (fecha_desde/fecha_hasta), ignorar `fecha` exacta
+             * para no producir filtros contradictorios. */
+            fecha: if query.fecha_desde.is_some() || query.fecha_hasta.is_some() {
+                None
+            } else {
+                query.fecha
+            },
+            fecha_desde: query.fecha_desde,
+            fecha_hasta: query.fecha_hasta,
             estado: estado_normalizado,
             hora_desde,
             hora_hasta,

@@ -47,6 +47,10 @@ pub struct FiltrosReserva {
     pub page: i64,
     pub per_page: i64,
     pub fecha: Option<chrono::NaiveDate>,
+    /// [303A-15] Inicio del rango de fechas (inclusive)
+    pub fecha_desde: Option<chrono::NaiveDate>,
+    /// [303A-15] Fin del rango de fechas (inclusive)
+    pub fecha_hasta: Option<chrono::NaiveDate>,
     pub estado: Option<String>,
     pub hora_desde: Option<chrono::NaiveTime>,
     pub hora_hasta: Option<chrono::NaiveTime>,
@@ -110,10 +114,14 @@ impl ReservaRepository {
 
         /* [303A-4] Cuando no hay filtro explícito de estado, excluir canceladas
          * para que el conteo coincida con el calendario (resumen_mensual) y el
-         * conteo del Home. Si el usuario elige "cancelada" en el filtro, sí las ve. */
+         * conteo del Home. Si el usuario elige "cancelada" en el filtro, sí las ve.
+         * [303A-15] Soporte rango de fechas (fecha_desde/fecha_hasta). Si se envía
+         * el campo `fecha` sin rango, se usa como filtro exacto (compatibilidad). */
         let items = sqlx::query_as::<_, Reserva>(
             "SELECT * FROM reservas WHERE user_id = $1 \
              AND ($4::DATE IS NULL OR fecha = $4) \
+             AND ($9::DATE IS NULL OR fecha >= $9) \
+             AND ($10::DATE IS NULL OR fecha <= $10) \
              AND (($5::VARCHAR IS NULL AND estado != 'cancelada') OR estado = $5) \
              AND ($6::TIME IS NULL OR hora >= $6) \
              AND ($7::TIME IS NULL OR hora < $7) \
@@ -131,12 +139,16 @@ impl ReservaRepository {
         .bind(filtros.hora_desde)
         .bind(filtros.hora_hasta)
         .bind(patron.as_deref())
+        .bind(filtros.fecha_desde)
+        .bind(filtros.fecha_hasta)
         .fetch_all(pool)
         .await?;
 
         let rec: (Option<i64>,) = sqlx::query_as(
             "SELECT COUNT(*) FROM reservas WHERE user_id = $1 \
              AND ($2::DATE IS NULL OR fecha = $2) \
+             AND ($7::DATE IS NULL OR fecha >= $7) \
+             AND ($8::DATE IS NULL OR fecha <= $8) \
              AND (($3::VARCHAR IS NULL AND estado != 'cancelada') OR estado = $3) \
              AND ($4::TIME IS NULL OR hora >= $4) \
              AND ($5::TIME IS NULL OR hora < $5) \
@@ -151,6 +163,8 @@ impl ReservaRepository {
         .bind(filtros.hora_desde)
         .bind(filtros.hora_hasta)
         .bind(patron.as_deref())
+        .bind(filtros.fecha_desde)
+        .bind(filtros.fecha_hasta)
         .fetch_one(pool)
         .await?;
 

@@ -1,6 +1,7 @@
 /* 263A-6: Hook para vista de reservas por día.
    Maneja filtros (fecha, turno, estado), paginación y modal.
-   Lee ?fecha= de la URL cuando se navega desde el calendario. */
+   Lee ?fecha= de la URL cuando se navega desde el calendario.
+   303A-15: Soporte rango de fechas (fecha_desde/fecha_hasta). */
 
 import { useState, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
@@ -8,6 +9,7 @@ import { useListarReservas, useEliminarReserva } from '../api/generated';
 
 interface FiltrosReservas {
   fecha: string;
+  fechaHasta: string;
   turno: string;
   estado: string;
   busqueda: string;
@@ -22,6 +24,7 @@ function useVistaReservas() {
 
   const [filtros, setFiltros] = useState<FiltrosReservas>({
     fecha: fechaUrl || new Date().toISOString().split('T')[0],
+    fechaHasta: '',
     turno: '',
     estado: '',
     busqueda: '',
@@ -29,10 +32,16 @@ function useVistaReservas() {
   });
   const [modalAbierto, setModalAbierto] = useState(false);
 
+  /* [303A-15] Si fechaHasta tiene valor, se usa rango (fecha_desde/fecha_hasta).
+   * Si no, se usa fecha exacta (compatibilidad con vista día). */
+  const usaRango = !!filtros.fechaHasta;
+
   const { data, isLoading, refetch } = useListarReservas({
     page: filtros.pagina,
     per_page: POR_PAGINA,
-    fecha: filtros.fecha || undefined,
+    fecha: usaRango ? undefined : (filtros.fecha || undefined),
+    fecha_desde: usaRango ? (filtros.fecha || undefined) : undefined,
+    fecha_hasta: usaRango ? (filtros.fechaHasta || undefined) : undefined,
     estado: filtros.estado || undefined,
     turno: filtros.turno || undefined,
     busqueda: filtros.busqueda || undefined,

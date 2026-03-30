@@ -128,7 +128,6 @@ export interface ActualizarIntegracionesRequest {
   meta_access_token?: string | null;
   /** @nullable */
   meta_business_app_id?: string | null;
-  /** [303A-1] Phone Number ID de Meta — requerido para enviar mensajes */
   /** @nullable */
   meta_phone_number_id?: string | null;
   /** @nullable */
@@ -1026,7 +1025,6 @@ export interface HistorialRecordatorios {
 export interface IntegracionMarketingPublica {
   id: string;
   meta_configurado: boolean;
-  /** [303A-1] Phone Number ID para enviar mensajes via Meta */
   /** @nullable */
   meta_phone_number_id?: string | null;
   /** @nullable */
@@ -1560,9 +1558,20 @@ export type ListarReservasParams = {
 page?: number;
 per_page?: number;
 /**
+ * Fecha exacta (mantiene compatibilidad). Si se env├¡a junto con `fecha_desde`/`fecha_hasta`, se ignora.
  * @nullable
  */
 fecha?: string | null;
+/**
+ * [303A-15] Inicio del rango de fechas (inclusive)
+ * @nullable
+ */
+fecha_desde?: string | null;
+/**
+ * [303A-15] Fin del rango de fechas (inclusive)
+ * @nullable
+ */
+fecha_hasta?: string | null;
 /**
  * @nullable
  */

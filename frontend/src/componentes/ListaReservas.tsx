@@ -64,6 +64,15 @@ function ListaReservas() {
           value={filtros.fecha}
           onChange={(e) => cambiarFiltro('fecha', e.target.value)}
           className="max-w-40"
+          title="Fecha desde"
+        />
+        <Input
+          type="date"
+          value={filtros.fechaHasta}
+          onChange={(e) => cambiarFiltro('fechaHasta', e.target.value)}
+          className="max-w-40"
+          title="Fecha hasta (dejar vacío para un solo día)"
+          placeholder="Hasta"
         />
         <Select value={filtros.turno || '__all__'} onValueChange={v => cambiarFiltro('turno', v === '__all__' ? '' : v)}>
           <SelectTrigger className="max-w-40"><SelectValue /></SelectTrigger>
@@ -106,6 +115,7 @@ function ListaReservas() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Mesa</TableHead>
+                  {filtros.fechaHasta && <TableHead>Fecha</TableHead>}
                   <TableHead>Hora</TableHead>
                   <TableHead>Nombre</TableHead>
                   <TableHead>Apellidos</TableHead>
@@ -119,6 +129,7 @@ function ListaReservas() {
                 {reservas.items.map((r) => (
                   <TableRow key={r.id}>
                     <TableCell>{r.num_mesa ?? '—'}</TableCell>
+                    {filtros.fechaHasta && <TableCell>{r.fecha}</TableCell>}
                     <TableCell>{r.hora}</TableCell>
                     <TableCell>{r.nombre_cliente}</TableCell>
                     <TableCell className="max-w-32 truncate">{r.apellidos_cliente || '—'}</TableCell>
@@ -152,7 +163,7 @@ function ListaReservas() {
           </div>
         </>
       ) : (
-        <p className="text-sm text-muted-foreground">No hay reservas para esta fecha</p>
+        <p className="text-sm text-muted-foreground">No hay reservas para {filtros.fechaHasta ? 'este rango de fechas' : 'esta fecha'}</p>
       )}
 
       <PlanoOcupacion fecha={filtros.fecha} turno={filtros.turno} />

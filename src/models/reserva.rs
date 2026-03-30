@@ -119,7 +119,12 @@ pub struct ReservasQuery {
     pub page: i64,
     #[serde(default = "default_per_page")]
     pub per_page: i64,
+    /// Fecha exacta (mantiene compatibilidad). Si se envía junto con `fecha_desde`/`fecha_hasta`, se ignora.
     pub fecha: Option<NaiveDate>,
+    /// [303A-15] Inicio del rango de fechas (inclusive)
+    pub fecha_desde: Option<NaiveDate>,
+    /// [303A-15] Fin del rango de fechas (inclusive)
+    pub fecha_hasta: Option<NaiveDate>,
     pub estado: Option<String>,
     pub turno: Option<String>,
     /// Búsqueda por nombre o apellidos del cliente
