@@ -120,3 +120,10 @@ Cada lección debe ser concisa y accionable.
 **Causa raíz:** `canal_nombre` en la query no tenía `?` override y el struct tenía `Option<String>`, pero la cache `.sqlx` marcaba la columna como `nullable: false` (heredado de la definición de tabla, no del JOIN). En runtime con datos reales, NULL causaba error de decodificación.
 **Solución:** `COALESCE(cr.nombre, 'Sin canal')` garantiza non-null. También agregar todos los campos no-agregados al GROUP BY.
 **Prevención:** Siempre usar COALESCE en LEFT JOINs o el override `as "col?"` en SQLx para columnas que pueden ser NULL.
+
+## 2026-03-30 — SQLx offline cache (.sqlx/) debe regenerarse tras cambios en queries
+
+**Problema:** Deploy falló con 4 errores `SQLX_OFFLINE=true but there is no cached data for this query`. El contenedor se construía pero cargo build abortaba.
+**Causa raíz:** Se modificaron queries SQL en `reserva.rs` y `cliente.rs` pero no se ejecutó `cargo sqlx prepare` para regenerar el hash de las queries en `.sqlx/`.
+**Solución:** Ejecutar `cargo sqlx prepare` (requiere DB local corriendo) y commitear los archivos `.sqlx/` resultantes.
+**Prevención:** SIEMPRE ejecutar `cargo sqlx prepare` después de modificar cualquier query `sqlx::query!`/`sqlx::query_as!`. Incluir en checklist pre-commit para archivos `.rs` que toquen queries.
