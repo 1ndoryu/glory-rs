@@ -18,6 +18,8 @@ interface OffScreenIndicatorsProps {
   onNavigate: (scrollLeft: number, scrollTop: number) => void;
 }
 
+const INDICATOR_EPSILON = 6;
+
 function OffScreenIndicators({
   mesas,
   viewportWidth,
@@ -31,6 +33,8 @@ function OffScreenIndicators({
   let izquierda = false;
   let derecha = false;
 
+  if (viewportWidth <= 0 || viewportHeight <= 0 || mesas.length === 0) return null;
+
   const viewRight = scrollLeft + viewportWidth;
   const viewBottom = scrollTop + viewportHeight;
 
@@ -38,10 +42,10 @@ function OffScreenIndicators({
     const mesaRight = m.x + m.ancho;
     const mesaBottom = m.y + m.alto;
 
-    if (mesaBottom < scrollTop) arriba = true;
-    if (m.y > viewBottom) abajo = true;
-    if (mesaRight < scrollLeft) izquierda = true;
-    if (m.x > viewRight) derecha = true;
+    if (mesaBottom < scrollTop - INDICATOR_EPSILON) arriba = true;
+    if (m.y > viewBottom + INDICATOR_EPSILON) abajo = true;
+    if (mesaRight < scrollLeft - INDICATOR_EPSILON) izquierda = true;
+    if (m.x > viewRight + INDICATOR_EPSILON) derecha = true;
   }
 
   if (!arriba && !abajo && !izquierda && !derecha) return null;
