@@ -5,7 +5,8 @@
 
 import { useState, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useListarReservas, useEliminarReserva } from '../api/generated';
+import { useQueryClient } from '@tanstack/react-query';
+import { useListarReservas, useEliminarReserva, getObtenerOcupacionQueryKey } from '../api/generated';
 
 interface FiltrosReservas {
   fecha: string;
@@ -19,6 +20,7 @@ interface FiltrosReservas {
 const POR_PAGINA = 20;
 
 function useVistaReservas() {
+  const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
   const fechaUrl = searchParams.get('fecha');
 
@@ -48,7 +50,13 @@ function useVistaReservas() {
   });
 
   const eliminarMutation = useEliminarReserva({
-    mutation: { onSuccess: () => { refetch(); } },
+    mutation: {
+      onSuccess: () => {
+        refetch();
+        /* [313A-8] Invalidar plano de ocupación al eliminar reserva */
+        queryClient.invalidateQueries({ queryKey: getObtenerOcupacionQueryKey() });
+      },
+    },
   });
 
   const reservas = data?.status === 200 ? data.data : null;
@@ -60,10 +68,13 @@ function useVistaReservas() {
     setFiltros(prev => ({ ...prev, [campo]: valor, pagina: campo === 'pagina' ? valor as number : 1 }));
   }, []);
 
+  /* [313A-8] Al cerrar modal de nueva reserva, refrescar lista Y plano de ocupación.
+   * Sin invalidar ocupación, las mesas no reflejaban la reserva recién creada. */
   const cerrarModalYRefrescar = useCallback(() => {
     setModalAbierto(false);
     refetch();
-  }, [refetch]);
+    queryClient.invalidateQueries({ queryKey: getObtenerOcupacionQueryKey() });
+  }, [refetch, queryClient]);
 
   return {
     filtros,
