@@ -4,7 +4,9 @@
  * [303A-18] Fix: useEffect movido antes del early return para cumplir reglas de hooks.
  * [313A-2] Viewport rect más visible. Minimap siempre visible si hay mesas.
  * [313A-5] Fix viewport rect: reemplazado clearRect+redraw por clip path evenodd.
- * clearRect borraba a transparente causando artefactos y el rect se perdía. */
+ * [313A-6] Fix viewport rect demasiado pequeño con zonas grandes o zoom alto.
+ * Minimap ampliado a 180px, mínimo del rect forzado a 20px para visibilidad.
+ * El overlay oscuro usa proporciones reales; el rect visual tiene floor de tamaño. */
 
 import { useEffect, useRef } from 'react';
 
@@ -26,8 +28,12 @@ interface CanvasMinimapProps {
   onNavigate: (scrollLeft: number, scrollTop: number) => void;
 }
 
-const MAX_MINIMAP_SIDE = 140;
-const MIN_MINIMAP_SIDE = 48;
+const MAX_MINIMAP_SIDE = 180;
+const MIN_MINIMAP_SIDE = 60;
+/* Tamaño mínimo visual del rectángulo del viewport en px del minimap.
+ * Con zonas grandes (3000px) a zoom 2x, el rect calculado podía ser ~10px,
+ * haciéndolo casi invisible. 20px garantiza que siempre sea reconocible. */
+const MIN_VIEWPORT_RECT = 20;
 
 function CanvasMinimap({
   mesas,
@@ -89,35 +95,40 @@ function CanvasMinimap({
       );
     }
 
-    /* [313A-5] Viewport rect — oscurecemos fuera del viewport con clip path
-     * en vez de clearRect (que borraba a transparente y causaba artefactos).
-     * Si el viewport cubre todo el contenido, solo dibujamos el borde azul. */
+    /* [313A-6] Viewport rect — proporciones reales para el overlay,
+     * pero con floor de tamaño mínimo para el borde azul visual. */
     const vx = offsetX + scrollLeft * scale;
     const vy = offsetY + scrollTop * scale;
-    const vw = Math.min(viewportWidth, effectiveWidth - scrollLeft) * scale;
-    const vh = Math.min(viewportHeight, effectiveHeight - scrollTop) * scale;
+    /* Tamaño real proporcional del viewport en coordenadas del minimap */
+    const rawVw = Math.min(viewportWidth, effectiveWidth - scrollLeft) * scale;
+    const rawVh = Math.min(viewportHeight, effectiveHeight - scrollTop) * scale;
 
-    /* Solo oscurecer si el viewport no cubre todo el contenido */
-    const viewportCoversAll = vw >= drawW - 1 && vh >= drawH - 1;
+    /* Solo oscurecer si el viewport no cubre todo el contenido.
+     * Usa rawVw/rawVh (proporciones reales) para que el overlay sea preciso. */
+    const viewportCoversAll = rawVw >= drawW - 1 && rawVh >= drawH - 1;
     if (!viewportCoversAll) {
       ctx.save();
-      /* Clip path: rectángulo exterior menos el viewport (even-odd) */
       const region = new Path2D();
       region.rect(offsetX, offsetY, drawW, drawH);
-      region.rect(vx, vy, vw, vh);
+      region.rect(vx, vy, rawVw, rawVh);
       ctx.clip(region, 'evenodd');
       ctx.fillStyle = 'rgba(0, 0, 0, 0.30)';
       ctx.fillRect(offsetX, offsetY, drawW, drawH);
       ctx.restore();
     }
 
+    /* Tamaño visual del rect con floor mínimo para que siempre sea visible.
+     * Clampeado al área dibujada para no desbordar el minimap. */
+    const vw = Math.min(Math.max(MIN_VIEWPORT_RECT, rawVw), drawW);
+    const vh = Math.min(Math.max(MIN_VIEWPORT_RECT, rawVh), drawH);
+
     /* Borde del viewport — azul sólido, siempre visible */
     ctx.strokeStyle = 'rgba(59, 130, 246, 1)';
     ctx.lineWidth = 2.5;
-    ctx.strokeRect(vx + 1, vy + 1, Math.max(4, vw - 2), Math.max(4, vh - 2));
+    ctx.strokeRect(vx + 1, vy + 1, vw - 2, vh - 2);
     /* Fill interior semitransparente */
-    ctx.fillStyle = 'rgba(59, 130, 246, 0.10)';
-    ctx.fillRect(vx + 1, vy + 1, Math.max(4, vw - 2), Math.max(4, vh - 2));
+    ctx.fillStyle = 'rgba(59, 130, 246, 0.12)';
+    ctx.fillRect(vx + 1, vy + 1, vw - 2, vh - 2);
   }, [visible, mesas, viewportWidth, viewportHeight, scrollLeft, scrollTop, scale, drawW, drawH, minimapWidth, minimapHeight, offsetX, offsetY, effectiveWidth, effectiveHeight]);
 
   if (!visible) return null;
