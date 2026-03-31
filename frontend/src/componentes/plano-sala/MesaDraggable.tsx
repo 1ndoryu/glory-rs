@@ -1,8 +1,10 @@
-/* [263A-14] Mesa arrastrable con @dnd-kit para el canvas del plano de sala */
+/* [263A-14] Mesa arrastrable con @dnd-kit para el canvas del plano de sala.
+ * [313A-2] Resize handles cambiados de <Button> a <div> — el Button de shadcn
+ * inyecta clases Tailwind (size-6, inline-flex, border-transparent etc.)
+ * que conflictúan con el CSS custom de .planoMesaResizeHandle, haciéndolos invisibles. */
 
 import { useDraggable } from '@dnd-kit/core';
 import type { ActualizarMesaRequest, Mesa } from '../../api/generated';
-import { Button } from '@/components/ui/button';
 import { useMesaResize } from '../../hooks/useMesaResize';
 
 interface MesaDraggableProps {
@@ -90,10 +92,10 @@ function MesaDraggable({
       </span>
       {seleccionada && (
         <>
-          <Button type="button" variant="ghost" size="icon-xs" className="planoMesaResizeHandle norte" onMouseDown={onResizeStart('n')} aria-label="Redimensionar alto desde arriba" />
-          <Button type="button" variant="ghost" size="icon-xs" className="planoMesaResizeHandle sur" onMouseDown={onResizeStart('s')} aria-label="Redimensionar alto desde abajo" />
-          <Button type="button" variant="ghost" size="icon-xs" className="planoMesaResizeHandle este" onMouseDown={onResizeStart('e')} aria-label="Redimensionar ancho desde la derecha" />
-          <Button type="button" variant="ghost" size="icon-xs" className="planoMesaResizeHandle oeste" onMouseDown={onResizeStart('w')} aria-label="Redimensionar ancho desde la izquierda" />
+          <div className="planoMesaResizeHandle norte" onMouseDown={onResizeStart('n')} role="separator" aria-label="Redimensionar alto desde arriba" />
+          <div className="planoMesaResizeHandle sur" onMouseDown={onResizeStart('s')} role="separator" aria-label="Redimensionar alto desde abajo" />
+          <div className="planoMesaResizeHandle este" onMouseDown={onResizeStart('e')} role="separator" aria-label="Redimensionar ancho desde la derecha" />
+          <div className="planoMesaResizeHandle oeste" onMouseDown={onResizeStart('w')} role="separator" aria-label="Redimensionar ancho desde la izquierda" />
         </>
       )}
     </div>

@@ -56,10 +56,12 @@ function PlanoSala() {
   } = usePlanoSala(canvasRef);
 
   /* [313A-1] El tamaño real del plano sale de la zona y de la mesa más lejana.
-   * El grid/minimapa no pueden depender solo de la última mesa visible. */
+   * [313A-2] contentBounds NO incluye canvasHeight — ese es el viewport, no el contenido.
+   * Incluirlo inflaba las proporciones del minimap y hacía que el viewport rect
+   * cubriera 100% del alto, volviéndose invisible. */
   const contentBounds = useMemo(() => {
     let maxX = (zonaData?.ancho ?? 0) * zoom;
-    let maxY = Math.max(canvasHeight, (zonaData?.alto ?? 0) * zoom);
+    let maxY = (zonaData?.alto ?? 0) * zoom;
     for (const m of mesasZona) {
       const p = posicionesLocales[m.id];
       const d = dimensionesLocales[m.id];
@@ -69,7 +71,7 @@ function PlanoSala() {
       if (y > maxY) maxY = y;
     }
     return { w: maxX, h: maxY };
-  }, [canvasHeight, dimensionesLocales, mesasZona, posicionesLocales, zonaData, zoom]);
+  }, [dimensionesLocales, mesasZona, posicionesLocales, zonaData, zoom]);
 
   const maxPanOffset = useMemo(() => ({
     x: Math.max(0, contentBounds.w - viewportSize.w),
