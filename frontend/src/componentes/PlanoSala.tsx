@@ -5,7 +5,7 @@
  * [303A-13] Resize handle arrastrable en borde inferior.
  * Lógica en usePlanoSala, mesa arrastrable en MesaDraggable, config en PanelConfigMesa. */
 
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useCallback, useEffect } from 'react';
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import { Button } from '@/components/ui/button';
@@ -42,6 +42,10 @@ function PlanoSala() {
       h: el.clientHeight,
     });
   }, []);
+
+  /* [303A-18] Medir viewport al montar para que indicadores off-screen
+   * tengan dimensiones correctas desde el primer render */
+  useEffect(() => { onScroll(); }, [onScroll]);
 
   const {
     plano, zonaActiva, zonaData, mesasZona, mesaSeleccionada, arrastrando,
@@ -221,6 +225,12 @@ function PlanoSala() {
                 viewportHeight={canvasViewState.h || (viewportRef.current?.clientHeight ?? 0)}
                 scrollLeft={canvasViewState.scrollLeft}
                 scrollTop={canvasViewState.scrollTop}
+                onNavigate={(sl, st) => {
+                  if (viewportRef.current) {
+                    viewportRef.current.scrollLeft = sl;
+                    viewportRef.current.scrollTop = st;
+                  }
+                }}
               />
             </div>
           ) : (

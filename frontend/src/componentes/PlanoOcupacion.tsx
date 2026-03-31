@@ -5,7 +5,7 @@
  * [283A-36] Zoom sincronizado con PlanoSala via zoomStore.
  * [303A-12] Pan, minimap, indicadores off-screen. */
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ZoomIn, ZoomOut } from 'lucide-react';
 import { useObtenerOcupacion, MesaOcupacion, ZonaOcupacion } from '../api/generated';
@@ -63,6 +63,9 @@ function PlanoOcupacion({ fecha, turno }: Props) {
       h: el.clientHeight,
     });
   }, []);
+
+  /* [303A-18] Medir viewport al montar para indicadores off-screen correctos */
+  useEffect(() => { onScroll(); }, [onScroll]);
 
   if (plano && plano.zonas.length > 0 && !zonaActiva) {
     setZonaActiva(plano.zonas[0].id);
@@ -190,6 +193,12 @@ function PlanoOcupacion({ fecha, turno }: Props) {
             viewportHeight={canvasViewState.h || (viewportRef.current?.clientHeight ?? 0)}
             scrollLeft={canvasViewState.scrollLeft}
             scrollTop={canvasViewState.scrollTop}
+            onNavigate={(sl, st) => {
+              if (viewportRef.current) {
+                viewportRef.current.scrollLeft = sl;
+                viewportRef.current.scrollTop = st;
+              }
+            }}
           />
         </div>
       )}

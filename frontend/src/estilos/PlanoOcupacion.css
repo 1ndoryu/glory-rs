@@ -81,12 +81,18 @@
 }
 
 /* Canvas */
-/* [303A-11] overflow:auto ya estaba. Altura fija viene del store.
- * Separado en viewport (.planoOcupacionCanvas) + contenido (.planoOcupacionContent). */
+/* [303A-11] Altura fija viene del store.
+ * Separado en viewport (.planoOcupacionCanvas) + contenido (.planoOcupacionContent).
+ * [303A-18] overflow: auto con scrollbars ocultos — navegación por pan. */
 .planoOcupacionCanvas {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: auto;
+  scrollbar-width: none;
+}
+
+.planoOcupacionCanvas::-webkit-scrollbar {
+  display: none;
 }
 
 /* [303A-12] Cursor pan cuando se hace shift+drag o middle-click */
@@ -196,8 +202,12 @@
 @media (max-width: 768px) {
   .planoOcupacionCanvas {
     max-width: 100%;
-    overflow-x: auto;
-    overflow-y: auto;
+    overflow: auto;
+    scrollbar-width: none;
     max-height: 300px;
+  }
+
+  .planoOcupacionCanvas::-webkit-scrollbar {
+    display: none;
   }
 }

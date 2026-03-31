@@ -63,13 +63,19 @@
 }
 
 /* === Canvas del plano === */
-/* [303A-11] overflow: auto para scrollbars cuando contenido zoom-in excede viewport.
- * Altura fija viene del store (canvasHeight), no depende del zoom.
- * El fondo cuadriculado se mueve al inner content (.planoCanvasContent). */
+/* [303A-11] Altura fija viene del store (canvasHeight), no depende del zoom.
+ * El fondo cuadriculado se mueve al inner content (.planoCanvasContent).
+ * [303A-18] overflow: auto con scrollbars ocultos — la navegación es por pan
+ * (shift+drag o middle-click). Scroll programático sigue funcionando. */
 .planoCanvas {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: auto;
+  scrollbar-width: none;
+}
+
+.planoCanvas::-webkit-scrollbar {
+  display: none;
 }
 
 /* [303A-12] Cursor pan cuando se hace shift+drag o middle-click */
@@ -310,7 +316,7 @@
   border-radius: 4px;
   opacity: 0.8;
   z-index: 50;
-  pointer-events: none;
+  cursor: pointer;
   animation: planoIndicadorPulse 1.5s ease-in-out infinite;
 }
 
