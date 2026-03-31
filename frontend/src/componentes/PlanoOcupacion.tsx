@@ -47,7 +47,11 @@ function PlanoOcupacion({ fecha, turno }: Props) {
   /* [303A-13] Resize del canvas arrastrando el borde inferior — sincronizado via store */
   const { resizing, onResizeStart } = useCanvasResize({ canvasHeight, setCanvasHeight });
 
-  /* [303A-20] Medir viewport via ResizeObserver */
+  /* [303A-20] Medir viewport via ResizeObserver.
+   * [313A-11] Dependencia en zonaActiva: el div con viewportRef se renderiza
+   * condicionalmente (solo cuando zonaData existe). Con deps=[] el effect corría
+   * antes de que el div existiera y nunca re-corría → viewportSize quedaba en 0,0
+   * → el rectángulo azul del minimap era invisible. */
   const [viewportSize, setViewportSize] = useState({ w: 0, h: 0 });
   useLayoutEffect(() => {
     const el = viewportRef.current;
@@ -58,7 +62,7 @@ function PlanoOcupacion({ fecha, turno }: Props) {
     });
     ro.observe(el);
     return () => ro.disconnect();
-  }, []);
+  }, [zonaActiva]);
 
   if (plano && plano.zonas.length > 0 && !zonaActiva) {
     setZonaActiva(plano.zonas[0].id);
