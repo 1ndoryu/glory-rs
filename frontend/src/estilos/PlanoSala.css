@@ -176,16 +176,11 @@
 .planoMesaResizeHandle {
   position: absolute;
   z-index: 2;
-  border: none;
-  background: transparent;
+  width: 14px;
+  height: 14px;
+  min-width: 14px;
+  min-height: 14px;
   padding: 0;
-}
-
-.planoMesaResizeHandle::after {
-  content: '';
-  position: absolute;
-  width: 10px;
-  height: 10px;
   border-radius: 999px;
   background: var(--primary);
   border: 2px solid var(--background);
@@ -194,58 +189,34 @@
 
 .planoMesaResizeHandle.norte,
 .planoMesaResizeHandle.sur {
-  left: 10px;
-  right: 10px;
-  height: 12px;
+  left: 50%;
   cursor: ns-resize;
 }
 
 .planoMesaResizeHandle.este,
 .planoMesaResizeHandle.oeste {
-  top: 10px;
-  bottom: 10px;
-  width: 12px;
+  top: 50%;
   cursor: ew-resize;
 }
 
 .planoMesaResizeHandle.norte {
-  top: -6px;
-}
-
-.planoMesaResizeHandle.norte::after {
-  top: 1px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 0;
+  transform: translate(-50%, -50%);
 }
 
 .planoMesaResizeHandle.sur {
-  bottom: -6px;
-}
-
-.planoMesaResizeHandle.sur::after {
-  bottom: 1px;
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: 0;
+  transform: translate(-50%, 50%);
 }
 
 .planoMesaResizeHandle.este {
-  right: -6px;
-}
-
-.planoMesaResizeHandle.este::after {
-  right: 1px;
-  top: 50%;
-  transform: translateY(-50%);
+  right: 0;
+  transform: translate(50%, -50%);
 }
 
 .planoMesaResizeHandle.oeste {
-  left: -6px;
-}
-
-.planoMesaResizeHandle.oeste::after {
-  left: 1px;
-  top: 50%;
-  transform: translateY(-50%);
+  left: 0;
+  transform: translate(-50%, -50%);
 }
 
 .planoMesa.redonda {
