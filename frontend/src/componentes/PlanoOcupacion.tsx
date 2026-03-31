@@ -66,23 +66,25 @@ function PlanoOcupacion({ fecha, turno }: Props) {
 
   const zonaData = plano?.zonas.find((z: ZonaOcupacion) => z.id === zonaActiva);
 
-  /* [313A-1][313A-9] contentBounds = bounding box de las mesas reales, no de la zona.
-   * En PlanoSala (editor) se usa zona.ancho/alto porque necesitas el canvas completo.
-   * En PlanoOcupacion (solo lectura) solo importa dónde están las mesas — usar la
-   * zona inflaba artificialmente el "mundo" del minimap haciendo que el rect del
-   * viewport fuera desproporcionadamente pequeño respecto a lo que realmente se ve. */
+  /* [313A-10] contentBounds = misma fórmula que PlanoSala.
+   * Base: zonaData.ancho/alto (el "mundo" de diseño del plano).
+   * Extensión: si alguna mesa se sale de la zona, el mundo crece.
+   * SIN canvasHeight (eso era el bug original — igualaba content a viewport
+   * haciendo que el rect del minimap cubriera 100% del alto y fuera invisible).
+   * SIN calcular solo bounding box de mesas (eso hacía que el "mundo" fuera
+   * diferente al de PlanoSala, desproporcionando el rect del viewport).
+   * Ver Agente/planes/plan-minimap-viewport-rect-2026-03-31.md para historial. */
   const contentBounds = useMemo(() => {
-    if (!zonaData || zonaData.mesas.length === 0) return { w: 0, h: 0 };
-    let maxX = 0;
-    let maxY = 0;
+    if (!zonaData) return { w: 0, h: 0 };
+    let maxX = zonaData.ancho * zoom;
+    let maxY = zonaData.alto * zoom;
     for (const m of zonaData.mesas) {
       const x = (m.pos_x + m.ancho) * zoom;
       const y = (m.pos_y + m.alto) * zoom;
       if (x > maxX) maxX = x;
       if (y > maxY) maxY = y;
     }
-    /* Padding para que las mesas no toquen el borde del canvas */
-    return { w: maxX + 40, h: maxY + 40 };
+    return { w: maxX, h: maxY };
   }, [zonaData, zoom]);
 
   const maxPanOffset = useMemo(() => ({
