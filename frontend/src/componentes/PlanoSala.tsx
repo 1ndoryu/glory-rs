@@ -229,7 +229,7 @@ function PlanoSala() {
                   };
                 })}
                 contentWidth={contentBounds.w}
-                contentHeight={Math.max(canvasHeight, contentBounds.h)}
+                contentHeight={contentBounds.h}
                 viewportWidth={viewportSize.w}
                 viewportHeight={viewportSize.h}
                 scrollLeft={panOffset.x}

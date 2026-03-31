@@ -14,7 +14,6 @@ import { useCanvasResize } from '../hooks/useCanvasResize';
 import { useCanvasPan } from '../hooks/useCanvasPan';
 import CanvasMinimap from './plano-sala/CanvasMinimap';
 import OffScreenIndicators from './plano-sala/OffScreenIndicators';
-import { normalizarDimensionesMesa, obtenerEstiloVisualMesa } from './plano-sala/mesaGeometry';
 import '../estilos/PlanoOcupacion.css';
 
 interface Props {
@@ -67,33 +66,19 @@ function PlanoOcupacion({ fecha, turno }: Props) {
 
   const zonaData = plano?.zonas.find((z: ZonaOcupacion) => z.id === zonaActiva);
 
-  const mesasRender = useMemo(() => {
-    if (!zonaData) return [];
-    return zonaData.mesas.map((mesa) => {
-      const normalizada = normalizarDimensionesMesa(mesa);
-      return {
-        ...normalizada,
-        pos_x: normalizada.pos_x * zoom,
-        pos_y: normalizada.pos_y * zoom,
-        ancho: normalizada.ancho * zoom,
-        alto: normalizada.alto * zoom,
-      };
-    });
-  }, [zonaData, zoom]);
-
   /* [313A-1] El tamaño real del plano sale de la zona y de la mesa más lejana. */
   const contentBounds = useMemo(() => {
     if (!zonaData) return { w: 0, h: 0 };
     let maxX = zonaData.ancho * zoom;
     let maxY = Math.max(canvasHeight, zonaData.alto * zoom);
-    for (const m of mesasRender) {
-      const x = m.pos_x + m.ancho;
-      const y = m.pos_y + m.alto;
+    for (const m of zonaData.mesas) {
+      const x = (m.pos_x + m.ancho) * zoom;
+      const y = (m.pos_y + m.alto) * zoom;
       if (x > maxX) maxX = x;
       if (y > maxY) maxY = y;
     }
     return { w: maxX, h: maxY };
-  }, [canvasHeight, mesasRender, zonaData, zoom]);
+  }, [canvasHeight, zonaData, zoom]);
 
   const maxPanOffset = useMemo(() => ({
     x: Math.max(0, contentBounds.w - viewportSize.w),
@@ -157,7 +142,7 @@ function PlanoOcupacion({ fecha, turno }: Props) {
                 transform: `translate(${-panOffset.x}px, ${-panOffset.y}px)`,
               }}
             >
-              {mesasRender.map((mesa: MesaOcupacion) => {
+              {zonaData.mesas.map((mesa: MesaOcupacion) => {
                 const estado = estadoMesa(mesa);
                 const esHover = mesaHover === mesa.id;
 
@@ -170,7 +155,6 @@ function PlanoOcupacion({ fecha, turno }: Props) {
                       top: mesa.pos_y * zoom,
                       width: mesa.ancho * zoom,
                       height: mesa.alto * zoom,
-                      ...obtenerEstiloVisualMesa(mesa.forma),
                     }}
                     onMouseEnter={() => setMesaHover(mesa.id)}
                     onMouseLeave={() => setMesaHover(null)}
@@ -195,14 +179,14 @@ function PlanoOcupacion({ fecha, turno }: Props) {
           </div>
           {/* [303A-12] Minimap + indicadores off-screen */}
           <CanvasMinimap
-            mesas={mesasRender.map((m: MesaOcupacion) => ({
-              x: m.pos_x,
-              y: m.pos_y,
-              ancho: m.ancho,
-              alto: m.alto,
+            mesas={zonaData.mesas.map((m: MesaOcupacion) => ({
+              x: m.pos_x * zoom,
+              y: m.pos_y * zoom,
+              ancho: m.ancho * zoom,
+              alto: m.alto * zoom,
             }))}
             contentWidth={contentBounds.w}
-            contentHeight={Math.max(canvasHeight, contentBounds.h)}
+            contentHeight={contentBounds.h}
             viewportWidth={viewportSize.w}
             viewportHeight={viewportSize.h}
             scrollLeft={panOffset.x}
@@ -210,11 +194,11 @@ function PlanoOcupacion({ fecha, turno }: Props) {
             onNavigate={(x, y) => setPanOffset({ x, y })}
           />
           <OffScreenIndicators
-            mesas={mesasRender.map((m: MesaOcupacion) => ({
-              x: m.pos_x,
-              y: m.pos_y,
-              ancho: m.ancho,
-              alto: m.alto,
+            mesas={zonaData.mesas.map((m: MesaOcupacion) => ({
+              x: m.pos_x * zoom,
+              y: m.pos_y * zoom,
+              ancho: m.ancho * zoom,
+              alto: m.alto * zoom,
             }))}
             viewportWidth={viewportSize.w}
             viewportHeight={viewportSize.h}
