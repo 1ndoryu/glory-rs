@@ -5,7 +5,7 @@
  * [283A-36] Zoom sincronizado con PlanoSala via zoomStore.
  * [303A-12] Pan, minimap, indicadores off-screen. */
 
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useMemo, useLayoutEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ZoomIn, ZoomOut } from 'lucide-react';
 import { useObtenerOcupacion, MesaOcupacion, ZonaOcupacion } from '../api/generated';
@@ -64,14 +64,27 @@ function PlanoOcupacion({ fecha, turno }: Props) {
     });
   }, []);
 
-  /* [303A-18] Medir viewport al montar para indicadores off-screen correctos */
-  useEffect(() => { onScroll(); }, [onScroll]);
+  /* [303A-19] Medir viewport antes del primer paint */
+  useLayoutEffect(() => { onScroll(); }, [onScroll]);
 
   if (plano && plano.zonas.length > 0 && !zonaActiva) {
     setZonaActiva(plano.zonas[0].id);
   }
 
   const zonaData = plano?.zonas.find((z: ZonaOcupacion) => z.id === zonaActiva);
+
+  /* [303A-19] Extensión del contenido desde datos de mesas */
+  const contentBounds = useMemo(() => {
+    if (!zonaData) return { w: 0, h: 0 };
+    let maxX = 0, maxY = 0;
+    for (const m of zonaData.mesas) {
+      const x = (m.pos_x + m.ancho) * zoom;
+      const y = (m.pos_y + m.alto) * zoom;
+      if (x > maxX) maxX = x;
+      if (y > maxY) maxY = y;
+    }
+    return { w: maxX, h: maxY };
+  }, [zonaData, zoom]);
 
   if (isLoading) return <p className="text-sm text-muted-foreground text-center py-4">Cargando plano...</p>;
   if (!plano || plano.zonas.length === 0) return null;
@@ -124,7 +137,7 @@ function PlanoOcupacion({ fecha, turno }: Props) {
           >
             <div
               className="planoOcupacionContent"
-              style={{ minHeight: Math.max(canvasHeight, zonaData.alto * zoom), position: 'relative' }}
+              style={{ minHeight: Math.max(canvasHeight, zonaData.alto * zoom), minWidth: contentBounds.w, position: 'relative' }}
             >
               {zonaData.mesas.map((mesa: MesaOcupacion) => {
                 const estado = estadoMesa(mesa);
@@ -169,8 +182,8 @@ function PlanoOcupacion({ fecha, turno }: Props) {
               ancho: m.ancho * zoom,
               alto: m.alto * zoom,
             }))}
-            contentWidth={viewportRef.current?.scrollWidth ?? 0}
-            contentHeight={viewportRef.current?.scrollHeight ?? 0}
+            contentWidth={contentBounds.w}
+            contentHeight={Math.max(canvasHeight, contentBounds.h)}
             viewportWidth={canvasViewState.w || (viewportRef.current?.clientWidth ?? 0)}
             viewportHeight={canvasViewState.h || (viewportRef.current?.clientHeight ?? 0)}
             scrollLeft={canvasViewState.scrollLeft}

@@ -5,7 +5,7 @@
  * [303A-13] Resize handle arrastrable en borde inferior.
  * Lógica en usePlanoSala, mesa arrastrable en MesaDraggable, config en PanelConfigMesa. */
 
-import { useRef, useState, useCallback, useEffect } from 'react';
+import { useRef, useState, useCallback, useMemo, useLayoutEffect } from 'react';
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import { Button } from '@/components/ui/button';
@@ -43,9 +43,9 @@ function PlanoSala() {
     });
   }, []);
 
-  /* [303A-18] Medir viewport al montar para que indicadores off-screen
-   * tengan dimensiones correctas desde el primer render */
-  useEffect(() => { onScroll(); }, [onScroll]);
+  /* [303A-19] useLayoutEffect mide ANTES del primer paint para evitar
+   * flash de indicadores incorrectos y minimap invisible */
+  useLayoutEffect(() => { onScroll(); }, [onScroll]);
 
   const {
     plano, zonaActiva, zonaData, mesasZona, mesaSeleccionada, arrastrando,
@@ -60,6 +60,21 @@ function PlanoSala() {
     dialogoConfirmar, setDialogoConfirmar,
     dialogoCombinacion, setDialogoCombinacion,
   } = usePlanoSala(canvasRef);
+
+  /* [303A-19] Calcular extensión del contenido desde datos de mesas.
+   * minWidth en el div de contenido crea scroll range para el pan.
+   * contentBounds se pasa al minimap en vez de leer refs del DOM. */
+  const contentBounds = useMemo(() => {
+    let maxX = 0, maxY = 0;
+    for (const m of mesasZona) {
+      const p = posicionesLocales[m.id];
+      const x = ((p?.x ?? m.pos_x) + m.ancho) * zoom;
+      const y = ((p?.y ?? m.pos_y) + m.alto) * zoom;
+      if (x > maxX) maxX = x;
+      if (y > maxY) maxY = y;
+    }
+    return { w: maxX, h: maxY };
+  }, [mesasZona, posicionesLocales, zoom]);
 
   /* [303A-13] Resize del canvas arrastrando el borde inferior */
   const { resizing, onResizeStart } = useCanvasResize({ canvasHeight, setCanvasHeight });
@@ -163,7 +178,7 @@ function PlanoSala() {
                 <div
                   ref={canvasRef}
                   className="planoCanvasContent"
-                  style={{ minHeight: Math.max(canvasHeight, zonaData.alto * zoom) }}
+                  style={{ minHeight: Math.max(canvasHeight, zonaData.alto * zoom), minWidth: contentBounds.w }}
                 >
                   {mesasZona.map(mesa => {
                     const pos = posicionesLocales[mesa.id];
@@ -198,8 +213,8 @@ function PlanoSala() {
                     alto: m.alto * zoom,
                   };
                 })}
-                contentWidth={canvasRef.current?.scrollWidth ?? 0}
-                contentHeight={canvasRef.current?.scrollHeight ?? 0}
+                contentWidth={contentBounds.w}
+                contentHeight={Math.max(canvasHeight, contentBounds.h)}
                 viewportWidth={canvasViewState.w || (viewportRef.current?.clientWidth ?? 0)}
                 viewportHeight={canvasViewState.h || (viewportRef.current?.clientHeight ?? 0)}
                 scrollLeft={canvasViewState.scrollLeft}
