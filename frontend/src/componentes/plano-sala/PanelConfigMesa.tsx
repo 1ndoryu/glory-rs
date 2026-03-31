@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { MIN_LADO_MESA, RATIO_RECTANGULAR } from './mesaGeometry';
 
 interface PanelConfigMesaProps {
   mesa: Mesa;
@@ -16,9 +17,6 @@ interface PanelConfigMesaProps {
 }
 
 function PanelConfigMesa({ mesa, onGuardar, onEliminar, onCerrar }: PanelConfigMesaProps) {
-  const MIN_LADO_MESA = 72;
-  const RATIO_RECTANGULAR = 1.8;
-
   const [form, setForm] = useState({
     numero: mesa.numero,
     minP: mesa.min_personas,

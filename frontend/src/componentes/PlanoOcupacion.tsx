@@ -14,6 +14,7 @@ import { useCanvasResize } from '../hooks/useCanvasResize';
 import { useCanvasPan } from '../hooks/useCanvasPan';
 import CanvasMinimap from './plano-sala/CanvasMinimap';
 import OffScreenIndicators from './plano-sala/OffScreenIndicators';
+import { normalizarDimensionesMesa } from './plano-sala/mesaGeometry';
 import '../estilos/PlanoOcupacion.css';
 
 interface Props {
@@ -66,19 +67,33 @@ function PlanoOcupacion({ fecha, turno }: Props) {
 
   const zonaData = plano?.zonas.find((z: ZonaOcupacion) => z.id === zonaActiva);
 
+  const mesasRender = useMemo(() => {
+    if (!zonaData) return [];
+    return zonaData.mesas.map((mesa) => {
+      const normalizada = normalizarDimensionesMesa(mesa);
+      return {
+        ...normalizada,
+        pos_x: normalizada.pos_x * zoom,
+        pos_y: normalizada.pos_y * zoom,
+        ancho: normalizada.ancho * zoom,
+        alto: normalizada.alto * zoom,
+      };
+    });
+  }, [zonaData, zoom]);
+
   /* [313A-1] El tamaño real del plano sale de la zona y de la mesa más lejana. */
   const contentBounds = useMemo(() => {
     if (!zonaData) return { w: 0, h: 0 };
     let maxX = zonaData.ancho * zoom;
     let maxY = Math.max(canvasHeight, zonaData.alto * zoom);
-    for (const m of zonaData.mesas) {
-      const x = (m.pos_x + m.ancho) * zoom;
-      const y = (m.pos_y + m.alto) * zoom;
+    for (const m of mesasRender) {
+      const x = m.pos_x + m.ancho;
+      const y = m.pos_y + m.alto;
       if (x > maxX) maxX = x;
       if (y > maxY) maxY = y;
     }
     return { w: maxX, h: maxY };
-  }, [canvasHeight, zonaData, zoom]);
+  }, [canvasHeight, mesasRender, zonaData, zoom]);
 
   const maxPanOffset = useMemo(() => ({
     x: Math.max(0, contentBounds.w - viewportSize.w),
@@ -142,7 +157,7 @@ function PlanoOcupacion({ fecha, turno }: Props) {
                 transform: `translate(${-panOffset.x}px, ${-panOffset.y}px)`,
               }}
             >
-              {zonaData.mesas.map((mesa: MesaOcupacion) => {
+              {mesasRender.map((mesa: MesaOcupacion) => {
                 const estado = estadoMesa(mesa);
                 const esHover = mesaHover === mesa.id;
 
@@ -179,11 +194,11 @@ function PlanoOcupacion({ fecha, turno }: Props) {
           </div>
           {/* [303A-12] Minimap + indicadores off-screen */}
           <CanvasMinimap
-            mesas={zonaData.mesas.map((m: MesaOcupacion) => ({
-              x: m.pos_x * zoom,
-              y: m.pos_y * zoom,
-              ancho: m.ancho * zoom,
-              alto: m.alto * zoom,
+            mesas={mesasRender.map((m: MesaOcupacion) => ({
+              x: m.pos_x,
+              y: m.pos_y,
+              ancho: m.ancho,
+              alto: m.alto,
             }))}
             contentWidth={contentBounds.w}
             contentHeight={Math.max(canvasHeight, contentBounds.h)}
@@ -194,11 +209,11 @@ function PlanoOcupacion({ fecha, turno }: Props) {
             onNavigate={(x, y) => setPanOffset({ x, y })}
           />
           <OffScreenIndicators
-            mesas={zonaData.mesas.map((m: MesaOcupacion) => ({
-              x: m.pos_x * zoom,
-              y: m.pos_y * zoom,
-              ancho: m.ancho * zoom,
-              alto: m.alto * zoom,
+            mesas={mesasRender.map((m: MesaOcupacion) => ({
+              x: m.pos_x,
+              y: m.pos_y,
+              ancho: m.ancho,
+              alto: m.alto,
             }))}
             viewportWidth={viewportSize.w}
             viewportHeight={viewportSize.h}

@@ -16,6 +16,7 @@ import PanelConfigMesa from './plano-sala/PanelConfigMesa';
 import PlanoDialogs from './plano-sala/PlanoDialogs';
 import CanvasMinimap from './plano-sala/CanvasMinimap';
 import OffScreenIndicators from './plano-sala/OffScreenIndicators';
+import { normalizarDimensionesMesa } from './plano-sala/mesaGeometry';
 import { usePlanoSala } from './plano-sala/usePlanoSala';
 import { useCanvasResize } from '../hooks/useCanvasResize';
 import { useCanvasPan } from '../hooks/useCanvasPan';
@@ -55,20 +56,32 @@ function PlanoSala() {
     dialogoCombinacion, setDialogoCombinacion,
   } = usePlanoSala(canvasRef);
 
+  const mesasRender = useMemo(() => mesasZona.map((mesa) => {
+    const pos = posicionesLocales[mesa.id];
+    const base = pos ? { ...mesa, pos_x: pos.x, pos_y: pos.y } : mesa;
+    const mesaNormalizada = normalizarDimensionesMesa(base);
+    return zoom === 1 ? mesaNormalizada : {
+      ...mesaNormalizada,
+      pos_x: mesaNormalizada.pos_x * zoom,
+      pos_y: mesaNormalizada.pos_y * zoom,
+      ancho: mesaNormalizada.ancho * zoom,
+      alto: mesaNormalizada.alto * zoom,
+    };
+  }), [mesasZona, posicionesLocales, zoom]);
+
   /* [313A-1] El tamaño real del plano sale de la zona y de la mesa más lejana.
    * El grid/minimapa no pueden depender solo de la última mesa visible. */
   const contentBounds = useMemo(() => {
     let maxX = (zonaData?.ancho ?? 0) * zoom;
     let maxY = Math.max(canvasHeight, (zonaData?.alto ?? 0) * zoom);
-    for (const m of mesasZona) {
-      const p = posicionesLocales[m.id];
-      const x = ((p?.x ?? m.pos_x) + m.ancho) * zoom;
-      const y = ((p?.y ?? m.pos_y) + m.alto) * zoom;
+    for (const m of mesasRender) {
+      const x = m.pos_x + m.ancho;
+      const y = m.pos_y + m.alto;
       if (x > maxX) maxX = x;
       if (y > maxY) maxY = y;
     }
     return { w: maxX, h: maxY };
-  }, [canvasHeight, mesasZona, posicionesLocales, zonaData, zoom]);
+  }, [canvasHeight, mesasRender, zonaData, zoom]);
 
   const maxPanOffset = useMemo(() => ({
     x: Math.max(0, contentBounds.w - viewportSize.w),
@@ -182,23 +195,17 @@ function PlanoSala() {
                     transform: `translate(${-panOffset.x}px, ${-panOffset.y}px)`,
                   }}
                 >
-                  {mesasZona.map(mesa => {
-                    const pos = posicionesLocales[mesa.id];
-                    const base = pos ? { ...mesa, pos_x: pos.x, pos_y: pos.y } : mesa;
-                    const mesaZoom = zoom === 1 ? base : {
-                      ...base,
-                      pos_x: base.pos_x * zoom,
-                      pos_y: base.pos_y * zoom,
-                      ancho: base.ancho * zoom,
-                      alto: base.alto * zoom,
-                    };
+                  {mesasRender.map(mesa => {
                     return (
                       <MesaDraggable
                         key={mesa.id}
-                        mesa={mesaZoom}
+                        mesa={mesa}
                         seleccionada={mesaSeleccionada?.id === mesa.id}
                         arrastrando={arrastrando === mesa.id}
-                        onClick={() => setMesaSeleccionada(mesa)}
+                        onClick={() => {
+                          const mesaOriginal = mesasZona.find((m) => m.id === mesa.id);
+                          if (mesaOriginal) setMesaSeleccionada(mesaOriginal);
+                        }}
                       />
                     );
                   })}
@@ -206,15 +213,12 @@ function PlanoSala() {
               </div>
               {/* [303A-12] Minimap + indicadores off-screen */}
               <CanvasMinimap
-                mesas={mesasZona.map(m => {
-                  const p = posicionesLocales[m.id];
-                  return {
-                    x: (p?.x ?? m.pos_x) * zoom,
-                    y: (p?.y ?? m.pos_y) * zoom,
-                    ancho: m.ancho * zoom,
-                    alto: m.alto * zoom,
-                  };
-                })}
+                mesas={mesasRender.map(m => ({
+                  x: m.pos_x,
+                  y: m.pos_y,
+                  ancho: m.ancho,
+                  alto: m.alto,
+                }))}
                 contentWidth={contentBounds.w}
                 contentHeight={Math.max(canvasHeight, contentBounds.h)}
                 viewportWidth={viewportSize.w}
@@ -224,15 +228,12 @@ function PlanoSala() {
                 onNavigate={(x, y) => setPanOffset({ x, y })}
               />
               <OffScreenIndicators
-                mesas={mesasZona.map(m => {
-                  const p = posicionesLocales[m.id];
-                  return {
-                    x: (p?.x ?? m.pos_x) * zoom,
-                    y: (p?.y ?? m.pos_y) * zoom,
-                    ancho: m.ancho * zoom,
-                    alto: m.alto * zoom,
-                  };
-                })}
+                mesas={mesasRender.map(m => ({
+                  x: m.pos_x,
+                  y: m.pos_y,
+                  ancho: m.ancho,
+                  alto: m.alto,
+                }))}
                 viewportWidth={viewportSize.w}
                 viewportHeight={viewportSize.h}
                 scrollLeft={panOffset.x}
