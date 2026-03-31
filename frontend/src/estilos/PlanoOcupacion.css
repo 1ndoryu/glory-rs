@@ -83,15 +83,12 @@
 /* Canvas */
 /* [303A-11] Altura fija viene del store.
  * Separado en viewport (.planoOcupacionCanvas) + contenido (.planoOcupacionContent).
- * [303A-20] overflow:hidden + transform para pan. Sin scroll nativo. */
+ * [303A-20] overflow:hidden + position:relative. Transform para pan. */
 .planoOcupacionCanvas {
+  position: relative;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
-}
-
-.planoOcupacionCanvas::-webkit-scrollbar {
-  display: none;
 }
 
 /* [303A-12] Cursor pan cuando se hace shift+drag o middle-click */
@@ -100,8 +97,11 @@
   user-select: none;
 }
 
+/* [303A-20] position:absolute — fuera del flujo, no empuja layout. */
 .planoOcupacionContent {
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
   min-width: 100%;
   min-height: 100%;
   background: var(--background);

@@ -172,8 +172,6 @@ function PlanoSala() {
                   ref={canvasRef}
                   className="planoCanvasContent"
                   style={{
-                    width: contentBounds.w,
-                    height: Math.max(canvasHeight, contentBounds.h),
                     transform: `translate(${-panOffset.x}px, ${-panOffset.y}px)`,
                   }}
                 >

@@ -65,9 +65,10 @@
 /* === Canvas del plano === */
 /* [303A-11] Altura fija viene del store (canvasHeight), no depende del zoom.
  * El fondo cuadriculado se mueve al inner content (.planoCanvasContent).
- * [303A-20] overflow:hidden + transform para pan. Sin scroll nativo,
- * sin scrollbars, sin desbordamiento. */
+ * [303A-20] overflow:hidden + position:relative para contener hijo absolute.
+ * Transform para pan. Sin scroll nativo, sin desbordamiento. */
 .planoCanvas {
+  position: relative;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
@@ -79,8 +80,12 @@
   user-select: none;
 }
 
+/* [303A-20] position:absolute saca al content del flujo normal.
+ * Nunca puede empujar ni expandir el layout del padre. */
 .planoCanvasContent {
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
   min-width: 100%;
   min-height: 100%;
   background: var(--card);

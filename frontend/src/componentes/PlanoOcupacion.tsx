@@ -131,8 +131,6 @@ function PlanoOcupacion({ fecha, turno }: Props) {
             <div
               className="planoOcupacionContent"
               style={{
-                width: contentBounds.w,
-                height: Math.max(canvasHeight, contentBounds.h),
                 transform: `translate(${-panOffset.x}px, ${-panOffset.y}px)`,
               }}
             >
