@@ -57,9 +57,11 @@ export function usePlanoSala(
   const [zonaActiva, setZonaActiva] = useState<string | null>(null);
   const [mesaSeleccionada, setMesaSeleccionada] = useState<Mesa | null>(null);
   const [arrastrando, setArrastrando] = useState<string | null>(null);
-  const [mesasSobrescritas, setMesasSobrescritas] = useState<Record<string, Mesa>>({});
   const [posicionesLocales, setPosicionesLocales] = useState<
     Record<string, { x: number; y: number }>
+  >({});
+  const [dimensionesLocales, setDimensionesLocales] = useState<
+    Record<string, { ancho: number; alto: number }>
   >({});
   const zoom = useZoomStore(s => s.zoom);
   const setZoom = useZoomStore(s => s.setZoom);
@@ -73,7 +75,7 @@ export function usePlanoSala(
   const archivoImportRef = useRef<PlanoExport | null>(null);
 
   const zonaData = plano?.zonas.find((z) => z.id === zonaActiva);
-  const mesasZona = (zonaData?.mesas ?? []).map((mesa) => mesasSobrescritas[mesa.id] ?? mesa);
+  const mesasZona = zonaData?.mesas ?? [];
 
   if (plano && plano.zonas.length > 0 && !zonaActiva) {
     setZonaActiva(plano.zonas[0].id);
@@ -83,7 +85,7 @@ export function usePlanoSala(
     setZonaActiva(id);
     setMesaSeleccionada(null);
     setPosicionesLocales({});
-    setMesasSobrescritas({});
+    setDimensionesLocales({});
   };
 
   const handleCrearZona = () => {
@@ -142,12 +144,50 @@ export function usePlanoSala(
   };
 
   const handleGuardarMesa = async (id: string, req: ActualizarMesaRequest) => {
-    const response = await actualizarMesaApi(id, req);
-    if (response.status === 200) {
-      setMesasSobrescritas((prev) => ({ ...prev, [id]: response.data }));
+    if (req.pos_x !== undefined || req.pos_y !== undefined) {
+      setPosicionesLocales((prev) => ({ ...prev, [id]: { x: req.pos_x ?? prev[id]?.x ?? 0, y: req.pos_y ?? prev[id]?.y ?? 0 } }));
     }
+    if (req.ancho !== undefined || req.alto !== undefined) {
+      const mesaActual = mesasZona.find((m) => m.id === id);
+      setDimensionesLocales((prev) => ({ ...prev, [id]: { ancho: req.ancho ?? prev[id]?.ancho ?? mesaActual?.ancho ?? 80, alto: req.alto ?? prev[id]?.alto ?? mesaActual?.alto ?? 80 } }));
+    }
+    await actualizarMesaApi(id, req);
     setMesaSeleccionada(null);
     refetch();
+  };
+
+  const handleResizeMesa = async (id: string, req: ActualizarMesaRequest) => {
+    const mesaActual = mesasZona.find((m) => m.id === id);
+    if (!mesaActual) return;
+
+    const prevPosicion = posicionesLocales[id];
+    const prevDimension = dimensionesLocales[id];
+    const prevSeleccionada = mesaSeleccionada;
+
+    setPosicionesLocales((prev) => ({ ...prev, [id]: { x: req.pos_x ?? prev[id]?.x ?? mesaActual.pos_x, y: req.pos_y ?? prev[id]?.y ?? mesaActual.pos_y } }));
+    setDimensionesLocales((prev) => ({ ...prev, [id]: { ancho: req.ancho ?? prev[id]?.ancho ?? mesaActual.ancho, alto: req.alto ?? prev[id]?.alto ?? mesaActual.alto } }));
+
+    if (mesaSeleccionada?.id === id) {
+      setMesaSeleccionada({ ...mesaSeleccionada, pos_x: req.pos_x ?? mesaSeleccionada.pos_x, pos_y: req.pos_y ?? mesaSeleccionada.pos_y, ancho: req.ancho ?? mesaSeleccionada.ancho, alto: req.alto ?? mesaSeleccionada.alto });
+    }
+
+    try {
+      await actualizarMesaApi(id, req);
+      refetch();
+    } catch {
+      setPosicionesLocales((prev) => {
+        const next = { ...prev };
+        if (prevPosicion) next[id] = prevPosicion; else delete next[id];
+        return next;
+      });
+      setDimensionesLocales((prev) => {
+        const next = { ...prev };
+        if (prevDimension) next[id] = prevDimension; else delete next[id];
+        return next;
+      });
+      if (prevSeleccionada?.id === id) setMesaSeleccionada(prevSeleccionada);
+      toast.error('No se pudo redimensionar la mesa');
+    }
   };
 
   const handleEliminarMesa = (id: string) => {
@@ -265,10 +305,10 @@ export function usePlanoSala(
 
   return {
     plano, zonaActiva, zonaData, mesasZona, mesaSeleccionada, arrastrando,
-    posicionesLocales, setMesaSeleccionada, cambiarZona, zoom, setZoom,
+    posicionesLocales, dimensionesLocales, setMesaSeleccionada, cambiarZona, zoom, setZoom,
     canvasHeight,
     handleCrearZona, handleEliminarZona, handleEditarZona,
-    handleCrearMesa, handleGuardarMesa, handleEliminarMesa,
+    handleCrearMesa, handleGuardarMesa, handleResizeMesa, handleEliminarMesa,
     handleDragStart, handleDragEnd,
     handleExportar, handleImportar,
     handleCrearCombinacion, handleEliminarCombinacion,

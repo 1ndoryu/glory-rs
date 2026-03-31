@@ -7,7 +7,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { MIN_LADO_MESA, RATIO_RECTANGULAR } from './mesaGeometry';
 
 interface PanelConfigMesaProps {
   mesa: Mesa;
@@ -17,6 +16,10 @@ interface PanelConfigMesaProps {
 }
 
 function PanelConfigMesa({ mesa, onGuardar, onEliminar, onCerrar }: PanelConfigMesaProps) {
+  const MIN_LADO_MESA = 30;
+  const MAX_LADO_MESA = 400;
+  const RATIO_RECTANGULAR = 1.8;
+
   const [form, setForm] = useState({
     numero: mesa.numero,
     minP: mesa.min_personas,
@@ -27,32 +30,46 @@ function PanelConfigMesa({ mesa, onGuardar, onEliminar, onCerrar }: PanelConfigM
     activa: mesa.activa,
   });
 
-  /* [313A-1] La forma debe producir un cambio visual real.
-   * Se fuerzan proporciones claras para evitar que rectangular quede casi
-   * igual a cuadrada y para que redonda/cuadrada no hereden deformaciones. */
+  const clampDimension = (value: number) =>
+    Math.min(MAX_LADO_MESA, Math.max(MIN_LADO_MESA, value || MIN_LADO_MESA));
+
+  const normalizeForma = (forma: string, ancho: number, alto: number) => {
+    const anchoSeguro = clampDimension(ancho);
+    const altoSeguro = clampDimension(alto);
+
+    if (forma === 'rectangular') {
+      const altoBase = Math.min(anchoSeguro, altoSeguro);
+      return {
+        ancho: clampDimension(Math.round(altoBase * RATIO_RECTANGULAR)),
+        alto: altoBase,
+      };
+    }
+
+    if (forma === 'cuadrada' || forma === 'redonda') {
+      const lado = Math.min(anchoSeguro, altoSeguro);
+      return { ancho: lado, alto: lado };
+    }
+
+    return { ancho: anchoSeguro, alto: altoSeguro };
+  };
+
+  /* [313A-2] El usuario debe poder bajar px manualmente.
+   * Cambiar de forma solo normaliza una vez; editar ancho/alto no puede
+   * inflar la mesa por acumulación. */
   const set = (campo: string, valor: number | string | boolean) =>
     setForm((prev) => {
       const next = { ...prev, [campo]: valor };
-      const ladoBase = Math.max(next.ancho, next.alto, MIN_LADO_MESA);
 
       if (campo === 'forma') {
-        if (valor === 'cuadrada') {
-          next.ancho = ladoBase;
-          next.alto = ladoBase;
-        } else if (valor === 'rectangular') {
-          next.alto = Math.max(MIN_LADO_MESA, Math.round(ladoBase * 0.9));
-          next.ancho = Math.round(next.alto * RATIO_RECTANGULAR);
-        } else if (valor === 'redonda') {
-          next.ancho = ladoBase;
-          next.alto = ladoBase;
-        }
+        const dimensiones = normalizeForma(String(valor), next.ancho, next.alto);
+        next.ancho = dimensiones.ancho;
+        next.alto = dimensiones.alto;
       } else if ((campo === 'ancho' || campo === 'alto') && (next.forma === 'cuadrada' || next.forma === 'redonda')) {
-        const lado = Math.max(next.ancho, next.alto, MIN_LADO_MESA);
+        const lado = clampDimension(Number(valor));
         next.ancho = lado;
         next.alto = lado;
-      } else if ((campo === 'ancho' || campo === 'alto') && next.forma === 'rectangular') {
-        next.alto = Math.max(MIN_LADO_MESA, next.alto);
-        next.ancho = Math.max(next.ancho, Math.round(next.alto * RATIO_RECTANGULAR));
+      } else if (campo === 'ancho' || campo === 'alto') {
+        next[campo as 'ancho' | 'alto'] = clampDimension(Number(valor));
       }
       return next;
     });
