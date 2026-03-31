@@ -69,7 +69,7 @@ function ListaClientes() {
 
       <Input
         type="search"
-        placeholder="Buscar por nombre, apellidos, teléfono o email..."
+        placeholder="Buscar por nombre, apellidos, teléfono, email, empresa o notas..."
         value={busqueda}
         onChange={(e) => buscar(e.target.value)}
         className="max-w-md"

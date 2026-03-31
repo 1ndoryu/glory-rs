@@ -100,8 +100,11 @@ impl ReservaService {
             }
         }
 
-        /* Verificar disponibilidad de mesas físicas asignadas */
-        if mesas_asignadas >= total_mesas {
+        /* Verificar disponibilidad de mesas físicas asignadas.
+         * [DataIV-2] Solo bloquear por mesas llenas si la nueva reserva pide
+         * una mesa concreta.  Reservas sin mesa especifica solo se validan
+         * por capacidad de personas (siguiente check). */
+        if mesa_id.is_some() && mesas_asignadas >= total_mesas {
             return Err(AppError::Conflict(
                 format!(
                     "No hay mesas disponibles en la franja de {hora}. \

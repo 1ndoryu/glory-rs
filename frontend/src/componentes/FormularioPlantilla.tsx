@@ -128,7 +128,10 @@ export default function FormularioPlantilla() {
         <CardHeader>
           <CardTitle className="text-base">Media (opcional)</CardTitle>
           <CardDescription>
-            Adjunta una imagen, vídeo o documento a la cabecera
+            Adjunta una imagen, vídeo o documento a la cabecera.
+            Meta requiere una URL pública accesible desde internet.
+            Puede subir su archivo a un servicio de almacenamiento (Google Drive, Dropbox, etc.)
+            y pegar aquí el enlace directo.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

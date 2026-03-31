@@ -269,12 +269,12 @@ function PlanoSala() {
           />
         </div>
         {/* [283A-17] Panel lateral derecho: config de mesa seleccionada */}
-        {/* [303A-9] key={mesa.id} fuerza remount al cambiar de mesa, reseteando
-         * el useState interno para que min/max personas se actualicen. */}
+        {/* [303A-9][DataIV-6] key incluye todos los campos editables para forzar
+         * remount al cambiar de mesa o cuando cambian valores tras un refetch. */}
         {mesaSeleccionada && (
           <div className="w-72 shrink-0">
             <PanelConfigMesa
-              key={`${mesaSeleccionada.id}:${mesaSeleccionada.ancho}:${mesaSeleccionada.alto}:${mesaSeleccionada.forma}`}
+              key={`${mesaSeleccionada.id}:${mesaSeleccionada.ancho}:${mesaSeleccionada.alto}:${mesaSeleccionada.forma}:${mesaSeleccionada.min_personas}:${mesaSeleccionada.max_personas}:${mesaSeleccionada.numero}:${mesaSeleccionada.activa}`}
               mesa={mesaSeleccionada}
               onGuardar={handleGuardarMesa}
               onEliminar={handleEliminarMesa}

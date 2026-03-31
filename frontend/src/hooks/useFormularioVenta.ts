@@ -5,10 +5,11 @@
    El backend acepta un turno por venta, así que se crean simultáneamente N ventas
    (una por turno) usando Promise.all con crearVenta directamente. */
 
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { crearVenta, actualizarVenta, getListarVentasQueryKey, Turno, CanalVenta, MetodoPago, CrearVentaRequest, Venta } from '../api/generated';
+import { useObtenerConfiguracion } from '../api/generated/configuracion/configuracion';
 
 export interface DetalleTurno {
   importeBase: string;
@@ -79,6 +80,17 @@ function useFormularioVenta(onExito?: () => void, ventaInicial?: Venta) {
   const [cargando, setCargando] = useState(false);
   const [campos, setCampos] = useState<CamposVenta>(() => camposIniciales(ventaInicial));
   const esEdicion = !!ventaInicial;
+
+  /* [DataIV-12] Leer IVA por defecto de configuración en vez de hardcodear '10' */
+  const { data: configData } = useObtenerConfiguracion();
+  useEffect(() => {
+    if (!esEdicion && configData?.status === 200) {
+      const ivaConfig = configData.data.iva_por_defecto;
+      if (ivaConfig) {
+        setCampos(prev => ({ ...prev, ivaPorcentaje: String(ivaConfig) }));
+      }
+    }
+  }, [configData, esEdicion]);
 
   function cambiarCampo<K extends keyof CamposVenta>(campo: K, valor: CamposVenta[K]) {
     setCampos(prev => ({ ...prev, [campo]: valor }));

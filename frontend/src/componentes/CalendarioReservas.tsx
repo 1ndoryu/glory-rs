@@ -21,7 +21,8 @@ function CalendarioReservas() {
   const [mes, setMes] = useState(hoy.getMonth() + 1);
   const navigate = useNavigate();
 
-  const { data, isLoading } = useResumenMensual({ anio, mes });
+  /* [DataIV-3] refetchOnMount asegura datos frescos al navegar de vuelta al calendario */
+  const { data, isLoading } = useResumenMensual({ anio, mes }, { query: { refetchOnMount: 'always' } });
   const resumen = data?.status === 200 ? data.data : [];
 
   const totales = useMemo(() => {
