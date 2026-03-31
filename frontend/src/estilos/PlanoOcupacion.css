@@ -83,8 +83,10 @@
 /* Canvas */
 /* [303A-11] Altura fija viene del store.
  * Separado en viewport (.planoOcupacionCanvas) + contenido (.planoOcupacionContent).
- * [303A-18] overflow: auto con scrollbars ocultos — navegación por pan. */
+ * [303A-18] overflow: auto con scrollbars ocultos — navegación por pan.
+ * [303A-19] width:100% evita que el canvas se salga de la pantalla. */
 .planoOcupacionCanvas {
+  width: 100%;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: auto;
