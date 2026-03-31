@@ -59,8 +59,8 @@ if (-not $SkipBuild) {
     Write-Host "       Esto toma ~5-7 min. No hay downtime." -ForegroundColor DarkGray
     $buildStart = Get-Date
 
-    # Build via SSH — stream progress
-    $buildOutput = ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 $sshTarget "cd $serviceDir && docker compose build app --progress=plain 2>&1 | tail -30"
+    # Build via SSH — --no-cache para invalidar git clone (cargo usa mount cache, no se pierde)
+    $buildOutput = ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 $sshTarget "cd $serviceDir && docker compose build app --no-cache --progress=plain 2>&1 | tail -30"
     $buildEnd = Get-Date
     $buildDuration = [math]::Round(($buildEnd - $buildStart).TotalSeconds)
 
