@@ -5,7 +5,7 @@
  * [283A-36] Zoom sincronizado con PlanoSala via zoomStore.
  * [303A-12] Pan, minimap, indicadores off-screen. */
 
-import { useState, useRef, useMemo, useLayoutEffect } from 'react';
+import { useState, useRef, useMemo, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { ZoomIn, ZoomOut } from 'lucide-react';
 import { useObtenerOcupacion, MesaOcupacion, ZonaOcupacion } from '../api/generated';
@@ -37,7 +37,6 @@ function PlanoOcupacion({ fecha, turno }: Props) {
   const plano = data?.status === 200 ? data.data : null;
   const [zonaActiva, setZonaActiva] = useState<string | null>(null);
   const [mesaHover, setMesaHover] = useState<string | null>(null);
-  const viewportRef = useRef<HTMLDivElement>(null);
   const zoom = useZoomStore(s => s.zoom);
   const zoomIn = useZoomStore(s => s.zoomIn);
   const zoomOut = useZoomStore(s => s.zoomOut);
@@ -47,22 +46,31 @@ function PlanoOcupacion({ fecha, turno }: Props) {
   /* [303A-13] Resize del canvas arrastrando el borde inferior — sincronizado via store */
   const { resizing, onResizeStart } = useCanvasResize({ canvasHeight, setCanvasHeight });
 
-  /* [303A-20] Medir viewport via ResizeObserver.
-   * [313A-11] Dependencia en zonaActiva: el div con viewportRef se renderiza
-   * condicionalmente (solo cuando zonaData existe). Con deps=[] el effect corría
-   * antes de que el div existiera y nunca re-corría → viewportSize quedaba en 0,0
-   * → el rectángulo azul del minimap era invisible. */
+  /* [313A-12] Medir viewport con callback ref + ResizeObserver.
+   * useLayoutEffect con [zonaActiva] no funcionaba: el div se renderiza condicionalmente
+   * (solo cuando zonaData existe) y React no re-dispara el effect de forma fiable cuando
+   * setState(zonaActiva) ocurre durante render. Callback ref es invocado directamente
+   * por React cuando el elemento DOM se crea/destruye — sin dependencia de timing. */
   const [viewportSize, setViewportSize] = useState({ w: 0, h: 0 });
-  useLayoutEffect(() => {
-    const el = viewportRef.current;
-    if (!el) return;
+  const roRef = useRef<ResizeObserver | null>(null);
+  const viewportRef = useRef<HTMLDivElement | null>(null);
+  const viewportCallbackRef = useCallback((el: HTMLDivElement | null) => {
+    if (roRef.current) {
+      roRef.current.disconnect();
+      roRef.current = null;
+    }
+    viewportRef.current = el;
+    if (!el) {
+      setViewportSize({ w: 0, h: 0 });
+      return;
+    }
     setViewportSize({ w: el.clientWidth, h: el.clientHeight });
     const ro = new ResizeObserver(() => {
       setViewportSize({ w: el.clientWidth, h: el.clientHeight });
     });
     ro.observe(el);
-    return () => ro.disconnect();
-  }, [zonaActiva]);
+    roRef.current = ro;
+  }, []);
 
   if (plano && plano.zonas.length > 0 && !zonaActiva) {
     setZonaActiva(plano.zonas[0].id);
@@ -140,7 +148,7 @@ function PlanoOcupacion({ fecha, turno }: Props) {
       {zonaData && (
         <div style={{ position: 'relative' }}>
           <div
-            ref={viewportRef}
+            ref={viewportCallbackRef}
             className={`planoOcupacionCanvas ${panning ? 'planoPanning' : ''}`}
             style={{ height: canvasHeight }}
             onMouseDown={onPanMouseDown}
