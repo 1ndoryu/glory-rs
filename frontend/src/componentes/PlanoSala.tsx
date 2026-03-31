@@ -55,11 +55,11 @@ function PlanoSala() {
     dialogoCombinacion, setDialogoCombinacion,
   } = usePlanoSala(canvasRef);
 
-  /* [303A-19] Calcular extensión del contenido desde datos de mesas.
-   * minWidth en el div de contenido crea scroll range para el pan.
-   * contentBounds se pasa al minimap en vez de leer refs del DOM. */
+  /* [313A-1] El tamaño real del plano sale de la zona y de la mesa más lejana.
+   * El grid/minimapa no pueden depender solo de la última mesa visible. */
   const contentBounds = useMemo(() => {
-    let maxX = 0, maxY = 0;
+    let maxX = (zonaData?.ancho ?? 0) * zoom;
+    let maxY = Math.max(canvasHeight, (zonaData?.alto ?? 0) * zoom);
     for (const m of mesasZona) {
       const p = posicionesLocales[m.id];
       const x = ((p?.x ?? m.pos_x) + m.ancho) * zoom;
@@ -68,14 +68,19 @@ function PlanoSala() {
       if (y > maxY) maxY = y;
     }
     return { w: maxX, h: maxY };
-  }, [mesasZona, posicionesLocales, zoom]);
+  }, [canvasHeight, mesasZona, posicionesLocales, zonaData, zoom]);
+
+  const maxPanOffset = useMemo(() => ({
+    x: Math.max(0, contentBounds.w - viewportSize.w),
+    y: Math.max(0, contentBounds.h - viewportSize.h),
+  }), [contentBounds.h, contentBounds.w, viewportSize.h, viewportSize.w]);
 
   /* [303A-13] Resize del canvas arrastrando el borde inferior */
   const { resizing, onResizeStart } = useCanvasResize({ canvasHeight, setCanvasHeight });
 
   /* [303A-12] Pan del canvas shift+drag o middle-click
    * [303A-20] Transform-based: panOffset state en vez de scrollLeft/scrollTop */
-  const { panning, panOffset, setPanOffset, onPanMouseDown } = useCanvasPan();
+  const { panning, panOffset, setPanOffset, onPanMouseDown } = useCanvasPan(maxPanOffset);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -172,6 +177,8 @@ function PlanoSala() {
                   ref={canvasRef}
                   className="planoCanvasContent"
                   style={{
+                    width: contentBounds.w,
+                    height: contentBounds.h,
                     transform: `translate(${-panOffset.x}px, ${-panOffset.y}px)`,
                   }}
                 >

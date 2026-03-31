@@ -16,6 +16,9 @@ interface PanelConfigMesaProps {
 }
 
 function PanelConfigMesa({ mesa, onGuardar, onEliminar, onCerrar }: PanelConfigMesaProps) {
+  const MIN_LADO_MESA = 72;
+  const RATIO_RECTANGULAR = 1.8;
+
   const [form, setForm] = useState({
     numero: mesa.numero,
     minP: mesa.min_personas,
@@ -26,23 +29,32 @@ function PanelConfigMesa({ mesa, onGuardar, onEliminar, onCerrar }: PanelConfigM
     activa: mesa.activa,
   });
 
-  /* [303A-10] Auto-ajuste de dimensiones al cambiar forma:
-   * - cuadrada: ancho = alto (cuadrado perfecto)
-   * - rectangular: ancho mínimo 1.5× alto
-   * - redonda: ancho = alto (círculo perfecto) */
+  /* [313A-1] La forma debe producir un cambio visual real.
+   * Se fuerzan proporciones claras para evitar que rectangular quede casi
+   * igual a cuadrada y para que redonda/cuadrada no hereden deformaciones. */
   const set = (campo: string, valor: number | string | boolean) =>
     setForm((prev) => {
       const next = { ...prev, [campo]: valor };
+      const ladoBase = Math.max(next.ancho, next.alto, MIN_LADO_MESA);
+
       if (campo === 'forma') {
         if (valor === 'cuadrada') {
-          next.alto = next.ancho;
+          next.ancho = ladoBase;
+          next.alto = ladoBase;
         } else if (valor === 'rectangular') {
-          if (next.ancho <= next.alto) {
-            next.ancho = Math.round(next.alto * 1.5);
-          }
+          next.alto = Math.max(MIN_LADO_MESA, Math.round(ladoBase * 0.9));
+          next.ancho = Math.round(next.alto * RATIO_RECTANGULAR);
         } else if (valor === 'redonda') {
-          next.alto = next.ancho;
+          next.ancho = ladoBase;
+          next.alto = ladoBase;
         }
+      } else if ((campo === 'ancho' || campo === 'alto') && (next.forma === 'cuadrada' || next.forma === 'redonda')) {
+        const lado = Math.max(next.ancho, next.alto, MIN_LADO_MESA);
+        next.ancho = lado;
+        next.alto = lado;
+      } else if ((campo === 'ancho' || campo === 'alto') && next.forma === 'rectangular') {
+        next.alto = Math.max(MIN_LADO_MESA, next.alto);
+        next.ancho = Math.max(next.ancho, Math.round(next.alto * RATIO_RECTANGULAR));
       }
       return next;
     });

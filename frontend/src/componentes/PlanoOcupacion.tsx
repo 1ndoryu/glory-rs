@@ -47,10 +47,6 @@ function PlanoOcupacion({ fecha, turno }: Props) {
   /* [303A-13] Resize del canvas arrastrando el borde inferior — sincronizado via store */
   const { resizing, onResizeStart } = useCanvasResize({ canvasHeight, setCanvasHeight });
 
-  /* [303A-12] Pan del canvas
-   * [303A-20] Transform-based: panOffset state en vez de scrollLeft/scrollTop */
-  const { panning, panOffset, setPanOffset, onPanMouseDown } = useCanvasPan();
-
   /* [303A-20] Medir viewport via ResizeObserver */
   const [viewportSize, setViewportSize] = useState({ w: 0, h: 0 });
   useLayoutEffect(() => {
@@ -70,10 +66,11 @@ function PlanoOcupacion({ fecha, turno }: Props) {
 
   const zonaData = plano?.zonas.find((z: ZonaOcupacion) => z.id === zonaActiva);
 
-  /* [303A-19] Extensión del contenido desde datos de mesas */
+  /* [313A-1] El tamaño real del plano sale de la zona y de la mesa más lejana. */
   const contentBounds = useMemo(() => {
     if (!zonaData) return { w: 0, h: 0 };
-    let maxX = 0, maxY = 0;
+    let maxX = zonaData.ancho * zoom;
+    let maxY = Math.max(canvasHeight, zonaData.alto * zoom);
     for (const m of zonaData.mesas) {
       const x = (m.pos_x + m.ancho) * zoom;
       const y = (m.pos_y + m.alto) * zoom;
@@ -81,7 +78,16 @@ function PlanoOcupacion({ fecha, turno }: Props) {
       if (y > maxY) maxY = y;
     }
     return { w: maxX, h: maxY };
-  }, [zonaData, zoom]);
+  }, [canvasHeight, zonaData, zoom]);
+
+  const maxPanOffset = useMemo(() => ({
+    x: Math.max(0, contentBounds.w - viewportSize.w),
+    y: Math.max(0, contentBounds.h - viewportSize.h),
+  }), [contentBounds.h, contentBounds.w, viewportSize.h, viewportSize.w]);
+
+  /* [303A-12] Pan del canvas
+   * [303A-20] Transform-based + clamp al área real del plano. */
+  const { panning, panOffset, setPanOffset, onPanMouseDown } = useCanvasPan(maxPanOffset);
 
   if (isLoading) return <p className="text-sm text-muted-foreground text-center py-4">Cargando plano...</p>;
   if (!plano || plano.zonas.length === 0) return null;
@@ -131,6 +137,8 @@ function PlanoOcupacion({ fecha, turno }: Props) {
             <div
               className="planoOcupacionContent"
               style={{
+                width: contentBounds.w,
+                height: contentBounds.h,
                 transform: `translate(${-panOffset.x}px, ${-panOffset.y}px)`,
               }}
             >
