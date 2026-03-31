@@ -2,8 +2,9 @@
  * como puntos y un rectángulo representando el viewport visible.
  * Reutilizable entre PlanoSala y PlanoOcupacion.
  * [303A-18] Fix: useEffect movido antes del early return para cumplir reglas de hooks.
- * [313A-2] Viewport rect más visible (opacidad subida, área fuera del viewport oscurecida).
- * Minimap siempre visible si hay mesas, aunque no haya scroll. */
+ * [313A-2] Viewport rect más visible. Minimap siempre visible si hay mesas.
+ * [313A-5] Fix viewport rect: reemplazado clearRect+redraw por clip path evenodd.
+ * clearRect borraba a transparente causando artefactos y el rect se perdía. */
 
 import { useEffect, useRef } from 'react';
 
@@ -88,41 +89,35 @@ function CanvasMinimap({
       );
     }
 
-    /* [313A-2] Viewport rect — oscurecer fuera del viewport para que el rect resalte.
-     * Luego dibujar borde azul + fill semitransparente dentro. */
+    /* [313A-5] Viewport rect — oscurecemos fuera del viewport con clip path
+     * en vez de clearRect (que borraba a transparente y causaba artefactos).
+     * Si el viewport cubre todo el contenido, solo dibujamos el borde azul. */
     const vx = offsetX + scrollLeft * scale;
     const vy = offsetY + scrollTop * scale;
     const vw = Math.min(viewportWidth, effectiveWidth - scrollLeft) * scale;
     const vh = Math.min(viewportHeight, effectiveHeight - scrollTop) * scale;
 
-    /* Oscurecer todo excepto viewport */
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
-    ctx.fillRect(offsetX, offsetY, drawW, drawH);
-
-    /* Limpiar la zona del viewport (quitar el oscurecimiento) */
-    ctx.clearRect(vx, vy, vw, vh);
-
-    /* Redibujar fondo claro + mesas dentro del viewport */
-    ctx.fillStyle = 'rgba(128, 128, 128, 0.1)';
-    ctx.fillRect(vx, vy, vw, vh);
-    ctx.fillStyle = 'rgba(100, 100, 240, 0.5)';
-    for (const m of mesas) {
-      const mx = offsetX + m.x * scale;
-      const my = offsetY + m.y * scale;
-      const mw = Math.max(2, m.ancho * scale);
-      const mh = Math.max(2, m.alto * scale);
-      /* Solo redibujar si está dentro del viewport rect */
-      if (mx + mw > vx && mx < vx + vw && my + mh > vy && my < vy + vh) {
-        ctx.fillRect(mx, my, mw, mh);
-      }
+    /* Solo oscurecer si el viewport no cubre todo el contenido */
+    const viewportCoversAll = vw >= drawW - 1 && vh >= drawH - 1;
+    if (!viewportCoversAll) {
+      ctx.save();
+      /* Clip path: rectángulo exterior menos el viewport (even-odd) */
+      const region = new Path2D();
+      region.rect(offsetX, offsetY, drawW, drawH);
+      region.rect(vx, vy, vw, vh);
+      ctx.clip(region, 'evenodd');
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.30)';
+      ctx.fillRect(offsetX, offsetY, drawW, drawH);
+      ctx.restore();
     }
 
-    /* Borde del viewport — azul, bien visible */
-    ctx.strokeStyle = 'rgba(59, 130, 246, 0.9)';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(vx, vy, vw, vh);
-    ctx.fillStyle = 'rgba(59, 130, 246, 0.12)';
-    ctx.fillRect(vx, vy, vw, vh);
+    /* Borde del viewport — azul sólido, siempre visible */
+    ctx.strokeStyle = 'rgba(59, 130, 246, 1)';
+    ctx.lineWidth = 2.5;
+    ctx.strokeRect(vx + 1, vy + 1, Math.max(4, vw - 2), Math.max(4, vh - 2));
+    /* Fill interior semitransparente */
+    ctx.fillStyle = 'rgba(59, 130, 246, 0.10)';
+    ctx.fillRect(vx + 1, vy + 1, Math.max(4, vw - 2), Math.max(4, vh - 2));
   }, [visible, mesas, viewportWidth, viewportHeight, scrollLeft, scrollTop, scale, drawW, drawH, minimapWidth, minimapHeight, offsetX, offsetY, effectiveWidth, effectiveHeight]);
 
   if (!visible) return null;
