@@ -1,38 +1,45 @@
-/* [303A-12] Hook para pan del canvas — middle-click drag o shift+click drag
- * para desplazar el viewport. Funciona con cualquier div scrollable. */
+/* [303A-12] Hook para pan del canvas — middle-click drag o shift+click drag.
+ * [303A-20] Reescrito: usa panOffset (state) + CSS transform en vez de
+ * scrollLeft/scrollTop. Elimina toda dependencia de overflow:auto,
+ * evitando desbordamiento de layout. */
 
 import { useCallback, useRef, useState, useEffect } from 'react';
 
-export function useCanvasPan(scrollRef: React.RefObject<HTMLElement | null>) {
+export interface PanOffset {
+  x: number;
+  y: number;
+}
+
+export function useCanvasPan() {
   const [panning, setPanning] = useState(false);
+  const [panOffset, setPanOffset] = useState<PanOffset>({ x: 0, y: 0 });
   const startPos = useRef({ x: 0, y: 0 });
-  const startScroll = useRef({ left: 0, top: 0 });
+  const startPan = useRef({ x: 0, y: 0 });
+  const panRef = useRef(panOffset);
+  panRef.current = panOffset;
 
   const onMouseDown = useCallback((e: React.MouseEvent) => {
     /* Middle-click (button=1) o shift+left-click activan el pan */
     const isMiddle = e.button === 1;
     const isShiftLeft = e.button === 0 && e.shiftKey;
     if (!isMiddle && !isShiftLeft) return;
-    if (!scrollRef.current) return;
 
     e.preventDefault();
     startPos.current = { x: e.clientX, y: e.clientY };
-    startScroll.current = {
-      left: scrollRef.current.scrollLeft,
-      top: scrollRef.current.scrollTop,
-    };
+    startPan.current = { ...panRef.current };
     setPanning(true);
-  }, [scrollRef]);
+  }, []);
 
   useEffect(() => {
     if (!panning) return;
 
     const onMove = (e: MouseEvent) => {
-      if (!scrollRef.current) return;
       const dx = e.clientX - startPos.current.x;
       const dy = e.clientY - startPos.current.y;
-      scrollRef.current.scrollLeft = startScroll.current.left - dx;
-      scrollRef.current.scrollTop = startScroll.current.top - dy;
+      setPanOffset({
+        x: Math.max(0, startPan.current.x - dx),
+        y: Math.max(0, startPan.current.y - dy),
+      });
     };
 
     const onUp = () => setPanning(false);
@@ -43,7 +50,7 @@ export function useCanvasPan(scrollRef: React.RefObject<HTMLElement | null>) {
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseup', onUp);
     };
-  }, [panning, scrollRef]);
+  }, [panning]);
 
-  return { panning, onPanMouseDown: onMouseDown };
+  return { panning, panOffset, setPanOffset, onPanMouseDown: onMouseDown };
 }

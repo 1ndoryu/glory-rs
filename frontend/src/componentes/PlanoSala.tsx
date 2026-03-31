@@ -5,7 +5,7 @@
  * [303A-13] Resize handle arrastrable en borde inferior.
  * Lógica en usePlanoSala, mesa arrastrable en MesaDraggable, config en PanelConfigMesa. */
 
-import { useRef, useState, useCallback, useMemo, useLayoutEffect } from 'react';
+import { useRef, useState, useMemo, useLayoutEffect } from 'react';
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import { Button } from '@/components/ui/button';
@@ -27,25 +27,19 @@ function PlanoSala() {
   const viewportRef = useRef<HTMLDivElement>(null);
   const setCanvasHeight = useZoomStore(s => s.setCanvasHeight);
 
-  /* [303A-12] Estado de scroll para minimap e indicadores off-screen */
-  const [canvasViewState, setCanvasViewState] = useState({
-    scrollLeft: 0, scrollTop: 0, w: 0, h: 0,
-  });
-
-  const onScroll = useCallback(() => {
+  /* [303A-20] Medir viewport via ResizeObserver para minimap/indicadores.
+   * Reemplaza canvasViewState + onScroll — ya no hay scroll real. */
+  const [viewportSize, setViewportSize] = useState({ w: 0, h: 0 });
+  useLayoutEffect(() => {
     const el = viewportRef.current;
     if (!el) return;
-    setCanvasViewState({
-      scrollLeft: el.scrollLeft,
-      scrollTop: el.scrollTop,
-      w: el.clientWidth,
-      h: el.clientHeight,
+    setViewportSize({ w: el.clientWidth, h: el.clientHeight });
+    const ro = new ResizeObserver(() => {
+      setViewportSize({ w: el.clientWidth, h: el.clientHeight });
     });
+    ro.observe(el);
+    return () => ro.disconnect();
   }, []);
-
-  /* [303A-19] useLayoutEffect mide ANTES del primer paint para evitar
-   * flash de indicadores incorrectos y minimap invisible */
-  useLayoutEffect(() => { onScroll(); }, [onScroll]);
 
   const {
     plano, zonaActiva, zonaData, mesasZona, mesaSeleccionada, arrastrando,
@@ -79,8 +73,9 @@ function PlanoSala() {
   /* [303A-13] Resize del canvas arrastrando el borde inferior */
   const { resizing, onResizeStart } = useCanvasResize({ canvasHeight, setCanvasHeight });
 
-  /* [303A-12] Pan del canvas shift+drag o middle-click */
-  const { panning, onPanMouseDown } = useCanvasPan(viewportRef);
+  /* [303A-12] Pan del canvas shift+drag o middle-click
+   * [303A-20] Transform-based: panOffset state en vez de scrollLeft/scrollTop */
+  const { panning, panOffset, setPanOffset, onPanMouseDown } = useCanvasPan();
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -160,25 +155,27 @@ function PlanoSala() {
       </div>
 
       {/* [283A-17] Canvas 100% ancho + Panel lateral derecho */}
-      {/* [303A-11] Canvas viewport con altura fija del store, overflow:auto.
-         * Inner div con minHeight = zonaData.alto * zoom para que el scroll
-         * funcione cuando el contenido zoom-in excede el viewport. */}
+      {/* [303A-20] Canvas con overflow:hidden + transform para pan.
+         * El contenido se desplaza via CSS transform, no scroll nativo. */}
       <div className="flex gap-4">
         <div className="flex-1 min-w-0">
           {zonaData ? (
-            <div style={{ position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'relative' }}>
               <div
                 ref={viewportRef}
                 className={`planoCanvas ${panning ? 'planoPanning' : ''}`}
                 style={{ height: canvasHeight }}
                 onClick={() => setMesaSeleccionada(null)}
-                onScroll={onScroll}
                 onMouseDown={onPanMouseDown}
               >
                 <div
                   ref={canvasRef}
                   className="planoCanvasContent"
-                  style={{ minHeight: Math.max(canvasHeight, zonaData.alto * zoom), minWidth: contentBounds.w }}
+                  style={{
+                    width: contentBounds.w,
+                    height: Math.max(canvasHeight, contentBounds.h),
+                    transform: `translate(${-panOffset.x}px, ${-panOffset.y}px)`,
+                  }}
                 >
                   {mesasZona.map(mesa => {
                     const pos = posicionesLocales[mesa.id];
@@ -215,16 +212,11 @@ function PlanoSala() {
                 })}
                 contentWidth={contentBounds.w}
                 contentHeight={Math.max(canvasHeight, contentBounds.h)}
-                viewportWidth={canvasViewState.w || (viewportRef.current?.clientWidth ?? 0)}
-                viewportHeight={canvasViewState.h || (viewportRef.current?.clientHeight ?? 0)}
-                scrollLeft={canvasViewState.scrollLeft}
-                scrollTop={canvasViewState.scrollTop}
-                onNavigate={(sl, st) => {
-                  if (viewportRef.current) {
-                    viewportRef.current.scrollLeft = sl;
-                    viewportRef.current.scrollTop = st;
-                  }
-                }}
+                viewportWidth={viewportSize.w}
+                viewportHeight={viewportSize.h}
+                scrollLeft={panOffset.x}
+                scrollTop={panOffset.y}
+                onNavigate={(x, y) => setPanOffset({ x, y })}
               />
               <OffScreenIndicators
                 mesas={mesasZona.map(m => {
@@ -236,16 +228,11 @@ function PlanoSala() {
                     alto: m.alto * zoom,
                   };
                 })}
-                viewportWidth={canvasViewState.w || (viewportRef.current?.clientWidth ?? 0)}
-                viewportHeight={canvasViewState.h || (viewportRef.current?.clientHeight ?? 0)}
-                scrollLeft={canvasViewState.scrollLeft}
-                scrollTop={canvasViewState.scrollTop}
-                onNavigate={(sl, st) => {
-                  if (viewportRef.current) {
-                    viewportRef.current.scrollLeft = sl;
-                    viewportRef.current.scrollTop = st;
-                  }
-                }}
+                viewportWidth={viewportSize.w}
+                viewportHeight={viewportSize.h}
+                scrollLeft={panOffset.x}
+                scrollTop={panOffset.y}
+                onNavigate={(x, y) => setPanOffset({ x, y })}
               />
             </div>
           ) : (

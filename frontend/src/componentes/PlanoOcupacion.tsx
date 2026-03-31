@@ -5,7 +5,7 @@
  * [283A-36] Zoom sincronizado con PlanoSala via zoomStore.
  * [303A-12] Pan, minimap, indicadores off-screen. */
 
-import { useState, useRef, useCallback, useMemo, useLayoutEffect } from 'react';
+import { useState, useRef, useMemo, useLayoutEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ZoomIn, ZoomOut } from 'lucide-react';
 import { useObtenerOcupacion, MesaOcupacion, ZonaOcupacion } from '../api/generated';
@@ -47,25 +47,22 @@ function PlanoOcupacion({ fecha, turno }: Props) {
   /* [303A-13] Resize del canvas arrastrando el borde inferior — sincronizado via store */
   const { resizing, onResizeStart } = useCanvasResize({ canvasHeight, setCanvasHeight });
 
-  /* [303A-12] Pan del canvas + estado de scroll para minimap/indicadores */
-  const { panning, onPanMouseDown } = useCanvasPan(viewportRef);
-  const [canvasViewState, setCanvasViewState] = useState({
-    scrollLeft: 0, scrollTop: 0, w: 0, h: 0,
-  });
+  /* [303A-12] Pan del canvas
+   * [303A-20] Transform-based: panOffset state en vez de scrollLeft/scrollTop */
+  const { panning, panOffset, setPanOffset, onPanMouseDown } = useCanvasPan();
 
-  const onScroll = useCallback(() => {
+  /* [303A-20] Medir viewport via ResizeObserver */
+  const [viewportSize, setViewportSize] = useState({ w: 0, h: 0 });
+  useLayoutEffect(() => {
     const el = viewportRef.current;
     if (!el) return;
-    setCanvasViewState({
-      scrollLeft: el.scrollLeft,
-      scrollTop: el.scrollTop,
-      w: el.clientWidth,
-      h: el.clientHeight,
+    setViewportSize({ w: el.clientWidth, h: el.clientHeight });
+    const ro = new ResizeObserver(() => {
+      setViewportSize({ w: el.clientWidth, h: el.clientHeight });
     });
+    ro.observe(el);
+    return () => ro.disconnect();
   }, []);
-
-  /* [303A-19] Medir viewport antes del primer paint */
-  useLayoutEffect(() => { onScroll(); }, [onScroll]);
 
   if (plano && plano.zonas.length > 0 && !zonaActiva) {
     setZonaActiva(plano.zonas[0].id);
@@ -122,22 +119,22 @@ function PlanoOcupacion({ fecha, turno }: Props) {
         <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-sm bg-muted-foreground/30" /> Inactiva</span>
       </div>
 
-      {/* [283A-43] Canvas con px absolutos × zoom — idéntico a PlanoSala
-         * para que el tamaño de los cuadros de mesas sea consistente entre ambas vistas.
-         * [303A-11] Viewport con altura fija del store + overflow:auto.
-         * Inner div con minHeight = zonaData.alto * zoom para scroll cuando zoom-in. */}
+      {/* [303A-20] Canvas con overflow:hidden + transform para pan. */}
       {zonaData && (
-        <div style={{ position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'relative' }}>
           <div
             ref={viewportRef}
             className={`planoOcupacionCanvas ${panning ? 'planoPanning' : ''}`}
             style={{ height: canvasHeight }}
-            onScroll={onScroll}
             onMouseDown={onPanMouseDown}
           >
             <div
               className="planoOcupacionContent"
-              style={{ minHeight: Math.max(canvasHeight, zonaData.alto * zoom), minWidth: contentBounds.w, position: 'relative' }}
+              style={{
+                width: contentBounds.w,
+                height: Math.max(canvasHeight, contentBounds.h),
+                transform: `translate(${-panOffset.x}px, ${-panOffset.y}px)`,
+              }}
             >
               {zonaData.mesas.map((mesa: MesaOcupacion) => {
                 const estado = estadoMesa(mesa);
@@ -184,16 +181,11 @@ function PlanoOcupacion({ fecha, turno }: Props) {
             }))}
             contentWidth={contentBounds.w}
             contentHeight={Math.max(canvasHeight, contentBounds.h)}
-            viewportWidth={canvasViewState.w || (viewportRef.current?.clientWidth ?? 0)}
-            viewportHeight={canvasViewState.h || (viewportRef.current?.clientHeight ?? 0)}
-            scrollLeft={canvasViewState.scrollLeft}
-            scrollTop={canvasViewState.scrollTop}
-            onNavigate={(sl, st) => {
-              if (viewportRef.current) {
-                viewportRef.current.scrollLeft = sl;
-                viewportRef.current.scrollTop = st;
-              }
-            }}
+            viewportWidth={viewportSize.w}
+            viewportHeight={viewportSize.h}
+            scrollLeft={panOffset.x}
+            scrollTop={panOffset.y}
+            onNavigate={(x, y) => setPanOffset({ x, y })}
           />
           <OffScreenIndicators
             mesas={zonaData.mesas.map((m: MesaOcupacion) => ({
@@ -202,16 +194,11 @@ function PlanoOcupacion({ fecha, turno }: Props) {
               ancho: m.ancho * zoom,
               alto: m.alto * zoom,
             }))}
-            viewportWidth={canvasViewState.w || (viewportRef.current?.clientWidth ?? 0)}
-            viewportHeight={canvasViewState.h || (viewportRef.current?.clientHeight ?? 0)}
-            scrollLeft={canvasViewState.scrollLeft}
-            scrollTop={canvasViewState.scrollTop}
-            onNavigate={(sl, st) => {
-              if (viewportRef.current) {
-                viewportRef.current.scrollLeft = sl;
-                viewportRef.current.scrollTop = st;
-              }
-            }}
+            viewportWidth={viewportSize.w}
+            viewportHeight={viewportSize.h}
+            scrollLeft={panOffset.x}
+            scrollTop={panOffset.y}
+            onNavigate={(x, y) => setPanOffset({ x, y })}
           />
         </div>
       )}

@@ -83,14 +83,11 @@
 /* Canvas */
 /* [303A-11] Altura fija viene del store.
  * Separado en viewport (.planoOcupacionCanvas) + contenido (.planoOcupacionContent).
- * [303A-18] overflow: auto con scrollbars ocultos — navegación por pan.
- * [303A-19] width:100% evita que el canvas se salga de la pantalla. */
+ * [303A-20] overflow:hidden + transform para pan. Sin scroll nativo. */
 .planoOcupacionCanvas {
-  width: 100%;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  overflow: auto;
-  scrollbar-width: none;
+  overflow: hidden;
 }
 
 .planoOcupacionCanvas::-webkit-scrollbar {
@@ -105,6 +102,8 @@
 
 .planoOcupacionContent {
   position: relative;
+  min-width: 100%;
+  min-height: 100%;
   background: var(--background);
 }
 
@@ -204,12 +203,7 @@
 @media (max-width: 768px) {
   .planoOcupacionCanvas {
     max-width: 100%;
-    overflow: auto;
-    scrollbar-width: none;
+    overflow: hidden;
     max-height: 300px;
-  }
-
-  .planoOcupacionCanvas::-webkit-scrollbar {
-    display: none;
   }
 }

@@ -65,19 +65,12 @@
 /* === Canvas del plano === */
 /* [303A-11] Altura fija viene del store (canvasHeight), no depende del zoom.
  * El fondo cuadriculado se mueve al inner content (.planoCanvasContent).
- * [303A-18] overflow: auto con scrollbars ocultos — la navegación es por pan
- * (shift+drag o middle-click). Scroll programático sigue funcionando.
- * [303A-19] width:100% evita que el canvas se salga de la pantalla. */
+ * [303A-20] overflow:hidden + transform para pan. Sin scroll nativo,
+ * sin scrollbars, sin desbordamiento. */
 .planoCanvas {
-  width: 100%;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  overflow: auto;
-  scrollbar-width: none;
-}
-
-.planoCanvas::-webkit-scrollbar {
-  display: none;
+  overflow: hidden;
 }
 
 /* [303A-12] Cursor pan cuando se hace shift+drag o middle-click */
@@ -88,6 +81,8 @@
 
 .planoCanvasContent {
   position: relative;
+  min-width: 100%;
+  min-height: 100%;
   background: var(--card);
   background-image:
     linear-gradient(var(--border) 1px, transparent 1px),
