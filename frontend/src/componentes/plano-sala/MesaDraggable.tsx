@@ -2,6 +2,7 @@
 
 import { useDraggable } from '@dnd-kit/core';
 import type { Mesa } from '../../api/generated';
+import { obtenerEstiloVisualMesa } from './mesaGeometry';
 
 interface MesaDraggableProps {
   mesa: Mesa;
@@ -20,6 +21,7 @@ function MesaDraggable({ mesa, seleccionada, arrastrando, onClick }: MesaDraggab
     top: mesa.pos_y,
     width: mesa.ancho,
     height: mesa.alto,
+    ...obtenerEstiloVisualMesa(mesa.forma),
     transform: transform
       ? `translate(${transform.x}px, ${transform.y}px)`
       : undefined,

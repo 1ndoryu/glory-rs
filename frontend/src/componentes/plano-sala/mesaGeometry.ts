@@ -4,6 +4,11 @@ export interface MesaGeometryInput {
   forma?: string;
 }
 
+export interface MesaVisualStyle {
+  borderRadius?: string;
+  clipPath?: string;
+}
+
 export const MIN_LADO_MESA = 72;
 export const RATIO_RECTANGULAR = 1.8;
 
@@ -21,4 +26,24 @@ export function normalizarDimensionesMesa<T extends MesaGeometryInput>(mesa: T):
   }
 
   return mesa;
+}
+
+export function obtenerEstiloVisualMesa(forma?: string): MesaVisualStyle {
+  if (forma === 'redonda') {
+    return {
+      borderRadius: '9999px',
+      clipPath: 'circle(49% at 50% 50%)',
+    };
+  }
+
+  if (forma === 'rectangular') {
+    return {
+      borderRadius: '8px',
+      clipPath: 'inset(0 round 8px)',
+    };
+  }
+
+  return {
+    borderRadius: '12px',
+  };
 }

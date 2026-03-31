@@ -14,7 +14,7 @@ import { useCanvasResize } from '../hooks/useCanvasResize';
 import { useCanvasPan } from '../hooks/useCanvasPan';
 import CanvasMinimap from './plano-sala/CanvasMinimap';
 import OffScreenIndicators from './plano-sala/OffScreenIndicators';
-import { normalizarDimensionesMesa } from './plano-sala/mesaGeometry';
+import { normalizarDimensionesMesa, obtenerEstiloVisualMesa } from './plano-sala/mesaGeometry';
 import '../estilos/PlanoOcupacion.css';
 
 interface Props {
@@ -170,6 +170,7 @@ function PlanoOcupacion({ fecha, turno }: Props) {
                       top: mesa.pos_y * zoom,
                       width: mesa.ancho * zoom,
                       height: mesa.alto * zoom,
+                      ...obtenerEstiloVisualMesa(mesa.forma),
                     }}
                     onMouseEnter={() => setMesaHover(mesa.id)}
                     onMouseLeave={() => setMesaHover(null)}
