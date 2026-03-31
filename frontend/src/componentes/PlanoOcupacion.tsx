@@ -66,11 +66,11 @@ function PlanoOcupacion({ fecha, turno }: Props) {
 
   const zonaData = plano?.zonas.find((z: ZonaOcupacion) => z.id === zonaActiva);
 
-  /* [313A-1] El tamaño real del plano sale de la zona y de la mesa más lejana. */
+  /* [313A-3] El tamaño lógico del plano NO depende de la altura visible del viewport. */
   const contentBounds = useMemo(() => {
     if (!zonaData) return { w: 0, h: 0 };
     let maxX = zonaData.ancho * zoom;
-    let maxY = Math.max(canvasHeight, zonaData.alto * zoom);
+    let maxY = zonaData.alto * zoom;
     for (const m of zonaData.mesas) {
       const x = (m.pos_x + m.ancho) * zoom;
       const y = (m.pos_y + m.alto) * zoom;
@@ -78,7 +78,7 @@ function PlanoOcupacion({ fecha, turno }: Props) {
       if (y > maxY) maxY = y;
     }
     return { w: maxX, h: maxY };
-  }, [canvasHeight, zonaData, zoom]);
+  }, [zonaData, zoom]);
 
   const maxPanOffset = useMemo(() => ({
     x: Math.max(0, contentBounds.w - viewportSize.w),

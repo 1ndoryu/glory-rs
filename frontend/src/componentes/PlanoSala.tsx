@@ -55,11 +55,11 @@ function PlanoSala() {
     dialogoCombinacion, setDialogoCombinacion,
   } = usePlanoSala(canvasRef);
 
-  /* [313A-1] El tamaño real del plano sale de la zona y de la mesa más lejana.
-   * El grid/minimapa no pueden depender solo de la última mesa visible. */
+  /* [313A-3] El tamaño lógico del plano NO depende de la altura visible del viewport.
+   * Si mezclamos canvasHeight aquí, el minimapa se descuadra al cambiar zoom. */
   const contentBounds = useMemo(() => {
     let maxX = (zonaData?.ancho ?? 0) * zoom;
-    let maxY = Math.max(canvasHeight, (zonaData?.alto ?? 0) * zoom);
+    let maxY = (zonaData?.alto ?? 0) * zoom;
     for (const m of mesasZona) {
       const p = posicionesLocales[m.id];
       const d = dimensionesLocales[m.id];
@@ -69,7 +69,7 @@ function PlanoSala() {
       if (y > maxY) maxY = y;
     }
     return { w: maxX, h: maxY };
-  }, [canvasHeight, dimensionesLocales, mesasZona, posicionesLocales, zonaData, zoom]);
+  }, [dimensionesLocales, mesasZona, posicionesLocales, zonaData, zoom]);
 
   const maxPanOffset = useMemo(() => ({
     x: Math.max(0, contentBounds.w - viewportSize.w),
