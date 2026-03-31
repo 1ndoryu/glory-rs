@@ -57,6 +57,7 @@ export function usePlanoSala(
   const [zonaActiva, setZonaActiva] = useState<string | null>(null);
   const [mesaSeleccionada, setMesaSeleccionada] = useState<Mesa | null>(null);
   const [arrastrando, setArrastrando] = useState<string | null>(null);
+  const [mesasSobrescritas, setMesasSobrescritas] = useState<Record<string, Mesa>>({});
   const [posicionesLocales, setPosicionesLocales] = useState<
     Record<string, { x: number; y: number }>
   >({});
@@ -72,7 +73,7 @@ export function usePlanoSala(
   const archivoImportRef = useRef<PlanoExport | null>(null);
 
   const zonaData = plano?.zonas.find((z) => z.id === zonaActiva);
-  const mesasZona = zonaData?.mesas ?? [];
+  const mesasZona = (zonaData?.mesas ?? []).map((mesa) => mesasSobrescritas[mesa.id] ?? mesa);
 
   if (plano && plano.zonas.length > 0 && !zonaActiva) {
     setZonaActiva(plano.zonas[0].id);
@@ -82,6 +83,7 @@ export function usePlanoSala(
     setZonaActiva(id);
     setMesaSeleccionada(null);
     setPosicionesLocales({});
+    setMesasSobrescritas({});
   };
 
   const handleCrearZona = () => {
@@ -140,7 +142,10 @@ export function usePlanoSala(
   };
 
   const handleGuardarMesa = async (id: string, req: ActualizarMesaRequest) => {
-    await actualizarMesaApi(id, req);
+    const response = await actualizarMesaApi(id, req);
+    if (response.status === 200) {
+      setMesasSobrescritas((prev) => ({ ...prev, [id]: response.data }));
+    }
     setMesaSeleccionada(null);
     refetch();
   };
