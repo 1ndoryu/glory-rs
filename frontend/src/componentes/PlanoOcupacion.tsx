@@ -5,13 +5,14 @@
  * [283A-36] Zoom sincronizado con PlanoSala via zoomStore.
  * [303A-12] Pan, minimap, indicadores off-screen. */
 
-import { useState, useRef, useMemo, useCallback } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ZoomIn, ZoomOut } from 'lucide-react';
 import { useObtenerOcupacion, MesaOcupacion, ZonaOcupacion } from '../api/generated';
 import { useZoomStore } from '../stores/zoomStore';
 import { useCanvasResize } from '../hooks/useCanvasResize';
 import { useCanvasPan } from '../hooks/useCanvasPan';
+import { useViewportSize } from '../hooks/useViewportSize';
 import CanvasMinimap from './plano-sala/CanvasMinimap';
 import OffScreenIndicators from './plano-sala/OffScreenIndicators';
 import '../estilos/PlanoOcupacion.css';
@@ -46,37 +47,22 @@ function PlanoOcupacion({ fecha, turno }: Props) {
   /* [303A-13] Resize del canvas arrastrando el borde inferior — sincronizado via store */
   const { resizing, onResizeStart } = useCanvasResize({ canvasHeight, setCanvasHeight });
 
-  /* [313A-12] Medir viewport con callback ref + ResizeObserver.
-   * useLayoutEffect con [zonaActiva] no funcionaba: el div se renderiza condicionalmente
-   * (solo cuando zonaData existe) y React no re-dispara el effect de forma fiable cuando
-   * setState(zonaActiva) ocurre durante render. Callback ref es invocado directamente
-   * por React cuando el elemento DOM se crea/destruye — sin dependencia de timing. */
-  const [viewportSize, setViewportSize] = useState({ w: 0, h: 0 });
-  const roRef = useRef<ResizeObserver | null>(null);
-  const viewportRef = useRef<HTMLDivElement | null>(null);
-  const viewportCallbackRef = useCallback((el: HTMLDivElement | null) => {
-    if (roRef.current) {
-      roRef.current.disconnect();
-      roRef.current = null;
-    }
-    viewportRef.current = el;
-    if (!el) {
-      setViewportSize({ w: 0, h: 0 });
+  const zonaData = plano?.zonas.find((z: ZonaOcupacion) => z.id === zonaActiva);
+
+  /* [313A-13] Medición compartida del viewport.
+   * PlanoOcupacion y PlanoSala usan el mismo hook para evitar divergencias: si el viewport
+   * se renderiza condicionalmente, el hook espera al layout real antes de fijar su tamaño. */
+  const { viewportRef, viewportSize } = useViewportSize(Boolean(zonaData), [canvasHeight, zonaActiva]);
+
+  useEffect(() => {
+    if (!plano || plano.zonas.length === 0) {
+      if (zonaActiva !== null) setZonaActiva(null);
       return;
     }
-    setViewportSize({ w: el.clientWidth, h: el.clientHeight });
-    const ro = new ResizeObserver(() => {
-      setViewportSize({ w: el.clientWidth, h: el.clientHeight });
-    });
-    ro.observe(el);
-    roRef.current = ro;
-  }, []);
-
-  if (plano && plano.zonas.length > 0 && !zonaActiva) {
-    setZonaActiva(plano.zonas[0].id);
-  }
-
-  const zonaData = plano?.zonas.find((z: ZonaOcupacion) => z.id === zonaActiva);
+    if (!zonaActiva || !plano.zonas.some((zona) => zona.id === zonaActiva)) {
+      setZonaActiva(plano.zonas[0].id);
+    }
+  }, [plano, zonaActiva]);
 
   /* [313A-10] contentBounds = misma fórmula que PlanoSala.
    * Base: zonaData.ancho/alto (el "mundo" de diseño del plano).
@@ -148,9 +134,9 @@ function PlanoOcupacion({ fecha, turno }: Props) {
       {zonaData && (
         <div style={{ position: 'relative' }}>
           <div
-            ref={viewportCallbackRef}
+            ref={viewportRef}
             className={`planoOcupacionCanvas ${panning ? 'planoPanning' : ''}`}
-            style={{ height: canvasHeight }}
+            style={{ height: canvasHeight, width: '100%' }}
             onMouseDown={onPanMouseDown}
           >
             <div

@@ -8,7 +8,9 @@
  * hacía que el borde azul fuera más grande que el overlay, creando un desajuste
  * visual. Ahora overlay y rect usan las mismas dimensiones proporcionales exactas.
  * El borde azul tiene lineWidth 2.5 y el overlay es suficiente para ver el rect
- * incluso cuando es pequeño. */
+ * incluso cuando es pequeño.
+ * [313A-14] Quitado el log de diagnóstico y restaurado el posicionamiento absoluto
+ * del canvas para que el minimap vuelva a quedar dentro de la esquina del plano. */
 
 import { useEffect, useRef } from 'react';
 
@@ -127,9 +129,6 @@ function CanvasMinimap({
 
   if (!visible) return null;
 
-  /* DEBUG — valores del minimap para diagnosticar viewport rect */
-  const debugTxt = `cW=${contentWidth} cH=${contentHeight} vW=${viewportWidth} vH=${viewportHeight} eW=${Math.round(effectiveWidth)} eH=${Math.round(effectiveHeight)} sc=${scale.toFixed(4)} vw=${Math.round(viewportWidth*scale)} vh=${Math.round(viewportHeight*scale)} dW=${Math.round(drawW)} dH=${Math.round(drawH)} sL=${Math.round(scrollLeft)} sT=${Math.round(scrollTop)} zoom=${(contentWidth/(viewportWidth||1)).toFixed(2)}`;
-
   const handleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const rect = canvasElRef.current!.getBoundingClientRect();
     const mx = e.clientX - rect.left - offsetX;
@@ -140,20 +139,14 @@ function CanvasMinimap({
   };
 
   return (
-    <div style={{ position: 'relative' }}>
-      <div style={{ position: 'absolute', bottom: '100%', left: 0, fontSize: 9, color: 'red', background: 'rgba(255,255,255,0.9)', padding: '2px 4px', whiteSpace: 'nowrap', zIndex: 100, pointerEvents: 'none', maxWidth: 400, overflow: 'hidden' }}>
-        {debugTxt}
-      </div>
-      <canvas
-        ref={canvasElRef}
-        width={minimapWidth}
-        height={minimapHeight}
-        className="planoMinimap"
-        style={{ position: 'relative' }}
-        onClick={handleClick}
-        title="Click para navegar"
-      />
-    </div>
+    <canvas
+      ref={canvasElRef}
+      width={minimapWidth}
+      height={minimapHeight}
+      className="planoMinimap"
+      onClick={handleClick}
+      title="Click para navegar"
+    />
   );
 }
 

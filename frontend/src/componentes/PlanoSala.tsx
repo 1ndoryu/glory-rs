@@ -5,7 +5,7 @@
  * [303A-13] Resize handle arrastrable en borde inferior.
  * Lógica en usePlanoSala, mesa arrastrable en MesaDraggable, config en PanelConfigMesa. */
 
-import { useRef, useState, useMemo, useLayoutEffect } from 'react';
+import { useRef, useMemo } from 'react';
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import { Button } from '@/components/ui/button';
@@ -19,27 +19,13 @@ import OffScreenIndicators from './plano-sala/OffScreenIndicators';
 import { usePlanoSala } from './plano-sala/usePlanoSala';
 import { useCanvasResize } from '../hooks/useCanvasResize';
 import { useCanvasPan } from '../hooks/useCanvasPan';
+import { useViewportSize } from '../hooks/useViewportSize';
 import { useZoomStore } from '../stores/zoomStore';
 import '../estilos/PlanoSala.css';
 
 function PlanoSala() {
   const canvasRef = useRef<HTMLDivElement>(null);
-  const viewportRef = useRef<HTMLDivElement>(null);
   const setCanvasHeight = useZoomStore(s => s.setCanvasHeight);
-
-  /* [303A-20] Medir viewport via ResizeObserver para minimap/indicadores.
-   * Reemplaza canvasViewState + onScroll — ya no hay scroll real. */
-  const [viewportSize, setViewportSize] = useState({ w: 0, h: 0 });
-  useLayoutEffect(() => {
-    const el = viewportRef.current;
-    if (!el) return;
-    setViewportSize({ w: el.clientWidth, h: el.clientHeight });
-    const ro = new ResizeObserver(() => {
-      setViewportSize({ w: el.clientWidth, h: el.clientHeight });
-    });
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
 
   const {
     plano, zonaActiva, zonaData, mesasZona, mesaSeleccionada, arrastrando,
@@ -54,6 +40,13 @@ function PlanoSala() {
     dialogoConfirmar, setDialogoConfirmar,
     dialogoCombinacion, setDialogoCombinacion,
   } = usePlanoSala(canvasRef);
+
+  /* [313A-13] PlanoSala sufría la misma clase de bug que reservas: el viewport se mide
+   * sobre un nodo que aparece condicionalmente cuando existe zonaData. Con deps=[] el
+   * effect podía correr con ref=null y dejar viewportSize en 0x0 para todo el ciclo.
+   * Se unifica con el hook compartido para que ambos minimaps sigan exactamente la
+   * misma estrategia de medición. */
+  const { viewportRef, viewportSize } = useViewportSize(Boolean(zonaData), [canvasHeight, zonaActiva]);
 
   /* [313A-1] El tamaño real del plano sale de la zona y de la mesa más lejana.
    * [313A-2] contentBounds NO incluye canvasHeight — ese es el viewport, no el contenido.

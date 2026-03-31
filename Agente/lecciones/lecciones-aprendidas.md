@@ -127,3 +127,17 @@ Cada lección debe ser concisa y accionable.
 **Causa raíz:** Se modificaron queries SQL en `reserva.rs` y `cliente.rs` pero no se ejecutó `cargo sqlx prepare` para regenerar el hash de las queries en `.sqlx/`.
 **Solución:** Ejecutar `cargo sqlx prepare` (requiere DB local corriendo) y commitear los archivos `.sqlx/` resultantes.
 **Prevención:** SIEMPRE ejecutar `cargo sqlx prepare` después de modificar cualquier query `sqlx::query!`/`sqlx::query_as!`. Incluir en checklist pre-commit para archivos `.rs` que toquen queries.
+
+## 2026-03-31 — Viewports condicionales no deben medirse con effects de una sola vez
+
+**Problema:** El minimapa recibía `viewportWidth=0` y `viewportHeight=0`, así que el cuadro azul parecía roto aunque la matemática del canvas era correcta.
+**Causa raíz:** El viewport se renderizaba condicionalmente y algunos componentes seguían midiéndolo con `useLayoutEffect(..., [])`; si el nodo aún no existía en ese primer commit, la medición quedaba en 0 para todo el ciclo.
+**Solución:** Extraer una estrategia compartida (`useViewportSize`) que mida tras el layout real con `getBoundingClientRect()`, reintentos por `requestAnimationFrame` y `ResizeObserver`.
+**Prevención:** Cuando un nodo dependa de datos async o render condicional, no usar mediciones one-shot con deps vacías; compartir el hook de medición entre consumidores para que no diverjan.
+
+## 2026-03-31 — Un inline style puede invalidar por completo un overlay bien calculado
+
+**Problema:** El minimapa seguía viéndose fuera de la esquina del plano incluso después de corregir `viewportWidth` y `viewportHeight`.
+**Causa raíz:** `CanvasMinimap` seguía renderizando el `<canvas>` con `style={{ position: 'relative' }}`, lo que anulaba la regla CSS `.planoMinimap { position: absolute; ... }` y sacaba el overlay del comportamiento esperado.
+**Solución:** Quitar el wrapper de debug y dejar que el posicionamiento dependa únicamente de la clase CSS compartida.
+**Prevención:** En overlays reutilizables, evitar mezclar posicionamiento crítico en CSS con inline styles contradictorios; si la posición la define una clase, no sobrescribirla desde JSX salvo que sea imprescindible.
