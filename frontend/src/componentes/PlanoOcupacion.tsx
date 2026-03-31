@@ -127,7 +127,7 @@ function PlanoOcupacion({ fecha, turno }: Props) {
          * [303A-11] Viewport con altura fija del store + overflow:auto.
          * Inner div con minHeight = zonaData.alto * zoom para scroll cuando zoom-in. */}
       {zonaData && (
-        <div style={{ position: 'relative' }}>
+        <div style={{ position: 'relative', overflow: 'hidden' }}>
           <div
             ref={viewportRef}
             className={`planoOcupacionCanvas ${panning ? 'planoPanning' : ''}`}

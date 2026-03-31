@@ -166,7 +166,7 @@ function PlanoSala() {
       <div className="flex gap-4">
         <div className="flex-1 min-w-0">
           {zonaData ? (
-            <div style={{ position: 'relative' }}>
+            <div style={{ position: 'relative', overflow: 'hidden' }}>
               <div
                 ref={viewportRef}
                 className={`planoCanvas ${panning ? 'planoPanning' : ''}`}
