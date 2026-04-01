@@ -115,7 +115,7 @@ function NuevaReglaDialog({ onCrear }: { onCrear: (data: { data: { nombre: strin
       <DialogTrigger asChild>
         <Button><Plus className="mr-1 size-4" /> Nueva Regla</Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Nueva Regla de Recordatorio</DialogTitle>
           <DialogDescription>
@@ -132,7 +132,7 @@ function NuevaReglaDialog({ onCrear }: { onCrear: (data: { data: { nombre: strin
               placeholder="Ej: Recordatorio 24h antes"
             />
           </div>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-3">
             <div className="space-y-2">
               <Label>Tipo</Label>
               <Select value={tipo} onValueChange={(v) => setTipo(v as 'antes' | 'despues')}>
