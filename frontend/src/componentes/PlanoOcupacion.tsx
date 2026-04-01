@@ -171,14 +171,18 @@ function PlanoOcupacion({ fecha, turno }: Props) {
             </div>
           </div>
 
-          {/* [014A-10] Tooltip fuera del canvas (overflow:hidden) para que no se corte.
-           * Posicionado absolutamente en el wrapper relativo, calculando la posición
-           * visual de la mesa considerando zoom y pan. */}
+          {/* [014A-10] Tooltip position:fixed con coordenadas de pantalla reales.
+           * position:fixed escapa de overflow:hidden en cualquier ancestro — el tooltip
+           * nunca se recorta por el límite del plano ni por contenedores padre.
+           * Las coordenadas se calculan sumando el rect del viewport al offset lógico. */}
           {mesaHover && (() => {
             const mesa = zonaData.mesas.find((m: MesaOcupacion) => m.id === mesaHover);
             if (!mesa || mesa.reservas.length === 0) return null;
-            const tooltipLeft = mesa.pos_x * zoom - panOffset.x + (mesa.ancho * zoom) / 2;
-            const tooltipTop = mesa.pos_y * zoom - panOffset.y;
+            const canvasRect = viewportRef.current?.getBoundingClientRect();
+            const originX = canvasRect?.left ?? 0;
+            const originY = canvasRect?.top ?? 0;
+            const tooltipLeft = originX + mesa.pos_x * zoom - panOffset.x + (mesa.ancho * zoom) / 2;
+            const tooltipTop = originY + mesa.pos_y * zoom - panOffset.y;
             return (
               <div
                 className="mesaOcupacionTooltip"

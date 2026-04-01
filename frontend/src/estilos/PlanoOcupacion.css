@@ -173,12 +173,13 @@
   pointer-events: none;
 }
 
-/* [014A-10] Tooltip renderizado fuera del canvas (overflow:hidden) como hijo
- * del wrapper position:relative. left/top vienen por inline-style.
- * translate(-50%, -100%) centra horizontalmente y lo sube encima de la mesa,
- * con 8px de separación. z-index alto para no quedar debajo del minimap. */
+/* [014A-10] Tooltip position:fixed con coordenadas de pantalla reales (getBoundingClientRect).
+ * position:fixed escapa de cualquier contenedor padre con overflow:hidden — garantiza
+ * que el tooltip nunca se recorte por el borde del plano ni por layouts externos.
+ * left/top son coordenadas absolutas de pantalla calculadas en el componente.
+ * translate(-50%, -100%) centra y sube el tooltip 8px por encima del borde superior de la mesa. */
 .mesaOcupacionTooltip {
-  position: absolute;
+  position: fixed;
   transform: translate(-50%, calc(-100% - 8px));
   background: var(--popover);
   border: 1px solid var(--border);
