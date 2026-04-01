@@ -165,23 +165,36 @@ function PlanoOcupacion({ fecha, turno }: Props) {
                     onMouseLeave={() => setMesaHover(null)}
                   >
                     <span className="mesaOcupacionNumero">{mesa.numero}</span>
-
-                    {esHover && mesa.reservas.length > 0 && (
-                      <div className="mesaOcupacionTooltip">
-                        {mesa.reservas.map((r) => (
-                          <div key={r.reserva_id} className="mesaOcupacionReserva">
-                            <strong>{r.hora.slice(0, 5)}</strong>{' '}
-                            {r.nombre_cliente} {r.apellidos_cliente}
-                            <span className="mesaOcupacionPersonas">{r.num_personas} pers.</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
                   </div>
                 );
               })}
             </div>
           </div>
+
+          {/* [014A-10] Tooltip fuera del canvas (overflow:hidden) para que no se corte.
+           * Posicionado absolutamente en el wrapper relativo, calculando la posición
+           * visual de la mesa considerando zoom y pan. */}
+          {mesaHover && (() => {
+            const mesa = zonaData.mesas.find((m: MesaOcupacion) => m.id === mesaHover);
+            if (!mesa || mesa.reservas.length === 0) return null;
+            const tooltipLeft = mesa.pos_x * zoom - panOffset.x + (mesa.ancho * zoom) / 2;
+            const tooltipTop = mesa.pos_y * zoom - panOffset.y;
+            return (
+              <div
+                className="mesaOcupacionTooltip"
+                style={{ left: tooltipLeft, top: tooltipTop }}
+              >
+                {mesa.reservas.map((r) => (
+                  <div key={r.reserva_id} className="mesaOcupacionReserva">
+                    <strong>{r.hora.slice(0, 5)}</strong>{' '}
+                    {r.nombre_cliente} {r.apellidos_cliente}
+                    <span className="mesaOcupacionPersonas">{r.num_personas} pers.</span>
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
+
           {/* [303A-12] Minimap + indicadores off-screen */}
           <CanvasMinimap
             mesas={zonaData.mesas.map((m: MesaOcupacion) => ({

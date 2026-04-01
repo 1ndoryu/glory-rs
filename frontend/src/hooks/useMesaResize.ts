@@ -25,23 +25,27 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
 
+/* [014A-10] bounds solo se usa para w/n (evitar coordenadas negativas).
+ * Para e/s ya no se restringe al borde de zona: el canvas es 100% ancho y
+ * la mesa puede crecer libremente hasta maxSize — igual que el drag.
+ * Antes: la zona imponía un techo que impedía resize cerca del borde derecho. */
 function calculateNextRect(
   rect: MesaResizeRect,
   direction: MesaResizeDirection,
   dx: number,
   dy: number,
-  bounds: { width: number; height: number },
+  _bounds: { width: number; height: number },
   minSize: number,
   maxSize: number,
 ): MesaResizeRect {
   let next = { ...rect };
 
   if (direction === 'e') {
-    next.width = clamp(rect.width + dx, minSize, Math.min(maxSize, bounds.width - rect.x));
+    next.width = clamp(rect.width + dx, minSize, maxSize);
   }
 
   if (direction === 's') {
-    next.height = clamp(rect.height + dy, minSize, Math.min(maxSize, bounds.height - rect.y));
+    next.height = clamp(rect.height + dy, minSize, maxSize);
   }
 
   if (direction === 'w') {

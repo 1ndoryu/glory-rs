@@ -173,19 +173,20 @@
   pointer-events: none;
 }
 
-/* Tooltip */
+/* [014A-10] Tooltip renderizado fuera del canvas (overflow:hidden) como hijo
+ * del wrapper position:relative. left/top vienen por inline-style.
+ * translate(-50%, -100%) centra horizontalmente y lo sube encima de la mesa,
+ * con 8px de separación. z-index alto para no quedar debajo del minimap. */
 .mesaOcupacionTooltip {
   position: absolute;
-  bottom: calc(100% + 8px);
-  left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, calc(-100% - 8px));
   background: var(--popover);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 0.5rem;
   min-width: 180px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  z-index: 100;
+  z-index: 200;
   pointer-events: none;
 }
 

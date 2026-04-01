@@ -148,4 +148,4 @@ Tarea Final. ~~Actualiza el despliege con coolify-manager-rs~~ → 283A-33
 
 1. Veo que en el codigo hay query_as en vez de query_as! ¿como hacemos para que obligarnos siempre a usar query_as!? no quiero asumir que las consultas estan siempre bien, necesito verificación en tiempo real de todo. 
 
-2. Creo (no estoy segura de esto)que hay cosas que no entediste sobre lo que dijo el cliente, la primera es que se defería a que algunos tooltip dentro del plano se cortaban 
+~~2. Creo (no estoy segura pero igual aclaro) que hay cosas que no entediste sobre lo que dijo el cliente, la primera es que se refería a que algunos tooltip dentro del plano se cortaban, dentro del plano en reservas, y que las mesas no ese pueden redimencionar cuando estan muy movidas a la derecha, o sea, si una mesa esta cerca de la izquierda, esta se puede redimencionar de cualquier forma pero si esta al final a la derecha esta no puede redimencionar o alargar a la derecha, o sea, muy problemente el plano lo impida por el limite pero ni siquiera cuando esta cerca del limite simplemente si esta muy a la derecha suceda.~~ → 014A-10
