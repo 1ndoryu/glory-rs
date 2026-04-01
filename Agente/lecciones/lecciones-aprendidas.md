@@ -141,3 +141,20 @@ Cada lección debe ser concisa y accionable.
 **Causa raíz:** `CanvasMinimap` seguía renderizando el `<canvas>` con `style={{ position: 'relative' }}`, lo que anulaba la regla CSS `.planoMinimap { position: absolute; ... }` y sacaba el overlay del comportamiento esperado.
 **Solución:** Quitar el wrapper de debug y dejar que el posicionamiento dependa únicamente de la clase CSS compartida.
 **Prevención:** En overlays reutilizables, evitar mezclar posicionamiento crítico en CSS con inline styles contradictorios; si la posición la define una clase, no sobrescribirla desde JSX salvo que sea imprescindible.
+
+## 2026-04-01 — Migraciones manuales rompen SQLx migrate run
+
+**Problema:** Se aplicó una migración manualmente via `docker exec psql` para desbloquear `cargo sqlx prepare`. El siguiente deploy falló con `constraint already exists` porque SQLx intentó re-ejecutar la migración (no había registro en `_sqlx_migrations`).
+**Causa raíz:** Aplicar SQL manualmente no registra la migración en `_sqlx_migrations`. SQLx la ve como pendiente.
+**Solución:** Eliminar el constraint duplicado (`DROP CONSTRAINT IF EXISTS`) y dejar que el contenedor reinicie — SQLx ejecuta la migración limpiamente y la registra.
+**Prevención:** Nunca aplicar migraciones manualmente en producción. Usar `cargo sqlx migrate run` o, si no es posible, insertar manualmente el registro en `_sqlx_migrations` CON EL CHECKSUM CORRECTO (computado desde dentro del contenedor, no localmente — los line endings pueden diferir).
+
+## 2026-04-01 — SQLx macros: patrones de conversión importantes
+
+**Problema:** Convertir queries runtime (`query_as::`, `query_scalar::`, `query(`) a macros compile-time requiere ajustes específicos.
+**Patrones clave:**
+- `COUNT(*)` retorna `Option<i64>` → necesita `.unwrap_or(0)` o `AS "count!"`
+- `COALESCE(col, default) AS col` en LEFT JOIN sigue siendo `Option<T>` → usar `AS "col!"`
+- `Option<String>` params necesitan `.as_deref()` para pasar como `Option<&str>`
+- Queries dinámicas (SQL en variable, loops sobre arrays de SQL) NO se pueden convertir — dejar como `query(sql)`
+- `.bind()` desaparece: los params van directamente como argumentos del macro `query!("SQL", param1, param2)`
