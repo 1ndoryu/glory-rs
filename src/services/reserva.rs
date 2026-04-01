@@ -1,10 +1,14 @@
 /* 253A-5: Servicio de reservas
    263A-6: Filtros turno/estado, num_mesa, apellidos_cliente, resumen mensual
    283A-4: Validación de colisiones — impide crear/actualizar reservas que excedan
-   capacidad (mesas/personas) o que dupliquen una mesa ya ocupada en la franja. */
+   capacidad (mesas/personas) o que dupliquen una mesa ya ocupada en la franja.
+   014A-1: Auto-venta al completar reserva (configurable).
+   014A-2: Upsert cliente al crear reserva. */
 
 use chrono::{NaiveDate, NaiveTime, Timelike};
+use rust_decimal::Decimal;
 use sqlx::PgPool;
+use tracing::warn;
 use uuid::Uuid;
 
 use crate::errors::AppError;
@@ -12,8 +16,13 @@ use crate::models::{
     ActualizarReservaRequest, CrearReservaRequest, NoShowStats, Reserva, ReservasConteo,
     ReservasPaginadas, ReservasQuery, ResumenDiario,
 };
+use crate::repositories::cliente::NuevoCliente;
 use crate::repositories::reserva::{ActualizarReservaData, FiltrosReserva, NuevaReserva};
-use crate::repositories::{PlanoSalaRepository, ReservaRepository};
+use crate::repositories::venta::NuevaVenta;
+use crate::repositories::{
+    ClienteRepository, ConfiguracionRepository, PlanoSalaRepository, ReservaRepository,
+    VentaRepository,
+};
 
 pub struct ReservaService;
 
@@ -153,6 +162,19 @@ impl ReservaService {
             })
             .unwrap_or_else(|| "confirmada".into());
 
+        /* [014A-2] Upsert cliente: buscar por teléfono/email y vincular o crear */
+        let telefono = req.telefono.as_deref().unwrap_or("");
+        let apellidos = req.apellidos_cliente.as_deref().unwrap_or("");
+        let cliente_id = Self::upsert_cliente(
+            pool,
+            user_id,
+            &req.nombre_cliente,
+            apellidos,
+            telefono,
+            "",
+        )
+        .await;
+
         let data = NuevaReserva {
             user_id,
             fecha: req.fecha,
@@ -161,14 +183,27 @@ impl ReservaService {
             num_personas: req.num_personas,
             estado: &estado,
             notas: req.notas.as_deref().unwrap_or(""),
-            telefono: req.telefono.as_deref().unwrap_or(""),
+            telefono,
             num_mesa: req.num_mesa,
-            apellidos_cliente: req.apellidos_cliente.as_deref().unwrap_or(""),
+            apellidos_cliente: apellidos,
             canal_id: req.canal_id,
             mesa_id: req.mesa_id,
         };
 
-        let reserva = ReservaRepository::create(pool, &data).await?;
+        let mut reserva = ReservaRepository::create(pool, &data).await?;
+
+        /* [014A-2] Vincular cliente_id a la reserva si se encontró/creó */
+        if let Some(cid) = cliente_id {
+            let _ = sqlx::query(
+                "UPDATE reservas SET cliente_id = $1 WHERE id = $2",
+            )
+            .bind(cid)
+            .bind(reserva.id)
+            .execute(pool)
+            .await;
+            reserva.cliente_id = Some(cid);
+        }
+
         Ok(reserva)
     }
 
@@ -228,7 +263,7 @@ impl ReservaService {
     fn turno_a_horas(turno: Option<&str>) -> (Option<NaiveTime>, Option<NaiveTime>) {
         match turno {
             Some("desayuno") => (
-                Some(NaiveTime::from_hms_opt(7, 0, 0).expect("hora válida")),
+                Some(NaiveTime::from_hms_opt(0, 0, 0).expect("hora válida")),
                 Some(NaiveTime::from_hms_opt(12, 0, 0).expect("hora válida")),
             ),
             Some("comida") => (
@@ -289,9 +324,17 @@ impl ReservaService {
             mesa_id: req.mesa_id,
         };
 
-        ReservaRepository::update(pool, &data)
+        let reserva = ReservaRepository::update(pool, &data)
             .await?
-            .ok_or_else(|| AppError::NotFound("Reserva no encontrada".into()))
+            .ok_or_else(|| AppError::NotFound("Reserva no encontrada".into()))?;
+
+        /* [014A-1] Si el estado cambió a "completada" y auto_venta_reserva está activo,
+         * crear una venta automáticamente con los datos de la reserva. */
+        if estado_str.as_deref() == Some("completada") {
+            Self::crear_venta_automatica(pool, user_id, &reserva).await;
+        }
+
+        Ok(reserva)
     }
 
     pub async fn delete(pool: &PgPool, id: Uuid, user_id: Uuid) -> Result<(), AppError> {
@@ -347,5 +390,104 @@ impl ReservaService {
             ratio_porcentaje,
             por_canal,
         })
+    }
+
+    /* [014A-2] Buscar o crear cliente a partir de los datos de la reserva.
+     * Busca por teléfono o email. Si no existe, crea un cliente nuevo.
+     * Retorna None si no hay datos suficientes para identificar al cliente. */
+    async fn upsert_cliente(
+        pool: &PgPool,
+        user_id: Uuid,
+        nombre: &str,
+        apellidos: &str,
+        telefono: &str,
+        email: &str,
+    ) -> Option<Uuid> {
+        /* Si no hay teléfono ni email, no podemos identificar al cliente */
+        if telefono.is_empty() && email.is_empty() {
+            return None;
+        }
+
+        /* Buscar existente */
+        match ClienteRepository::find_by_telefono_o_email(pool, user_id, telefono, email).await {
+            Ok(Some(cliente)) => return Some(cliente.id),
+            Ok(None) => { /* crear nuevo */ }
+            Err(e) => {
+                warn!("[014A-2] Error buscando cliente: {e}");
+                return None;
+            }
+        }
+
+        /* Crear cliente nuevo con datos mínimos */
+        let data = NuevoCliente {
+            user_id,
+            nombre,
+            apellidos,
+            telefono,
+            prefijo_telefono: "",
+            email,
+            empresa: "",
+            notas: "",
+            foto_url: "",
+            consentimiento_comercial_email: false,
+            consentimiento_comercial_sms: false,
+            enviar_encuestas: false,
+            alergias: "",
+            preferencias_bebida: "",
+            preferencias_ubicacion: "",
+        };
+
+        match ClienteRepository::create(pool, &data).await {
+            Ok(cliente) => Some(cliente.id),
+            Err(e) => {
+                warn!("[014A-2] Error creando cliente: {e}");
+                None
+            }
+        }
+    }
+
+    /* [014A-1] Crear venta automáticamente cuando una reserva se marca como completada.
+     * Solo si auto_venta_reserva está habilitado en la configuración.
+     * No falla la operación si algo sale mal — solo loguea el error. */
+    async fn crear_venta_automatica(pool: &PgPool, user_id: Uuid, reserva: &Reserva) {
+        /* Verificar si auto_venta_reserva está habilitado */
+        let config = match ConfiguracionRepository::obtener_o_crear(pool, user_id).await {
+            Ok(c) => c,
+            Err(e) => {
+                warn!("[014A-1] Error obteniendo config para auto-venta: {e}");
+                return;
+            }
+        };
+
+        if !config.auto_venta_reserva {
+            return;
+        }
+
+        /* Determinar turno según la hora de la reserva y la config de turnos */
+        let hora = reserva.hora;
+        let turno = if hora >= config.hora_desayuno_inicio && hora < config.hora_desayuno_fin {
+            "manana"
+        } else if hora >= config.hora_comida_inicio && hora < config.hora_comida_fin {
+            "mediodia"
+        } else {
+            "noche"
+        };
+
+        let data = NuevaVenta {
+            user_id,
+            fecha: reserva.fecha,
+            comensales: Some(reserva.num_personas),
+            descripcion: &format!("Generada automáticamente desde reserva de {}", reserva.nombre_cliente),
+            iva_porcentaje: config.iva_por_defecto,
+            turno,
+            canal: "comedor",
+            metodo_pago: "efectivo",
+            importe_base: Decimal::ZERO,
+            importe_iva: Decimal::ZERO,
+        };
+
+        if let Err(e) = VentaRepository::create(pool, &data).await {
+            warn!("[014A-1] Error creando venta automática para reserva {}: {e}", reserva.id);
+        }
     }
 }

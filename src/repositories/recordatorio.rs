@@ -11,9 +11,11 @@ use crate::models::{
 
 pub struct NuevaRegla {
     pub nombre: String,
-    pub horas_antes: i32,
+    pub horas_antes: Option<i32>,
     pub canal: String,
     pub mensaje_plantilla: String,
+    pub tipo: String,
+    pub horas_despues: Option<i32>,
 }
 
 pub struct ActualizarReglaData {
@@ -22,6 +24,8 @@ pub struct ActualizarReglaData {
     pub canal: Option<String>,
     pub mensaje_plantilla: Option<String>,
     pub activa: Option<bool>,
+    pub tipo: Option<String>,
+    pub horas_despues: Option<i32>,
 }
 
 /* Reserva que necesita recordatorio: datos mínimos para el envío */
@@ -30,7 +34,9 @@ pub struct ReservaPendienteRecordatorio {
     pub reserva_id: Uuid,
     pub regla_id: Uuid,
     pub canal: String,
-    pub horas_antes: i32,
+    pub horas_antes: Option<i32>,
+    pub horas_despues: Option<i32>,
+    pub tipo: String,
     pub mensaje_plantilla: String,
     pub nombre_cliente: String,
     pub telefono: String,
@@ -52,14 +58,16 @@ impl RecordatorioRepository {
         data: NuevaRegla,
     ) -> Result<ReglaRecordatorio, sqlx::Error> {
         sqlx::query_as::<_, ReglaRecordatorio>(
-            "INSERT INTO reglas_recordatorio (user_id, nombre, horas_antes, canal, mensaje_plantilla) \
-             VALUES ($1, $2, $3, $4, $5) RETURNING *",
+            "INSERT INTO reglas_recordatorio (user_id, nombre, horas_antes, canal, mensaje_plantilla, tipo, horas_despues) \
+             VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
         )
         .bind(user_id)
         .bind(&data.nombre)
         .bind(data.horas_antes)
         .bind(&data.canal)
         .bind(&data.mensaje_plantilla)
+        .bind(&data.tipo)
+        .bind(data.horas_despues)
         .fetch_one(pool)
         .await
     }
@@ -120,6 +128,8 @@ impl RecordatorioRepository {
              canal = COALESCE($5, canal), \
              mensaje_plantilla = COALESCE($6, mensaje_plantilla), \
              activa = COALESCE($7, activa), \
+             tipo = COALESCE($8, tipo), \
+             horas_despues = COALESCE($9, horas_despues), \
              updated_at = now() \
              WHERE id = $1 AND user_id = $2 RETURNING *",
         )
@@ -130,6 +140,8 @@ impl RecordatorioRepository {
         .bind(data.canal)
         .bind(data.mensaje_plantilla)
         .bind(data.activa)
+        .bind(data.tipo)
+        .bind(data.horas_despues)
         .fetch_optional(pool)
         .await
     }
@@ -150,10 +162,10 @@ impl RecordatorioRepository {
         Ok(result.rows_affected() > 0)
     }
 
-    /* Busca reservas futuras que necesitan recordatorio según las reglas activas.
-     * Excluye reservas ya notificadas (vía recordatorios_enviados).
-     * La lógica: fecha+hora de la reserva está dentro del rango
-     * [now, now + horas_antes] y no hay registro en recordatorios_enviados. */
+    /* [014A-3] Busca reservas que necesitan recordatorio según las reglas activas.
+     * Tipo "antes": reservas futuras cuya fecha+hora está dentro de [now, now + horas_antes].
+     * Tipo "despues": reservas completadas cuya fecha+hora pasó hace <= horas_despues horas.
+     * Excluye reservas ya notificadas (vía recordatorios_enviados). */
     pub async fn reservas_pendientes_recordatorio(
         pool: &PgPool,
     ) -> Result<Vec<ReservaPendienteRecordatorio>, sqlx::Error> {
@@ -163,6 +175,8 @@ impl RecordatorioRepository {
                rr.id AS regla_id, \
                rr.canal, \
                rr.horas_antes, \
+               rr.horas_despues, \
+               rr.tipo, \
                rr.mensaje_plantilla, \
                r.nombre_cliente, \
                r.telefono, \
@@ -175,12 +189,22 @@ impl RecordatorioRepository {
              JOIN reservas r ON r.user_id = rr.user_id \
              LEFT JOIN clientes c ON c.id = r.cliente_id \
              WHERE rr.activa = true \
-               AND r.estado IN ('pendiente', 'confirmada', 'lista_espera') \
-               AND (r.fecha + r.hora) > now() \
-               AND (r.fecha + r.hora) <= now() + (rr.horas_antes || ' hours')::interval \
                AND NOT EXISTS ( \
                  SELECT 1 FROM recordatorios_enviados re \
                  WHERE re.regla_id = rr.id AND re.reserva_id = r.id \
+               ) \
+               AND ( \
+                 (rr.tipo = 'antes' \
+                   AND r.estado IN ('pendiente', 'confirmada', 'lista_espera') \
+                   AND (r.fecha + r.hora) > now() \
+                   AND (r.fecha + r.hora) <= now() + (rr.horas_antes || ' hours')::interval \
+                 ) \
+                 OR \
+                 (rr.tipo = 'despues' \
+                   AND r.estado = 'completada' \
+                   AND (r.fecha + r.hora) < now() \
+                   AND (r.fecha + r.hora) >= now() - (rr.horas_despues || ' hours')::interval \
+                 ) \
                ) \
              ORDER BY r.fecha ASC, r.hora ASC",
         )

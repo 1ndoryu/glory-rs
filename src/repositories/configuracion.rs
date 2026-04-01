@@ -53,6 +53,13 @@ impl ConfiguracionRepository {
                 iva_por_defecto = COALESCE($6, iva_por_defecto),
                 nombre_restaurante = COALESCE($7, nombre_restaurante),
                 groq_api_key = COALESCE($8, groq_api_key),
+                auto_venta_reserva = COALESCE($9, auto_venta_reserva),
+                hora_desayuno_inicio = COALESCE($10, hora_desayuno_inicio),
+                hora_desayuno_fin = COALESCE($11, hora_desayuno_fin),
+                hora_comida_inicio = COALESCE($12, hora_comida_inicio),
+                hora_comida_fin = COALESCE($13, hora_comida_fin),
+                hora_cena_inicio = COALESCE($14, hora_cena_inicio),
+                hora_cena_fin = COALESCE($15, hora_cena_fin),
                 updated_at = NOW()
                WHERE user_id = $1 RETURNING *",
         )
@@ -64,6 +71,13 @@ impl ConfiguracionRepository {
         .bind(req.iva_por_defecto)
         .bind(req.nombre_restaurante.as_deref())
         .bind(req.groq_api_key.as_deref())
+        .bind(req.auto_venta_reserva)
+        .bind(req.hora_desayuno_inicio)
+        .bind(req.hora_desayuno_fin)
+        .bind(req.hora_comida_inicio)
+        .bind(req.hora_comida_fin)
+        .bind(req.hora_cena_inicio)
+        .bind(req.hora_cena_fin)
         .fetch_one(pool)
         .await
     }

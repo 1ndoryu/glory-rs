@@ -146,4 +146,6 @@ Tarea Final. ~~Actualiza el despliege con coolify-manager-rs~~ → 283A-33
 
 ## Tareas pendientes
 
-(Sin tareas pendientes)
+1. Veo que en el codigo hay query_as en vez de query_as! ¿como hacemos para que obligarnos siempre a usar query_as!? no quiero asumir que las consultas estan siempre bien, necesito verificación en tiempo real de todo. 
+
+2. Creo (no estoy segura de esto)que hay cosas que no entediste sobre lo que dijo el cliente, la primera es que se defería a que algunos tooltip dentro del plano se cortaban 

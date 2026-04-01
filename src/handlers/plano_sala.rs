@@ -299,20 +299,26 @@ pub async fn importar_plano(
 
 /* ========== Ocupación (263A-16) ========== */
 
-/// Turno a rango horario (reutilizado de reservas handler)
-fn turno_a_rango(turno: &str) -> (Option<chrono::NaiveTime>, Option<chrono::NaiveTime>) {
+/* [014A-4] turno_a_rango ahora acepta la config de turnos.
+ * Si no se tiene config disponible, usa defaults. */
+fn turno_a_rango_config(
+    turno: &str,
+    config: Option<&crate::models::ConfiguracionRestaurante>,
+) -> (Option<chrono::NaiveTime>, Option<chrono::NaiveTime>) {
     use chrono::NaiveTime;
-    /* [303A-2] expect ok: literales de hora siempre válidos */
-    match turno {
-        "desayuno" => (
-            Some(NaiveTime::from_hms_opt(7, 0, 0).expect("hora literal válida")),
+    match (turno, config) {
+        ("desayuno", Some(c)) => (Some(c.hora_desayuno_inicio), Some(c.hora_desayuno_fin)),
+        ("comida", Some(c)) => (Some(c.hora_comida_inicio), Some(c.hora_comida_fin)),
+        ("cena", Some(c)) => (Some(c.hora_cena_inicio), Some(c.hora_cena_fin)),
+        ("desayuno", None) => (
+            Some(NaiveTime::from_hms_opt(0, 0, 0).expect("hora literal válida")),
             Some(NaiveTime::from_hms_opt(12, 0, 0).expect("hora literal válida")),
         ),
-        "comida" => (
+        ("comida", None) => (
             Some(NaiveTime::from_hms_opt(12, 0, 0).expect("hora literal válida")),
             Some(NaiveTime::from_hms_opt(18, 0, 0).expect("hora literal válida")),
         ),
-        "cena" => (
+        ("cena", None) => (
             Some(NaiveTime::from_hms_opt(18, 0, 0).expect("hora literal válida")),
             Some(NaiveTime::from_hms_opt(23, 59, 59).expect("hora literal válida")),
         ),
@@ -336,10 +342,18 @@ pub async fn obtener_ocupacion(
     auth: AuthUser,
     Query(query): Query<PlanoOcupacionQuery>,
 ) -> Result<Json<PlanoOcupacion>, AppError> {
+    /* [014A-4] Obtener config de turnos para rangos horarios configurables */
+    let config = crate::repositories::ConfiguracionRepository::obtener_o_crear(
+        &state.pool,
+        auth.user_id,
+    )
+    .await
+    .ok();
+
     let (hora_desde, hora_hasta) = query
         .turno
         .as_deref()
-        .map_or((None, None), turno_a_rango);
+        .map_or((None, None), |t| turno_a_rango_config(t, config.as_ref()));
 
     let plano = PlanoSalaService::plano_ocupacion(
         &state.pool,

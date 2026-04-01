@@ -189,6 +189,90 @@ function Configuracion() {
         </CardContent>
       </Card>
 
+      {/* [014A-1] Toggle auto-venta al completar reserva */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Ventas automáticas</CardTitle>
+          <CardDescription>Crear una venta automáticamente cuando una reserva se marca como completada</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="auto-venta">Activar venta automática</Label>
+            <Switch
+              id="auto-venta"
+              checked={config.auto_venta_reserva}
+              onCheckedChange={(checked) => cambiarCampo('auto_venta_reserva', checked)}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* [014A-4] Turnos configurables */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Horarios de turnos</CardTitle>
+          <CardDescription>Define los rangos horarios para desayuno, comida y cena</CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <div className="grid grid-cols-3 gap-4">
+            <div className="flex flex-col gap-2">
+              <Label className="font-semibold">Desayuno</Label>
+              <div className="flex items-center gap-1">
+                <Input
+                  type="time"
+                  value={config.hora_desayuno_inicio.slice(0, 5)}
+                  onChange={(e) => cambiarCampo('hora_desayuno_inicio', e.target.value + ':00')}
+                  className="max-w-28"
+                />
+                <span className="text-muted-foreground">-</span>
+                <Input
+                  type="time"
+                  value={config.hora_desayuno_fin.slice(0, 5)}
+                  onChange={(e) => cambiarCampo('hora_desayuno_fin', e.target.value + ':00')}
+                  className="max-w-28"
+                />
+              </div>
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label className="font-semibold">Comida</Label>
+              <div className="flex items-center gap-1">
+                <Input
+                  type="time"
+                  value={config.hora_comida_inicio.slice(0, 5)}
+                  onChange={(e) => cambiarCampo('hora_comida_inicio', e.target.value + ':00')}
+                  className="max-w-28"
+                />
+                <span className="text-muted-foreground">-</span>
+                <Input
+                  type="time"
+                  value={config.hora_comida_fin.slice(0, 5)}
+                  onChange={(e) => cambiarCampo('hora_comida_fin', e.target.value + ':00')}
+                  className="max-w-28"
+                />
+              </div>
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label className="font-semibold">Cena</Label>
+              <div className="flex items-center gap-1">
+                <Input
+                  type="time"
+                  value={config.hora_cena_inicio.slice(0, 5)}
+                  onChange={(e) => cambiarCampo('hora_cena_inicio', e.target.value + ':00')}
+                  className="max-w-28"
+                />
+                <span className="text-muted-foreground">-</span>
+                <Input
+                  type="time"
+                  value={config.hora_cena_fin.slice(0, 5)}
+                  onChange={(e) => cambiarCampo('hora_cena_fin', e.target.value + ':00')}
+                  className="max-w-28"
+                />
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="flex items-center gap-4">
         <Button onClick={guardar} disabled={guardando}>
           {guardando ? 'Guardando...' : 'Guardar configuración'}

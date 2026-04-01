@@ -97,7 +97,8 @@
   user-select: none;
 }
 
-/* [303A-20] position:absolute — fuera del flujo, no empuja layout. */
+/* [303A-20] position:absolute — fuera del flujo, no empuja layout.
+ * [014A-8] padding-top para evitar cortar texto de mesas cercanas al borde superior. */
 .planoOcupacionContent {
   position: absolute;
   top: 0;
@@ -105,6 +106,7 @@
   min-width: 100%;
   min-height: 100%;
   background: var(--background);
+  padding-top: 4px;
 }
 
 /* Mesa individual */
@@ -160,10 +162,15 @@
   z-index: 10;
 }
 
+/* [014A-8] overflow:visible para que el número no se corte en mesas pequeñas
+ * o cercanas al borde del viewport. white-space:nowrap evita wrap interno. */
 .mesaOcupacionNumero {
   font-size: 0.85rem;
   font-weight: 700;
   color: var(--foreground);
+  overflow: visible;
+  white-space: nowrap;
+  pointer-events: none;
 }
 
 /* Tooltip */

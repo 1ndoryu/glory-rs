@@ -321,6 +321,9 @@ impl PlanoSalaService {
         let zonas = Repo::listar_zonas(pool, user_id).await?;
         let reservas_rows =
             Repo::reservas_por_mesa(pool, user_id, fecha, hora_desde, hora_hasta).await?;
+        /* [014A-9] Reservas sin mesa_id vinculado, fallback por num_mesa */
+        let reservas_sin_id =
+            Repo::reservas_sin_mesa_id(pool, user_id, fecha, hora_desde, hora_hasta).await?;
 
         /* Indexar reservas por mesa_id para O(1) lookup */
         let mut reservas_por_mesa: std::collections::HashMap<Uuid, Vec<ReservaMesa>> =
@@ -340,13 +343,35 @@ impl PlanoSalaService {
                 });
         }
 
+        /* [014A-9] Indexar reservas sin mesa_id por num_mesa para fallback */
+        let mut reservas_por_num: std::collections::HashMap<i32, Vec<ReservaMesa>> =
+            std::collections::HashMap::new();
+        for r in reservas_sin_id {
+            reservas_por_num
+                .entry(r.num_mesa)
+                .or_default()
+                .push(ReservaMesa {
+                    reserva_id: r.reserva_id,
+                    hora: r.hora,
+                    nombre_cliente: r.nombre_cliente,
+                    apellidos_cliente: r.apellidos_cliente,
+                    num_personas: r.num_personas,
+                    estado: r.estado,
+                    telefono: r.telefono,
+                });
+        }
+
         let mut zonas_ocupacion = Vec::with_capacity(zonas.len());
         for zona in zonas {
             let mesas = Repo::listar_mesas_zona(pool, zona.id).await?;
             let mesas_ocupacion = mesas
                 .into_iter()
                 .map(|mesa| {
-                    let reservas = reservas_por_mesa.remove(&mesa.id).unwrap_or_default();
+                    /* Primero buscar por mesa_id, luego fallback por num_mesa [014A-9] */
+                    let mut reservas = reservas_por_mesa.remove(&mesa.id).unwrap_or_default();
+                    if let Some(mut por_num) = reservas_por_num.remove(&mesa.numero) {
+                        reservas.append(&mut por_num);
+                    }
                     MesaOcupacion { mesa, reservas }
                 })
                 .collect();

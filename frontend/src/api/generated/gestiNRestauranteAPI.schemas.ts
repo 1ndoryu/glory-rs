@@ -61,7 +61,21 @@ export interface ActualizarClienteRequest {
  */
 export interface ActualizarConfiguracionRequest {
   /** @nullable */
+  auto_venta_reserva?: boolean | null;
+  /** @nullable */
   groq_api_key?: string | null;
+  /** @nullable */
+  hora_cena_fin?: string | null;
+  /** @nullable */
+  hora_cena_inicio?: string | null;
+  /** @nullable */
+  hora_comida_fin?: string | null;
+  /** @nullable */
+  hora_comida_inicio?: string | null;
+  /** @nullable */
+  hora_desayuno_fin?: string | null;
+  /** @nullable */
+  hora_desayuno_inicio?: string | null;
   /** @nullable */
   iva_por_defecto?: string | null;
   /** @nullable */
@@ -210,9 +224,13 @@ export interface ActualizarReglaRequest {
   /** @nullable */
   horas_antes?: number | null;
   /** @nullable */
+  horas_despues?: number | null;
+  /** @nullable */
   mensaje_plantilla?: string | null;
   /** @nullable */
   nombre?: string | null;
+  /** @nullable */
+  tipo?: string | null;
 }
 
 /**
@@ -605,7 +623,14 @@ export interface CombinacionExport {
  * Configuraci├│n almacenada del restaurante
  */
 export interface ConfiguracionRestaurante {
+  auto_venta_reserva: boolean;
   created_at: string;
+  hora_cena_fin: string;
+  hora_cena_inicio: string;
+  hora_comida_fin: string;
+  hora_comida_inicio: string;
+  hora_desayuno_fin: string;
+  hora_desayuno_inicio: string;
   id: string;
   iva_por_defecto: string;
   nombre_restaurante: string;
@@ -768,10 +793,15 @@ export interface CrearPlantillaRequest {
 
 export interface CrearReglaRequest {
   canal: string;
-  horas_antes: number;
+  /** @nullable */
+  horas_antes?: number | null;
+  /** @nullable */
+  horas_despues?: number | null;
   /** @nullable */
   mensaje_plantilla?: string | null;
   nombre: string;
+  /** @nullable */
+  tipo?: string | null;
 }
 
 /**
@@ -1230,10 +1260,14 @@ export interface ReglaRecordatorio {
   activa: boolean;
   canal: string;
   created_at: string;
-  horas_antes: number;
+  /** @nullable */
+  horas_antes?: number | null;
+  /** @nullable */
+  horas_despues?: number | null;
   id: string;
   mensaje_plantilla: string;
   nombre: string;
+  tipo: string;
   updated_at: string;
   user_id: string;
 }

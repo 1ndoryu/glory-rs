@@ -9,7 +9,8 @@ const SEGMENTOS_VALIDOS = [
   'habitual', 'sin_1m', 'sin_3m', 'sin_6m', 'sin_9m', 'sin_1a', 'sin_mas_1a', 'todos',
 ] as const;
 
-const CANALES_VALIDOS = ['sms', 'email', 'whatsapp'] as const;
+/* [014A-5] WhatsApp retirado del selector de canales de campaña por decisión del cliente */
+const CANALES_VALIDOS = ['sms', 'email'] as const;
 
 /* Caracteres GSM especiales que ocupan 2 posiciones en SMS */
 const CHARS_DOBLES = new Set('|^€{}[]~\\');

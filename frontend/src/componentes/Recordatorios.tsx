@@ -63,19 +63,24 @@ function badgeCanal(canal: string) {
   }
 }
 
-function formatHoras(horas: number) {
-  if (horas >= 24) {
-    const dias = Math.floor(horas / 24);
-    const rest = horas % 24;
-    return rest > 0 ? `${dias}d ${rest}h antes` : `${dias}d antes`;
+/* [014A-3] Soporta tipo "antes" y "despues" */
+function formatHoras(horas: number | null | undefined, tipo?: string | null) {
+  const h = horas ?? 0;
+  const sufijo = tipo === 'despues' ? 'después' : 'antes';
+  if (h >= 24) {
+    const dias = Math.floor(h / 24);
+    const rest = h % 24;
+    return rest > 0 ? `${dias}d ${rest}h ${sufijo}` : `${dias}d ${sufijo}`;
   }
-  return `${horas}h antes`;
+  return `${h}h ${sufijo}`;
 }
 
-function NuevaReglaDialog({ onCrear }: { onCrear: (data: { data: { nombre: string; horas_antes: number; canal: string; mensaje_plantilla?: string } }) => Promise<unknown> }) {
+/* [014A-3] Soporta tipo "antes" y "despues". [014A-5] WhatsApp removido. */
+function NuevaReglaDialog({ onCrear }: { onCrear: (data: { data: { nombre: string; horas_antes?: number; horas_despues?: number; tipo?: string; canal: string; mensaje_plantilla?: string } }) => Promise<unknown> }) {
   const [open, setOpen] = useState(false);
   const [nombre, setNombre] = useState('');
-  const [horasAntes, setHorasAntes] = useState('24');
+  const [tipo, setTipo] = useState<'antes' | 'despues'>('antes');
+  const [horas, setHoras] = useState('24');
   const [canal, setCanal] = useState('sms');
   const [mensaje, setMensaje] = useState('');
   const [enviando, setEnviando] = useState(false);
@@ -83,18 +88,21 @@ function NuevaReglaDialog({ onCrear }: { onCrear: (data: { data: { nombre: strin
   const handleCrear = async () => {
     if (!nombre.trim() || enviando) return;
     setEnviando(true);
+    const h = parseInt(horas, 10) || 24;
     try {
       await onCrear({
         data: {
           nombre: nombre.trim(),
-          horas_antes: parseInt(horasAntes, 10) || 24,
+          tipo,
+          ...(tipo === 'antes' ? { horas_antes: h } : { horas_despues: h }),
           canal,
           mensaje_plantilla: mensaje.trim() || undefined,
         },
       });
       setOpen(false);
       setNombre('');
-      setHorasAntes('24');
+      setTipo('antes');
+      setHoras('24');
       setCanal('sms');
       setMensaje('');
     } finally {
@@ -124,14 +132,26 @@ function NuevaReglaDialog({ onCrear }: { onCrear: (data: { data: { nombre: strin
               placeholder="Ej: Recordatorio 24h antes"
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label>Horas antes</Label>
+              <Label>Tipo</Label>
+              <Select value={tipo} onValueChange={(v) => setTipo(v as 'antes' | 'despues')}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="antes">Antes de reserva</SelectItem>
+                  <SelectItem value="despues">Después de reserva</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>{tipo === 'antes' ? 'Horas antes' : 'Horas después'}</Label>
               <Input
                 type="number"
                 min={1}
-                value={horasAntes}
-                onChange={e => setHorasAntes(e.target.value)}
+                value={horas}
+                onChange={e => setHoras(e.target.value)}
               />
             </div>
             <div className="space-y-2">
@@ -143,7 +163,6 @@ function NuevaReglaDialog({ onCrear }: { onCrear: (data: { data: { nombre: strin
                 <SelectContent>
                   <SelectItem value="sms">SMS</SelectItem>
                   <SelectItem value="email">Email</SelectItem>
-                  <SelectItem value="whatsapp">WhatsApp</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -232,7 +251,12 @@ function TablaReglas() {
                         )}
                       </div>
                     </TableCell>
-                    <TableCell>{formatHoras(r.horas_antes)}</TableCell>
+                    <TableCell>
+                      {formatHoras(
+                        r.tipo === 'despues' ? r.horas_despues : r.horas_antes,
+                        r.tipo,
+                      )}
+                    </TableCell>
                     <TableCell>{badgeCanal(r.canal)}</TableCell>
                     <TableCell>
                       <Switch

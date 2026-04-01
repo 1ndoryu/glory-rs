@@ -173,13 +173,15 @@
   box-shadow: 0 0 0 2px var(--primary);
 }
 
+/* [014A-7] Handles posicionados dentro de la mesa para evitar clipping
+ * por overflow:hidden del canvas. Width/height reducidos para no tapar contenido. */
 .planoMesaResizeHandle {
   position: absolute;
   z-index: 2;
-  width: 14px;
-  height: 14px;
-  min-width: 14px;
-  min-height: 14px;
+  width: 12px;
+  height: 12px;
+  min-width: 12px;
+  min-height: 12px;
   padding: 0;
   border-radius: 999px;
   background: var(--primary);
@@ -190,33 +192,31 @@
 .planoMesaResizeHandle.norte,
 .planoMesaResizeHandle.sur {
   left: 50%;
+  transform: translateX(-50%);
   cursor: ns-resize;
 }
 
 .planoMesaResizeHandle.este,
 .planoMesaResizeHandle.oeste {
   top: 50%;
+  transform: translateY(-50%);
   cursor: ew-resize;
 }
 
 .planoMesaResizeHandle.norte {
-  top: 0;
-  transform: translate(-50%, -50%);
+  top: -1px;
 }
 
 .planoMesaResizeHandle.sur {
-  bottom: 0;
-  transform: translate(-50%, 50%);
+  bottom: -1px;
 }
 
 .planoMesaResizeHandle.este {
-  right: 0;
-  transform: translate(50%, -50%);
+  right: -1px;
 }
 
 .planoMesaResizeHandle.oeste {
-  left: 0;
-  transform: translate(-50%, -50%);
+  left: -1px;
 }
 
 .planoMesa.redonda {

@@ -23,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Users, Mail, MessageSquare, Phone } from 'lucide-react';
+import { Users, Mail, Phone } from 'lucide-react';
 
 const ETIQUETAS_SEGMENTO: Record<string, string> = {
   habitual: 'Habituales',
@@ -36,10 +36,10 @@ const ETIQUETAS_SEGMENTO: Record<string, string> = {
   todos: 'Todos los clientes',
 };
 
+/* [014A-5] WhatsApp removido del selector por decisión del cliente */
 const ETIQUETAS_CANAL: Record<string, { label: string; icon: React.ReactNode }> = {
   sms: { label: 'SMS', icon: <Phone className="size-4" /> },
   email: { label: 'Email', icon: <Mail className="size-4" /> },
-  whatsapp: { label: 'WhatsApp', icon: <MessageSquare className="size-4" /> },
 };
 
 export default function FormularioCampana() {

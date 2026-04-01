@@ -1,7 +1,8 @@
 /* [263A-25] Modelo de reglas de recordatorio automático.
- * Cada regla define: horas_antes de la reserva, canal (sms/email/whatsapp),
+ * Cada regla define: horas_antes/horas_despues de la reserva, canal (sms/email/whatsapp),
  * mensaje plantilla y si está activa. El scheduler revisa periódicamente
- * y envía según estas reglas. */
+ * y envía según estas reglas.
+ * [014A-3] tipo "antes" o "despues" — horas_despues para mensajes post-reserva (reseñas). */
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
@@ -15,10 +16,13 @@ pub struct ReglaRecordatorio {
     pub id: Uuid,
     pub user_id: Uuid,
     pub nombre: String,
-    pub horas_antes: i32,
+    pub horas_antes: Option<i32>,
     pub canal: String,
     pub mensaje_plantilla: String,
     pub activa: bool,
+    /* [014A-3] Tipo de regla: "antes" (pre-reserva) o "despues" (post-reserva) */
+    pub tipo: String,
+    pub horas_despues: Option<i32>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -27,11 +31,13 @@ pub struct ReglaRecordatorio {
 pub struct CrearReglaRequest {
     #[validate(length(min = 1, max = 255))]
     pub nombre: String,
-    #[validate(range(min = 1))]
-    pub horas_antes: i32,
+    pub horas_antes: Option<i32>,
     #[validate(length(min = 1, max = 20))]
     pub canal: String,
     pub mensaje_plantilla: Option<String>,
+    /* [014A-3] "antes" o "despues". Default: "antes" */
+    pub tipo: Option<String>,
+    pub horas_despues: Option<i32>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Validate, ToSchema)]
@@ -41,6 +47,8 @@ pub struct ActualizarReglaRequest {
     pub canal: Option<String>,
     pub mensaje_plantilla: Option<String>,
     pub activa: Option<bool>,
+    pub tipo: Option<String>,
+    pub horas_despues: Option<i32>,
 }
 
 #[derive(Debug, FromRow, Serialize, Deserialize, ToSchema)]

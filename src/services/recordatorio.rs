@@ -20,6 +20,7 @@ use crate::services::twilio::TwilioService;
 pub struct RecordatorioService;
 
 impl RecordatorioService {
+    /* [014A-3] Crear regla de recordatorio con soporte para tipo "antes" y "despues" */
     pub async fn crear_regla(
         pool: &PgPool,
         user_id: Uuid,
@@ -27,15 +28,16 @@ impl RecordatorioService {
     ) -> Result<ReglaRecordatorio, AppError> {
         validar_canal(&req.canal)?;
 
-        if req.horas_antes <= 0 {
-            return Err(AppError::Validation("horas_antes debe ser > 0".into()));
-        }
+        let tipo = req.tipo.as_deref().unwrap_or("antes");
+        validar_tipo_y_horas(tipo, req.horas_antes, req.horas_despues)?;
 
         let data = NuevaRegla {
             nombre: req.nombre,
             horas_antes: req.horas_antes,
             canal: req.canal,
             mensaje_plantilla: req.mensaje_plantilla.unwrap_or_default(),
+            tipo: tipo.to_string(),
+            horas_despues: req.horas_despues,
         };
 
         RecordatorioRepository::create(pool, user_id, data)
@@ -77,9 +79,19 @@ impl RecordatorioService {
         if let Some(ref canal) = req.canal {
             validar_canal(canal)?;
         }
-        if let Some(h) = req.horas_antes {
-            if h <= 0 {
-                return Err(AppError::Validation("horas_antes debe ser > 0".into()));
+        if let Some(ref tipo) = req.tipo {
+            validar_tipo_y_horas(tipo, req.horas_antes, req.horas_despues)?;
+        } else {
+            /* Si no cambia tipo, validar horas individuales */
+            if let Some(h) = req.horas_antes {
+                if h <= 0 {
+                    return Err(AppError::Validation("horas_antes debe ser > 0".into()));
+                }
+            }
+            if let Some(h) = req.horas_despues {
+                if h <= 0 {
+                    return Err(AppError::Validation("horas_despues debe ser > 0".into()));
+                }
             }
         }
 
@@ -89,6 +101,8 @@ impl RecordatorioService {
             canal: req.canal,
             mensaje_plantilla: req.mensaje_plantilla,
             activa: req.activa,
+            tipo: req.tipo,
+            horas_despues: req.horas_despues,
         };
 
         RecordatorioRepository::update(pool, id, user_id, data)
@@ -177,6 +191,26 @@ fn validar_canal(canal: &str) -> Result<(), AppError> {
             "Canal inválido: {canal}. Opciones: {}",
             CANALES_RECORDATORIO.join(", ")
         )));
+    }
+    Ok(())
+}
+
+/* [014A-3] Valida coherencia entre tipo y campos horas_antes/horas_despues */
+fn validar_tipo_y_horas(tipo: &str, horas_antes: Option<i32>, horas_despues: Option<i32>) -> Result<(), AppError> {
+    match tipo {
+        "antes" => {
+            let h = horas_antes.unwrap_or(0);
+            if h <= 0 {
+                return Err(AppError::Validation("Tipo 'antes' requiere horas_antes > 0".into()));
+            }
+        }
+        "despues" => {
+            let h = horas_despues.unwrap_or(0);
+            if h <= 0 {
+                return Err(AppError::Validation("Tipo 'despues' requiere horas_despues > 0".into()));
+            }
+        }
+        _ => return Err(AppError::Validation("Tipo debe ser 'antes' o 'despues'".into())),
     }
     Ok(())
 }

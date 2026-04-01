@@ -1,7 +1,9 @@
 /* [263A-17] Modelo de configuración del restaurante.
- * Campos obligatorios al reservar + IVA por defecto + nombre restaurante. */
+ * Campos obligatorios al reservar + IVA por defecto + nombre restaurante.
+ * [014A-1] auto_venta_reserva: al completar reserva, crear venta automáticamente.
+ * [014A-4] Turnos configurables: horas de desayuno, comida, cena. */
 
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, NaiveTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use utoipa::ToSchema;
@@ -10,7 +12,7 @@ use validator::Validate;
 
 /// Configuración almacenada del restaurante
 #[derive(Debug, Clone, FromRow, Serialize, ToSchema)]
-#[allow(clippy::struct_excessive_bools)] /* 4 flags de campos obligatorios al reservar — intencional */
+#[allow(clippy::struct_excessive_bools)]
 pub struct ConfiguracionRestaurante {
     pub id: Uuid,
     pub user_id: Uuid,
@@ -20,11 +22,18 @@ pub struct ConfiguracionRestaurante {
     pub reserva_apellidos_obligatorio: bool,
     pub iva_por_defecto: rust_decimal::Decimal,
     pub nombre_restaurante: String,
-    /* [283A-8] API key de Groq para digitalización de documentos.
-     * Se almacena en texto plano porque el backend la necesita en claro para llamar a Groq.
-     * Se oculta en la respuesta JSON: solo se muestra si existe o no. */
+    /* [283A-8] API key de Groq para digitalización de documentos. */
     #[serde(skip_serializing)]
     pub groq_api_key: Option<String>,
+    /* [014A-1] Si true, al marcar reserva como "completada" se crea venta automáticamente */
+    pub auto_venta_reserva: bool,
+    /* [014A-4] Rangos horarios de turnos (configurables) */
+    pub hora_desayuno_inicio: NaiveTime,
+    pub hora_desayuno_fin: NaiveTime,
+    pub hora_comida_inicio: NaiveTime,
+    pub hora_comida_fin: NaiveTime,
+    pub hora_cena_inicio: NaiveTime,
+    pub hora_cena_fin: NaiveTime,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -40,9 +49,18 @@ pub struct ActualizarConfiguracionRequest {
     pub iva_por_defecto: Option<rust_decimal::Decimal>,
     #[validate(length(max = 255))]
     pub nombre_restaurante: Option<String>,
-    /* [283A-8] API key de Groq — se valida longitud máxima para evitar payloads enormes */
+    /* [283A-8] API key de Groq */
     #[validate(length(max = 200))]
     pub groq_api_key: Option<String>,
+    /* [014A-1] Toggle auto-venta al completar reserva */
+    pub auto_venta_reserva: Option<bool>,
+    /* [014A-4] Rangos horarios configurables */
+    pub hora_desayuno_inicio: Option<NaiveTime>,
+    pub hora_desayuno_fin: Option<NaiveTime>,
+    pub hora_comida_inicio: Option<NaiveTime>,
+    pub hora_comida_fin: Option<NaiveTime>,
+    pub hora_cena_inicio: Option<NaiveTime>,
+    pub hora_cena_fin: Option<NaiveTime>,
 }
 
 fn validar_iva(valor: &rust_decimal::Decimal) -> Result<(), validator::ValidationError> {

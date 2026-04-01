@@ -3,9 +3,11 @@
  * [283A-8] Añadido groq_api_key para digitalización de documentos. */
 
 import { useState, useEffect, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   useObtenerConfiguracion,
   useActualizarConfiguracion,
+  getObtenerConfiguracionQueryKey,
 } from '../api/generated/configuracion/configuracion';
 import type { ActualizarConfiguracionRequest } from '../api/generated/gestiNRestauranteAPI.schemas';
 
@@ -17,6 +19,15 @@ interface EstadoConfiguracion {
   iva_por_defecto: number;
   nombre_restaurante: string;
   groq_api_key: string;
+  /* [014A-1] Auto-venta al completar reserva */
+  auto_venta_reserva: boolean;
+  /* [014A-4] Turnos configurables */
+  hora_desayuno_inicio: string;
+  hora_desayuno_fin: string;
+  hora_comida_inicio: string;
+  hora_comida_fin: string;
+  hora_cena_inicio: string;
+  hora_cena_fin: string;
 }
 
 const DEFAULTS: EstadoConfiguracion = {
@@ -27,11 +38,19 @@ const DEFAULTS: EstadoConfiguracion = {
   iva_por_defecto: 10,
   nombre_restaurante: '',
   groq_api_key: '',
+  auto_venta_reserva: false,
+  hora_desayuno_inicio: '00:00:00',
+  hora_desayuno_fin: '12:00:00',
+  hora_comida_inicio: '12:00:00',
+  hora_comida_fin: '18:00:00',
+  hora_cena_inicio: '18:00:00',
+  hora_cena_fin: '23:59:59',
 };
 
 export function useConfiguracion() {
   const [config, setConfig] = useState<EstadoConfiguracion>(DEFAULTS);
   const [mensaje, setMensaje] = useState('');
+  const queryClient = useQueryClient();
 
   const { data: datos, isLoading } = useObtenerConfiguracion();
   const mutacion = useActualizarConfiguracion();
@@ -50,6 +69,15 @@ export function useConfiguracion() {
         /* [283A-8] groq_api_key no viene en la respuesta (skip_serializing),
          * mantener valor local si ya fue editado */
         groq_api_key: config.groq_api_key || '',
+        /* [014A-1] */
+        auto_venta_reserva: d.auto_venta_reserva,
+        /* [014A-4] Turnos — formato HH:MM:SS desde el servidor */
+        hora_desayuno_inicio: d.hora_desayuno_inicio,
+        hora_desayuno_fin: d.hora_desayuno_fin,
+        hora_comida_inicio: d.hora_comida_inicio,
+        hora_comida_fin: d.hora_comida_fin,
+        hora_cena_inicio: d.hora_cena_inicio,
+        hora_cena_fin: d.hora_cena_fin,
       });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -73,9 +101,20 @@ export function useConfiguracion() {
       nombre_restaurante: config.nombre_restaurante,
       /* [283A-8] Solo enviar groq_api_key si el usuario la ha editado */
       ...(config.groq_api_key ? { groq_api_key: config.groq_api_key } : {}),
+      /* [014A-1] Auto-venta */
+      auto_venta_reserva: config.auto_venta_reserva,
+      /* [014A-4] Turnos configurables */
+      hora_desayuno_inicio: config.hora_desayuno_inicio,
+      hora_desayuno_fin: config.hora_desayuno_fin,
+      hora_comida_inicio: config.hora_comida_inicio,
+      hora_comida_fin: config.hora_comida_fin,
+      hora_cena_inicio: config.hora_cena_inicio,
+      hora_cena_fin: config.hora_cena_fin,
     };
     try {
       await mutacion.mutateAsync({ data: body });
+      /* [014A-6] Invalidar cache para que la UI refleje el valor actualizado del servidor */
+      await queryClient.invalidateQueries({ queryKey: getObtenerConfiguracionQueryKey() });
       setMensaje('Configuración guardada');
     } catch {
       setMensaje('Error al guardar');

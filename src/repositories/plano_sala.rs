@@ -19,6 +19,19 @@ pub struct ReservaMesaRow {
     pub telefono: String,
 }
 
+/* [014A-9] Reservas sin mesa_id vinculado pero con num_mesa (fallback por número) */
+#[derive(Debug, sqlx::FromRow)]
+pub struct ReservaSinMesaRow {
+    pub reserva_id: uuid::Uuid,
+    pub num_mesa: i32,
+    pub hora: chrono::NaiveTime,
+    pub nombre_cliente: String,
+    pub apellidos_cliente: String,
+    pub num_personas: i32,
+    pub estado: String,
+    pub telefono: String,
+}
+
 pub struct PlanoSalaRepository;
 
 impl PlanoSalaRepository {
@@ -358,6 +371,38 @@ impl PlanoSalaRepository {
                WHERE r.user_id = $1
                  AND r.fecha = $2
                  AND r.mesa_id IS NOT NULL
+                 AND r.estado NOT IN ('cancelada')
+                 AND ($3::TIME IS NULL OR r.hora >= $3)
+                 AND ($4::TIME IS NULL OR r.hora < $4)
+               ORDER BY r.hora ASC"#,
+            user_id,
+            fecha,
+            hora_desde,
+            hora_hasta
+        )
+        .fetch_all(pool)
+        .await
+    }
+
+    /* [014A-9] Reservas sin mesa_id vinculado pero con num_mesa (fallback por número).
+     * Permite que mesas nuevas muestren reservas creadas antes de que la mesa existiera. */
+    pub async fn reservas_sin_mesa_id(
+        pool: &PgPool,
+        user_id: Uuid,
+        fecha: chrono::NaiveDate,
+        hora_desde: Option<chrono::NaiveTime>,
+        hora_hasta: Option<chrono::NaiveTime>,
+    ) -> Result<Vec<ReservaSinMesaRow>, sqlx::Error> {
+        sqlx::query_as!(
+            ReservaSinMesaRow,
+            r#"SELECT r.id as reserva_id, r.num_mesa as "num_mesa!",
+                      r.hora, r.nombre_cliente, r.apellidos_cliente,
+                      r.num_personas, r.estado, r.telefono
+               FROM reservas r
+               WHERE r.user_id = $1
+                 AND r.fecha = $2
+                 AND r.mesa_id IS NULL
+                 AND r.num_mesa IS NOT NULL
                  AND r.estado NOT IN ('cancelada')
                  AND ($3::TIME IS NULL OR r.hora >= $3)
                  AND ($4::TIME IS NULL OR r.hora < $4)
