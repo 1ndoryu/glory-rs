@@ -154,4 +154,5 @@ Tarea Final. ~~Actualiza el despliege con coolify-manager-rs~~ → 283A-33
 
 4. ~~PlanoOcupacion (reservas) no se actualiza en tiempo real cuando se editan mesas en PlanoSala.~~ → 014A-13
 5. ~~Redactar mensaje al cliente respondiendo dudas de Data V.~~ → 014A-14
-6. Subir cambios al servidor. → 014A-15
+~~6. Subir cambios al servidor.~~ → 014A-15
+~~7. Modal Nueva Regla de Recordatorio muy estrecho — tipo y horas antes se enciman.~~ → 014A-16
