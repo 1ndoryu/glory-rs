@@ -194,11 +194,11 @@ impl ReservaService {
 
         /* [014A-2] Vincular cliente_id a la reserva si se encontró/creó */
         if let Some(cid) = cliente_id {
-            let _ = sqlx::query(
+            let _ = sqlx::query!(
                 "UPDATE reservas SET cliente_id = $1 WHERE id = $2",
+                cid,
+                reserva.id
             )
-            .bind(cid)
-            .bind(reserva.id)
             .execute(pool)
             .await;
             reserva.cliente_id = Some(cid);

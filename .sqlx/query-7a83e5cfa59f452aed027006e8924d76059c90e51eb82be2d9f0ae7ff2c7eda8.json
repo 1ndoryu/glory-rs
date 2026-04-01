@@ -1,0 +1,90 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE reglas_recordatorio SET nombre = COALESCE($3, nombre), horas_antes = COALESCE($4, horas_antes), canal = COALESCE($5, canal), mensaje_plantilla = COALESCE($6, mensaje_plantilla), activa = COALESCE($7, activa), tipo = COALESCE($8, tipo), horas_despues = COALESCE($9, horas_despues), updated_at = now() WHERE id = $1 AND user_id = $2 RETURNING *",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "nombre",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "horas_antes",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "canal",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "mensaje_plantilla",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "activa",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 7,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 8,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 9,
+        "name": "horas_despues",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 10,
+        "name": "tipo",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Varchar",
+        "Int4",
+        "Varchar",
+        "Text",
+        "Bool",
+        "Varchar",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "7a83e5cfa59f452aed027006e8924d76059c90e51eb82be2d9f0ae7ff2c7eda8"
+}

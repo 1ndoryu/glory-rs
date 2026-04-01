@@ -1,0 +1,98 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT r.id AS reserva_id, rr.id AS regla_id, rr.canal, rr.horas_antes, rr.horas_despues, rr.tipo, rr.mensaje_plantilla, r.nombre_cliente, r.telefono, COALESCE(c.prefijo_telefono, '+34') AS \"prefijo_telefono!\", r.fecha, r.hora, r.user_id, c.email AS email_cliente FROM reglas_recordatorio rr JOIN reservas r ON r.user_id = rr.user_id LEFT JOIN clientes c ON c.id = r.cliente_id WHERE rr.activa = true AND NOT EXISTS ( SELECT 1 FROM recordatorios_enviados re WHERE re.regla_id = rr.id AND re.reserva_id = r.id ) AND ( (rr.tipo = 'antes' AND r.estado IN ('pendiente', 'confirmada', 'lista_espera') AND (r.fecha + r.hora) > now() AND (r.fecha + r.hora) <= now() + (rr.horas_antes || ' hours')::interval ) OR (rr.tipo = 'despues' AND r.estado = 'completada' AND (r.fecha + r.hora) < now() AND (r.fecha + r.hora) >= now() - (rr.horas_despues || ' hours')::interval ) ) ORDER BY r.fecha ASC, r.hora ASC",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "reserva_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "regla_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "canal",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "horas_antes",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "horas_despues",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 5,
+        "name": "tipo",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "mensaje_plantilla",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 7,
+        "name": "nombre_cliente",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 8,
+        "name": "telefono",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 9,
+        "name": "prefijo_telefono!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 10,
+        "name": "fecha",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 11,
+        "name": "hora",
+        "type_info": "Time"
+      },
+      {
+        "ordinal": 12,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 13,
+        "name": "email_cliente",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      null,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "a8062f8a829190871e768ba44c6f7ae1f6b8310224b8aba00cddc8cfc4857cc2"
+}

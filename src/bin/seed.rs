@@ -36,14 +36,14 @@ async fn main() {
         .expect("Error al hashear password")
         .to_string();
 
-    let user_id: Uuid = sqlx::query_scalar(
+    let user_id: Uuid = sqlx::query_scalar!(
         "INSERT INTO users (email, password_hash, nombre) VALUES ($1, $2, $3) \
          ON CONFLICT (email) DO UPDATE SET password_hash = $2 \
          RETURNING id",
+        email,
+        &hash,
+        "Demo Admin"
     )
-    .bind(email)
-    .bind(&hash)
-    .bind("Demo Admin")
     .fetch_one(&pool)
     .await
     .expect("Error al crear usuario demo");
@@ -107,11 +107,11 @@ async fn seed_canales(pool: &PgPool, user_id: Uuid) -> Vec<Uuid> {
     ];
     let mut ids = Vec::with_capacity(nombres.len());
     for nombre in &nombres {
-        let id: Uuid = sqlx::query_scalar(
+        let id: Uuid = sqlx::query_scalar!(
             "INSERT INTO canales_reserva (user_id, nombre) VALUES ($1, $2) RETURNING id",
+            user_id,
+            *nombre
         )
-        .bind(user_id)
-        .bind(*nombre)
         .fetch_one(pool)
         .await
         .expect("Error al insertar canal");
@@ -147,20 +147,20 @@ async fn seed_clientes(pool: &PgPool, user_id: Uuid) -> Vec<Uuid> {
     ];
     let mut ids = Vec::with_capacity(datos.len());
     for &(nombre, apellidos, tel, email, empresa, alergias, pref_beb, pref_ubi) in datos {
-        let id: Uuid = sqlx::query_scalar(
+        let id: Uuid = sqlx::query_scalar!(
             "INSERT INTO clientes (user_id, nombre, apellidos, telefono, email, empresa, \
              alergias, preferencias_bebida, preferencias_ubicacion) \
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id",
+            user_id,
+            nombre,
+            apellidos,
+            tel,
+            email,
+            empresa,
+            alergias,
+            pref_beb,
+            pref_ubi
         )
-        .bind(user_id)
-        .bind(nombre)
-        .bind(apellidos)
-        .bind(tel)
-        .bind(email)
-        .bind(empresa)
-        .bind(alergias)
-        .bind(pref_beb)
-        .bind(pref_ubi)
         .fetch_one(pool)
         .await
         .expect("Error al insertar cliente");
@@ -194,20 +194,20 @@ async fn seed_ventas(pool: &PgPool, user_id: Uuid, desde: NaiveDate, hasta: Naiv
                 .round_dp(2);
             let comensales = 1 + (idx + i) % 8;
 
-            sqlx::query(
+            sqlx::query!(
                 "INSERT INTO ventas (user_id, fecha, comensales, descripcion, iva_porcentaje, turno, canal, metodo_pago, importe_base, importe_iva) \
-                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
+                user_id,
+                fecha,
+                i32::try_from(comensales).unwrap_or(2),
+                descripciones[(idx + i) % descripciones.len()],
+                Decimal::from(10),
+                turnos[(idx + i) % turnos.len()],
+                canales[(idx + i) % canales.len()],
+                metodos[(idx + i) % metodos.len()],
+                base,
+                iva
             )
-            .bind(user_id)
-            .bind(fecha)
-            .bind(i32::try_from(comensales).unwrap_or(2))
-            .bind(descripciones[(idx + i) % descripciones.len()])
-            .bind(Decimal::from(10))
-            .bind(turnos[(idx + i) % turnos.len()])
-            .bind(canales[(idx + i) % canales.len()])
-            .bind(metodos[(idx + i) % metodos.len()])
-            .bind(base)
-            .bind(iva)
             .execute(pool)
             .await
             .expect("Error al insertar venta");
@@ -222,7 +222,7 @@ async fn seed_ventas(pool: &PgPool, user_id: Uuid, desde: NaiveDate, hasta: Naiv
 
 async fn seed_gastos(pool: &PgPool, user_id: Uuid, desde: NaiveDate, hasta: NaiveDate) {
     /* Obtener IDs de categorias existentes */
-    let categorias: Vec<Uuid> = sqlx::query_scalar("SELECT id FROM categorias_gasto ORDER BY nombre")
+    let categorias: Vec<Uuid> = sqlx::query_scalar!("SELECT id FROM categorias_gasto ORDER BY nombre")
         .fetch_all(pool)
         .await
         .unwrap_or_default();
@@ -255,20 +255,20 @@ async fn seed_gastos(pool: &PgPool, user_id: Uuid, desde: NaiveDate, hasta: Naiv
                 Some(categorias[(idx + i) % categorias.len()])
             };
 
-            sqlx::query(
+            sqlx::query!(
                 "INSERT INTO gastos (user_id, fecha, proveedor, categoria_id, tipo_documento, metodo_pago, numero_documento, recurrente, importe_base, importe_iva) \
-                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
+                user_id,
+                fecha,
+                proveedores[(idx + i) % proveedores.len()],
+                cat_id,
+                tipos[(idx + i) % tipos.len()],
+                metodos[(idx + i) % metodos.len()],
+                format!("DOC-{:04}", count + 1),
+                (idx + i).is_multiple_of(5),
+                base,
+                iva
             )
-            .bind(user_id)
-            .bind(fecha)
-            .bind(proveedores[(idx + i) % proveedores.len()])
-            .bind(cat_id)
-            .bind(tipos[(idx + i) % tipos.len()])
-            .bind(metodos[(idx + i) % metodos.len()])
-            .bind(format!("DOC-{:04}", count + 1))
-            .bind((idx + i).is_multiple_of(5))
-            .bind(base)
-            .bind(iva)
             .execute(pool)
             .await
             .expect("Error al insertar gasto");
@@ -352,24 +352,24 @@ async fn seed_reservas(
 
             let telefono = format!("6{:08}", 10_000_000 + count * 1234 + dia * 100);
 
-            sqlx::query(
+            sqlx::query!(
                 "INSERT INTO reservas (user_id, fecha, hora, nombre_cliente, apellidos_cliente, \
                  num_personas, estado, notas, telefono, canal_id, cliente_id, no_show, num_mesa) \
                  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)",
+                user_id,
+                fecha,
+                horas[i % horas.len()],
+                nombre_cli,
+                apellido_cli,
+                i32::try_from(personas).unwrap_or(2),
+                estado,
+                if i % 4 == 0 { "Mesa junto a ventana" } else { "" },
+                &telefono,
+                canal_id,
+                cliente_id,
+                no_show,
+                num_mesa
             )
-            .bind(user_id)
-            .bind(fecha)
-            .bind(horas[i % horas.len()])
-            .bind(nombre_cli)
-            .bind(apellido_cli)
-            .bind(i32::try_from(personas).unwrap_or(2))
-            .bind(estado)
-            .bind(if i % 4 == 0 { "Mesa junto a ventana" } else { "" })
-            .bind(&telefono)
-            .bind(canal_id)
-            .bind(cliente_id)
-            .bind(no_show)
-            .bind(num_mesa)
             .execute(pool)
             .await
             .expect("Error al insertar reserva pasada");
@@ -416,24 +416,24 @@ async fn seed_reservas(
 
             let telefono = format!("6{:08}", 10_000_000 + count * 1234 + dia * 100);
 
-            sqlx::query(
+            sqlx::query!(
                 "INSERT INTO reservas (user_id, fecha, hora, nombre_cliente, apellidos_cliente, \
                  num_personas, estado, notas, telefono, canal_id, cliente_id, no_show, num_mesa) \
                  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)",
+                user_id,
+                fecha,
+                horas[i % horas.len()],
+                nombre_cli,
+                apellido_cli,
+                i32::try_from(personas).unwrap_or(2),
+                estado,
+                if i % 3 == 0 { "Mesa junto a ventana" } else { "" },
+                &telefono,
+                canal_id,
+                cliente_id,
+                false,
+                num_mesa
             )
-            .bind(user_id)
-            .bind(fecha)
-            .bind(horas[i % horas.len()])
-            .bind(nombre_cli)
-            .bind(apellido_cli)
-            .bind(i32::try_from(personas).unwrap_or(2))
-            .bind(estado)
-            .bind(if i % 3 == 0 { "Mesa junto a ventana" } else { "" })
-            .bind(&telefono)
-            .bind(canal_id)
-            .bind(cliente_id)
-            .bind(false)
-            .bind(num_mesa)
             .execute(pool)
             .await
             .expect("Error al insertar reserva futura");
@@ -447,11 +447,11 @@ async fn seed_reservas(
 /* Asigna etiquetas del sistema a algunos clientes para probar el CRM */
 async fn seed_etiquetas_clientes(pool: &PgPool, user_id: Uuid, cliente_ids: &[Uuid]) {
     /* Obtener etiquetas del sistema (es_sistema = TRUE, aplica_a = 'cliente') */
-    let etiquetas: Vec<(Uuid, String)> = sqlx::query_as(
+    let etiquetas = sqlx::query!(
         "SELECT e.id, e.nombre FROM etiquetas e \
          JOIN categorias_etiqueta ce ON ce.id = e.categoria_id \
          WHERE e.es_sistema = TRUE AND ce.aplica_a = 'cliente' \
-         ORDER BY e.nombre",
+         ORDER BY e.nombre"
     )
     .fetch_all(pool)
     .await
@@ -468,15 +468,15 @@ async fn seed_etiquetas_clientes(pool: &PgPool, user_id: Uuid, cliente_ids: &[Uu
     for (ci, cliente_id) in cliente_ids.iter().enumerate() {
         let num_tags = 1 + ci % 3;
         for t in 0..num_tags {
-            let (etiqueta_id, _) = &etiquetas[(ci + t) % etiquetas.len()];
+            let etiqueta = &etiquetas[(ci + t) % etiquetas.len()];
 
             /* ON CONFLICT para evitar duplicados si se re-ejecuta */
-            let resultado = sqlx::query(
+            let resultado = sqlx::query!(
                 "INSERT INTO clientes_etiquetas (cliente_id, etiqueta_id) \
                  VALUES ($1, $2) ON CONFLICT DO NOTHING",
+                cliente_id,
+                etiqueta.id
             )
-            .bind(cliente_id)
-            .bind(etiqueta_id)
             .execute(pool)
             .await;
 
@@ -490,19 +490,20 @@ async fn seed_etiquetas_clientes(pool: &PgPool, user_id: Uuid, cliente_ids: &[Uu
     /* Tambien verificar que las etiquetas del usuario existan.
        Si no hay etiquetas propias, crear algunas del usuario demo
        para que el frontend las muestre como disponibles. */
-    let user_tags: i64 = sqlx::query_scalar(
+    let user_tags: i64 = sqlx::query_scalar!(
         "SELECT COUNT(*) FROM etiquetas WHERE user_id = $1",
+        user_id
     )
-    .bind(user_id)
     .fetch_one(pool)
     .await
+    .unwrap_or(None)
     .unwrap_or(0);
 
     if user_tags == 0 {
         /* Obtener categorias de sistema para usarlas como padre */
-        let cat_fidelizacion: Option<Uuid> = sqlx::query_scalar(
+        let cat_fidelizacion: Option<Uuid> = sqlx::query_scalar!(
             "SELECT id FROM categorias_etiqueta \
-             WHERE nombre = 'Fidelización' AND aplica_a = 'cliente' AND es_sistema = TRUE",
+             WHERE nombre = 'Fidelización' AND aplica_a = 'cliente' AND es_sistema = TRUE"
         )
         .fetch_optional(pool)
         .await
@@ -512,14 +513,14 @@ async fn seed_etiquetas_clientes(pool: &PgPool, user_id: Uuid, cliente_ids: &[Uu
             /* Crear etiquetas personalizadas del usuario sobre la categoria de sistema */
             let custom = [("Habitual fin de semana", "#2196F3"), ("Amigo del chef", "#9C27B0")];
             for (nombre, color) in &custom {
-                let _ = sqlx::query(
+                let _ = sqlx::query!(
                     "INSERT INTO etiquetas (user_id, categoria_id, nombre, color) \
                      VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING",
+                    user_id,
+                    cat_id,
+                    *nombre,
+                    *color
                 )
-                .bind(user_id)
-                .bind(cat_id)
-                .bind(*nombre)
-                .bind(*color)
                 .execute(pool)
                 .await;
             }
@@ -564,21 +565,21 @@ async fn seed_campanas(pool: &PgPool, user_id: Uuid) {
         let total_env: i32 = if *estado == "enviada" { 38 } else { 0 };
         let total_fall: i32 = if *estado == "enviada" { 4 } else { 0 };
 
-        sqlx::query(
+        sqlx::query!(
             "INSERT INTO campanas (user_id, nombre, descripcion_interna, cuerpo_mensaje, \
              canales, segmento, estado, total_destinatarios, total_enviados, total_fallidos) \
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
+            user_id,
+            *nombre,
+            *desc,
+            *mensaje,
+            &canales_arr,
+            *segmento,
+            *estado,
+            total_dest,
+            total_env,
+            total_fall
         )
-        .bind(user_id)
-        .bind(*nombre)
-        .bind(*desc)
-        .bind(*mensaje)
-        .bind(&canales_arr)
-        .bind(*segmento)
-        .bind(*estado)
-        .bind(total_dest)
-        .bind(total_env)
-        .bind(total_fall)
         .execute(pool)
         .await
         .expect("Error al insertar campaña de prueba");
@@ -621,19 +622,19 @@ async fn seed_plantillas_whatsapp(pool: &PgPool, user_id: Uuid) {
     ];
 
     for (nombre, categoria, idioma, cuerpo, estado, meta_id, razon) in &plantillas {
-        sqlx::query(
+        sqlx::query!(
             "INSERT INTO plantillas_whatsapp (user_id, nombre, categoria, idioma, cuerpo_mensaje, \
              estado, meta_template_id, meta_razon_rechazo) \
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
+            user_id,
+            *nombre,
+            *categoria,
+            *idioma,
+            *cuerpo,
+            *estado,
+            *meta_id,
+            *razon
         )
-        .bind(user_id)
-        .bind(*nombre)
-        .bind(*categoria)
-        .bind(*idioma)
-        .bind(*cuerpo)
-        .bind(*estado)
-        .bind(*meta_id)
-        .bind(*razon)
         .execute(pool)
         .await
         .expect("Error al insertar plantilla WhatsApp de prueba");
@@ -670,16 +671,16 @@ async fn seed_reglas_recordatorio(pool: &PgPool, user_id: Uuid) {
     ];
 
     for (nombre, horas_antes, canal, mensaje, activa) in &reglas {
-        sqlx::query(
+        sqlx::query!(
             "INSERT INTO reglas_recordatorio (user_id, nombre, horas_antes, canal, mensaje_plantilla, activa) \
              VALUES ($1, $2, $3, $4, $5, $6)",
+            user_id,
+            *nombre,
+            *horas_antes,
+            *canal,
+            *mensaje,
+            *activa
         )
-        .bind(user_id)
-        .bind(*nombre)
-        .bind(*horas_antes)
-        .bind(*canal)
-        .bind(*mensaje)
-        .bind(*activa)
         .execute(pool)
         .await
         .expect("Error al insertar regla de recordatorio de prueba");

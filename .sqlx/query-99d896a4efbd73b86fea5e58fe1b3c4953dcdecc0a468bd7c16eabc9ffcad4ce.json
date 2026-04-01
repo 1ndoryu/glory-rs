@@ -1,0 +1,118 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT * FROM integraciones_marketing WHERE user_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "smtp_host",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "smtp_port",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "smtp_user",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "smtp_password",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "smtp_from_email",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 7,
+        "name": "smtp_from_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 8,
+        "name": "twilio_account_sid",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 9,
+        "name": "twilio_auth_token",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 10,
+        "name": "twilio_from_number",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 11,
+        "name": "meta_waba_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 12,
+        "name": "meta_business_app_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 13,
+        "name": "meta_access_token",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 14,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 15,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 16,
+        "name": "meta_phone_number_id",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "99d896a4efbd73b86fea5e58fe1b3c4953dcdecc0a468bd7c16eabc9ffcad4ce"
+}

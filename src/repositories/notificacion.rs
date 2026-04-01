@@ -1,6 +1,6 @@
 /* [283A-20] Repositorio de notificaciones.
- * Queries runtime (no macro) porque la migración notificaciones
- * no está en el cache .sqlx offline hasta ejecutarla. */
+ * [014A-11] Convertido de query_as runtime a query_as!/query_scalar!
+ * para verificación SQL en tiempo de compilación. */
 
 use sqlx::PgPool;
 use uuid::Uuid;
@@ -19,15 +19,16 @@ impl NotificacionRepository {
         titulo: &str,
         mensaje: &str,
     ) -> Result<Notificacion, AppError> {
-        let row = sqlx::query_as::<_, Notificacion>(
+        let row = sqlx::query_as!(
+            Notificacion,
             "INSERT INTO notificaciones (user_id, tipo, titulo, mensaje)
              VALUES ($1, $2, $3, $4)
              RETURNING id, user_id, tipo, titulo, mensaje, leida, created_at",
+            user_id,
+            tipo,
+            titulo,
+            mensaje
         )
-        .bind(user_id)
-        .bind(tipo)
-        .bind(titulo)
-        .bind(mensaje)
         .fetch_one(pool)
         .await?;
 
@@ -40,15 +41,16 @@ impl NotificacionRepository {
         user_id: Uuid,
         limite: i64,
     ) -> Result<Vec<Notificacion>, AppError> {
-        let rows = sqlx::query_as::<_, Notificacion>(
+        let rows = sqlx::query_as!(
+            Notificacion,
             "SELECT id, user_id, tipo, titulo, mensaje, leida, created_at
              FROM notificaciones
              WHERE user_id = $1
              ORDER BY created_at DESC
              LIMIT $2",
+            user_id,
+            limite
         )
-        .bind(user_id)
-        .bind(limite)
         .fetch_all(pool)
         .await?;
 
@@ -57,23 +59,23 @@ impl NotificacionRepository {
 
     /// Cuenta notificaciones no leídas
     pub async fn contar_no_leidas(pool: &PgPool, user_id: Uuid) -> Result<i64, AppError> {
-        let row: (i64,) = sqlx::query_as(
+        let count = sqlx::query_scalar!(
             "SELECT COUNT(*) FROM notificaciones WHERE user_id = $1 AND leida = FALSE",
+            user_id
         )
-        .bind(user_id)
         .fetch_one(pool)
         .await?;
 
-        Ok(row.0)
+        Ok(count.unwrap_or(0))
     }
 
     /// Marca una notificación como leída
     pub async fn marcar_leida(pool: &PgPool, id: Uuid, user_id: Uuid) -> Result<(), AppError> {
-        let result = sqlx::query(
+        let result = sqlx::query!(
             "UPDATE notificaciones SET leida = TRUE WHERE id = $1 AND user_id = $2",
+            id,
+            user_id
         )
-        .bind(id)
-        .bind(user_id)
         .execute(pool)
         .await?;
 
@@ -85,10 +87,10 @@ impl NotificacionRepository {
 
     /// Marca todas las notificaciones de un usuario como leídas
     pub async fn marcar_todas_leidas(pool: &PgPool, user_id: Uuid) -> Result<u64, AppError> {
-        let result = sqlx::query(
+        let result = sqlx::query!(
             "UPDATE notificaciones SET leida = TRUE WHERE user_id = $1 AND leida = FALSE",
+            user_id
         )
-        .bind(user_id)
         .execute(pool)
         .await?;
 

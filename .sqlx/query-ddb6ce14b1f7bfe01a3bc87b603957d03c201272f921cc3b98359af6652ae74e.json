@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO recordatorios_enviados (regla_id, reserva_id, canal, estado, error_mensaje) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (regla_id, reserva_id) DO NOTHING",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Varchar",
+        "Varchar",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ddb6ce14b1f7bfe01a3bc87b603957d03c201272f921cc3b98359af6652ae74e"
+}

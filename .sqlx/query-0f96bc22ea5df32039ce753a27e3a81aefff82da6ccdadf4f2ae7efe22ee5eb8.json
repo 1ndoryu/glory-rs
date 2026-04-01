@@ -1,0 +1,119 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT * FROM plantillas_whatsapp WHERE id = $1 AND user_id = $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "nombre",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "categoria",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "idioma",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "cuerpo_mensaje",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "cabecera_texto",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 7,
+        "name": "pie_texto",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 8,
+        "name": "cabecera_media_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 9,
+        "name": "cabecera_media_tipo",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 10,
+        "name": "estado",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 11,
+        "name": "meta_template_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 12,
+        "name": "meta_razon_rechazo",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 13,
+        "name": "meta_enviada_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 14,
+        "name": "meta_respondida_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 15,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 16,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      false,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "0f96bc22ea5df32039ce753a27e3a81aefff82da6ccdadf4f2ae7efe22ee5eb8"
+}

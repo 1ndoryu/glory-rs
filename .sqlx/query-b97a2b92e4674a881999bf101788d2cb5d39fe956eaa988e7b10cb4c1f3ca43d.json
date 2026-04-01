@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXTRACT(HOUR FROM hora)::FLOAT8 as \"hora!\", COUNT(*)::BIGINT as \"total!\" FROM reservas WHERE user_id = $1 AND fecha >= $2 AND fecha <= $3 AND estado NOT IN ('cancelada') GROUP BY 1 ORDER BY 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "hora!",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 1,
+        "name": "total!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Date",
+        "Date"
+      ]
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "b97a2b92e4674a881999bf101788d2cb5d39fe956eaa988e7b10cb4c1f3ca43d"
+}

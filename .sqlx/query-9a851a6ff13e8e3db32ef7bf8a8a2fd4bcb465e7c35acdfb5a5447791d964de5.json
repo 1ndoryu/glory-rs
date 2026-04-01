@@ -1,0 +1,36 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COUNT(*)::BIGINT as \"total_reservas!\", COALESCE(SUM(num_personas), 0)::BIGINT as \"total_personas!\", COALESCE(AVG(num_personas)::FLOAT8, 0) as \"media_personas!\" FROM reservas WHERE user_id = $1 AND fecha >= $2 AND fecha <= $3 AND estado NOT IN ('cancelada')",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "total_reservas!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "total_personas!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 2,
+        "name": "media_personas!",
+        "type_info": "Float8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Date",
+        "Date"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "9a851a6ff13e8e3db32ef7bf8a8a2fd4bcb465e7c35acdfb5a5447791d964de5"
+}

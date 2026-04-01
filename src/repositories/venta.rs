@@ -19,8 +19,7 @@ pub struct NuevaVenta<'a> {
     pub importe_iva: rust_decimal::Decimal,
 }
 
-/* [283A-22] Datos para actualizar parcialmente una venta.
- * Runtime query para no depender de .sqlx cache. */
+/* [283A-22] Datos para actualizar parcialmente una venta. */
 pub struct ActualizarVentaData<'a> {
     pub id: Uuid,
     pub user_id: Uuid,
@@ -128,12 +127,14 @@ impl VentaRepository {
     }
 
     /* [283A-22] Actualizar parcialmente una venta — COALESCE mantiene valores existentes
-     * cuando el campo no se envía (None). Runtime query para no depender de .sqlx cache. */
+     * cuando el campo no se envía (None).
+     * [014A-11] Convertido a query_as! para verificación SQL en compilación. */
     pub async fn update(
         pool: &PgPool,
         data: &ActualizarVentaData<'_>,
     ) -> Result<Option<Venta>, sqlx::Error> {
-        sqlx::query_as::<_, Venta>(
+        sqlx::query_as!(
+            Venta,
             "UPDATE ventas SET \
              fecha = COALESCE($3, fecha), \
              comensales = COALESCE($4, comensales), \
@@ -147,18 +148,18 @@ impl VentaRepository {
              updated_at = NOW() \
              WHERE id = $1 AND user_id = $2 \
              RETURNING *",
+            data.id,
+            data.user_id,
+            data.fecha,
+            data.comensales,
+            data.descripcion,
+            data.iva_porcentaje,
+            data.turno,
+            data.canal,
+            data.metodo_pago,
+            data.importe_base,
+            data.importe_iva
         )
-        .bind(data.id)
-        .bind(data.user_id)
-        .bind(data.fecha)
-        .bind(data.comensales)
-        .bind(data.descripcion)
-        .bind(data.iva_porcentaje)
-        .bind(data.turno)
-        .bind(data.canal)
-        .bind(data.metodo_pago)
-        .bind(data.importe_base)
-        .bind(data.importe_iva)
         .fetch_optional(pool)
         .await
     }

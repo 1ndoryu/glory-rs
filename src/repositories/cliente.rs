@@ -95,21 +95,23 @@ impl ClienteRepository {
     }
 
     /* [014A-2] Buscar cliente existente por teléfono o email para evitar duplicados.
-     * Prioriza teléfono (más fiable), luego email. Solo busca campos no vacíos. */
+     * Prioriza teléfono (más fiable), luego email. Solo busca campos no vacíos.
+     * [014A-11] Convertido a query_as! para verificación SQL en compilación. */
     pub async fn find_by_telefono_o_email(
         pool: &PgPool,
         user_id: Uuid,
         telefono: &str,
         email: &str,
     ) -> Result<Option<Cliente>, sqlx::Error> {
-        sqlx::query_as::<_, Cliente>(
+        sqlx::query_as!(
+            Cliente,
             "SELECT * FROM clientes WHERE user_id = $1 \
              AND (($2 != '' AND telefono = $2) OR ($3 != '' AND email = $3)) \
              LIMIT 1",
+            user_id,
+            telefono,
+            email
         )
-        .bind(user_id)
-        .bind(telefono)
-        .bind(email)
         .fetch_optional(pool)
         .await
     }

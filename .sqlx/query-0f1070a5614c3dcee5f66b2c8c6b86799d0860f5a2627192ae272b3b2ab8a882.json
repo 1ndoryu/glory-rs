@@ -1,0 +1,104 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE gastos SET fecha = COALESCE($3, fecha), proveedor = COALESCE($4, proveedor), categoria_id = COALESCE($5, categoria_id), tipo_documento = COALESCE($6, tipo_documento), metodo_pago = COALESCE($7, metodo_pago), numero_documento = COALESCE($8, numero_documento), recurrente = COALESCE($9, recurrente), importe_base = COALESCE($10, importe_base), importe_iva = COALESCE($11, importe_iva), updated_at = NOW() WHERE id = $1 AND user_id = $2 RETURNING *",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "fecha",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 3,
+        "name": "proveedor",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "categoria_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 5,
+        "name": "tipo_documento",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "metodo_pago",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 7,
+        "name": "numero_documento",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 8,
+        "name": "recurrente",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 9,
+        "name": "importe_base",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 10,
+        "name": "importe_iva",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 11,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 12,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Date",
+        "Varchar",
+        "Uuid",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Bool",
+        "Numeric",
+        "Numeric"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "0f1070a5614c3dcee5f66b2c8c6b86799d0860f5a2627192ae272b3b2ab8a882"
+}

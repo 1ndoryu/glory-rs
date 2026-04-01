@@ -1,0 +1,126 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO plantillas_whatsapp (user_id, nombre, categoria, idioma, cuerpo_mensaje, cabecera_texto, pie_texto, cabecera_media_url, cabecera_media_tipo) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "nombre",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "categoria",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "idioma",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "cuerpo_mensaje",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "cabecera_texto",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 7,
+        "name": "pie_texto",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 8,
+        "name": "cabecera_media_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 9,
+        "name": "cabecera_media_tipo",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 10,
+        "name": "estado",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 11,
+        "name": "meta_template_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 12,
+        "name": "meta_razon_rechazo",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 13,
+        "name": "meta_enviada_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 14,
+        "name": "meta_respondida_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 15,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 16,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Text",
+        "Varchar",
+        "Varchar",
+        "Text",
+        "Varchar"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      false,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "361d466d8dadc2be624dac7f24028d110ca27072c6f96a59c7577f89af7af0cd"
+}

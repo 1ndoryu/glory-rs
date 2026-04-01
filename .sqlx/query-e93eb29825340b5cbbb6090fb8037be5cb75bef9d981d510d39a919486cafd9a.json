@@ -1,0 +1,36 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT CASE WHEN EXTRACT(HOUR FROM hora) >= 7 AND EXTRACT(HOUR FROM hora) < 12 THEN 'Desayuno' WHEN EXTRACT(HOUR FROM hora) >= 12 AND EXTRACT(HOUR FROM hora) < 18 THEN 'Comida' ELSE 'Cena' END as \"turno!\", COUNT(*)::BIGINT as \"total!\", COALESCE(SUM(num_personas), 0)::BIGINT as \"personas!\" FROM reservas WHERE user_id = $1 AND fecha >= $2 AND fecha <= $3 AND estado NOT IN ('cancelada') GROUP BY 1 ORDER BY 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "turno!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "total!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 2,
+        "name": "personas!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Date",
+        "Date"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "e93eb29825340b5cbbb6090fb8037be5cb75bef9d981d510d39a919486cafd9a"
+}

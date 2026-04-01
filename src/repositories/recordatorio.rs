@@ -57,17 +57,18 @@ impl RecordatorioRepository {
         user_id: Uuid,
         data: NuevaRegla,
     ) -> Result<ReglaRecordatorio, sqlx::Error> {
-        sqlx::query_as::<_, ReglaRecordatorio>(
+        sqlx::query_as!(
+            ReglaRecordatorio,
             "INSERT INTO reglas_recordatorio (user_id, nombre, horas_antes, canal, mensaje_plantilla, tipo, horas_despues) \
              VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
+            user_id,
+            &data.nombre,
+            data.horas_antes,
+            &data.canal,
+            &data.mensaje_plantilla,
+            &data.tipo,
+            data.horas_despues
         )
-        .bind(user_id)
-        .bind(&data.nombre)
-        .bind(data.horas_antes)
-        .bind(&data.canal)
-        .bind(&data.mensaje_plantilla)
-        .bind(&data.tipo)
-        .bind(data.horas_despues)
         .fetch_one(pool)
         .await
     }
@@ -77,11 +78,12 @@ impl RecordatorioRepository {
         id: Uuid,
         user_id: Uuid,
     ) -> Result<Option<ReglaRecordatorio>, sqlx::Error> {
-        sqlx::query_as::<_, ReglaRecordatorio>(
+        sqlx::query_as!(
+            ReglaRecordatorio,
             "SELECT * FROM reglas_recordatorio WHERE id = $1 AND user_id = $2",
+            id,
+            user_id
         )
-        .bind(id)
-        .bind(user_id)
         .fetch_optional(pool)
         .await
     }
@@ -94,21 +96,23 @@ impl RecordatorioRepository {
     ) -> Result<ReglasPaginadas, sqlx::Error> {
         let offset = (page - 1) * per_page;
 
-        let total: i64 = sqlx::query_scalar(
+        let total: i64 = sqlx::query_scalar!(
             "SELECT COUNT(*) FROM reglas_recordatorio WHERE user_id = $1",
+            user_id
         )
-        .bind(user_id)
         .fetch_one(pool)
-        .await?;
+        .await?
+        .unwrap_or(0);
 
-        let items = sqlx::query_as::<_, ReglaRecordatorio>(
+        let items = sqlx::query_as!(
+            ReglaRecordatorio,
             "SELECT * FROM reglas_recordatorio WHERE user_id = $1 \
              ORDER BY horas_antes ASC, created_at DESC \
              LIMIT $2 OFFSET $3",
+            user_id,
+            per_page,
+            offset
         )
-        .bind(user_id)
-        .bind(per_page)
-        .bind(offset)
         .fetch_all(pool)
         .await?;
 
@@ -121,7 +125,8 @@ impl RecordatorioRepository {
         user_id: Uuid,
         data: ActualizarReglaData,
     ) -> Result<Option<ReglaRecordatorio>, sqlx::Error> {
-        sqlx::query_as::<_, ReglaRecordatorio>(
+        sqlx::query_as!(
+            ReglaRecordatorio,
             "UPDATE reglas_recordatorio SET \
              nombre = COALESCE($3, nombre), \
              horas_antes = COALESCE($4, horas_antes), \
@@ -132,16 +137,16 @@ impl RecordatorioRepository {
              horas_despues = COALESCE($9, horas_despues), \
              updated_at = now() \
              WHERE id = $1 AND user_id = $2 RETURNING *",
+            id,
+            user_id,
+            data.nombre,
+            data.horas_antes,
+            data.canal,
+            data.mensaje_plantilla,
+            data.activa,
+            data.tipo,
+            data.horas_despues
         )
-        .bind(id)
-        .bind(user_id)
-        .bind(data.nombre)
-        .bind(data.horas_antes)
-        .bind(data.canal)
-        .bind(data.mensaje_plantilla)
-        .bind(data.activa)
-        .bind(data.tipo)
-        .bind(data.horas_despues)
         .fetch_optional(pool)
         .await
     }
@@ -151,11 +156,11 @@ impl RecordatorioRepository {
         id: Uuid,
         user_id: Uuid,
     ) -> Result<bool, sqlx::Error> {
-        let result = sqlx::query(
+        let result = sqlx::query!(
             "DELETE FROM reglas_recordatorio WHERE id = $1 AND user_id = $2",
+            id,
+            user_id
         )
-        .bind(id)
-        .bind(user_id)
         .execute(pool)
         .await?;
 
@@ -166,10 +171,12 @@ impl RecordatorioRepository {
      * Tipo "antes": reservas futuras cuya fecha+hora está dentro de [now, now + horas_antes].
      * Tipo "despues": reservas completadas cuya fecha+hora pasó hace <= horas_despues horas.
      * Excluye reservas ya notificadas (vía recordatorios_enviados). */
+    /* [014A-11] Convertido a query_as! para verificación SQL en compilación. */
     pub async fn reservas_pendientes_recordatorio(
         pool: &PgPool,
     ) -> Result<Vec<ReservaPendienteRecordatorio>, sqlx::Error> {
-        sqlx::query_as::<_, ReservaPendienteRecordatorio>(
+        sqlx::query_as!(
+            ReservaPendienteRecordatorio,
             "SELECT \
                r.id AS reserva_id, \
                rr.id AS regla_id, \
@@ -180,7 +187,7 @@ impl RecordatorioRepository {
                rr.mensaje_plantilla, \
                r.nombre_cliente, \
                r.telefono, \
-               COALESCE(c.prefijo_telefono, '+34') AS prefijo_telefono, \
+               COALESCE(c.prefijo_telefono, '+34') AS \"prefijo_telefono!\", \
                r.fecha, \
                r.hora, \
                r.user_id, \
@@ -206,7 +213,7 @@ impl RecordatorioRepository {
                    AND (r.fecha + r.hora) >= now() - (rr.horas_despues || ' hours')::interval \
                  ) \
                ) \
-             ORDER BY r.fecha ASC, r.hora ASC",
+             ORDER BY r.fecha ASC, r.hora ASC"
         )
         .fetch_all(pool)
         .await
@@ -221,16 +228,16 @@ impl RecordatorioRepository {
         estado: &str,
         error_mensaje: Option<&str>,
     ) -> Result<(), sqlx::Error> {
-        sqlx::query(
+        sqlx::query!(
             "INSERT INTO recordatorios_enviados (regla_id, reserva_id, canal, estado, error_mensaje) \
              VALUES ($1, $2, $3, $4, $5) \
              ON CONFLICT (regla_id, reserva_id) DO NOTHING",
+            regla_id,
+            reserva_id,
+            canal,
+            estado,
+            error_mensaje
         )
-        .bind(regla_id)
-        .bind(reserva_id)
-        .bind(canal)
-        .bind(estado)
-        .bind(error_mensaje)
         .execute(pool)
         .await?;
 
@@ -246,16 +253,18 @@ impl RecordatorioRepository {
     ) -> Result<(Vec<RecordatorioEnviadoDetalle>, i64), sqlx::Error> {
         let offset = (page - 1) * per_page;
 
-        let total: i64 = sqlx::query_scalar(
+        let total: i64 = sqlx::query_scalar!(
             "SELECT COUNT(*) FROM recordatorios_enviados re \
              JOIN reglas_recordatorio rr ON rr.id = re.regla_id \
              WHERE rr.user_id = $1",
+            user_id
         )
-        .bind(user_id)
         .fetch_one(pool)
-        .await?;
+        .await?
+        .unwrap_or(0);
 
-        let items = sqlx::query_as::<_, RecordatorioEnviadoDetalle>(
+        let items = sqlx::query_as!(
+            RecordatorioEnviadoDetalle,
             "SELECT \
                re.id, re.regla_id, rr.nombre AS regla_nombre, \
                re.reserva_id, r.nombre_cliente, r.fecha AS fecha_reserva, \
@@ -267,10 +276,10 @@ impl RecordatorioRepository {
              WHERE rr.user_id = $1 \
              ORDER BY re.enviado_at DESC \
              LIMIT $2 OFFSET $3",
+            user_id,
+            per_page,
+            offset
         )
-        .bind(user_id)
-        .bind(per_page)
-        .bind(offset)
         .fetch_all(pool)
         .await?;
 

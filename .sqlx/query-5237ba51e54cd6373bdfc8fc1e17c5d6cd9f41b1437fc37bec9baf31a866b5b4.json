@@ -1,0 +1,61 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO notificaciones (user_id, tipo, titulo, mensaje)\n             VALUES ($1, $2, $3, $4)\n             RETURNING id, user_id, tipo, titulo, mensaje, leida, created_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "tipo",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "titulo",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "mensaje",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "leida",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 6,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Varchar",
+        "Varchar",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "5237ba51e54cd6373bdfc8fc1e17c5d6cd9f41b1437fc37bec9baf31a866b5b4"
+}

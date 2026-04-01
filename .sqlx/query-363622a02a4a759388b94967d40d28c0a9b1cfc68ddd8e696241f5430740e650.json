@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO gastos (user_id, fecha, proveedor, categoria_id, tipo_documento, metodo_pago, numero_documento, recurrente, importe_base, importe_iva) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Date",
+        "Varchar",
+        "Uuid",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Bool",
+        "Numeric",
+        "Numeric"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "363622a02a4a759388b94967d40d28c0a9b1cfc68ddd8e696241f5430740e650"
+}

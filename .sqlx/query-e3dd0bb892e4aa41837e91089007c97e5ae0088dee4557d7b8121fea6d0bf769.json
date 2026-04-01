@@ -1,0 +1,127 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT * FROM reservas WHERE user_id = $1 AND ($4::DATE IS NULL OR fecha = $4) AND ($9::DATE IS NULL OR fecha >= $9) AND ($10::DATE IS NULL OR fecha <= $10) AND (($5::VARCHAR IS NULL AND estado != 'cancelada') OR estado = $5) AND ($6::TIME IS NULL OR hora >= $6) AND ($7::TIME IS NULL OR hora < $7) AND ($8::TEXT IS NULL OR nombre_cliente ILIKE $8 OR apellidos_cliente ILIKE $8 OR telefono ILIKE $8) ORDER BY fecha ASC, hora ASC LIMIT $2 OFFSET $3",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "fecha",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 3,
+        "name": "hora",
+        "type_info": "Time"
+      },
+      {
+        "ordinal": 4,
+        "name": "nombre_cliente",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "num_personas",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 6,
+        "name": "estado",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 7,
+        "name": "notas",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 8,
+        "name": "telefono",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 9,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 10,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 11,
+        "name": "cliente_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 12,
+        "name": "canal_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 13,
+        "name": "no_show",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 14,
+        "name": "num_mesa",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 15,
+        "name": "apellidos_cliente",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 16,
+        "name": "mesa_id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int8",
+        "Int8",
+        "Date",
+        "Varchar",
+        "Time",
+        "Time",
+        "Text",
+        "Date",
+        "Date"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      true,
+      false,
+      true
+    ]
+  },
+  "hash": "e3dd0bb892e4aa41837e91089007c97e5ae0088dee4557d7b8121fea6d0bf769"
+}

@@ -1,6 +1,8 @@
 /* [263A-13] Repositorio para el dashboard de reservas.
  * Queries SQL optimizadas para cada panel del dashboard.
- * Todas filtran por user_id y rango de fechas del mes. */
+ * Todas filtran por user_id y rango de fechas del mes.
+ * [014A-11] Convertido de query_as runtime (tuplas) a query! macro
+ * para verificación SQL en tiempo de compilación. */
 
 use chrono::NaiveDate;
 use rust_decimal::Decimal;
@@ -23,17 +25,17 @@ impl DashboardReservasRepository {
         desde: NaiveDate,
         hasta: NaiveDate,
     ) -> Result<i64, AppError> {
-        let rec = sqlx::query_scalar::<_, i64>(
+        let rec = sqlx::query_scalar!(
             "SELECT COUNT(*) FROM reservas \
              WHERE user_id = $1 AND fecha >= $2 AND fecha <= $3 \
              AND estado NOT IN ('cancelada')",
+            user_id,
+            desde,
+            hasta
         )
-        .bind(user_id)
-        .bind(desde)
-        .bind(hasta)
         .fetch_one(pool)
         .await?;
-        Ok(rec)
+        Ok(rec.unwrap_or(0))
     }
 
     /// Reservas agrupadas por dia dentro del rango
@@ -43,25 +45,25 @@ impl DashboardReservasRepository {
         desde: NaiveDate,
         hasta: NaiveDate,
     ) -> Result<Vec<AgrupacionFecha>, AppError> {
-        let rows: Vec<(NaiveDate, i64, i64)> = sqlx::query_as(
-            "SELECT fecha, COUNT(*)::BIGINT, COALESCE(SUM(num_personas), 0)::BIGINT \
+        let rows = sqlx::query!(
+            "SELECT fecha, COUNT(*)::BIGINT as \"total!\", COALESCE(SUM(num_personas), 0)::BIGINT as \"personas!\" \
              FROM reservas \
              WHERE user_id = $1 AND fecha >= $2 AND fecha <= $3 \
              AND estado NOT IN ('cancelada') \
              GROUP BY fecha ORDER BY fecha",
+            user_id,
+            desde,
+            hasta
         )
-        .bind(user_id)
-        .bind(desde)
-        .bind(hasta)
         .fetch_all(pool)
         .await?;
 
         Ok(rows
             .into_iter()
-            .map(|(f, t, p)| AgrupacionFecha {
-                fecha: f.to_string(),
-                total: t,
-                personas: p,
+            .map(|r| AgrupacionFecha {
+                fecha: r.fecha.to_string(),
+                total: r.total,
+                personas: r.personas,
             })
             .collect())
     }
@@ -73,25 +75,25 @@ impl DashboardReservasRepository {
         desde: NaiveDate,
         hasta: NaiveDate,
     ) -> Result<Vec<AgrupacionDiaSemana>, AppError> {
-        let rows: Vec<(f64, i64)> = sqlx::query_as(
-            "SELECT EXTRACT(DOW FROM fecha)::FLOAT8, COUNT(*)::BIGINT \
+        let rows = sqlx::query!(
+            "SELECT EXTRACT(DOW FROM fecha)::FLOAT8 as \"dow!\", COUNT(*)::BIGINT as \"total!\" \
              FROM reservas \
              WHERE user_id = $1 AND fecha >= $2 AND fecha <= $3 \
              AND estado NOT IN ('cancelada') \
              GROUP BY 1 ORDER BY 1",
+            user_id,
+            desde,
+            hasta
         )
-        .bind(user_id)
-        .bind(desde)
-        .bind(hasta)
         .fetch_all(pool)
         .await?;
 
         let dias = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
         Ok(rows
             .into_iter()
-            .map(|(dow, t)| AgrupacionDiaSemana {
-                dia: dias.get(dow as usize).unwrap_or(&"?").to_string(),
-                total: t,
+            .map(|r| AgrupacionDiaSemana {
+                dia: dias.get(r.dow as usize).unwrap_or(&"?").to_string(),
+                total: r.total,
             })
             .collect())
     }
@@ -104,17 +106,17 @@ impl DashboardReservasRepository {
         hasta: NaiveDate,
         total_general: i64,
     ) -> Result<Vec<AgrupacionCanal>, AppError> {
-        let rows: Vec<(String, i64)> = sqlx::query_as(
-            "SELECT COALESCE(cr.nombre, 'Sin canal'), COUNT(*)::BIGINT \
+        let rows = sqlx::query!(
+            "SELECT COALESCE(cr.nombre, 'Sin canal') as \"canal!\", COUNT(*)::BIGINT as \"total!\" \
              FROM reservas r \
              LEFT JOIN canales_reserva cr ON cr.id = r.canal_id \
              WHERE r.user_id = $1 AND r.fecha >= $2 AND r.fecha <= $3 \
              AND r.estado NOT IN ('cancelada') \
              GROUP BY cr.nombre ORDER BY 2 DESC",
+            user_id,
+            desde,
+            hasta
         )
-        .bind(user_id)
-        .bind(desde)
-        .bind(hasta)
         .fetch_all(pool)
         .await?;
 
@@ -126,10 +128,10 @@ impl DashboardReservasRepository {
 
         Ok(rows
             .into_iter()
-            .map(|(canal, total)| AgrupacionCanal {
-                canal,
-                total,
-                porcentaje: (total as f64 / divisor * 100.0 * 10.0).round() / 10.0,
+            .map(|r| AgrupacionCanal {
+                canal: r.canal,
+                total: r.total,
+                porcentaje: (r.total as f64 / divisor * 100.0 * 10.0).round() / 10.0,
             })
             .collect())
     }
@@ -141,16 +143,16 @@ impl DashboardReservasRepository {
         desde: NaiveDate,
         hasta: NaiveDate,
     ) -> Result<i64, AppError> {
-        let rec = sqlx::query_scalar::<_, i64>(
+        let rec = sqlx::query_scalar!(
             "SELECT COUNT(*) FROM clientes \
              WHERE user_id = $1 AND created_at::date >= $2 AND created_at::date <= $3",
+            user_id,
+            desde,
+            hasta
         )
-        .bind(user_id)
-        .bind(desde)
-        .bind(hasta)
         .fetch_one(pool)
         .await?;
-        Ok(rec)
+        Ok(rec.unwrap_or(0))
     }
 
     /// Datos de ocupacion: media personas, total personas, total reservas del mes
@@ -161,20 +163,20 @@ impl DashboardReservasRepository {
         hasta: NaiveDate,
     ) -> Result<(i64, i64, f64), AppError> {
         /* Retorna (total_reservas, total_personas, media_personas) */
-        let rec: (i64, i64, f64) = sqlx::query_as(
-            "SELECT COUNT(*)::BIGINT, \
-                    COALESCE(SUM(num_personas), 0)::BIGINT, \
-                    COALESCE(AVG(num_personas)::FLOAT8, 0) \
+        let rec = sqlx::query!(
+            "SELECT COUNT(*)::BIGINT as \"total_reservas!\", \
+                    COALESCE(SUM(num_personas), 0)::BIGINT as \"total_personas!\", \
+                    COALESCE(AVG(num_personas)::FLOAT8, 0) as \"media_personas!\" \
              FROM reservas \
              WHERE user_id = $1 AND fecha >= $2 AND fecha <= $3 \
              AND estado NOT IN ('cancelada')",
+            user_id,
+            desde,
+            hasta
         )
-        .bind(user_id)
-        .bind(desde)
-        .bind(hasta)
         .fetch_one(pool)
         .await?;
-        Ok(rec)
+        Ok((rec.total_reservas, rec.total_personas, rec.media_personas))
     }
 
     /// Distribucion por hora (agrupa por hora de la reserva)
@@ -184,24 +186,24 @@ impl DashboardReservasRepository {
         desde: NaiveDate,
         hasta: NaiveDate,
     ) -> Result<Vec<AgrupacionHora>, AppError> {
-        let rows: Vec<(f64, i64)> = sqlx::query_as(
-            "SELECT EXTRACT(HOUR FROM hora)::FLOAT8, COUNT(*)::BIGINT \
+        let rows = sqlx::query!(
+            "SELECT EXTRACT(HOUR FROM hora)::FLOAT8 as \"hora!\", COUNT(*)::BIGINT as \"total!\" \
              FROM reservas \
              WHERE user_id = $1 AND fecha >= $2 AND fecha <= $3 \
              AND estado NOT IN ('cancelada') \
              GROUP BY 1 ORDER BY 1",
+            user_id,
+            desde,
+            hasta
         )
-        .bind(user_id)
-        .bind(desde)
-        .bind(hasta)
         .fetch_all(pool)
         .await?;
 
         Ok(rows
             .into_iter()
-            .map(|(h, t)| AgrupacionHora {
-                hora: format!("{:02}:00", h as u32),
-                total: t,
+            .map(|r| AgrupacionHora {
+                hora: format!("{:02}:00", r.hora as u32),
+                total: r.total,
             })
             .collect())
     }
@@ -213,32 +215,32 @@ impl DashboardReservasRepository {
         desde: NaiveDate,
         hasta: NaiveDate,
     ) -> Result<Vec<AgrupacionTurno>, AppError> {
-        let rows: Vec<(String, i64, i64)> = sqlx::query_as(
+        let rows = sqlx::query!(
             "SELECT \
                CASE \
                  WHEN EXTRACT(HOUR FROM hora) >= 7 AND EXTRACT(HOUR FROM hora) < 12 THEN 'Desayuno' \
                  WHEN EXTRACT(HOUR FROM hora) >= 12 AND EXTRACT(HOUR FROM hora) < 18 THEN 'Comida' \
                  ELSE 'Cena' \
-               END, \
-               COUNT(*)::BIGINT, \
-               COALESCE(SUM(num_personas), 0)::BIGINT \
+               END as \"turno!\", \
+               COUNT(*)::BIGINT as \"total!\", \
+               COALESCE(SUM(num_personas), 0)::BIGINT as \"personas!\" \
              FROM reservas \
              WHERE user_id = $1 AND fecha >= $2 AND fecha <= $3 \
              AND estado NOT IN ('cancelada') \
              GROUP BY 1 ORDER BY 1",
+            user_id,
+            desde,
+            hasta
         )
-        .bind(user_id)
-        .bind(desde)
-        .bind(hasta)
         .fetch_all(pool)
         .await?;
 
         Ok(rows
             .into_iter()
-            .map(|(turno, total, personas)| AgrupacionTurno {
-                turno,
-                total,
-                personas,
+            .map(|r| AgrupacionTurno {
+                turno: r.turno,
+                total: r.total,
+                personas: r.personas,
             })
             .collect())
     }
@@ -250,15 +252,15 @@ impl DashboardReservasRepository {
         desde: NaiveDate,
         hasta: NaiveDate,
     ) -> Result<f64, AppError> {
-        let rec = sqlx::query_scalar::<_, f64>(
-            "SELECT COALESCE(AVG(fecha - created_at::date)::FLOAT8, 0) \
+        let rec = sqlx::query_scalar!(
+            "SELECT COALESCE(AVG(fecha - created_at::date)::FLOAT8, 0) as \"antelacion!\" \
              FROM reservas \
              WHERE user_id = $1 AND fecha >= $2 AND fecha <= $3 \
              AND estado NOT IN ('cancelada')",
+            user_id,
+            desde,
+            hasta
         )
-        .bind(user_id)
-        .bind(desde)
-        .bind(hasta)
         .fetch_one(pool)
         .await?;
         Ok(rec)
@@ -271,18 +273,18 @@ impl DashboardReservasRepository {
         desde: NaiveDate,
         hasta: NaiveDate,
     ) -> Result<(i64, i64), AppError> {
-        let rec: (i64, i64) = sqlx::query_as(
-            "SELECT COUNT(*)::BIGINT, COALESCE(SUM(num_personas), 0)::BIGINT \
+        let rec = sqlx::query!(
+            "SELECT COUNT(*)::BIGINT as \"total!\", COALESCE(SUM(num_personas), 0)::BIGINT as \"personas!\" \
              FROM reservas \
              WHERE user_id = $1 AND fecha >= $2 AND fecha <= $3 \
              AND estado NOT IN ('cancelada', 'no_show')",
+            user_id,
+            desde,
+            hasta
         )
-        .bind(user_id)
-        .bind(desde)
-        .bind(hasta)
         .fetch_one(pool)
         .await?;
-        Ok(rec)
+        Ok((rec.total, rec.personas))
     }
 
     /// Total ventas del mes (para ticket medio) — reutiliza la misma query
@@ -292,14 +294,14 @@ impl DashboardReservasRepository {
         desde: NaiveDate,
         hasta: NaiveDate,
     ) -> Result<Decimal, AppError> {
-        let rec = sqlx::query_scalar::<_, Decimal>(
-            "SELECT COALESCE(SUM(importe_base + importe_iva), 0) \
+        let rec = sqlx::query_scalar!(
+            "SELECT COALESCE(SUM(importe_base + importe_iva), 0) as \"total!\" \
              FROM ventas \
              WHERE user_id = $1 AND fecha >= $2 AND fecha <= $3",
+            user_id,
+            desde,
+            hasta
         )
-        .bind(user_id)
-        .bind(desde)
-        .bind(hasta)
         .fetch_one(pool)
         .await?;
         Ok(rec)

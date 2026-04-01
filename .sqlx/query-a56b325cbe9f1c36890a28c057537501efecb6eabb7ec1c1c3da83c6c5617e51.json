@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXTRACT(DOW FROM fecha)::FLOAT8 as \"dow!\", COUNT(*)::BIGINT as \"total!\" FROM reservas WHERE user_id = $1 AND fecha >= $2 AND fecha <= $3 AND estado NOT IN ('cancelada') GROUP BY 1 ORDER BY 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "dow!",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 1,
+        "name": "total!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Date",
+        "Date"
+      ]
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "a56b325cbe9f1c36890a28c057537501efecb6eabb7ec1c1c3da83c6c5617e51"
+}

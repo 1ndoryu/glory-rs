@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE reservas SET estado = 'cancelada', updated_at = NOW() WHERE id = $1 AND user_id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "02f7131c6d34f0df5b6cf0f72ca4489d31822f1a3b7d7819b319a86fef35ebd5"
+}

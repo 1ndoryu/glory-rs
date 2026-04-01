@@ -1,0 +1,127 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE plantillas_whatsapp SET nombre = COALESCE($3, nombre), categoria = COALESCE($4, categoria), idioma = COALESCE($5, idioma), cuerpo_mensaje = COALESCE($6, cuerpo_mensaje), cabecera_texto = COALESCE($7, cabecera_texto), pie_texto = COALESCE($8, pie_texto), cabecera_media_url = COALESCE($9, cabecera_media_url), cabecera_media_tipo = COALESCE($10, cabecera_media_tipo), updated_at = NOW() WHERE id = $1 AND user_id = $2 AND estado = 'borrador' RETURNING *",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "nombre",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "categoria",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "idioma",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "cuerpo_mensaje",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "cabecera_texto",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 7,
+        "name": "pie_texto",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 8,
+        "name": "cabecera_media_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 9,
+        "name": "cabecera_media_tipo",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 10,
+        "name": "estado",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 11,
+        "name": "meta_template_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 12,
+        "name": "meta_razon_rechazo",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 13,
+        "name": "meta_enviada_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 14,
+        "name": "meta_respondida_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 15,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 16,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Text",
+        "Varchar",
+        "Varchar",
+        "Text",
+        "Varchar"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      false,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "3d92736cdf20ed1db70221ec86313778385185c11f5308aaa1ede1f43e9e7c06"
+}

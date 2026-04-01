@@ -1,6 +1,6 @@
 /* [283A-23] Repositorio de integraciones de marketing.
  * Upsert: si no existe, crea con defaults vacios; si existe, actualiza parcialmente.
- * Runtime queries para evitar dependencia de cache .sqlx. */
+ * [014A-11] Convertido a query_as! para verificación SQL en compilación. */
 
 use sqlx::PgPool;
 use uuid::Uuid;
@@ -15,10 +15,11 @@ impl IntegracionMarketingRepository {
         pool: &PgPool,
         user_id: Uuid,
     ) -> Result<IntegracionMarketing, sqlx::Error> {
-        let existente = sqlx::query_as::<_, IntegracionMarketing>(
+        let existente = sqlx::query_as!(
+            IntegracionMarketing,
             "SELECT * FROM integraciones_marketing WHERE user_id = $1",
+            user_id
         )
-        .bind(user_id)
         .fetch_optional(pool)
         .await?;
 
@@ -27,11 +28,12 @@ impl IntegracionMarketingRepository {
         }
 
         let id = Uuid::new_v4();
-        sqlx::query_as::<_, IntegracionMarketing>(
+        sqlx::query_as!(
+            IntegracionMarketing,
             "INSERT INTO integraciones_marketing (id, user_id) VALUES ($1, $2) RETURNING *",
+            id,
+            user_id
         )
-        .bind(id)
-        .bind(user_id)
         .fetch_one(pool)
         .await
     }
@@ -42,7 +44,8 @@ impl IntegracionMarketingRepository {
         user_id: Uuid,
         req: &ActualizarIntegracionesRequest,
     ) -> Result<IntegracionMarketing, sqlx::Error> {
-        sqlx::query_as::<_, IntegracionMarketing>(
+        sqlx::query_as!(
+            IntegracionMarketing,
             r"UPDATE integraciones_marketing SET
                 smtp_host = COALESCE($2, smtp_host),
                 smtp_port = COALESCE($3, smtp_port),
@@ -59,21 +62,21 @@ impl IntegracionMarketingRepository {
                 meta_phone_number_id = COALESCE($14, meta_phone_number_id),
                 updated_at = now()
             WHERE user_id = $1 RETURNING *",
+            user_id,
+            req.smtp_host.as_deref(),
+            req.smtp_port,
+            req.smtp_user.as_deref(),
+            req.smtp_password.as_deref(),
+            req.smtp_from_email.as_deref(),
+            req.smtp_from_name.as_deref(),
+            req.twilio_account_sid.as_deref(),
+            req.twilio_auth_token.as_deref(),
+            req.twilio_from_number.as_deref(),
+            req.meta_waba_id.as_deref(),
+            req.meta_business_app_id.as_deref(),
+            req.meta_access_token.as_deref(),
+            req.meta_phone_number_id.as_deref()
         )
-        .bind(user_id)
-        .bind(&req.smtp_host)
-        .bind(req.smtp_port)
-        .bind(&req.smtp_user)
-        .bind(&req.smtp_password)
-        .bind(&req.smtp_from_email)
-        .bind(&req.smtp_from_name)
-        .bind(&req.twilio_account_sid)
-        .bind(&req.twilio_auth_token)
-        .bind(&req.twilio_from_number)
-        .bind(&req.meta_waba_id)
-        .bind(&req.meta_business_app_id)
-        .bind(&req.meta_access_token)
-        .bind(&req.meta_phone_number_id)
         .fetch_one(pool)
         .await
     }

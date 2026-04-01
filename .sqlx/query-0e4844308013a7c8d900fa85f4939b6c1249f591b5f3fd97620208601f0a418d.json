@@ -1,0 +1,84 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT re.id, re.regla_id, rr.nombre AS regla_nombre, re.reserva_id, r.nombre_cliente, r.fecha AS fecha_reserva, r.hora AS hora_reserva, re.canal, re.estado, re.enviado_at, re.error_mensaje FROM recordatorios_enviados re JOIN reglas_recordatorio rr ON rr.id = re.regla_id JOIN reservas r ON r.id = re.reserva_id WHERE rr.user_id = $1 ORDER BY re.enviado_at DESC LIMIT $2 OFFSET $3",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "regla_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "regla_nombre",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "reserva_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 4,
+        "name": "nombre_cliente",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "fecha_reserva",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 6,
+        "name": "hora_reserva",
+        "type_info": "Time"
+      },
+      {
+        "ordinal": 7,
+        "name": "canal",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 8,
+        "name": "estado",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 9,
+        "name": "enviado_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 10,
+        "name": "error_mensaje",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int8",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "0e4844308013a7c8d900fa85f4939b6c1249f591b5f3fd97620208601f0a418d"
+}

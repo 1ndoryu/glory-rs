@@ -1,0 +1,59 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, user_id, tipo, titulo, mensaje, leida, created_at\n             FROM notificaciones\n             WHERE user_id = $1\n             ORDER BY created_at DESC\n             LIMIT $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "tipo",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "titulo",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "mensaje",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "leida",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 6,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "0917a67aec3449afeb528dc287a8094fc23540d6f05cc2f1d37e1caeaa072a3d"
+}

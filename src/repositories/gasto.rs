@@ -133,12 +133,14 @@ impl GastoRepository {
     }
 
     /* [283A-22] Actualizar parcialmente un gasto — COALESCE mantiene valores existentes
-     * cuando el campo no se envía (None). Runtime query para no depender de .sqlx cache. */
+     * cuando el campo no se envía (None).
+     * [014A-11] Convertido a query_as! para verificación SQL en compilación. */
     pub async fn update(
         pool: &PgPool,
         data: &ActualizarGastoData<'_>,
     ) -> Result<Option<Gasto>, sqlx::Error> {
-        sqlx::query_as::<_, Gasto>(
+        sqlx::query_as!(
+            Gasto,
             "UPDATE gastos SET \
              fecha = COALESCE($3, fecha), \
              proveedor = COALESCE($4, proveedor), \
@@ -152,18 +154,18 @@ impl GastoRepository {
              updated_at = NOW() \
              WHERE id = $1 AND user_id = $2 \
              RETURNING *",
+            data.id,
+            data.user_id,
+            data.fecha,
+            data.proveedor,
+            data.categoria_id,
+            data.tipo_documento,
+            data.metodo_pago,
+            data.numero_documento,
+            data.recurrente,
+            data.importe_base,
+            data.importe_iva
         )
-        .bind(data.id)
-        .bind(data.user_id)
-        .bind(data.fecha)
-        .bind(data.proveedor)
-        .bind(data.categoria_id)
-        .bind(data.tipo_documento)
-        .bind(data.metodo_pago)
-        .bind(data.numero_documento)
-        .bind(data.recurrente)
-        .bind(data.importe_base)
-        .bind(data.importe_iva)
         .fetch_optional(pool)
         .await
     }

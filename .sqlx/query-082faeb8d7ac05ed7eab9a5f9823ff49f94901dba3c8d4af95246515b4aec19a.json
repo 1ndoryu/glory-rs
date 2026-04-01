@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT e.id, e.nombre FROM etiquetas e JOIN categorias_etiqueta ce ON ce.id = e.categoria_id WHERE e.es_sistema = TRUE AND ce.aplica_a = 'cliente' ORDER BY e.nombre",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "nombre",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "082faeb8d7ac05ed7eab9a5f9823ff49f94901dba3c8d4af95246515b4aec19a"
+}

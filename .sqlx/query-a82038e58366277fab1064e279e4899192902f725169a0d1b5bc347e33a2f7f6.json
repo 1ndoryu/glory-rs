@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COALESCE(cr.nombre, 'Sin canal') as \"canal!\", COUNT(*)::BIGINT as \"total!\" FROM reservas r LEFT JOIN canales_reserva cr ON cr.id = r.canal_id WHERE r.user_id = $1 AND r.fecha >= $2 AND r.fecha <= $3 AND r.estado NOT IN ('cancelada') GROUP BY cr.nombre ORDER BY 2 DESC",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "canal!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 1,
+        "name": "total!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Date",
+        "Date"
+      ]
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "a82038e58366277fab1064e279e4899192902f725169a0d1b5bc347e33a2f7f6"
+}

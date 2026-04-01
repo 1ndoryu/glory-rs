@@ -1,0 +1,36 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT fecha, COUNT(*)::BIGINT as \"total!\", COALESCE(SUM(num_personas), 0)::BIGINT as \"personas!\" FROM reservas WHERE user_id = $1 AND fecha >= $2 AND fecha <= $3 AND estado NOT IN ('cancelada') GROUP BY fecha ORDER BY fecha",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "fecha",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 1,
+        "name": "total!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 2,
+        "name": "personas!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Date",
+        "Date"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      null
+    ]
+  },
+  "hash": "3a82473414f63b73043a7c6a51bf00d7a598a319f66749f3e58473c9a7955350"
+}

@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE notificaciones SET leida = TRUE WHERE user_id = $1 AND leida = FALSE",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "db2619ffca990241a7595ab985f7894a9b64045deb0e61091cbca65c333f664f"
+}

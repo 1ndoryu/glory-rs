@@ -116,8 +116,10 @@ impl ReservaRepository {
          * para que el conteo coincida con el calendario (resumen_mensual) y el
          * conteo del Home. Si el usuario elige "cancelada" en el filtro, sí las ve.
          * [303A-15] Soporte rango de fechas (fecha_desde/fecha_hasta). Si se envía
-         * el campo `fecha` sin rango, se usa como filtro exacto (compatibilidad). */
-        let items = sqlx::query_as::<_, Reserva>(
+         * el campo `fecha` sin rango, se usa como filtro exacto (compatibilidad).
+         * [014A-11] Convertido a query_as! para verificación SQL en compilación. */
+        let items = sqlx::query_as!(
+            Reserva,
             "SELECT * FROM reservas WHERE user_id = $1 \
              AND ($4::DATE IS NULL OR fecha = $4) \
              AND ($9::DATE IS NULL OR fecha >= $9) \
@@ -130,21 +132,21 @@ impl ReservaRepository {
                   OR apellidos_cliente ILIKE $8 \
                   OR telefono ILIKE $8) \
              ORDER BY fecha ASC, hora ASC LIMIT $2 OFFSET $3",
+            filtros.user_id,
+            filtros.per_page,
+            offset,
+            filtros.fecha,
+            filtros.estado.as_deref(),
+            filtros.hora_desde,
+            filtros.hora_hasta,
+            patron.as_deref(),
+            filtros.fecha_desde,
+            filtros.fecha_hasta
         )
-        .bind(filtros.user_id)
-        .bind(filtros.per_page)
-        .bind(offset)
-        .bind(filtros.fecha)
-        .bind(filtros.estado.as_deref())
-        .bind(filtros.hora_desde)
-        .bind(filtros.hora_hasta)
-        .bind(patron.as_deref())
-        .bind(filtros.fecha_desde)
-        .bind(filtros.fecha_hasta)
         .fetch_all(pool)
         .await?;
 
-        let rec: (Option<i64>,) = sqlx::query_as(
+        let rec = sqlx::query_scalar!(
             "SELECT COUNT(*) FROM reservas WHERE user_id = $1 \
              AND ($2::DATE IS NULL OR fecha = $2) \
              AND ($7::DATE IS NULL OR fecha >= $7) \
@@ -156,19 +158,19 @@ impl ReservaRepository {
                   OR nombre_cliente ILIKE $6 \
                   OR apellidos_cliente ILIKE $6 \
                   OR telefono ILIKE $6)",
+            filtros.user_id,
+            filtros.fecha,
+            filtros.estado.as_deref(),
+            filtros.hora_desde,
+            filtros.hora_hasta,
+            patron.as_deref(),
+            filtros.fecha_desde,
+            filtros.fecha_hasta
         )
-        .bind(filtros.user_id)
-        .bind(filtros.fecha)
-        .bind(filtros.estado.as_deref())
-        .bind(filtros.hora_desde)
-        .bind(filtros.hora_hasta)
-        .bind(patron.as_deref())
-        .bind(filtros.fecha_desde)
-        .bind(filtros.fecha_hasta)
         .fetch_one(pool)
         .await?;
 
-        Ok((items, rec.0.unwrap_or(0)))
+        Ok((items, rec.unwrap_or(0)))
     }
 
     pub async fn update(
@@ -330,8 +332,8 @@ impl ReservaRepository {
         .await
     }
 
-    /* [283A-2] Métodos para el chatbot — usan queries runtime porque
-     * las entradas de cache offline .sqlx/ se generan con cargo sqlx prepare. */
+    /* [283A-2] Métodos para el chatbot.
+     * [014A-11] Convertido a query_as! para verificación SQL en compilación. */
 
     /// [303A-4] Lista reservas que ocupan sitio para una fecha dada.
     /// Excluye canceladas, completadas y `no_show` — usada para disponibilidad
@@ -341,14 +343,15 @@ impl ReservaRepository {
         user_id: Uuid,
         fecha: NaiveDate,
     ) -> Result<Vec<Reserva>, sqlx::Error> {
-        sqlx::query_as::<_, Reserva>(
+        sqlx::query_as!(
+            Reserva,
             "SELECT * FROM reservas \
              WHERE user_id = $1 AND fecha = $2 \
              AND estado NOT IN ('cancelada', 'completada', 'no_show') \
              ORDER BY hora ASC",
+            user_id,
+            fecha
         )
-        .bind(user_id)
-        .bind(fecha)
         .fetch_all(pool)
         .await
     }
@@ -359,12 +362,12 @@ impl ReservaRepository {
         id: Uuid,
         user_id: Uuid,
     ) -> Result<bool, sqlx::Error> {
-        let result = sqlx::query(
+        let result = sqlx::query!(
             "UPDATE reservas SET estado = 'cancelada', updated_at = NOW() \
              WHERE id = $1 AND user_id = $2",
+            id,
+            user_id
         )
-        .bind(id)
-        .bind(user_id)
         .execute(pool)
         .await?;
 

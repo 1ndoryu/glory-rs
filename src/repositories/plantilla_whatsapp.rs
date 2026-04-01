@@ -33,32 +33,34 @@ pub struct PlantillaRepository;
 
 impl PlantillaRepository {
     pub async fn create(pool: &PgPool, p: NuevaPlantilla) -> Result<PlantillaWhatsapp, sqlx::Error> {
-        sqlx::query_as::<_, PlantillaWhatsapp>(
+        sqlx::query_as!(
+            PlantillaWhatsapp,
             "INSERT INTO plantillas_whatsapp \
              (user_id, nombre, categoria, idioma, cuerpo_mensaje, cabecera_texto, \
               pie_texto, cabecera_media_url, cabecera_media_tipo) \
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) \
              RETURNING *",
+            p.user_id,
+            &p.nombre,
+            &p.categoria,
+            &p.idioma,
+            &p.cuerpo_mensaje,
+            p.cabecera_texto.as_deref(),
+            p.pie_texto.as_deref(),
+            p.cabecera_media_url.as_deref(),
+            p.cabecera_media_tipo.as_deref()
         )
-        .bind(p.user_id)
-        .bind(&p.nombre)
-        .bind(&p.categoria)
-        .bind(&p.idioma)
-        .bind(&p.cuerpo_mensaje)
-        .bind(&p.cabecera_texto)
-        .bind(&p.pie_texto)
-        .bind(&p.cabecera_media_url)
-        .bind(&p.cabecera_media_tipo)
         .fetch_one(pool)
         .await
     }
 
     pub async fn find_by_id(pool: &PgPool, id: Uuid, user_id: Uuid) -> Result<Option<PlantillaWhatsapp>, sqlx::Error> {
-        sqlx::query_as::<_, PlantillaWhatsapp>(
+        sqlx::query_as!(
+            PlantillaWhatsapp,
             "SELECT * FROM plantillas_whatsapp WHERE id = $1 AND user_id = $2",
+            id,
+            user_id
         )
-        .bind(id)
-        .bind(user_id)
         .fetch_optional(pool)
         .await
     }
@@ -73,45 +75,49 @@ impl PlantillaRepository {
         let offset = (page - 1) * per_page;
 
         let (items, total) = if let Some(est) = estado {
-            let items = sqlx::query_as::<_, PlantillaWhatsapp>(
+            let items = sqlx::query_as!(
+                PlantillaWhatsapp,
                 "SELECT * FROM plantillas_whatsapp \
                  WHERE user_id = $1 AND estado = $2 \
                  ORDER BY created_at DESC LIMIT $3 OFFSET $4",
+                user_id,
+                est,
+                per_page,
+                offset
             )
-            .bind(user_id)
-            .bind(est)
-            .bind(per_page)
-            .bind(offset)
             .fetch_all(pool)
             .await?;
 
-            let total: i64 = sqlx::query_scalar(
+            let total: i64 = sqlx::query_scalar!(
                 "SELECT COUNT(*) FROM plantillas_whatsapp WHERE user_id = $1 AND estado = $2",
+                user_id,
+                est
             )
-            .bind(user_id)
-            .bind(est)
             .fetch_one(pool)
-            .await?;
+            .await?
+            .unwrap_or(0);
 
             (items, total)
         } else {
-            let items = sqlx::query_as::<_, PlantillaWhatsapp>(
+            let items = sqlx::query_as!(
+                PlantillaWhatsapp,
                 "SELECT * FROM plantillas_whatsapp \
                  WHERE user_id = $1 \
                  ORDER BY created_at DESC LIMIT $2 OFFSET $3",
+                user_id,
+                per_page,
+                offset
             )
-            .bind(user_id)
-            .bind(per_page)
-            .bind(offset)
             .fetch_all(pool)
             .await?;
 
-            let total: i64 = sqlx::query_scalar(
+            let total: i64 = sqlx::query_scalar!(
                 "SELECT COUNT(*) FROM plantillas_whatsapp WHERE user_id = $1",
+                user_id
             )
-            .bind(user_id)
             .fetch_one(pool)
-            .await?;
+            .await?
+            .unwrap_or(0);
 
             (items, total)
         };
@@ -125,7 +131,8 @@ impl PlantillaRepository {
         user_id: Uuid,
         data: ActualizarPlantillaData,
     ) -> Result<Option<PlantillaWhatsapp>, sqlx::Error> {
-        sqlx::query_as::<_, PlantillaWhatsapp>(
+        sqlx::query_as!(
+            PlantillaWhatsapp,
             "UPDATE plantillas_whatsapp SET \
              nombre = COALESCE($3, nombre), \
              categoria = COALESCE($4, categoria), \
@@ -138,27 +145,27 @@ impl PlantillaRepository {
              updated_at = NOW() \
              WHERE id = $1 AND user_id = $2 AND estado = 'borrador' \
              RETURNING *",
+            id,
+            user_id,
+            data.nombre.as_deref(),
+            data.categoria.as_deref(),
+            data.idioma.as_deref(),
+            data.cuerpo_mensaje.as_deref(),
+            data.cabecera_texto.as_deref(),
+            data.pie_texto.as_deref(),
+            data.cabecera_media_url.as_deref(),
+            data.cabecera_media_tipo.as_deref()
         )
-        .bind(id)
-        .bind(user_id)
-        .bind(&data.nombre)
-        .bind(&data.categoria)
-        .bind(&data.idioma)
-        .bind(&data.cuerpo_mensaje)
-        .bind(&data.cabecera_texto)
-        .bind(&data.pie_texto)
-        .bind(&data.cabecera_media_url)
-        .bind(&data.cabecera_media_tipo)
         .fetch_optional(pool)
         .await
     }
 
     pub async fn delete(pool: &PgPool, id: Uuid, user_id: Uuid) -> Result<bool, sqlx::Error> {
-        let result = sqlx::query(
+        let result = sqlx::query!(
             "DELETE FROM plantillas_whatsapp WHERE id = $1 AND user_id = $2",
+            id,
+            user_id
         )
-        .bind(id)
-        .bind(user_id)
         .execute(pool)
         .await?;
         Ok(result.rows_affected() > 0)
@@ -171,7 +178,8 @@ impl PlantillaRepository {
         user_id: Uuid,
         meta_template_id: &str,
     ) -> Result<Option<PlantillaWhatsapp>, sqlx::Error> {
-        sqlx::query_as::<_, PlantillaWhatsapp>(
+        sqlx::query_as!(
+            PlantillaWhatsapp,
             "UPDATE plantillas_whatsapp SET \
              estado = 'enviada', \
              meta_template_id = $3, \
@@ -179,10 +187,10 @@ impl PlantillaRepository {
              updated_at = NOW() \
              WHERE id = $1 AND user_id = $2 AND estado = 'borrador' \
              RETURNING *",
+            id,
+            user_id,
+            meta_template_id
         )
-        .bind(id)
-        .bind(user_id)
-        .bind(meta_template_id)
         .fetch_optional(pool)
         .await
     }
@@ -195,7 +203,8 @@ impl PlantillaRepository {
         razon_rechazo: Option<&str>,
     ) -> Result<Option<PlantillaWhatsapp>, sqlx::Error> {
         let estado = if aprobada { "aprobada" } else { "rechazada" };
-        sqlx::query_as::<_, PlantillaWhatsapp>(
+        sqlx::query_as!(
+            PlantillaWhatsapp,
             "UPDATE plantillas_whatsapp SET \
              estado = $2, \
              meta_razon_rechazo = $3, \
@@ -203,10 +212,10 @@ impl PlantillaRepository {
              updated_at = NOW() \
              WHERE id = $1 AND estado = 'enviada' \
              RETURNING *",
+            id,
+            estado,
+            razon_rechazo
         )
-        .bind(id)
-        .bind(estado)
-        .bind(razon_rechazo)
         .fetch_optional(pool)
         .await
     }
