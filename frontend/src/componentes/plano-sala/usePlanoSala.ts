@@ -1,14 +1,18 @@
 /* [263A-14] Hook con lógica de negocio del plano de sala.
  * [263A-28] Reemplazados prompt/confirm/alert nativos por estado React + toast.
+ * [014A-13] Tras cada mutación se invalidate también /api/plano-sala/ocupacion
+ * para que PlanoOcupacion (reservas) refleje cambios en tiempo real.
  * Los diálogos se renderizan en PlanoSala.tsx usando shadcn Dialog. */
 
 import { useState, useCallback, useRef, type RefObject } from 'react';
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
+import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import axios from '@/api/axios-instance';
 import { useZoomStore } from '../../stores/zoomStore';
 import {
   useObtenerPlano,
+  getObtenerOcupacionQueryKey,
   ActualizarMesaRequest,
   ActualizarPosicionesRequest,
   CrearCombinacionRequest,
@@ -51,8 +55,16 @@ export interface DialogoCombinacion {
 export function usePlanoSala(
   canvasRef: RefObject<HTMLDivElement | null>,
 ) {
+  const queryClient = useQueryClient();
   const { data, refetch } = useObtenerPlano();
   const plano = data?.status === 200 ? data.data : null;
+
+  /* [014A-13] Invalida tanto /api/plano-sala como /api/plano-sala/ocupacion
+   * para que PlanoOcupacion (reservas) refleje cambios de mesas al instante. */
+  const refetchPlano = useCallback(async () => {
+    await refetch();
+    queryClient.invalidateQueries({ queryKey: getObtenerOcupacionQueryKey() });
+  }, [refetch, queryClient]);
 
   const [zonaActiva, setZonaActiva] = useState<string | null>(null);
   const [mesaSeleccionada, setMesaSeleccionada] = useState<Mesa | null>(null);
@@ -93,7 +105,7 @@ export function usePlanoSala(
       titulo: 'Nueva zona', label: 'Nombre de la zona', valorInicial: '', tipo: 'text',
       onConfirmar: async (nombre) => {
         await crearZona({ nombre } as CrearZonaRequest);
-        refetch();
+        refetchPlano();
       },
     });
   };
@@ -107,7 +119,7 @@ export function usePlanoSala(
         await eliminarZona(zonaActiva);
         setZonaActiva(null);
         setMesaSeleccionada(null);
-        refetch();
+        refetchPlano();
       },
     });
   };
@@ -118,7 +130,7 @@ export function usePlanoSala(
       titulo: 'Renombrar zona', label: 'Nuevo nombre', valorInicial: zonaData.nombre, tipo: 'text',
       onConfirmar: async (nombre) => {
         await actualizarZonaApi(zonaActiva, { nombre } as ActualizarZonaRequest);
-        refetch();
+        refetchPlano();
       },
     });
   };
@@ -134,7 +146,7 @@ export function usePlanoSala(
         if (Number.isNaN(numero) || numero < 1) return;
         try {
           await crearMesa({ zona_id: zonaActiva, numero, pos_x: pos?.x ?? 50, pos_y: pos?.y ?? 50 } as CrearMesaRequest);
-          refetch();
+          refetchPlano();
         } catch (err: unknown) {
           const axiosErr = err as { response?: { data?: { message?: string } } };
           toast.error(axiosErr?.response?.data?.message || 'Error al crear mesa');
@@ -153,7 +165,7 @@ export function usePlanoSala(
     }
     await actualizarMesaApi(id, req);
     setMesaSeleccionada(null);
-    refetch();
+    refetchPlano();
   };
 
   const handleResizeMesa = async (id: string, req: ActualizarMesaRequest) => {
@@ -173,7 +185,7 @@ export function usePlanoSala(
 
     try {
       await actualizarMesaApi(id, req);
-      refetch();
+      refetchPlano();
     } catch {
       setPosicionesLocales((prev) => {
         const next = { ...prev };
@@ -197,7 +209,7 @@ export function usePlanoSala(
       onConfirmar: async () => {
         await eliminarMesaApi(id);
         setMesaSeleccionada(null);
-        refetch();
+        refetchPlano();
       },
     });
   };
@@ -228,12 +240,12 @@ export function usePlanoSala(
     };
     try {
       await actualizarPosiciones(req);
-      refetch();
+      refetchPlano();
     } catch {
       setPosicionesLocales((p) => ({ ...p, [mesaId]: { x: prev?.x ?? mesa.pos_x, y: prev?.y ?? mesa.pos_y } }));
       toast.error('No se pudo guardar la posición');
     }
-  }, [mesasZona, posicionesLocales, zonaData, canvasRef, zoom, refetch]);
+  }, [mesasZona, posicionesLocales, zonaData, canvasRef, zoom, refetchPlano]);
 
   /* [303A-2] Migrado de raw fetch a axios para usar interceptors JWT/401 */
   const handleExportar = async () => {
@@ -270,7 +282,7 @@ export function usePlanoSala(
             archivoImportRef.current = null;
             setZonaActiva(null);
             setMesaSeleccionada(null);
-            refetch();
+            refetchPlano();
           },
         });
       } catch { toast.error('Error al importar: archivo inválido'); }
@@ -284,7 +296,7 @@ export function usePlanoSala(
       onConfirmar: async (nombre, maxPersonas, mesaIds) => {
         try {
           await crearCombinacion({ nombre, max_personas: maxPersonas, mesa_ids: mesaIds } as CrearCombinacionRequest);
-          refetch();
+          refetchPlano();
         } catch {
           toast.error('Error al crear combinación');
         }
@@ -298,7 +310,7 @@ export function usePlanoSala(
       mensaje: '¿Eliminar esta combinación?',
       onConfirmar: async () => {
         await eliminarCombinacion(id);
-        refetch();
+        refetchPlano();
       },
     });
   };

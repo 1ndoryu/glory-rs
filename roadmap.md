@@ -151,3 +151,7 @@ Tarea Final. ~~Actualiza el despliege con coolify-manager-rs~~ → 283A-33
 ~~2. Creo (no estoy segura pero igual aclaro) que hay cosas que no entediste sobre lo que dijo el cliente, la primera es que se refería a que algunos tooltip dentro del plano se cortaban, dentro del plano en reservas, y que las mesas no ese pueden redimencionar cuando estan muy movidas a la derecha, o sea, si una mesa esta cerca de la izquierda, esta se puede redimencionar de cualquier forma pero si esta al final a la derecha esta no puede redimencionar o alargar a la derecha, o sea, muy problemente el plano lo impida por el limite pero ni siquiera cuando esta cerca del limite simplemente si esta muy a la derecha suceda.~~ → 014A-10
 
 ~~3. Sube los cambios al servidor.~~ → 014A-12
+
+4. ~~PlanoOcupacion (reservas) no se actualiza en tiempo real cuando se editan mesas en PlanoSala.~~ → 014A-13
+5. Redactar mensaje al cliente respondiendo dudas de Data V. → 014A-14
+6. Subir cambios al servidor. → 014A-15
