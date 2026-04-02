@@ -39,6 +39,7 @@ function ListaReservas() {
     reservas,
     isLoading,
     eliminarMutation,
+    actualizarMutation,
     cerrarModalYRefrescar,
     porPagina,
   } = useVistaReservas();
@@ -134,10 +135,27 @@ function ListaReservas() {
                     <TableCell>{r.nombre_cliente}</TableCell>
                     <TableCell className="max-w-32 truncate">{r.apellidos_cliente || '—'}</TableCell>
                     <TableCell>{r.num_personas}</TableCell>
+                    {/* [024A-2] Select inline para cambiar estado directamente desde la lista */}
                     <TableCell>
-                      <Badge variant={VARIANTE_ESTADO[r.estado] ?? 'outline'}>
-                        {ETIQUETA_ESTADO[r.estado] ?? r.estado}
-                      </Badge>
+                      <Select
+                        value={r.estado}
+                        onValueChange={(nuevoEstado) => {
+                          if (nuevoEstado !== r.estado) {
+                            actualizarMutation.mutate({ id: r.id, data: { estado: nuevoEstado as 'pendiente' | 'confirmada' | 'cancelada' | 'completada' | 'no_show' | 'lista_espera' } });
+                          }
+                        }}
+                      >
+                        <SelectTrigger className="h-7 w-auto min-w-28 border-0 bg-transparent px-1">
+                          <Badge variant={VARIANTE_ESTADO[r.estado] ?? 'outline'}>
+                            {ETIQUETA_ESTADO[r.estado] ?? r.estado}
+                          </Badge>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Object.entries(ETIQUETA_ESTADO).map(([valor, etiqueta]) => (
+                            <SelectItem key={valor} value={valor}>{etiqueta}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </TableCell>
                     <TableCell>{r.telefono || '—'}</TableCell>
                     <TableCell>

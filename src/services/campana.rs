@@ -17,6 +17,7 @@ use crate::repositories::campana::{
 use crate::models::IntegracionMarketing;
 use crate::repositories::CampanaRepository;
 use crate::repositories::IntegracionMarketingRepository;
+use crate::repositories::plantilla_whatsapp::PlantillaRepository;
 use crate::services::email::EmailService;
 
 pub struct CampanaService;
@@ -31,6 +32,11 @@ impl CampanaService {
         let segmento = req.segmento.as_deref().unwrap_or("todos");
         Self::validar_segmento(segmento)?;
 
+        /* [024A-1] Si canal incluye 'whatsapp', validar plantilla aprobada */
+        if req.canales.iter().any(|c| c == "whatsapp") {
+            Self::validar_plantilla_whatsapp(pool, user_id, req.plantilla_whatsapp_id).await?;
+        }
+
         let data = NuevaCampana {
             user_id,
             nombre: &req.nombre,
@@ -40,6 +46,7 @@ impl CampanaService {
             segmento,
             incluir_baja: req.incluir_baja.unwrap_or(false),
             telefono_baja: req.telefono_baja.as_deref().unwrap_or(""),
+            plantilla_whatsapp_id: req.plantilla_whatsapp_id,
         };
 
         let campana = CampanaRepository::create(pool, &data).await?;
@@ -93,6 +100,7 @@ impl CampanaService {
             segmento: req.segmento.as_deref(),
             incluir_baja: req.incluir_baja,
             telefono_baja: req.telefono_baja.as_deref(),
+            plantilla_whatsapp_id: req.plantilla_whatsapp_id,
         };
 
         CampanaRepository::update(pool, &data)
@@ -227,6 +235,30 @@ impl CampanaService {
         }
         Ok(())
     }
+
+    /* [024A-1] Validar que la plantilla existe, pertenece al usuario y está aprobada por Meta */
+    async fn validar_plantilla_whatsapp(
+        pool: &PgPool,
+        user_id: Uuid,
+        plantilla_id: Option<Uuid>,
+    ) -> Result<(), AppError> {
+        let id = plantilla_id.ok_or_else(|| {
+            AppError::Validation(
+                "Se requiere seleccionar una plantilla aprobada por Meta para enviar por WhatsApp".into(),
+            )
+        })?;
+        let plantilla = PlantillaRepository::find_by_id(pool, id, user_id)
+            .await
+            .map_err(AppError::Database)?
+            .ok_or_else(|| AppError::NotFound("Plantilla WhatsApp no encontrada".into()))?;
+        if plantilla.estado != "aprobada" {
+            return Err(AppError::Validation(format!(
+                "La plantilla '{}' no está aprobada por Meta (estado actual: {}). Solo se pueden usar plantillas aprobadas para WhatsApp.",
+                plantilla.nombre, plantilla.estado
+            )));
+        }
+        Ok(())
+    }
 }
 
 use crate::services::meta_whatsapp::MetaWhatsappService;
@@ -235,7 +267,8 @@ use crate::services::twilio::TwilioService;
 /* [283A-23] Función libre que envía la campaña por cada canal configurado.
  * Extraída de `enviar()` para cumplir el límite de líneas de clippy.
  * Email via SMTP, SMS via Twilio, `WhatsApp` via Meta Cloud API.
- * [303A-1] Retorna (enviados, fallidos) y actualiza estado de cada destinatario. */
+ * [303A-1] Retorna (enviados, fallidos) y actualiza estado de cada destinatario.
+ * [024A-1] WhatsApp usa Template Message API cuando hay plantilla asociada. */
 async fn enviar_por_canales(
     pool: &PgPool,
     campana_id: Uuid,
@@ -245,6 +278,19 @@ async fn enviar_por_canales(
 ) -> (u32, u32) {
     let mut enviados = 0u32;
     let mut errores = 0u32;
+
+    /* [024A-1] Si hay plantilla WhatsApp, cargar nombre e idioma para template API */
+    let plantilla_info = if let Some(pid) = campana.plantilla_whatsapp_id {
+        crate::repositories::plantilla_whatsapp::PlantillaRepository::find_by_id(
+            pool, pid, campana.user_id,
+        )
+        .await
+        .ok()
+        .flatten()
+        .map(|p| (p.nombre, p.idioma))
+    } else {
+        None
+    };
 
     for cliente in clientes {
         for canal in &campana.canales {
@@ -260,11 +306,19 @@ async fn enviar_por_canales(
                         .await
                         .map_err(|e| e.to_string())
                 }
+                /* [024A-1] WhatsApp: si hay plantilla aprobada usa template API,
+                 * si no, fallback a texto libre (ej: dentro de ventana 24h). */
                 "whatsapp" if cliente.consentimiento_comercial_sms && !cliente.telefono.is_empty() => {
                     let numero = format!("{}{}", cliente.prefijo_telefono, cliente.telefono);
-                    MetaWhatsappService::enviar_mensaje(integ, &numero, &campana.cuerpo_mensaje)
-                        .await
-                        .map_err(|e| e.to_string())
+                    if let Some((ref nombre_tpl, ref idioma_tpl)) = plantilla_info {
+                        MetaWhatsappService::enviar_template(integ, &numero, nombre_tpl, idioma_tpl)
+                            .await
+                            .map_err(|e| e.to_string())
+                    } else {
+                        MetaWhatsappService::enviar_mensaje(integ, &numero, &campana.cuerpo_mensaje)
+                            .await
+                            .map_err(|e| e.to_string())
+                    }
                 }
                 _ => continue,
             };

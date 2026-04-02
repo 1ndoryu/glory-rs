@@ -1,16 +1,17 @@
 /* [263A-23] Hook para formulario de creación de campañas.
- * Maneja estado del form, contador SMS, preview de segmento y envío. */
+ * Maneja estado del form, contador SMS, preview de segmento y envío.
+ * [024A-1] WhatsApp re-habilitado, pero requiere selección de plantilla aprobada. */
 
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useCrearCampana, usePreviewSegmento } from '../api/generated';
+import { useCrearCampana, usePreviewSegmento, useListarPlantillas } from '../api/generated';
 
 const SEGMENTOS_VALIDOS = [
   'habitual', 'sin_1m', 'sin_3m', 'sin_6m', 'sin_9m', 'sin_1a', 'sin_mas_1a', 'todos',
 ] as const;
 
-/* [014A-5] WhatsApp retirado del selector de canales de campaña por decisión del cliente */
-const CANALES_VALIDOS = ['sms', 'email'] as const;
+/* [024A-1] WhatsApp re-habilitado — el backend valida que tenga plantilla aprobada */
+const CANALES_VALIDOS = ['sms', 'email', 'whatsapp'] as const;
 
 /* Caracteres GSM especiales que ocupan 2 posiciones en SMS */
 const CHARS_DOBLES = new Set('|^€{}[]~\\');
@@ -33,6 +34,8 @@ export function useFormularioCampana() {
   const [incluirBaja, setIncluirBaja] = useState(false);
   const [telefonoBaja, setTelefonoBaja] = useState('');
   const [enviando, setEnviando] = useState(false);
+  /* [024A-1] Plantilla WhatsApp — solo necesaria si el canal whatsapp está activo */
+  const [plantillaWhatsappId, setPlantillaWhatsappId] = useState<string | null>(null);
 
   const crearMutation = useCrearCampana();
 
@@ -43,6 +46,14 @@ export function useFormularioCampana() {
     { query: { enabled: previewHabilitado } },
   );
   const preview = previewData?.data ?? null;
+
+  /* [024A-1] Cargar plantillas aprobadas solo si WhatsApp está seleccionado */
+  const tieneWhatsapp = canales.has('whatsapp');
+  const { data: plantillasData } = useListarPlantillas(
+    { estado: 'aprobada', per_page: 50 },
+    { query: { enabled: tieneWhatsapp } },
+  );
+  const plantillasAprobadas = plantillasData?.data?.items ?? [];
 
   /* Contador SMS: max 160, si incluir_baja reservar 17 chars para "\nNo: XXXXXXX" */
   const tieneSms = canales.has('sms');
@@ -61,7 +72,9 @@ export function useFormularioCampana() {
   const formValido =
     nombre.trim().length > 0 &&
     canales.size > 0 &&
-    (!tieneSms || caracteresSms <= maxSms);
+    (!tieneSms || caracteresSms <= maxSms) &&
+    /* [024A-1] Si WhatsApp activo, exigir plantilla seleccionada */
+    (!tieneWhatsapp || plantillaWhatsappId !== null);
 
   const crearCampana = async () => {
     if (!formValido || enviando) return;
@@ -76,6 +89,8 @@ export function useFormularioCampana() {
           cuerpo_mensaje: cuerpoMensaje.trim() || null,
           incluir_baja: incluirBaja || null,
           telefono_baja: incluirBaja ? telefonoBaja.trim() || null : null,
+          /* [024A-1] Solo enviar plantilla si WhatsApp activo */
+          plantilla_whatsapp_id: tieneWhatsapp ? plantillaWhatsappId : null,
         },
       });
       navigate('/marketing/campanas');
@@ -93,6 +108,8 @@ export function useFormularioCampana() {
     incluirBaja, setIncluirBaja,
     telefonoBaja, setTelefonoBaja,
     tieneSms, maxSms, caracteresSms,
+    tieneWhatsapp, plantillaWhatsappId, setPlantillaWhatsappId,
+    plantillasAprobadas,
     preview, previewLoading, previewHabilitado,
     formValido, enviando,
     crearCampana,

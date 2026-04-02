@@ -16,6 +16,8 @@ pub struct NuevaCampana<'a> {
     pub segmento: &'a str,
     pub incluir_baja: bool,
     pub telefono_baja: &'a str,
+    /* [024A-1] Plantilla WhatsApp aprobada para envío por template API */
+    pub plantilla_whatsapp_id: Option<Uuid>,
 }
 
 pub struct ActualizarCampanaData<'a> {
@@ -28,6 +30,8 @@ pub struct ActualizarCampanaData<'a> {
     pub segmento: Option<&'a str>,
     pub incluir_baja: Option<bool>,
     pub telefono_baja: Option<&'a str>,
+    /* [024A-1] Plantilla WhatsApp aprobada para envío por template API */
+    pub plantilla_whatsapp_id: Option<Uuid>,
 }
 
 pub struct CampanaRepository;
@@ -38,8 +42,8 @@ impl CampanaRepository {
         sqlx::query_as!(
             Campana,
             "INSERT INTO campanas (id, user_id, nombre, descripcion_interna, cuerpo_mensaje, \
-             canales, segmento, incluir_baja, telefono_baja) \
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) \
+             canales, segmento, incluir_baja, telefono_baja, plantilla_whatsapp_id) \
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) \
              RETURNING *",
             id,
             data.user_id,
@@ -49,7 +53,8 @@ impl CampanaRepository {
             data.canales,
             data.segmento,
             data.incluir_baja,
-            data.telefono_baja
+            data.telefono_baja,
+            data.plantilla_whatsapp_id
         )
         .fetch_one(pool)
         .await
@@ -120,6 +125,7 @@ impl CampanaRepository {
              segmento = COALESCE($7, segmento), \
              incluir_baja = COALESCE($8, incluir_baja), \
              telefono_baja = COALESCE($9, telefono_baja), \
+             plantilla_whatsapp_id = COALESCE($10, plantilla_whatsapp_id), \
              updated_at = NOW() \
              WHERE id = $1 AND user_id = $2 AND estado = 'borrador' \
              RETURNING *",
@@ -131,7 +137,8 @@ impl CampanaRepository {
             data.canales as Option<&[String]>,
             data.segmento,
             data.incluir_baja,
-            data.telefono_baja
+            data.telefono_baja,
+            data.plantilla_whatsapp_id
         )
         .fetch_optional(pool)
         .await

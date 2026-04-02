@@ -77,6 +77,11 @@
         "ordinal": 14,
         "name": "updated_at",
         "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 15,
+        "name": "plantilla_whatsapp_id",
+        "type_info": "Uuid"
       }
     ],
     "parameters": {
@@ -104,7 +109,8 @@
       false,
       false,
       false,
-      false
+      false,
+      true
     ]
   },
   "hash": "0d641834efe8727402f537a6849ef202597f93b01452e4010e37043099985fd6"

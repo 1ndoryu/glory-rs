@@ -17,6 +17,8 @@ export interface ActualizarCampanaRequest {
   /** @nullable */
   nombre?: string | null;
   /** @nullable */
+  plantilla_whatsapp_id?: string | null;
+  /** @nullable */
   segmento?: string | null;
   /** @nullable */
   telefono_baja?: string | null;
@@ -231,6 +233,8 @@ export interface Campana {
   id: string;
   incluir_baja: boolean;
   nombre: string;
+  /** @nullable */
+  plantilla_whatsapp_id?: string | null;
   segmento: string;
   telefono_baja: string;
   total_destinatarios: number;
@@ -401,6 +405,8 @@ export interface CrearCampanaRequest {
   /** @nullable */
   incluir_baja?: boolean | null;
   nombre: string;
+  /** @nullable */
+  plantilla_whatsapp_id?: string | null;
   /** @nullable */
   segmento?: string | null;
   /** @nullable */

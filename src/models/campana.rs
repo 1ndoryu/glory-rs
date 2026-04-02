@@ -25,6 +25,8 @@ pub struct Campana {
     pub total_destinatarios: i32,
     pub total_enviados: i32,
     pub total_fallidos: i32,
+    /* [024A-1] Plantilla WhatsApp aprobada por Meta para envío por template API */
+    pub plantilla_whatsapp_id: Option<Uuid>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -45,6 +47,8 @@ pub struct CrearCampanaRequest {
     pub segmento: Option<String>,
     pub incluir_baja: Option<bool>,
     pub telefono_baja: Option<String>,
+    /* [024A-1] Plantilla aprobada requerida si canal incluye 'whatsapp' */
+    pub plantilla_whatsapp_id: Option<Uuid>,
 }
 
 /* Request para actualizar una campaña */
@@ -59,6 +63,8 @@ pub struct ActualizarCampanaRequest {
     pub segmento: Option<String>,
     pub incluir_baja: Option<bool>,
     pub telefono_baja: Option<String>,
+    /* [024A-1] Plantilla aprobada requerida si canal incluye 'whatsapp' */
+    pub plantilla_whatsapp_id: Option<Uuid>,
 }
 
 /* Respuesta paginada de campañas */

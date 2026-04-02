@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "INSERT INTO campanas (id, user_id, nombre, descripcion_interna, cuerpo_mensaje, canales, segmento, incluir_baja, telefono_baja) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *",
+  "query": "INSERT INTO campanas (id, user_id, nombre, descripcion_interna, cuerpo_mensaje, canales, segmento, incluir_baja, telefono_baja, plantilla_whatsapp_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *",
   "describe": {
     "columns": [
       {
@@ -77,6 +77,11 @@
         "ordinal": 14,
         "name": "updated_at",
         "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 15,
+        "name": "plantilla_whatsapp_id",
+        "type_info": "Uuid"
       }
     ],
     "parameters": {
@@ -89,7 +94,8 @@
         "TextArray",
         "Varchar",
         "Bool",
-        "Varchar"
+        "Varchar",
+        "Uuid"
       ]
     },
     "nullable": [
@@ -107,8 +113,9 @@
       false,
       false,
       false,
-      false
+      false,
+      true
     ]
   },
-  "hash": "7ed92d80c16ccf02e66aa06e7c57f51a7b55c6c76dc7983add818517d40b6fe7"
+  "hash": "95d6a140f1776851ec33b778e27da9cab86064696b8acf505c3a90251607f7e1"
 }

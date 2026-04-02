@@ -1,12 +1,20 @@
 /* 263A-6: Hook para vista de reservas por día.
    Maneja filtros (fecha, turno, estado), paginación y modal.
    Lee ?fecha= de la URL cuando se navega desde el calendario.
-   303A-15: Soporte rango de fechas (fecha_desde/fecha_hasta). */
+   303A-15: Soporte rango de fechas (fecha_desde/fecha_hasta).
+   [024A-2] Actualizar estado inline desde la lista.
+   [024A-3] Invalidar TODAS las queries de reservas tras mutaciones (no solo la actual). */
 
 import { useState, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { useListarReservas, useEliminarReserva, getObtenerOcupacionQueryKey } from '../api/generated';
+import {
+  useListarReservas,
+  useEliminarReserva,
+  useActualizarReserva,
+  getObtenerOcupacionQueryKey,
+  getListarReservasQueryKey,
+} from '../api/generated';
 
 interface FiltrosReservas {
   fecha: string;
@@ -38,7 +46,7 @@ function useVistaReservas() {
    * Si no, se usa fecha exacta (compatibilidad con vista día). */
   const usaRango = !!filtros.fechaHasta;
 
-  const { data, isLoading, refetch } = useListarReservas({
+  const { data, isLoading } = useListarReservas({
     page: filtros.pagina,
     per_page: POR_PAGINA,
     fecha: usaRango ? undefined : (filtros.fecha || undefined),
@@ -49,12 +57,28 @@ function useVistaReservas() {
     busqueda: filtros.busqueda || undefined,
   });
 
+  /* [024A-3] Invalidar TODAS las variantes de queries de reservas y ocupación.
+   * Antes solo se usaba refetch() que refrescaba la query actual, dejando stale
+   * las demás combinaciones de filtros (ej: cambiar de cena → día completo). */
+  const invalidarReservas = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: getListarReservasQueryKey() });
+    queryClient.invalidateQueries({ queryKey: getObtenerOcupacionQueryKey() });
+  }, [queryClient]);
+
   const eliminarMutation = useEliminarReserva({
     mutation: {
       onSuccess: () => {
-        refetch();
-        /* [313A-8] Invalidar plano de ocupación al eliminar reserva */
-        queryClient.invalidateQueries({ queryKey: getObtenerOcupacionQueryKey() });
+        /* [024A-3] Usar invalidación amplia en vez de refetch puntual */
+        invalidarReservas();
+      },
+    },
+  });
+
+  /* [024A-2] Mutation para cambiar estado inline desde la lista */
+  const actualizarMutation = useActualizarReserva({
+    mutation: {
+      onSuccess: () => {
+        invalidarReservas();
       },
     },
   });
@@ -69,12 +93,11 @@ function useVistaReservas() {
   }, []);
 
   /* [313A-8] Al cerrar modal de nueva reserva, refrescar lista Y plano de ocupación.
-   * Sin invalidar ocupación, las mesas no reflejaban la reserva recién creada. */
+   * [024A-3] Usar invalidación amplia para todas las variantes de query. */
   const cerrarModalYRefrescar = useCallback(() => {
     setModalAbierto(false);
-    refetch();
-    queryClient.invalidateQueries({ queryKey: getObtenerOcupacionQueryKey() });
-  }, [refetch, queryClient]);
+    invalidarReservas();
+  }, [invalidarReservas]);
 
   return {
     filtros,
@@ -83,8 +106,8 @@ function useVistaReservas() {
     setModalAbierto,
     reservas,
     isLoading,
-    refetch,
     eliminarMutation,
+    actualizarMutation,
     cerrarModalYRefrescar,
     porPagina: POR_PAGINA,
   };

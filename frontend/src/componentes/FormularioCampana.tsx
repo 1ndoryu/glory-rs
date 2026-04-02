@@ -23,8 +23,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Users, Mail, Phone } from 'lucide-react';
+import { Users, Mail, Phone, MessageSquare } from 'lucide-react';
 
+/* [024A-1] WhatsApp re-habilitado con selector de plantilla aprobada */
 const ETIQUETAS_SEGMENTO: Record<string, string> = {
   habitual: 'Habituales',
   sin_1m: 'Sin venir 1 mes',
@@ -36,10 +37,11 @@ const ETIQUETAS_SEGMENTO: Record<string, string> = {
   todos: 'Todos los clientes',
 };
 
-/* [014A-5] WhatsApp removido del selector por decisión del cliente */
+/* [024A-1] WhatsApp añadido con icono MessageSquare */
 const ETIQUETAS_CANAL: Record<string, { label: string; icon: React.ReactNode }> = {
   sms: { label: 'SMS', icon: <Phone className="size-4" /> },
   email: { label: 'Email', icon: <Mail className="size-4" /> },
+  whatsapp: { label: 'WhatsApp', icon: <MessageSquare className="size-4" /> },
 };
 
 export default function FormularioCampana() {
@@ -106,6 +108,37 @@ export default function FormularioCampana() {
               );
             })}
           </div>
+          {/* [024A-1] Selector de plantilla WhatsApp aprobada */}
+          {f.tieneWhatsapp && (
+            <div className="mt-4 space-y-2">
+              <Label>Plantilla WhatsApp aprobada *</Label>
+              {f.plantillasAprobadas.length === 0 ? (
+                <p className="text-destructive text-sm">
+                  No hay plantillas aprobadas. Crea y envía una plantilla a Meta primero.
+                </p>
+              ) : (
+                <Select
+                  value={f.plantillaWhatsappId ?? '__none__'}
+                  onValueChange={v => f.setPlantillaWhatsappId(v === '__none__' ? null : v)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar plantilla" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">Seleccionar plantilla</SelectItem>
+                    {f.plantillasAprobadas.map(p => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.nombre} ({p.idioma})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+              <p className="text-muted-foreground text-xs">
+                WhatsApp solo permite enviar mensajes usando plantillas aprobadas por Meta.
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
 

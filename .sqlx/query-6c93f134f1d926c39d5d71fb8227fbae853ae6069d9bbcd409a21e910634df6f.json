@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "UPDATE campanas SET nombre = COALESCE($3, nombre), descripcion_interna = COALESCE($4, descripcion_interna), cuerpo_mensaje = COALESCE($5, cuerpo_mensaje), canales = COALESCE($6, canales), segmento = COALESCE($7, segmento), incluir_baja = COALESCE($8, incluir_baja), telefono_baja = COALESCE($9, telefono_baja), updated_at = NOW() WHERE id = $1 AND user_id = $2 AND estado = 'borrador' RETURNING *",
+  "query": "UPDATE campanas SET nombre = COALESCE($3, nombre), descripcion_interna = COALESCE($4, descripcion_interna), cuerpo_mensaje = COALESCE($5, cuerpo_mensaje), canales = COALESCE($6, canales), segmento = COALESCE($7, segmento), incluir_baja = COALESCE($8, incluir_baja), telefono_baja = COALESCE($9, telefono_baja), plantilla_whatsapp_id = COALESCE($10, plantilla_whatsapp_id), updated_at = NOW() WHERE id = $1 AND user_id = $2 AND estado = 'borrador' RETURNING *",
   "describe": {
     "columns": [
       {
@@ -77,6 +77,11 @@
         "ordinal": 14,
         "name": "updated_at",
         "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 15,
+        "name": "plantilla_whatsapp_id",
+        "type_info": "Uuid"
       }
     ],
     "parameters": {
@@ -89,7 +94,8 @@
         "TextArray",
         "Varchar",
         "Bool",
-        "Varchar"
+        "Varchar",
+        "Uuid"
       ]
     },
     "nullable": [
@@ -107,8 +113,9 @@
       false,
       false,
       false,
-      false
+      false,
+      true
     ]
   },
-  "hash": "bc13595e14a88aacfb0b79afb53cf5e36d81e3db58bc80b4cabcfbb2c062825f"
+  "hash": "6c93f134f1d926c39d5d71fb8227fbae853ae6069d9bbcd409a21e910634df6f"
 }
