@@ -114,6 +114,19 @@ Cada lección debe ser concisa y accionable.
 **Solución:** Cambiar `{id}` a `:id` en todas las llamadas `.route()`. Las anotaciones `#[utoipa::path]` mantienen `{id}` (sintaxis OpenAPI).
 **Prevención:** No copiar la sintaxis de utoipa a los `.route()`. Agregar test que haga GET/DELETE por ID en CI.
 
+## 2026-04-02 — SQLx offline: cambiar .sqlx cache no dispara recompilación
+
+**Problema:** Cambiar solo el JSON en `.sqlx/` (nullable flag) no regenera el binario — cargo no trackea `.sqlx/` como dependencia.
+**Causa raíz:** `query_as!` macro usa `include_str!` implícito al `.sqlx/` en compile-time; pero cargo mira timestamps de .rs, no de .sqlx.
+**Solución:** Usar type override `"column?"` en la query SQL del .rs para forzar nullable. Esto cambia el .rs → cargo recompila.
+**Prevención:** Para LEFT JOIN nullable, siempre usar `AS "col?"` en lugar de confiar en el cache.
+
+## 2026-04-02 — useMutation: siempre onError con toast en acciones de usuario
+
+**Problema:** `mutateAsync` sin try/catch causa "Uncaught (in promise)" en consola. Reportado ya en 024A-6 y repetido en 024A-9.
+**Solución:** Usar `mutate` (no `mutateAsync`) + `onError` con `toast.error()` + helper `extraerMensajeError()`.
+**Prevención:** Patrón obligatorio para todo useMutation con acción de usuario visible.
+
 ## 2026-03-26 — LEFT JOIN + NULL en SQLx: unexpected null
 
 **Problema:** Query con LEFT JOIN producía `cr.nombre = NULL` para filas sin relación, causando 500 "unexpected null; try decoding as an Option" en SQLx.
