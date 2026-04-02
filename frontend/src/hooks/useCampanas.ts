@@ -1,14 +1,22 @@
 /* [263A-23] Hook para gestión de campañas de marketing.
- * Maneja creación, envío y navegación a formulario. */
+ * Maneja creación, envío y navegación a formulario.
+ * [024A-9] Toast de error con mensaje del backend al enviar campaña. */
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import {
   useListarCampanas,
   useCrearCampana,
   useEliminarCampana,
   useEnviarCampana,
 } from '../api/generated';
+
+/* [024A-9] Extrae el mensaje de error del backend */
+function extraerMensajeError(err: unknown): string {
+  const axiosErr = err as { response?: { data?: { message?: string } } };
+  return axiosErr?.response?.data?.message || 'Error al enviar campaña';
+}
 
 export function useCampanas() {
   const [page, setPage] = useState(1);
@@ -29,7 +37,15 @@ export function useCampanas() {
   });
 
   const enviarMutation = useEnviarCampana({
-    mutation: { onSuccess: () => { refetch(); } },
+    mutation: {
+      onSuccess: () => {
+        toast.success('Campaña enviada');
+        refetch();
+      },
+      onError: (err: unknown) => {
+        toast.error(extraerMensajeError(err));
+      },
+    },
   });
 
   const campanas = data?.data?.items ?? [];
@@ -47,7 +63,8 @@ export function useCampanas() {
     setFiltroEstado,
     crearCampana: crearMutation.mutateAsync,
     eliminarCampana: eliminarMutation.mutateAsync,
-    enviarCampana: enviarMutation.mutateAsync,
+    /* [024A-9] mutate en vez de mutateAsync para que onError maneje sin exception */
+    enviarCampana: enviarMutation.mutate,
     irANuevaCampana: () => navigate('/marketing/campanas/nueva'),
     refetch,
   };

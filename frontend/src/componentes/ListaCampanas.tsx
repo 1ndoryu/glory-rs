@@ -71,9 +71,9 @@ export default function ListaCampanas() {
     await eliminarCampana({ id });
   };
 
-  const handleEnviar = async (c: Campana) => {
+  const handleEnviar = (c: Campana) => {
     if (c.estado !== 'borrador') return;
-    await enviarCampana({ id: c.id });
+    enviarCampana({ id: c.id });
   };
 
   return (
