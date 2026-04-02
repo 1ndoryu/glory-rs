@@ -191,7 +191,7 @@ impl RecordatorioRepository {
                r.fecha, \
                r.hora, \
                r.user_id, \
-               c.email AS email_cliente \
+               c.email AS \"email_cliente?\" \
              FROM reglas_recordatorio rr \
              JOIN reservas r ON r.user_id = rr.user_id \
              LEFT JOIN clientes c ON c.id = r.cliente_id \

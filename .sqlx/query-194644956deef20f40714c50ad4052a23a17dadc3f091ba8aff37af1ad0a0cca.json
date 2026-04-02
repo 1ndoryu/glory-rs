@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT r.id AS reserva_id, rr.id AS regla_id, rr.canal, rr.horas_antes, rr.horas_despues, rr.tipo, rr.mensaje_plantilla, r.nombre_cliente, r.telefono, COALESCE(c.prefijo_telefono, '+34') AS \"prefijo_telefono!\", r.fecha, r.hora, r.user_id, c.email AS email_cliente FROM reglas_recordatorio rr JOIN reservas r ON r.user_id = rr.user_id LEFT JOIN clientes c ON c.id = r.cliente_id WHERE rr.activa = true AND NOT EXISTS ( SELECT 1 FROM recordatorios_enviados re WHERE re.regla_id = rr.id AND re.reserva_id = r.id ) AND ( (rr.tipo = 'antes' AND r.estado IN ('pendiente', 'confirmada', 'lista_espera') AND (r.fecha + r.hora) > now() AND (r.fecha + r.hora) <= now() + (rr.horas_antes || ' hours')::interval ) OR (rr.tipo = 'despues' AND r.estado = 'completada' AND (r.fecha + r.hora) < now() AND (r.fecha + r.hora) >= now() - (rr.horas_despues || ' hours')::interval ) ) ORDER BY r.fecha ASC, r.hora ASC",
+  "query": "SELECT r.id AS reserva_id, rr.id AS regla_id, rr.canal, rr.horas_antes, rr.horas_despues, rr.tipo, rr.mensaje_plantilla, r.nombre_cliente, r.telefono, COALESCE(c.prefijo_telefono, '+34') AS \"prefijo_telefono!\", r.fecha, r.hora, r.user_id, c.email AS \"email_cliente?\" FROM reglas_recordatorio rr JOIN reservas r ON r.user_id = rr.user_id LEFT JOIN clientes c ON c.id = r.cliente_id WHERE rr.activa = true AND NOT EXISTS ( SELECT 1 FROM recordatorios_enviados re WHERE re.regla_id = rr.id AND re.reserva_id = r.id ) AND ( (rr.tipo = 'antes' AND r.estado IN ('pendiente', 'confirmada', 'lista_espera') AND (r.fecha + r.hora) > now() AND (r.fecha + r.hora) <= now() + (rr.horas_antes || ' hours')::interval ) OR (rr.tipo = 'despues' AND r.estado = 'completada' AND (r.fecha + r.hora) < now() AND (r.fecha + r.hora) >= now() - (rr.horas_despues || ' hours')::interval ) ) ORDER BY r.fecha ASC, r.hora ASC",
   "describe": {
     "columns": [
       {
@@ -70,7 +70,7 @@
       },
       {
         "ordinal": 13,
-        "name": "email_cliente",
+        "name": "email_cliente?",
         "type_info": "Varchar"
       }
     ],
@@ -94,5 +94,5 @@
       true
     ]
   },
-  "hash": "a8062f8a829190871e768ba44c6f7ae1f6b8310224b8aba00cddc8cfc4857cc2"
+  "hash": "194644956deef20f40714c50ad4052a23a17dadc3f091ba8aff37af1ad0a0cca"
 }
