@@ -1,5 +1,6 @@
 /* [263A-16] Lista de reservas — reescrita con shadcn Table + Dialog + Badge.
- * Filtros con shadcn Input y select nativo. Plano de ocupación integrado. */
+ * Filtros con shadcn Input y select nativo. Plano de ocupación integrado.
+ * [024A-10] Estado usa DropdownMenu en vez de Select para evitar confusión visual. */
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -7,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Trash2, Pencil } from 'lucide-react';
 import FormularioReserva from './FormularioReserva';
 import PlanoOcupacion from './PlanoOcupacion';
@@ -145,27 +147,35 @@ function ListaReservas() {
                     <TableCell>{r.nombre_cliente}</TableCell>
                     <TableCell className="max-w-32 truncate">{r.apellidos_cliente || '—'}</TableCell>
                     <TableCell>{r.num_personas}</TableCell>
-                    {/* [024A-2] Select inline para cambiar estado directamente desde la lista */}
+                    {/* [024A-10] DropdownMenu para cambiar estado — reemplaza Select+Badge
+                     * que generaba confusión visual (parecía badge decorativo). */}
                     <TableCell>
-                      <Select
-                        value={r.estado}
-                        onValueChange={(nuevoEstado) => {
-                          if (nuevoEstado !== r.estado) {
-                            actualizarMutation.mutate({ id: r.id, data: { estado: nuevoEstado as 'pendiente' | 'confirmada' | 'cancelada' | 'completada' | 'no_show' | 'lista_espera' } });
-                          }
-                        }}
-                      >
-                        <SelectTrigger className="h-7 w-auto min-w-28 border-0 bg-transparent px-1">
-                          <Badge variant={VARIANTE_ESTADO[r.estado] ?? 'outline'}>
-                            {ETIQUETA_ESTADO[r.estado] ?? r.estado}
-                          </Badge>
-                        </SelectTrigger>
-                        <SelectContent>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button type="button" className="cursor-pointer">
+                            <Badge variant={VARIANTE_ESTADO[r.estado] ?? 'outline'}>
+                              {ETIQUETA_ESTADO[r.estado] ?? r.estado} ▾
+                            </Badge>
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start">
                           {Object.entries(ETIQUETA_ESTADO).map(([valor, etiqueta]) => (
-                            <SelectItem key={valor} value={valor}>{etiqueta}</SelectItem>
+                            <DropdownMenuItem
+                              key={valor}
+                              disabled={valor === r.estado}
+                              onSelect={() => {
+                                if (valor !== r.estado) {
+                                  actualizarMutation.mutate({ id: r.id, data: { estado: valor as 'pendiente' | 'confirmada' | 'cancelada' | 'completada' | 'no_show' | 'lista_espera' } });
+                                }
+                              }}
+                            >
+                              <Badge variant={VARIANTE_ESTADO[valor] ?? 'outline'} className="pointer-events-none">
+                                {etiqueta}
+                              </Badge>
+                            </DropdownMenuItem>
                           ))}
-                        </SelectContent>
-                      </Select>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
                     <TableCell>{r.telefono || '—'}</TableCell>
                     <TableCell>
