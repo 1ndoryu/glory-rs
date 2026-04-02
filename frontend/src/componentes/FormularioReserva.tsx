@@ -1,6 +1,7 @@
-/* [263A-16] Formulario de reserva — reescrito con shadcn Input + Button + Label + Textarea. */
+/* [263A-16] Formulario de reserva — reescrito con shadcn Input + Button + Label + Textarea.
+ * [024A-5] Soporte dual crear/editar: si se pasa reserva, pre-rellena y usa PUT. */
 
-import { EstadoReserva } from '../api/generated';
+import { EstadoReserva, Reserva } from '../api/generated';
 import useFormularioReserva from '../hooks/useFormularioReserva';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,10 +11,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 interface Props {
   onExito?: () => void;
+  reserva?: Reserva;
 }
 
-function FormularioReserva({ onExito }: Props) {
-  const { campos, cambiarCampo, error, manejarEnvio, cargando, mesasDisponibles } = useFormularioReserva(onExito);
+function FormularioReserva({ onExito, reserva }: Props) {
+  const { campos, cambiarCampo, error, manejarEnvio, cargando, mesasDisponibles, esEdicion } = useFormularioReserva(onExito, reserva);
 
   return (
     <div>
@@ -76,6 +78,7 @@ function FormularioReserva({ onExito }: Props) {
                 <SelectItem value={EstadoReserva.pendiente}>Pendiente</SelectItem>
                 <SelectItem value={EstadoReserva.confirmada}>Confirmada</SelectItem>
                 <SelectItem value={EstadoReserva.lista_espera}>Lista de espera</SelectItem>
+                <SelectItem value={EstadoReserva.completada}>Completada</SelectItem>
                 <SelectItem value={EstadoReserva.cancelada}>Cancelada</SelectItem>
               </SelectContent>
             </Select>
@@ -88,7 +91,7 @@ function FormularioReserva({ onExito }: Props) {
         </div>
 
         <Button type="submit" className="w-full" disabled={cargando}>
-          {cargando ? 'Creando...' : 'Crear Reserva'}
+          {cargando ? (esEdicion ? 'Guardando...' : 'Creando...') : (esEdicion ? 'Guardar Cambios' : 'Crear Reserva')}
         </Button>
       </form>
     </div>

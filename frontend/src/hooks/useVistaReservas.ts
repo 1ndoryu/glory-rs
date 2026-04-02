@@ -3,7 +3,8 @@
    Lee ?fecha= de la URL cuando se navega desde el calendario.
    303A-15: Soporte rango de fechas (fecha_desde/fecha_hasta).
    [024A-2] Actualizar estado inline desde la lista.
-   [024A-3] Invalidar TODAS las queries de reservas tras mutaciones (no solo la actual). */
+   [024A-3] Invalidar TODAS las queries de reservas tras mutaciones (no solo la actual).
+   [024A-5] Modal de edición con reserva seleccionada. */
 
 import { useState, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
@@ -14,6 +15,7 @@ import {
   useActualizarReserva,
   getObtenerOcupacionQueryKey,
   getListarReservasQueryKey,
+  Reserva,
 } from '../api/generated';
 
 interface FiltrosReservas {
@@ -41,6 +43,8 @@ function useVistaReservas() {
     pagina: 1,
   });
   const [modalAbierto, setModalAbierto] = useState(false);
+  /* [024A-5] Reserva seleccionada para edición en modal */
+  const [reservaEditando, setReservaEditando] = useState<Reserva | null>(null);
 
   /* [303A-15] Si fechaHasta tiene valor, se usa rango (fecha_desde/fecha_hasta).
    * Si no, se usa fecha exacta (compatibilidad con vista día). */
@@ -96,8 +100,15 @@ function useVistaReservas() {
    * [024A-3] Usar invalidación amplia para todas las variantes de query. */
   const cerrarModalYRefrescar = useCallback(() => {
     setModalAbierto(false);
+    setReservaEditando(null);
     invalidarReservas();
   }, [invalidarReservas]);
+
+  /* [024A-5] Abrir modal de edición con la reserva seleccionada */
+  const abrirEdicion = useCallback((reserva: Reserva) => {
+    setReservaEditando(reserva);
+    setModalAbierto(true);
+  }, []);
 
   return {
     filtros,
@@ -110,6 +121,8 @@ function useVistaReservas() {
     actualizarMutation,
     cerrarModalYRefrescar,
     porPagina: POR_PAGINA,
+    reservaEditando,
+    abrirEdicion,
   };
 }
 

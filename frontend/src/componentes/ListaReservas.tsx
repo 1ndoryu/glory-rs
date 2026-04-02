@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Pencil } from 'lucide-react';
 import FormularioReserva from './FormularioReserva';
 import PlanoOcupacion from './PlanoOcupacion';
 import useVistaReservas from '../hooks/useVistaReservas';
@@ -42,6 +42,8 @@ function ListaReservas() {
     actualizarMutation,
     cerrarModalYRefrescar,
     porPagina,
+    reservaEditando,
+    abrirEdicion,
   } = useVistaReservas();
 
   return (
@@ -98,12 +100,20 @@ function ListaReservas() {
         </Select>
       </div>
 
-      <Dialog open={modalAbierto} onOpenChange={setModalAbierto}>
+      <Dialog open={modalAbierto} onOpenChange={(open) => {
+        setModalAbierto(open);
+        if (!open) cerrarModalYRefrescar();
+      }}>
         <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Nueva Reserva</DialogTitle>
+            <DialogTitle>{reservaEditando ? 'Editar Reserva' : 'Nueva Reserva'}</DialogTitle>
           </DialogHeader>
-          <FormularioReserva onExito={cerrarModalYRefrescar} />
+          {/* [024A-5] key fuerza remount al cambiar de reserva o al crear nueva */}
+          <FormularioReserva
+            key={reservaEditando?.id ?? 'nueva'}
+            onExito={cerrarModalYRefrescar}
+            reserva={reservaEditando ?? undefined}
+          />
         </DialogContent>
       </Dialog>
 
@@ -159,14 +169,26 @@ function ListaReservas() {
                     </TableCell>
                     <TableCell>{r.telefono || '—'}</TableCell>
                     <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => eliminarMutation.mutate({ id: r.id })}
-                        disabled={eliminarMutation.isPending}
-                      >
-                        <Trash2 className="size-4 text-destructive" />
-                      </Button>
+                      <div className="flex items-center gap-1">
+                        {/* [024A-5] Botón para editar todos los campos de la reserva */}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => abrirEdicion(r)}
+                          title="Editar reserva"
+                        >
+                          <Pencil className="size-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => eliminarMutation.mutate({ id: r.id })}
+                          disabled={eliminarMutation.isPending}
+                          title="Eliminar reserva"
+                        >
+                          <Trash2 className="size-4 text-destructive" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
