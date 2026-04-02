@@ -120,6 +120,7 @@ Cada lección debe ser concisa y accionable.
 **Causa raíz:** `canal_nombre` en la query no tenía `?` override y el struct tenía `Option<String>`, pero la cache `.sqlx` marcaba la columna como `nullable: false` (heredado de la definición de tabla, no del JOIN). En runtime con datos reales, NULL causaba error de decodificación.
 **Solución:** `COALESCE(cr.nombre, 'Sin canal')` garantiza non-null. También agregar todos los campos no-agregados al GROUP BY.
 **Prevención:** Siempre usar COALESCE en LEFT JOINs o el override `as "col?"` en SQLx para columnas que pueden ser NULL.
+**Recurrencia (2026-04-02, 024A-4):** Mismo problema con `c.email AS email_cliente` en scheduler de recordatorios. El struct ya tenía `Option<String>` pero el `.sqlx` cache decía `nullable: false`. Fix: cambiar nullable flag directamente en `.sqlx/query-*.json`. Alternativa: usar `AS "email_cliente?"` (override con `?`). Lección: SQLx offline NUNCA infiere nullable correctamente desde LEFT JOINs — siempre verificar manualmente.
 
 ## 2026-03-30 — SQLx offline cache (.sqlx/) debe regenerarse tras cambios en queries
 
@@ -158,3 +159,10 @@ Cada lección debe ser concisa y accionable.
 - `Option<String>` params necesitan `.as_deref()` para pasar como `Option<&str>`
 - Queries dinámicas (SQL en variable, loops sobre arrays de SQL) NO se pueden convertir — dejar como `query(sql)`
 - `.bind()` desaparece: los params van directamente como argumentos del macro `query!("SQL", param1, param2)`
+
+## 2026-04-02 — React Query mutateAsync re-lanza errores aunque exista onError
+
+**Problema:** `enviarAMeta` en ListaPlantillas usaba `mutateAsync` con `await`, causando "Uncaught (in promise) AxiosError" en consola aunque la mutation tenía `onError`.
+**Causa raíz:** `mutateAsync` SIEMPRE re-lanza el error como excepción — `onError` se ejecuta pero NO suprime la excepción. Si el caller hace `await mutateAsync(...)` sin try-catch, el error es "unhandled".
+**Solución:** Usar `mutate` (fire-and-forget) cuando el caller no necesita manejar el resultado. Los errores se manejan exclusivamente en `onError`.
+**Prevención:** Usar `mutateAsync` SOLO cuando se necesita `await` del resultado (ej: encadenar acciones post-éxito). Para fire-and-forget con toast de error, siempre `mutate`.
