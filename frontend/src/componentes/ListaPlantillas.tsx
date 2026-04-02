@@ -67,9 +67,9 @@ export default function ListaPlantillas() {
     await eliminarPlantilla({ id });
   };
 
-  const handleEnviar = async (p: PlantillaWhatsapp) => {
+  const handleEnviar = (p: PlantillaWhatsapp) => {
     if (p.estado !== 'borrador') return;
-    await enviarAMeta({ id: p.id });
+    enviarAMeta({ id: p.id });
   };
 
   return (

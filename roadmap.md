@@ -28,3 +28,8 @@
 - Parte económica simplificada: solo Gastos, Ventas y Margen (Ventas - Gastos).
 - Secciones omitidas/pausadas: Dashboard analítico avanzado, Administración de documentos, Conciliación, Incidencias, Tesorería, Bancos.
 
+## Tareas pendientes
+
+1. La combinacion de mesas parece algo manual, debería ser automatico arrastrando dos mesas, esto haria que queden pegadas visualmente sin combinarse, 
+
+4. Warning de radix-ui en consola (forwardRef en DialogOverlay) — es un issue conocido de radix-ui@1.4.3 con React 18. No afecta funcionalidad en producción, solo aparece en dev mode. Se resolverá cuando radix-ui publique un fix upstream.
