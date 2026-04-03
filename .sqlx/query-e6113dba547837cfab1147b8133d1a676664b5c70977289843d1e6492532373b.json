@@ -92,6 +92,11 @@
         "ordinal": 17,
         "name": "hora_cena_fin",
         "type_info": "Time"
+      },
+      {
+        "ordinal": 18,
+        "name": "url_haddock",
+        "type_info": "Text"
       }
     ],
     "parameters": {
@@ -111,6 +116,7 @@
       false,
       false,
       true,
+      false,
       false,
       false,
       false,

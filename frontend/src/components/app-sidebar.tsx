@@ -43,7 +43,9 @@ import {
   MessageSquare,
   Bell,
   Bug,
+  ExternalLink,
 } from "lucide-react"
+import { useObtenerConfiguracion } from "@/api/generated/configuracion/configuracion"
 
 const navPrincipal = [
   { title: "Dashboard", url: "/", icon: <LayoutDashboard /> },
@@ -68,6 +70,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [modalError, setModalError] = useState(false)
   const [mensaje, setMensaje] = useState("")
   const [enviando, setEnviando] = useState(false)
+  const { data: configData } = useObtenerConfiguracion()
+  const urlHaddock = configData?.status === 200
+    ? (configData.data as { url_haddock?: string }).url_haddock
+    : undefined
 
   /* [303A-2] Migrado de raw fetch a axios para usar interceptors JWT/401 */
   const enviarReporte = async () => {
@@ -113,6 +119,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
+              {/* [034A-3] Botón Haddock: solo visible si url_haddock está configurada */}
+              {urlHaddock && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton tooltip="Ver en Haddock" asChild>
+                    <a href={urlHaddock} target="_blank" rel="noopener noreferrer">
+                      <ExternalLink />
+                      <span>Ver en Haddock</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
               <SidebarMenuItem>
                 <SidebarMenuButton tooltip="Reportar error" onClick={() => setModalError(true)}>
                   <Bug />

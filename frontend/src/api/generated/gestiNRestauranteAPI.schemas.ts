@@ -90,6 +90,8 @@ export interface ActualizarConfiguracionRequest {
   reserva_nombre_obligatorio?: boolean | null;
   /** @nullable */
   reserva_telefono_obligatorio?: boolean | null;
+  /** @nullable */
+  url_haddock?: string | null;
 }
 
 /**
@@ -643,6 +645,7 @@ export interface ConfiguracionRestaurante {
   reserva_nombre_obligatorio: boolean;
   reserva_telefono_obligatorio: boolean;
   updated_at: string;
+  url_haddock: string;
   user_id: string;
 }
 

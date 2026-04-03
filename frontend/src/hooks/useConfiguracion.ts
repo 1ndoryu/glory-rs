@@ -28,6 +28,8 @@ interface EstadoConfiguracion {
   hora_comida_fin: string;
   hora_cena_inicio: string;
   hora_cena_fin: string;
+  /* [034A-3] URL de Haddock */
+  url_haddock: string;
 }
 
 const DEFAULTS: EstadoConfiguracion = {
@@ -45,6 +47,7 @@ const DEFAULTS: EstadoConfiguracion = {
   hora_comida_fin: '18:00:00',
   hora_cena_inicio: '18:00:00',
   hora_cena_fin: '23:59:59',
+  url_haddock: '',
 };
 
 export function useConfiguracion() {
@@ -78,6 +81,7 @@ export function useConfiguracion() {
         hora_comida_fin: d.hora_comida_fin,
         hora_cena_inicio: d.hora_cena_inicio,
         hora_cena_fin: d.hora_cena_fin,
+        url_haddock: d.url_haddock ?? '',
       });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -110,6 +114,8 @@ export function useConfiguracion() {
       hora_comida_fin: config.hora_comida_fin,
       hora_cena_inicio: config.hora_cena_inicio,
       hora_cena_fin: config.hora_cena_fin,
+      /* [034A-3] URL de Haddock */
+      url_haddock: config.url_haddock || undefined,
     };
     try {
       await mutacion.mutateAsync({ data: body });

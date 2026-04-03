@@ -207,6 +207,29 @@ function Configuracion() {
         </CardContent>
       </Card>
 
+      {/* [034A-3] URL de Haddock para vista detallada */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Plataforma Haddock</CardTitle>
+          <CardDescription>Enlace a Haddock para ver gestión financiera detallada. Si se configura, aparecerá un botón en la barra lateral.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="url-haddock">URL de Haddock</Label>
+            <Input
+              id="url-haddock"
+              type="url"
+              value={config.url_haddock}
+              onChange={(e) => cambiarCampo('url_haddock', e.target.value)}
+              placeholder="https://app.haddock.com/tu-restaurante"
+            />
+            <p className="text-xs text-muted-foreground">
+              Si tu restaurante usa <a href="https://haddock.com" target="_blank" rel="noopener noreferrer" className="underline">Haddock</a> para gestión financiera detallada, pega aquí la URL de tu cuenta.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* [014A-4] Turnos configurables */}
       <Card>
         <CardHeader>

@@ -1,7 +1,8 @@
 /* [263A-17] Modelo de configuración del restaurante.
  * Campos obligatorios al reservar + IVA por defecto + nombre restaurante.
  * [014A-1] auto_venta_reserva: al completar reserva, crear venta automáticamente.
- * [014A-4] Turnos configurables: horas de desayuno, comida, cena. */
+ * [014A-4] Turnos configurables: horas de desayuno, comida, cena.
+ * [034A-3] url_haddock: enlace configurable a plataforma externa Haddock. */
 
 use chrono::{DateTime, NaiveTime, Utc};
 use serde::{Deserialize, Serialize};
@@ -34,6 +35,8 @@ pub struct ConfiguracionRestaurante {
     pub hora_comida_fin: NaiveTime,
     pub hora_cena_inicio: NaiveTime,
     pub hora_cena_fin: NaiveTime,
+    /* [034A-3] URL de la plataforma Haddock para vista detallada */
+    pub url_haddock: String,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -61,6 +64,9 @@ pub struct ActualizarConfiguracionRequest {
     pub hora_comida_fin: Option<NaiveTime>,
     pub hora_cena_inicio: Option<NaiveTime>,
     pub hora_cena_fin: Option<NaiveTime>,
+    /* [034A-3] URL de la plataforma Haddock (vacía = sin enlace) */
+    #[validate(length(max = 500))]
+    pub url_haddock: Option<String>,
 }
 
 fn validar_iva(valor: &rust_decimal::Decimal) -> Result<(), validator::ValidationError> {
