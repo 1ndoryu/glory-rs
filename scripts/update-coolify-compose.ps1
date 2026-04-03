@@ -1,4 +1,6 @@
-# [283A-33] Script para actualizar el compose del servicio glory-rest en Coolify
+# [283A-33] [044A-1 DEPRECATED] Script legacy para actualizar compose manualmente.
+# La sincronizacion de compose ahora la hace coolify-manager-rs deploy-service --name glory-rest.
+# Este script se mantiene como referencia pero ya no es invocado por deploy.ps1.
 $envFile = "c:\Users\Owner\OneDrive\Documentos\WP\app\public\wp-content\themes\glorytemplate\.agent\coolify-manager-rs\.env"
 $token = ((Get-Content $envFile | Where-Object { $_ -match '^COOLIFY_VPS1_API_TOKEN=' }) -replace 'COOLIFY_VPS1_API_TOKEN=','').Trim()
 

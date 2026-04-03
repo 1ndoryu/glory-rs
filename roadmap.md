@@ -3,7 +3,7 @@
 > **URL producción:** http://restaurante.wandori.us (Swagger UI: /swagger-ui/)
 > **URL legacy (no funcional):** ~~http://app-b8s0cks444o0sogo8kg8wcgw.66.94.100.241.sslip.io~~
 > **Servidor:** 66.94.100.241 (Coolify, servicio UUID: b8s0cks444o0sogo8kg8wcgw)
-> **Deploy:** `.\scripts\deploy.ps1` — zero-downtime via SSH (build + swap, sin Coolify restart)
+> **Deploy:** `.\scripts\deploy.ps1` — wrapper que invoca coolify-manager-rs deploy-service (zero-downtime)
 > **Repositorio:** 1ndoryu/glory-rs, rama glory-rs-rest
 
 ## Stack
@@ -30,4 +30,6 @@
 
 ## Tareas pendientes
 
-- Sincronización bidireccional con Haddock (requiere info del cliente sobre API de Haddock — botón de enlace ya implementado en 034A-3)
+- veo frontend\src\api\generated\campa├▒as\campa├▒as.ts con textos raros, 
+- cuando intento eliminar los datos de prueba dice "No se pudo conectar con el servidor" Elimina todos los datos de prueba.
+- regresa a la rama main y verifica que el cambio de rama no tenga problemas, que la rama main este limpia para nuevos proyectos, que no haya perdida de datos.
