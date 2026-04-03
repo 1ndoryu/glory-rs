@@ -204,6 +204,12 @@ impl ReservaService {
             reserva.cliente_id = Some(cid);
         }
 
+        /* [034A-1] Si la reserva se crea directamente como "completada",
+         * disparar auto-venta igual que en update. */
+        if estado == "completada" {
+            Self::crear_venta_automatica(pool, user_id, &reserva).await;
+        }
+
         Ok(reserva)
     }
 
@@ -331,6 +337,29 @@ impl ReservaService {
         /* [014A-1] Si el estado cambió a "completada" y auto_venta_reserva está activo,
          * crear una venta automáticamente con los datos de la reserva. */
         if estado_str.as_deref() == Some("completada") {
+            /* [034A-2] Si la reserva no tiene cliente vinculado, intentar crearlo ahora.
+             * Cubre reservas creadas antes del fix donde upsert_cliente requería tel/email. */
+            if reserva.cliente_id.is_none() {
+                let cid = Self::upsert_cliente(
+                    pool,
+                    user_id,
+                    &reserva.nombre_cliente,
+                    &reserva.apellidos_cliente,
+                    &reserva.telefono,
+                    "",
+                )
+                .await;
+                if let Some(cid) = cid {
+                    let _ = sqlx::query!(
+                        "UPDATE reservas SET cliente_id = $1 WHERE id = $2",
+                        cid,
+                        reserva.id
+                    )
+                    .execute(pool)
+                    .await;
+                }
+            }
+
             Self::crear_venta_automatica(pool, user_id, &reserva).await;
         }
 
@@ -403,18 +432,21 @@ impl ReservaService {
         telefono: &str,
         email: &str,
     ) -> Option<Uuid> {
-        /* Si no hay teléfono ni email, no podemos identificar al cliente */
-        if telefono.is_empty() && email.is_empty() {
+        /* [034A-2] Si no hay nombre, no tiene sentido crear un cliente vacío */
+        if nombre.is_empty() {
             return None;
         }
 
-        /* Buscar existente */
-        match ClienteRepository::find_by_telefono_o_email(pool, user_id, telefono, email).await {
-            Ok(Some(cliente)) => return Some(cliente.id),
-            Ok(None) => { /* crear nuevo */ }
-            Err(e) => {
-                warn!("[014A-2] Error buscando cliente: {e}");
-                return None;
+        /* Si hay teléfono o email, intentar encontrar cliente existente para deduplicar */
+        if !telefono.is_empty() || !email.is_empty() {
+            match ClienteRepository::find_by_telefono_o_email(pool, user_id, telefono, email).await
+            {
+                Ok(Some(cliente)) => return Some(cliente.id),
+                Ok(None) => { /* no existe, crear nuevo */ }
+                Err(e) => {
+                    warn!("[014A-2] Error buscando cliente: {e}");
+                    return None;
+                }
             }
         }
 

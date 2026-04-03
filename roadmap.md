@@ -30,4 +30,8 @@
 
 ## Tareas pendientes
 
+- 034A-1: Fix reservas completadas no generan venta automática (auto_venta_reserva default false, crear venta también en create, no solo update)
+- 034A-2: Fix clientes de reservas no aparecen en lista (upsert_cliente requiere tel/email, update no llama upsert_cliente)
+- 034A-3: Botón "Ver en Haddock" — enlace configurable a plataforma externa Haddock para vista detallada (pendiente: sincronización entre apps requiere info del cliente sobre API de Haddock)
+
 
