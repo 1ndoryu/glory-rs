@@ -1431,13 +1431,41 @@ export interface Venta {
   turno: string;
   updated_at: string;
   user_id: string;
+  /** @nullable */
+  reserva_id?: string | null;
+  /** @nullable */
+  cliente_id?: string | null;
+}
+
+/* [034A-5] Venta enriquecida con nombre del cliente para listados */
+export interface VentaConCliente {
+  canal: string;
+  /** @nullable */
+  comensales?: number | null;
+  created_at: string;
+  descripcion: string;
+  fecha: string;
+  id: string;
+  importe_base: string;
+  importe_iva: string;
+  iva_porcentaje: string;
+  metodo_pago: string;
+  turno: string;
+  updated_at: string;
+  user_id: string;
+  /** @nullable */
+  reserva_id?: string | null;
+  /** @nullable */
+  cliente_id?: string | null;
+  /** @nullable */
+  nombre_cliente?: string | null;
 }
 
 /**
  * Response paginada de ventas
  */
 export interface VentasPaginadas {
-  items: Venta[];
+  items: VentaConCliente[];
   page: number;
   per_page: number;
   total: number;

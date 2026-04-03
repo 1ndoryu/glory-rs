@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "INSERT INTO ventas (id, user_id, fecha, comensales, descripcion, iva_porcentaje, turno, canal, metodo_pago, importe_base, importe_iva) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *",
+  "query": "SELECT v.id, v.user_id, v.fecha, v.comensales, v.descripcion,\n                      v.iva_porcentaje, v.turno, v.canal, v.metodo_pago,\n                      v.importe_base, v.importe_iva, v.reserva_id, v.cliente_id,\n                      CASE WHEN c.id IS NOT NULL\n                           THEN CONCAT(c.nombre, CASE WHEN c.apellidos != '' THEN CONCAT(' ', c.apellidos) ELSE '' END)\n                           ELSE NULL\n                      END AS nombre_cliente,\n                      v.created_at, v.updated_at\n               FROM ventas v\n               LEFT JOIN clientes c ON c.id = v.cliente_id\n               WHERE v.user_id = $1\n               AND ($4::DATE IS NULL OR v.fecha >= $4)\n               AND ($5::DATE IS NULL OR v.fecha <= $5)\n               ORDER BY v.fecha DESC, v.created_at DESC LIMIT $2 OFFSET $3",
   "describe": {
     "columns": [
       {
@@ -60,11 +60,26 @@
       },
       {
         "ordinal": 11,
+        "name": "reserva_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 12,
+        "name": "cliente_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 13,
+        "name": "nombre_cliente",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 14,
         "name": "created_at",
         "type_info": "Timestamptz"
       },
       {
-        "ordinal": 12,
+        "ordinal": 15,
         "name": "updated_at",
         "type_info": "Timestamptz"
       }
@@ -72,16 +87,10 @@
     "parameters": {
       "Left": [
         "Uuid",
-        "Uuid",
+        "Int8",
+        "Int8",
         "Date",
-        "Int4",
-        "Text",
-        "Numeric",
-        "Varchar",
-        "Varchar",
-        "Varchar",
-        "Numeric",
-        "Numeric"
+        "Date"
       ]
     },
     "nullable": [
@@ -96,9 +105,12 @@
       false,
       false,
       false,
+      true,
+      true,
+      null,
       false,
       false
     ]
   },
-  "hash": "44264acb70ffc50fe78adad1082314f99f1c6057fe33bcf3f4ab13f5a0d2bb68"
+  "hash": "58129d83696f4dc89ece582e081d307c6b8f6fae9b151cfc6126e67646067629"
 }

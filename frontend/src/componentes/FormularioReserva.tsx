@@ -1,5 +1,6 @@
 /* [263A-16] Formulario de reserva — reescrito con shadcn Input + Button + Label + Textarea.
- * [024A-5] Soporte dual crear/editar: si se pasa reserva, pre-rellena y usa PUT. */
+ * [024A-5] Soporte dual crear/editar: si se pasa reserva, pre-rellena y usa PUT.
+ * [034A-7] Autocomplete de clientes existentes al escribir nombre. */
 
 import { EstadoReserva, Reserva } from '../api/generated';
 import useFormularioReserva from '../hooks/useFormularioReserva';
@@ -8,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useRef } from 'react';
 
 interface Props {
   onExito?: () => void;
@@ -15,7 +17,12 @@ interface Props {
 }
 
 function FormularioReserva({ onExito, reserva }: Props) {
-  const { campos, cambiarCampo, error, manejarEnvio, cargando, mesasDisponibles, esEdicion } = useFormularioReserva(onExito, reserva);
+  const {
+    campos, cambiarCampo, error, manejarEnvio, cargando, mesasDisponibles, esEdicion,
+    sugerenciasClientes, autocompletarAbierto, setAutocompletarAbierto, seleccionarCliente,
+  } = useFormularioReserva(onExito, reserva);
+  /* [034A-7] Ref del contenedor para cerrar autocomplete al hacer click fuera */
+  const autocompleteRef = useRef<HTMLDivElement>(null);
 
   return (
     <div>
@@ -36,9 +43,38 @@ function FormularioReserva({ onExito, reserva }: Props) {
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <div className="flex flex-col gap-2">
+          {/* [034A-7] Nombre con autocomplete de clientes existentes */}
+          <div className="flex flex-col gap-2 relative" ref={autocompleteRef}>
             <Label htmlFor="nombreCliente">Nombre</Label>
-            <Input id="nombreCliente" type="text" value={campos.nombreCliente} onChange={e => cambiarCampo('nombreCliente', e.target.value)} placeholder="Nombre" />
+            <Input
+              id="nombreCliente"
+              type="text"
+              value={campos.nombreCliente}
+              onChange={e => cambiarCampo('nombreCliente', e.target.value)}
+              onFocus={() => { if (sugerenciasClientes.length > 0) setAutocompletarAbierto(true); }}
+              onBlur={() => { setTimeout(() => setAutocompletarAbierto(false), 200); }}
+              placeholder="Nombre"
+              autoComplete="off"
+            />
+            {autocompletarAbierto && sugerenciasClientes.length > 0 && (
+              <div className="absolute top-full left-0 right-0 z-50 mt-1 max-h-48 overflow-y-auto rounded-md border bg-popover shadow-md">
+                {sugerenciasClientes.map(c => (
+                  <Button
+                    key={c.id}
+                    variant="ghost"
+                    className="w-full justify-start h-auto py-2 px-3 rounded-none text-left"
+                    onMouseDown={(e) => { e.preventDefault(); seleccionarCliente(c); }}
+                  >
+                    <div className="flex flex-col">
+                      <span className="font-medium text-sm">{c.nombre} {c.apellidos}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {c.telefono || 'Sin teléfono'}{c.email ? ` · ${c.email}` : ''}
+                      </span>
+                    </div>
+                  </Button>
+                ))}
+              </div>
+            )}
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="apellidosCliente">Apellidos</Label>

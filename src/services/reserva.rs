@@ -524,6 +524,9 @@ impl ReservaService {
             metodo_pago: "efectivo",
             importe_base: Decimal::ZERO,
             importe_iva: Decimal::ZERO,
+            /* [034A-5] Vincular venta con reserva y cliente de origen */
+            reserva_id: Some(reserva.id),
+            cliente_id: reserva.cliente_id,
         };
 
         if let Err(e) = VentaRepository::create(pool, &data).await {

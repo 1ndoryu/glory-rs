@@ -1,8 +1,9 @@
 /* [283A-28] Hook para ListaVentas — reduce useState count en el componente.
- * Maneja paginación, filtros de fecha (desde/hasta) y modales. */
+ * Maneja paginación, filtros de fecha (desde/hasta) y modales.
+ * [034A-5] VentaConCliente con nombre_cliente + visor de reserva asociada. */
 
 import { useState } from 'react';
-import { useListarVentas, useEliminarVenta, Venta } from '../api/generated';
+import { useListarVentas, useEliminarVenta, useObtenerReserva, VentaConCliente } from '../api/generated';
 
 interface FiltrosVentas {
   pagina: number;
@@ -19,7 +20,9 @@ function useListaVentas() {
     hasta: '',
   });
   const [modalAbierto, setModalAbierto] = useState(false);
-  const [ventaEditando, setVentaEditando] = useState<Venta | null>(null);
+  const [ventaEditando, setVentaEditando] = useState<VentaConCliente | null>(null);
+  /* [034A-5] ID de reserva para el diálogo de detalle */
+  const [reservaIdViewer, setReservaIdViewer] = useState<string | null>(null);
 
   const { data, isLoading, refetch } = useListarVentas({
     page: filtros.pagina,
@@ -33,6 +36,12 @@ function useListaVentas() {
   });
 
   const ventas = data?.status === 200 ? data.data : null;
+
+  /* [034A-5] Obtener detalle de reserva asociada (solo cuando se abre el viewer) */
+  const { data: reservaData, isLoading: reservaCargando } = useObtenerReserva(reservaIdViewer ?? '', {
+    query: { enabled: !!reservaIdViewer },
+  });
+  const reservaDetalle = reservaData?.status === 200 ? reservaData.data : null;
 
   const cambiarFiltro = <K extends keyof FiltrosVentas>(
     campo: K,
@@ -68,6 +77,10 @@ function useListaVentas() {
     eliminarMutation,
     cerrarModalYRefrescar,
     cerrarEdicionYRefrescar,
+    reservaIdViewer,
+    setReservaIdViewer,
+    reservaDetalle,
+    reservaCargando,
   };
 }
 

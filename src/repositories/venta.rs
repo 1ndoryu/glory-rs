@@ -3,7 +3,7 @@
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::models::Venta;
+use crate::models::{Venta, VentaConCliente};
 
 /// Datos necesarios para insertar una venta en BD
 pub struct NuevaVenta<'a> {
@@ -17,6 +17,9 @@ pub struct NuevaVenta<'a> {
     pub metodo_pago: &'a str,
     pub importe_base: rust_decimal::Decimal,
     pub importe_iva: rust_decimal::Decimal,
+    /* [034A-5] Relaciones opcionales */
+    pub reserva_id: Option<Uuid>,
+    pub cliente_id: Option<Uuid>,
 }
 
 /* [283A-22] Datos para actualizar parcialmente una venta. */
@@ -42,8 +45,8 @@ impl VentaRepository {
         sqlx::query_as!(
             Venta,
             "INSERT INTO ventas (id, user_id, fecha, comensales, descripcion, iva_porcentaje, \
-             turno, canal, metodo_pago, importe_base, importe_iva) \
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) \
+             turno, canal, metodo_pago, importe_base, importe_iva, reserva_id, cliente_id) \
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) \
              RETURNING *",
             id,
             data.user_id,
@@ -55,7 +58,9 @@ impl VentaRepository {
             data.canal,
             data.metodo_pago,
             data.importe_base,
-            data.importe_iva
+            data.importe_iva,
+            data.reserva_id,
+            data.cliente_id
         )
         .fetch_one(pool)
         .await
@@ -76,6 +81,8 @@ impl VentaRepository {
         .await
     }
 
+    /* [034A-5] LEFT JOIN con clientes para incluir nombre_cliente en el listado.
+     * Usa COALESCE para garantizar non-null en campos de venta. */
     pub async fn list(
         pool: &PgPool,
         user_id: Uuid,
@@ -83,15 +90,25 @@ impl VentaRepository {
         per_page: i64,
         desde: Option<chrono::NaiveDate>,
         hasta: Option<chrono::NaiveDate>,
-    ) -> Result<(Vec<Venta>, i64), sqlx::Error> {
+    ) -> Result<(Vec<VentaConCliente>, i64), sqlx::Error> {
         let offset = (page - 1) * per_page;
 
         let items = sqlx::query_as!(
-            Venta,
-            "SELECT * FROM ventas WHERE user_id = $1 \
-             AND ($4::DATE IS NULL OR fecha >= $4) \
-             AND ($5::DATE IS NULL OR fecha <= $5) \
-             ORDER BY fecha DESC, created_at DESC LIMIT $2 OFFSET $3",
+            VentaConCliente,
+            r#"SELECT v.id, v.user_id, v.fecha, v.comensales, v.descripcion,
+                      v.iva_porcentaje, v.turno, v.canal, v.metodo_pago,
+                      v.importe_base, v.importe_iva, v.reserva_id, v.cliente_id,
+                      CASE WHEN c.id IS NOT NULL
+                           THEN CONCAT(c.nombre, CASE WHEN c.apellidos != '' THEN CONCAT(' ', c.apellidos) ELSE '' END)
+                           ELSE NULL
+                      END AS nombre_cliente,
+                      v.created_at, v.updated_at
+               FROM ventas v
+               LEFT JOIN clientes c ON c.id = v.cliente_id
+               WHERE v.user_id = $1
+               AND ($4::DATE IS NULL OR v.fecha >= $4)
+               AND ($5::DATE IS NULL OR v.fecha <= $5)
+               ORDER BY v.fecha DESC, v.created_at DESC LIMIT $2 OFFSET $3"#,
             user_id,
             per_page,
             offset,

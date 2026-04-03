@@ -57,6 +57,9 @@ pub struct Venta {
     pub metodo_pago: String,
     pub importe_base: rust_decimal::Decimal,
     pub importe_iva: rust_decimal::Decimal,
+    /* [034A-5] Relaciones opcionales para trazabilidad */
+    pub reserva_id: Option<Uuid>,
+    pub cliente_id: Option<Uuid>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -93,12 +96,35 @@ pub struct ActualizarVentaRequest {
 }
 
 /// Response paginada de ventas
+/* [034A-5] Incluye nombre_cliente resuelto por LEFT JOIN para evitar N+1 en frontend */
 #[derive(Debug, Serialize, ToSchema)]
 pub struct VentasPaginadas {
-    pub items: Vec<Venta>,
+    pub items: Vec<VentaConCliente>,
     pub total: i64,
     pub page: i64,
     pub per_page: i64,
+}
+
+/* [034A-5] Venta enriquecida con nombre del cliente para listados.
+ * Evita que el frontend haga un request por cada venta para resolver el nombre. */
+#[derive(Debug, Clone, sqlx::FromRow, Serialize, ToSchema)]
+pub struct VentaConCliente {
+    pub id: Uuid,
+    pub user_id: Uuid,
+    pub fecha: NaiveDate,
+    pub comensales: Option<i32>,
+    pub descripcion: String,
+    pub iva_porcentaje: rust_decimal::Decimal,
+    pub turno: String,
+    pub canal: String,
+    pub metodo_pago: String,
+    pub importe_base: rust_decimal::Decimal,
+    pub importe_iva: rust_decimal::Decimal,
+    pub reserva_id: Option<Uuid>,
+    pub cliente_id: Option<Uuid>,
+    pub nombre_cliente: Option<String>,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
 }
 
 /// Query params para listar ventas con filtro por fecha

@@ -1,14 +1,16 @@
 /* [263A-16] Lista de ventas — reescrita con shadcn Table + Dialog + Button.
  * Iconos para eliminar en vez de texto (tarea 17).
  * [283A-22] Botón de edición con Dialog reutilizando FormularioVenta.
- * [283A-28] Filtros de fecha (desde/hasta) extraídos a useListaVentas hook. */
+ * [283A-28] Filtros de fecha (desde/hasta) extraídos a useListaVentas hook.
+ * [034A-5] Columna "Cliente" con nombre_cliente + botón para ver reserva asociada. */
 
 import useListaVentas from '../hooks/useListaVentas';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Trash2, Pencil } from 'lucide-react';
+import { Trash2, Pencil, Eye } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import FormularioVenta from './FormularioVenta';
 
 /* [283A-47] Mapa de etiquetas para turnos — el enum backend usa ascii ("manana")
@@ -37,6 +39,10 @@ function ListaVentas() {
     eliminarMutation,
     cerrarModalYRefrescar,
     cerrarEdicionYRefrescar,
+    reservaIdViewer,
+    setReservaIdViewer,
+    reservaDetalle,
+    reservaCargando,
   } = useListaVentas();
 
   return (
@@ -86,6 +92,63 @@ function ListaVentas() {
         </DialogContent>
       </Dialog>
 
+      {/* [034A-5] Diálogo de detalle de la reserva asociada a una venta */}
+      <Dialog open={!!reservaIdViewer} onOpenChange={(open) => { if (!open) setReservaIdViewer(null); }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Reserva Asociada</DialogTitle>
+          </DialogHeader>
+          {reservaCargando ? (
+            <p className="text-sm text-muted-foreground">Cargando reserva...</p>
+          ) : reservaDetalle ? (
+            <div className="flex flex-col gap-3 text-sm">
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <span className="text-muted-foreground">Cliente</span>
+                  <p className="font-medium">{reservaDetalle.nombre_cliente} {reservaDetalle.apellidos_cliente}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Teléfono</span>
+                  <p className="font-medium">{reservaDetalle.telefono || '—'}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <span className="text-muted-foreground">Fecha</span>
+                  <p className="font-medium">{reservaDetalle.fecha}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Hora</span>
+                  <p className="font-medium">{reservaDetalle.hora}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Personas</span>
+                  <p className="font-medium">{reservaDetalle.num_personas}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <span className="text-muted-foreground">Estado</span>
+                  <p><Badge variant="outline">{reservaDetalle.estado}</Badge></p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Mesa</span>
+                  <p className="font-medium">{reservaDetalle.num_mesa ?? '—'}</p>
+                </div>
+              </div>
+              {reservaDetalle.notas && (
+                <div>
+                  <span className="text-muted-foreground">Notas</span>
+                  <p className="font-medium">{reservaDetalle.notas}</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">No se encontró la reserva</p>
+          )}
+        </DialogContent>
+      </Dialog>
+
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Cargando...</p>
       ) : ventas && ventas.items.length > 0 ? (
@@ -95,19 +158,21 @@ function ListaVentas() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Fecha</TableHead>
+                  <TableHead>Cliente</TableHead>
                   <TableHead>Turno</TableHead>
                   <TableHead>Canal</TableHead>
                   <TableHead>Método</TableHead>
                   <TableHead className="text-right">Base</TableHead>
                   <TableHead className="text-right">IVA</TableHead>
                   <TableHead className="text-right">Total</TableHead>
-                  <TableHead className="w-20"></TableHead>
+                  <TableHead className="w-28"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {ventas.items.map((v) => (
                   <TableRow key={v.id}>
                     <TableCell>{v.fecha}</TableCell>
+                    <TableCell>{v.nombre_cliente ?? '—'}</TableCell>
                     <TableCell>{ETIQUETAS_TURNO[v.turno] ?? v.turno}</TableCell>
                     <TableCell className="capitalize">{v.canal}</TableCell>
                     <TableCell className="capitalize">{v.metodo_pago}</TableCell>
@@ -116,6 +181,17 @@ function ListaVentas() {
                     <TableCell className="text-right font-medium">{formatearMoneda((parseFloat(v.importe_base) + parseFloat(v.importe_iva)).toFixed(2))}</TableCell>
                     <TableCell>
                       <div className="flex gap-1">
+                        {/* [034A-5] Botón para ver la reserva de origen (solo si existe) */}
+                        {v.reserva_id && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setReservaIdViewer(v.reserva_id!)}
+                            title="Ver reserva"
+                          >
+                            <Eye className="size-4 text-muted-foreground" />
+                          </Button>
+                        )}
                         <Button
                           variant="ghost"
                           size="icon"

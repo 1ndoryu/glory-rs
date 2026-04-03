@@ -41,6 +41,9 @@ impl VentaService {
             metodo_pago: &metodo,
             importe_base: req.importe_base,
             importe_iva: req.importe_iva,
+            /* [034A-5] Ventas manuales no tienen reserva ni cliente asociado */
+            reserva_id: None,
+            cliente_id: None,
         };
 
         let venta = VentaRepository::create(pool, &data).await?;

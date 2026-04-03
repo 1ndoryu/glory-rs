@@ -1,11 +1,12 @@
 /* 253A-10: Hook para FormularioReserva
    263A-6: Añade num_mesa y apellidos_cliente
    283A-24: Mesa dropdown con mesa_id desde plano de sala
-   024A-5: Soporte edición — acepta reserva existente, usa useActualizarReserva */
+   024A-5: Soporte edición — acepta reserva existente, usa useActualizarReserva
+   [034A-7] Autocomplete de clientes existentes al escribir nombre */
 
-import { useState, useMemo, FormEvent } from 'react';
+import { useState, useMemo, useEffect, useRef, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useCrearReserva, useActualizarReserva, useObtenerPlano, EstadoReserva, Reserva } from '../api/generated';
+import { useCrearReserva, useActualizarReserva, useObtenerPlano, useListarClientes, EstadoReserva, Reserva, Cliente } from '../api/generated';
 
 interface CamposReserva {
   fecha: string;
@@ -70,6 +71,44 @@ function useFormularioReserva(onExito?: () => void, reservaExistente?: Reserva) 
 
   const cambiarCampo = <K extends keyof CamposReserva>(campo: K, valor: CamposReserva[K]) => {
     setCampos(prev => ({ ...prev, [campo]: valor }));
+  };
+
+  /* [034A-7] Búsqueda de clientes con debounce de 300ms.
+   * Se activa al escribir en el campo nombre (≥2 chars).
+   * Al seleccionar un cliente, rellena nombre, apellidos y teléfono. */
+  const [busquedaCliente, setBusquedaCliente] = useState('');
+  const [autocompletarAbierto, setAutocompletarAbierto] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (campos.nombreCliente.length < 2) {
+      setBusquedaCliente('');
+      setAutocompletarAbierto(false);
+      return;
+    }
+    debounceRef.current = setTimeout(() => {
+      setBusquedaCliente(campos.nombreCliente);
+      setAutocompletarAbierto(true);
+    }, 300);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [campos.nombreCliente]);
+
+  const { data: clientesData } = useListarClientes(
+    { busqueda: busquedaCliente, per_page: 8 },
+    { query: { enabled: busquedaCliente.length >= 2 } },
+  );
+  const sugerenciasClientes = clientesData?.status === 200 ? clientesData.data.items : [];
+
+  const seleccionarCliente = (cliente: Cliente) => {
+    setCampos(prev => ({
+      ...prev,
+      nombreCliente: cliente.nombre,
+      apellidosCliente: cliente.apellidos,
+      telefono: cliente.telefono,
+    }));
+    setAutocompletarAbierto(false);
+    setBusquedaCliente('');
   };
 
   const crearMutation = useCrearReserva({
@@ -161,6 +200,10 @@ function useFormularioReserva(onExito?: () => void, reservaExistente?: Reserva) 
     cargando: esEdicion ? editarMutation.isPending : crearMutation.isPending,
     mesasDisponibles,
     esEdicion,
+    sugerenciasClientes,
+    autocompletarAbierto,
+    setAutocompletarAbierto,
+    seleccionarCliente,
   };
 }
 

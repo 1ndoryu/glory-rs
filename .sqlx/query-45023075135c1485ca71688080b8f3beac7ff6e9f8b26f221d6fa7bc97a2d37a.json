@@ -67,6 +67,16 @@
         "ordinal": 12,
         "name": "updated_at",
         "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 13,
+        "name": "reserva_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 14,
+        "name": "cliente_id",
+        "type_info": "Uuid"
       }
     ],
     "parameters": {
@@ -88,7 +98,9 @@
       false,
       false,
       false,
-      false
+      false,
+      true,
+      true
     ]
   },
   "hash": "45023075135c1485ca71688080b8f3beac7ff6e9f8b26f221d6fa7bc97a2d37a"

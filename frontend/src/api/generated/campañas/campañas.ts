@@ -32,7 +32,7 @@ import type {
   ListarCampanasParams,
   PreviewSegmentoParams,
   SegmentoPreview
-} from '../gestiónRestauranteAPI.schemas';
+} from '../gestiNRestauranteAPI.schemas';
 
 import { customInstance } from '../../axios-instance';
 

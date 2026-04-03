@@ -51,7 +51,7 @@ pub use user::{
 };
 pub use venta::{
     ActualizarVentaRequest, CanalVenta, CrearVentaRequest, MetodoPago, Turno, Venta,
-    VentasPaginadas, VentasQuery,
+    VentaConCliente, VentasPaginadas, VentasQuery,
 };
 pub use plano_sala::{
     ActualizarMesaRequest, ActualizarPosicionesRequest, ActualizarZonaRequest,

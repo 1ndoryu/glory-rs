@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Trash2, Send, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
-import type { Campana } from '../api/generated/gestiónRestauranteAPI.schemas';
+import type { Campana } from '../api/generated/gestiNRestauranteAPI.schemas';
 
 const ETIQUETAS_SEGMENTO: Record<string, string> = {
   habitual: 'Habituales',

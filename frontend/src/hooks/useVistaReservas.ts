@@ -4,7 +4,8 @@
    303A-15: Soporte rango de fechas (fecha_desde/fecha_hasta).
    [024A-2] Actualizar estado inline desde la lista.
    [024A-3] Invalidar TODAS las queries de reservas tras mutaciones (no solo la actual).
-   [024A-5] Modal de edición con reserva seleccionada. */
+   [024A-5] Modal de edición con reserva seleccionada.
+   [034A-6] Visor de ficha de cliente al hacer click en nombre. */
 
 import { useState, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
@@ -13,6 +14,7 @@ import {
   useListarReservas,
   useEliminarReserva,
   useActualizarReserva,
+  useObtenerCliente,
   getObtenerOcupacionQueryKey,
   getListarReservasQueryKey,
   Reserva,
@@ -45,6 +47,8 @@ function useVistaReservas() {
   const [modalAbierto, setModalAbierto] = useState(false);
   /* [024A-5] Reserva seleccionada para edición en modal */
   const [reservaEditando, setReservaEditando] = useState<Reserva | null>(null);
+  /* [034A-6] ID de cliente para el diálogo de ficha */
+  const [clienteIdViewer, setClienteIdViewer] = useState<string | null>(null);
 
   /* [303A-15] Si fechaHasta tiene valor, se usa rango (fecha_desde/fecha_hasta).
    * Si no, se usa fecha exacta (compatibilidad con vista día). */
@@ -68,6 +72,12 @@ function useVistaReservas() {
     queryClient.invalidateQueries({ queryKey: getListarReservasQueryKey() });
     queryClient.invalidateQueries({ queryKey: getObtenerOcupacionQueryKey() });
   }, [queryClient]);
+
+  /* [034A-6] Obtener ficha de cliente (solo cuando se abre el viewer) */
+  const { data: clienteData, isLoading: clienteCargando } = useObtenerCliente(clienteIdViewer ?? '', {
+    query: { enabled: !!clienteIdViewer },
+  });
+  const clienteDetalle = clienteData?.status === 200 ? clienteData.data : null;
 
   const eliminarMutation = useEliminarReserva({
     mutation: {
@@ -123,6 +133,10 @@ function useVistaReservas() {
     porPagina: POR_PAGINA,
     reservaEditando,
     abrirEdicion,
+    clienteIdViewer,
+    setClienteIdViewer,
+    clienteDetalle,
+    clienteCargando,
   };
 }
 

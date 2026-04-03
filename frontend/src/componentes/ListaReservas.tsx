@@ -1,6 +1,7 @@
 /* [263A-16] Lista de reservas — reescrita con shadcn Table + Dialog + Badge.
  * Filtros con shadcn Input y select nativo. Plano de ocupación integrado.
- * [024A-10] Estado usa DropdownMenu en vez de Select para evitar confusión visual. */
+ * [024A-10] Estado usa DropdownMenu en vez de Select para evitar confusión visual.
+ * [034A-6] Click en nombre del cliente abre ficha del cliente (si tiene cliente_id). */
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -46,6 +47,10 @@ function ListaReservas() {
     porPagina,
     reservaEditando,
     abrirEdicion,
+    clienteIdViewer,
+    setClienteIdViewer,
+    clienteDetalle,
+    clienteCargando,
   } = useVistaReservas();
 
   return (
@@ -119,6 +124,71 @@ function ListaReservas() {
         </DialogContent>
       </Dialog>
 
+      {/* [034A-6] Diálogo de ficha del cliente */}
+      <Dialog open={!!clienteIdViewer} onOpenChange={(open) => { if (!open) setClienteIdViewer(null); }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Ficha del Cliente</DialogTitle>
+          </DialogHeader>
+          {clienteCargando ? (
+            <p className="text-sm text-muted-foreground">Cargando cliente...</p>
+          ) : clienteDetalle ? (
+            <div className="flex flex-col gap-3 text-sm">
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <span className="text-muted-foreground">Nombre</span>
+                  <p className="font-medium">{clienteDetalle.nombre} {clienteDetalle.apellidos}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Teléfono</span>
+                  <p className="font-medium">{clienteDetalle.prefijo_telefono ? `${clienteDetalle.prefijo_telefono} ` : ''}{clienteDetalle.telefono || '—'}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <span className="text-muted-foreground">Email</span>
+                  <p className="font-medium">{clienteDetalle.email || '—'}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Empresa</span>
+                  <p className="font-medium">{clienteDetalle.empresa || '—'}</p>
+                </div>
+              </div>
+              {clienteDetalle.alergias && (
+                <div>
+                  <span className="text-muted-foreground">Alergias</span>
+                  <p className="font-medium">{clienteDetalle.alergias}</p>
+                </div>
+              )}
+              {(clienteDetalle.preferencias_ubicacion || clienteDetalle.preferencias_bebida) && (
+                <div className="grid grid-cols-2 gap-2">
+                  {clienteDetalle.preferencias_ubicacion && (
+                    <div>
+                      <span className="text-muted-foreground">Pref. ubicación</span>
+                      <p className="font-medium">{clienteDetalle.preferencias_ubicacion}</p>
+                    </div>
+                  )}
+                  {clienteDetalle.preferencias_bebida && (
+                    <div>
+                      <span className="text-muted-foreground">Pref. bebida</span>
+                      <p className="font-medium">{clienteDetalle.preferencias_bebida}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+              {clienteDetalle.notas && (
+                <div>
+                  <span className="text-muted-foreground">Notas</span>
+                  <p className="font-medium">{clienteDetalle.notas}</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">No se encontró el cliente</p>
+          )}
+        </DialogContent>
+      </Dialog>
+
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Cargando...</p>
       ) : reservas && reservas.items.length > 0 ? (
@@ -144,7 +214,20 @@ function ListaReservas() {
                     <TableCell>{r.num_mesa ?? '—'}</TableCell>
                     {filtros.fechaHasta && <TableCell>{r.fecha}</TableCell>}
                     <TableCell>{r.hora}</TableCell>
-                    <TableCell>{r.nombre_cliente}</TableCell>
+                    {/* [034A-6] Click en nombre → ficha del cliente (si tiene cliente_id) */}
+                    <TableCell>
+                      {r.cliente_id ? (
+                        <Button
+                          variant="link"
+                          className="h-auto p-0 text-left underline decoration-dotted underline-offset-2"
+                          onClick={() => setClienteIdViewer(r.cliente_id!)}
+                        >
+                          {r.nombre_cliente}
+                        </Button>
+                      ) : (
+                        r.nombre_cliente
+                      )}
+                    </TableCell>
                     <TableCell className="max-w-32 truncate">{r.apellidos_cliente || '—'}</TableCell>
                     <TableCell>{r.num_personas}</TableCell>
                     {/* [024A-10] DropdownMenu para cambiar estado — reemplaza Select+Badge
@@ -152,11 +235,11 @@ function ListaReservas() {
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <button type="button" className="cursor-pointer">
+                          <Button variant="ghost" className="h-auto p-0 cursor-pointer">
                             <Badge variant={VARIANTE_ESTADO[r.estado] ?? 'outline'}>
                               {ETIQUETA_ESTADO[r.estado] ?? r.estado} ▾
                             </Badge>
-                          </button>
+                          </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="start">
                           {Object.entries(ETIQUETA_ESTADO).map(([valor, etiqueta]) => (
