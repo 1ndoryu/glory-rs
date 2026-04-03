@@ -31,6 +31,3 @@
 ## Tareas pendientes
 
 - Sincronización bidireccional con Haddock (requiere info del cliente sobre API de Haddock — botón de enlace ya implementado en 034A-3)
-
-- Necesito testear por mi cuenta los ultimos problema que reporto el ciente en data vii, dime que tengo que probar, y prepara una respuesta para el cliente. 
-
