@@ -179,3 +179,10 @@ Cada lección debe ser concisa y accionable.
 **Causa raíz:** `mutateAsync` SIEMPRE re-lanza el error como excepción — `onError` se ejecuta pero NO suprime la excepción. Si el caller hace `await mutateAsync(...)` sin try-catch, el error es "unhandled".
 **Solución:** Usar `mutate` (fire-and-forget) cuando el caller no necesita manejar el resultado. Los errores se manejan exclusivamente en `onError`.
 **Prevención:** Usar `mutateAsync` SOLO cuando se necesita `await` del resultado (ej: encadenar acciones post-éxito). Para fire-and-forget con toast de error, siempre `mutate`.
+
+## 2026-04-03 — Docker BuildKit mount cache sirve binarios stale con --no-cache
+
+**Problema:** `docker compose build --no-cache` no invalida `--mount=type=cache,target=/app/target`. Cargo reutiliza el binario compilado previo sin recompilar, aunque el source cambió (git clone fresco).
+**Causa raíz:** `--no-cache` solo invalida layer cache, pero `--mount=type=cache` es una cache mount de BuildKit que persiste entre builds. Cargo no siempre detecta cambios si el fingerprint del target coincide.
+**Solución:** Se eliminó `--mount=type=cache,target=/app/target` del Dockerfile inline permanentemente. `docker builder prune -af` puede tardar >30s y si se interrumpe, las caches persisten. Sin el mount de target, la compilación toma ~8 min en vez de ~1 min, pero garantiza binario fresco.
+**Prevención:** No usar `--mount=type=cache,target=/app/target` en Dockerfiles con `git clone` como fuente. Los caches de registry/git sí son seguros (solo almacenan crates descargados).
