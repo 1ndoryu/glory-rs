@@ -316,14 +316,8 @@ impl ReservaService {
 
         /* [034A-4] Guardar estado anterior para evitar crear ventas duplicadas
          * cuando se re-guarda una reserva que ya es "completada". */
-        let estado_anterior: Option<Option<String>> = sqlx::query_scalar(
-            "SELECT estado FROM reservas WHERE id = $1 AND user_id = $2",
-        )
-        .bind(id)
-        .bind(user_id)
-        .fetch_optional(pool)
-        .await?;
-        let estado_anterior = estado_anterior.flatten();
+        let reserva_antes = Self::get(pool, id, user_id).await?;
+        let estado_anterior = reserva_antes.estado.clone();
 
         let data = ActualizarReservaData {
             id,
@@ -348,7 +342,7 @@ impl ReservaService {
         /* [014A-1] Solo crear venta automática si el estado CAMBIÓ a "completada"
          * (no si ya era "completada" antes). Evita ventas duplicadas. */
         let cambio_a_completada = estado_str.as_deref() == Some("completada")
-            && estado_anterior.as_deref() != Some("completada");
+            && estado_anterior != "completada";
 
         if cambio_a_completada {
             /* [034A-2] Si la reserva no tiene cliente vinculado, intentar crearlo ahora.
