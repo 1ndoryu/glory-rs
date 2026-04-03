@@ -318,6 +318,7 @@ impl ReservaService {
          * cuando se re-guarda una reserva que ya es "completada". */
         let reserva_antes = Self::get(pool, id, user_id).await?;
         let estado_anterior = reserva_antes.estado.clone();
+        warn!("[034A-4] update reserva {id}: estado_anterior={estado_anterior:?}, nuevo={estado_str:?}");
 
         let data = ActualizarReservaData {
             id,
@@ -343,6 +344,8 @@ impl ReservaService {
          * (no si ya era "completada" antes). Evita ventas duplicadas. */
         let cambio_a_completada = estado_str.as_deref() == Some("completada")
             && estado_anterior != "completada";
+
+        warn!("[034A-4] cambio_a_completada={cambio_a_completada}");
 
         if cambio_a_completada {
             /* [034A-2] Si la reserva no tiene cliente vinculado, intentar crearlo ahora.
