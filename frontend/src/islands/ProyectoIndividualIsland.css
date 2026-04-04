@@ -87,11 +87,15 @@
     background-color: var(--bg-primary);
 }
 
+/* [044A-26] Igualado a .showcaseContenedor para consistencia visual */
 .proyectoRelacionadosContenedor {
+    width: 100%;
     max-width: var(--container-width);
     margin: 0 auto;
     padding: 0 var(--spacing-lg);
-    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xl);
 }
 
 .proyectoRelacionadosGrid {
