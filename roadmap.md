@@ -30,4 +30,7 @@
 
 ## Tareas pendientes
 
-(ninguna)
+- Asi como cuando se escribe un nombre de un cliente y aparece recomendaciones debería pasar con los proveedores. 
+- Debería haber un boton para editar la Reserva asociada y la ficha del cliente en ambos modales, o sea, abre el modal de editar de la reserva o ficha, creo que facilita las cosas si se quiere cambiar algo rapidamente. 
+- El arrastre no funciona bien, al arrastrar se abre el modal de configurar de ese habito en vez de moverse. 
+- Un bug grave ha sucedido, muy probablmente por lo del arrastre, tengo varios habitos y esos habitos ahora tienen cientos de subhabitos (dice 0/56) o sea varios habitos tienen varias subtareas con el nombre del mismo habito, pero al abrir la configuracion esos subhabitos no aparecen en "Subhábitos" asi que supongo que es algo que se puede arreglar, se necesita corregir urgente
