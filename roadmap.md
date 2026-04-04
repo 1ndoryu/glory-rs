@@ -30,4 +30,4 @@
 
 ## Tareas pendientes
 
-- regresa a la rama main y verifica que el cambio de rama no tenga problemas, que la rama main este limpia para nuevos proyectos, que no haya perdida de datos.
+(ninguna)
