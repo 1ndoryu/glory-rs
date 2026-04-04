@@ -38,7 +38,7 @@ pub use etiqueta::{
 };
 pub use gasto::{
     ActualizarGastoRequest, CategoriaGasto, CrearGastoRequest, Gasto, GastosPaginados,
-    GastosQuery, TipoDocumento,
+    GastosQuery, ProveedoresQuery, TipoDocumento,
 };
 pub use reserva::{
     ActualizarReservaRequest, CrearReservaRequest, EstadoReserva, NoShowPorCanal, NoShowQuery,

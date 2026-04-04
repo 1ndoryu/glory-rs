@@ -33,7 +33,8 @@ import type {
   ErrorResponse,
   Gasto,
   GastosPaginados,
-  ListarGastosParams
+  ListarGastosParams,
+  ListarProveedoresParams
 } from '../gestionRestauranteAPI.schemas';
 
 import { customInstance } from '../../axios-instance';
@@ -471,6 +472,130 @@ export const useDigitalizarDocumento = <TError = ErrorResponse,
       return useMutation(getDigitalizarDocumentoMutationOptions(options), queryClient);
     }
     /**
+ * @summary Listar proveedores únicos para autocomplete
+ */
+export type listarProveedoresResponse200 = {
+  data: string[]
+  status: 200
+}
+
+export type listarProveedoresResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type listarProveedoresResponseSuccess = (listarProveedoresResponse200) & {
+  headers: Headers;
+};
+export type listarProveedoresResponseError = (listarProveedoresResponse401) & {
+  headers: Headers;
+};
+
+export type listarProveedoresResponse = (listarProveedoresResponseSuccess | listarProveedoresResponseError)
+
+export const getListarProveedoresUrl = (params?: ListarProveedoresParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/gastos/proveedores?${stringifiedParams}` : `/api/gastos/proveedores`
+}
+
+export const listarProveedores = async (params?: ListarProveedoresParams, options?: RequestInit): Promise<listarProveedoresResponse> => {
+
+  return customInstance<listarProveedoresResponse>(getListarProveedoresUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListarProveedoresQueryKey = (params?: ListarProveedoresParams,) => {
+    return [
+    `/api/gastos/proveedores`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListarProveedoresQueryOptions = <TData = Awaited<ReturnType<typeof listarProveedores>>, TError = ErrorResponse>(params?: ListarProveedoresParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarProveedores>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListarProveedoresQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listarProveedores>>> = ({ signal }) => listarProveedores(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listarProveedores>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListarProveedoresQueryResult = NonNullable<Awaited<ReturnType<typeof listarProveedores>>>
+export type ListarProveedoresQueryError = ErrorResponse
+
+
+export function useListarProveedores<TData = Awaited<ReturnType<typeof listarProveedores>>, TError = ErrorResponse>(
+ params: undefined |  ListarProveedoresParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarProveedores>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listarProveedores>>,
+          TError,
+          Awaited<ReturnType<typeof listarProveedores>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListarProveedores<TData = Awaited<ReturnType<typeof listarProveedores>>, TError = ErrorResponse>(
+ params?: ListarProveedoresParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarProveedores>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listarProveedores>>,
+          TError,
+          Awaited<ReturnType<typeof listarProveedores>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListarProveedores<TData = Awaited<ReturnType<typeof listarProveedores>>, TError = ErrorResponse>(
+ params?: ListarProveedoresParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarProveedores>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Listar proveedores únicos para autocomplete
+ */
+
+export function useListarProveedores<TData = Awaited<ReturnType<typeof listarProveedores>>, TError = ErrorResponse>(
+ params?: ListarProveedoresParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listarProveedores>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListarProveedoresQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+/**
  * @summary Obtener un gasto por ID
  */
 export type obtenerGastoResponse200 = {

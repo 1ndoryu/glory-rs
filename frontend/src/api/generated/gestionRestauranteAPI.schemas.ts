@@ -1589,6 +1589,14 @@ sort_by?: string | null;
 sort_order?: string | null;
 };
 
+export type ListarProveedoresParams = {
+/**
+ * Texto para filtrar proveedores (ILIKE)
+ * @nullable
+ */
+busqueda?: string | null;
+};
+
 export type ListarNotificacionesParams = {
 /**
  * Máximo de notificaciones a devolver (default: 50)

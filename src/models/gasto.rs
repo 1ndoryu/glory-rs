@@ -123,3 +123,10 @@ fn default_page() -> i64 {
 fn default_per_page() -> i64 {
     20
 }
+
+/* [044A-10] Query para autocomplete de proveedores */
+#[derive(Debug, Deserialize, IntoParams)]
+pub struct ProveedoresQuery {
+    /// Texto para filtrar proveedores (ILIKE)
+    pub busqueda: Option<String>,
+}

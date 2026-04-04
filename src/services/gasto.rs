@@ -125,4 +125,14 @@ impl GastoService {
         let cats = CategoriaGastoRepository::list_all(pool).await?;
         Ok(cats)
     }
+
+    /* [044A-10] Proveedores únicos para autocomplete */
+    pub async fn proveedores(
+        pool: &PgPool,
+        user_id: Uuid,
+        busqueda: Option<String>,
+    ) -> Result<Vec<String>, AppError> {
+        let items = GastoRepository::proveedores_unicos(pool, user_id, busqueda.as_deref()).await?;
+        Ok(items)
+    }
 }

@@ -218,6 +218,28 @@ impl GastoRepository {
         .await
     }
 
+    /* [044A-10] Proveedores únicos para autocomplete.
+     * Filtra por ILIKE si se proporciona búsqueda. Máximo 20 resultados. */
+    pub async fn proveedores_unicos(
+        pool: &PgPool,
+        user_id: Uuid,
+        busqueda: Option<&str>,
+    ) -> Result<Vec<String>, sqlx::Error> {
+        let pattern = busqueda.map(|b| format!("%{b}%"));
+        sqlx::query_scalar::<_, String>(
+            "SELECT DISTINCT proveedor FROM gastos \
+             WHERE user_id = $1 \
+             AND proveedor != '' \
+             AND ($2::TEXT IS NULL OR proveedor ILIKE $2) \
+             ORDER BY proveedor ASC \
+             LIMIT 20",
+        )
+        .bind(user_id)
+        .bind(pattern.as_deref())
+        .fetch_all(pool)
+        .await
+    }
+
     /// Suma de `importe_base` de gastos en un período
     pub async fn total_periodo(
         pool: &PgPool,

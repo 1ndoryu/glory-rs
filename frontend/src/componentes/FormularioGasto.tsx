@@ -26,7 +26,10 @@ interface Props {
 function FormularioGasto({ onExito, gasto }: Props) {
   /* En modo edición saltar directamente al formulario manual */
   const [modo, setModo] = useState<ModoGasto>(gasto ? 'manual' : 'menu');
-  const { campos, cambiarCampo, error, manejarEnvio, cargando, categorias, esEdicion } = useFormularioGasto(onExito, gasto);
+  const {
+    campos, cambiarCampo, error, manejarEnvio, cargando, categorias, esEdicion,
+    sugerenciasProveedores, autocompletarAbierto, setAutocompletarAbierto, seleccionarProveedor,
+  } = useFormularioGasto(onExito, gasto);
   const digitalizacion = useDigitalizacion();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -162,9 +165,33 @@ function FormularioGasto({ onExito, gasto }: Props) {
             <Label htmlFor="fecha">Fecha</Label>
             <Input id="fecha" type="date" value={campos.fecha} onChange={e => cambiarCampo('fecha', e.target.value)} />
           </div>
-          <div className="flex flex-col gap-2">
+          {/* [044A-10] Proveedor con autocomplete de proveedores existentes */}
+          <div className="flex flex-col gap-2 relative">
             <Label htmlFor="proveedor">Proveedor</Label>
-            <Input id="proveedor" type="text" value={campos.proveedor} onChange={e => cambiarCampo('proveedor', e.target.value)} placeholder="Opcional" />
+            <Input
+              id="proveedor"
+              type="text"
+              value={campos.proveedor}
+              onChange={e => cambiarCampo('proveedor', e.target.value)}
+              onFocus={() => { if (sugerenciasProveedores.length > 0) setAutocompletarAbierto(true); }}
+              onBlur={() => { setTimeout(() => setAutocompletarAbierto(false), 200); }}
+              placeholder="Opcional"
+              autoComplete="off"
+            />
+            {autocompletarAbierto && sugerenciasProveedores.length > 0 && (
+              <div className="absolute top-full left-0 right-0 z-50 mt-1 max-h-48 overflow-y-auto rounded-md border bg-popover shadow-md">
+                {sugerenciasProveedores.map(nombre => (
+                  <Button
+                    key={nombre}
+                    variant="ghost"
+                    className="w-full justify-start h-auto py-2 px-3 rounded-none text-left"
+                    onMouseDown={(e) => { e.preventDefault(); seleccionarProveedor(nombre); }}
+                  >
+                    <span className="text-sm">{nombre}</span>
+                  </Button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 

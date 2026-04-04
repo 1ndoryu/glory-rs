@@ -79,6 +79,7 @@ impl utoipa::Modify for SecurityAddon {
         gastos::eliminar_gasto,
         gastos::listar_categorias,
         gastos::digitalizar_documento,
+        gastos::listar_proveedores,
         reservas::crear_reserva,
         reservas::obtener_reserva,
         reservas::listar_reservas,

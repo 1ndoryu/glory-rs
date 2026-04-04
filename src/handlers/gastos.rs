@@ -12,7 +12,7 @@ use crate::errors::AppError;
 use crate::middleware::AuthUser;
 use crate::models::{
     ActualizarGastoRequest, CategoriaGasto, CrearGastoRequest, DatosDocumentoExtraidos,
-    DigitalizarDocumentoRequest, Gasto, GastosPaginados, GastosQuery,
+    DigitalizarDocumentoRequest, Gasto, GastosPaginados, GastosQuery, ProveedoresQuery,
 };
 use crate::services::{DigitalizacionService, GastoService};
 use crate::AppState;
@@ -192,9 +192,31 @@ pub async fn digitalizar_documento(
     Ok(Json(datos))
 }
 
+/// Listar proveedores únicos para autocomplete
+#[utoipa::path(
+    get,
+    path = "/api/gastos/proveedores",
+    tag = "Gastos",
+    params(ProveedoresQuery),
+    responses(
+        (status = 200, description = "Lista de proveedores únicos", body = Vec<String>),
+        (status = 401, description = "No autorizado", body = ErrorResponse)
+    ),
+    security(("bearer_auth" = []))
+)]
+pub async fn listar_proveedores(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    Query(params): Query<ProveedoresQuery>,
+) -> Result<Json<Vec<String>>, AppError> {
+    let proveedores = GastoService::proveedores(&state.pool, auth.user_id, params.busqueda).await?;
+    Ok(Json(proveedores))
+}
+
 pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/gastos/categorias", get(listar_categorias))
+        .route("/gastos/proveedores", get(listar_proveedores))
         .route("/gastos/digitalizar", post(digitalizar_documento))
         .route("/gastos", post(crear_gasto).get(listar_gastos))
         .route("/gastos/:id", get(obtener_gasto).put(actualizar_gasto).delete(eliminar_gasto))

@@ -1,11 +1,12 @@
 /* 253A-10: Hook para FormularioGasto — reduce 10 useState a 2 (regla usestate-excesivo)
    253A-14: acepta onExito para uso en modales
    253A-21: metodo_pago es opcional — puede enviarse null si el usuario no selecciona
-   283A-22: soporte edición — acepta gastoInicial para pre-rellenar y usa PUT */
+   283A-22: soporte edición — acepta gastoInicial para pre-rellenar y usa PUT
+   044A-10: autocomplete de proveedores — debounce 300ms, ≥2 chars */
 
-import { useState, FormEvent } from 'react';
+import { useState, useEffect, useRef, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useCrearGasto, useActualizarGasto, useListarCategorias, MetodoPago, TipoDocumento, Gasto } from '../api/generated';
+import { useCrearGasto, useActualizarGasto, useListarCategorias, useListarProveedores, MetodoPago, TipoDocumento, Gasto } from '../api/generated';
 
 interface CamposGasto {
   fecha: string;
@@ -53,6 +54,40 @@ function useFormularioGasto(onExito?: () => void, gastoInicial?: Gasto) {
 
   const { data: categoriasResp } = useListarCategorias();
   const categorias = categoriasResp?.status === 200 ? categoriasResp.data : [];
+
+  /* [044A-10] Autocomplete de proveedores — mismo patrón que clientes en reservas.
+   * Debounce 300ms, se activa al escribir ≥2 chars en el campo proveedor. */
+  const [busquedaProveedor, setBusquedaProveedor] = useState('');
+  const [autocompletarAbierto, setAutocompletarAbierto] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (campos.proveedor.length < 2) {
+      setBusquedaProveedor('');
+      setAutocompletarAbierto(false);
+      return;
+    }
+    debounceRef.current = setTimeout(() => {
+      setBusquedaProveedor(campos.proveedor);
+      setAutocompletarAbierto(true);
+    }, 300);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [campos.proveedor]);
+
+  const { data: proveedoresData } = useListarProveedores(
+    { busqueda: busquedaProveedor },
+    { query: { enabled: busquedaProveedor.length >= 2 } },
+  );
+  const sugerenciasProveedores: string[] = proveedoresData?.status === 200
+    ? (proveedoresData.data as string[])
+    : [];
+
+  const seleccionarProveedor = (nombre: string) => {
+    setCampos(prev => ({ ...prev, proveedor: nombre }));
+    setAutocompletarAbierto(false);
+    setBusquedaProveedor('');
+  };
 
   const cambiarCampo = <K extends keyof CamposGasto>(campo: K, valor: CamposGasto[K]) => {
     setCampos(prev => ({ ...prev, [campo]: valor }));
@@ -130,6 +165,10 @@ function useFormularioGasto(onExito?: () => void, gastoInicial?: Gasto) {
     cargando: crearMutation.isPending || actualizarMutation.isPending,
     categorias,
     esEdicion,
+    sugerenciasProveedores,
+    autocompletarAbierto,
+    setAutocompletarAbierto,
+    seleccionarProveedor,
   };
 }
 
