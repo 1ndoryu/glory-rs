@@ -1,4 +1,5 @@
-/* [044A-2] Estilos del selector de idioma */
+/* [044A-17] Selector de idioma rediseñado para verse como subMenuDesplegable.
+ * Replicamos la misma estética: fondo blanco, border, shadow, animación. */
 .selectorIdioma {
     position: relative;
     display: inline-block;
@@ -19,21 +20,40 @@
 
 .selectorIdiomaBoton:hover {
     color: var(--text-primary);
-    background: var(--bg-card-subtle, rgba(255, 255, 255, 0.05));
 }
 
+/* Dropdown con estilo subMenuDesplegable */
 .selectorIdiomaLista {
     position: absolute;
     top: 100%;
     right: 0;
-    margin-top: 4px;
+    padding-top: var(--spacing-xs);
     list-style: none;
-    padding: 4px;
-    background: var(--bg-secondary, #1a1a2e);
-    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.15));
-    border-radius: 8px;
+    margin: 0;
+    background-color: transparent;
+    min-width: 70px;
     z-index: 100;
-    min-width: 60px;
+}
+
+/* Fondo visual como ::before (igual que subMenuDesplegable) */
+.selectorIdiomaLista::before {
+    content: '';
+    position: absolute;
+    top: var(--spacing-xs);
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ffffff;
+    border: 1px solid var(--bg-card-subtle);
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    z-index: -1;
+    animation: selectorIdiomaEntrada 0.15s ease-out;
+}
+
+@keyframes selectorIdiomaEntrada {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .selectorIdiomaOpcion {
@@ -42,20 +62,32 @@
     background: transparent;
     border: none;
     color: var(--text-secondary);
-    padding: 6px 12px;
-    border-radius: 4px;
+    padding: var(--spacing-sm) var(--spacing-md);
     cursor: pointer;
     font-size: var(--text-sm);
+    font-weight: 500;
     text-align: center;
-    transition: background 0.2s ease, color 0.2s ease;
+    position: relative;
+    white-space: nowrap;
+    transition: background-color var(--transicion-rapida), color var(--transicion-rapida);
+}
+
+.selectorIdiomaOpcion:first-child {
+    padding-top: calc(var(--spacing-xs) + var(--spacing-sm));
+    border-radius: 8px 8px 0 0;
+}
+
+.selectorIdiomaOpcion:last-child {
+    padding-bottom: calc(var(--spacing-xs) + var(--spacing-sm));
+    border-radius: 0 0 8px 8px;
 }
 
 .selectorIdiomaOpcion:hover {
-    background: var(--bg-card-subtle, rgba(255, 255, 255, 0.08));
-    color: var(--text-primary);
+    background-color: var(--overlay-hover);
+    color: var(--brand-black);
 }
 
 .selectorIdiomaOpcion.activo {
-    color: var(--accent-primary, #4f46e5);
+    color: var(--brand-black);
     font-weight: 600;
 }
