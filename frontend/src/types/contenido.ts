@@ -15,6 +15,7 @@ export interface PostBlog {
     id: number;
     titulo: string;
     resumen: string;
+    contenido?: string;
     fecha: string;
     categoria: string;
     link?: string;

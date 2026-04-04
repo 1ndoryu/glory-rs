@@ -45,7 +45,7 @@ export const BlogSingleIsland = ({
 
         if (postLocal) {
             titulo = postLocal.titulo;
-            contenido = postLocal.resumen || '';
+            contenido = postLocal.contenido || postLocal.resumen || '';
             fecha = postLocal.fecha;
             categoria = postLocal.categoria;
             imagen = postLocal.imagen || obtenerImagenBlog(postLocal.id);
@@ -102,28 +102,33 @@ export const BlogSingleIsland = ({
                 </article>
             </section>
 
-            {/* Articulos relacionados */}
-            <section className="blogSingleRelacionados">
-                <div className="blogSingleRelacionadosContenedor">
-                    <h2 className="blogSingleRelacionadosTitulo">Más artículos</h2>
-                    <div className="blogSingleRelacionadosGrid">
-                        {POSTS_BLOG.filter(p => {
-                            const postSlug = p.link?.split('/').filter(Boolean).pop() || '';
-                            return postSlug !== slug;
-                        }).slice(0, 2).map(post => (
-                            <a key={post.id} href={post.link} className="blogSingleRelacionadoCard">
-                                <div className="blogSingleRelacionadoImagen">
-                                    <img src={post.imagen || obtenerImagenBlog(post.id)} alt={post.titulo} loading="lazy" />
-                                </div>
-                                <div className="blogSingleRelacionadoInfo">
-                                    <span className="blogSingleRelacionadoCategoria">{post.categoria}</span>
-                                    <h3 className="blogSingleRelacionadoNombre">{post.titulo}</h3>
-                                </div>
-                            </a>
-                        ))}
+            {/* Articulos relacionados — solo si hay otros posts */}
+            {POSTS_BLOG.filter(p => {
+                const postSlug = p.link?.split('/').filter(Boolean).pop() || '';
+                return postSlug !== slug;
+            }).length > 0 && (
+                <section className="blogSingleRelacionados">
+                    <div className="blogSingleRelacionadosContenedor">
+                        <h2 className="blogSingleRelacionadosTitulo">Más artículos</h2>
+                        <div className="blogSingleRelacionadosGrid">
+                            {POSTS_BLOG.filter(p => {
+                                const postSlug = p.link?.split('/').filter(Boolean).pop() || '';
+                                return postSlug !== slug;
+                            }).slice(0, 2).map(post => (
+                                <a key={post.id} href={post.link} className="blogSingleRelacionadoCard">
+                                    <div className="blogSingleRelacionadoImagen">
+                                        <img src={post.imagen || obtenerImagenBlog(post.id)} alt={post.titulo} loading="lazy" />
+                                    </div>
+                                    <div className="blogSingleRelacionadoInfo">
+                                        <span className="blogSingleRelacionadoCategoria">{post.categoria}</span>
+                                        <h3 className="blogSingleRelacionadoNombre">{post.titulo}</h3>
+                                    </div>
+                                </a>
+                            ))}
+                        </div>
                     </div>
-                </div>
-            </section>
+                </section>
+            )}
 
             <SeccionContacto />
         </LayoutPagina>

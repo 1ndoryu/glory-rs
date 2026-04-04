@@ -1,40 +1,39 @@
 /*
  * Datos de blog centralizados.
- * Fuente: window.GLORY_CONTEXT.blog (PHP/WP posts nativos) -> Fallback estatico.
- * TO-DO: Conectar con WP REST API para posts reales.
+ * [044A-4] Post real sobre Kamples. Placeholders eliminados.
  */
 import {PostBlog} from '../types/contenido';
-import {obtenerImagenBlog} from '../hooks/useImagenes';
 
 const POSTS_FALLBACK: PostBlog[] = [
     {
         id: 1,
-        titulo: 'The Future of Digital Design',
-        resumen: 'Exploring how AI and spatial computing are reshaping the landscape of user interfaces and experience design in 2026.',
-        fecha: 'Feb 7, 2026',
-        categoria: 'Design',
-        link: '/blog/the-future-of-digital-design',
-        imagen: obtenerImagenBlog(1)
-    },
-    {
-        id: 7,
-        titulo: 'Building Scalable Systems',
-        resumen: 'A comprehensive guide to architecting modern web applications that can handle millions of users without compromising performance.',
-        fecha: 'Jan 28, 2026',
-        categoria: 'Engineering',
-        link: '/blog/building-scalable-systems',
-        imagen: obtenerImagenBlog(7)
-    },
-    {
-        id: 12,
-        titulo: 'Brand Identity in the AI Era',
-        resumen: 'How brands can maintain authenticity and emotional connection in a world increasingly saturated with synthetic content.',
-        fecha: 'Jan 15, 2026',
-        categoria: 'Strategy',
-        link: '/blog/brand-identity-in-the-ai-era',
-        imagen: obtenerImagenBlog(12)
+        titulo: 'Kamples: Reimagining How Musicians Discover and Share Samples',
+        resumen: 'An open-source platform that combines a sample library, recommendation engine, lightweight DAW, and social features — think WhoSampled meets Pinterest for music production.',
+        contenido: `
+            <p>Music production today relies heavily on samples — but discovering, organizing, and sharing them remains fragmented across dozens of tools and communities. <strong>Kamples</strong> is our answer to that problem: a single platform where producers can explore, preview, and share samples with the depth of WhoSampled and the visual curation of Pinterest.</p>
+
+            <h2>The Problem</h2>
+            <p>Producers juggle between sample marketplaces, DAWs, and social media to find what they need. There's no single place that lets you <em>discover</em> samples algorithmically, <em>preview</em> them in context, and <em>share</em> collections with your community — all in one flow.</p>
+
+            <h2>What Kamples Does</h2>
+            <p>At its core, Kamples is a sample library with three layers built on top:</p>
+            <ul>
+                <li><strong>Recommendation Engine</strong> — An algorithm that surfaces samples based on genre, mood, BPM, key, and your usage history. The more you interact, the better it gets.</li>
+                <li><strong>Integrated DAW</strong> — A lightweight, browser-based workstation for previewing samples in context. Layer, mix, and test before downloading. No need to leave the platform.</li>
+                <li><strong>Social Layer</strong> — Organize samples into collections and boards (like Pinterest). Follow other producers, see what they're sampling, and explore "more ideas like this" chains that surface unexpected connections.</li>
+            </ul>
+
+            <h2>Open Source</h2>
+            <p>Kamples is fully open source. We believe tools for creative expression should be transparent and community-driven. Contributions are welcome — from algorithm improvements to UI components to new audio processing features.</p>
+
+            <h2>Try It</h2>
+            <p>Kamples is live at <strong>kamples.com</strong>. Sign up, upload your first sample, and start building your library. The platform is free for individual producers — we're exploring sustainability models for teams and commercial use.</p>
+        `,
+        fecha: 'Apr 4, 2026',
+        categoria: 'Product',
+        link: '/blog/kamples-reimagining-sample-discovery',
+        imagen: '/assets/Proyectos portadas/Kamples portada.jpg'
     }
 ];
 
-/* [044A-1] Sin GLORY_CONTEXT, datos directos */
 export const POSTS_BLOG: PostBlog[] = POSTS_FALLBACK;
