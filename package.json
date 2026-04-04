@@ -12,6 +12,8 @@
     "dev:back": "cargo run",
     "dev:front": "npm --prefix frontend run dev",
     "codegen": "npm --prefix frontend run codegen",
-    "test": "cargo test"
+    "test": "cargo test",
+    "roadmap": "node scripts/check-roadmap.mjs",
+    "roadmap:watch": "node scripts/check-roadmap.mjs --watch"
   }
 }
