@@ -1,16 +1,14 @@
 /**
  * Planes de precios: indice central.
- * Re-exporta tipos, datos y helper de busqueda.
- * [044A-31] Reducido a 5 servicios activos (eliminados chatbots, ux/ui, automatización, consultoría).
+ * [044A-32] Todos los planes centralizados en planes.ts para edicion rapida.
  */
 export type {CaracteristicaPlan, PlanServicio, PlanesDeServicio} from './tipos';
 export {incluida, noIncluida} from './tipos';
 
-import {PLANES_WEB, PLANES_APPS, PLANES_BRANDING} from './planesCreacion';
-import {PLANES_IA} from './planesIA';
-import {PLANES_SEO, PLANES_MARKETING} from './planesCrecimiento';
-import {PLANES_ECOMMERCE} from './planesExtras';
+import {PLANES_WEB, PLANES_APPS, PLANES_IA, PLANES_BRANDING, PLANES_ECOMMERCE, PLANES_SEO, PLANES_MARKETING} from './planes';
 import type {PlanesDeServicio} from './tipos';
+
+export {PLANES_WEB, PLANES_APPS, PLANES_IA, PLANES_BRANDING, PLANES_ECOMMERCE, PLANES_SEO, PLANES_MARKETING} from './planes';
 
 export const PLANES_POR_SERVICIO: PlanesDeServicio[] = [PLANES_WEB, PLANES_APPS, PLANES_IA, PLANES_BRANDING, PLANES_SEO, PLANES_MARKETING, PLANES_ECOMMERCE];
 
