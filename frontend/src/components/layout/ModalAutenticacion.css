@@ -80,6 +80,17 @@
     border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
+/* [044A-13] Mensaje de error de autenticación */
+.modalError {
+    color: #dc2626;
+    font-size: 0.875rem;
+    text-align: center;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background: rgba(220, 38, 38, 0.06);
+    border-radius: 6px;
+    margin-bottom: var(--spacing-sm);
+}
+
 .modalTab {
     flex: 1;
     font-family: var(--font-primary);

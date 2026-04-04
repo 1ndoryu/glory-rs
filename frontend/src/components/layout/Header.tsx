@@ -3,7 +3,7 @@
  * Cabecera global del sitio.
  * Enlaces centralizados en data/navegacion.ts (DRY).
  * Incluye submenú dropdown para "Soluciones".
- * Detecta sesión activa via GLORY_CONTEXT para adaptar acciones.
+ * [044A-13] Sesión conectada con authStore (Zustand + JWT).
  * Accesibilidad: aria-labels, aria-expanded, navegación por teclado.
  */
 import React, {useState, useRef, useCallback, useEffect} from 'react';
@@ -15,6 +15,7 @@ import {ModalAutenticacion} from './ModalAutenticacion';
 import {navegar} from '../../navegacionSPA';
 import {Logo} from '../ui/Logo';
 import {LanguageSelector} from '../ui/LanguageSelector';
+import {useAuthStore} from '../../stores/authStore';
 import '../../styles/header.css';
 
 /* [044A-2] Mapeo de labels estáticos (español) a claves i18n.
@@ -29,14 +30,7 @@ const NAV_KEYS: Record<string, string> = {
     'Hosting': 'nav.hosting',
 };
 
-/* [044A-1] Sin GLORY_CONTEXT, sesión desactivada por defecto.
- * TO-DO: Conectar con API Rust para detectar sesión. */
-function obtenerEstadoSesion() {
-    return {
-        logueado: false,
-        usuario: null
-    };
-}
+/* [044A-13] Sesión conectada con authStore (Zustand + JWT) */
 
 /* Comprueba si la ruta actual coincide con un path dado */
 function esRutaActual(path: string): boolean {
@@ -49,7 +43,8 @@ export const Header: React.FC = () => {
     const [dropdownAbierto, setDropdownAbierto] = useState<string | null>(null);
     const [modalAbierto, setModalAbierto] = useState(false);
     const [menuMovilAbierto, setMenuMovilAbierto] = useState(false);
-    const {logueado} = obtenerEstadoSesion();
+    const logueado = useAuthStore(s => s.logueado);
+    const logout = useAuthStore(s => s.logout);
     const enPanel = esRutaActual('/panel');
     const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -140,9 +135,14 @@ export const Header: React.FC = () => {
                 <div className="accionCabecera" role="group" aria-label={t('accessibility.user_actions')}>
                     <LanguageSelector />
                     {logueado ? (
-                        <a className="enlaceAcceder" href={hrefAccion!}>
-                            {textoAccion}
-                        </a>
+                        <>
+                            <a className="enlaceAcceder" href={hrefAccion!}>
+                                {textoAccion}
+                            </a>
+                            <button className="enlaceAcceder" onClick={logout}>
+                                {t('nav.logout')}
+                            </button>
+                        </>
                     ) : (
                         <button className="enlaceAcceder" onClick={() => setModalAbierto(true)}>
                             {t('nav.login')}

@@ -2,10 +2,13 @@
  * Hook: useAutenticacion
  * Encapsula toda la logica de estado del modal de autenticacion.
  * Reduce useState en ModalAutenticacion de 9 a 0 (SRP).
- * TO-DO: Conectar con backend REST API, JWT, OAuth.
+ * [044A-13] Conectado con backend REST API (login/registro via JWT).
+ * Pendiente: OAuth Google, recuperación de contraseña.
  */
 import {useState, useEffect, useRef, useCallback} from 'react';
 import {useFocusTrap} from './useFocusTrap';
+import {apiLogin, apiRegister, extraerMensajeError} from '../api/auth';
+import {useAuthStore} from '../stores/authStore';
 
 export type VistaModal = 'login' | 'registro' | 'recuperar';
 
@@ -30,6 +33,7 @@ interface RetornoUseAutenticacion {
     vista: VistaModal;
     setVista: (v: VistaModal) => void;
     cargando: boolean;
+    error: string | null;
     modalRef: React.RefObject<HTMLDivElement>;
     login: EstadoLogin;
     registro: EstadoRegistro;
@@ -47,7 +51,9 @@ interface RetornoUseAutenticacion {
 export const useAutenticacion = (abierto: boolean, onCerrar: () => void): RetornoUseAutenticacion => {
     const [vista, setVista] = useState<VistaModal>('login');
     const [cargando, setCargando] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const modalRef = useRef<HTMLDivElement>(null);
+    const authLogin = useAuthStore(s => s.login);
 
     const [login, setLogin] = useState<EstadoLogin>({email: '', password: ''});
 
@@ -83,30 +89,43 @@ export const useAutenticacion = (abierto: boolean, onCerrar: () => void): Retorn
         setRecuperar(prev => ({...prev, [campo]: valor}));
     }, []);
 
-    /* TO-DO: Integrar con backend REST API */
-    const handleLogin = useCallback((e: React.FormEvent) => {
+    /* [044A-13] Login real contra backend REST API */
+    const handleLogin = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
+        setError(null);
         setCargando(true);
-        setTimeout(() => {
+        try {
+            const resp = await apiLogin(login.email, login.password);
+            authLogin(resp.token, resp.user_id, login.email);
+            onCerrar();
+        } catch (err) {
+            setError(extraerMensajeError(err));
+        } finally {
             setCargando(false);
-            alert('Funcionalidad de login pendiente de integracion con backend.');
-        }, 500);
-    }, []);
+        }
+    }, [login.email, login.password, authLogin, onCerrar]);
 
+    /* [044A-13] Registro real contra backend REST API */
     const handleRegistro = useCallback(
-        (e: React.FormEvent) => {
+        async (e: React.FormEvent) => {
             e.preventDefault();
             if (registro.password !== registro.confirmar) {
-                alert('Las contrasenas no coinciden.');
+                setError('Las contraseñas no coinciden.');
                 return;
             }
+            setError(null);
             setCargando(true);
-            setTimeout(() => {
+            try {
+                const resp = await apiRegister(registro.email, registro.password);
+                authLogin(resp.token, resp.user_id, registro.email);
+                onCerrar();
+            } catch (err) {
+                setError(extraerMensajeError(err));
+            } finally {
                 setCargando(false);
-                alert('Funcionalidad de registro pendiente de integracion con backend.');
-            }, 500);
+            }
         },
-        [registro.password, registro.confirmar]
+        [registro.email, registro.password, registro.confirmar, authLogin, onCerrar]
     );
 
     const handleRecuperar = useCallback((e: React.FormEvent) => {
@@ -131,6 +150,7 @@ export const useAutenticacion = (abierto: boolean, onCerrar: () => void): Retorn
         vista,
         setVista,
         cargando,
+        error,
         modalRef,
         login,
         registro,

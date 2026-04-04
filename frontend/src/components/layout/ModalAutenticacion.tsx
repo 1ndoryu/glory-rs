@@ -3,7 +3,8 @@
  * Modal con tabs para Iniciar Sesion / Registrarse.
  * Incluye: login, registro, recuperacion de contrasena, login con Google.
  * La logica de estado se delega al hook useAutenticacion (SRP).
- * TO-DO: Conectar con backend (REST API, JWT, OAuth) cuando esten las credenciales.
+ * [044A-13] Conectado con backend REST API. Login y registro funcionales.
+ * Pendiente: OAuth Google, reCAPTCHA, recuperación de contraseña real.
  */
 import React from 'react';
 import {useTranslation} from 'react-i18next';
@@ -19,7 +20,7 @@ interface ModalAutenticacionProps {
 export const ModalAutenticacion: React.FC<ModalAutenticacionProps> = ({abierto, onCerrar}) => {
     const {t} = useTranslation();
     const {
-        vista, setVista, cargando, modalRef,
+        vista, setVista, cargando, error, modalRef,
         login, registro, recuperar,
         actualizarLogin, actualizarRegistro, actualizarRecuperar,
         handleLogin, handleRegistro, handleRecuperar,
@@ -58,6 +59,9 @@ export const ModalAutenticacion: React.FC<ModalAutenticacionProps> = ({abierto, 
                         </button>
                     </div>
                 )}
+
+                {/* [044A-13] Mensaje de error visible al usuario */}
+                {error && <p className="modalError" role="alert">{error}</p>}
 
                 {/* Contenido: Login */}
                 {vista === 'login' && (
