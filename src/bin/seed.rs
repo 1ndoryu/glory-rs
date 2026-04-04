@@ -56,9 +56,10 @@ async fn main() {
 
     seed_configuracion(&pool, user_id).await;
     let canal_ids = seed_canales(&pool, user_id).await;
-    let cliente_ids = seed_clientes(&pool, user_id).await;
+    let clientes = seed_clientes(&pool, user_id).await;
+    let cliente_ids: Vec<Uuid> = clientes.iter().map(|c| c.id).collect();
     let mesa_ids = seed_zonas_mesas(&pool, user_id).await;
-    let reserva_ids = seed_reservas(&pool, user_id, hoy, &canal_ids, &cliente_ids, &mesa_ids).await;
+    let reserva_ids = seed_reservas(&pool, user_id, hoy, &canal_ids, &clientes, &mesa_ids).await;
     seed_ventas(&pool, user_id, hoy, &reserva_ids, &cliente_ids).await;
     seed_gastos(&pool, user_id, hoy).await;
     seed_etiquetas_clientes(&pool, user_id, &cliente_ids).await;
@@ -138,7 +139,7 @@ async fn seed_canales(pool: &PgPool, user_id: Uuid) -> Vec<Uuid> {
 
 /* 8 clientes demo con datos variados */
 #[allow(clippy::type_complexity)]
-async fn seed_clientes(pool: &PgPool, user_id: Uuid) -> Vec<Uuid> {
+async fn seed_clientes(pool: &PgPool, user_id: Uuid) -> Vec<ClienteCreado> {
     /* (nombre, apellidos, telefono, email, empresa, alergias, pref_bebida, pref_ubicacion) */
     let datos: &[(&str, &str, &str, &str, &str, &str, &str, &str)] = &[
         ("María", "García López", "612345678", "maria.garcia@email.com", "", "Frutos secos", "Vino tinto", ""),
@@ -150,7 +151,7 @@ async fn seed_clientes(pool: &PgPool, user_id: Uuid) -> Vec<Uuid> {
         ("Carmen", "Ruiz", "678901234", "carmen.ruiz@email.com", "", "Vegetariana", "Agua con gas", ""),
         ("Miguel", "Torres", "689012345", "", "Eventos Sol S.L.", "", "", "Salón privado"),
     ];
-    let mut ids = Vec::with_capacity(datos.len());
+    let mut clientes = Vec::with_capacity(datos.len());
     for &(nombre, apellidos, tel, email, empresa, alergias, pref_beb, pref_ubi) in datos {
         let id: Uuid = sqlx::query_scalar!(
             "INSERT INTO clientes (user_id, nombre, apellidos, telefono, email, empresa, \
@@ -169,10 +170,10 @@ async fn seed_clientes(pool: &PgPool, user_id: Uuid) -> Vec<Uuid> {
         .fetch_one(pool)
         .await
         .expect("Error al insertar cliente");
-        ids.push(id);
+        clientes.push(ClienteCreado { id, nombre: nombre.to_string(), apellidos: apellidos.to_string() });
     }
-    println!("  {} clientes insertados.", ids.len());
-    ids
+    println!("  {} clientes insertados.", clientes.len());
+    clientes
 }
 
 /* 1 zona de sala + 6 mesas posicionadas */
@@ -217,6 +218,13 @@ async fn seed_zonas_mesas(pool: &PgPool, user_id: Uuid) -> Vec<Uuid> {
     mesa_ids
 }
 
+/* Datos de cada cliente creado, para vincular reservas con nombre real */
+struct ClienteCreado {
+    id: Uuid,
+    nombre: String,
+    apellidos: String,
+}
+
 /* Datos de cada reserva creada, para vincular ventas despues */
 struct ReservaCreada {
     id: Uuid,
@@ -235,7 +243,7 @@ async fn seed_reservas(
     user_id: Uuid,
     hoy: NaiveDate,
     canal_ids: &[Uuid],
-    cliente_ids: &[Uuid],
+    clientes: &[ClienteCreado],
     mesa_ids: &[Uuid],
 ) -> Vec<ReservaCreada> {
     let nombres = ["Elena", "Sergio", "Teresa", "Raúl", "Isabel", "Alejandro"];
@@ -280,11 +288,12 @@ async fn seed_reservas(
                 }
             };
 
-            /* ~50% vinculadas a un cliente del CRM */
-            let cliente_id = if i % 2 == 0 {
-                Some(cliente_ids[idx % cliente_ids.len()])
+            /* ~50% vinculadas a un cliente del CRM — usar nombre real del cliente */
+            let (nombre_r, apellidos_r, cliente_id) = if i % 2 == 0 {
+                let c = &clientes[idx % clientes.len()];
+                (c.nombre.as_str(), c.apellidos.as_str(), Some(c.id))
             } else {
-                None
+                (nombres[idx], apellidos[idx], None)
             };
 
             /* Asignar mesa FK a 4 de cada 6 reservas */
@@ -305,8 +314,8 @@ async fn seed_reservas(
                 user_id,
                 fecha,
                 horas[i],
-                nombres[idx],
-                apellidos[idx],
+                nombre_r,
+                apellidos_r,
                 personas,
                 estado,
                 if i == 0 { "Mesa junto a ventana" } else { "" },
