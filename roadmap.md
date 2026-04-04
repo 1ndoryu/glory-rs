@@ -37,12 +37,6 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 ## Pendientes (por prioridad — lo más difícil primero)
 
-### 044A-2: i18n triple (EN/ES/JP) con selector y detección de navegador
-- Implementar sistema de traducciones (react-i18next o similar)
-- Selector de idioma en header
-- Detección automática del idioma del navegador
-- Traducir todos los textos estáticos
-
 ### 044A-9: Página de hosting + adaptar Coolify Manager
 - Tarea compleja, requiere planificación detallada
 - Crear plan en App/Agente/planes/ antes de ejecutar
