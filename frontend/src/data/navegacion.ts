@@ -16,9 +16,9 @@ export const ENLACES_HEADER: EnlaceNavegacion[] = [
         href: '/soluciones/',
         hasDropdown: true,
         subEnlaces: [
-            {label: 'Hosting', href: '/soluciones/hosting/'},
-            {label: 'VPS', href: '/soluciones/vps/'},
-            {label: 'Agentes de IA', href: '/soluciones/agentes-ia/'}
+            {label: 'Hosting', href: '/soluciones/hosting/'}
+            /* [044A-7] VPS y Agentes de IA ocultos temporalmente.
+             * Reactivar cuando las páginas estén listas. */
         ]
     }
 ];
