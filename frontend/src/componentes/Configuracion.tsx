@@ -29,7 +29,8 @@ function Configuracion() {
       const resp = await axios.post(`/api/${endpoint}`);
       toast.success(descripcion, { description: resp.data.mensaje });
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { mensaje?: string } } })?.response?.data?.mensaje ?? 'No se pudo conectar con el servidor';
+      /* [044A-3] ErrorResponse usa 'message', no 'mensaje' */
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'No se pudo conectar con el servidor';
       toast.error('Error', { description: msg });
     } finally {
       setOperandoSeed(false);
