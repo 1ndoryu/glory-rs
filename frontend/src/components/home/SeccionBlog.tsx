@@ -9,6 +9,7 @@ import {useTranslation} from 'react-i18next';
 import {SeccionHeader} from '../ui/SeccionHeader';
 import {obtenerImagenBlog} from '../../hooks/useImagenes';
 import {POSTS_BLOG} from '../../data/blog';
+import {navegar} from '../../navegacionSPA';
 import './SeccionBlog.css';
 
 export const SeccionBlog: React.FC = () => {
@@ -21,9 +22,9 @@ export const SeccionBlog: React.FC = () => {
 
                 <div className="blogGrid">
                     {POSTS_BLOG.slice(0, 3).map(post => (
-                        <article key={post.id} className="blogCard">
+                        <a key={post.id} href={post.link || '#'} onClick={(e) => { e.preventDefault(); if (post.link) navegar(post.link); }} className="blogCard">
                             <div className="blogImagenWrapper">
-                                <img src={obtenerImagenBlog(post.id)} alt={post.titulo} className="blogImagen" loading="lazy" />
+                                <img src={post.imagen || obtenerImagenBlog(post.id)} alt={post.titulo} className="blogImagen" loading="lazy" />
                             </div>
                             <div className="blogInfo">
                                 <div className="blogMeta">
@@ -34,7 +35,7 @@ export const SeccionBlog: React.FC = () => {
                                 <h3 className="blogTitulo">{post.titulo}</h3>
                                 <p className="blogResumen">{post.resumen}</p>
                             </div>
-                        </article>
+                        </a>
                     ))}
                 </div>
             </div>

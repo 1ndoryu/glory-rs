@@ -13,6 +13,7 @@ import {SeccionContacto} from '../components/home/SeccionContacto';
 import {POSTS_BLOG} from '../data/blog';
 import {PostBlog} from '../types/contenido';
 import {obtenerImagenBlog} from '../hooks/useImagenes';
+import {navegar} from '../navegacionSPA';
 
 interface BlogIslandProps {
     titulo?: string;
@@ -27,7 +28,7 @@ const TarjetaArticulo: React.FC<{post: PostBlog; destacado?: boolean}> = ({post,
     const imagenFinal = post.imagen || obtenerImagenBlog(post.id);
 
     return (
-        <a href={post.link || '#'} className={`tarjetaArticulo ${destacado ? 'tarjetaArticuloDestacado' : ''}`}>
+        <a href={post.link || '#'} onClick={(e) => { e.preventDefault(); if (post.link) navegar(post.link); }} className={`tarjetaArticulo ${destacado ? 'tarjetaArticuloDestacado' : ''}`}>
             <div className="articuloImagenWrapper">
                 <img src={imagenFinal} alt={post.titulo} className="articuloImagen" loading="lazy" />
             </div>

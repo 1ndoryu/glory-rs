@@ -1,36 +1,36 @@
 /*
  * Datos de blog centralizados.
- * [044A-4] Post real sobre Kamples. Placeholders eliminados.
+ * [044A-33] Artículo de Kamples traducido a español, imagen corregida, navegación SPA funcional.
  */
 import {PostBlog} from '../types/contenido';
 
 const POSTS_FALLBACK: PostBlog[] = [
     {
         id: 1,
-        titulo: 'Kamples: Reimagining How Musicians Discover and Share Samples',
-        resumen: 'An open-source platform that combines a sample library, recommendation engine, lightweight DAW, and social features — think WhoSampled meets Pinterest for music production.',
+        titulo: 'Kamples: Reimaginando cómo los músicos descubren y comparten samples',
+        resumen: 'Una plataforma open-source que combina una librería de samples, motor de recomendaciones, DAW ligero y funciones sociales — como WhoSampled con Pinterest para producción musical.',
         contenido: `
-            <p>Music production today relies heavily on samples — but discovering, organizing, and sharing them remains fragmented across dozens of tools and communities. <strong>Kamples</strong> is our answer to that problem: a single platform where producers can explore, preview, and share samples with the depth of WhoSampled and the visual curation of Pinterest.</p>
+            <p>La producción musical actual depende en gran parte de samples, pero descubrirlos, organizarlos y compartirlos sigue fragmentado entre docenas de herramientas y comunidades. <strong>Kamples</strong> es nuestra respuesta a ese problema: una plataforma única donde los productores pueden explorar, previsualizar y compartir samples con la profundidad de WhoSampled y la curación visual de Pinterest.</p>
 
-            <h2>The Problem</h2>
-            <p>Producers juggle between sample marketplaces, DAWs, and social media to find what they need. There's no single place that lets you <em>discover</em> samples algorithmically, <em>preview</em> them in context, and <em>share</em> collections with your community — all in one flow.</p>
+            <h2>El Problema</h2>
+            <p>Los productores hacen malabarismos entre marketplaces de samples, DAWs y redes sociales para encontrar lo que necesitan. No existe un solo lugar que te permita <em>descubrir</em> samples algorítmicamente, <em>previsualizarlos</em> en contexto y <em>compartir</em> colecciones con tu comunidad — todo en un mismo flujo.</p>
 
-            <h2>What Kamples Does</h2>
-            <p>At its core, Kamples is a sample library with three layers built on top:</p>
+            <h2>Qué hace Kamples</h2>
+            <p>En su núcleo, Kamples es una librería de samples con tres capas construidas encima:</p>
             <ul>
-                <li><strong>Recommendation Engine</strong> — An algorithm that surfaces samples based on genre, mood, BPM, key, and your usage history. The more you interact, the better it gets.</li>
-                <li><strong>Integrated DAW</strong> — A lightweight, browser-based workstation for previewing samples in context. Layer, mix, and test before downloading. No need to leave the platform.</li>
-                <li><strong>Social Layer</strong> — Organize samples into collections and boards (like Pinterest). Follow other producers, see what they're sampling, and explore "more ideas like this" chains that surface unexpected connections.</li>
+                <li><strong>Motor de Recomendaciones</strong> — Un algoritmo que sugiere samples según género, mood, BPM, tonalidad y tu historial de uso. Cuanto más interactúas, mejor se vuelve.</li>
+                <li><strong>DAW Integrado</strong> — Un workstation ligero basado en el navegador para previsualizar samples en contexto. Capas, mezcla y prueba antes de descargar. Sin necesidad de salir de la plataforma.</li>
+                <li><strong>Capa Social</strong> — Organiza samples en colecciones y tableros (como Pinterest). Sigue a otros productores, mira qué están sampleando y explora cadenas de "más ideas como esta" que revelan conexiones inesperadas.</li>
             </ul>
 
             <h2>Open Source</h2>
-            <p>Kamples is fully open source. We believe tools for creative expression should be transparent and community-driven. Contributions are welcome — from algorithm improvements to UI components to new audio processing features.</p>
+            <p>Kamples es completamente open source. Creemos que las herramientas para la expresión creativa deben ser transparentes e impulsadas por la comunidad. Las contribuciones son bienvenidas — desde mejoras en el algoritmo hasta componentes de UI y nuevas funciones de procesamiento de audio.</p>
 
-            <h2>Try It</h2>
-            <p>Kamples is live at <strong>kamples.com</strong>. Sign up, upload your first sample, and start building your library. The platform is free for individual producers — we're exploring sustainability models for teams and commercial use.</p>
+            <h2>Pruébalo</h2>
+            <p>Kamples está disponible en <strong>kamples.com</strong>. Regístrate, sube tu primer sample y empieza a construir tu librería. La plataforma es gratuita para productores individuales — estamos explorando modelos de sostenibilidad para equipos y uso comercial.</p>
         `,
-        fecha: 'Apr 4, 2026',
-        categoria: 'Product',
+        fecha: '4 Abr, 2026',
+        categoria: 'Producto',
         link: '/blog/kamples-reimagining-sample-discovery',
         imagen: '/assets/Proyectos portadas/Kamples portada.jpg'
     }
