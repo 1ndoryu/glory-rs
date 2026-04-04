@@ -72,11 +72,11 @@
     margin: 0;
 }
 
-/* Tabs */
+/* [044A-19] Tabs - margin-bottom reducido a la mitad */
 .modalTabs {
     display: flex;
     gap: 0;
-    margin-bottom: var(--spacing-xl);
+    margin-bottom: calc(var(--spacing-xl) / 2);
     border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
