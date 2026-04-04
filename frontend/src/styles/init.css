@@ -1,0 +1,153 @@
+/*
+ * Inicializacion y Fuentes
+ */
+
+@font-face {
+    font-family: 'Neue Montreal';
+    src: url('../../../App/Assets/fonts/NeueMontreal-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Neue Montreal';
+    src: url('../../../App/Assets/fonts/NeueMontreal-Medium.woff2') format('woff2');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'JetBrains Mono';
+    src: url('../../../App/Assets/fonts/JetBrainsMono-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Anthropic Sans';
+    src: url('../../../App/Assets/fonts/AnthropicSans-Roman.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Anthropic Serif';
+    src: url('../../../App/Assets/fonts/AnthropicSerif-Roman.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Anthropic Serif';
+    src: url('../../../App/Assets/fonts/AnthropicSerif-Italic.woff2') format('woff2');
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+}
+
+/* Reset basico */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/*
+ * Clase utilitaria para lectores de pantalla (sr-only).
+ * Oculta visualmente pero accesible para screen readers.
+ */
+.soloLectores {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/*
+ * Skip link: visible solo al recibir foco (Tab).
+ * Permite saltar al contenido principal.
+ */
+.enlaceSaltarContenido {
+    position: fixed;
+    top: -100%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10000;
+    padding: 0.75rem 1.5rem;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    border: 2px solid var(--accent-primary);
+    border-radius: 0.5rem;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    text-decoration: none;
+    transition: top 0.2s ease;
+}
+
+.enlaceSaltarContenido:focus {
+    top: 1rem;
+    outline: 2px solid var(--accent-primary);
+    outline-offset: 2px;
+}
+
+html,
+body {
+    height: 100%;
+    width: 100%;
+    font-family: var(--font-sans-alt);
+    color: var(--text-primary);
+    background-color: var(--bg-primary);
+    -webkit-font-smoothing: antialiased;
+}
+
+html {
+    overflow-x: hidden;
+}
+
+
+/* SPA Loader Overlay */
+.spaLoader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg-primary);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.spaLoader.visible {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.spaLoaderLogo {
+    width: 64px;
+    height: 64px;
+    animation: pulseLogo 1.5s infinite ease-in-out;
+    color: var(--text-primary);
+}
+
+@keyframes pulseLogo {
+    0% { transform: scale(0.95); opacity: 0.5; }
+    50% { transform: scale(1.05); opacity: 1; }
+    100% { transform: scale(0.95); opacity: 0.5; }
+}

@@ -1,0 +1,70 @@
+/*
+ * CSS: PanelIsland
+ * Layout principal del panel con sidebar lateral.
+ * Sidebar a la izquierda, contenido principal a la derecha.
+ */
+.panelContenedor {
+    min-height: 80vh;
+    max-width: var(--container-width);
+    margin: 0 auto;
+    padding: var(--spacing-md) 0 var(--spacing-3xl);
+}
+
+/* Layout horizontal: sidebar + contenido */
+.panelLayout {
+    display: flex;
+    min-height: 60vh;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+/* Contenido principal (a la derecha del sidebar) */
+.panelContenidoPrincipal {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.panelContenidoCabecera {
+    padding: var(--spacing-lg) var(--spacing-xl);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    display: none;
+}
+
+.panelTitulo {
+    font-family: var(--font-primary);
+    font-size: var(--text-2xl);
+    font-weight: 500;
+    color: var(--brand-black);
+    margin: 0;
+}
+
+.panelContenido {
+    flex: 1;
+    padding: var(--spacing-xl);
+}
+
+/* Responsive: stack vertical en movil */
+@media (max-width: 768px) {
+    .panelContenedor {
+        padding: 15vh var(--spacing-md) var(--spacing-xl);
+    }
+
+    .panelLayout {
+        flex-direction: column;
+        border-radius: 12px;
+    }
+
+    .panelContenidoCabecera {
+        padding: var(--spacing-md) var(--spacing-lg);
+    }
+
+    .panelTitulo {
+        font-size: var(--text-xl);
+    }
+
+    .panelContenido {
+        padding: var(--spacing-lg);
+    }
+}

@@ -1,0 +1,163 @@
+/* Seccion Clientes */
+.seccionClientes {
+    padding: var(--spacing-xl) 0;
+    background-color: var(--bg-secondary);
+    color: var(--bg-primary);
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+/* Override para SeccionHeader dentro de este contexto oscuro */
+.seccionClientes .seccionHeader {
+    border-bottom-color: rgba(255, 255, 255, 0.2);
+}
+
+.seccionClientes .seccionTitulo {
+    color: var(--bg-primary);
+    opacity: 0.9;
+}
+
+.clientesContenedor {
+    width: 100%;
+    max-width: var(--container-width);
+    padding: 0 var(--spacing-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+/* Header manejado por SeccionHeader.css */
+
+.clientesBotonBox {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid var(--border-color); /* o un color mas suave */
+    border-radius: 4px; /* Ajustar segun variables globales si hay radius */
+    background-color: transparent;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    text-decoration: none;
+    color: var(--text-primary);
+}
+
+.clientesBotonBox:hover {
+    background-color: var(--overlay-hover);
+}
+
+.clientesBotonIcono {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background-color: var(--text-primary);
+    color: var(--bg-primary);
+    border-radius: 4px;
+}
+
+.clientesBotonTexto {
+    display: flex;
+    flex-direction: column;
+}
+
+.clientesBotonTitulo {
+    font-family: var(--font-sans-alt);
+    font-size: var(--text-base);
+    font-weight: 500;
+    line-height: 1.2;
+}
+
+.clientesBotonSubtitulo {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+}
+
+/* Grid de Logos */
+.clientesGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-md);
+}
+
+@media (min-width: 768px) {
+    .clientesGrid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .clientesGrid {
+        grid-template-columns: repeat(6, 1fr);
+    }
+}
+
+.clienteLogoCard {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 3/2;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    padding: var(--spacing-md);
+    transition: background-color 0.3s ease;
+    overflow: hidden; /* Necesario para el hack de color SVG */
+}
+
+.clienteLogoCard:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.clienteLogoImg {
+    max-width: 80%;
+    height: 40px;
+    width: auto;
+    object-fit: contain;
+
+    /*
+     * Colorear SVG a blanco sobre fondo oscuro.
+     * Reemplaza el hack de translateY/drop-shadow que causaba carga intermitente.
+     */
+    filter: brightness(0) invert(1);
+    opacity: 0.7;
+
+    transition: opacity 0.3s;
+}
+
+.clienteLogoCard:hover .clienteLogoImg {
+    opacity: 1;
+}
+
+/* Texto fallback cuando no hay logo SVG */
+.clienteLogoTexto {
+    font-family: var(--font-primary);
+    font-size: var(--text-sm);
+    color: var(--bg-primary);
+    opacity: 0.6;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.clienteLogoCard:hover .clienteLogoTexto {
+    opacity: 0.9;
+}
+
+/* Footer Texto */
+.clientesFooter {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: var(--spacing-lg);
+}
+
+.clientesDescripcion {
+    max-width: 600px;
+    font-family: var(--font-sans-alt);
+    font-size: var(--text-base);
+    color: var(--bg-primary);
+    line-height: 1.5;
+    opacity: 0.9;
+}

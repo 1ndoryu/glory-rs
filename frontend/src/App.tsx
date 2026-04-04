@@ -1,46 +1,115 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+/* [044A-1] App principal con React Router.
+ * Reemplaza el sistema de islands de WordPress por rutas SPA.
+ * Cada island se convierte en una ruta. Las páginas de detalle
+ * reciben el slug del URL param y buscan datos en data/. */
+
+import {useEffect} from 'react';
+import {BrowserRouter, Routes, Route, useNavigate, useParams} from 'react-router-dom';
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
+import {registrarNavigate} from './navegacionSPA';
+
+/* Pages (ex-islands) */
+import {BienvenidaIsland} from './islands/BienvenidaIsland';
+import {ServiciosIsland} from './islands/ServiciosIsland';
+import {ServicioIndividualIsland} from './islands/ServicioIndividualIsland';
+import {ProyectosIsland} from './islands/ProyectosIsland';
+import {ProyectoIndividualIsland} from './islands/ProyectoIndividualIsland';
+import {NosotrosIsland} from './islands/NosotrosIsland';
+import {BlogIsland} from './islands/BlogIsland';
+import {BlogSingleIsland} from './islands/BlogSingleIsland';
+import {SolucionesIsland} from './islands/SolucionesIsland';
+import {SolucionPlaceholderIsland} from './islands/SolucionPlaceholderIsland';
+import {ContactoIsland} from './islands/ContactoIsland';
+import {PanelIsland} from './islands/PanelIsland';
+
+/* Data para resolver slugs */
+import {SERVICIOS_DATA} from './data/servicios';
+import {PROYECTOS_DATA} from './data/showcase';
+
 import './App.css';
 
 const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000,
-      retry: 1,
+    defaultOptions: {
+        queries: {
+            staleTime: 5 * 60 * 1000,
+            retry: 1,
+        },
     },
-  },
 });
 
+/* Registra navigate de React Router en el módulo navegacionSPA para compatibilidad */
+function NavigateRegistrar() {
+    const navigate = useNavigate();
+    useEffect(() => {
+        registrarNavigate((to: string) => navigate(to));
+    }, [navigate]);
+    return null;
+}
+
+/* Wrapper: resuelve slug de servicio a props */
+function ServicioDetallePage() {
+    const {slug} = useParams<{slug: string}>();
+    const servicio = SERVICIOS_DATA.find(s => {
+        const sSlug = s.link?.split('/').filter(Boolean).pop() || '';
+        return sSlug === slug || String(s.id) === slug;
+    });
+    return (
+        <ServicioIndividualIsland
+            titulo={servicio?.titulo}
+            descripcion={servicio?.descripcion}
+            slug={slug}
+        />
+    );
+}
+
+/* Wrapper: resuelve slug de proyecto a props */
+function ProyectoDetallePage() {
+    const {slug} = useParams<{slug: string}>();
+    const proyecto = PROYECTOS_DATA.find(p => {
+        const pSlug = p.link?.split('/').filter(Boolean).pop() || '';
+        return pSlug === slug || String(p.id) === slug;
+    });
+    return (
+        <ProyectoIndividualIsland
+            titulo={proyecto?.titulo}
+            descripcion={proyecto?.descripcion}
+            cliente={proyecto?.cliente}
+            categorias={Array.isArray(proyecto?.categorias) ? proyecto.categorias.join(', ') : proyecto?.categorias}
+            slug={slug}
+        />
+    );
+}
+
+/* Wrapper: resuelve slug de blog post */
+function BlogDetallePage() {
+    const {slug} = useParams<{slug: string}>();
+    return <BlogSingleIsland slug={slug} />;
+}
+
 function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <div className="aplicacion">
-        <h1 className="titulo">Glory RS</h1>
-        <p className="descripcion">
-          Template funcionando correctamente. Backend Rust + Frontend React + OpenAPI.
-        </p>
-        <nav className="navegacion">
-          <a
-            className="enlace"
-            href="http://localhost:3000/swagger-ui/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Swagger UI — Documentación de la API
-          </a>
-        </nav>
-        <section className="instrucciones">
-          <h2>Primeros pasos</h2>
-          <ol>
-            <li>Copia <code>.env.example</code> a <code>.env</code> y configura tus variables</li>
-            <li>Crea la base de datos PostgreSQL</li>
-            <li>Ejecuta el backend: <code>cargo run</code></li>
-            <li>Ejecuta el frontend: <code>cd frontend && npm run dev</code></li>
-            <li>Genera el cliente API: <code>npm run codegen</code></li>
-          </ol>
-        </section>
-      </div>
-    </QueryClientProvider>
-  );
+    return (
+        <QueryClientProvider client={queryClient}>
+            <BrowserRouter>
+                <NavigateRegistrar />
+                <Routes>
+                    <Route path="/" element={<BienvenidaIsland />} />
+                    <Route path="/servicios" element={<ServiciosIsland />} />
+                    <Route path="/servicios/:slug" element={<ServicioDetallePage />} />
+                    <Route path="/proyectos" element={<ProyectosIsland />} />
+                    <Route path="/proyectos/:slug" element={<ProyectoDetallePage />} />
+                    <Route path="/nosotros" element={<NosotrosIsland />} />
+                    <Route path="/blog" element={<BlogIsland />} />
+                    <Route path="/blog/:slug" element={<BlogDetallePage />} />
+                    <Route path="/soluciones" element={<SolucionesIsland />} />
+                    <Route path="/soluciones/:slug" element={<SolucionPlaceholderIsland />} />
+                    <Route path="/contacto" element={<ContactoIsland />} />
+                    <Route path="/panel" element={<PanelIsland />} />
+                    {/* Catch-all: redirige al home */}
+                    <Route path="*" element={<BienvenidaIsland />} />
+                </Routes>
+            </BrowserRouter>
+        </QueryClientProvider>
+    );
 }
 
 export default App;

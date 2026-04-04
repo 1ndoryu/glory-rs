@@ -1,0 +1,10 @@
+/*
+ * Estilos para la pagina de bienvenida (Hero)
+ */
+
+.mainContainer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xl);
+    background: var(--bg-primary);
+}

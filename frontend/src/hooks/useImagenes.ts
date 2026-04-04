@@ -1,0 +1,51 @@
+/* [044A-1] Helper y Hook centralizados para gestión de imágenes.
+ * Migrado de import.meta.glob (WordPress/Glory) a rutas estáticas en /assets/.
+ * Las imágenes viven en frontend/public/assets/. */
+import {useMemo} from 'react';
+
+/* Sin import.meta.glob — usamos placeholders hasta tener imágenes reales en /assets/ */
+export const IMAGENES_COLORS: string[] = [];
+export const IMAGENES_SHOWCASE: string[] = [];
+export const LOGOS_CLIENTES: string[] = [];
+
+export const IMAGENES_DISPONIBLES = IMAGENES_COLORS;
+
+const PLACEHOLDER_DEFAULT = 'https://placehold.co/600x600/e8f0e6/151411?text=Service';
+const PLACEHOLDER_SHOWCASE = 'https://placehold.co/400x500/e2e8f0/1e293b?text=Project';
+const PLACEHOLDER_BLOG = 'https://placehold.co/600x400/e2e8f0/1e293b?text=Blog';
+
+/**
+ * Obtiene una imagen del catálogo "colors" de forma cíclica.
+ */
+export const obtenerImagen = (indice: number): string => {
+    if (IMAGENES_COLORS.length === 0) return PLACEHOLDER_DEFAULT;
+    return IMAGENES_COLORS[indice % IMAGENES_COLORS.length];
+};
+
+/**
+ * Obtiene una imagen del catálogo "showcase" de forma cíclica.
+ */
+export const obtenerImagenShowcase = (indice: number): string => {
+    if (IMAGENES_SHOWCASE.length === 0) return PLACEHOLDER_SHOWCASE;
+    return IMAGENES_SHOWCASE[indice % IMAGENES_SHOWCASE.length];
+};
+
+/**
+ * Obtiene una imagen "colors" determinista para blog (basada en ID).
+ */
+export const obtenerImagenBlog = (id: number): string => {
+    if (IMAGENES_COLORS.length === 0) return PLACEHOLDER_BLOG;
+    return IMAGENES_COLORS[id % IMAGENES_COLORS.length];
+};
+
+/**
+ * Hook para usar las imágenes "colors" en componentes.
+ */
+export const useImagenes = () => {
+    const imagenes = useMemo(() => IMAGENES_COLORS, []);
+
+    return {
+        imagenes,
+        obtenerImagen
+    };
+};

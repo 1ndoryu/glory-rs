@@ -1,0 +1,112 @@
+/* Estilos para SeccionSkillsServicio */
+.seccionSkillsServicio {
+    padding: var(--spacing-2xl) 0;
+    background-color: var(--bg-secondary);
+    color: var(--bg-primary);
+    width: 100%;
+    margin: 0;
+}
+
+/* Ajustes de color para el Header en fondo oscuro */
+.seccionSkillsServicio .seccionHeader {
+    border-bottom-color: var(--white-20);
+}
+
+.seccionSkillsServicio .seccionTitulo {
+    color: var(--bg-primary);
+}
+
+.skillsContenedor {
+    max-width: var(--container-width);
+    margin: 0 auto;
+    padding: 0 var(--spacing-lg);
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xl);
+}
+
+.skillsLista {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.skillItem {
+    display: flex;
+    flex-direction: column;
+    padding: var(--spacing-lg) 0;
+    border-bottom: 1px solid var(--white-15);
+    transition: border-color var(--transicion-rapida);
+    cursor: pointer;
+    user-select: none;
+}
+
+.skillItem:hover {
+    border-bottom-color: var(--bg-primary);
+}
+
+.skillItemActivo {
+    border-bottom-color: var(--white-40);
+}
+
+.skillContenido {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.skillTitulo {
+    font-family: var(--font-primary);
+    font-size: var(--text-2xl);
+    color: var(--bg-primary);
+    margin: 0;
+    font-weight: 400;
+}
+
+.skillIcono {
+    color: var(--bg-primary);
+    display: flex;
+    align-items: center;
+}
+
+.skillArrow {
+    width: 24px;
+    height: 24px;
+    transition: transform var(--transicion-rapida);
+}
+
+.skillItem:hover .skillArrow {
+    transform: translateX(5px);
+}
+
+.skillItemActivo .skillArrow {
+    transform: rotate(90deg);
+}
+
+/* Descripción expandible al hacer click */
+.skillDescripcion {
+    padding-top: var(--spacing-md);
+    animation: skillDescripcionEntrada 0.25s ease-out;
+}
+
+.skillDescripcion p {
+    font-family: var(--font-serif);
+    font-size: var(--text-lg);
+    color: var(--white-40);
+    line-height: 1.6;
+    margin: 0;
+    max-width: 60ch;
+}
+
+@keyframes skillDescripcionEntrada {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

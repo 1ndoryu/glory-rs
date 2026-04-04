@@ -24,3 +24,21 @@ desktop.ini
 
 # Logs
 *.log
+/cliente 
+/node_modules/
+glory-rust-template.code-workspace
+frontend/openapi-debug.json
+
+# App legacy (PHP files not tracked, React already migrated to frontend/)
+/App/Config/
+/App/Content/
+/App/Handlers/
+/App/Helpers/
+/App/Templates/
+/App/React/
+/App/logs/
+
+# Submodule / build artifacts
+/glory-rs/
+.sentinel-report.md
+frontend/tsconfig.tsbuildinfo

@@ -1,0 +1,142 @@
+/*
+ * Estilos para SeccionTestimonios
+ * Carrusel infinito con drag. El slide-unit se calcula via CSS vars (no JS).
+ */
+
+.seccionTestimonios {
+    padding: var(--spacing-xl) 0;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+
+    /* Dimensiones del slide para transform calc() */
+    --testimonio-card-width: 350px;
+    --testimonio-gap: var(--spacing-lg);
+    --testimonio-slide-unit: calc(var(--testimonio-card-width) + var(--testimonio-gap));
+}
+
+@media (min-width: 768px) {
+    .seccionTestimonios {
+        --testimonio-card-width: 450px;
+    }
+}
+
+.testimoniosContenedor {
+    width: 100%;
+    max-width: var(--container-width);
+    padding: 0 var(--spacing-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+/* Header manejado por SeccionHeader.css */
+
+/* Contenedor del header + botón de escribir */
+.testimoniosHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+}
+
+.testimoniosBotonEscribir {
+    font-family: var(--font-primary);
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+    background: none;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color var(--transicion-rapida), border-color var(--transicion-rapida);
+}
+
+.testimoniosBotonEscribir:hover {
+    color: var(--brand-black);
+    border-color: rgba(0, 0, 0, 0.3);
+}
+
+/* Pista del Carrusel */
+.testimoniosCarruselWindow {
+    width: 100%;
+    overflow: visible; /* Permitir que se vean hasta el borde de la pantalla */
+    position: relative;
+    /* Cursor para indicar interactividad */
+    cursor: grab;
+}
+
+.testimoniosCarruselWindow:active {
+    cursor: grabbing;
+}
+
+.testimoniosPista {
+    display: flex;
+    gap: var(--spacing-lg);
+    width: max-content;
+    will-change: transform;
+    /* Transicion controlada por React/JS */
+}
+
+/* Tarjeta de Testimonio */
+.testimonioCard {
+    width: var(--testimonio-card-width);
+    min-width: 300px;
+    flex: 0 0 auto;
+
+    background-color: var(--bg-card-subtle); /* Fondo gris claro suave */
+    border-radius: 8px;
+    padding: var(--spacing-xl);
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+
+    /* Evitar seleccion de texto al arrastrar */
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.testimonioTexto {
+    font-family: var(--font-primary); /* Asumiendo fuente clean sans o serif */
+    font-size: var(--text-xl);
+    line-height: 1.5;
+    color: var(--text-primary);
+}
+
+.testimonioAutor {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-top: auto;
+}
+
+.autorAvatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    background-color: var(--border-color); /* Placeholder bg */
+}
+
+.autorInfo {
+    display: flex;
+    flex-direction: column;
+}
+
+.autorNombre {
+    font-family: var(--font-sans-alt);
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+}
+
+.autorCargo {
+    font-family: var(--font-sans-alt);
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+}
