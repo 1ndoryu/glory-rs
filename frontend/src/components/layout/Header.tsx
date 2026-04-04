@@ -14,7 +14,6 @@ import {ENLACES_HEADER} from '../../data/navegacion';
 import {ModalAutenticacion} from './ModalAutenticacion';
 import {navegar} from '../../navegacionSPA';
 import {Logo} from '../ui/Logo';
-import {LanguageSelector} from '../ui/LanguageSelector';
 import {useAuthStore} from '../../stores/authStore';
 import '../../styles/header.css';
 
@@ -133,7 +132,7 @@ export const Header: React.FC = () => {
                 </nav>
 
                 <div className="accionCabecera" role="group" aria-label={t('accessibility.user_actions')}>
-                    <LanguageSelector />
+                    {/* [044A-37] LanguageSelector removido del header por petición del usuario. Se mantiene en footer. */}
                     {logueado ? (
                         <>
                             <a className="enlaceAcceder" href={hrefAccion!}>

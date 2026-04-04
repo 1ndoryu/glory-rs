@@ -41,4 +41,3 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 - borra el servicio de chatbot y tambien
 
 - Planifica la tarea de integrar un chat a Nakomi donde los clientes puedan hablar directamente con los encargados, por supuesto, esto es una tarea complicada, significa muchas cosas, 1. Que los clientes pueden escribir sin estar logeados. 2. Integrar inteligencia artificial para que responda cuando no haya personal disponible. 3. Implica que el personal puede intervenir en una conversacion que esta siendo atentida por una IA 4. Implica gestionar bien un panel para el personal para ver las conversaciones. 5. El personal puede ver lo que escribe el usuario antes de enviar.
-- Quita el selectorIdioma del header
