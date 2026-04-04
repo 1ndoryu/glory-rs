@@ -39,3 +39,12 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 (sin tareas pendientes)
 
+
+
+- Pon en .proyectoHeroMeta font weight 500 !important
+- Quita de .heroTitulo span la linea. 
+- .tarjetaPlanDescripcion necesita 17px y .tarjetaPlanItemIncluido .tarjetaPlanItemTexto sin font serif
+- Hay botones con <button class="botonBase botonPrimario botonMediano ctaBotonPrimario">Contratar desde $997</button> que estan puestos y no son coherentes con el precio minimo del servicio que aparece. 
+- Cuando hago un arrastre a carruselTitulo automaticamente se da click
+- Las imagenes de la galería dentro de los proyecto sigue sin ser cuadradas. 
+- de .skillDescripcion p quita borra los estilos de  /* font-family: var(--font-serif); *//* font-size: var(--text-lg);
