@@ -326,3 +326,66 @@ Binario: `.agent/coolify-manager-rs/target/release/coolify-manager.exe`
 - `codeSentinel.analyzeFile` — analizar archivo actual
 - `cssVarsValidator.exportReport` — reporte CSS exportable (si disponible)
 - `cssVarsValidator.scanOrphanClasses` — clases CSS sin uso (si disponible)
+
+---
+
+## VI. ROADMAP WATCHER (verificacion automatica de tareas pendientes)
+
+Al iniciar sesion, verificar que existan estos dos archivos. Si no existen, crearlos exactamente como se describe aqui.
+
+### `scripts/check-roadmap.mjs`
+Script Node.js que parsea `roadmap.md` (y `App/roadmap.md` si existe) buscando tareas pendientes bajo secciones con titulo que contiene "pendiente". Genera salida en formato `archivo:linea:columna: warning: TAREA PENDIENTE: texto` compatible con VS Code problemMatcher.
+
+**Funcionalidad requerida:**
+- Buscar `roadmap.md` en raiz del proyecto y `App/roadmap.md`
+- Detectar secciones `## Pendientes` (case-insensitive, busca "pendiente" en lineas que empiezan con `#`)
+- Cada linea que inicia con `-`, `###` o `--` dentro de la seccion pendientes = tarea
+- Ignorar lineas vacias, `(sin tareas pendientes)` y parentesis decorativos
+- Modo `--watch`: usar `watchFile` con intervalo 2s para re-parsear automaticamente
+- `process.exit(1)` si hay tareas pendientes (modo normal), `0` si no hay
+- Agregar al `package.json`: `"roadmap": "node scripts/check-roadmap.mjs"` y `"roadmap:watch": "node scripts/check-roadmap.mjs --watch"`
+
+### `.vscode/tasks.json`
+Tarea de VS Code que ejecuta el watcher en segundo plano al abrir el proyecto.
+
+```json
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Roadmap Watcher",
+            "type": "shell",
+            "command": "node",
+            "args": ["scripts/check-roadmap.mjs", "--watch"],
+            "isBackground": true,
+            "problemMatcher": {
+                "owner": "roadmap-watcher",
+                "fileLocation": "absolute",
+                "pattern": {
+                    "regexp": "^(.+):(\\d+):(\\d+):\\s+warning:\\s+(.+)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "message": 4
+                },
+                "severity": "warning",
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "^\\[roadmap-watcher\\] (Cambio detectado|Vigilando)",
+                    "endsPattern": "^\\[roadmap-watcher\\] \\d+ tarea|^\\[roadmap-watcher\\] Sin tareas"
+                }
+            },
+            "runOptions": {
+                "runOn": "folderOpen"
+            },
+            "presentation": {
+                "reveal": "silent",
+                "panel": "dedicated",
+                "showReuseMessage": false
+            }
+        }
+    ]
+}
+```
+
+**Nota:** `.vscode/` esta en `.gitignore`, por lo que `tasks.json` se crea localmente. El agente debe verificar su existencia al inicio de cada sesion y recrearlo si falta.
