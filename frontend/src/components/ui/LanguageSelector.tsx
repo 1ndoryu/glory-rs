@@ -5,9 +5,9 @@ import {useTranslation} from 'react-i18next';
 import './LanguageSelector.css';
 
 const LANGUAGES = [
-    {code: 'es', label: 'ES'},
-    {code: 'en', label: 'EN'},
-    {code: 'ja', label: 'JA'}
+    {code: 'es', label: 'ES', nombre: 'Español'},
+    {code: 'en', label: 'EN', nombre: 'English'},
+    {code: 'ja', label: 'JA', nombre: '日本語'}
 ];
 
 export const LanguageSelector = () => {
@@ -50,7 +50,7 @@ export const LanguageSelector = () => {
                                 className={`selectorIdiomaOpcion ${lang.code === i18n.language ? 'activo' : ''}`}
                                 onClick={() => cambiarIdioma(lang.code)}
                             >
-                                {lang.label}
+                                {lang.nombre}
                             </button>
                         </li>
                     ))}

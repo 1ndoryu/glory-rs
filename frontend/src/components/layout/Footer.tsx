@@ -6,6 +6,7 @@
 import React, {useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {Button} from '../ui/Button';
+import {LanguageSelector} from '../ui/LanguageSelector';
 import {ENLACES_FOOTER} from '../../data/navegacion';
 import './Footer.css';
 
@@ -126,6 +127,8 @@ export const Footer: React.FC = () => {
                     </nav>
 
                     <span className="footerCopyright">{t('footer.copyright', {year: currentYear})}</span>
+
+                    <LanguageSelector />
                 </div>
             </div>
         </footer>
