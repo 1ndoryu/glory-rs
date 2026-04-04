@@ -30,4 +30,4 @@
 
 ## Tareas pendientes
 
-- Sube los cambios al servidor. Asegurate de que este actualizado el seed.
+(sin tareas pendientes)
