@@ -7,9 +7,9 @@
 
 :root {
     /* Colors - Backgrounds */
-    --bg-primary: #f0eee6;
+    --bg-primary: #fdfcfc;
     --bg-secondary: #141413;
-    --bg-accent: #eef2ff;
+    --bg-accent: #f5f3f1;
     --overlay-hover: rgba(0, 0, 0, 0.05);
 
     /* Colors - Cards */

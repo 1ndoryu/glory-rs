@@ -110,12 +110,12 @@ body {
     color: var(--text-primary);
     background-color: var(--bg-primary);
     -webkit-font-smoothing: antialiased;
+    
 }
 
 html {
     overflow-x: hidden;
 }
-
 
 /* SPA Loader Overlay */
 .spaLoader {
@@ -147,7 +147,25 @@ html {
 }
 
 @keyframes pulseLogo {
-    0% { transform: scale(0.95); opacity: 0.5; }
-    50% { transform: scale(1.05); opacity: 1; }
-    100% { transform: scale(0.95); opacity: 0.5; }
+    0% {
+        transform: scale(0.95);
+        opacity: 0.5;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(0.95);
+        opacity: 0.5;
+    }
+}
+
+a {
+    text-decoration: unset !important;
+    color: unset;
+}
+
+h2, h3, h4, h5, h6, title, p, span, label, button {
+    font-weight: unset;
 }
