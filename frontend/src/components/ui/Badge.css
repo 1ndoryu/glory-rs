@@ -1,6 +1,6 @@
 /* Estilos base para el componente Badge */
 .badge {
-    font-size: var(--text-sm);
+    font-size: 12px;
     padding: 4px 12px;
     border-radius: 100px;
     border: 1px solid var(--border-color);

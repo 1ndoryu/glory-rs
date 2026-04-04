@@ -32,11 +32,11 @@
     },
     "contact": {
         "title": "Contacto",
-        "section_title": "Get in Touch",
-        "heading": "Have a project in mind?",
-        "description": "Send some details about your project or inquiry. We can help your business designing a website, digital product, or building a custom solution.",
-        "btn_contact": "Contact",
-        "btn_hire": "Hire Service",
+        "section_title": "Hablemos",
+        "heading": "¿Tienes un proyecto en mente?",
+        "description": "Cuéntanos los detalles de tu proyecto. Podemos ayudarte a diseñar un sitio web, producto digital o construir una solución personalizada.",
+        "btn_contact": "Contactar",
+        "btn_hire": "Contratar Servicio",
         "name_label": "Nombre completo",
         "name_placeholder": "Tu nombre",
         "email_label": "Correo electrónico",
@@ -130,11 +130,11 @@
         "contact_info": "Contactar para más info"
     },
     "footer": {
-        "brand_desc": "Crafting digital experiences with precision and passion. Based in Copenhagen, available worldwide.",
-        "newsletter_title": "Stay updated",
-        "newsletter_placeholder": "Enter your email address",
-        "newsletter_submit": "Subscribe",
-        "newsletter_sending": "Sending...",
+        "brand_desc": "Creando experiencias digitales con precisión y pasión. Basados en Copenhague, disponibles en todo el mundo.",
+        "newsletter_title": "Mantente al día",
+        "newsletter_placeholder": "Tu correo electrónico",
+        "newsletter_submit": "Suscribir",
+        "newsletter_sending": "Enviando...",
         "newsletter_success": "¡Suscripción exitosa! Te mantendremos informado.",
         "copyright": "© {{year}} Nakomi Template. All rights reserved.",
         "privacy": "Política de Privacidad"
