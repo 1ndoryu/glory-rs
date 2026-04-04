@@ -41,20 +41,12 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 > Plan de chat: `Agente/planes/plan-live-chat-2026-04-04.md` (5 fases)
 > Plan de hosting: `Agente/planes/plan-hosting-coolify-2026-04-04.md` (5 fases)
 
-### Marketplace — Fase 0: Modelo de datos y migración
-- Nueva migración SQL con todas las tablas del marketplace (orders, payments, phases, refunds, reviews, delegations, notifications, activity_log)
-- Extender users con role, active_role, email_verified, status
-- Crear user_profiles y employee_profiles
-- Modelos Rust y repositorios
-- Seed admin@admin.com como role='admin'
-
-### Marketplace — Fase 1: Roles y auth extendido
-- JWT claims con role + active_role
-- Middleware RequireRole guards
-- Endpoint switch-role para admin
-- Frontend: authStore con role, botón switch en esquina inferior izquierda
+### Marketplace — Fase 1: Frontend roles y panel dinámico
+- Frontend: authStore con role/effectiveRole, persist en localStorage
+- Botón switch-role en esquina inferior izquierda (solo admin)
 - Panel dinámico por rol (tabs diferentes por admin/empleado/cliente)
 - Redirección / → /panel si logueado
+- Página /servicios/:slug con botón contratar
 
 ### Marketplace — Fase 2: CRUD de órdenes
 - Endpoints de órdenes: crear, listar, detalle, cancelar
