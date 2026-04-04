@@ -40,5 +40,5 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 - Hay que hacer una revisión seo completa y planificar todas las mejoras y ejecutarlas.
 - Antes habia pedido un plan completo para que el servicio de hosting funcionara, hacer todo lo necesario aprovechando que existe coolify manager-rs, esto es una tarea gigante asi que requiere una planificación buena. 
-- .tarjetaSolucion que usen el color acento de fondo
 - .modalTabs tiene mucho margin botton, reducelo a la mitad.
+- "Funcionalidad de login pendiente de integracion con backend." Completa la funcionalidad.
