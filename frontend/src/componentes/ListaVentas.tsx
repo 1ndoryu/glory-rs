@@ -5,6 +5,7 @@
  * [034A-5] Columna "Cliente" con nombre_cliente + botón para ver reserva asociada.
  * [044A-8+9] Buscador + cabeceras de columna clicables para ordenar (sort_by/sort_order). */
 
+import { useState } from 'react';
 import useListaVentas from '../hooks/useListaVentas';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,6 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Trash2, Pencil, Eye } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import FormularioVenta from './FormularioVenta';
+import FormularioReserva from './FormularioReserva';
 
 /* [283A-47] Mapa de etiquetas para turnos — el enum backend usa ascii ("manana")
  * pero la UI debe mostrar tildes ("Mañana"). */
@@ -46,6 +48,9 @@ function ListaVentas() {
     reservaDetalle,
     reservaCargando,
   } = useListaVentas();
+
+  /* [044A-11] Estado para alternar entre vista y edición en el dialog de Reserva Asociada */
+  const [editandoReserva, setEditandoReserva] = useState(false);
 
   return (
     <div className="flex flex-col gap-4">
@@ -101,13 +106,19 @@ function ListaVentas() {
         </DialogContent>
       </Dialog>
 
-      {/* [034A-5] Diálogo de detalle de la reserva asociada a una venta */}
-      <Dialog open={!!reservaIdViewer} onOpenChange={(open) => { if (!open) setReservaIdViewer(null); }}>
-        <DialogContent className="sm:max-w-md">
+      {/* [034A-5] Diálogo de detalle de la reserva asociada a una venta
+         [044A-11] Con botón para editar la reserva directamente desde aquí */}
+      <Dialog open={!!reservaIdViewer} onOpenChange={(open) => { if (!open) { setReservaIdViewer(null); setEditandoReserva(false); } }}>
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Reserva Asociada</DialogTitle>
+            <DialogTitle>{editandoReserva ? 'Editar Reserva' : 'Reserva Asociada'}</DialogTitle>
           </DialogHeader>
-          {reservaCargando ? (
+          {editandoReserva && reservaDetalle ? (
+            <FormularioReserva
+              reserva={reservaDetalle}
+              onExito={() => { setEditandoReserva(false); setReservaIdViewer(null); }}
+            />
+          ) : reservaCargando ? (
             <p className="text-sm text-muted-foreground">Cargando reserva...</p>
           ) : reservaDetalle ? (
             <div className="flex flex-col gap-3 text-sm">
@@ -151,6 +162,9 @@ function ListaVentas() {
                   <p className="font-medium">{reservaDetalle.notas}</p>
                 </div>
               )}
+              <Button variant="outline" size="sm" className="self-end mt-2" onClick={() => setEditandoReserva(true)}>
+                <Pencil className="size-3.5 mr-1.5" /> Editar reserva
+              </Button>
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">No se encontró la reserva</p>

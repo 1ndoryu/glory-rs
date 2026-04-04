@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Trash2, Pencil } from 'lucide-react';
 import FormularioReserva from './FormularioReserva';
+import DialogoFichaCliente from './DialogoFichaCliente';
 import PlanoOcupacion from './PlanoOcupacion';
 import useVistaReservas from '../hooks/useVistaReservas';
 
@@ -126,70 +127,13 @@ function ListaReservas() {
         </DialogContent>
       </Dialog>
 
-      {/* [034A-6] Diálogo de ficha del cliente */}
-      <Dialog open={!!clienteIdViewer} onOpenChange={(open) => { if (!open) setClienteIdViewer(null); }}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Ficha del Cliente</DialogTitle>
-          </DialogHeader>
-          {clienteCargando ? (
-            <p className="text-sm text-muted-foreground">Cargando cliente...</p>
-          ) : clienteDetalle ? (
-            <div className="flex flex-col gap-3 text-sm">
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <span className="text-muted-foreground">Nombre</span>
-                  <p className="font-medium">{clienteDetalle.nombre} {clienteDetalle.apellidos}</p>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Teléfono</span>
-                  <p className="font-medium">{clienteDetalle.prefijo_telefono ? `${clienteDetalle.prefijo_telefono} ` : ''}{clienteDetalle.telefono || '—'}</p>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <span className="text-muted-foreground">Email</span>
-                  <p className="font-medium">{clienteDetalle.email || '—'}</p>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Empresa</span>
-                  <p className="font-medium">{clienteDetalle.empresa || '—'}</p>
-                </div>
-              </div>
-              {clienteDetalle.alergias && (
-                <div>
-                  <span className="text-muted-foreground">Alergias</span>
-                  <p className="font-medium">{clienteDetalle.alergias}</p>
-                </div>
-              )}
-              {(clienteDetalle.preferencias_ubicacion || clienteDetalle.preferencias_bebida) && (
-                <div className="grid grid-cols-2 gap-2">
-                  {clienteDetalle.preferencias_ubicacion && (
-                    <div>
-                      <span className="text-muted-foreground">Pref. ubicación</span>
-                      <p className="font-medium">{clienteDetalle.preferencias_ubicacion}</p>
-                    </div>
-                  )}
-                  {clienteDetalle.preferencias_bebida && (
-                    <div>
-                      <span className="text-muted-foreground">Pref. bebida</span>
-                      <p className="font-medium">{clienteDetalle.preferencias_bebida}</p>
-                    </div>
-                  )}
-                </div>
-              )}
-              {clienteDetalle.notas && (
-                <div>
-                  <span className="text-muted-foreground">Notas</span>
-                  <p className="font-medium">{clienteDetalle.notas}</p>
-                </div>
-              )}
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">No se encontró el cliente</p>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* [034A-6][044A-11] Ficha del cliente con edición inline */}
+      <DialogoFichaCliente
+        clienteId={clienteIdViewer}
+        onClose={() => setClienteIdViewer(null)}
+        clienteDetalle={clienteDetalle ?? undefined}
+        clienteCargando={clienteCargando}
+      />
 
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Cargando...</p>
