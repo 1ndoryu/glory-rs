@@ -7,6 +7,7 @@ import {useTranslation} from 'react-i18next';
 import '../styles/variables.css';
 import './SolucionPlaceholderIsland.css';
 import {LayoutPagina} from '../components/layout/LayoutPagina';
+import {SEOHead} from '../components/seo/SEOHead';
 import {SeccionContacto} from '../components/home/SeccionContacto';
 
 interface SolucionPlaceholderIslandProps {
@@ -22,6 +23,11 @@ export const SolucionPlaceholderIsland = ({
 
     return (
         <LayoutPagina className="placeholderMain" id="paginaPlaceholder">
+            <SEOHead
+                title={titulo}
+                description={descripcion}
+                path="/soluciones"
+            />
             <section className="placeholderHero">
                 <div className="placeholderContenido">
                     <span className="placeholderEtiqueta">{t('solutions_page.under_construction')}</span>

@@ -8,6 +8,7 @@ import {useTranslation} from 'react-i18next';
 import '../styles/variables.css';
 import './ContactoIsland.css';
 import {LayoutPagina} from '../components/layout/LayoutPagina';
+import {SEOHead} from '../components/seo/SEOHead';
 import {Button} from '../components/ui/Button';
 import {INFO_CONTACTO} from '../data/contacto';
 
@@ -56,6 +57,11 @@ export const ContactoIsland = ({titulo}: ContactoIslandProps): JSX.Element => {
 
     return (
         <LayoutPagina className="contactoMain" id="paginaContacto">
+            <SEOHead
+                title="Contacto"
+                description="Contáctanos para tu próximo proyecto de desarrollo web o diseño digital."
+                path="/contacto"
+            />
             {/* Hero */}
             <section className="contactoHero">
                 <div className="contactoHeroContenido">

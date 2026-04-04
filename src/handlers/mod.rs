@@ -3,6 +3,7 @@
 mod auth;
 mod health;
 mod notes;
+mod seo;
 
 use axum::Router;
 use tower_http::cors::{Any, CorsLayer};
@@ -80,6 +81,7 @@ pub fn create_router(pool: sqlx::PgPool, config: crate::config::AppConfig) -> Ro
 
     Router::new()
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
+        .merge(seo::routes())
         .nest("/api", api_routes())
         .layer(TraceLayer::new_for_http())
         .layer(cors)

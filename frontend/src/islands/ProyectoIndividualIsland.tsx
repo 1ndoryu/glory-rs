@@ -8,6 +8,7 @@ import {useTranslation} from 'react-i18next';
 import '../styles/variables.css';
 import './ProyectoIndividualIsland.css';
 import {LayoutPagina} from '../components/layout/LayoutPagina';
+import {SEOHead} from '../components/seo/SEOHead';
 import {SeccionSkillsServicio} from '../components/servicios/SeccionSkillsServicio';
 import {SeccionGaleriaServicio} from '../components/servicios/SeccionGaleriaServicio';
 import {SeccionCta} from '../components/ui/SeccionCta';
@@ -57,6 +58,11 @@ export const ProyectoIndividualIsland = ({titulo = 'Proyecto', descripcion = '',
 
     return (
         <LayoutPagina className="proyectoIndividualMain" id="paginaProyecto">
+            <SEOHead
+                title={titulo}
+                description={desc}
+                path={`/proyectos/${slug || ''}`}
+            />
             {/* Hero del proyecto */}
             <section className="proyectoHero">
                 <div className="proyectoHeroContenido">

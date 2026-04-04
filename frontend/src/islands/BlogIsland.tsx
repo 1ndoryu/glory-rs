@@ -8,6 +8,7 @@ import {useTranslation} from 'react-i18next';
 import '../styles/variables.css';
 import './BlogIsland.css';
 import {LayoutPagina} from '../components/layout/LayoutPagina';
+import {SEOHead} from '../components/seo/SEOHead';
 import {SeccionContacto} from '../components/home/SeccionContacto';
 import {POSTS_BLOG} from '../data/blog';
 import {PostBlog} from '../types/contenido';
@@ -60,6 +61,11 @@ export const BlogIsland = ({titulo}: BlogIslandProps): JSX.Element => {
 
     return (
         <LayoutPagina className="blogMain" id="paginaBlog">
+            <SEOHead
+                title="Blog"
+                description="Artículos sobre desarrollo web, diseño y tecnología del equipo de Nakomi Studio."
+                path="/blog"
+            />
             {/* Hero */}
             <section className="blogHero">
                 <div className="blogHeroContenido">

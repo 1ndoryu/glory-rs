@@ -6,6 +6,8 @@
  */
 import {useTranslation} from 'react-i18next';
 import {LayoutPagina} from '../components/layout/LayoutPagina';
+import {SEOHead} from '../components/seo/SEOHead';
+import {blogPostSchema} from '../components/seo/schemas';
 import {SeccionContacto} from '../components/home/SeccionContacto';
 import {POSTS_BLOG} from '../data/blog';
 import {obtenerImagenBlog} from '../hooks/useImagenes';
@@ -58,6 +60,13 @@ export const BlogSingleIsland = ({
 
     return (
         <LayoutPagina className="blogSingleMain" id="paginaBlogSingle">
+            <SEOHead
+                title={titulo}
+                description={contenido.substring(0, 160)}
+                path={`/blog/${slug || ''}`}
+                type="article"
+                jsonLd={blogPostSchema(titulo, contenido.substring(0, 160), slug || '', fecha)}
+            />
             {/* Hero del articulo */}
             <section className="blogSingleHero">
                 <div className="blogSingleHeroContenido">

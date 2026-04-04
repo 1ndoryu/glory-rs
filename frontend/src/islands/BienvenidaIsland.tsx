@@ -6,6 +6,8 @@
 import '../styles/variables.css';
 import '../styles/bienvenida.css';
 import {LayoutPagina} from '../components/layout/LayoutPagina';
+import {SEOHead} from '../components/seo/SEOHead';
+import {organizationSchema, websiteSchema} from '../components/seo/schemas';
 import {SeccionHero} from '../components/home/SeccionHero';
 import {SeccionServicios} from '../components/home/SeccionServicios';
 import {SeccionBlog} from '../components/home/SeccionBlog';
@@ -17,6 +19,11 @@ import {SeccionShowcase} from '../components/home/SeccionShowcase';
 export const BienvenidaIsland = (): JSX.Element => {
     return (
         <LayoutPagina className="mainContainer">
+            <SEOHead
+                description="Agencia creativa especializada en desarrollo web, diseño UI/UX y soluciones digitales."
+                path="/"
+                jsonLd={{...organizationSchema, ...websiteSchema}}
+            />
             <SeccionHero />
             <SeccionShowcase />
             <SeccionServicios />

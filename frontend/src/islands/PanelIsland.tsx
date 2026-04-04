@@ -11,6 +11,7 @@ import {SeccionMetodosPago} from '../components/panel/SeccionMetodosPago';
 import {SidebarPanel} from '../components/panel/SidebarPanel';
 import {PlaceholderSeccion} from '../components/panel/PlaceholderSeccion';
 import {TABS_PANEL, type SeccionPanel} from '../data/panel';
+import {SEOHead} from '../components/seo/SEOHead';
 import '../styles/variables.css';
 import './PanelIsland.css';
 
@@ -32,6 +33,7 @@ export const PanelIsland: React.FC = () => {
 
     return (
         <>
+            <SEOHead title="Panel" noindex />
             <HeaderPanel />
             <section id="panelUsuario" className="panelContenedor">
                 <div className="panelLayout">

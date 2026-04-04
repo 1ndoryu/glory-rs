@@ -21,6 +21,7 @@ import {SolucionesIsland} from './islands/SolucionesIsland';
 import {SolucionPlaceholderIsland} from './islands/SolucionPlaceholderIsland';
 import {ContactoIsland} from './islands/ContactoIsland';
 import {PanelIsland} from './islands/PanelIsland';
+import {NotFoundIsland} from './islands/NotFoundIsland';
 
 /* Data para resolver slugs */
 import {SERVICIOS_DATA} from './data/servicios';
@@ -104,8 +105,8 @@ function App() {
                     <Route path="/soluciones/:slug" element={<SolucionPlaceholderIsland />} />
                     <Route path="/contacto" element={<ContactoIsland />} />
                     <Route path="/panel" element={<PanelIsland />} />
-                    {/* Catch-all: redirige al home */}
-                    <Route path="*" element={<BienvenidaIsland />} />
+                    {/* [044A-28] Página 404 real en vez de redirigir silenciosamente al home */}
+                    <Route path="*" element={<NotFoundIsland />} />
                 </Routes>
             </BrowserRouter>
         </QueryClientProvider>

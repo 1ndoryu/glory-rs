@@ -7,6 +7,7 @@ import '../styles/variables.css';
 import {useTranslation} from 'react-i18next';
 import './ServiciosIsland.css';
 import {LayoutPagina} from '../components/layout/LayoutPagina';
+import {SEOHead} from '../components/seo/SEOHead';
 import {BarraFiltros} from '../components/servicios/BarraFiltros';
 import {GridServicios} from '../components/servicios/GridServicios';
 import {useServicios} from '../hooks/useServicios';
@@ -22,6 +23,11 @@ export const ServiciosIsland = ({titulo}: ServiciosIslandProps): JSX.Element => 
 
     return (
         <LayoutPagina className="serviciosMain" id="paginaServicios">
+            <SEOHead
+                title="Servicios"
+                description="Descubre nuestros servicios de desarrollo web, diseño UI/UX y soluciones digitales a medida."
+                path="/servicios"
+            />
             <section className="serviciosHero">
                 <div className="heroContenido">
                     <div>

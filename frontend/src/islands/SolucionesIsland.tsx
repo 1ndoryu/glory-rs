@@ -7,6 +7,7 @@ import {useTranslation} from 'react-i18next';
 import '../styles/variables.css';
 import './SolucionesIsland.css';
 import {LayoutPagina} from '../components/layout/LayoutPagina';
+import {SEOHead} from '../components/seo/SEOHead';
 import {SeccionContacto} from '../components/home/SeccionContacto';
 
 interface SolucionesIslandProps {
@@ -61,6 +62,11 @@ export const SolucionesIsland = ({titulo}: SolucionesIslandProps): JSX.Element =
 
     return (
         <LayoutPagina className="solucionesMain" id="paginaSoluciones">
+            <SEOHead
+                title="Soluciones"
+                description="Soluciones digitales: hosting administrado, VPS y agentes IA para tu negocio."
+                path="/soluciones"
+            />
             {/* Hero */}
             <section className="solucionesHero">
                 <div className="solucionesHeroContenido">

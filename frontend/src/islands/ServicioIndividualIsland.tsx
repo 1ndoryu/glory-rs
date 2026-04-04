@@ -8,6 +8,8 @@ import {useTranslation} from 'react-i18next';
 import '../styles/variables.css';
 import './ServicioIndividualIsland.css';
 import {LayoutPagina} from '../components/layout/LayoutPagina';
+import {SEOHead} from '../components/seo/SEOHead';
+import {serviceSchema} from '../components/seo/schemas';
 import {SeccionHeroServicio} from '../components/servicios/SeccionHeroServicio';
 import {SeccionGaleriaServicio} from '../components/servicios/SeccionGaleriaServicio';
 import {SeccionSkillsServicio} from '../components/servicios/SeccionSkillsServicio';
@@ -50,6 +52,12 @@ export const ServicioIndividualIsland = ({titulo, descripcion, precio_desde, slu
 
     return (
         <LayoutPagina className="servicioIndividualMain">
+            <SEOHead
+                title={titulo}
+                description={descripcion}
+                path={`/servicios/${slug || ''}`}
+                jsonLd={titulo && descripcion && slug ? serviceSchema(titulo, descripcion, slug) : undefined}
+            />
             <SeccionHeroServicio titulo={titulo} descripcion={descripcion} />
             <SeccionGaleriaServicio />
             <SeccionPlanesServicio slug={servicioId} />

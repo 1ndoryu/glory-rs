@@ -7,6 +7,7 @@ import {useTranslation} from 'react-i18next';
 import '../styles/variables.css';
 import './ProyectosIsland.css';
 import {LayoutPagina} from '../components/layout/LayoutPagina';
+import {SEOHead} from '../components/seo/SEOHead';
 import {PROYECTOS_DATA} from '../data/showcase';
 import {CATEGORIAS_PROYECTOS} from '../data/navegacion';
 import {BarraFiltros} from '../components/servicios/BarraFiltros';
@@ -61,6 +62,11 @@ export const ProyectosIsland = ({titulo}: ProyectosIslandProps): JSX.Element => 
 
     return (
         <LayoutPagina className="proyectosMain" id="paginaProyectos">
+            <SEOHead
+                title="Proyectos"
+                description="Portfolio de proyectos de desarrollo web y diseño digital de Nakomi Studio."
+                path="/proyectos"
+            />
             <section className="proyectosHero">
                 <div className="heroContenido">
                     <div>

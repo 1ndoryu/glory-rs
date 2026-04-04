@@ -7,6 +7,7 @@ import {useTranslation} from 'react-i18next';
 import '../styles/variables.css';
 import './NosotrosIsland.css';
 import {LayoutPagina} from '../components/layout/LayoutPagina';
+import {SEOHead} from '../components/seo/SEOHead';
 import {SeccionTestimonios} from '../components/home/SeccionTestimonios';
 import {SeccionHeader} from '../components/ui/SeccionHeader';
 import {SeccionClientes} from '../components/home/SeccionClientes';
@@ -49,6 +50,11 @@ export const NosotrosIsland = ({titulo}: NosotrosIslandProps): JSX.Element => {
 
     return (
         <LayoutPagina className="nosotrosMain" id="paginaNosotros">
+            <SEOHead
+                title="Nosotros"
+                description="Conoce al equipo de Nakomi Studio, nuestra misión y valores."
+                path="/nosotros"
+            />
             {/* Hero */}
             <section className="nosotrosHero">
                 <div className="nosotrosHeroContenido">
