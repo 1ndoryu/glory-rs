@@ -6,6 +6,7 @@ mod notes;
 
 use axum::Router;
 use tower_http::cors::{Any, CorsLayer};
+use tower_http::services::{ServeDir, ServeFile};
 use tower_http::trace::TraceLayer;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
@@ -83,6 +84,21 @@ pub fn create_router(pool: sqlx::PgPool, config: crate::config::AppConfig) -> Ro
         .layer(TraceLayer::new_for_http())
         .layer(cors)
         .with_state(state)
+}
+
+/* [044A-9] Monta el frontend React como SPA: archivos estaticos con fallback a index.html.
+ * Solo se activa si STATIC_DIR esta configurado (en produccion). En desarrollo, Vite sirve el frontend. */
+pub fn create_app(pool: sqlx::PgPool, config: crate::config::AppConfig) -> Router {
+    let static_dir = config.static_dir.clone();
+    let router = create_router(pool, config);
+
+    if let Some(dir) = static_dir {
+        let index_path = format!("{dir}/index.html");
+        let serve = ServeDir::new(&dir).not_found_service(ServeFile::new(&index_path));
+        router.fallback_service(serve)
+    } else {
+        router
+    }
 }
 
 fn api_routes() -> Router<AppState> {

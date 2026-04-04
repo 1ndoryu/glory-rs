@@ -11,7 +11,7 @@ authors = ["1ndoryu"]
 axum = { version = "0.7", features = ["macros"] }
 tokio = { version = "1", features = ["full"] }
 tower = "0.4"
-tower-http = { version = "0.5", features = ["cors", "trace"] }
+tower-http = { version = "0.5", features = ["cors", "trace", "fs"] }
 
 # Serialization
 serde = { version = "1", features = ["derive"] }

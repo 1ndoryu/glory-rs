@@ -15,6 +15,7 @@ pub struct AppConfig {
     pub jwt_secret: String,
     pub host: String,
     pub port: u16,
+    pub static_dir: Option<String>,
 }
 
 impl AppConfig {
@@ -30,6 +31,7 @@ impl AppConfig {
             port: std::env::var("PORT")
                 .unwrap_or_else(|_| "3000".to_string())
                 .parse()?,
+            static_dir: std::env::var("STATIC_DIR").ok(),
         })
     }
 }
