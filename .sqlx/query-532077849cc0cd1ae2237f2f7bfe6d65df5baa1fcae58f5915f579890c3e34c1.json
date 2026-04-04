@@ -1,0 +1,25 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO ventas (user_id, fecha, comensales, descripcion, iva_porcentaje, turno, canal, metodo_pago, importe_base, importe_iva, reserva_id, cliente_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Date",
+        "Int4",
+        "Text",
+        "Numeric",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Numeric",
+        "Numeric",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "532077849cc0cd1ae2237f2f7bfe6d65df5baa1fcae58f5915f579890c3e34c1"
+}

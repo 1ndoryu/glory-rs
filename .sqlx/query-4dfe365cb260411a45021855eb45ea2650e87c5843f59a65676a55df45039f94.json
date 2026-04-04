@@ -1,0 +1,35 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO reservas (user_id, fecha, hora, nombre_cliente, apellidos_cliente, num_personas, estado, notas, telefono, canal_id, cliente_id, no_show, mesa_id, num_mesa) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Date",
+        "Time",
+        "Varchar",
+        "Varchar",
+        "Int4",
+        "Varchar",
+        "Text",
+        "Varchar",
+        "Uuid",
+        "Uuid",
+        "Bool",
+        "Uuid",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "4dfe365cb260411a45021855eb45ea2650e87c5843f59a65676a55df45039f94"
+}
