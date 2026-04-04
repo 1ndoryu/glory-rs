@@ -62,7 +62,7 @@
     gap: var(--spacing-lg);
 }
 
-/* Tarjeta de solución */
+/* [044A-18] Fondo con color acento por solicitud del usuario */
 .tarjetaSolucion {
     display: flex;
     flex-direction: column;
@@ -72,7 +72,7 @@
     padding: var(--spacing-xl);
     border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 12px;
-    background-color: var(--bg-primary);
+    background-color: var(--accent-primary);
     transition:
         border-color var(--transicion-media),
         box-shadow var(--transicion-media),
