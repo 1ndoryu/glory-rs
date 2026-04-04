@@ -30,6 +30,6 @@
 
 ## Tareas pendientes
 
-- veo frontend\src\api\generated\campa├▒as\campa├▒as.ts con textos raros, 
-- cuando intento eliminar los datos de prueba dice "No se pudo conectar con el servidor" Elimina todos los datos de prueba.
+- frontend\src\componentes\ListaCampanas.tsx el ide me marca errores, como es que no lo detectaste antes. (frontend\src\componentes\Recordatorios.tsx) tambien marca error ¿estas seguro de que se reviso bien todo??
+- Agrega nuevos datos de pruebo pero no demasiados, agrega unos pocos, unos 6 de cada cosa por dia, 14 dias empezando por hoy, tienen que estar actualizados, los datos viejos no estaban actualizado porque el codigo habia cambiado bastante, no tenian relaciones, y algunos estados estaban mal, asi que, rehacer los datos a unos mas breves,
 - regresa a la rama main y verifica que el cambio de rama no tenga problemas, que la rama main este limpia para nuevos proyectos, que no haya perdida de datos.
