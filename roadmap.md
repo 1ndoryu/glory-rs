@@ -38,7 +38,6 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 ## Pendientes (por prioridad — lo más difícil primero)
 
 
-- Tiene que haber instrucciones de como crear scripts\check-roadmap.mjs y .vscode\tasks.json en caso de que no exista en .github\instructions\test.instructions.md
 - Hay que hacer una revisión seo completa y planificar todas las mejoras y ejecutarlas.
 - Antes habia pedido un plan completo para que el servicio de hosting funcionara, hacer todo lo necesario aprovechando que existe coolify manager-rs, esto es una tarea gigante asi que requiere una planificación buena. 
 - El componente de cambiar idioma sigue siendo horrible deberia verse como subMenuDesplegable.
