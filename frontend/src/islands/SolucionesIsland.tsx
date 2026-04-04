@@ -3,6 +3,7 @@
  * Página landing de soluciones con cards que enlazan a sub-páginas.
  */
 import React from 'react';
+import {useTranslation} from 'react-i18next';
 import '../styles/variables.css';
 import './SolucionesIsland.css';
 import {LayoutPagina} from '../components/layout/LayoutPagina';
@@ -41,31 +42,33 @@ const SOLUCIONES: Solucion[] = [
 ];
 
 /* Tarjeta de solución individual */
-const TarjetaSolucion: React.FC<{solucion: Solucion}> = ({solucion}) => (
-    <a href={solucion.enlace} className="tarjetaSolucion">
-        <div className="solucionContenido">
-            <span className="solucionEtiqueta">{solucion.etiqueta}</span>
-            <h3 className="solucionTitulo">{solucion.titulo}</h3>
-            <p className="solucionDescripcion">{solucion.descripcion}</p>
-        </div>
-        <span className="solucionEnlace">Explorar →</span>
-    </a>
-);
+const TarjetaSolucion: React.FC<{solucion: Solucion}> = ({solucion}) => {
+    const {t} = useTranslation();
+    return (
+        <a href={solucion.enlace} className="tarjetaSolucion">
+            <div className="solucionContenido">
+                <span className="solucionEtiqueta">{solucion.etiqueta}</span>
+                <h3 className="solucionTitulo">{solucion.titulo}</h3>
+                <p className="solucionDescripcion">{solucion.descripcion}</p>
+            </div>
+            <span className="solucionEnlace">{t('solutions_page.explore')}</span>
+        </a>
+    );
+};
 
-export const SolucionesIsland = ({titulo = 'Soluciones'}: SolucionesIslandProps): JSX.Element => {
+export const SolucionesIsland = ({titulo}: SolucionesIslandProps): JSX.Element => {
+    const {t} = useTranslation();
+
     return (
         <LayoutPagina className="solucionesMain" id="paginaSoluciones">
             {/* Hero */}
             <section className="solucionesHero">
                 <div className="solucionesHeroContenido">
                     <div>
-                        <h1 className="solucionesHeroTitulo">{titulo}</h1>
+                        <h1 className="solucionesHeroTitulo">{titulo || t('solutions_page.title')}</h1>
                     </div>
                     <div className="solucionesHeroDescripcion">
-                        <p>
-                            Infraestructura, herramientas y tecnología de punta para potenciar
-                            tu negocio digital. Soluciones escalables diseñadas para crecer con vos.
-                        </p>
+                        <p>{t('solutions_page.description')}</p>
                     </div>
                 </div>
             </section>

@@ -1,0 +1,61 @@
+/* [044A-2] Estilos del selector de idioma */
+.selectorIdioma {
+    position: relative;
+    display: inline-block;
+}
+
+.selectorIdiomaBoton {
+    background: transparent;
+    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.15));
+    color: var(--text-primary);
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.selectorIdiomaBoton:hover {
+    border-color: var(--accent-primary, #4f46e5);
+    background: var(--bg-card-subtle, rgba(255, 255, 255, 0.05));
+}
+
+.selectorIdiomaLista {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 4px;
+    list-style: none;
+    padding: 4px;
+    background: var(--bg-secondary, #1a1a2e);
+    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.15));
+    border-radius: 8px;
+    z-index: 100;
+    min-width: 60px;
+}
+
+.selectorIdiomaOpcion {
+    display: block;
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: var(--text-sm);
+    text-align: center;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.selectorIdiomaOpcion:hover {
+    background: var(--bg-card-subtle, rgba(255, 255, 255, 0.08));
+    color: var(--text-primary);
+}
+
+.selectorIdiomaOpcion.activo {
+    color: var(--accent-primary, #4f46e5);
+    font-weight: 600;
+}

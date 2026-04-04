@@ -4,6 +4,7 @@
  * Estructura: Hero -> Galería -> Skills -> CTA -> Relacionados -> Footer
  */
 import React from 'react';
+import {useTranslation} from 'react-i18next';
 import '../styles/variables.css';
 import './ProyectoIndividualIsland.css';
 import {LayoutPagina} from '../components/layout/LayoutPagina';
@@ -36,6 +37,8 @@ const TarjetaRelacionado: React.FC<{proyecto: Proyecto}> = ({proyecto}) => (
 );
 
 export const ProyectoIndividualIsland = ({titulo = 'Proyecto', descripcion = '', cliente = '', categorias = '', slug = ''}: ProyectoIndividualIslandProps): JSX.Element => {
+    const {t} = useTranslation();
+
     /* Buscar datos enriquecidos desde el contexto */
     const proyectoContexto = PROYECTOS_DATA.find(p => p.titulo.toLowerCase() === titulo.toLowerCase() || String(p.id) === slug);
 
@@ -73,13 +76,13 @@ export const ProyectoIndividualIsland = ({titulo = 'Proyecto', descripcion = '',
             {skills.length > 0 && <SeccionSkillsServicio skills={skills} />}
 
             {/* CTA */}
-            <SeccionCta descripcion={['¿Te gustaría un proyecto similar? Estamos listos para transformar tu idea en una experiencia digital excepcional.', 'Contáctanos para discutir tu visión y hagamos algo increíble juntos.']} textoBotonPrimario="Comenzar Proyecto" linkBotonPrimario="/contacto/" textoBotonSecundario="Ver más proyectos" linkBotonSecundario="/proyectos/" />
+            <SeccionCta descripcion={[t('project_detail.cta_1'), t('project_detail.cta_2')]} textoBotonPrimario={t('project_detail.cta_start')} linkBotonPrimario="/contacto/" textoBotonSecundario={t('project_detail.cta_more')} linkBotonSecundario="/proyectos/" />
 
             {/* Proyectos relacionados */}
             {relacionados.length > 0 && (
                 <section className="proyectoRelacionados">
                     <div className="proyectoRelacionadosContenedor">
-                        <SeccionHeader titulo="Proyectos Relacionados" />
+                        <SeccionHeader titulo={t('sections.related_projects')} />
                         <div className="proyectoRelacionadosGrid">
                             {relacionados.map(p => (
                                 <TarjetaRelacionado key={p.id} proyecto={p} />

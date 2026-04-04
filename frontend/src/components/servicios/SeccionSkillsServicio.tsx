@@ -5,6 +5,7 @@
  * Tipo Skill centralizado en types/contenido.ts (DRY).
  */
 import React, {useState} from 'react';
+import {useTranslation} from 'react-i18next';
 import {ArrowRight} from 'lucide-react';
 import {SeccionHeader} from '../ui/SeccionHeader';
 import {Skill} from '../../types/contenido';
@@ -15,6 +16,7 @@ interface SeccionSkillsServicioProps {
 }
 
 export const SeccionSkillsServicio: React.FC<SeccionSkillsServicioProps> = ({skills = []}) => {
+    const {t} = useTranslation();
     const [skillActiva, setSkillActiva] = useState<string | number | null>(null);
 
     if (!skills || skills.length === 0) {
@@ -28,7 +30,7 @@ export const SeccionSkillsServicio: React.FC<SeccionSkillsServicioProps> = ({ski
     return (
         <section className="seccionSkillsServicio">
             <div className="skillsContenedor">
-                <SeccionHeader titulo="Capabilities" />
+                <SeccionHeader titulo={t('sections.capabilities')} />
                 <div className="skillsLista">
                     {skills.map(skill => (
                         <div

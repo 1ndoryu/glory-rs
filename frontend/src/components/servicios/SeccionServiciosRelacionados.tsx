@@ -3,6 +3,7 @@
  * Descripcion: Muestra 3 servicios relacionados excluyendo el actual.
  */
 import React, {useMemo} from 'react';
+import {useTranslation} from 'react-i18next';
 import {SeccionHeader} from '../ui/SeccionHeader';
 import {ServiceCard} from '../ui/ServiceCard';
 import {obtenerServiciosRelacionados} from '../../data/servicios';
@@ -13,6 +14,7 @@ interface SeccionServiciosRelacionadosProps {
 }
 
 export const SeccionServiciosRelacionados: React.FC<SeccionServiciosRelacionadosProps> = ({servicioActualId}) => {
+    const {t} = useTranslation();
     const servicios = useMemo(
         () => obtenerServiciosRelacionados(servicioActualId, 3),
         [servicioActualId]
@@ -23,7 +25,7 @@ export const SeccionServiciosRelacionados: React.FC<SeccionServiciosRelacionados
     return (
         <section className="seccionServiciosRelacionados">
             <div className="relacionadosContenedor">
-                <SeccionHeader titulo="More Services" />
+                <SeccionHeader titulo={t('sections.more_services')} />
 
                 <div className="relacionadosLista">
                     {servicios.map(servicio => (

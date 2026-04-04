@@ -6,6 +6,7 @@
  * TO-DO: Conectar con backend (REST API, JWT, OAuth) cuando esten las credenciales.
  */
 import React from 'react';
+import {useTranslation} from 'react-i18next';
 import {Button} from '../ui/Button';
 import {useAutenticacion} from '../../hooks/useAutenticacion';
 import './ModalAutenticacion.css';
@@ -16,6 +17,7 @@ interface ModalAutenticacionProps {
 }
 
 export const ModalAutenticacion: React.FC<ModalAutenticacionProps> = ({abierto, onCerrar}) => {
+    const {t} = useTranslation();
     const {
         vista, setVista, cargando, modalRef,
         login, registro, recuperar,
@@ -37,7 +39,7 @@ export const ModalAutenticacion: React.FC<ModalAutenticacionProps> = ({abierto, 
         <div className="modalOverlay" onClick={handleOverlayClick} role="dialog" aria-modal="true" aria-label="Autenticación">
             <div className="modalContenedor" ref={modalRef}>
                 {/* Boton cerrar */}
-                <button className="modalCerrar" onClick={onCerrar} aria-label="Cerrar modal">
+                <button className="modalCerrar" onClick={onCerrar} aria-label={t('auth.close')}>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M18 6L6 18M6 6l12 12" />
                     </svg>
@@ -46,9 +48,9 @@ export const ModalAutenticacion: React.FC<ModalAutenticacionProps> = ({abierto, 
                 {/* Header */}
                 <div className="modalHeader">
                     <h2 className="modalTitulo">
-                        {vista === 'login' && 'Iniciar Sesión'}
-                        {vista === 'registro' && 'Crear Cuenta'}
-                        {vista === 'recuperar' && 'Recuperar Contraseña'}
+                        {vista === 'login' && t('auth.login')}
+                        {vista === 'registro' && t('auth.register')}
+                        {vista === 'recuperar' && t('auth.recover')}
                     </h2>
                 </div>
 
@@ -59,13 +61,13 @@ export const ModalAutenticacion: React.FC<ModalAutenticacionProps> = ({abierto, 
                             className={`modalTab ${vista === 'login' ? 'modalTabActivo' : ''}`}
                             onClick={() => setVista('login')}
                         >
-                            Iniciar Sesión
+                            {t('auth.login')}
                         </button>
                         <button
                             className={`modalTab ${vista === 'registro' ? 'modalTabActivo' : ''}`}
                             onClick={() => setVista('registro')}
                         >
-                            Registrarse
+                            {t('auth.register')}
                         </button>
                     </div>
                 )}
@@ -74,25 +76,25 @@ export const ModalAutenticacion: React.FC<ModalAutenticacionProps> = ({abierto, 
                 {vista === 'login' && (
                     <form className="modalFormulario" onSubmit={handleLogin}>
                         <div className="modalCampo">
-                            <label htmlFor="loginEmail" className="modalEtiqueta">Correo electrónico</label>
+                            <label htmlFor="loginEmail" className="modalEtiqueta">{t('auth.email_label')}</label>
                             <input
                                 type="email"
                                 id="loginEmail"
                                 value={login.email}
                                 onChange={e => actualizarLogin('email', e.target.value)}
-                                placeholder="tu@email.com"
+                                placeholder={t('auth.email_placeholder')}
                                 className="modalInput"
                                 required
                             />
                         </div>
                         <div className="modalCampo">
-                            <label htmlFor="loginPassword" className="modalEtiqueta">Contraseña</label>
+                            <label htmlFor="loginPassword" className="modalEtiqueta">{t('auth.password_label')}</label>
                             <input
                                 type="password"
                                 id="loginPassword"
                                 value={login.password}
                                 onChange={e => actualizarLogin('password', e.target.value)}
-                                placeholder="Tu contraseña"
+                                placeholder={t('auth.password_placeholder')}
                                 className="modalInput"
                                 required
                             />
@@ -102,14 +104,14 @@ export const ModalAutenticacion: React.FC<ModalAutenticacionProps> = ({abierto, 
                             className="modalEnlaceTexto"
                             onClick={() => setVista('recuperar')}
                         >
-                            ¿Olvidaste tu contraseña?
+                            {t('auth.forgot_password')}
                         </button>
                         <Button variante="primario" tamano="mediano" className="modalBotonPrincipal" disabled={cargando}>
-                            {cargando ? 'Cargando...' : 'Iniciar Sesión'}
+                            {cargando ? t('auth.loading') : t('auth.login')}
                         </Button>
 
                         <div className="modalSeparador">
-                            <span>o</span>
+                            <span>{t('auth.or')}</span>
                         </div>
 
                         <button type="button" className="modalBotonGoogle" onClick={handleGoogleLogin}>
@@ -119,7 +121,7 @@ export const ModalAutenticacion: React.FC<ModalAutenticacionProps> = ({abierto, 
                                 <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
                                 <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                             </svg>
-                            Continuar con Google
+                            {t('auth.google_login')}
                         </button>
                     </form>
                 )}
@@ -128,65 +130,63 @@ export const ModalAutenticacion: React.FC<ModalAutenticacionProps> = ({abierto, 
                 {vista === 'registro' && (
                     <form className="modalFormulario" onSubmit={handleRegistro}>
                         <div className="modalCampo">
-                            <label htmlFor="regNombre" className="modalEtiqueta">Nombre completo</label>
+                            <label htmlFor="regNombre" className="modalEtiqueta">{t('auth.name_label')}</label>
                             <input
                                 type="text"
                                 id="regNombre"
                                 value={registro.nombre}
                                 onChange={e => actualizarRegistro('nombre', e.target.value)}
-                                placeholder="Tu nombre"
+                                placeholder={t('auth.name_placeholder')}
                                 className="modalInput"
                                 required
                             />
                         </div>
                         <div className="modalCampo">
-                            <label htmlFor="regEmail" className="modalEtiqueta">Correo electrónico</label>
+                            <label htmlFor="regEmail" className="modalEtiqueta">{t('auth.email_label')}</label>
                             <input
                                 type="email"
                                 id="regEmail"
                                 value={registro.email}
                                 onChange={e => actualizarRegistro('email', e.target.value)}
-                                placeholder="tu@email.com"
+                                placeholder={t('auth.email_placeholder')}
                                 className="modalInput"
                                 required
                             />
                         </div>
                         <div className="modalCampo">
-                            <label htmlFor="regPassword" className="modalEtiqueta">Contraseña</label>
+                            <label htmlFor="regPassword" className="modalEtiqueta">{t('auth.password_label')}</label>
                             <input
                                 type="password"
                                 id="regPassword"
                                 value={registro.password}
                                 onChange={e => actualizarRegistro('password', e.target.value)}
-                                placeholder="Mínimo 8 caracteres"
+                                placeholder={t('auth.min_chars')}
                                 className="modalInput"
                                 minLength={8}
                                 required
                             />
                         </div>
                         <div className="modalCampo">
-                            <label htmlFor="regConfirmar" className="modalEtiqueta">Confirmar contraseña</label>
+                            <label htmlFor="regConfirmar" className="modalEtiqueta">{t('auth.confirm_password')}</label>
                             <input
                                 type="password"
                                 id="regConfirmar"
                                 value={registro.confirmar}
                                 onChange={e => actualizarRegistro('confirmar', e.target.value)}
-                                placeholder="Repite la contraseña"
+                                placeholder={t('auth.confirm_placeholder')}
                                 className="modalInput"
                                 minLength={8}
                                 required
                             />
                         </div>
                         {/* TO-DO: Agregar reCAPTCHA aqui cuando se configuren las keys */}
-                        <p className="modalNotaCaptcha">
-                            Protegido por reCAPTCHA. Se aplicarán la política de privacidad y los términos de servicio.
-                        </p>
+                        <p className="modalNotaCaptcha">{t('auth.captcha_note')}</p>
                         <Button variante="primario" tamano="mediano" className="modalBotonPrincipal" disabled={cargando}>
-                            {cargando ? 'Creando cuenta...' : 'Crear cuenta'}
+                            {cargando ? t('auth.creating') : t('auth.register')}
                         </Button>
 
                         <div className="modalSeparador">
-                            <span>o</span>
+                            <span>{t('auth.or')}</span>
                         </div>
 
                         <button type="button" className="modalBotonGoogle" onClick={handleGoogleLogin}>
@@ -196,7 +196,7 @@ export const ModalAutenticacion: React.FC<ModalAutenticacionProps> = ({abierto, 
                                 <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
                                 <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                             </svg>
-                            Registrarse con Google
+                            {t('auth.google_register')}
                         </button>
                     </form>
                 )}
@@ -206,35 +206,31 @@ export const ModalAutenticacion: React.FC<ModalAutenticacionProps> = ({abierto, 
                     <div className="modalFormulario">
                         {recuperar.enviado ? (
                             <div className="modalExito">
-                                <p className="modalExitoTexto">
-                                    Si el correo existe en nuestro sistema, recibirás un enlace para restablecer tu contraseña.
-                                </p>
+                                <p className="modalExitoTexto">{t('auth.recover_sent')}</p>
                                 <Button variante="outline" onClick={resetRecuperacion}>
-                                    Volver al login
+                                    {t('auth.back_login')}
                                 </Button>
                             </div>
                         ) : (
                             <form onSubmit={handleRecuperar}>
-                                <p className="modalDescripcion">
-                                    Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.
-                                </p>
+                                <p className="modalDescripcion">{t('auth.recover_desc')}</p>
                                 <div className="modalCampo">
-                                    <label htmlFor="recEmail" className="modalEtiqueta">Correo electrónico</label>
+                                    <label htmlFor="recEmail" className="modalEtiqueta">{t('auth.email_label')}</label>
                                     <input
                                         type="email"
                                         id="recEmail"
                                         value={recuperar.email}
                                         onChange={e => actualizarRecuperar('email', e.target.value)}
-                                        placeholder="tu@email.com"
+                                        placeholder={t('auth.email_placeholder')}
                                         className="modalInput"
                                         required
                                     />
                                 </div>
                                 <Button variante="primario" tamano="mediano" className="modalBotonPrincipal" disabled={cargando}>
-                                    {cargando ? 'Enviando...' : 'Enviar enlace'}
+                                    {cargando ? t('auth.sending') : t('auth.send_link')}
                                 </Button>
                                 <button type="button" className="modalEnlaceTexto" onClick={() => setVista('login')}>
-                                    Volver al inicio de sesión
+                                    {t('auth.back_login_text')}
                                 </button>
                             </form>
                         )}

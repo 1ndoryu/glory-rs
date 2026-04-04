@@ -4,6 +4,7 @@
  * Acepta prop compacto para reducir padding cuando el contenedor padre ya tiene gap.
  */
 import React from 'react';
+import {useTranslation} from 'react-i18next';
 import {SeccionHeader} from '../ui/SeccionHeader';
 import {Button} from '../ui/Button';
 import {navegar} from '../../navegacionSPA';
@@ -14,24 +15,25 @@ interface SeccionContactoProps {
 }
 
 export const SeccionContacto: React.FC<SeccionContactoProps> = ({compacto = false}) => {
+    const {t} = useTranslation();
     const claseExtra = compacto ? 'seccionContactoCompacta' : '';
 
     return (
         <section className={`seccionContacto ${claseExtra}`} id="contacto">
             <div className="contactoContenedor">
-                <SeccionHeader titulo="Get in Touch" />
-                <h2 className="contactoTitulo">Have a project in mind?</h2>
+                <SeccionHeader titulo={t('contact.section_title')} />
+                <h2 className="contactoTitulo">{t('contact.heading')}</h2>
 
                 <div className="contactoDescripcion">
-                    <p>Send some details about your project or inquiry. We can help your business designing a website, digital product, or building a custom solution.</p>
+                    <p>{t('contact.description')}</p>
                 </div>
 
                 <div className="contactoBotones">
                     <Button variante="primario" onClick={() => navegar('/contacto/')}>
-                        Contact
+                        {t('contact.btn_contact')}
                     </Button>
                     <Button variante="outline" onClick={() => navegar('/servicios/')}>
-                        Hire Service
+                        {t('contact.btn_hire')}
                     </Button>
                 </div>
             </div>

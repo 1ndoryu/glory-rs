@@ -3,6 +3,7 @@
  * Página placeholder "En construcción" para sub-páginas de soluciones.
  * Se reutiliza para /soluciones/hosting, /soluciones/vps, /soluciones/agentes-ia.
  */
+import {useTranslation} from 'react-i18next';
 import '../styles/variables.css';
 import './SolucionPlaceholderIsland.css';
 import {LayoutPagina} from '../components/layout/LayoutPagina';
@@ -14,22 +15,24 @@ interface SolucionPlaceholderIslandProps {
 }
 
 export const SolucionPlaceholderIsland = ({
-    titulo = 'Próximamente',
-    descripcion = 'Estamos trabajando en esta solución. Pronto tendrás toda la información que necesitas.'
+    titulo,
+    descripcion
 }: SolucionPlaceholderIslandProps): JSX.Element => {
+    const {t} = useTranslation();
+
     return (
         <LayoutPagina className="placeholderMain" id="paginaPlaceholder">
             <section className="placeholderHero">
                 <div className="placeholderContenido">
-                    <span className="placeholderEtiqueta">En construcción</span>
-                    <h1 className="placeholderTitulo">{titulo}</h1>
-                    <p className="placeholderDescripcion">{descripcion}</p>
+                    <span className="placeholderEtiqueta">{t('solutions_page.under_construction')}</span>
+                    <h1 className="placeholderTitulo">{titulo || t('solutions_page.coming_soon')}</h1>
+                    <p className="placeholderDescripcion">{descripcion || t('solutions_page.coming_soon_desc')}</p>
                     <div className="placeholderBotones">
                         <a href="/soluciones" className="placeholderBoton">
-                            ← Volver a Soluciones
+                            {t('solutions_page.back_solutions')}
                         </a>
                         <a href="#contacto" className="placeholderBotonContacto">
-                            Contactar para más info
+                            {t('solutions_page.contact_info')}
                         </a>
                     </div>
                 </div>

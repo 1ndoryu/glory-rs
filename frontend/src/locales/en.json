@@ -1,0 +1,208 @@
+{
+    "nav": {
+        "home": "Home",
+        "services": "Services",
+        "projects": "Projects",
+        "about": "About",
+        "blog": "Blog",
+        "solutions": "Solutions",
+        "hosting": "Hosting",
+        "contact": "Contact",
+        "login": "Sign In",
+        "panel": "Dashboard",
+        "back": "Back",
+        "chat": "Chat",
+        "logout": "Log Out"
+    },
+    "hero": {
+        "title_start": "Creative studio specialized in ",
+        "title_web": "web design",
+        "title_software": "software",
+        "description": "We merge graphic design with software engineering to create web solutions, applications, and AI tools that stand out for their aesthetics and performance.",
+        "cta": "Start a project"
+    },
+    "sections": {
+        "services": "Services",
+        "selected_work": "Selected Work",
+        "journal": "Journal",
+        "capabilities": "Capabilities",
+        "more_services": "More Services",
+        "testimonials": "Testimonials",
+        "related_projects": "Related Projects"
+    },
+    "contact": {
+        "title": "Contact",
+        "section_title": "Get in Touch",
+        "heading": "Have a project in mind?",
+        "description": "Send some details about your project or inquiry. We can help your business designing a website, digital product, or building a custom solution.",
+        "btn_contact": "Contact",
+        "btn_hire": "Hire Service",
+        "name_label": "Full name",
+        "name_placeholder": "Your name",
+        "email_label": "Email address",
+        "email_placeholder": "you@email.com",
+        "phone_label": "Phone (optional)",
+        "phone_placeholder": "+1 234 567 890",
+        "budget_label": "Estimated budget",
+        "budget_select": "Select a range",
+        "budget_1": "Under $5,000",
+        "budget_2": "$5,000 - $10,000",
+        "budget_3": "$10,000 - $25,000",
+        "budget_4": "$25,000 - $50,000",
+        "budget_5": "Over $50,000",
+        "project_label": "Project description",
+        "project_placeholder": "Tell us about your project, goals, and timeline...",
+        "submit": "Send message",
+        "submitting": "Sending...",
+        "help": "We'll respond within 24 business hours.",
+        "success_title": "Message sent",
+        "success_message": "Thank you for reaching out. We'll review your request and get back to you within 24 hours.",
+        "success_another": "Send another message",
+        "hero_description": "Tell us about your project. We love hearing new ideas and finding the best way to bring them to life."
+    },
+    "services_page": {
+        "title": "Our Services",
+        "description": "We offer comprehensive services that combine creativity and technology to transform your vision into exceptional digital products.",
+        "search_placeholder": "Search service...",
+        "empty": "No services found"
+    },
+    "projects_page": {
+        "title": "Our Projects",
+        "description": "Every project is a story of collaboration. Explore our work and discover how we transform ideas into memorable digital experiences.",
+        "empty": "No projects found for this category."
+    },
+    "project_detail": {
+        "default_title": "Project",
+        "cta_1": "Want a similar project? We're ready to transform your idea into an exceptional digital experience.",
+        "cta_2": "Contact us to discuss your vision and let's create something amazing together.",
+        "cta_start": "Start Project",
+        "cta_more": "View more projects"
+    },
+    "service_detail": {
+        "default_title": "Service Name",
+        "default_description": "Detailed service description and how we deliver value through our expertise and methodology.",
+        "cta_1": "Ready to take your project to the next level? Our team of experts is prepared to transform your vision into a high-impact digital solution.",
+        "cta_2": "Don't wait to stand out in the market. Contact us today to discuss the details and take the first step toward your business success.",
+        "cta_hire": "Hire from",
+        "cta_contact": "Contact"
+    },
+    "plans": {
+        "title": "Choose your plan",
+        "subtitle": "Select the plan that best fits your needs. All plans include support and satisfaction guarantee.",
+        "recommended": "Recommended",
+        "processing": "Processing..."
+    },
+    "about": {
+        "title": "About Us",
+        "description": "We are a multidisciplinary team that combines design, technology, and artificial intelligence to create digital experiences that generate real impact on our clients' businesses.",
+        "mission_title": "Our Mission",
+        "mission_text": "Democratize access to high-level digital solutions, combining premium design with cutting-edge technology so every business can compete at the highest level.",
+        "approach_title": "Our Approach",
+        "approach_text": "We believe in the intersection of aesthetics and functionality. Every project is an opportunity to create something that not only looks incredible but also delivers measurable results.",
+        "values_title": "Our Values",
+        "values_text": "Transparency, technical excellence, and obsession with detail guide every decision we make, from the first wireframe to the final deploy.",
+        "team_title": "The Team"
+    },
+    "blog_page": {
+        "title": "Blog",
+        "description": "Ideas, reflections, and learnings about design, technology, and the digital future.",
+        "all": "All",
+        "empty": "No articles for this category.",
+        "read_more": "Read article →"
+    },
+    "blog_single": {
+        "default_title": "Blog Post",
+        "placeholder_1": "This article is being written. The full content will be available soon. In the meantime, explore our other articles and discover more about design, technology, and digital strategy.",
+        "placeholder_2": "On our blog, we share insights, trends, and practical guides that can help you make better decisions for your next digital project.",
+        "more_articles": "More articles"
+    },
+    "solutions_page": {
+        "title": "Solutions",
+        "description": "Infrastructure, tools, and cutting-edge technology to power your digital business. Scalable solutions designed to grow with you.",
+        "hosting_title": "Managed Hosting",
+        "hosting_desc": "High-performance infrastructure with 24/7 support, automatic backups, and continuous optimization so your site never stops.",
+        "hosting_price": "From $29/mo",
+        "explore": "Explore →",
+        "coming_soon": "Coming Soon",
+        "coming_soon_desc": "We're working on this solution. You'll have all the information you need soon.",
+        "under_construction": "Under Construction",
+        "back_solutions": "← Back to Solutions",
+        "contact_info": "Contact for more info"
+    },
+    "footer": {
+        "brand_desc": "Crafting digital experiences with precision and passion. Based in Copenhagen, available worldwide.",
+        "newsletter_title": "Stay updated",
+        "newsletter_placeholder": "Enter your email address",
+        "newsletter_submit": "Subscribe",
+        "newsletter_sending": "Sending...",
+        "newsletter_success": "Subscribed successfully! We'll keep you updated.",
+        "copyright": "© {{year}} Nakomi Template. All rights reserved.",
+        "privacy": "Privacy Policy"
+    },
+    "auth": {
+        "login": "Sign In",
+        "register": "Create Account",
+        "recover": "Reset Password",
+        "close": "Close modal",
+        "email_label": "Email",
+        "email_placeholder": "you@email.com",
+        "password_label": "Password",
+        "password_placeholder": "Your password",
+        "name_label": "Full name",
+        "name_placeholder": "Your name",
+        "confirm_password": "Confirm password",
+        "confirm_placeholder": "Repeat password",
+        "min_chars": "Minimum 8 characters",
+        "forgot_password": "Forgot your password?",
+        "loading": "Loading...",
+        "creating": "Creating account...",
+        "sending": "Sending...",
+        "or": "or",
+        "google_login": "Continue with Google",
+        "google_register": "Sign up with Google",
+        "captcha_note": "Protected by reCAPTCHA. Privacy policy and terms of service apply.",
+        "recover_sent": "If the email exists in our system, you will receive a link to reset your password.",
+        "recover_desc": "Enter your email and we'll send you a link to reset your password.",
+        "send_link": "Send link",
+        "back_login": "Back to login",
+        "back_login_text": "Back to login"
+    },
+    "panel": {
+        "profile_intro": "Customize your public profile. This information will be used in your testimonials and comments.",
+        "change_photo": "Change photo",
+        "photo_help": "JPG, PNG. Max 2MB.",
+        "display_name": "Display name",
+        "display_name_placeholder": "Your public name",
+        "email": "Email",
+        "bio_label": "Bio",
+        "bio_placeholder": "Tell us about yourself...",
+        "social_title": "Social Networks",
+        "website": "Website",
+        "save": "Save changes",
+        "saved_success": "Profile updated successfully"
+    },
+    "accessibility": {
+        "logo_home": "Nakomi - Go to home",
+        "close_menu": "Close menu",
+        "open_menu": "Open menu",
+        "main_nav": "Main navigation",
+        "user_actions": "User actions",
+        "skip_content": "Skip to main content",
+        "panel_nav": "User panel navigation",
+        "panel_sections": "Panel sections",
+        "profile_photo": "Your profile",
+        "random_bg": "Random background"
+    },
+    "categories": {
+        "all": "All",
+        "web": "Web Design",
+        "software": "Software",
+        "ai": "Artificial Intelligence",
+        "branding": "Branding"
+    },
+    "language": {
+        "es": "Español",
+        "en": "English",
+        "ja": "日本語"
+    }
+}

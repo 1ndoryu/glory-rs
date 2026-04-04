@@ -4,6 +4,7 @@
  * Muestra avatar, nombre, rol y links de navegacion con iconos.
  */
 import React from 'react';
+import {useTranslation} from 'react-i18next';
 import {FolderOpen, Briefcase, Receipt, User, CreditCard} from 'lucide-react';
 import {TABS_PANEL, obtenerUsuarioActual, type SeccionPanel} from '../../data/panel';
 import './SidebarPanel.css';
@@ -23,10 +24,11 @@ const ICONOS_SECCION: Record<SeccionPanel, React.ElementType> = {
 };
 
 export const SidebarPanel: React.FC<SidebarPanelProps> = ({seccionActiva, onCambiarSeccion}) => {
+    const {t} = useTranslation();
     const usuario = obtenerUsuarioActual();
 
     return (
-        <aside className="panelSidebar" aria-label="Panel de navegación del usuario">
+        <aside className="panelSidebar" aria-label={t('accessibility.panel_nav')}>
             {/* Info usuario */}
             <div className="sidebarUsuario">
                 <div className="sidebarAvatar">
@@ -42,7 +44,7 @@ export const SidebarPanel: React.FC<SidebarPanelProps> = ({seccionActiva, onCamb
             </div>
 
             {/* Navegacion con iconos */}
-            <nav className="sidebarNav" aria-label="Secciones del panel">
+            <nav className="sidebarNav" aria-label={t('accessibility.panel_sections')}>
                 {TABS_PANEL.map(tab => {
                     const Icono = ICONOS_SECCION[tab.id];
                     return (

@@ -4,6 +4,7 @@
  * Categorías centralizadas en data/navegacion.ts (DRY).
  */
 import '../styles/variables.css';
+import {useTranslation} from 'react-i18next';
 import './ServiciosIsland.css';
 import {LayoutPagina} from '../components/layout/LayoutPagina';
 import {BarraFiltros} from '../components/servicios/BarraFiltros';
@@ -15,7 +16,8 @@ interface ServiciosIslandProps {
     titulo?: string;
 }
 
-export const ServiciosIsland = ({titulo = 'Nuestros Servicios'}: ServiciosIslandProps): JSX.Element => {
+export const ServiciosIsland = ({titulo}: ServiciosIslandProps): JSX.Element => {
+    const {t} = useTranslation();
     const {categoriaActiva, setCategoriaActiva, busqueda, setBusqueda, serviciosFiltrados} = useServicios();
 
     return (
@@ -23,11 +25,11 @@ export const ServiciosIsland = ({titulo = 'Nuestros Servicios'}: ServiciosIsland
             <section className="serviciosHero">
                 <div className="heroContenido">
                     <div>
-                        <h1 className="heroTitulo">{titulo}</h1>
+                        <h1 className="heroTitulo">{titulo || t('services_page.title')}</h1>
                     </div>
 
                     <div className="heroDescripcion">
-                        <p>Ofrecemos servicios integrales que combinan creatividad y tecnología para transformar tu visión en productos digitales excepcionales.</p>
+                        <p>{t('services_page.description')}</p>
                     </div>
                 </div>
             </section>

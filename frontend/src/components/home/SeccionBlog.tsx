@@ -5,16 +5,19 @@
  * Imágenes centralizadas en hooks/useImagenes.ts (DRY).
  */
 import React from 'react';
+import {useTranslation} from 'react-i18next';
 import {SeccionHeader} from '../ui/SeccionHeader';
 import {obtenerImagenBlog} from '../../hooks/useImagenes';
 import {POSTS_BLOG} from '../../data/blog';
 import './SeccionBlog.css';
 
 export const SeccionBlog: React.FC = () => {
+    const {t} = useTranslation();
+
     return (
         <section className="seccionBlog" id="blog">
             <div className="blogContenedor">
-                <SeccionHeader titulo="Journal" />
+                <SeccionHeader titulo={t('sections.journal')} />
 
                 <div className="blogGrid">
                     {POSTS_BLOG.slice(0, 3).map(post => (

@@ -4,6 +4,7 @@
  * TO-DO: Conectar con WP REST API para paginación real.
  */
 import React, {useState, useMemo} from 'react';
+import {useTranslation} from 'react-i18next';
 import '../styles/variables.css';
 import './BlogIsland.css';
 import {LayoutPagina} from '../components/layout/LayoutPagina';
@@ -21,6 +22,7 @@ interface BlogIslandProps {
  * Siempre muestra imagen: backend -> fallback colors (obtenerImagenBlog).
  */
 const TarjetaArticulo: React.FC<{post: PostBlog; destacado?: boolean}> = ({post, destacado = false}) => {
+    const {t} = useTranslation();
     const imagenFinal = post.imagen || obtenerImagenBlog(post.id);
 
     return (
@@ -35,13 +37,14 @@ const TarjetaArticulo: React.FC<{post: PostBlog; destacado?: boolean}> = ({post,
                 </div>
                 <h3 className="articuloTitulo">{post.titulo}</h3>
                 <p className="articuloResumen">{post.resumen}</p>
-                <span className="articuloLeer">Leer artículo →</span>
+                <span className="articuloLeer">{t('blog_page.read_more')}</span>
             </div>
         </a>
     );
 };
 
-export const BlogIsland = ({titulo = 'Blog'}: BlogIslandProps): JSX.Element => {
+export const BlogIsland = ({titulo}: BlogIslandProps): JSX.Element => {
+    const {t} = useTranslation();
     const [categoriaActiva, setCategoriaActiva] = useState('todos');
 
     /* Categorías únicas extraídas de los posts */
@@ -61,10 +64,10 @@ export const BlogIsland = ({titulo = 'Blog'}: BlogIslandProps): JSX.Element => {
             <section className="blogHero">
                 <div className="blogHeroContenido">
                     <div>
-                        <h1 className="blogHeroTitulo">{titulo}</h1>
+                        <h1 className="blogHeroTitulo">{titulo || t('blog_page.title')}</h1>
                     </div>
                     <div className="blogHeroDescripcion">
-                        <p>Ideas, reflexiones y aprendizajes sobre diseño, tecnología y el futuro digital.</p>
+                        <p>{t('blog_page.description')}</p>
                     </div>
                 </div>
             </section>
@@ -79,7 +82,7 @@ export const BlogIsland = ({titulo = 'Blog'}: BlogIslandProps): JSX.Element => {
                                 className={`blogFiltroBtn ${categoriaActiva === cat ? 'blogFiltroBtnActivo' : ''}`}
                                 onClick={() => setCategoriaActiva(cat)}
                             >
-                                {cat === 'todos' ? 'Todos' : cat}
+                                {cat === 'todos' ? t('blog_page.all') : cat}
                             </button>
                         ))}
                     </div>
@@ -94,7 +97,7 @@ export const BlogIsland = ({titulo = 'Blog'}: BlogIslandProps): JSX.Element => {
                     )}
 
                     {postsFiltrados.length === 0 && (
-                        <p className="blogSinResultados">No hay artículos para esta categoría.</p>
+                        <p className="blogSinResultados">{t('blog_page.empty')}</p>
                     )}
                 </div>
             </section>

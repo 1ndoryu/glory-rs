@@ -3,6 +3,7 @@
  * Página de portfolio/proyectos con grid filtrable.
  */
 import React, {useState, useMemo} from 'react';
+import {useTranslation} from 'react-i18next';
 import '../styles/variables.css';
 import './ProyectosIsland.css';
 import {LayoutPagina} from '../components/layout/LayoutPagina';
@@ -42,7 +43,8 @@ const TarjetaProyecto: React.FC<{proyecto: Proyecto; indice: number}> = ({proyec
     );
 };
 
-export const ProyectosIsland = ({titulo = 'Nuestros Proyectos'}: ProyectosIslandProps): JSX.Element => {
+export const ProyectosIsland = ({titulo}: ProyectosIslandProps): JSX.Element => {
+    const {t} = useTranslation();
     const [categoriaActiva, setCategoriaActiva] = useState('todos');
     const [busqueda, setBusqueda] = useState('');
 
@@ -62,10 +64,10 @@ export const ProyectosIsland = ({titulo = 'Nuestros Proyectos'}: ProyectosIsland
             <section className="proyectosHero">
                 <div className="heroContenido">
                     <div>
-                        <h1 className="heroTitulo">{titulo}</h1>
+                        <h1 className="heroTitulo">{titulo || t('projects_page.title')}</h1>
                     </div>
                     <div className="heroDescripcion">
-                        <p>Cada proyecto es una historia de colaboración. Explorá nuestro trabajo y descubrí cómo transformamos ideas en experiencias digitales memorables.</p>
+                        <p>{t('projects_page.description')}</p>
                     </div>
                 </div>
             </section>
@@ -85,7 +87,7 @@ export const ProyectosIsland = ({titulo = 'Nuestros Proyectos'}: ProyectosIsland
                         ))}
                     </div>
                     {proyectosFiltrados.length === 0 && (
-                        <p className="proyectosSinResultados">No se encontraron proyectos para esta categoría.</p>
+                        <p className="proyectosSinResultados">{t('projects_page.empty')}</p>
                     )}
                 </div>
             </section>

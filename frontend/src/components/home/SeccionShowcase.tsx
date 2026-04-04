@@ -3,16 +3,19 @@
  * Muestra proyectos destacados organizados por categoría.
  * Datos centralizados en data/showcase.ts (DRY).
  */
+import {useTranslation} from 'react-i18next';
 import {SeccionHeader} from '../ui/SeccionHeader';
 import {Badge} from '../ui/Badge';
 import {CATEGORIAS_SHOWCASE} from '../../data/showcase';
 import './SeccionShowcase.css';
 
 export const SeccionShowcase = (): JSX.Element => {
+    const {t} = useTranslation();
+
     return (
         <section className="seccionShowcase">
             <div className="showcaseContenedor">
-                <SeccionHeader titulo="Selected Work" />
+                <SeccionHeader titulo={t('sections.selected_work')} />
 
                 {CATEGORIAS_SHOWCASE.map((categoria, index) => (
                     <div className="showcaseFila" key={index}>

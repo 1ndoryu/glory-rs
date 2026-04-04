@@ -5,17 +5,19 @@
  * TO-DO: Conectar con REST API backend para persistir cambios.
  */
 import React from 'react';
+import {useTranslation} from 'react-i18next';
 import {Button} from '../ui/Button';
 import {usePerfil} from '../../hooks/usePerfil';
 import './SeccionPerfil.css';
 
 export const SeccionPerfil: React.FC = () => {
+    const {t} = useTranslation();
     const {estado, guardado, actualizarCampo, handleGuardar, usuario} = usePerfil();
 
     return (
         <div className="perfilSeccion">
             <p className="perfilDescripcionIntro">
-                Personaliza tu perfil publico. Esta informacion se usara en tus testimonios y comentarios.
+                {t('panel.profile_intro')}
             </p>
 
             <form className="perfilFormulario" onSubmit={handleGuardar}>
@@ -24,29 +26,29 @@ export const SeccionPerfil: React.FC = () => {
                     <div className="perfilAvatar">
                         <img
                             src={usuario?.avatar || 'https://i.pravatar.cc/100?u=default'}
-                            alt="Avatar del usuario"
+                            alt={t('accessibility.profile_photo')}
                         />
                     </div>
                     <div className="perfilAvatarAcciones">
-                        <Button variante="outline" tamano="pequeno">Cambiar foto</Button>
-                        <span className="perfilAvatarNota">JPG, PNG. Max 2MB.</span>
+                        <Button variante="outline" tamano="pequeno">{t('panel.change_photo')}</Button>
+                        <span className="perfilAvatarNota">{t('panel.photo_help')}</span>
                     </div>
                 </div>
 
                 <div className="perfilFormGrid">
                     <div className="perfilCampo">
-                        <label htmlFor="perfilNombre" className="perfilCampoEtiqueta">Nombre para mostrar</label>
+                        <label htmlFor="perfilNombre" className="perfilCampoEtiqueta">{t('panel.display_name')}</label>
                         <input
                             type="text"
                             id="perfilNombre"
                             value={estado.nombre}
                             onChange={(e) => actualizarCampo('nombre', e.target.value)}
-                            placeholder="Tu nombre publico"
+                            placeholder={t('panel.display_name_placeholder')}
                             className="perfilCampoInput"
                         />
                     </div>
                     <div className="perfilCampo">
-                        <label htmlFor="perfilEmail" className="perfilCampoEtiqueta">Email</label>
+                        <label htmlFor="perfilEmail" className="perfilCampoEtiqueta">{t('panel.email')}</label>
                         <input
                             type="email"
                             id="perfilEmail"
@@ -58,18 +60,18 @@ export const SeccionPerfil: React.FC = () => {
                 </div>
 
                 <div className="perfilCampo">
-                    <label htmlFor="perfilDescripcion" className="perfilCampoEtiqueta">Descripcion</label>
+                    <label htmlFor="perfilDescripcion" className="perfilCampoEtiqueta">{t('panel.bio_label')}</label>
                     <textarea
                         id="perfilDescripcion"
                         value={estado.descripcion}
                         onChange={(e) => actualizarCampo('descripcion', e.target.value)}
-                        placeholder="Cuentanos sobre ti..."
+                        placeholder={t('panel.bio_placeholder')}
                         className="perfilCampoTextarea"
                         rows={4}
                     />
                 </div>
 
-                <h3 className="perfilSubseccionTitulo">Redes Sociales</h3>
+                <h3 className="perfilSubseccionTitulo">{t('panel.social_title')}</h3>
                 <div className="perfilFormGrid">
                     <div className="perfilCampo">
                         <label htmlFor="perfilLinkedin" className="perfilCampoEtiqueta">LinkedIn</label>
@@ -94,7 +96,7 @@ export const SeccionPerfil: React.FC = () => {
                         />
                     </div>
                     <div className="perfilCampo">
-                        <label htmlFor="perfilWebsite" className="perfilCampoEtiqueta">Sitio Web</label>
+                        <label htmlFor="perfilWebsite" className="perfilCampoEtiqueta">{t('panel.website')}</label>
                         <input
                             type="url"
                             id="perfilWebsite"
@@ -107,8 +109,8 @@ export const SeccionPerfil: React.FC = () => {
                 </div>
 
                 <div className="perfilFormAcciones">
-                    <Button variante="primario" tamano="mediano">Guardar cambios</Button>
-                    {guardado && <span className="perfilGuardadoExito">Perfil actualizado correctamente</span>}
+                    <Button variante="primario" tamano="mediano">{t('panel.save')}</Button>
+                    {guardado && <span className="perfilGuardadoExito">{t('panel.saved_success')}</span>}
                 </div>
             </form>
         </div>

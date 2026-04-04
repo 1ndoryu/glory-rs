@@ -4,6 +4,7 @@
  * Campos: nombre, email, telefono, descripcion, presupuesto.
  */
 import React, {useState} from 'react';
+import {useTranslation} from 'react-i18next';
 import '../styles/variables.css';
 import './ContactoIsland.css';
 import {LayoutPagina} from '../components/layout/LayoutPagina';
@@ -22,16 +23,17 @@ interface FormularioContacto {
     presupuesto: string;
 }
 
-const PRESUPUESTOS = [
-    {value: '', label: 'Selecciona un rango'},
-    {value: 'menos-5k', label: 'Menos de $5,000'},
-    {value: '5k-10k', label: '$5,000 - $10,000'},
-    {value: '10k-25k', label: '$10,000 - $25,000'},
-    {value: '25k-50k', label: '$25,000 - $50,000'},
-    {value: 'mas-50k', label: 'Más de $50,000'},
+const PRESUPUESTOS_KEYS = [
+    {value: '', key: 'contact.budget_select'},
+    {value: 'menos-5k', key: 'contact.budget_1'},
+    {value: '5k-10k', key: 'contact.budget_2'},
+    {value: '10k-25k', key: 'contact.budget_3'},
+    {value: '25k-50k', key: 'contact.budget_4'},
+    {value: 'mas-50k', key: 'contact.budget_5'},
 ];
 
-export const ContactoIsland = ({titulo = 'Contacto'}: ContactoIslandProps): JSX.Element => {
+export const ContactoIsland = ({titulo}: ContactoIslandProps): JSX.Element => {
+    const {t} = useTranslation();
     const [formulario, setFormulario] = useState<FormularioContacto>({
         nombre: '',
         email: '',
@@ -58,13 +60,10 @@ export const ContactoIsland = ({titulo = 'Contacto'}: ContactoIslandProps): JSX.
             <section className="contactoHero">
                 <div className="contactoHeroContenido">
                     <div className="contactoHeroTexto">
-                        <h1 className="contactoHeroTitulo">{titulo}</h1>
+                        <h1 className="contactoHeroTitulo">{titulo || t('contact.title')}</h1>
                     </div>
                     <div className="contactoHeroDescripcion">
-                        <p>
-                            Cuéntanos sobre tu proyecto. Nos encanta escuchar ideas nuevas y
-                            encontrar la mejor manera de hacerlas realidad.
-                        </p>
+                        <p>{t('contact.hero_description')}</p>
                     </div>
                 </div>
             </section>
@@ -74,11 +73,8 @@ export const ContactoIsland = ({titulo = 'Contacto'}: ContactoIslandProps): JSX.
                 <div className="contactoFormularioContenedor">
                     {enviado ? (
                         <div className="contactoExito" role="status" aria-live="polite">
-                            <h2 className="contactoExitoTitulo">Mensaje enviado</h2>
-                            <p className="contactoExitoTexto">
-                                Gracias por contactarnos. Revisaremos tu solicitud y te
-                                responderemos en menos de 24 horas.
-                            </p>
+                            <h2 className="contactoExitoTitulo">{t('contact.success_title')}</h2>
+                            <p className="contactoExitoTexto">{t('contact.success_message')}</p>
                             <Button
                                 variante="outline"
                                 onClick={() => {
@@ -86,7 +82,7 @@ export const ContactoIsland = ({titulo = 'Contacto'}: ContactoIslandProps): JSX.
                                     setFormulario({nombre: '', email: '', telefono: '', descripcion: '', presupuesto: ''});
                                 }}
                             >
-                                Enviar otro mensaje
+                                {t('contact.success_another')}
                             </Button>
                         </div>
                     ) : (
@@ -94,14 +90,14 @@ export const ContactoIsland = ({titulo = 'Contacto'}: ContactoIslandProps): JSX.
                             <div className="formularioGrid">
                                 {/* Nombre */}
                                 <div className="campoCampo">
-                                    <label htmlFor="nombre" className="campoEtiqueta">Nombre completo</label>
+                                    <label htmlFor="nombre" className="campoEtiqueta">{t('contact.name_label')}</label>
                                     <input
                                         type="text"
                                         id="nombre"
                                         name="nombre"
                                         value={formulario.nombre}
                                         onChange={handleChange}
-                                        placeholder="Tu nombre"
+                                        placeholder={t('contact.name_placeholder')}
                                         className="campoInput"
                                         required
                                     />
@@ -109,7 +105,7 @@ export const ContactoIsland = ({titulo = 'Contacto'}: ContactoIslandProps): JSX.
 
                                 {/* Email */}
                                 <div className="campoCampo">
-                                    <label htmlFor="email" className="campoEtiqueta">Correo electrónico</label>
+                                    <label htmlFor="email" className="campoEtiqueta">{t('contact.email_label')}</label>
                                     <input
                                         type="email"
                                         id="email"
@@ -124,21 +120,21 @@ export const ContactoIsland = ({titulo = 'Contacto'}: ContactoIslandProps): JSX.
 
                                 {/* Teléfono */}
                                 <div className="campoCampo">
-                                    <label htmlFor="telefono" className="campoEtiqueta">Teléfono (opcional)</label>
+                                    <label htmlFor="telefono" className="campoEtiqueta">{t('contact.phone_label')}</label>
                                     <input
                                         type="tel"
                                         id="telefono"
                                         name="telefono"
                                         value={formulario.telefono}
                                         onChange={handleChange}
-                                        placeholder="+1 234 567 890"
+                                        placeholder={t('contact.phone_placeholder')}
                                         className="campoInput"
                                     />
                                 </div>
 
                                 {/* Presupuesto */}
                                 <div className="campoCampo">
-                                    <label htmlFor="presupuesto" className="campoEtiqueta">Presupuesto estimado</label>
+                                    <label htmlFor="presupuesto" className="campoEtiqueta">{t('contact.budget_label')}</label>
                                     <select
                                         id="presupuesto"
                                         name="presupuesto"
@@ -146,8 +142,8 @@ export const ContactoIsland = ({titulo = 'Contacto'}: ContactoIslandProps): JSX.
                                         onChange={handleChange}
                                         className="campoSelect"
                                     >
-                                        {PRESUPUESTOS.map(p => (
-                                            <option key={p.value} value={p.value}>{p.label}</option>
+                                        {PRESUPUESTOS_KEYS.map(p => (
+                                            <option key={p.value} value={p.value}>{t(p.key)}</option>
                                         ))}
                                     </select>
                                 </div>
@@ -155,13 +151,13 @@ export const ContactoIsland = ({titulo = 'Contacto'}: ContactoIslandProps): JSX.
 
                             {/* Descripción - campo completo */}
                             <div className="campoCampo campoCompleto">
-                                <label htmlFor="descripcion" className="campoEtiqueta">Descripción del proyecto</label>
+                                <label htmlFor="descripcion" className="campoEtiqueta">{t('contact.project_label')}</label>
                                 <textarea
                                     id="descripcion"
                                     name="descripcion"
                                     value={formulario.descripcion}
                                     onChange={handleChange}
-                                    placeholder="Cuéntanos sobre tu proyecto, objetivos y plazos..."
+                                    placeholder={t('contact.project_placeholder')}
                                     className="campoTextarea"
                                     rows={6}
                                     required
@@ -170,10 +166,10 @@ export const ContactoIsland = ({titulo = 'Contacto'}: ContactoIslandProps): JSX.
 
                             <div className="formularioAcciones">
                                 <Button variante="primario" tamano="mediano" className="formularioBoton">
-                                    Enviar mensaje
+                                    {t('contact.submit')}
                                 </Button>
                                 <p className="formularioNota">
-                                    Responderemos en menos de 24 horas hábiles.
+                                    {t('contact.help')}
                                 </p>
                             </div>
                         </form>

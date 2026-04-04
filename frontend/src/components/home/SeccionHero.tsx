@@ -5,23 +5,26 @@
  */
 
 import './SeccionHero.css';
+import {useTranslation} from 'react-i18next';
 import {Button} from '../ui/Button';
 import {CarruselShowcase} from './CarruselShowcase';
 
 export const SeccionHero = (): JSX.Element => {
+    const {t} = useTranslation();
+
     return (
         <section className="seccionHero">
             <div className="heroContenido">
                 <div>
                     <h1 className="heroTitulo">
-                        Estudio creativo especializado en <span>diseño web</span> y <span>software</span>.
+                        {t('hero.title_start')}<span>{t('hero.title_web')}</span> y <span>{t('hero.title_software')}</span>.
                     </h1>
                 </div>
 
                 <div className="heroDescripcion">
-                    <p>Fusionamos diseño gráfico con ingeniería de software para crear soluciones web, aplicaciones y herramientas de inteligencia artificial que destacan por su estética y rendimiento.</p>
+                    <p>{t('hero.description')}</p>
                     <Button variante="primario" tamano="mediano" className="heroBoton">
-                        Comenzar proyecto
+                        {t('hero.cta')}
                     </Button>
                 </div>
             </div>

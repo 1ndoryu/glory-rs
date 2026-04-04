@@ -3,6 +3,7 @@
  * Página "Sobre Nosotros" con misión, equipo, marcas y testimonios.
  */
 import React from 'react';
+import {useTranslation} from 'react-i18next';
 import '../styles/variables.css';
 import './NosotrosIsland.css';
 import {LayoutPagina} from '../components/layout/LayoutPagina';
@@ -43,17 +44,19 @@ const TarjetaMiembro: React.FC<{miembro: Miembro}> = ({miembro}) => (
     </article>
 );
 
-export const NosotrosIsland = ({titulo = 'Sobre Nosotros'}: NosotrosIslandProps): JSX.Element => {
+export const NosotrosIsland = ({titulo}: NosotrosIslandProps): JSX.Element => {
+    const {t} = useTranslation();
+
     return (
         <LayoutPagina className="nosotrosMain" id="paginaNosotros">
             {/* Hero */}
             <section className="nosotrosHero">
                 <div className="nosotrosHeroContenido">
                     <div className="nosotrosHeroTexto">
-                        <h1 className="nosotrosHeroTitulo">{titulo}</h1>
+                        <h1 className="nosotrosHeroTitulo">{titulo || t('about.title')}</h1>
                     </div>
                     <div className="nosotrosHeroDescripcion">
-                        <p>Somos un equipo multidisciplinario que combina diseño, tecnología e inteligencia artificial para crear experiencias digitales que generan impacto real en los negocios de nuestros clientes.</p>
+                        <p>{t('about.description')}</p>
                     </div>
                 </div>
             </section>
@@ -63,16 +66,16 @@ export const NosotrosIsland = ({titulo = 'Sobre Nosotros'}: NosotrosIslandProps)
                 <div className="nosotrosMisionContenedor">
                     <div className="misionGrid">
                         <div className="misionItem">
-                            <h3 className="misionItemTitulo">Nuestra Misión</h3>
-                            <p className="misionItemTexto">Democratizar el acceso a soluciones digitales de alto nivel, combinando diseño premium con tecnología de vanguardia para que cada negocio pueda competir al más alto nivel.</p>
+                            <h3 className="misionItemTitulo">{t('about.mission_title')}</h3>
+                            <p className="misionItemTexto">{t('about.mission_text')}</p>
                         </div>
                         <div className="misionItem">
-                            <h3 className="misionItemTitulo">Nuestro Enfoque</h3>
-                            <p className="misionItemTexto">Creemos en la intersección entre estética y funcionalidad. Cada proyecto es una oportunidad de crear algo que no solo se vea increíble, sino que también genere resultados medibles.</p>
+                            <h3 className="misionItemTitulo">{t('about.approach_title')}</h3>
+                            <p className="misionItemTexto">{t('about.approach_text')}</p>
                         </div>
                         <div className="misionItem">
-                            <h3 className="misionItemTitulo">Nuestros Valores</h3>
-                            <p className="misionItemTexto">Transparencia, excelencia técnica y obsesión por los detalles guían cada decisión que tomamos, desde el primer wireframe hasta el deploy final.</p>
+                            <h3 className="misionItemTitulo">{t('about.values_title')}</h3>
+                            <p className="misionItemTexto">{t('about.values_text')}</p>
                         </div>
                     </div>
                 </div>
@@ -81,7 +84,7 @@ export const NosotrosIsland = ({titulo = 'Sobre Nosotros'}: NosotrosIslandProps)
             {/* Equipo */}
             <section className="nosotrosEquipo">
                 <div className="nosotrosEquipoContenedor">
-                    <SeccionHeader titulo="El Equipo" />
+                    <SeccionHeader titulo={t('about.team_title')} />
                     <div className="equipoGrid">
                         {MIEMBROS_DATA.map(miembro => (
                             <TarjetaMiembro key={miembro.id} miembro={miembro} />

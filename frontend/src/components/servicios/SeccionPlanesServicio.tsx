@@ -5,6 +5,7 @@
  * Conecta con Stripe Checkout cuando el plan tiene stripePriceId.
  */
 import React, {useState} from 'react';
+import {useTranslation} from 'react-i18next';
 import {obtenerPlanesServicio, type PlanServicio} from '../../data/planes/index';
 import {Button} from '../ui/Button';
 import {navegar} from '../../navegacionSPA';
@@ -30,6 +31,7 @@ async function iniciarCheckout(plan: PlanServicio): Promise<void> {
 }
 
 const TarjetaPlan: React.FC<{plan: PlanServicio}> = ({plan}) => {
+    const {t} = useTranslation();
     const [cargando, setCargando] = useState(false);
     const claseDestacado = plan.destacado ? 'tarjetaPlanDestacado' : '';
     const clasePersonalizado = plan.esPersonalizado ? 'tarjetaPlanPersonalizado' : '';
@@ -46,7 +48,7 @@ const TarjetaPlan: React.FC<{plan: PlanServicio}> = ({plan}) => {
 
     return (
         <div className={`tarjetaPlan ${claseDestacado} ${clasePersonalizado}`}>
-            {plan.destacado && <div className="tarjetaPlanBadge">Recomendado</div>}
+            {plan.destacado && <div className="tarjetaPlanBadge">{t('plans.recommended')}</div>}
 
             <div className="tarjetaPlanCabecera">
                 <h3 className="tarjetaPlanNombre">{plan.nombre}</h3>
@@ -84,7 +86,7 @@ const TarjetaPlan: React.FC<{plan: PlanServicio}> = ({plan}) => {
                     onClick={handleClick}
                     disabled={cargando}
                 >
-                    {cargando ? 'Procesando...' : plan.ctaTexto}
+                    {cargando ? t('plans.processing') : plan.ctaTexto}
                 </Button>
             </div>
         </div>
@@ -92,6 +94,7 @@ const TarjetaPlan: React.FC<{plan: PlanServicio}> = ({plan}) => {
 };
 
 export const SeccionPlanesServicio: React.FC<SeccionPlanesServicioProps> = ({slug}) => {
+    const {t} = useTranslation();
     const datos = obtenerPlanesServicio(slug);
 
     if (!datos) return null;
@@ -100,10 +103,8 @@ export const SeccionPlanesServicio: React.FC<SeccionPlanesServicioProps> = ({slu
         <section id="planesServicio" className="planesSeccion">
             <div className="planesContenedor">
                 <div className="planesCabecera">
-                    <h2 className="planesTitulo">Elige tu plan</h2>
-                    <p className="planesSubtitulo">
-                        Selecciona el plan que mejor se adapte a tus necesidades. Todos incluyen soporte y garantia de satisfaccion.
-                    </p>
+                    <h2 className="planesTitulo">{t('plans.title')}</h2>
+                    <p className="planesSubtitulo">{t('plans.subtitle')}</p>
                 </div>
                 <div className="planesGrid">
                     {datos.planes.map(plan => (

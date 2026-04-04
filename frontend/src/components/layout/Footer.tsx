@@ -4,14 +4,27 @@
  * Enlaces centralizados en data/navegacion.ts (DRY).
  */
 import React, {useState} from 'react';
+import {useTranslation} from 'react-i18next';
 import {Button} from '../ui/Button';
 import {ENLACES_FOOTER} from '../../data/navegacion';
 import './Footer.css';
+
+/* [044A-2] Mapeo de labels de footer a claves i18n */
+const FOOTER_NAV_KEYS: Record<string, string> = {
+    'Inicio': 'nav.home',
+    'Servicios': 'nav.services',
+    'Proyectos': 'nav.projects',
+    'Nosotros': 'nav.about',
+    'Blog': 'nav.blog',
+    'Contacto': 'nav.contact',
+    'Política de Privacidad': 'footer.privacy',
+};
 
 /* Validación simple de email */
 const esEmailValido = (email: string): boolean => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
 export const Footer: React.FC = () => {
+    const {t} = useTranslation();
     const currentYear = new Date().getFullYear();
     const [email, setEmail] = useState('');
     const [estado, setEstado] = useState<'idle' | 'enviando' | 'exito' | 'error'>('idle');
@@ -65,11 +78,11 @@ export const Footer: React.FC = () => {
                 <div className="footerTop">
                     <div className="footerBrand">
                         <h3 className="footerLogo">Nakomi.</h3>
-                        <p className="footerDescripcion">Crafting digital experiences with precision and passion. Based in Copenhagen, available worldwide.</p>
+                        <p className="footerDescripcion">{t('footer.brand_desc')}</p>
                     </div>
 
                     <div className="footerNewsletter">
-                        <h4 className="footerNewsletterTitulo" id="newsletter-titulo">Stay updated</h4>
+                        <h4 className="footerNewsletterTitulo" id="newsletter-titulo">{t('footer.newsletter_title')}</h4>
                         <div aria-live="polite" aria-atomic="true">
                             {estado === 'exito' && (
                                 <p className="footerNewsletterExito">{mensaje}</p>
@@ -82,7 +95,7 @@ export const Footer: React.FC = () => {
                                     <input
                                         id="footer-email"
                                         type="email"
-                                        placeholder="Enter your email address"
+                                        placeholder={t('footer.newsletter_placeholder')}
                                         className="footerInput"
                                         value={email}
                                         onChange={e => setEmail(e.target.value)}
@@ -92,7 +105,7 @@ export const Footer: React.FC = () => {
                                         aria-invalid={estado === 'error' ? true : undefined}
                                     />
                                     <Button variante="outline" className="botonFooter" disabled={estado === 'enviando'}>
-                                        {estado === 'enviando' ? 'Sending...' : 'Subscribe'}
+                                        {estado === 'enviando' ? t('footer.newsletter_sending') : t('footer.newsletter_submit')}
                                     </Button>
                                 </form>
                                 {estado === 'error' && (
@@ -107,12 +120,12 @@ export const Footer: React.FC = () => {
                     <nav className="footerLinks" aria-label="Enlaces del pie de página">
                         {ENLACES_FOOTER.map(enlace => (
                             <a key={enlace.label} href={enlace.href} className="footerLink">
-                                {enlace.label}
+                                {t(FOOTER_NAV_KEYS[enlace.label] || enlace.label)}
                             </a>
                         ))}
                     </nav>
 
-                    <span className="footerCopyright">&copy; {currentYear} Nakomi Template. All rights reserved.</span>
+                    <span className="footerCopyright">{t('footer.copyright', {year: currentYear})}</span>
                 </div>
             </div>
         </footer>

@@ -1,0 +1,208 @@
+{
+    "nav": {
+        "home": "Inicio",
+        "services": "Servicios",
+        "projects": "Proyectos",
+        "about": "Nosotros",
+        "blog": "Blog",
+        "solutions": "Soluciones",
+        "hosting": "Hosting",
+        "contact": "Contacto",
+        "login": "Acceder",
+        "panel": "Panel",
+        "back": "Volver",
+        "chat": "Chat",
+        "logout": "Salir"
+    },
+    "hero": {
+        "title_start": "Estudio creativo especializado en ",
+        "title_web": "diseño web",
+        "title_software": "software",
+        "description": "Fusionamos diseño gráfico con ingeniería de software para crear soluciones web, aplicaciones y herramientas de inteligencia artificial que destacan por su estética y rendimiento.",
+        "cta": "Comenzar proyecto"
+    },
+    "sections": {
+        "services": "Services",
+        "selected_work": "Selected Work",
+        "journal": "Journal",
+        "capabilities": "Capabilities",
+        "more_services": "More Services",
+        "testimonials": "Testimonials",
+        "related_projects": "Proyectos Relacionados"
+    },
+    "contact": {
+        "title": "Contacto",
+        "section_title": "Get in Touch",
+        "heading": "Have a project in mind?",
+        "description": "Send some details about your project or inquiry. We can help your business designing a website, digital product, or building a custom solution.",
+        "btn_contact": "Contact",
+        "btn_hire": "Hire Service",
+        "name_label": "Nombre completo",
+        "name_placeholder": "Tu nombre",
+        "email_label": "Correo electrónico",
+        "email_placeholder": "tu@email.com",
+        "phone_label": "Teléfono (opcional)",
+        "phone_placeholder": "+1 234 567 890",
+        "budget_label": "Presupuesto estimado",
+        "budget_select": "Selecciona un rango",
+        "budget_1": "Menos de $5,000",
+        "budget_2": "$5,000 - $10,000",
+        "budget_3": "$10,000 - $25,000",
+        "budget_4": "$25,000 - $50,000",
+        "budget_5": "Más de $50,000",
+        "project_label": "Descripción del proyecto",
+        "project_placeholder": "Cuéntanos sobre tu proyecto, objetivos y plazos...",
+        "submit": "Enviar mensaje",
+        "submitting": "Enviando...",
+        "help": "Responderemos en menos de 24 horas hábiles.",
+        "success_title": "Mensaje enviado",
+        "success_message": "Gracias por contactarnos. Revisaremos tu solicitud y te responderemos en menos de 24 horas.",
+        "success_another": "Enviar otro mensaje",
+        "hero_description": "Cuéntanos sobre tu proyecto. Nos encanta escuchar ideas nuevas y encontrar la mejor manera de hacerlas realidad."
+    },
+    "services_page": {
+        "title": "Nuestros Servicios",
+        "description": "Ofrecemos servicios integrales que combinan creatividad y tecnología para transformar tu visión en productos digitales excepcionales.",
+        "search_placeholder": "Buscar servicio...",
+        "empty": "No se encontraron servicios"
+    },
+    "projects_page": {
+        "title": "Nuestros Proyectos",
+        "description": "Cada proyecto es una historia de colaboración. Explorá nuestro trabajo y descubrí cómo transformamos ideas en experiencias digitales memorables.",
+        "empty": "No se encontraron proyectos para esta categoría."
+    },
+    "project_detail": {
+        "default_title": "Proyecto",
+        "cta_1": "¿Te gustaría un proyecto similar? Estamos listos para transformar tu idea en una experiencia digital excepcional.",
+        "cta_2": "Contáctanos para discutir tu visión y hagamos algo increíble juntos.",
+        "cta_start": "Comenzar Proyecto",
+        "cta_more": "Ver más proyectos"
+    },
+    "service_detail": {
+        "default_title": "Nombre del Servicio",
+        "default_description": "Descripción detallada del servicio y cómo aportamos valor a través de nuestra experiencia y metodología.",
+        "cta_1": "¿Listo para llevar tu proyecto al siguiente nivel? Nuestro equipo de expertos está preparado para transformar tu visión en una solución digital de alto impacto.",
+        "cta_2": "No esperes más para destacar en el mercado. Contáctanos hoy mismo para discutir los detalles y dar el primer paso hacia el éxito de tu negocio.",
+        "cta_hire": "Contratar desde",
+        "cta_contact": "Contactar"
+    },
+    "plans": {
+        "title": "Elige tu plan",
+        "subtitle": "Selecciona el plan que mejor se adapte a tus necesidades. Todos incluyen soporte y garantía de satisfacción.",
+        "recommended": "Recomendado",
+        "processing": "Procesando..."
+    },
+    "about": {
+        "title": "Sobre Nosotros",
+        "description": "Somos un equipo multidisciplinario que combina diseño, tecnología e inteligencia artificial para crear experiencias digitales que generan impacto real en los negocios de nuestros clientes.",
+        "mission_title": "Nuestra Misión",
+        "mission_text": "Democratizar el acceso a soluciones digitales de alto nivel, combinando diseño premium con tecnología de vanguardia para que cada negocio pueda competir al más alto nivel.",
+        "approach_title": "Nuestro Enfoque",
+        "approach_text": "Creemos en la intersección entre estética y funcionalidad. Cada proyecto es una oportunidad de crear algo que no solo se vea increíble, sino que también genere resultados medibles.",
+        "values_title": "Nuestros Valores",
+        "values_text": "Transparencia, excelencia técnica y obsesión por los detalles guían cada decisión que tomamos, desde el primer wireframe hasta el deploy final.",
+        "team_title": "El Equipo"
+    },
+    "blog_page": {
+        "title": "Blog",
+        "description": "Ideas, reflexiones y aprendizajes sobre diseño, tecnología y el futuro digital.",
+        "all": "Todos",
+        "empty": "No hay artículos para esta categoría.",
+        "read_more": "Leer artículo →"
+    },
+    "blog_single": {
+        "default_title": "Post del Blog",
+        "placeholder_1": "Este artículo está en proceso de redacción. Pronto tendrás el contenido completo disponible. Mientras tanto, explorá nuestros otros artículos y descubrí más sobre diseño, tecnología y estrategia digital.",
+        "placeholder_2": "En nuestro blog compartimos insights, tendencias y guías prácticas que pueden ayudarte a tomar mejores decisiones para tu próximo proyecto digital.",
+        "more_articles": "Más artículos"
+    },
+    "solutions_page": {
+        "title": "Soluciones",
+        "description": "Infraestructura, herramientas y tecnología de punta para potenciar tu negocio digital. Soluciones escalables diseñadas para crecer con vos.",
+        "hosting_title": "Hosting Administrado",
+        "hosting_desc": "Infraestructura de alto rendimiento con soporte 24/7, backups automáticos y optimización continua para que tu sitio nunca se detenga.",
+        "hosting_price": "Desde $29/mes",
+        "explore": "Explorar →",
+        "coming_soon": "Próximamente",
+        "coming_soon_desc": "Estamos trabajando en esta solución. Pronto tendrás toda la información que necesitas.",
+        "under_construction": "En construcción",
+        "back_solutions": "← Volver a Soluciones",
+        "contact_info": "Contactar para más info"
+    },
+    "footer": {
+        "brand_desc": "Crafting digital experiences with precision and passion. Based in Copenhagen, available worldwide.",
+        "newsletter_title": "Stay updated",
+        "newsletter_placeholder": "Enter your email address",
+        "newsletter_submit": "Subscribe",
+        "newsletter_sending": "Sending...",
+        "newsletter_success": "¡Suscripción exitosa! Te mantendremos informado.",
+        "copyright": "© {{year}} Nakomi Template. All rights reserved.",
+        "privacy": "Política de Privacidad"
+    },
+    "auth": {
+        "login": "Iniciar Sesión",
+        "register": "Crear Cuenta",
+        "recover": "Recuperar Contraseña",
+        "close": "Cerrar modal",
+        "email_label": "Correo electrónico",
+        "email_placeholder": "tu@email.com",
+        "password_label": "Contraseña",
+        "password_placeholder": "Tu contraseña",
+        "name_label": "Nombre completo",
+        "name_placeholder": "Tu nombre",
+        "confirm_password": "Confirmar contraseña",
+        "confirm_placeholder": "Repite la contraseña",
+        "min_chars": "Mínimo 8 caracteres",
+        "forgot_password": "¿Olvidaste tu contraseña?",
+        "loading": "Cargando...",
+        "creating": "Creando cuenta...",
+        "sending": "Enviando...",
+        "or": "o",
+        "google_login": "Continuar con Google",
+        "google_register": "Registrarse con Google",
+        "captcha_note": "Protegido por reCAPTCHA. Se aplicarán la política de privacidad y los términos de servicio.",
+        "recover_sent": "Si el correo existe en nuestro sistema, recibirás un enlace para restablecer tu contraseña.",
+        "recover_desc": "Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.",
+        "send_link": "Enviar enlace",
+        "back_login": "Volver al login",
+        "back_login_text": "Volver al inicio de sesión"
+    },
+    "panel": {
+        "profile_intro": "Personaliza tu perfil público. Esta información se usará en tus testimonios y comentarios.",
+        "change_photo": "Cambiar foto",
+        "photo_help": "JPG, PNG. Max 2MB.",
+        "display_name": "Nombre para mostrar",
+        "display_name_placeholder": "Tu nombre público",
+        "email": "Email",
+        "bio_label": "Descripción",
+        "bio_placeholder": "Cuéntanos sobre ti...",
+        "social_title": "Redes Sociales",
+        "website": "Sitio Web",
+        "save": "Guardar cambios",
+        "saved_success": "Perfil actualizado correctamente"
+    },
+    "accessibility": {
+        "logo_home": "Nakomi - Ir al inicio",
+        "close_menu": "Cerrar menú",
+        "open_menu": "Abrir menú",
+        "main_nav": "Navegación principal",
+        "user_actions": "Acciones del usuario",
+        "skip_content": "Ir al contenido principal",
+        "panel_nav": "Panel de navegación del usuario",
+        "panel_sections": "Secciones del panel",
+        "profile_photo": "Tu perfil",
+        "random_bg": "Fondo aleatorio"
+    },
+    "categories": {
+        "all": "Todos",
+        "web": "Diseño Web",
+        "software": "Software",
+        "ai": "Inteligencia Artificial",
+        "branding": "Branding"
+    },
+    "language": {
+        "es": "Español",
+        "en": "English",
+        "ja": "日本語"
+    }
+}

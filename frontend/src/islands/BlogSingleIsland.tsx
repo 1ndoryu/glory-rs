@@ -4,6 +4,7 @@
  * Consume datos de window.GLORY_CONTEXT para el post actual.
  * TO-DO: Conectar con WP REST API para contenido real de posts.
  */
+import {useTranslation} from 'react-i18next';
 import {LayoutPagina} from '../components/layout/LayoutPagina';
 import {SeccionContacto} from '../components/home/SeccionContacto';
 import {POSTS_BLOG} from '../data/blog';
@@ -27,11 +28,12 @@ export const BlogSingleIsland = ({
     categoria: categoriaProp,
     imagen: imagenProp
 }: BlogSingleIslandProps): JSX.Element => {
+    const {t} = useTranslation();
     /*
      * Si venimos de un single-post.php con datos inyectados,
      * usamos las props. Si no, buscamos en los datos locales por slug.
      */
-    let titulo = tituloProp || 'Post del Blog';
+    let titulo = tituloProp || t('blog_single.default_title');
     let contenido = contenidoProp || '';
     let fecha = fechaProp || '';
     let categoria = categoriaProp || '';
@@ -89,14 +91,8 @@ export const BlogSingleIsland = ({
                         />
                     ) : (
                         <div className="blogSingleTexto">
-                            <p>
-                                Este artículo está en proceso de redacción. Pronto tendrás el contenido completo disponible.
-                                Mientras tanto, explorá nuestros otros artículos y descubrí más sobre diseño, tecnología y estrategia digital.
-                            </p>
-                            <p>
-                                En nuestro blog compartimos insights, tendencias y guías prácticas que pueden ayudarte
-                                a tomar mejores decisiones para tu próximo proyecto digital.
-                            </p>
+                            <p>{t('blog_single.placeholder_1')}</p>
+                            <p>{t('blog_single.placeholder_2')}</p>
                         </div>
                     )}
                 </article>
@@ -109,7 +105,7 @@ export const BlogSingleIsland = ({
             }).length > 0 && (
                 <section className="blogSingleRelacionados">
                     <div className="blogSingleRelacionadosContenedor">
-                        <h2 className="blogSingleRelacionadosTitulo">Más artículos</h2>
+                        <h2 className="blogSingleRelacionadosTitulo">{t('blog_single.more_articles')}</h2>
                         <div className="blogSingleRelacionadosGrid">
                             {POSTS_BLOG.filter(p => {
                                 const postSlug = p.link?.split('/').filter(Boolean).pop() || '';

@@ -1,0 +1,208 @@
+{
+    "nav": {
+        "home": "ホーム",
+        "services": "サービス",
+        "projects": "プロジェクト",
+        "about": "私たちについて",
+        "blog": "ブログ",
+        "solutions": "ソリューション",
+        "hosting": "ホスティング",
+        "contact": "お問い合わせ",
+        "login": "ログイン",
+        "panel": "ダッシュボード",
+        "back": "戻る",
+        "chat": "チャット",
+        "logout": "ログアウト"
+    },
+    "hero": {
+        "title_start": "",
+        "title_web": "ウェブデザイン",
+        "title_software": "ソフトウェア",
+        "description": "グラフィックデザインとソフトウェアエンジニアリングを融合し、美しさとパフォーマンスを兼ね備えたウェブソリューション、アプリケーション、AIツールを創造します。",
+        "cta": "プロジェクトを始める"
+    },
+    "sections": {
+        "services": "サービス",
+        "selected_work": "主な実績",
+        "journal": "ジャーナル",
+        "capabilities": "技術力",
+        "more_services": "その他のサービス",
+        "testimonials": "お客様の声",
+        "related_projects": "関連プロジェクト"
+    },
+    "contact": {
+        "title": "お問い合わせ",
+        "section_title": "お気軽にご連絡ください",
+        "heading": "プロジェクトをお考えですか？",
+        "description": "プロジェクトやお問い合わせの詳細をお送りください。ウェブサイト、デジタルプロダクト、カスタムソリューションの設計をお手伝いします。",
+        "btn_contact": "お問い合わせ",
+        "btn_hire": "サービスを依頼",
+        "name_label": "氏名",
+        "name_placeholder": "お名前",
+        "email_label": "メールアドレス",
+        "email_placeholder": "you@email.com",
+        "phone_label": "電話番号（任意）",
+        "phone_placeholder": "+81 90 1234 5678",
+        "budget_label": "推定予算",
+        "budget_select": "範囲を選択",
+        "budget_1": "$5,000未満",
+        "budget_2": "$5,000 - $10,000",
+        "budget_3": "$10,000 - $25,000",
+        "budget_4": "$25,000 - $50,000",
+        "budget_5": "$50,000以上",
+        "project_label": "プロジェクトの説明",
+        "project_placeholder": "プロジェクトの目標やスケジュールについてお聞かせください...",
+        "submit": "メッセージを送信",
+        "submitting": "送信中...",
+        "help": "24営業時間以内にご返信いたします。",
+        "success_title": "送信完了",
+        "success_message": "お問い合わせありがとうございます。内容を確認し、24時間以内にご返信いたします。",
+        "success_another": "別のメッセージを送信",
+        "hero_description": "プロジェクトについてお聞かせください。新しいアイデアを聞くことが大好きで、最良の実現方法を見つけます。"
+    },
+    "services_page": {
+        "title": "サービス一覧",
+        "description": "創造性とテクノロジーを組み合わせた包括的なサービスで、お客様のビジョンを卓越したデジタルプロダクトに変えます。",
+        "search_placeholder": "サービスを検索...",
+        "empty": "サービスが見つかりません"
+    },
+    "projects_page": {
+        "title": "プロジェクト一覧",
+        "description": "すべてのプロジェクトはコラボレーションの物語です。私たちの仕事を探索し、アイデアを記憶に残るデジタル体験に変える方法をご覧ください。",
+        "empty": "このカテゴリーのプロジェクトは見つかりませんでした。"
+    },
+    "project_detail": {
+        "default_title": "プロジェクト",
+        "cta_1": "同様のプロジェクトをご希望ですか？お客様のアイデアを卓越したデジタル体験に変える準備ができています。",
+        "cta_2": "ビジョンについてご相談ください。一緒に素晴らしいものを創りましょう。",
+        "cta_start": "プロジェクトを始める",
+        "cta_more": "他のプロジェクトを見る"
+    },
+    "service_detail": {
+        "default_title": "サービス名",
+        "default_description": "サービスの詳細と、私たちの専門知識と方法論を通じてどのように価値を提供するかについての説明。",
+        "cta_1": "プロジェクトを次のレベルに引き上げる準備はできていますか？私たちの専門家チームが、お客様のビジョンを高インパクトなデジタルソリューションに変えます。",
+        "cta_2": "市場で際立つことを待つ必要はありません。今すぐお問い合わせいただき、ビジネスの成功への第一歩を踏み出しましょう。",
+        "cta_hire": "料金",
+        "cta_contact": "お問い合わせ"
+    },
+    "plans": {
+        "title": "プランを選択",
+        "subtitle": "ニーズに最適なプランをお選びください。すべてのプランにサポートと満足保証が含まれています。",
+        "recommended": "おすすめ",
+        "processing": "処理中..."
+    },
+    "about": {
+        "title": "私たちについて",
+        "description": "デザイン、テクノロジー、人工知能を組み合わせ、お客様のビジネスに真のインパクトを生み出すデジタル体験を創造する学際的なチームです。",
+        "mission_title": "ミッション",
+        "mission_text": "プレミアムデザインと最先端技術を組み合わせ、すべてのビジネスが最高レベルで競争できるよう、ハイレベルなデジタルソリューションへのアクセスを民主化します。",
+        "approach_title": "アプローチ",
+        "approach_text": "美学と機能性の交差点を信じています。すべてのプロジェクトは、見た目が素晴らしいだけでなく、測定可能な結果をもたらすものを創る機会です。",
+        "values_title": "バリュー",
+        "values_text": "透明性、技術的卓越性、そしてディテールへのこだわりが、最初のワイヤーフレームから最終デプロイまで、私たちのすべての決定を導きます。",
+        "team_title": "チーム"
+    },
+    "blog_page": {
+        "title": "ブログ",
+        "description": "デザイン、テクノロジー、デジタルの未来に関するアイデア、考察、学び。",
+        "all": "すべて",
+        "empty": "このカテゴリーの記事はありません。",
+        "read_more": "記事を読む →"
+    },
+    "blog_single": {
+        "default_title": "ブログ記事",
+        "placeholder_1": "この記事は執筆中です。完全なコンテンツは近日公開予定です。それまでの間、他の記事を探索して、デザイン、テクノロジー、デジタル戦略について詳しくご覧ください。",
+        "placeholder_2": "私たちのブログでは、次のデジタルプロジェクトのためのより良い意思決定に役立つインサイト、トレンド、実践ガイドを共有しています。",
+        "more_articles": "その他の記事"
+    },
+    "solutions_page": {
+        "title": "ソリューション",
+        "description": "デジタルビジネスを強化する最先端のインフラ、ツール、テクノロジー。お客様と共に成長するスケーラブルなソリューション。",
+        "hosting_title": "マネージドホスティング",
+        "hosting_desc": "24時間365日のサポート、自動バックアップ、継続的な最適化を備えた高性能インフラストラクチャ。",
+        "hosting_price": "$29/月から",
+        "explore": "詳細 →",
+        "coming_soon": "近日公開",
+        "coming_soon_desc": "このソリューションは準備中です。必要な情報はまもなくご覧いただけます。",
+        "under_construction": "準備中",
+        "back_solutions": "← ソリューションに戻る",
+        "contact_info": "詳細をお問い合わせ"
+    },
+    "footer": {
+        "brand_desc": "精密さと情熱でデジタル体験を創造。コペンハーゲンを拠点に、世界中で活動。",
+        "newsletter_title": "最新情報を受け取る",
+        "newsletter_placeholder": "メールアドレスを入力",
+        "newsletter_submit": "登録",
+        "newsletter_sending": "送信中...",
+        "newsletter_success": "登録完了！最新情報をお届けします。",
+        "copyright": "© {{year}} Nakomi Template. All rights reserved.",
+        "privacy": "プライバシーポリシー"
+    },
+    "auth": {
+        "login": "ログイン",
+        "register": "アカウント作成",
+        "recover": "パスワードリセット",
+        "close": "閉じる",
+        "email_label": "メールアドレス",
+        "email_placeholder": "you@email.com",
+        "password_label": "パスワード",
+        "password_placeholder": "パスワードを入力",
+        "name_label": "氏名",
+        "name_placeholder": "お名前",
+        "confirm_password": "パスワード確認",
+        "confirm_placeholder": "パスワードを再入力",
+        "min_chars": "8文字以上",
+        "forgot_password": "パスワードをお忘れですか？",
+        "loading": "読み込み中...",
+        "creating": "アカウント作成中...",
+        "sending": "送信中...",
+        "or": "または",
+        "google_login": "Googleでログイン",
+        "google_register": "Googleで登録",
+        "captcha_note": "reCAPTCHAで保護されています。プライバシーポリシーと利用規約が適用されます。",
+        "recover_sent": "メールが当システムに登録されている場合、パスワードリセットリンクをお送りします。",
+        "recover_desc": "メールアドレスを入力してください。パスワードリセットリンクをお送りします。",
+        "send_link": "リンクを送信",
+        "back_login": "ログインに戻る",
+        "back_login_text": "ログインに戻る"
+    },
+    "panel": {
+        "profile_intro": "公開プロフィールをカスタマイズしてください。この情報はお客様の声やコメントに使用されます。",
+        "change_photo": "写真を変更",
+        "photo_help": "JPG、PNG。最大2MB。",
+        "display_name": "表示名",
+        "display_name_placeholder": "公開名",
+        "email": "メール",
+        "bio_label": "自己紹介",
+        "bio_placeholder": "自己紹介を書いてください...",
+        "social_title": "ソーシャルネットワーク",
+        "website": "ウェブサイト",
+        "save": "変更を保存",
+        "saved_success": "プロフィールが正常に更新されました"
+    },
+    "accessibility": {
+        "logo_home": "Nakomi - ホームに移動",
+        "close_menu": "メニューを閉じる",
+        "open_menu": "メニューを開く",
+        "main_nav": "メインナビゲーション",
+        "user_actions": "ユーザーアクション",
+        "skip_content": "メインコンテンツへスキップ",
+        "panel_nav": "ユーザーパネルナビゲーション",
+        "panel_sections": "パネルセクション",
+        "profile_photo": "プロフィール",
+        "random_bg": "ランダム背景"
+    },
+    "categories": {
+        "all": "すべて",
+        "web": "ウェブデザイン",
+        "software": "ソフトウェア",
+        "ai": "人工知能",
+        "branding": "ブランディング"
+    },
+    "language": {
+        "es": "Español",
+        "en": "English",
+        "ja": "日本語"
+    }
+}

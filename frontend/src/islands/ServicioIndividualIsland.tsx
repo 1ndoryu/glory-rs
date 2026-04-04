@@ -4,6 +4,7 @@
  * Estructura: Hero -> Galeria -> CTA -> Skills -> Relacionados -> Contacto -> Footer
  * Skills y datos centralizados en data/ (DRY).
  */
+import {useTranslation} from 'react-i18next';
 import '../styles/variables.css';
 import './ServicioIndividualIsland.css';
 import {LayoutPagina} from '../components/layout/LayoutPagina';
@@ -24,6 +25,8 @@ interface ServicioIndividualIslandProps {
 }
 
 export const ServicioIndividualIsland = ({titulo, descripcion, precio_desde, slug}: ServicioIndividualIslandProps): JSX.Element => {
+    const {t} = useTranslation();
+
     /* ID del servicio actual para excluirlo de relacionados */
     const servicioId = slug || titulo?.toLowerCase().replace(/\s+/g, '-') || '';
 
@@ -32,7 +35,7 @@ export const ServicioIndividualIsland = ({titulo, descripcion, precio_desde, slu
             <SeccionHeroServicio titulo={titulo} descripcion={descripcion} />
             <SeccionGaleriaServicio />
             <SeccionPlanesServicio slug={servicioId} />
-            <SeccionCta descripcion={['¿Listo para llevar tu proyecto al siguiente nivel? Nuestro equipo de expertos está preparado para transformar tu visión en una solución digital de alto impacto.', 'No esperes más para destacar en el mercado. Contáctanos hoy mismo para discutir los detalles y dar el primer paso hacia el éxito de tu negocio.']} textoBotonPrimario={`Contratar desde ${precio_desde || '$997'}`} linkBotonPrimario="/contacto/" textoBotonSecundario="Contactar" linkBotonSecundario="/contacto/" />
+            <SeccionCta descripcion={[t('service_detail.cta_1'), t('service_detail.cta_2')]} textoBotonPrimario={`${t('service_detail.cta_hire')} ${precio_desde || '$997'}`} linkBotonPrimario="/contacto/" textoBotonSecundario={t('service_detail.cta_contact')} linkBotonSecundario="/contacto/" />
             <SeccionSkillsServicio skills={SKILLS_POR_DEFECTO} />
             <SeccionServiciosRelacionados servicioActualId={servicioId} />
             <SeccionContacto />
