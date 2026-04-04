@@ -100,7 +100,7 @@
 }
 
 .tarjetaArticulo:hover {
-    background-color: var(--bg-card-subtle);
+    background-color: var(--bg-accent);
     padding-left: var(--spacing-md);
     padding-right: var(--spacing-md);
     margin-left: calc(-1 * var(--spacing-md));
@@ -115,7 +115,7 @@
     aspect-ratio: 4 / 3;
     overflow: hidden;
     border-radius: 8px;
-    background-color: var(--bg-card-subtle);
+    background-color: var(--bg-accent);
 }
 
 .articuloImagen {

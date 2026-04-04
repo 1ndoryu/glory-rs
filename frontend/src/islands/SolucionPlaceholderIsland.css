@@ -28,7 +28,7 @@
     text-transform: uppercase;
     letter-spacing: 0.12em;
     color: var(--text-tertiary);
-    background-color: var(--bg-card-subtle);
+    background-color: var(--bg-accent);
     padding: var(--spacing-xs) var(--spacing-md);
     border-radius: 4px;
 }

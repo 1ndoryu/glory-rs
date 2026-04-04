@@ -55,7 +55,7 @@
 .tarjetaPlan {
     display: flex;
     flex-direction: column;
-    background-color: var(--bg-card-subtle);
+    background-color: var(--bg-accent);
     border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 16px;
     padding: var(--spacing-xl);

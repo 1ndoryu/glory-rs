@@ -27,7 +27,7 @@
     aspect-ratio: 1 / 1;
     border-radius: 8px;
     overflow: hidden;
-    background-color: var(--bg-card-subtle);
+    background-color: var(--bg-accent);
 }
 
 .serviceCard.detailed .cardImage {
@@ -114,24 +114,20 @@
     border-bottom-color: currentColor;
 }
 
-/* Imagen Simple */
+/* [044A-15] Imagen Simple — oculta temporalmente en seccionServicios.
+ * TO-DO: Agregar imágenes reales de servicios y mostrar de nuevo. */
 .serviceCard.simple .simpleImageWrapper {
-    width: 120px;
-    height: 80px;
-    border-radius: 12px;
-    overflow: hidden;
-    flex-shrink: 0;
-    background-color: var(--white-10);
-    display: none; /* Oculto por defecto en móvil según diseño anterior */
+    display: none;
 }
 
+/* TO-DO [044A-15]: Restaurar cuando se agreguen imágenes de servicios
 @media (min-width: 768px) {
     .serviceCard.simple .simpleImageWrapper {
         display: block;
         width: 180px;
         height: 100px;
     }
-}
+} */
 
 .serviceCard.simple .simpleImage {
     width: 100%;

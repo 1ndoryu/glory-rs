@@ -118,7 +118,7 @@
     aspect-ratio: 1 / 1;
     overflow: hidden;
     border-radius: 8px;
-    background-color: var(--bg-card-subtle);
+    background-color: var(--bg-accent);
 }
 
 .proyectoRelacionadoImagen img {

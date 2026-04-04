@@ -4,9 +4,11 @@ interface UseCarruselInfinitoProps {
     totalItems: number;
     tiempoEspera?: number;
     tiempoTransicion?: number;
+    /* [044A-16] Autoplay desactivado por defecto. Solo drag manual. */
+    autoplay?: boolean;
 }
 
-export const useCarruselInfinito = ({totalItems, tiempoEspera = 6000, tiempoTransicion = 800}: UseCarruselInfinitoProps) => {
+export const useCarruselInfinito = ({totalItems, tiempoEspera = 6000, tiempoTransicion = 800, autoplay = false}: UseCarruselInfinitoProps) => {
     const [indiceActual, setIndiceActual] = useState(0);
     const [conTransicion, setConTransicion] = useState(true);
     const [isDragging, setIsDragging] = useState(false);
@@ -56,11 +58,12 @@ export const useCarruselInfinito = ({totalItems, tiempoEspera = 6000, tiempoTran
         // Por simplicidad, el drag hacia derecha desde 0 se bloquea visualmente o se deja rebotar
     }, [indiceActual, totalItems, tiempoTransicion]);
 
-    // Autoplay lifecycle
+    // Autoplay lifecycle — solo si autoplay está habilitado
     useEffect(() => {
+        if (!autoplay) return;
         startAutoplay();
         return () => stopAutoplay();
-    }, [startAutoplay, stopAutoplay]);
+    }, [startAutoplay, stopAutoplay, autoplay]);
 
     // Handlers de Drag
     const onPointerDown = (e: React.PointerEvent) => {
