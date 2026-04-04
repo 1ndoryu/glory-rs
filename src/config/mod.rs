@@ -20,11 +20,13 @@ pub struct AppConfig {
 
 impl AppConfig {
     /// Carga la configuración desde variables de entorno.
-    /// Requiere `DATABASE_URL` y `JWT_SECRET`. `HOST` y `PORT` son opcionales.
+    /// Requiere `JWT_SECRET`. `DATABASE_URL`, `HOST` y `PORT` son opcionales.
+    /// Si `DATABASE_URL` no está definida, usa la DB local por defecto del proyecto.
     pub fn from_env() -> Result<Self, ConfigError> {
         Ok(Self {
-            database_url: std::env::var("DATABASE_URL")
-                .map_err(|_| ConfigError::MissingEnvVar("DATABASE_URL".into()))?,
+            database_url: std::env::var("DATABASE_URL").unwrap_or_else(|_| {
+                "postgres://postgres:root@localhost:5432/nakomi_db".to_string()
+            }),
             jwt_secret: std::env::var("JWT_SECRET")
                 .map_err(|_| ConfigError::MissingEnvVar("JWT_SECRET".into()))?,
             host: std::env::var("HOST").unwrap_or_else(|_| "127.0.0.1".to_string()),

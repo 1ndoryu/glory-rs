@@ -5,6 +5,10 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
+    /* Permitir servir fuentes desde App/Assets/fonts/ (fuera de frontend/) */
+    fs: {
+      allow: ['..'],
+    },
     /* Proxy API requests al backend Rust en desarrollo */
     proxy: {
       '/api': {
