@@ -139,9 +139,10 @@
     color: var(--text-muted);
 }
 
+/* [044A-11] font-size cambiado a 17px por solicitud del usuario */
 .tarjetaPlanDescripcion {
     font-family: var(--font-serif);
-    font-size: var(--text-sm);
+    font-size: 17px;
     color: var(--text-muted);
     line-height: 1.5;
     margin: 0;
@@ -178,15 +179,14 @@
     opacity: 0.4;
 }
 
+/* [044A-11] Eliminado font-serif de tarjetaPlanItemTexto */
 .tarjetaPlanItemIncluido .tarjetaPlanItemTexto {
-    font-family: var(--font-serif);
     font-size: var(--text-sm);
     color: var(--text-primary);
     line-height: 1.4;
 }
 
 .tarjetaPlanItemNoIncluido .tarjetaPlanItemTexto {
-    font-family: var(--font-serif);
     font-size: var(--text-sm);
     color: var(--text-tertiary);
     line-height: 1.4;

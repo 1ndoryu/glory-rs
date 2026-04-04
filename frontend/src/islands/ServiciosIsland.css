@@ -41,10 +41,9 @@
     margin: 0;
 }
 
+/* [044A-11] Eliminado underline de .heroTitulo span por solicitud del usuario */
 .serviciosHero .heroTitulo span {
-    text-decoration: underline;
-    text-decoration-thickness: 4px;
-    text-underline-offset: 6px;
+    /* Sin text-decoration */
 }
 
 .serviciosHero .heroDescripcion {

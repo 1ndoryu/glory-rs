@@ -1,15 +1,16 @@
 /* Estilos para la Galeria de Servicio
- * [044A-5] Proporciones alineadas con CarruselShowcase para consistencia visual. */
+ * [044A-5] Proporciones alineadas con CarruselShowcase para consistencia visual.
+ * [044A-11] Cambiado a aspecto cuadrado (1:1) por solicitud del usuario. */
 :root {
     --galeria-item-width: 300px;
-    --galeria-item-height: 400px;
+    --galeria-item-height: 300px;
     --galeria-item-gap: 20px;
 }
 
 @media (min-width: 768px) {
     :root {
         --galeria-item-width: 450px;
-        --galeria-item-height: 550px;
+        --galeria-item-height: 450px;
         --galeria-item-gap: 32px;
     }
 }
@@ -17,7 +18,7 @@
 @media (min-width: 1440px) {
     :root {
         --galeria-item-width: 450px;
-        --galeria-item-height: 600px;
+        --galeria-item-height: 450px;
         --galeria-item-gap: 48px;
     }
 }

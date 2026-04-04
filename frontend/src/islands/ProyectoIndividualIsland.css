@@ -20,12 +20,14 @@
     gap: var(--spacing-md);
 }
 
+/* [044A-11] Agregado font-weight: 500 !important por solicitud del usuario */
 .proyectoHeroMeta {
     display: flex;
     align-items: center;
     gap: var(--spacing-md);
     font-family: var(--font-primary);
     font-size: var(--text-sm);
+    font-weight: 500 !important;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--text-tertiary);

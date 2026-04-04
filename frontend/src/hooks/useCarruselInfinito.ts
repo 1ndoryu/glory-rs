@@ -15,6 +15,8 @@ export const useCarruselInfinito = ({totalItems, tiempoEspera = 6000, tiempoTran
     const startX = useRef(0);
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const isPausedRef = useRef(false);
+    /* [044A-11] Ref para rastrear si ocurrió un drag significativo y prevenir click en <a> */
+    const draggedRef = useRef(false);
 
     // Iniciar autoplay
     const startAutoplay = useCallback(() => {
@@ -64,6 +66,7 @@ export const useCarruselInfinito = ({totalItems, tiempoEspera = 6000, tiempoTran
     const onPointerDown = (e: React.PointerEvent) => {
         setIsDragging(true);
         startX.current = e.clientX;
+        draggedRef.current = false;
         setConTransicion(false); // Quitar transición para respuesta inmediata
         isPausedRef.current = true;
     };
@@ -71,6 +74,8 @@ export const useCarruselInfinito = ({totalItems, tiempoEspera = 6000, tiempoTran
     const onPointerMove = (e: React.PointerEvent) => {
         if (!isDragging) return;
         const diff = e.clientX - startX.current;
+        /* [044A-11] Marcar como drag si el movimiento supera 5px para prevenir click */
+        if (Math.abs(diff) > 5) draggedRef.current = true;
         setDragOffset(diff);
     };
 
@@ -99,6 +104,15 @@ export const useCarruselInfinito = ({totalItems, tiempoEspera = 6000, tiempoTran
         if (isDragging) onPointerUp();
     };
 
+    /* [044A-11] Prevenir click/navegación en <a> si se acaba de arrastrar.
+     * Usa capture phase para interceptar antes de que el <a> procese el click. */
+    const onClickCapture = (e: React.MouseEvent) => {
+        if (draggedRef.current) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    };
+
     return {
         indiceActual,
         conTransicion,
@@ -107,7 +121,8 @@ export const useCarruselInfinito = ({totalItems, tiempoEspera = 6000, tiempoTran
             onPointerDown,
             onPointerMove,
             onPointerUp,
-            onPointerLeave
+            onPointerLeave,
+            onClickCapture
         }
     };
 };

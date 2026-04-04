@@ -91,9 +91,8 @@
     animation: skillDescripcionEntrada 0.25s ease-out;
 }
 
+/* [044A-11] Eliminado font-family y font-size por solicitud del usuario */
 .skillDescripcion p {
-    font-family: var(--font-serif);
-    font-size: var(--text-lg);
     color: var(--white-40);
     line-height: 1.6;
     margin: 0;

@@ -35,10 +35,9 @@
     letter-spacing: -0.02em;
 }
 
+/* [044A-11] Eliminado underline de .heroTitulo span por solicitud del usuario */
 .heroTitulo span {
-    text-decoration: underline;
-    text-decoration-thickness: 4px;
-    text-underline-offset: 6px;
+    /* Sin text-decoration */
 }
 
 .heroDescripcion {
