@@ -38,21 +38,8 @@ export const ModalAutenticacion: React.FC<ModalAutenticacionProps> = ({abierto, 
     return (
         <div className="modalOverlay" onClick={handleOverlayClick} role="dialog" aria-modal="true" aria-label="Autenticación">
             <div className="modalContenedor" ref={modalRef}>
-                {/* Boton cerrar */}
-                <button className="modalCerrar" onClick={onCerrar} aria-label={t('auth.close')}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M18 6L6 18M6 6l12 12" />
-                    </svg>
-                </button>
-
-                {/* Header */}
-                <div className="modalHeader">
-                    <h2 className="modalTitulo">
-                        {vista === 'login' && t('auth.login')}
-                        {vista === 'registro' && t('auth.register')}
-                        {vista === 'recuperar' && t('auth.recover')}
-                    </h2>
-                </div>
+                {/* [044A-15] Eliminado boton cerrar y titulo por solicitud del usuario.
+                 * Se cierra haciendo click fuera del modal (overlay). */}
 
                 {/* Tabs (solo login/registro) */}
                 {vista !== 'recuperar' && (
