@@ -1,77 +1,79 @@
 /*
  * Datos de showcase/proyectos centralizados.
- * Fuente: window.GLORY_CONTEXT.proyectos (PHP) → Fallback estático.
- * Se organizan en categorías para la sección showcase del home.
+ * [044A-3] Proyectos reales reemplazando placeholders.
  */
 import {Proyecto, CategoriaShowcase} from '../types/contenido';
-import {obtenerImagenShowcase} from '../hooks/useImagenes';
 
 const PROYECTOS_FALLBACK: Proyecto[] = [
     {
-        id: 'aureva',
-        titulo: 'AUREVA',
-        cliente: 'Luxury Interior Design',
-        categorias: ['branding', 'web'],
-        imagen: obtenerImagenShowcase(0),
-        descripcion: 'Diseño de marca e identidad visual para una firma de diseño de interiores de lujo.',
-        link: '/proyectos/aureva',
+        id: 'kamples',
+        titulo: 'KAMPLES',
+        cliente: 'Open Source Platform',
+        categorias: ['web', 'software'],
+        imagen: '/assets/Proyectos portadas/Kamples portada.jpg',
+        descripcion: 'Plataforma de samples musicales con algoritmo de recomendación, DAW integrado y funcionalidades de red social. Código abierto. Organiza, descubre y comparte colecciones como en Pinterest — con la profundidad de WhoSampled.',
+        link: '/proyectos/kamples',
         skills: [
-            {id: 1, titulo: 'Branding', descripcion: 'Identidad visual completa desde cero.'},
-            {id: 2, titulo: 'Web Design', descripcion: 'Sitio web que refleja elegancia y sofisticación.'}
+            {id: 1, titulo: 'Full-Stack Development', descripcion: 'Arquitectura completa: API, frontend SPA y procesamiento de audio.'},
+            {id: 2, titulo: 'Algoritmo de Recomendación', descripcion: 'Motor de descubrimiento basado en samples, géneros y uso.'},
+            {id: 3, titulo: 'DAW Integrado', descripcion: 'Workstation de audio embebida para previsualizar y mezclar samples.'},
+            {id: 4, titulo: 'Red Social', descripcion: 'Colecciones, tableros, "ver más ideas" y perfiles de usuario.'}
+        ],
+        galeria: ['/assets/Kamples/1.jpg', '/assets/Kamples/2.jpg', '/assets/Kamples/3.jpg']
+    },
+    {
+        id: 'mabuhay',
+        titulo: 'MABUHAY',
+        cliente: 'Agencia de Viajes',
+        categorias: ['web', 'branding'],
+        imagen: '/assets/Proyectos portadas/Mabuhay.jpg',
+        descripcion: 'Web y branding para agencia de viajes en España especializada en destinos asiáticos. Diseño cálido y visual que transmite la esencia de cada destino.',
+        link: '/proyectos/mabuhay',
+        skills: [
+            {id: 1, titulo: 'Web Design', descripcion: 'Sitio web responsive con catálogo de destinos y reservas.'},
+            {id: 2, titulo: 'Branding', descripcion: 'Identidad visual inspirada en la hospitalidad filipina.'},
+            {id: 3, titulo: 'Content Strategy', descripcion: 'Fotografía y textos que invitan a explorar.'}
+        ],
+        galeria: ['/assets/Mabuhay/1.png', '/assets/Mabuhay/2.jpg', '/assets/Mabuhay/3.jpg']
+    },
+    {
+        id: 'guillermochatbot',
+        titulo: 'GUILLERMOCHATBOT.ES',
+        cliente: 'AI Portfolio',
+        categorias: ['ai', 'web'],
+        imagen: '/assets/Proyectos portadas/Guillermochatbot.es.jpg',
+        descripcion: 'Portfolio interactivo con chatbot IA que responde sobre experiencia profesional, proyectos y skills técnicos.',
+        link: '/proyectos/guillermochatbot',
+        skills: [
+            {id: 1, titulo: 'AI Chatbot', descripcion: 'Asistente conversacional entrenado con contexto personal.'},
+            {id: 2, titulo: 'Web Design', descripcion: 'Portfolio moderno con interacciones fluidas.'}
         ]
     },
     {
-        id: 'venture',
-        titulo: 'VENTURE',
-        cliente: 'Digital Product Design',
-        categorias: ['web', 'app'],
-        imagen: obtenerImagenShowcase(1),
-        descripcion: 'Producto digital completo para una plataforma de inversiones.',
-        link: '/proyectos/venture',
+        id: 'task',
+        titulo: 'TASK',
+        cliente: 'Productivity App',
+        categorias: ['app', 'software'],
+        imagen: '/assets/Proyectos portadas/Task portada.jpg',
+        descripcion: 'Aplicación de gestión de tareas con enfoque en simplicidad y flujos de trabajo ágiles.',
+        link: '/proyectos/task',
         skills: [
-            {id: 1, titulo: 'Product Design', descripcion: 'Diseño de producto digital end-to-end.'},
-            {id: 2, titulo: 'Design System', descripcion: 'Sistema escalable de componentes.'}
+            {id: 1, titulo: 'Product Design', descripcion: 'UX centrada en flujos de productividad real.'},
+            {id: 2, titulo: 'App Development', descripcion: 'Desarrollo mobile-first con sincronización en tiempo real.'}
         ]
     },
     {
-        id: 'payby',
-        titulo: 'PAYBY',
-        cliente: 'Banking Mobile App',
-        categorias: ['app', 'web'],
-        imagen: obtenerImagenShowcase(2),
-        descripcion: 'Aplicación móvil de banca con flujos de pago intuitivos.',
-        link: '/proyectos/payby',
+        id: 'material-de-padel',
+        titulo: 'MATERIAL DE PÁDEL',
+        cliente: 'E-commerce Deportivo',
+        categorias: ['web', 'branding'],
+        imagen: '/assets/Proyectos portadas/material de padel.jpg',
+        descripcion: 'Tienda online de equipamiento de pádel con catálogo, comparador de palas y blog de contenido deportivo.',
+        link: '/proyectos/material-de-padel',
         skills: [
-            {id: 1, titulo: 'App Design', descripcion: 'Diseño mobile-first para fintech.'},
-            {id: 2, titulo: 'Motion Design', descripcion: 'Micro-interacciones que generan confianza.'}
+            {id: 1, titulo: 'E-commerce', descripcion: 'Tienda con catálogo filtrable y checkout optimizado.'},
+            {id: 2, titulo: 'SEO & Content', descripcion: 'Estrategia de contenido para posicionamiento orgánico.'}
         ]
-    },
-    {
-        id: 'kinetic',
-        titulo: 'KINETIC',
-        cliente: 'EV Startup',
-        categorias: ['branding'],
-        imagen: obtenerImagenShowcase(3),
-        descripcion: 'Estrategia de marca para startup de vehículos eléctricos.',
-        link: '/proyectos/kinetic'
-    },
-    {
-        id: 'lumos',
-        titulo: 'LUMOS',
-        cliente: 'Smart Lighting',
-        categorias: ['branding', 'web'],
-        imagen: obtenerImagenShowcase(4),
-        descripcion: 'Packaging y diseño web para marca de iluminación inteligente.',
-        link: '/proyectos/lumos'
-    },
-    {
-        id: 'elevate',
-        titulo: 'ELEVATE',
-        cliente: 'Fitness Brand',
-        categorias: ['branding', 'ai'],
-        imagen: obtenerImagenShowcase(5),
-        descripcion: 'Campaña digital y redes sociales para marca de fitness premium.',
-        link: '/proyectos/elevate'
     }
 ];
 

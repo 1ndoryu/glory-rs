@@ -42,6 +42,7 @@ export const ProyectoIndividualIsland = ({titulo = 'Proyecto', descripcion = '',
     const skills = proyectoContexto?.skills || [];
     const desc = descripcion || proyectoContexto?.descripcion || '';
     const cats = categorias || (Array.isArray(proyectoContexto?.categorias) ? proyectoContexto.categorias.join(', ') : proyectoContexto?.categorias || '');
+    const galeria = proyectoContexto?.galeria || [];
 
     /* Proyectos relacionados: misma categoría, excluyendo el actual */
     const categoriasArray = cats.split(',').map(c => c.trim().toLowerCase());
@@ -65,8 +66,8 @@ export const ProyectoIndividualIsland = ({titulo = 'Proyecto', descripcion = '',
                 </div>
             </section>
 
-            {/* Galería de imagenes con carrusel (usa colors temporales, igual que servicios) */}
-            <SeccionGaleriaServicio />
+            {/* Galería de imágenes — usa galería del proyecto si está disponible */}
+            <SeccionGaleriaServicio imagenes={galeria} />
 
             {/* Skills del proyecto */}
             {skills.length > 0 && <SeccionSkillsServicio skills={skills} />}

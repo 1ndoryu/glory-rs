@@ -1,15 +1,20 @@
 /**
  * Componente: SeccionGaleriaServicio
  * Descripcion: Galeria de imagenes con scroll infinito, efecto de arrastre y formato 3:4.
- * Ubicacion: App/React/components/servicios/SeccionGaleriaServicio.tsx
+ * [044A-3] Acepta imagenes como prop; si no se pasan, usa useImagenes().
  */
 import React from 'react';
 import {useCarruselInfinito} from '../../hooks/useCarruselInfinito';
 import {useImagenes} from '../../hooks/useImagenes';
 import './SeccionGaleriaServicio.css';
 
-export const SeccionGaleriaServicio: React.FC = () => {
-    const {imagenes} = useImagenes();
+interface SeccionGaleriaServicioProps {
+    imagenes?: string[];
+}
+
+export const SeccionGaleriaServicio: React.FC<SeccionGaleriaServicioProps> = ({imagenes: imagenesProp}) => {
+    const {imagenes: imagenesHook} = useImagenes();
+    const imagenes = (imagenesProp && imagenesProp.length > 0) ? imagenesProp : imagenesHook;
 
     // Si no hay imagenes, no renderizar nada
     if (imagenes.length === 0) return null;

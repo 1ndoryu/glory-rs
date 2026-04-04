@@ -31,6 +31,7 @@ export interface Proyecto {
     contenido?: string;
     link?: string;
     skills?: Skill[];
+    galeria?: string[];
 }
 
 export interface CategoriaShowcase {
