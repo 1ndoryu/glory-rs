@@ -3,7 +3,9 @@
 mod auth;
 mod health;
 mod notes;
+mod orders;
 mod seo;
+mod services;
 
 use axum::Router;
 use tower_http::cors::{Any, CorsLayer};
@@ -44,6 +46,13 @@ impl utoipa::Modify for SecurityAddon {
         notes::list_notes,
         notes::update_note,
         notes::delete_note,
+        services::list_services,
+        services::get_service,
+        orders::create_order,
+        orders::list_orders,
+        orders::get_order,
+        orders::assign_order,
+        orders::switch_role,
     ),
     components(schemas(
         health::HealthResponse,
@@ -54,6 +63,17 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::CreateNoteRequest,
         crate::models::UpdateNoteRequest,
         crate::models::PaginatedNotes,
+        crate::models::UserRole,
+        crate::models::ServiceDetailResponse,
+        crate::models::ServicePlanResponse,
+        crate::models::ServicePlanPhaseResponse,
+        crate::models::CreateOrderRequest,
+        crate::models::OrderResponse,
+        crate::models::OrderPhaseResponse,
+        crate::models::SwitchRoleRequest,
+        crate::models::PaymentMode,
+        crate::models::OrderStatus,
+        crate::models::PhaseStatus,
         crate::errors::ErrorResponse,
     )),
     modifiers(&SecurityAddon),
@@ -108,4 +128,6 @@ fn api_routes() -> Router<AppState> {
         .merge(health::routes())
         .merge(auth::routes())
         .merge(notes::routes())
+        .merge(services::routes())
+        .merge(orders::routes())
 }

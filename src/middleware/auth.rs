@@ -4,13 +4,28 @@ use axum::http::request::Parts;
 use uuid::Uuid;
 
 use crate::errors::AppError;
+use crate::models::UserRole;
 use crate::services::AuthService;
 use crate::AppState;
 
-/// Extractor que valida el JWT del header Authorization y extrae el `user_id`.
-/// Usar como parámetro en handlers que requieren autenticación.
+/* [044A-38] AuthUser extendido con role y effective_role del JWT.
+ * effective_role determina qué panel/permisos tiene el usuario en la sesión actual.
+ * Para admins, puede ser diferente de role si usan "cambiar rol". */
 pub struct AuthUser {
     pub user_id: Uuid,
+    pub role: UserRole,
+    pub effective_role: UserRole,
+}
+
+impl AuthUser {
+    /// Verifica que el `effective_role` sea uno de los roles permitidos
+    pub fn require_role(&self, allowed: &[UserRole]) -> Result<(), AppError> {
+        if allowed.contains(&self.effective_role) {
+            Ok(())
+        } else {
+            Err(AppError::Forbidden("No tienes permisos para esta acción".into()))
+        }
+    }
 }
 
 #[async_trait]
@@ -35,6 +50,8 @@ impl FromRequestParts<AppState> for AuthUser {
 
         Ok(Self {
             user_id: claims.sub,
+            role: claims.role,
+            effective_role: claims.effective_role,
         })
     }
 }

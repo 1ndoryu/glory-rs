@@ -8,13 +8,18 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::errors::AppError;
-use crate::models::{AuthResponse, LoginRequest, RegisterRequest};
+use crate::models::{AuthResponse, LoginRequest, RegisterRequest, UserRole};
 use crate::repositories::UserRepository;
 
-/// Claims del JWT — `sub` es el `user_id`, `exp` la expiración Unix
+/* [044A-38] Claims extendidos con role y effective_role.
+ * El effective_role es el rol con el que el usuario opera: para admins
+ * puede ser diferente de role si tienen active_role configurado. */
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
     pub sub: Uuid,
+    pub role: UserRole,
+    pub effective_role: UserRole,
     pub exp: usize,
 }
 
@@ -41,11 +46,14 @@ impl AuthService {
             .to_string();
 
         let user = UserRepository::create(pool, &req.email, &password_hash).await?;
-        let token = Self::generate_token(user.id, jwt_secret)?;
+        let effective = user.effective_role();
+        let token = Self::generate_token(user.id, user.role, effective, jwt_secret)?;
 
         Ok(AuthResponse {
             token,
             user_id: user.id,
+            role: user.role,
+            effective_role: effective,
         })
     }
 
@@ -66,16 +74,24 @@ impl AuthService {
             .verify_password(req.password.as_bytes(), &parsed_hash)
             .map_err(|_| AppError::Unauthorized)?;
 
-        let token = Self::generate_token(user.id, jwt_secret)?;
+        let effective = user.effective_role();
+        let token = Self::generate_token(user.id, user.role, effective, jwt_secret)?;
 
         Ok(AuthResponse {
             token,
             user_id: user.id,
+            role: user.role,
+            effective_role: effective,
         })
     }
 
-    /// Genera un JWT con expiración de 24 horas
-    pub fn generate_token(user_id: Uuid, secret: &str) -> Result<String, AppError> {
+    /// Genera un JWT con expiración de 24 horas, incluye role y `effective_role`
+    pub fn generate_token(
+        user_id: Uuid,
+        role: UserRole,
+        effective_role: UserRole,
+        secret: &str,
+    ) -> Result<String, AppError> {
         let timestamp = chrono::Utc::now()
             .checked_add_signed(chrono::Duration::hours(24))
             .ok_or_else(|| AppError::Internal("Error calculando expiración del token".into()))?
@@ -83,7 +99,12 @@ impl AuthService {
         let exp = usize::try_from(timestamp)
             .map_err(|_| AppError::Internal("Timestamp fuera de rango".into()))?;
 
-        let claims = Claims { sub: user_id, exp };
+        let claims = Claims {
+            sub: user_id,
+            role,
+            effective_role,
+            exp,
+        };
 
         encode(
             &Header::default(),
