@@ -11,6 +11,7 @@ import {
   useEliminarCampana,
   useEnviarCampana,
 } from '../api/generated';
+import type { Campana } from '../api/generated/gestionRestauranteAPI.schemas';
 
 /* [024A-9] Extrae el mensaje de error del backend */
 function extraerMensajeError(err: unknown): string {
@@ -48,7 +49,7 @@ export function useCampanas() {
     },
   });
 
-  const campanas = data?.data?.items ?? [];
+  const campanas: Campana[] = data?.data?.items ?? [];
   const total = data?.data?.total ?? 0;
   const totalPages = Math.ceil(total / 20);
 
