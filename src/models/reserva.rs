@@ -129,6 +129,10 @@ pub struct ReservasQuery {
     pub turno: Option<String>,
     /// Búsqueda por nombre o apellidos del cliente
     pub busqueda: Option<String>,
+    /// [044A-8] Columna por la que ordenar: `fecha`, `hora`, `nombre_cliente`, `num_personas`, `estado`, `num_mesa`
+    pub sort_by: Option<String>,
+    /// [044A-8] Dirección del orden: `asc` o `desc`
+    pub sort_order: Option<String>,
 }
 
 /// Resumen diario de reservas — para la vista mes

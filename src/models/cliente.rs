@@ -104,6 +104,10 @@ pub struct ClientesQuery {
     pub per_page: i64,
     /// Búsqueda por nombre, apellidos, teléfono o email
     pub busqueda: Option<String>,
+    /// [044A-8] Columna por la que ordenar: `nombre`, `apellidos`, `telefono`, `email`, `empresa`
+    pub sort_by: Option<String>,
+    /// [044A-8] Dirección del orden: `asc` o `desc`
+    pub sort_order: Option<String>,
 }
 
 fn default_page() -> i64 {

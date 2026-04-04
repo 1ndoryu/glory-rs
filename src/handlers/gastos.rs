@@ -88,6 +88,9 @@ pub async fn listar_gastos(
         params.desde,
         params.hasta,
         params.categoria_id,
+        params.busqueda,
+        params.sort_by,
+        params.sort_order,
     )
     .await?;
     Ok(Json(gastos))

@@ -1,5 +1,6 @@
 /* [283A-34] Hook para ListaGastos — filtros de fecha (desde/hasta) y paginación.
- * Reduce useState count en el componente. */
+ * Reduce useState count en el componente.
+ * [044A-8+9] Búsqueda y ordenamiento por columnas (sort_by/sort_order). */
 
 import { useState } from 'react';
 import { useListarGastos, useEliminarGasto, Gasto } from '../api/generated';
@@ -8,6 +9,9 @@ interface FiltrosGastos {
   pagina: number;
   desde: string;
   hasta: string;
+  busqueda: string;
+  sortBy: string;
+  sortOrder: 'asc' | 'desc';
 }
 
 const POR_PAGINA = 15;
@@ -17,6 +21,9 @@ function useListaGastos() {
     pagina: 1,
     desde: '',
     hasta: '',
+    busqueda: '',
+    sortBy: '',
+    sortOrder: 'desc',
   });
   const [modalAbierto, setModalAbierto] = useState(false);
   const [gastoEditando, setGastoEditando] = useState<Gasto | null>(null);
@@ -26,6 +33,9 @@ function useListaGastos() {
     per_page: POR_PAGINA,
     desde: filtros.desde || undefined,
     hasta: filtros.hasta || undefined,
+    busqueda: filtros.busqueda || undefined,
+    sort_by: filtros.sortBy || undefined,
+    sort_order: filtros.sortOrder || undefined,
   });
 
   const eliminarMutation = useEliminarGasto({
@@ -55,9 +65,20 @@ function useListaGastos() {
     refetch();
   };
 
+  /* [044A-8] Alterna ordenamiento por columna */
+  const toggleSort = (columna: string) => {
+    setFiltros(prev => ({
+      ...prev,
+      sortBy: columna,
+      sortOrder: prev.sortBy === columna && prev.sortOrder === 'asc' ? 'desc' : 'asc',
+      pagina: 1,
+    }));
+  };
+
   return {
     filtros,
     cambiarFiltro,
+    toggleSort,
     modalAbierto,
     setModalAbierto,
     gastoEditando,

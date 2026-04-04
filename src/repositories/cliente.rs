@@ -118,18 +118,31 @@ impl ClienteRepository {
 
     /// [303A-6] Lista clientes con paginación y búsqueda fulltext.
     /// Busca en nombre, apellidos, teléfono, email, empresa y notas.
+    /// [044A-8] ORDER BY dinámico con whitelist para `sort_by`.
     pub async fn list(
         pool: &PgPool,
         user_id: Uuid,
         page: i64,
         per_page: i64,
         busqueda: Option<&str>,
+        sort_by: Option<&str>,
+        sort_order: Option<&str>,
     ) -> Result<(Vec<Cliente>, i64), sqlx::Error> {
         let offset = (page - 1) * per_page;
         let patron = busqueda.map(|b| format!("%{b}%"));
 
-        let items = sqlx::query_as!(
-            Cliente,
+        /* [044A-8] Whitelist de columnas — previene SQL injection */
+        let order_col = match sort_by {
+            Some("nombre") => "nombre",
+            Some("telefono") => "telefono",
+            Some("email") => "email",
+            Some("empresa") => "empresa",
+            _ => "apellidos",
+        };
+        let order_dir = if sort_order == Some("asc") { "ASC" } else { "DESC" };
+        let secondary = if order_col == "apellidos" { ", nombre ASC" } else { "" };
+
+        let query_str = format!(
             "SELECT * FROM clientes WHERE user_id = $1 \
              AND ($4::TEXT IS NULL \
                   OR nombre ILIKE $4 \
@@ -138,15 +151,17 @@ impl ClienteRepository {
                   OR email ILIKE $4 \
                   OR empresa ILIKE $4 \
                   OR notas ILIKE $4) \
-             ORDER BY apellidos ASC, nombre ASC \
-             LIMIT $2 OFFSET $3",
-            user_id,
-            per_page,
-            offset,
-            patron.as_deref()
-        )
-        .fetch_all(pool)
-        .await?;
+             ORDER BY {order_col} {order_dir}{secondary} \
+             LIMIT $2 OFFSET $3"
+        );
+
+        let items = sqlx::query_as::<_, Cliente>(&query_str)
+            .bind(user_id)
+            .bind(per_page)
+            .bind(offset)
+            .bind(patron.as_deref())
+            .fetch_all(pool)
+            .await?;
 
         let rec = sqlx::query!(
             "SELECT COUNT(*) as total FROM clientes WHERE user_id = $1 \

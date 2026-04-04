@@ -5,7 +5,8 @@
    [024A-2] Actualizar estado inline desde la lista.
    [024A-3] Invalidar TODAS las queries de reservas tras mutaciones (no solo la actual).
    [024A-5] Modal de edición con reserva seleccionada.
-   [034A-6] Visor de ficha de cliente al hacer click en nombre. */
+   [034A-6] Visor de ficha de cliente al hacer click en nombre.
+   [044A-8] Ordenamiento por columna (sort_by/sort_order). */
 
 import { useState, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
@@ -27,6 +28,8 @@ interface FiltrosReservas {
   estado: string;
   busqueda: string;
   pagina: number;
+  sortBy: string;
+  sortOrder: 'asc' | 'desc';
 }
 
 const POR_PAGINA = 20;
@@ -43,6 +46,8 @@ function useVistaReservas() {
     estado: '',
     busqueda: '',
     pagina: 1,
+    sortBy: '',
+    sortOrder: 'desc',
   });
   const [modalAbierto, setModalAbierto] = useState(false);
   /* [024A-5] Reserva seleccionada para edición en modal */
@@ -63,6 +68,8 @@ function useVistaReservas() {
     estado: filtros.estado || undefined,
     turno: filtros.turno || undefined,
     busqueda: filtros.busqueda || undefined,
+    sort_by: filtros.sortBy || undefined,
+    sort_order: filtros.sortOrder || undefined,
   });
 
   /* [024A-3] Invalidar TODAS las variantes de queries de reservas y ocupación.
@@ -120,9 +127,20 @@ function useVistaReservas() {
     setModalAbierto(true);
   }, []);
 
+  /* [044A-8] Alterna ordenamiento por columna */
+  const toggleSort = useCallback((columna: string) => {
+    setFiltros(prev => ({
+      ...prev,
+      sortBy: columna,
+      sortOrder: prev.sortBy === columna && prev.sortOrder === 'asc' ? 'desc' : 'asc',
+      pagina: 1,
+    }));
+  }, []);
+
   return {
     filtros,
     cambiarFiltro,
+    toggleSort,
     modalAbierto,
     setModalAbierto,
     reservas,

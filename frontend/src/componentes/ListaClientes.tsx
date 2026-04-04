@@ -1,6 +1,7 @@
 /* [263A-16] Lista de clientes — reescrita con shadcn Table + Dialog + Input.
  * [263A-26] Agregado: seleccionar 2 clientes y fusionarlos (merge).
- * CRM con búsqueda, paginación, modal crear/editar, merge duplicados. */
+ * CRM con búsqueda, paginación, modal crear/editar, merge duplicados.
+ * [044A-8] Cabeceras de columna clicables para ordenar. */
 
 import { useState } from 'react';
 import useListaClientes from '../hooks/useListaClientes';
@@ -18,6 +19,9 @@ function ListaClientes() {
     setPagina,
     busqueda,
     buscar,
+    sortBy,
+    sortOrder,
+    toggleSort,
     modalCrear,
     setModalCrear,
     clienteEditar,
@@ -102,10 +106,18 @@ function ListaClientes() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-10"></TableHead>
-                  <TableHead>Nombre</TableHead>
-                  <TableHead>Teléfono</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Empresa</TableHead>
+                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('nombre')}>
+                    Nombre {sortBy === 'nombre' && (sortOrder === 'asc' ? '↑' : '↓')}
+                  </TableHead>
+                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('telefono')}>
+                    Teléfono {sortBy === 'telefono' && (sortOrder === 'asc' ? '↑' : '↓')}
+                  </TableHead>
+                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('email')}>
+                    Email {sortBy === 'email' && (sortOrder === 'asc' ? '↑' : '↓')}
+                  </TableHead>
+                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('empresa')}>
+                    Empresa {sortBy === 'empresa' && (sortOrder === 'asc' ? '↑' : '↓')}
+                  </TableHead>
                   <TableHead>Notas</TableHead>
                   <TableHead className="w-20"></TableHead>
                 </TableRow>

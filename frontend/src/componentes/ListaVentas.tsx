@@ -2,7 +2,8 @@
  * Iconos para eliminar en vez de texto (tarea 17).
  * [283A-22] Botón de edición con Dialog reutilizando FormularioVenta.
  * [283A-28] Filtros de fecha (desde/hasta) extraídos a useListaVentas hook.
- * [034A-5] Columna "Cliente" con nombre_cliente + botón para ver reserva asociada. */
+ * [034A-5] Columna "Cliente" con nombre_cliente + botón para ver reserva asociada.
+ * [044A-8+9] Buscador + cabeceras de columna clicables para ordenar (sort_by/sort_order). */
 
 import useListaVentas from '../hooks/useListaVentas';
 import { Button } from '@/components/ui/button';
@@ -29,6 +30,7 @@ function ListaVentas() {
   const {
     filtros,
     cambiarFiltro,
+    toggleSort,
     modalAbierto,
     setModalAbierto,
     ventaEditando,
@@ -54,8 +56,15 @@ function ListaVentas() {
         <Button onClick={() => setModalAbierto(true)}>+ Nueva Venta</Button>
       </div>
 
-      {/* Filtros de fecha */}
+      {/* [044A-9] Buscador + filtros de fecha */}
       <div className="flex flex-wrap gap-3 items-center">
+        <Input
+          type="search"
+          placeholder="Buscar por descripción, cliente, turno, canal..."
+          value={filtros.busqueda}
+          onChange={(e) => cambiarFiltro('busqueda', e.target.value)}
+          className="max-w-xs"
+        />
         <label className="text-sm text-muted-foreground">Desde</label>
         <Input
           type="date"
@@ -157,12 +166,24 @@ function ListaVentas() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Fecha</TableHead>
-                  <TableHead>Cliente</TableHead>
-                  <TableHead>Turno</TableHead>
-                  <TableHead>Canal</TableHead>
-                  <TableHead>Método</TableHead>
-                  <TableHead className="text-right">Base</TableHead>
+                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('fecha')}>
+                    Fecha {filtros.sortBy === 'fecha' && (filtros.sortOrder === 'asc' ? '↑' : '↓')}
+                  </TableHead>
+                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('nombre_cliente')}>
+                    Cliente {filtros.sortBy === 'nombre_cliente' && (filtros.sortOrder === 'asc' ? '↑' : '↓')}
+                  </TableHead>
+                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('turno')}>
+                    Turno {filtros.sortBy === 'turno' && (filtros.sortOrder === 'asc' ? '↑' : '↓')}
+                  </TableHead>
+                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('canal')}>
+                    Canal {filtros.sortBy === 'canal' && (filtros.sortOrder === 'asc' ? '↑' : '↓')}
+                  </TableHead>
+                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('metodo_pago')}>
+                    Método {filtros.sortBy === 'metodo_pago' && (filtros.sortOrder === 'asc' ? '↑' : '↓')}
+                  </TableHead>
+                  <TableHead className="text-right cursor-pointer select-none" onClick={() => toggleSort('importe_base')}>
+                    Base {filtros.sortBy === 'importe_base' && (filtros.sortOrder === 'asc' ? '↑' : '↓')}
+                  </TableHead>
                   <TableHead className="text-right">IVA</TableHead>
                   <TableHead className="text-right">Total</TableHead>
                   <TableHead className="w-28"></TableHead>
@@ -189,7 +210,7 @@ function ListaVentas() {
                             onClick={() => setReservaIdViewer(v.reserva_id!)}
                             title="Ver reserva"
                           >
-                            <Eye className="size-4 text-muted-foreground" />
+                            <Eye className="size-4" />
                           </Button>
                         )}
                         <Button

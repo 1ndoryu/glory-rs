@@ -1,12 +1,12 @@
 /* [263A-16] Lista de gastos — reescrita con shadcn Table + Dialog + Button.
  * Iconos para eliminar (tarea 17). Columnas en flex (tarea 18).
  * [283A-22] Botón de edición con Dialog reutilizando FormularioGasto.
- * [283A-34] Filtros de fecha (desde/hasta) via hook useListaGastos. */
+ * [283A-34] Filtros de fecha (desde/hasta) via hook useListaGastos.
+ * [044A-8+9] Buscador + cabeceras de columna clicables para ordenar. */
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Trash2, Pencil } from 'lucide-react';
 import FormularioGasto from './FormularioGasto';
@@ -18,7 +18,7 @@ function formatearMoneda(valor: string): string {
 
 function ListaGastos() {
   const {
-    filtros, cambiarFiltro,
+    filtros, cambiarFiltro, toggleSort,
     modalAbierto, setModalAbierto,
     gastoEditando, setGastoEditando,
     porPagina, gastos, isLoading,
@@ -29,19 +29,25 @@ function ListaGastos() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div className="flex flex-wrap items-end gap-3">
-          <div>
-            <Label htmlFor="gasto-desde" className="text-xs mb-1">Desde</Label>
-            <Input id="gasto-desde" type="date" className="w-40" value={filtros.desde} onChange={e => cambiarFiltro('desde', e.target.value)} />
-          </div>
-          <div>
-            <Label htmlFor="gasto-hasta" className="text-xs mb-1">Hasta</Label>
-            <Input id="gasto-hasta" type="date" className="w-40" value={filtros.hasta} onChange={e => cambiarFiltro('hasta', e.target.value)} />
-          </div>
-          <p className="text-sm text-muted-foreground pb-1">{gastos ? `${gastos.total} registros` : ''}</p>
-        </div>
+      {/* [044A-12] Contador y botón en fila separada, consistente con ListaVentas/ListaReservas */}
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">{gastos ? `${gastos.total} registros` : ''}</p>
         <Button onClick={() => setModalAbierto(true)}>+ Nuevo Gasto</Button>
+      </div>
+
+      {/* [044A-9] Buscador + filtros de fecha */}
+      <div className="flex flex-wrap gap-3 items-center">
+        <Input
+          type="search"
+          placeholder="Buscar por proveedor, tipo documento, número..."
+          value={filtros.busqueda}
+          onChange={(e) => cambiarFiltro('busqueda', e.target.value)}
+          className="max-w-xs"
+        />
+        <label className="text-sm text-muted-foreground">Desde</label>
+        <Input type="date" className="max-w-40" value={filtros.desde} onChange={e => cambiarFiltro('desde', e.target.value)} />
+        <label className="text-sm text-muted-foreground">Hasta</label>
+        <Input type="date" className="max-w-40" value={filtros.hasta} onChange={e => cambiarFiltro('hasta', e.target.value)} />
       </div>
 
       <Dialog open={modalAbierto} onOpenChange={setModalAbierto}>
@@ -74,11 +80,21 @@ function ListaGastos() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Fecha</TableHead>
-                  <TableHead>Proveedor</TableHead>
-                  <TableHead>Tipo doc.</TableHead>
-                  <TableHead>Método</TableHead>
-                  <TableHead className="text-right">Base</TableHead>
+                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('fecha')}>
+                    Fecha {filtros.sortBy === 'fecha' && (filtros.sortOrder === 'asc' ? '↑' : '↓')}
+                  </TableHead>
+                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('proveedor')}>
+                    Proveedor {filtros.sortBy === 'proveedor' && (filtros.sortOrder === 'asc' ? '↑' : '↓')}
+                  </TableHead>
+                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('tipo_documento')}>
+                    Tipo doc. {filtros.sortBy === 'tipo_documento' && (filtros.sortOrder === 'asc' ? '↑' : '↓')}
+                  </TableHead>
+                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('metodo_pago')}>
+                    Método {filtros.sortBy === 'metodo_pago' && (filtros.sortOrder === 'asc' ? '↑' : '↓')}
+                  </TableHead>
+                  <TableHead className="text-right cursor-pointer select-none" onClick={() => toggleSort('importe_base')}>
+                    Base {filtros.sortBy === 'importe_base' && (filtros.sortOrder === 'asc' ? '↑' : '↓')}
+                  </TableHead>
                   <TableHead className="text-right">IVA</TableHead>
                   <TableHead className="text-right">Total</TableHead>
                   <TableHead className="w-20"></TableHead>

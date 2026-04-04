@@ -1513,6 +1513,16 @@ per_page?: number;
  * @nullable
  */
 busqueda?: string | null;
+/**
+ * [044A-8] Columna por la que ordenar: `nombre`, `apellidos`, `telefono`, `email`, `empresa`
+ * @nullable
+ */
+sort_by?: string | null;
+/**
+ * [044A-8] Dirección del orden: `asc` o `desc`
+ * @nullable
+ */
+sort_order?: string | null;
 };
 
 export type DashboardReservasParams = {
@@ -1562,6 +1572,21 @@ hasta?: string | null;
  * @nullable
  */
 categoria_id?: string | null;
+/**
+ * Búsqueda por texto: proveedor, tipo documento, número documento
+ * @nullable
+ */
+busqueda?: string | null;
+/**
+ * Campo de ordenamiento: `fecha`, `proveedor`, `importe_base`, `tipo_documento`, `metodo_pago`
+ * @nullable
+ */
+sort_by?: string | null;
+/**
+ * Dirección de orden: asc o desc. Por defecto desc
+ * @nullable
+ */
+sort_order?: string | null;
 };
 
 export type ListarNotificacionesParams = {
@@ -1655,6 +1680,16 @@ turno?: string | null;
  * @nullable
  */
 busqueda?: string | null;
+/**
+ * [044A-8] Columna por la que ordenar: `fecha`, `hora`, `nombre_cliente`, `num_personas`, `estado`, `num_mesa`
+ * @nullable
+ */
+sort_by?: string | null;
+/**
+ * [044A-8] Dirección del orden: `asc` o `desc`
+ * @nullable
+ */
+sort_order?: string | null;
 };
 
 export type NoShowStatsParams = {
@@ -1686,5 +1721,20 @@ desde?: string | null;
  * @nullable
  */
 hasta?: string | null;
+/**
+ * Búsqueda por texto (descripción, cliente, canal)
+ * @nullable
+ */
+busqueda?: string | null;
+/**
+ * Campo de ordenamiento: `fecha`, `importe_base`, `turno`, `canal`, `metodo_pago`
+ * @nullable
+ */
+sort_by?: string | null;
+/**
+ * Dirección de orden: asc o desc. Por defecto desc
+ * @nullable
+ */
+sort_order?: string | null;
 };
 

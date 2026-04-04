@@ -52,6 +52,7 @@ impl GastoService {
             .ok_or_else(|| AppError::NotFound("Gasto no encontrado".into()))
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub async fn list(
         pool: &PgPool,
         user_id: Uuid,
@@ -60,9 +61,12 @@ impl GastoService {
         desde: Option<chrono::NaiveDate>,
         hasta: Option<chrono::NaiveDate>,
         categoria_id: Option<Uuid>,
+        busqueda: Option<String>,
+        sort_by: Option<String>,
+        sort_order: Option<String>,
     ) -> Result<GastosPaginados, AppError> {
         let (items, total) =
-            GastoRepository::list(pool, user_id, page, per_page, desde, hasta, categoria_id)
+            GastoRepository::list(pool, user_id, page, per_page, desde, hasta, categoria_id, busqueda.as_deref(), sort_by.as_deref(), sort_order.as_deref())
                 .await?;
         Ok(GastosPaginados {
             items,

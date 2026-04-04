@@ -77,6 +77,8 @@ impl GastoRepository {
         .await
     }
 
+    /* [044A-8+9] Whitelist de columnas — previene SQL injection */
+    #[allow(clippy::too_many_arguments)]
     pub async fn list(
         pool: &PgPool,
         user_id: Uuid,
@@ -85,40 +87,86 @@ impl GastoRepository {
         desde: Option<chrono::NaiveDate>,
         hasta: Option<chrono::NaiveDate>,
         categoria_id: Option<Uuid>,
+        busqueda: Option<&str>,
+        sort_by: Option<&str>,
+        sort_order: Option<&str>,
     ) -> Result<(Vec<Gasto>, i64), sqlx::Error> {
         let offset = (page - 1) * per_page;
 
-        let items = sqlx::query_as!(
-            Gasto,
+        /* Whitelist de columnas — previene SQL injection */
+        let order_col = match sort_by {
+            Some("proveedor") => "proveedor",
+            Some("importe_base") => "importe_base",
+            Some("tipo_documento") => "tipo_documento",
+            Some("metodo_pago") => "metodo_pago",
+            _ => "fecha",
+        };
+        let order_dir = if matches!(sort_order, Some("asc")) { "ASC" } else { "DESC" };
+
+        let busqueda_pattern = busqueda
+            .filter(|b| !b.is_empty())
+            .map(|b| format!("%{b}%"));
+
+        let query_str = format!(
             "SELECT * FROM gastos WHERE user_id = $1 \
              AND ($4::DATE IS NULL OR fecha >= $4) \
              AND ($5::DATE IS NULL OR fecha <= $5) \
              AND ($6::UUID IS NULL OR categoria_id = $6) \
-             ORDER BY fecha DESC, created_at DESC LIMIT $2 OFFSET $3",
-            user_id,
-            per_page,
-            offset,
-            desde,
-            hasta,
-            categoria_id
-        )
-        .fetch_all(pool)
-        .await?;
+             AND ($7::TEXT IS NULL \
+                  OR proveedor ILIKE $7 \
+                  OR tipo_documento ILIKE $7 \
+                  OR numero_documento ILIKE $7) \
+             ORDER BY {order_col} {order_dir}, created_at DESC \
+             LIMIT $2 OFFSET $3"
+        );
 
-        let rec = sqlx::query!(
-            "SELECT COUNT(*) as total FROM gastos WHERE user_id = $1 \
-             AND ($2::DATE IS NULL OR fecha >= $2) \
-             AND ($3::DATE IS NULL OR fecha <= $3) \
-             AND ($4::UUID IS NULL OR categoria_id = $4)",
-            user_id,
-            desde,
-            hasta,
-            categoria_id
-        )
-        .fetch_one(pool)
-        .await?;
+        let items = sqlx::query_as::<_, Gasto>(&query_str)
+            .bind(user_id)
+            .bind(per_page)
+            .bind(offset)
+            .bind(desde)
+            .bind(hasta)
+            .bind(categoria_id)
+            .bind(busqueda_pattern.as_deref())
+            .fetch_all(pool)
+            .await?;
 
-        Ok((items, rec.total.unwrap_or(0)))
+        /* COUNT con los mismos filtros */
+        let count = if busqueda_pattern.is_some() {
+            let rec = sqlx::query_scalar::<_, Option<i64>>(
+                "SELECT COUNT(*) FROM gastos WHERE user_id = $1 \
+                 AND ($2::DATE IS NULL OR fecha >= $2) \
+                 AND ($3::DATE IS NULL OR fecha <= $3) \
+                 AND ($4::UUID IS NULL OR categoria_id = $4) \
+                 AND (proveedor ILIKE $5 \
+                      OR tipo_documento ILIKE $5 \
+                      OR numero_documento ILIKE $5)",
+            )
+            .bind(user_id)
+            .bind(desde)
+            .bind(hasta)
+            .bind(categoria_id)
+            .bind(busqueda_pattern.as_deref())
+            .fetch_one(pool)
+            .await?;
+            rec.unwrap_or(0)
+        } else {
+            let rec = sqlx::query_scalar::<_, Option<i64>>(
+                "SELECT COUNT(*) FROM gastos WHERE user_id = $1 \
+                 AND ($2::DATE IS NULL OR fecha >= $2) \
+                 AND ($3::DATE IS NULL OR fecha <= $3) \
+                 AND ($4::UUID IS NULL OR categoria_id = $4)",
+            )
+            .bind(user_id)
+            .bind(desde)
+            .bind(hasta)
+            .bind(categoria_id)
+            .fetch_one(pool)
+            .await?;
+            rec.unwrap_or(0)
+        };
+
+        Ok((items, count))
     }
 
     pub async fn delete(pool: &PgPool, id: Uuid, user_id: Uuid) -> Result<bool, sqlx::Error> {

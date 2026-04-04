@@ -83,6 +83,9 @@ pub async fn listar_ventas(
         params.per_page,
         params.desde,
         params.hasta,
+        params.busqueda,
+        params.sort_by,
+        params.sort_order,
     )
     .await?;
     Ok(Json(ventas))

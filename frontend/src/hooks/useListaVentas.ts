@@ -1,6 +1,7 @@
 /* [283A-28] Hook para ListaVentas — reduce useState count en el componente.
  * Maneja paginación, filtros de fecha (desde/hasta) y modales.
- * [034A-5] VentaConCliente con nombre_cliente + visor de reserva asociada. */
+ * [034A-5] VentaConCliente con nombre_cliente + visor de reserva asociada.
+ * [044A-8+9] Búsqueda y ordenamiento por columnas (sort_by/sort_order). */
 
 import { useState } from 'react';
 import { useListarVentas, useEliminarVenta, useObtenerReserva, VentaConCliente } from '../api/generated';
@@ -9,6 +10,9 @@ interface FiltrosVentas {
   pagina: number;
   desde: string;
   hasta: string;
+  busqueda: string;
+  sortBy: string;
+  sortOrder: 'asc' | 'desc';
 }
 
 const POR_PAGINA = 15;
@@ -18,6 +22,9 @@ function useListaVentas() {
     pagina: 1,
     desde: '',
     hasta: '',
+    busqueda: '',
+    sortBy: '',
+    sortOrder: 'desc',
   });
   const [modalAbierto, setModalAbierto] = useState(false);
   const [ventaEditando, setVentaEditando] = useState<VentaConCliente | null>(null);
@@ -29,6 +36,9 @@ function useListaVentas() {
     per_page: POR_PAGINA,
     desde: filtros.desde || undefined,
     hasta: filtros.hasta || undefined,
+    busqueda: filtros.busqueda || undefined,
+    sort_by: filtros.sortBy || undefined,
+    sort_order: filtros.sortOrder || undefined,
   });
 
   const eliminarMutation = useEliminarVenta({
@@ -64,9 +74,20 @@ function useListaVentas() {
     refetch();
   };
 
+  /* [044A-8] Alterna ordenamiento por columna — click en la misma columna invierte dirección */
+  const toggleSort = (columna: string) => {
+    setFiltros(prev => ({
+      ...prev,
+      sortBy: columna,
+      sortOrder: prev.sortBy === columna && prev.sortOrder === 'asc' ? 'desc' : 'asc',
+      pagina: 1,
+    }));
+  };
+
   return {
     filtros,
     cambiarFiltro,
+    toggleSort,
     modalAbierto,
     setModalAbierto,
     ventaEditando,

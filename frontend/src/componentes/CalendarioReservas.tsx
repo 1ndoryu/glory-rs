@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useResumenMensual } from '../api/generated';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { ChevronLeft, ChevronRight, UtensilsCrossed } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const NOMBRES_MES = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -126,7 +126,6 @@ function CalendarioReservas() {
                   <span className={`text-sm ${esHoy(dia) ? 'font-bold text-primary' : ''}`}>{dia}</span>
                   {datos && (
                     <div className="mt-1 flex flex-col items-center text-[10px] text-muted-foreground">
-                      <UtensilsCrossed className="size-3 mb-0.5" />
                       <span>{datos.reservas} res.</span>
                       <span>{datos.personas} pers.</span>
                     </div>

@@ -128,6 +128,7 @@ pub struct VentaConCliente {
 }
 
 /// Query params para listar ventas con filtro por fecha
+/* [044A-8+9] Añadidos busqueda, sort_by, sort_order para buscador y ordenamiento */
 #[derive(Debug, Deserialize, IntoParams)]
 pub struct VentasQuery {
     #[serde(default = "default_page")]
@@ -138,6 +139,12 @@ pub struct VentasQuery {
     pub desde: Option<NaiveDate>,
     /// Filtrar hasta esta fecha (YYYY-MM-DD)
     pub hasta: Option<NaiveDate>,
+    /// Búsqueda por texto (descripción, cliente, canal)
+    pub busqueda: Option<String>,
+    /// Campo de ordenamiento: `fecha`, `importe_base`, `turno`, `canal`, `metodo_pago`
+    pub sort_by: Option<String>,
+    /// Dirección de orden: asc o desc. Por defecto desc
+    pub sort_order: Option<String>,
 }
 
 fn default_page() -> i64 {

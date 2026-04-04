@@ -254,6 +254,8 @@ impl ReservaService {
             hora_desde,
             hora_hasta,
             busqueda: busqueda_normalizada,
+            sort_by: query.sort_by.clone(),
+            sort_order: query.sort_order.clone(),
         };
 
         let (items, total) = ReservaRepository::list(pool, &filtros).await?;

@@ -1,7 +1,8 @@
 /* [263A-16] Lista de reservas — reescrita con shadcn Table + Dialog + Badge.
  * Filtros con shadcn Input y select nativo. Plano de ocupación integrado.
  * [024A-10] Estado usa DropdownMenu en vez de Select para evitar confusión visual.
- * [034A-6] Click en nombre del cliente abre ficha del cliente (si tiene cliente_id). */
+ * [034A-6] Click en nombre del cliente abre ficha del cliente (si tiene cliente_id).
+ * [044A-8] Cabeceras de columna clicables para ordenar (sort_by/sort_order). */
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -37,6 +38,7 @@ function ListaReservas() {
   const {
     filtros,
     cambiarFiltro,
+    toggleSort,
     modalAbierto,
     setModalAbierto,
     reservas,
@@ -197,13 +199,27 @@ function ListaReservas() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Mesa</TableHead>
-                  {filtros.fechaHasta && <TableHead>Fecha</TableHead>}
-                  <TableHead>Hora</TableHead>
-                  <TableHead>Nombre</TableHead>
+                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('num_mesa')}>
+                    Mesa {filtros.sortBy === 'num_mesa' && (filtros.sortOrder === 'asc' ? '↑' : '↓')}
+                  </TableHead>
+                  {filtros.fechaHasta && (
+                    <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('fecha')}>
+                      Fecha {filtros.sortBy === 'fecha' && (filtros.sortOrder === 'asc' ? '↑' : '↓')}
+                    </TableHead>
+                  )}
+                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('hora')}>
+                    Hora {filtros.sortBy === 'hora' && (filtros.sortOrder === 'asc' ? '↑' : '↓')}
+                  </TableHead>
+                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('nombre_cliente')}>
+                    Nombre {filtros.sortBy === 'nombre_cliente' && (filtros.sortOrder === 'asc' ? '↑' : '↓')}
+                  </TableHead>
                   <TableHead>Apellidos</TableHead>
-                  <TableHead>Personas</TableHead>
-                  <TableHead>Estado</TableHead>
+                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('num_personas')}>
+                    Personas {filtros.sortBy === 'num_personas' && (filtros.sortOrder === 'asc' ? '↑' : '↓')}
+                  </TableHead>
+                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('estado')}>
+                    Estado {filtros.sortBy === 'estado' && (filtros.sortOrder === 'asc' ? '↑' : '↓')}
+                  </TableHead>
                   <TableHead>Teléfono</TableHead>
                   <TableHead className="w-10"></TableHead>
                 </TableRow>

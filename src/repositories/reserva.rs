@@ -55,6 +55,10 @@ pub struct FiltrosReserva {
     pub hora_desde: Option<chrono::NaiveTime>,
     pub hora_hasta: Option<chrono::NaiveTime>,
     pub busqueda: Option<String>,
+    /// [044A-8] Columna para ORDER BY (whitelist en `list()`)
+    pub sort_by: Option<String>,
+    /// [044A-8] Dirección: "asc" o "desc"
+    pub sort_order: Option<String>,
 }
 
 pub struct ReservaRepository;
@@ -112,14 +116,23 @@ impl ReservaRepository {
             .filter(|s| !s.is_empty())
             .map(|b| format!("%{b}%"));
 
-        /* [303A-4] Cuando no hay filtro explícito de estado, excluir canceladas
-         * para que el conteo coincida con el calendario (resumen_mensual) y el
-         * conteo del Home. Si el usuario elige "cancelada" en el filtro, sí las ve.
-         * [303A-15] Soporte rango de fechas (fecha_desde/fecha_hasta). Si se envía
-         * el campo `fecha` sin rango, se usa como filtro exacto (compatibilidad).
-         * [014A-11] Convertido a query_as! para verificación SQL en compilación. */
-        let items = sqlx::query_as!(
-            Reserva,
+        /* [044A-8] ORDER BY dinámico — whitelist para prevenir SQL injection */
+        let order_col = match filtros.sort_by.as_deref() {
+            Some("hora") => "hora",
+            Some("nombre_cliente") => "nombre_cliente",
+            Some("num_personas") => "num_personas",
+            Some("estado") => "estado",
+            Some("num_mesa") => "num_mesa",
+            _ => "fecha",
+        };
+        let order_dir = if filtros.sort_order.as_deref() == Some("asc") { "ASC" } else { "DESC" };
+        /* Si se ordena por fecha, añadir hora como criterio secundario */
+        let secondary = if order_col == "fecha" { ", hora ASC" } else { "" };
+
+        /* [303A-4] Cuando no hay filtro explícito de estado, excluir canceladas.
+         * [303A-15] Soporte rango de fechas.
+         * [044A-8] Convertido a query_as runtime para ORDER BY dinámico. */
+        let query_str = format!(
             "SELECT * FROM reservas WHERE user_id = $1 \
              AND ($4::DATE IS NULL OR fecha = $4) \
              AND ($9::DATE IS NULL OR fecha >= $9) \
@@ -131,20 +144,22 @@ impl ReservaRepository {
                   OR nombre_cliente ILIKE $8 \
                   OR apellidos_cliente ILIKE $8 \
                   OR telefono ILIKE $8) \
-             ORDER BY fecha ASC, hora ASC LIMIT $2 OFFSET $3",
-            filtros.user_id,
-            filtros.per_page,
-            offset,
-            filtros.fecha,
-            filtros.estado.as_deref(),
-            filtros.hora_desde,
-            filtros.hora_hasta,
-            patron.as_deref(),
-            filtros.fecha_desde,
-            filtros.fecha_hasta
-        )
-        .fetch_all(pool)
-        .await?;
+             ORDER BY {order_col} {order_dir}{secondary} LIMIT $2 OFFSET $3"
+        );
+
+        let items = sqlx::query_as::<_, Reserva>(&query_str)
+            .bind(filtros.user_id)
+            .bind(filtros.per_page)
+            .bind(offset)
+            .bind(filtros.fecha)
+            .bind(filtros.estado.as_deref())
+            .bind(filtros.hora_desde)
+            .bind(filtros.hora_hasta)
+            .bind(patron.as_deref())
+            .bind(filtros.fecha_desde)
+            .bind(filtros.fecha_hasta)
+            .fetch_all(pool)
+            .await?;
 
         let rec = sqlx::query_scalar!(
             "SELECT COUNT(*) FROM reservas WHERE user_id = $1 \

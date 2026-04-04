@@ -109,6 +109,12 @@ pub struct GastosQuery {
     pub desde: Option<NaiveDate>,
     pub hasta: Option<NaiveDate>,
     pub categoria_id: Option<Uuid>,
+    /// Búsqueda por texto: proveedor, tipo documento, número documento
+    pub busqueda: Option<String>,
+    /// Campo de ordenamiento: `fecha`, `proveedor`, `importe_base`, `tipo_documento`, `metodo_pago`
+    pub sort_by: Option<String>,
+    /// Dirección de orden: asc o desc. Por defecto desc
+    pub sort_order: Option<String>,
 }
 
 fn default_page() -> i64 {

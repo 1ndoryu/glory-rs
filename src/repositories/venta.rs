@@ -81,8 +81,8 @@ impl VentaRepository {
         .await
     }
 
-    /* [034A-5] LEFT JOIN con clientes para incluir nombre_cliente en el listado.
-     * Usa COALESCE para garantizar non-null en campos de venta. */
+    /* [044A-8+9] Whitelist de columnas — previene SQL injection */
+    #[allow(clippy::too_many_arguments)]
     pub async fn list(
         pool: &PgPool,
         user_id: Uuid,
@@ -90,46 +90,97 @@ impl VentaRepository {
         per_page: i64,
         desde: Option<chrono::NaiveDate>,
         hasta: Option<chrono::NaiveDate>,
+        busqueda: Option<&str>,
+        sort_by: Option<&str>,
+        sort_order: Option<&str>,
     ) -> Result<(Vec<VentaConCliente>, i64), sqlx::Error> {
         let offset = (page - 1) * per_page;
 
-        let items = sqlx::query_as!(
-            VentaConCliente,
-            r#"SELECT v.id, v.user_id, v.fecha, v.comensales, v.descripcion,
-                      v.iva_porcentaje, v.turno, v.canal, v.metodo_pago,
-                      v.importe_base, v.importe_iva, v.reserva_id, v.cliente_id,
-                      CASE WHEN c.id IS NOT NULL
-                           THEN CONCAT(c.nombre, CASE WHEN c.apellidos != '' THEN CONCAT(' ', c.apellidos) ELSE '' END)
-                           ELSE NULL
-                      END AS nombre_cliente,
-                      v.created_at, v.updated_at
-               FROM ventas v
-               LEFT JOIN clientes c ON c.id = v.cliente_id
-               WHERE v.user_id = $1
-               AND ($4::DATE IS NULL OR v.fecha >= $4)
-               AND ($5::DATE IS NULL OR v.fecha <= $5)
-               ORDER BY v.fecha DESC, v.created_at DESC LIMIT $2 OFFSET $3"#,
-            user_id,
-            per_page,
-            offset,
-            desde,
-            hasta
-        )
-        .fetch_all(pool)
-        .await?;
+        /* Whitelist de columnas — previene SQL injection */
+        let order_col = match sort_by {
+            Some("importe_base") => "v.importe_base",
+            Some("turno") => "v.turno",
+            Some("canal") => "v.canal",
+            Some("metodo_pago") => "v.metodo_pago",
+            Some("nombre_cliente") => "nombre_cliente",
+            _ => "v.fecha",
+        };
+        let order_dir = if matches!(sort_order, Some("asc")) { "ASC" } else { "DESC" };
 
-        let rec = sqlx::query!(
-            "SELECT COUNT(*) as total FROM ventas WHERE user_id = $1 \
-             AND ($2::DATE IS NULL OR fecha >= $2) \
-             AND ($3::DATE IS NULL OR fecha <= $3)",
-            user_id,
-            desde,
-            hasta
-        )
-        .fetch_one(pool)
-        .await?;
+        let busqueda_pattern = busqueda
+            .filter(|b| !b.is_empty())
+            .map(|b| format!("%{b}%"));
 
-        Ok((items, rec.total.unwrap_or(0)))
+        let query_str = format!(
+            "SELECT v.id, v.user_id, v.fecha, v.comensales, v.descripcion, \
+                    v.iva_porcentaje, v.turno, v.canal, v.metodo_pago, \
+                    v.importe_base, v.importe_iva, v.reserva_id, v.cliente_id, \
+                    CASE WHEN c.id IS NOT NULL \
+                         THEN CONCAT(c.nombre, CASE WHEN c.apellidos != '' THEN CONCAT(' ', c.apellidos) ELSE '' END) \
+                         ELSE NULL \
+                    END AS nombre_cliente, \
+                    v.created_at, v.updated_at \
+             FROM ventas v \
+             LEFT JOIN clientes c ON c.id = v.cliente_id \
+             WHERE v.user_id = $1 \
+             AND ($4::DATE IS NULL OR v.fecha >= $4) \
+             AND ($5::DATE IS NULL OR v.fecha <= $5) \
+             AND ($6::TEXT IS NULL \
+                  OR v.descripcion ILIKE $6 \
+                  OR v.turno ILIKE $6 \
+                  OR v.canal ILIKE $6 \
+                  OR c.nombre ILIKE $6 \
+                  OR c.apellidos ILIKE $6) \
+             ORDER BY {order_col} {order_dir}, v.created_at DESC \
+             LIMIT $2 OFFSET $3"
+        );
+
+        let items = sqlx::query_as::<_, VentaConCliente>(&query_str)
+            .bind(user_id)
+            .bind(per_page)
+            .bind(offset)
+            .bind(desde)
+            .bind(hasta)
+            .bind(busqueda_pattern.as_deref())
+            .fetch_all(pool)
+            .await?;
+
+        /* COUNT con los mismos filtros (sin JOIN si no hay búsqueda para eficiencia) */
+        let count = if busqueda_pattern.is_some() {
+            let rec = sqlx::query_scalar::<_, Option<i64>>(
+                "SELECT COUNT(*) FROM ventas v \
+                 LEFT JOIN clientes c ON c.id = v.cliente_id \
+                 WHERE v.user_id = $1 \
+                 AND ($2::DATE IS NULL OR v.fecha >= $2) \
+                 AND ($3::DATE IS NULL OR v.fecha <= $3) \
+                 AND (v.descripcion ILIKE $4 \
+                      OR v.turno ILIKE $4 \
+                      OR v.canal ILIKE $4 \
+                      OR c.nombre ILIKE $4 \
+                      OR c.apellidos ILIKE $4)",
+            )
+            .bind(user_id)
+            .bind(desde)
+            .bind(hasta)
+            .bind(busqueda_pattern.as_deref())
+            .fetch_one(pool)
+            .await?;
+            rec.unwrap_or(0)
+        } else {
+            let rec = sqlx::query_scalar::<_, Option<i64>>(
+                "SELECT COUNT(*) FROM ventas WHERE user_id = $1 \
+                 AND ($2::DATE IS NULL OR fecha >= $2) \
+                 AND ($3::DATE IS NULL OR fecha <= $3)",
+            )
+            .bind(user_id)
+            .bind(desde)
+            .bind(hasta)
+            .fetch_one(pool)
+            .await?;
+            rec.unwrap_or(0)
+        };
+
+        Ok((items, count))
     }
 
     pub async fn delete(pool: &PgPool, id: Uuid, user_id: Uuid) -> Result<bool, sqlx::Error> {

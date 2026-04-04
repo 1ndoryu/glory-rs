@@ -1,5 +1,6 @@
 /* 263A-1: Hook para ListaClientes — reduce useState count en el componente.
- * [263A-26] Agregado: selección múltiple para merge de clientes duplicados. */
+ * [263A-26] Agregado: selección múltiple para merge de clientes duplicados.
+ * [044A-8] Ordenamiento por columna (sort_by/sort_order). */
 
 import { useState } from 'react';
 import { useListarClientes, useEliminarCliente, useMergeClientes, Cliente } from '../api/generated';
@@ -7,6 +8,8 @@ import { useListarClientes, useEliminarCliente, useMergeClientes, Cliente } from
 function useListaClientes() {
   const [pagina, setPagina] = useState(1);
   const [busqueda, setBusqueda] = useState('');
+  const [sortBy, setSortBy] = useState('');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [modalCrear, setModalCrear] = useState(false);
   const [clienteEditar, setClienteEditar] = useState<Cliente | null>(null);
   const [seleccionados, setSeleccionados] = useState<string[]>([]);
@@ -17,6 +20,8 @@ function useListaClientes() {
     page: pagina,
     per_page: porPagina,
     busqueda: busqueda || undefined,
+    sort_by: sortBy || undefined,
+    sort_order: sortOrder || undefined,
   });
 
   const eliminarMut = useEliminarCliente({
@@ -52,11 +57,24 @@ function useListaClientes() {
     );
   };
 
+  /* [044A-8] Alterna ordenamiento por columna */
+  const toggleSort = (columna: string) => {
+    setSortBy(prev => {
+      const newOrder = prev === columna && sortOrder === 'asc' ? 'desc' : 'asc';
+      setSortOrder(newOrder);
+      setPagina(1);
+      return columna;
+    });
+  };
+
   return {
     pagina,
     setPagina,
     busqueda,
     buscar,
+    sortBy,
+    sortOrder,
+    toggleSort,
     modalCrear,
     setModalCrear,
     clienteEditar,
