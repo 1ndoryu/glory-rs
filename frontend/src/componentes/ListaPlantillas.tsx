@@ -27,7 +27,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Trash2, Send, Plus, ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react';
-import type { PlantillaWhatsapp } from '../api/generated/gestiNRestauranteAPI.schemas';
+import type { PlantillaWhatsapp } from '../api/generated/gestionRestauranteAPI.schemas';
 
 const ETIQUETAS_CATEGORIA: Record<string, string> = {
   MARKETING: 'Marketing',

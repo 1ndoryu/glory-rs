@@ -44,7 +44,7 @@ import {
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
-import type { ReglaRecordatorio } from '../api/generated/gestiNRestauranteAPI.schemas';
+import type { ReglaRecordatorio } from '../api/generated/gestionRestauranteAPI.schemas';
 
 const ETIQUETAS_CANAL: Record<string, string> = {
   sms: 'SMS',

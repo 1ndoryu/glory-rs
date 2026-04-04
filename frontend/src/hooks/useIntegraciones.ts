@@ -7,7 +7,7 @@ import {
   useObtenerIntegraciones,
   useActualizarIntegraciones,
 } from '../api/generated/configuracion/configuracion';
-import type { ActualizarIntegracionesRequest } from '../api/generated/gestiNRestauranteAPI.schemas';
+import type { ActualizarIntegracionesRequest } from '../api/generated/gestionRestauranteAPI.schemas';
 
 interface EstadoIntegraciones {
   smtp_host: string;

@@ -177,6 +177,7 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::CrearVentaRequest,
         crate::models::ActualizarVentaRequest,
         crate::models::VentasPaginadas,
+        crate::models::VentaConCliente,
         crate::models::Gasto,
         crate::models::CrearGastoRequest,
         crate::models::ActualizarGastoRequest,
@@ -282,9 +283,9 @@ impl utoipa::Modify for SecurityAddon {
     )),
     modifiers(&SecurityAddon),
     info(
-        title = "Gestión Restaurante API",
+        title = "Gestion Restaurante API",
         version = "0.1.0",
-        description = "API para gestión de restaurantes — Ventas, Gastos, Reservas, Dashboard"
+        description = "API para gestion de restaurantes - Ventas, Gastos, Reservas, Dashboard"
     )
 )]
 #[allow(clippy::needless_for_each)]

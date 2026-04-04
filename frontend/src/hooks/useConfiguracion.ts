@@ -9,7 +9,7 @@ import {
   useActualizarConfiguracion,
   getObtenerConfiguracionQueryKey,
 } from '../api/generated/configuracion/configuracion';
-import type { ActualizarConfiguracionRequest } from '../api/generated/gestiNRestauranteAPI.schemas';
+import type { ActualizarConfiguracionRequest } from '../api/generated/gestionRestauranteAPI.schemas';
 
 interface EstadoConfiguracion {
   reserva_email_obligatorio: boolean;

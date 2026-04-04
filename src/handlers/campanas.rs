@@ -22,7 +22,7 @@ use crate::AppState;
 #[utoipa::path(
     post,
     path = "/api/campanas",
-    tag = "Campañas",
+    tag = "Campanas",
     request_body = CrearCampanaRequest,
     responses(
         (status = 201, description = "Campaña creada", body = Campana),
@@ -46,7 +46,7 @@ pub async fn crear_campana(
 #[utoipa::path(
     get,
     path = "/api/campanas/{id}",
-    tag = "Campañas",
+    tag = "Campanas",
     params(("id" = Uuid, Path, description = "ID de la campaña")),
     responses(
         (status = 200, description = "Campaña encontrada", body = Campana),
@@ -68,7 +68,7 @@ pub async fn obtener_campana(
 #[utoipa::path(
     get,
     path = "/api/campanas",
-    tag = "Campañas",
+    tag = "Campanas",
     params(CampanasQuery),
     responses(
         (status = 200, description = "Lista de campañas", body = CampanasPaginadas),
@@ -89,7 +89,7 @@ pub async fn listar_campanas(
 #[utoipa::path(
     put,
     path = "/api/campanas/{id}",
-    tag = "Campañas",
+    tag = "Campanas",
     params(("id" = Uuid, Path, description = "ID de la campaña")),
     request_body = ActualizarCampanaRequest,
     responses(
@@ -115,7 +115,7 @@ pub async fn actualizar_campana(
 #[utoipa::path(
     delete,
     path = "/api/campanas/{id}",
-    tag = "Campañas",
+    tag = "Campanas",
     params(("id" = Uuid, Path, description = "ID de la campaña")),
     responses(
         (status = 204, description = "Campaña eliminada"),
@@ -137,7 +137,7 @@ pub async fn eliminar_campana(
 #[utoipa::path(
     get,
     path = "/api/campanas/segmentos/preview",
-    tag = "Campañas",
+    tag = "Campanas",
     params(SegmentoPreviewQuery),
     responses(
         (status = 200, description = "Preview del segmento", body = SegmentoPreview),
@@ -160,7 +160,7 @@ pub async fn preview_segmento(
 #[utoipa::path(
     post,
     path = "/api/campanas/{id}/enviar",
-    tag = "Campañas",
+    tag = "Campanas",
     params(("id" = Uuid, Path, description = "ID de la campaña")),
     responses(
         (status = 200, description = "Campaña enviada", body = Campana),
