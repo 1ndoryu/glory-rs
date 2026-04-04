@@ -21,19 +21,13 @@ export const SeccionBlog: React.FC = () => {
                 <SeccionHeader titulo={t('sections.journal')} />
 
                 <div className="blogGrid">
+                    {/* [044A-35] Card minimalista: imagen + overlay con categoría y título */}
                     {POSTS_BLOG.slice(0, 3).map(post => (
                         <a key={post.id} href={post.link || '#'} onClick={(e) => { e.preventDefault(); if (post.link) navegar(post.link); }} className="blogCard">
-                            <div className="blogImagenWrapper">
-                                <img src={post.imagen || obtenerImagenBlog(post.id)} alt={post.titulo} className="blogImagen" loading="lazy" />
-                            </div>
-                            <div className="blogInfo">
-                                <div className="blogMeta">
-                                    <span className="blogCategoria">{post.categoria}</span>
-                                    <span className="blogSeparador">•</span>
-                                    <span className="blogFecha">{post.fecha}</span>
-                                </div>
+                            <img src={post.imagen || obtenerImagenBlog(post.id)} alt={post.titulo} className="blogImagen" loading="lazy" />
+                            <div className="blogOverlay">
+                                <span className="blogCategoria">{post.categoria}</span>
                                 <h3 className="blogTitulo">{post.titulo}</h3>
-                                <p className="blogResumen">{post.resumen}</p>
                             </div>
                         </a>
                     ))}

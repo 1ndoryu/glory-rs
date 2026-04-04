@@ -86,36 +86,19 @@
     font-weight: 500;
 }
 
-/* Tarjeta de artículo - layout horizontal */
+/* [044A-35] Tarjeta minimalista: imagen con overlay de título y categoría */
 .tarjetaArticulo {
-    display: flex;
-    flex-direction: row;
-    gap: var(--spacing-lg);
+    position: relative;
+    display: block;
     text-decoration: none;
     color: inherit;
-    padding: var(--spacing-lg) 0;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-    transition: background-color var(--transicion-rapida);
-    align-items: flex-start;
-}
-
-.tarjetaArticulo:hover {
-    background-color: var(--bg-accent);
-    padding-left: var(--spacing-md);
-    padding-right: var(--spacing-md);
-    margin-left: calc(-1 * var(--spacing-md));
-    margin-right: calc(-1 * var(--spacing-md));
-    border-radius: 8px;
-}
-
-/* Imagen del articulo - proporcion reducida en layout horizontal */
-.articuloImagenWrapper {
-    flex: 0 0 240px;
-    width: 240px;
-    aspect-ratio: 4 / 3;
     overflow: hidden;
-    border-radius: 8px;
-    background-color: var(--bg-accent);
+    border-radius: 12px;
+    aspect-ratio: 3 / 4;
+}
+
+.tarjetaArticulo:hover .articuloImagen {
+    transform: scale(1.03);
 }
 
 .articuloImagen {
@@ -125,95 +108,49 @@
     transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.tarjetaArticulo:hover .articuloImagen {
-    transform: scale(1.03);
-}
-
-/* Contenido textual al lado de la imagen */
-.articuloContenido {
+.articuloOverlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: var(--spacing-xl) var(--spacing-lg);
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-sm);
-    flex: 1;
-    min-width: 0;
-}
-
-/* El destacado muestra imagen mas grande */
-.tarjetaArticuloDestacado .articuloImagenWrapper {
-    flex: 0 0 320px;
-    width: 320px;
-}
-
-/* Tarjeta destacada */
-.tarjetaArticuloDestacado {
-    padding: var(--spacing-xl) 0;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-    margin-bottom: var(--spacing-md);
-}
-
-.tarjetaArticuloDestacado .articuloTitulo {
-    font-size: var(--text-3xl);
-}
-
-.tarjetaArticuloDestacado .articuloResumen {
-    font-size: var(--text-lg);
-    max-width: 70ch;
-}
-
-/* Meta */
-.articuloMeta {
-    display: flex;
-    gap: var(--spacing-md);
-    align-items: center;
+    gap: var(--spacing-xs);
 }
 
 .articuloCategoria {
     font-family: var(--font-primary);
     font-size: var(--text-xs);
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--text-tertiary);
-}
-
-.articuloFecha {
-    font-family: var(--font-primary);
-    font-size: var(--text-xs);
-    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    color: rgba(255, 255, 255, 0.8);
 }
 
 .articuloTitulo {
     font-family: var(--font-primary);
-    font-size: var(--text-2xl);
+    font-size: var(--text-xl);
     font-weight: 500;
-    color: var(--brand-black);
+    color: #fff;
     margin: 0;
     line-height: 1.2;
 }
 
-.articuloResumen {
-    font-family: var(--font-serif);
-    font-size: var(--text-base);
-    color: var(--text-muted);
-    line-height: 1.6;
-    margin: 0;
-    max-width: 65ch;
+/* Destacado ocupa más espacio */
+.tarjetaArticuloDestacado {
+    aspect-ratio: 16 / 9;
 }
 
-.articuloLeer {
-    font-family: var(--font-primary);
-    font-size: var(--text-sm);
-    color: var(--text-tertiary);
-    transition: color var(--transicion-rapida);
+.tarjetaArticuloDestacado .articuloTitulo {
+    font-size: var(--text-3xl);
 }
 
-.tarjetaArticulo:hover .articuloLeer {
-    color: var(--brand-black);
-}
-
-/* Lista de posts secundarios */
+/* Grid de blog cards */
 .blogListaArticulos {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--spacing-lg);
 }
 
 .blogSinResultados {
@@ -234,19 +171,8 @@
         font-size: var(--text-3xl);
     }
 
-    .tarjetaArticulo {
-        flex-direction: column;
-    }
-
-    .articuloImagenWrapper {
-        flex: none;
-        width: 100%;
-        aspect-ratio: 16 / 9;
-    }
-
-    .tarjetaArticuloDestacado .articuloImagenWrapper {
-        flex: none;
-        width: 100%;
+    .blogListaArticulos {
+        grid-template-columns: 1fr;
     }
 
     .tarjetaArticuloDestacado .articuloTitulo {

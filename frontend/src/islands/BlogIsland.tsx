@@ -23,23 +23,16 @@ interface BlogIslandProps {
  * Tarjeta de artículo con layout horizontal.
  * Siempre muestra imagen: backend -> fallback colors (obtenerImagenBlog).
  */
+/* [044A-35] Tarjeta minimalista: imagen de fondo con título y categoría superpuestos. */
 const TarjetaArticulo: React.FC<{post: PostBlog; destacado?: boolean}> = ({post, destacado = false}) => {
-    const {t} = useTranslation();
     const imagenFinal = post.imagen || obtenerImagenBlog(post.id);
 
     return (
         <a href={post.link || '#'} onClick={(e) => { e.preventDefault(); if (post.link) navegar(post.link); }} className={`tarjetaArticulo ${destacado ? 'tarjetaArticuloDestacado' : ''}`}>
-            <div className="articuloImagenWrapper">
-                <img src={imagenFinal} alt={post.titulo} className="articuloImagen" loading="lazy" />
-            </div>
-            <div className="articuloContenido">
-                <div className="articuloMeta">
-                    <span className="articuloCategoria">{post.categoria}</span>
-                    <span className="articuloFecha">{post.fecha}</span>
-                </div>
+            <img src={imagenFinal} alt={post.titulo} className="articuloImagen" loading="lazy" />
+            <div className="articuloOverlay">
+                <span className="articuloCategoria">{post.categoria}</span>
                 <h3 className="articuloTitulo">{post.titulo}</h3>
-                <p className="articuloResumen">{post.resumen}</p>
-                <span className="articuloLeer">{t('blog_page.read_more')}</span>
             </div>
         </a>
     );
