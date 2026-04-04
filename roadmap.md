@@ -37,4 +37,4 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 ## Pendientes (por prioridad — lo más difícil primero)
 
-- Antes habia pedido un plan completo para que el servicio de hosting funcionara, hacer todo lo necesario aprovechando que existe coolify manager-rs, esto es una tarea gigante asi que requiere una planificación buena.
+(sin tareas pendientes)
