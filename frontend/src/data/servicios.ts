@@ -1,14 +1,14 @@
 import {Servicio} from '../types/servicios';
-import {obtenerImagen} from '../hooks/useImagenes';
 
-/* [044A-5] Textos revisados para coherencia con el perfil de Nakomi Studio. */
+/* [044A-31] Solo servicios con imagen real en /public/assets/Servicios/.
+ * Eliminados: Chatbots, Diseño UX/UI, Automatización, Consultoría. */
 
 const SERVICIOS_FALLBACK: Servicio[] = [
     {
         id: '1',
         titulo: 'Diseño de Sitios Web',
         descripcion: 'Sitios web a medida con diseño original, rendimiento optimizado y código limpio. Desde landing pages hasta plataformas complejas.',
-        imagen: obtenerImagen(0),
+        imagen: '/assets/Servicios/diseno web.jpg',
         categorias: ['web', 'branding'],
         link: '/servicios/diseno-web',
         skills: [
@@ -22,7 +22,7 @@ const SERVICIOS_FALLBACK: Servicio[] = [
         id: '2',
         titulo: 'Desarrollo de Aplicaciones',
         descripcion: 'Software a medida: apps web, móviles y de escritorio. Arquitectura sólida, APIs robustas y experiencia de usuario cuidada.',
-        imagen: obtenerImagen(5),
+        imagen: '/assets/Servicios/diseno de aplicaciones.jpg',
         categorias: ['software'],
         link: '/servicios/desarrollo-apps',
         skills: [
@@ -36,7 +36,7 @@ const SERVICIOS_FALLBACK: Servicio[] = [
         id: '3',
         titulo: 'Agentes de IA',
         descripcion: 'Asistentes inteligentes, chatbots contextuales y automatización con modelos de lenguaje. Integración con tu flujo de trabajo existente.',
-        imagen: obtenerImagen(10),
+        imagen: '/assets/Servicios/agente ia.jpg',
         categorias: ['ai', 'software'],
         link: '/servicios/agentes-ia'
     },
@@ -44,7 +44,7 @@ const SERVICIOS_FALLBACK: Servicio[] = [
         id: '4',
         titulo: 'Identidad de Marca',
         descripcion: 'Identidad visual completa: logo, paleta, tipografía y guidelines. Una marca coherente que comunica tu esencia.',
-        imagen: obtenerImagen(15),
+        imagen: '/assets/Servicios/Identidad de marca.jpg',
         categorias: ['branding'],
         link: '/servicios/branding'
     },
@@ -52,41 +52,9 @@ const SERVICIOS_FALLBACK: Servicio[] = [
         id: '5',
         titulo: 'E-commerce',
         descripcion: 'Tiendas online con catálogo, checkout optimizado, pasarelas de pago y panel de gestión. Enfocadas en conversión.',
-        imagen: obtenerImagen(20),
+        imagen: '/assets/Servicios/ecommerce.jpg',
         categorias: ['web', 'software'],
         link: '/servicios/ecommerce'
-    },
-    {
-        id: '6',
-        titulo: 'Chatbots Personalizados',
-        descripcion: 'Bots conversacionales con IA que entienden contexto, escalan a agentes humanos y operan 24/7.',
-        imagen: obtenerImagen(25),
-        categorias: ['ai'],
-        link: '/servicios/chatbots'
-    },
-    {
-        id: '7',
-        titulo: 'Diseño UX/UI',
-        descripcion: 'Investigación de usuarios, wireframes, prototipos y diseño final. Interfaces que se sienten naturales desde el primer click.',
-        imagen: obtenerImagen(30),
-        categorias: ['web', 'software'],
-        link: '/servicios/diseno-ux-ui'
-    },
-    {
-        id: '8',
-        titulo: 'Automatización de Procesos',
-        descripcion: 'Pipelines, integraciones y herramientas que eliminan tareas repetitivas. Más tiempo para lo que importa.',
-        imagen: obtenerImagen(35),
-        categorias: ['software', 'ai'],
-        link: '/servicios/automatizacion'
-    },
-    {
-        id: '9',
-        titulo: 'Consultoría Digital',
-        descripcion: 'Análisis técnico, auditorías de rendimiento y estrategia digital. Decisiones informadas para tu próximo paso.',
-        imagen: obtenerImagen(40),
-        categorias: ['branding'],
-        link: '/servicios/consultoria'
     }
 ];
 
@@ -95,8 +63,8 @@ export const SERVICIOS_DATA: Servicio[] = SERVICIOS_FALLBACK;
 
 /* Subconjuntos derivados para uso en diferentes secciones */
 
-/* Para la Home (primeros 6) */
-export const SERVICIOS_PRINCIPALES = SERVICIOS_DATA.slice(0, 6);
+/* Para la Home (todos — antes eran 6 de 9, ahora solo quedan 5) */
+export const SERVICIOS_PRINCIPALES = SERVICIOS_DATA;
 
 /*
  * Obtener servicios relacionados excluyendo el servicio actual.

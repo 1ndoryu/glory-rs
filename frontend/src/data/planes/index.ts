@@ -1,18 +1,18 @@
 /**
  * Planes de precios: indice central.
  * Re-exporta tipos, datos y helper de busqueda.
- * Todos los 9 servicios tienen planes definidos.
+ * [044A-31] Reducido a 5 servicios activos (eliminados chatbots, ux/ui, automatización, consultoría).
  */
 export type {CaracteristicaPlan, PlanServicio, PlanesDeServicio} from './tipos';
 export {incluida, noIncluida} from './tipos';
 
 import {PLANES_WEB, PLANES_APPS, PLANES_BRANDING} from './planesCreacion';
-import {PLANES_IA, PLANES_CHATBOTS} from './planesIA';
+import {PLANES_IA} from './planesIA';
 import {PLANES_SEO, PLANES_MARKETING} from './planesCrecimiento';
-import {PLANES_ECOMMERCE, PLANES_UXUI, PLANES_AUTOMATIZACION, PLANES_CONSULTORIA} from './planesExtras';
+import {PLANES_ECOMMERCE} from './planesExtras';
 import type {PlanesDeServicio} from './tipos';
 
-export const PLANES_POR_SERVICIO: PlanesDeServicio[] = [PLANES_WEB, PLANES_APPS, PLANES_IA, PLANES_BRANDING, PLANES_CHATBOTS, PLANES_SEO, PLANES_MARKETING, PLANES_ECOMMERCE, PLANES_UXUI, PLANES_AUTOMATIZACION, PLANES_CONSULTORIA];
+export const PLANES_POR_SERVICIO: PlanesDeServicio[] = [PLANES_WEB, PLANES_APPS, PLANES_IA, PLANES_BRANDING, PLANES_SEO, PLANES_MARKETING, PLANES_ECOMMERCE];
 
 /*
  * Mapeo de slugs generados por WP (desde titulos) a slugs esperados por los planes.
@@ -23,10 +23,7 @@ const ALIAS_SERVICIOS: Record<string, string> = {
     'desarrollo-de-aplicaciones': 'desarrollo-apps',
     'agentes-de-ia': 'agentes-ia',
     'identidad-de-marca': 'branding',
-    'e-commerce': 'ecommerce',
-    'chatbots-personalizados': 'chatbots',
-    'automatizacion-de-procesos': 'automatizacion',
-    'consultoria-digital': 'consultoria'
+    'e-commerce': 'ecommerce'
 };
 
 /*
