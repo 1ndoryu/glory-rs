@@ -1,25 +1,24 @@
-/* Estilos para la Galeria de Servicio */
+/* Estilos para la Galeria de Servicio
+ * [044A-5] Proporciones alineadas con CarruselShowcase para consistencia visual. */
 :root {
-    /* Variables especificas para esta galeria (Mas grande: ancho y alto) */
-    --galeria-item-width: 290px;
-    /* Mayor altura relativa: factor 1.1 */
-    --galeria-item-height: calc(290px * 1.1);
+    --galeria-item-width: 300px;
+    --galeria-item-height: 400px;
     --galeria-item-gap: 20px;
 }
 
 @media (min-width: 768px) {
     :root {
-        --galeria-item-width: 390px;
-        --galeria-item-height: calc(390px * 1.1);
+        --galeria-item-width: 450px;
+        --galeria-item-height: 550px;
         --galeria-item-gap: 32px;
     }
 }
 
 @media (min-width: 1440px) {
     :root {
-        --galeria-item-width: 500px;
-        --galeria-item-height: calc(500px * 1.1);
-        --galeria-item-gap: 40px;
+        --galeria-item-width: 450px;
+        --galeria-item-height: 600px;
+        --galeria-item-gap: 48px;
     }
 }
 
@@ -38,8 +37,8 @@
     height: calc(var(--galeria-item-height) + var(--spacing-md));
     display: flex;
     align-items: center;
-    /* Alineacion con el contenedor del Hero usando el padding estandar */
-    padding-left: calc((100% - var(--container-width)) / 2 + var(--spacing-lg));
+    /* Alineacion con carruselContenedorPrincipal */
+    padding-left: calc(max(1rem, (100% - var(--container-width)) / 2) + var(--spacing-lg));
 }
 
 .galeriaPista {
