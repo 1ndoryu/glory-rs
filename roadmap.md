@@ -47,3 +47,4 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 - 054A-22: Nada en modalCompraResumen necesita (--font-serif)
 - 054A-23: Las cosas en modalCompraResumen deberían estar separadas gap y en columna, no con margenes
 - Creo que la mejor forma que en vez pedir que el usuario se registre, simplemente se cree una cuanta apartir del correo con el que se ponga en la compra y al comprar, ya este logeado, luego el usuario puede elegir o cambiar su contraseña. 
+- El globo de chat no se ve redondo y esta vacío
