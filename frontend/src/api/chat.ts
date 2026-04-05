@@ -87,6 +87,11 @@ export async function apiSendMessage(
     return data;
 }
 
+/* [054A-9] Cerrar sesión de chat (staff/admin) */
+export async function apiCloseSession(sessionId: string): Promise<void> {
+    await axiosInstance.post(`/chat/sessions/${sessionId}/close`);
+}
+
 /* ============================================================
    WEBSOCKET HELPERS
    ============================================================ */

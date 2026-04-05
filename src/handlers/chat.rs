@@ -413,6 +413,29 @@ pub async fn send_message(
     Ok((StatusCode::CREATED, Json(msg)))
 }
 
+/* [054A-9] Cerrar sesión de chat via REST (staff/admin) */
+#[utoipa::path(
+    post,
+    path = "/api/chat/sessions/{session_id}/close",
+    params(("session_id" = Uuid, Path, description = "ID de la sesión")),
+    responses(
+        (status = 204, description = "Sesión cerrada"),
+        (status = 401, description = "No autorizado"),
+        (status = 403, description = "Sin permisos"),
+    ),
+    security(("bearer_auth" = [])),
+    tag = "chat"
+)]
+pub async fn close_session(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    Path(session_id): Path<Uuid>,
+) -> Result<StatusCode, AppError> {
+    auth.require_role(&[crate::models::UserRole::Admin, crate::models::UserRole::Employee])?;
+    state.chat_hub.close_session(session_id).await?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
 /* ============================================================
    ROUTES
    ============================================================ */
@@ -429,4 +452,5 @@ pub fn rest_routes() -> Router<AppState> {
     Router::new()
         .route("/chat/sessions", get(list_sessions).post(create_session))
         .route("/chat/sessions/:session_id/messages", get(get_messages).post(send_message))
+        .route("/chat/sessions/:session_id/close", axum::routing::post(close_session))
 }

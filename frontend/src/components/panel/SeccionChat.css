@@ -150,6 +150,31 @@
     font-size: var(--text-sm);
     font-weight: 600;
     color: var(--brand-black);
+    flex: 1;
+}
+
+/* [054A-9] Botón cerrar conversación */
+.chatBtnCerrar {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--brand-black);
+    opacity: 0.5;
+    padding: 4px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    transition: opacity 0.15s, color 0.15s;
+}
+
+.chatBtnCerrar:hover {
+    opacity: 1;
+    color: #e74c3c;
+}
+
+.chatBtnCerrar:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
 }
 
 /* ── Mensajes ─────────────────────────────────── */
@@ -204,6 +229,46 @@
     line-height: 1.5;
     white-space: pre-wrap;
     word-break: break-word;
+}
+
+/* [054A-3] Typing indicator en panel staff */
+.chatBurbujaTyping {
+    opacity: 0.7;
+}
+
+.chatTypingDots {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    padding: 2px 0;
+}
+
+.chatTypingDots span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--brand-black);
+    opacity: 0.4;
+    animation: chatDotBounce 1.2s infinite ease-in-out;
+}
+
+.chatTypingDots span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.chatTypingDots span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes chatDotBounce {
+    0%, 80%, 100% {
+        transform: scale(0.6);
+        opacity: 0.4;
+    }
+    40% {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
 /* ── Input ────────────────────────────────────── */

@@ -28,6 +28,9 @@ import {NotFoundIsland} from './islands/NotFoundIsland';
 /* [054A-5] Toast system */
 import {ToastContainer} from './components/ui/ToastContainer';
 
+/* [054A-3] Chat widget flotante para visitantes */
+import {ChatWidget} from './components/chat/ChatWidget';
+
 /* Data para resolver slugs */
 import {SERVICIOS_DATA} from './data/servicios';
 import {PROYECTOS_DATA} from './data/showcase';
@@ -121,6 +124,8 @@ function App() {
                     {/* [044A-28] Página 404 real en vez de redirigir silenciosamente al home */}
                     <Route path="*" element={<NotFoundIsland />} />
                 </Routes>
+                {/* [054A-3] Chat flotante para visitantes (se oculta en /panel) */}
+                <ChatWidget />
             </BrowserRouter>
         </QueryClientProvider>
     );

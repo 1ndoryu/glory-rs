@@ -3,15 +3,17 @@
  * Staff: ve todas las sesiones. Cliente: solo sus chats de órdenes. */
 
 import React, {useState, useRef, useEffect, useCallback} from 'react';
-import {MessageCircle, Send, Bot, User, ChevronLeft} from 'lucide-react';
-import {useChat} from '../../hooks/useChat';
+import {MessageCircle, Send, Bot, User, ChevronLeft, XCircle} from 'lucide-react';
+import {useChat, useChatWs} from '../../hooks/useChat';
 import {
+    apiCloseSession,
     SENDER_LABELS,
     SENDER_COLORS,
     SESSION_STATUS_LABELS,
     type ChatSession,
     type ChatMessage,
 } from '../../api/chat';
+import {toast} from '../../stores/toastStore';
 import {Textarea} from '../ui/Textarea';
 import './SeccionChat.css';
 
@@ -20,7 +22,17 @@ export const SeccionChat: React.FC = () => {
     const {sessions, messages, cargandoSesiones, cargandoMensajes, enviarMensaje, enviando, crearSesion} =
         useChat(activeSessionId ?? undefined);
 
+    /* [054A-3] WebSocket en tiempo real para typing + sesiones nuevas */
+    const ws = useChatWs();
+
+    /* Conectar WS al montar */
+    useEffect(() => {
+        ws.connect();
+        return () => ws.disconnect();
+    }, [ws.connect, ws.disconnect]);
+
     const [input, setInput] = useState('');
+    const [closing, setClosing] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     /* Auto-scroll al recibir mensajes */
@@ -57,6 +69,21 @@ export const SeccionChat: React.FC = () => {
             /* Error manejado internamente */
         }
     }, [crearSesion]);
+
+    /* [054A-9] Cerrar sesión activa */
+    const handleCloseSession = useCallback(async () => {
+        if (!activeSessionId || closing) return;
+        setClosing(true);
+        try {
+            await apiCloseSession(activeSessionId);
+            toast.success('Conversación cerrada');
+            setActiveSessionId(null);
+        } catch {
+            toast.error('Error al cerrar conversación');
+        } finally {
+            setClosing(false);
+        }
+    }, [activeSessionId, closing]);
 
     /* Vista mobile: lista o chat */
     const showingChat = activeSessionId !== null;
@@ -118,6 +145,16 @@ export const SeccionChat: React.FC = () => {
                                     ? `Chat de orden`
                                     : 'Chat general'}
                             </span>
+                            {/* [054A-9] Botón cerrar conversación */}
+                            <button
+                                className="chatBtnCerrar"
+                                onClick={handleCloseSession}
+                                disabled={closing}
+                                type="button"
+                                title="Cerrar conversación"
+                            >
+                                <XCircle size={18} />
+                            </button>
                         </div>
 
                         <div className="chatMensajes">
@@ -127,6 +164,19 @@ export const SeccionChat: React.FC = () => {
                             {messages.map(m => (
                                 <MessageBubble key={m.id} message={m} />
                             ))}
+                            {/* [054A-3] Typing indicator desde WebSocket */}
+                            {activeSessionId && ws.typingMap[activeSessionId] && (
+                                <div className="chatBurbuja chatBurbujaTyping">
+                                    <div className="chatBurbujaHeader">
+                                        <span style={{color: SENDER_COLORS[ws.typingMap[activeSessionId].sender] || '#94a3b8'}}>
+                                            {SENDER_LABELS[ws.typingMap[activeSessionId].sender] || 'Visitante'} está escribiendo...
+                                        </span>
+                                    </div>
+                                    <div className="chatBurbujaContenido chatTypingDots">
+                                        <span /><span /><span />
+                                    </div>
+                                </div>
+                            )}
                             <div ref={messagesEndRef} />
                         </div>
 
