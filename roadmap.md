@@ -43,6 +43,8 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 ## Otras tareas
 
+- Termina todos los planes.
+
 - Cuando le doy a empezar en los planes de cualquier servicio debería empezar algo similar a fiver. Esto requiere restructurar un poco como se ven la pagina de los servicios, principalmente al principio debería verse la portada, tambien abajo de los botones de comenzar el plan tiene que ir el boton de conversar. Todos los servicios deben tener un plan basico, uno medio y uno pro, quita los de "A medida", se va a resumir con el boton de conversar, obviamente se tiene entender que el cliente dio click en ese boton porque es informacion util para cuando se abra el chat y la IA lo atendienda en primer lugar.
 
 - Cuando se de a comprar un servicio abre un modal que muestre la info brevemente del servicio, y con un boton abajo de continuar ($Precio), abajo un pequeño texto de Aun no se te cobrara. Luego de continuar va a la pasarela de pago. Al volver su el servicio aparecera en su panel, por supuesto, para que esto sea sencillo, si el usuario no esta registrado tenemos que hacer que eso no sea un impedimiento para comprar, en el mismo modal le podemos pedir que ponga su correo y una contraseña o en la pasarela, no lo se pero me entiendes el proposito.
@@ -52,8 +54,6 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 - Con el plan de chat, revisa que pude haberme olvidado, tambien el plan de servicio de hosting que me olvide, queremos ofrecer hosting y que los clientes pueda comprar hosting y gestionarlos. Y trabaja en todo eso que posiblemente olvide. 
 
 - En el panel de admin hace falta algo para ver los usuarios registrados, con buscador, y filtro, con capacidad de banear, cambiar de cliente a empleado, etc.
-
-- Parece que no hay mensajes claros de errores cuando se inicia sesion con la contraseña incorrecta. 
 
 - No se si ya existe pero hace falta un toast de notificaciones. 
 
