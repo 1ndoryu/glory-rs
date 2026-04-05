@@ -1,0 +1,179 @@
+/* [044A-38 Fase 2] API client para órdenes del marketplace.
+ * Conecta con todos los endpoints CRUD de /api/orders del backend Rust.
+ * Tipos alineados con OrderResponse y OrderPhaseResponse del backend. */
+import instance from './axios-instance';
+
+/* ============================================================
+   TIPOS — alineados con backend Rust (serde snake_case)
+   ============================================================ */
+
+export type OrderStatus =
+    | 'pending_payment'
+    | 'payment_held'
+    | 'awaiting_assignment'
+    | 'in_progress'
+    | 'under_review'
+    | 'completed'
+    | 'cancelled'
+    | 'disputed';
+
+export type PaymentMode = 'full' | 'half_half' | 'phased';
+
+export type PhaseStatus =
+    | 'locked'
+    | 'pending_payment'
+    | 'paid'
+    | 'in_progress'
+    | 'delivered'
+    | 'revision_requested'
+    | 'approved'
+    | 'skipped';
+
+export interface OrderResponse {
+    id: string;
+    order_number: number;
+    service_title: string;
+    plan_name: string;
+    payment_mode: PaymentMode;
+    base_price_cents: number;
+    discount_percent: number;
+    final_price_cents: number;
+    currency: string;
+    status: OrderStatus;
+    assigned_employee_id: string | null;
+    current_phase: number;
+    total_phases: number;
+    client_notes: string | null;
+    created_at: string;
+}
+
+export interface OrderPhaseResponse {
+    phase_number: number;
+    title: string;
+    description: string | null;
+    price_cents: number;
+    status: PhaseStatus;
+    max_revisions: number;
+    revisions_used: number;
+    estimated_days: number;
+    deadline: string | null;
+}
+
+export interface OrderDetailResponse {
+    order: OrderResponse;
+    phases: OrderPhaseResponse[];
+}
+
+export interface CreateOrderRequest {
+    service_slug: string;
+    plan_slug: string;
+    payment_mode: PaymentMode;
+    client_notes?: string;
+}
+
+/* ============================================================
+   API CALLS
+   ============================================================ */
+
+export async function apiListOrders(): Promise<OrderResponse[]> {
+    const {data} = await instance.get<OrderResponse[]>('/api/orders');
+    return data;
+}
+
+export async function apiGetOrder(orderId: string): Promise<OrderDetailResponse> {
+    const {data} = await instance.get<OrderDetailResponse>(`/api/orders/${orderId}`);
+    return data;
+}
+
+export async function apiCreateOrder(req: CreateOrderRequest): Promise<OrderResponse> {
+    const {data} = await instance.post<OrderResponse>('/api/orders', req);
+    return data;
+}
+
+export async function apiCancelOrder(orderId: string): Promise<{status: OrderStatus}> {
+    const {data} = await instance.post<{status: OrderStatus}>(`/api/orders/${orderId}/cancel`);
+    return data;
+}
+
+export async function apiApprovePhase(
+    orderId: string,
+    phaseNumber: number,
+): Promise<OrderPhaseResponse> {
+    const {data} = await instance.put<OrderPhaseResponse>(
+        `/api/orders/${orderId}/phases/${phaseNumber}/approve`,
+    );
+    return data;
+}
+
+export async function apiRequestRevision(
+    orderId: string,
+    phaseNumber: number,
+): Promise<OrderPhaseResponse> {
+    const {data} = await instance.put<OrderPhaseResponse>(
+        `/api/orders/${orderId}/phases/${phaseNumber}/revision`,
+    );
+    return data;
+}
+
+export async function apiDeliverPhase(
+    orderId: string,
+    phaseNumber: number,
+): Promise<OrderPhaseResponse> {
+    const {data} = await instance.put<OrderPhaseResponse>(
+        `/api/orders/${orderId}/phases/${phaseNumber}/deliver`,
+    );
+    return data;
+}
+
+/* ============================================================
+   HELPERS — labels y colores para UI
+   ============================================================ */
+
+export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
+    pending_payment: 'Pendiente de pago',
+    payment_held: 'Pago retenido',
+    awaiting_assignment: 'Sin asignar',
+    in_progress: 'En progreso',
+    under_review: 'En revisión',
+    completed: 'Completada',
+    cancelled: 'Cancelada',
+    disputed: 'Disputada',
+};
+
+export const ORDER_STATUS_COLOR: Record<OrderStatus, string> = {
+    pending_payment: '#c59000',
+    payment_held: '#0077b6',
+    awaiting_assignment: '#7b2cbf',
+    in_progress: '#0077b6',
+    under_review: '#c59000',
+    completed: '#2d6a4f',
+    cancelled: '#6c757d',
+    disputed: '#d62828',
+};
+
+export const PHASE_STATUS_LABELS: Record<PhaseStatus, string> = {
+    locked: 'Bloqueada',
+    pending_payment: 'Pendiente de pago',
+    paid: 'Pagada',
+    in_progress: 'En progreso',
+    delivered: 'Entregada',
+    revision_requested: 'Revisión solicitada',
+    approved: 'Aprobada',
+    skipped: 'Omitida',
+};
+
+export const PAYMENT_MODE_LABELS: Record<PaymentMode, string> = {
+    full: 'Pago completo',
+    half_half: '50/50',
+    phased: 'Por fases',
+};
+
+/* Formato precio en centavos → string legible */
+export function formatPrice(cents: number, currency = 'USD'): string {
+    return new Intl.NumberFormat('es', {
+        style: 'currency',
+        currency,
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
+    }).format(cents / 100);
+}

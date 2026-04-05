@@ -9,6 +9,7 @@ import {useNavigate} from 'react-router-dom';
 import {HeaderPanel} from '../components/panel/HeaderPanel';
 import {SeccionPerfil} from '../components/panel/SeccionPerfil';
 import {SeccionMetodosPago} from '../components/panel/SeccionMetodosPago';
+import {SeccionProyectos} from '../components/panel/SeccionProyectos';
 import {SidebarPanel} from '../components/panel/SidebarPanel';
 import {PlaceholderSeccion} from '../components/panel/PlaceholderSeccion';
 import {obtenerTabsPorRol, seccionInicialPorRol, type SeccionPanel} from '../data/panel';
@@ -47,6 +48,11 @@ export const PanelIsland: React.FC = () => {
                 return <SeccionPerfil />;
             case 'metodos-pago':
                 return <SeccionMetodosPago />;
+            /* [044A-38 Fase 2] Mis Proyectos con lista de órdenes + detalle + acciones */
+            case 'proyectos':
+            case 'asignados':
+            case 'todos-ordenes':
+                return <SeccionProyectos />;
             default:
                 return <PlaceholderSeccion tab={tabActual} />;
         }

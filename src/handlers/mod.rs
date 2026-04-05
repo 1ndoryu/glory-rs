@@ -53,6 +53,10 @@ impl utoipa::Modify for SecurityAddon {
         orders::get_order,
         orders::assign_order,
         orders::switch_role,
+        orders::cancel_order_handler,
+        orders::deliver_phase,
+        orders::approve_phase,
+        orders::request_revision,
     ),
     components(schemas(
         health::HealthResponse,

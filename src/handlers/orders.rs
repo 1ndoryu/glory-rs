@@ -178,13 +178,125 @@ pub async fn switch_role(
     }))
 }
 
+/* ============================================================
+   [044A-38 Fase 2] CANCELAR, ENTREGAR, APROBAR, REVISIÓN
+   ============================================================ */
+
+/// Cancelar una orden (solo el cliente dueño o admin, solo en estados iniciales)
+#[utoipa::path(
+    post,
+    path = "/api/orders/{order_id}/cancel",
+    params(("order_id" = Uuid, Path, description = "ID de la orden")),
+    responses(
+        (status = 200, description = "Orden cancelada"),
+        (status = 400, description = "Estado no permite cancelación", body = crate::errors::ErrorResponse),
+        (status = 401, description = "No autorizado", body = crate::errors::ErrorResponse),
+        (status = 403, description = "Sin permisos", body = crate::errors::ErrorResponse),
+    ),
+    security(("bearer_auth" = [])),
+    tag = "orders"
+)]
+pub async fn cancel_order_handler(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    Path(order_id): Path<Uuid>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    let order = OrderService::cancel_order(&state.pool, order_id, auth.user_id, auth.effective_role).await?;
+    Ok(Json(serde_json::json!({ "status": order.status })))
+}
+
+/// Empleado entrega una fase (marca como delivered)
+#[utoipa::path(
+    put,
+    path = "/api/orders/{order_id}/phases/{phase_number}/deliver",
+    params(
+        ("order_id" = Uuid, Path, description = "ID de la orden"),
+        ("phase_number" = i32, Path, description = "Número de fase"),
+    ),
+    responses(
+        (status = 200, description = "Fase entregada", body = crate::models::OrderPhaseResponse),
+        (status = 400, description = "Estado no permite entrega", body = crate::errors::ErrorResponse),
+        (status = 401, description = "No autorizado", body = crate::errors::ErrorResponse),
+        (status = 403, description = "Solo el empleado asignado", body = crate::errors::ErrorResponse),
+    ),
+    security(("bearer_auth" = [])),
+    tag = "orders"
+)]
+pub async fn deliver_phase(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    Path((order_id, phase_number)): Path<(Uuid, i32)>,
+) -> Result<Json<crate::models::OrderPhaseResponse>, AppError> {
+    auth.require_role(&[UserRole::Employee, UserRole::Admin])?;
+    let phase = OrderService::deliver_phase(&state.pool, order_id, phase_number, auth.user_id).await?;
+    Ok(Json(crate::models::OrderPhaseResponse::from(phase)))
+}
+
+/// Cliente aprueba una fase entregada
+#[utoipa::path(
+    put,
+    path = "/api/orders/{order_id}/phases/{phase_number}/approve",
+    params(
+        ("order_id" = Uuid, Path, description = "ID de la orden"),
+        ("phase_number" = i32, Path, description = "Número de fase"),
+    ),
+    responses(
+        (status = 200, description = "Fase aprobada", body = crate::models::OrderPhaseResponse),
+        (status = 400, description = "Estado no permite aprobación", body = crate::errors::ErrorResponse),
+        (status = 401, description = "No autorizado", body = crate::errors::ErrorResponse),
+        (status = 403, description = "Solo el cliente dueño", body = crate::errors::ErrorResponse),
+    ),
+    security(("bearer_auth" = [])),
+    tag = "orders"
+)]
+pub async fn approve_phase(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    Path((order_id, phase_number)): Path<(Uuid, i32)>,
+) -> Result<Json<crate::models::OrderPhaseResponse>, AppError> {
+    auth.require_role(&[UserRole::Client, UserRole::Admin])?;
+    let phase = OrderService::approve_phase(&state.pool, order_id, phase_number, auth.user_id).await?;
+    Ok(Json(crate::models::OrderPhaseResponse::from(phase)))
+}
+
+/// Cliente solicita revisión de una fase entregada
+#[utoipa::path(
+    put,
+    path = "/api/orders/{order_id}/phases/{phase_number}/revision",
+    params(
+        ("order_id" = Uuid, Path, description = "ID de la orden"),
+        ("phase_number" = i32, Path, description = "Número de fase"),
+    ),
+    responses(
+        (status = 200, description = "Revisión solicitada", body = crate::models::OrderPhaseResponse),
+        (status = 400, description = "No se puede pedir revisión", body = crate::errors::ErrorResponse),
+        (status = 401, description = "No autorizado", body = crate::errors::ErrorResponse),
+        (status = 403, description = "Solo el cliente dueño", body = crate::errors::ErrorResponse),
+    ),
+    security(("bearer_auth" = [])),
+    tag = "orders"
+)]
+pub async fn request_revision(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    Path((order_id, phase_number)): Path<(Uuid, i32)>,
+) -> Result<Json<crate::models::OrderPhaseResponse>, AppError> {
+    auth.require_role(&[UserRole::Client, UserRole::Admin])?;
+    let phase = OrderService::request_revision(&state.pool, order_id, phase_number, auth.user_id).await?;
+    Ok(Json(crate::models::OrderPhaseResponse::from(phase)))
+}
+
 pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/orders", post(create_order).get(list_orders))
         .route("/orders/:order_id", get(get_order))
+        .route("/orders/:order_id/cancel", post(cancel_order_handler))
         .route(
             "/orders/:order_id/assign/:employee_id",
             put(assign_order),
         )
+        .route("/orders/:order_id/phases/:phase_number/deliver", put(deliver_phase))
+        .route("/orders/:order_id/phases/:phase_number/approve", put(approve_phase))
+        .route("/orders/:order_id/phases/:phase_number/revision", put(request_revision))
         .route("/auth/switch-role", post(switch_role))
 }

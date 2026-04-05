@@ -262,6 +262,108 @@ impl OrderRepository {
         .await
     }
 
+    /* [044A-38 Fase 2] Busca una fase por order_id + phase_number */
+    pub async fn find_phase_by_number(
+        pool: &PgPool,
+        order_id: Uuid,
+        phase_number: i32,
+    ) -> Result<Option<OrderPhase>, sqlx::Error> {
+        sqlx::query_as::<_, OrderPhase>(
+            "SELECT * FROM order_phases WHERE order_id = $1 AND phase_number = $2",
+        )
+        .bind(order_id)
+        .bind(phase_number)
+        .fetch_optional(pool)
+        .await
+    }
+
+    /* [044A-38 Fase 2] Marca fase como entregada */
+    pub async fn deliver_phase(
+        pool: &PgPool,
+        phase_id: Uuid,
+    ) -> Result<OrderPhase, sqlx::Error> {
+        sqlx::query_as::<_, OrderPhase>(
+            "UPDATE order_phases SET status = 'delivered', delivered_at = NOW(), updated_at = NOW() \
+             WHERE id = $1 RETURNING *",
+        )
+        .bind(phase_id)
+        .fetch_one(pool)
+        .await
+    }
+
+    /* [044A-38 Fase 2] Marca fase como aprobada */
+    pub async fn approve_phase(
+        pool: &PgPool,
+        phase_id: Uuid,
+    ) -> Result<OrderPhase, sqlx::Error> {
+        sqlx::query_as::<_, OrderPhase>(
+            "UPDATE order_phases SET status = 'approved', approved_at = NOW(), updated_at = NOW() \
+             WHERE id = $1 RETURNING *",
+        )
+        .bind(phase_id)
+        .fetch_one(pool)
+        .await
+    }
+
+    /* [044A-38 Fase 2] Incrementa revisiones y pone status revision_requested */
+    pub async fn request_revision(
+        pool: &PgPool,
+        phase_id: Uuid,
+    ) -> Result<OrderPhase, sqlx::Error> {
+        sqlx::query_as::<_, OrderPhase>(
+            "UPDATE order_phases SET status = 'revision_requested', \
+             revisions_used = revisions_used + 1, updated_at = NOW() \
+             WHERE id = $1 RETURNING *",
+        )
+        .bind(phase_id)
+        .fetch_one(pool)
+        .await
+    }
+
+    /* [044A-38 Fase 2] Cancela una orden: marca cancelled + timestamp */
+    pub async fn cancel_order(
+        pool: &PgPool,
+        order_id: Uuid,
+    ) -> Result<Order, sqlx::Error> {
+        sqlx::query_as::<_, Order>(
+            "UPDATE orders SET status = 'cancelled', cancelled_at = NOW(), updated_at = NOW() \
+             WHERE id = $1 RETURNING *",
+        )
+        .bind(order_id)
+        .fetch_one(pool)
+        .await
+    }
+
+    /* [044A-38 Fase 2] Actualiza current_phase de una orden */
+    pub async fn update_current_phase(
+        pool: &PgPool,
+        order_id: Uuid,
+        phase_number: i32,
+    ) -> Result<Order, sqlx::Error> {
+        sqlx::query_as::<_, Order>(
+            "UPDATE orders SET current_phase = $2, updated_at = NOW() \
+             WHERE id = $1 RETURNING *",
+        )
+        .bind(order_id)
+        .bind(phase_number)
+        .fetch_one(pool)
+        .await
+    }
+
+    /* [044A-38 Fase 2] Marca orden como completada */
+    pub async fn complete_order(
+        pool: &PgPool,
+        order_id: Uuid,
+    ) -> Result<Order, sqlx::Error> {
+        sqlx::query_as::<_, Order>(
+            "UPDATE orders SET status = 'completed', completed_at = NOW(), updated_at = NOW() \
+             WHERE id = $1 RETURNING *",
+        )
+        .bind(order_id)
+        .fetch_one(pool)
+        .await
+    }
+
     /// Obtiene el título del servicio y nombre del plan para un order
     pub async fn get_order_display_info(
         pool: &PgPool,
