@@ -10,6 +10,7 @@ import React from 'react';
 import {useTranslation} from 'react-i18next';
 import {Button} from '../ui/Button';
 import {Input} from '../ui/Input';
+import {Modal} from '../ui/Modal';
 import {useAutenticacion} from '../../hooks/useAutenticacion';
 import './ModalAutenticacion.css';
 
@@ -21,27 +22,17 @@ interface ModalAutenticacionProps {
 export const ModalAutenticacion: React.FC<ModalAutenticacionProps> = ({abierto, onCerrar}) => {
     const {t} = useTranslation();
     const {
-        vista, setVista, cargando, error, modalRef,
+        vista, setVista, cargando, error,
         login, registro, recuperar,
         actualizarLogin, actualizarRegistro, actualizarRecuperar,
         handleLogin, handleRegistro, handleRecuperar,
         handleGoogleLogin, resetRecuperacion
-    } = useAutenticacion(abierto, onCerrar);
-
-    /* Cerrar al click fuera del modal */
-    const handleOverlayClick = (e: React.MouseEvent) => {
-        if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
-            onCerrar();
-        }
-    };
-
-    if (!abierto) return null;
+    } = useAutenticacion(onCerrar);
 
     return (
-        <div className="modalOverlay" onClick={handleOverlayClick} role="dialog" aria-modal="true" aria-label="Autenticación">
-            <div className="modalContenedor" ref={modalRef}>
+        <Modal abierto={abierto} onCerrar={onCerrar} className="modalAutenticacion">
                 {/* [044A-15] Eliminado boton cerrar y titulo por solicitud del usuario.
-                 * Se cierra haciendo click fuera del modal (overlay). */}
+                 * Se cierra haciendo click fuera del modal (overlay) o con Escape. */}
 
                 {/* Tabs (solo login/registro) */}
                 {vista !== 'recuperar' && (
@@ -233,7 +224,6 @@ export const ModalAutenticacion: React.FC<ModalAutenticacionProps> = ({abierto, 
                         )}
                     </div>
                 )}
-            </div>
-        </div>
+        </Modal>
     );
 };

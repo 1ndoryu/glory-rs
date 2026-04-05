@@ -8,6 +8,7 @@ import { useAdminUsers } from '../../hooks/useAdminUsers';
 import { ROLE_LABELS, STATUS_LABELS, STATUS_CLASS } from '../../api/admin-users';
 import type { AdminUserItem } from '../../api/admin-users';
 import { Input } from '../ui/Input';
+import { Select } from '../ui/Select';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { MenuContextual, type MenuContextualItem } from '../ui/ContextMenu';
@@ -70,7 +71,7 @@ export function SeccionUsuarios() {
                     />
                 </div>
 
-                <select
+                <Select
                     className="usuariosFiltroSelect"
                     value={roleFilter}
                     onChange={(e) => setRoleFilter(e.target.value)}
@@ -79,9 +80,9 @@ export function SeccionUsuarios() {
                     <option value="admin">Admin</option>
                     <option value="employee">Empleado</option>
                     <option value="client">Cliente</option>
-                </select>
+                </Select>
 
-                <select
+                <Select
                     className="usuariosFiltroSelect"
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
@@ -90,7 +91,7 @@ export function SeccionUsuarios() {
                     <option value="active">Activo</option>
                     <option value="banned">Baneado</option>
                     <option value="suspended">Suspendido</option>
-                </select>
+                </Select>
 
                 <span className="usuariosTotal">
                     <Users size={14} />

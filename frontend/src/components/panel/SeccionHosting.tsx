@@ -21,6 +21,7 @@ import {
 import {toast} from '../../stores/toastStore';
 import {Modal} from '../ui/Modal';
 import {Input} from '../ui/Input';
+import {Select} from '../ui/Select';
 import {Button} from '../ui/Button';
 import {MenuContextual, type MenuContextualItem} from '../ui/ContextMenu';
 import './SeccionHosting.css';
@@ -230,7 +231,7 @@ function CreateHostingForm({
                 value={form.client_email}
                 onChange={e => setForm(prev => ({...prev, client_email: e.target.value}))}
             />
-            <select
+            <Select
                 className="hostingSelect"
                 value={form.plan}
                 onChange={e => setForm(prev => ({...prev, plan: e.target.value}))}
@@ -239,7 +240,7 @@ function CreateHostingForm({
                 <option value="pro">Profesional ($35/mes)</option>
                 <option value="ecommerce">E-commerce ($60/mes)</option>
                 <option value="custom">Custom (cotización)</option>
-            </select>
+            </Select>
             <Input
                 type="text"
                 placeholder="Dominio (opcional)"

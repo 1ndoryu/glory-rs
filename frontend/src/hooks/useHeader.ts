@@ -1,0 +1,73 @@
+/* [054A-19] Hook: useHeader
+ * Encapsula lógica de estado del Header: dropdown, modal, menú móvil.
+ * Extraído del componente Header para cumplir SRP (<3 useState). */
+import {useState, useRef, useCallback, useEffect} from 'react';
+import {useAuthStore} from '../stores/authStore';
+
+/* Comprueba si la ruta actual coincide con un path dado */
+function esRutaActual(path: string): boolean {
+    if (typeof window === 'undefined') return false;
+    return window.location.pathname.replace(/\/+$/, '') === path.replace(/\/+$/, '');
+}
+
+export const useHeader = () => {
+    const [dropdownAbierto, setDropdownAbierto] = useState<string | null>(null);
+    const [modalAbierto, setModalAbierto] = useState(false);
+    const [menuMovilAbierto, setMenuMovilAbierto] = useState(false);
+    const logueado = useAuthStore(s => s.logueado);
+    const logout = useAuthStore(s => s.logout);
+    const enPanel = esRutaActual('/panel');
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    /* Cierra dropdown al hacer Escape */
+    const handleKeyDownDropdown = useCallback(
+        (e: React.KeyboardEvent, label: string) => {
+            if (e.key === 'Escape') {
+                setDropdownAbierto(null);
+            } else if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setDropdownAbierto(prev => (prev === label ? null : label));
+            } else if (e.key === 'ArrowDown' && dropdownAbierto === label) {
+                e.preventDefault();
+                const submenu = dropdownRef.current?.querySelector('.subMenuEnlace') as HTMLElement | null;
+                submenu?.focus();
+            }
+        },
+        [dropdownAbierto]
+    );
+
+    /* Navegación por teclado dentro del submenú */
+    const handleKeyDownSubmenu = useCallback((e: React.KeyboardEvent) => {
+        const target = e.currentTarget as HTMLElement;
+        if (e.key === 'Escape') {
+            setDropdownAbierto(null);
+            (target.closest('.enlaceNavegacionWrapper')?.querySelector('.enlaceNavegacion') as HTMLElement)?.focus();
+        } else if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            (target.nextElementSibling as HTMLElement)?.focus();
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            (target.previousElementSibling as HTMLElement)?.focus();
+        }
+    }, []);
+
+    /* Cerrar menú móvil con Escape */
+    useEffect(() => {
+        if (!menuMovilAbierto) return;
+        const handleEsc = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') setMenuMovilAbierto(false);
+        };
+        document.addEventListener('keydown', handleEsc);
+        return () => document.removeEventListener('keydown', handleEsc);
+    }, [menuMovilAbierto]);
+
+    return {
+        dropdownAbierto, setDropdownAbierto,
+        modalAbierto, setModalAbierto,
+        menuMovilAbierto, setMenuMovilAbierto,
+        logueado, logout, enPanel,
+        dropdownRef,
+        handleKeyDownDropdown,
+        handleKeyDownSubmenu,
+    };
+};

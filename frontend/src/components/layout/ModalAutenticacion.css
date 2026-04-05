@@ -1,29 +1,9 @@
-/* Estilos para ModalAutenticacion */
-
-/* Overlay */
-.modalOverlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: var(--overlay-medium);
-    backdrop-filter: blur(4px);
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--spacing-lg);
-    animation: modalFadeIn 0.2s ease;
-}
-
-@keyframes modalFadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
+/* [054A-19] Estilos para ModalAutenticacion.
+ * El overlay y focus trap vienen del componente <Modal> base.
+ * Esta clase se aplica al contenedor interno via className prop. */
 
 /* [044A-15] Contenedor principal: fondo blanco, padding 40px, sin titulo ni boton cerrar */
-.modalContenedor {
+.modalAutenticacion {
     background-color: var(--brand-white);
     border-radius: var(--radius-xl);
     width: 100%;

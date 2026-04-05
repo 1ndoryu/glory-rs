@@ -5,8 +5,7 @@
  * [044A-13] Conectado con backend REST API (login/registro via JWT).
  * Pendiente: OAuth Google, recuperación de contraseña.
  */
-import {useState, useEffect, useRef, useCallback} from 'react';
-import {useFocusTrap} from './useFocusTrap';
+import {useState, useCallback} from 'react';
 import {apiLogin, apiRegister, extraerMensajeError} from '../api/auth';
 import {useAuthStore} from '../stores/authStore';
 import {toast} from '../stores/toastStore';
@@ -35,7 +34,6 @@ interface RetornoUseAutenticacion {
     setVista: (v: VistaModal) => void;
     cargando: boolean;
     error: string | null;
-    modalRef: React.RefObject<HTMLDivElement>;
     login: EstadoLogin;
     registro: EstadoRegistro;
     recuperar: EstadoRecuperar;
@@ -49,34 +47,16 @@ interface RetornoUseAutenticacion {
     resetRecuperacion: () => void;
 }
 
-export const useAutenticacion = (abierto: boolean, onCerrar: () => void): RetornoUseAutenticacion => {
+export const useAutenticacion = (onCerrar: () => void): RetornoUseAutenticacion => {
     const [vista, setVista] = useState<VistaModal>('login');
     const [cargando, setCargando] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const modalRef = useRef<HTMLDivElement>(null);
     const authLogin = useAuthStore(s => s.login);
 
     const [login, setLogin] = useState<EstadoLogin>({email: '', password: ''});
 
-    /* Focus trap: atrapa Tab dentro del modal cuando está abierto */
-    useFocusTrap(modalRef, abierto);
     const [registro, setRegistro] = useState<EstadoRegistro>({nombre: '', email: '', password: '', confirmar: ''});
     const [recuperar, setRecuperar] = useState<EstadoRecuperar>({email: '', enviado: false});
-
-    /* Cerrar con Escape y bloquear scroll */
-    useEffect(() => {
-        const handleEsc = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') onCerrar();
-        };
-        if (abierto) {
-            document.addEventListener('keydown', handleEsc);
-            document.body.style.overflow = 'hidden';
-        }
-        return () => {
-            document.removeEventListener('keydown', handleEsc);
-            document.body.style.overflow = '';
-        };
-    }, [abierto, onCerrar]);
 
     const actualizarLogin = useCallback((campo: keyof EstadoLogin, valor: string) => {
         setLogin(prev => ({...prev, [campo]: valor}));
@@ -154,7 +134,6 @@ export const useAutenticacion = (abierto: boolean, onCerrar: () => void): Retorn
         setVista,
         cargando,
         error,
-        modalRef,
         login,
         registro,
         recuperar,

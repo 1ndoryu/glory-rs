@@ -5,16 +5,18 @@
  * Incluye submenú dropdown para "Soluciones".
  * [044A-13] Sesión conectada con authStore (Zustand + JWT).
  * Accesibilidad: aria-labels, aria-expanded, navegación por teclado.
+ * [054A-19] Lógica extraída a useHeader (SRP). Links internos usan GloryLink.
  */
-import React, {useState, useRef, useCallback, useEffect} from 'react';
+import React from 'react';
 import {useTranslation} from 'react-i18next';
 import {ChevronDown, ChevronRight, Menu, X} from 'lucide-react';
 import {Button} from '../ui/Button';
 import {ENLACES_HEADER} from '../../data/navegacion';
 import {ModalAutenticacion} from './ModalAutenticacion';
-import {navegar, spaClick} from '../../navegacionSPA';
+import {navegar} from '../../navegacionSPA';
+import {GloryLink} from '../../core/router';
 import {Logo} from '../ui/Logo';
-import {useAuthStore} from '../../stores/authStore';
+import {useHeader} from '../../hooks/useHeader';
 import '../../styles/header.css';
 
 /* [044A-2] Mapeo de labels estáticos (español) a claves i18n.
@@ -29,23 +31,17 @@ const NAV_KEYS: Record<string, string> = {
     'Hosting': 'nav.hosting',
 };
 
-/* [044A-13] Sesión conectada con authStore (Zustand + JWT) */
-
-/* Comprueba si la ruta actual coincide con un path dado */
-function esRutaActual(path: string): boolean {
-    if (typeof window === 'undefined') return false;
-    return window.location.pathname.replace(/\/+$/, '') === path.replace(/\/+$/, '');
-}
-
 export const Header: React.FC = () => {
     const {t} = useTranslation();
-    const [dropdownAbierto, setDropdownAbierto] = useState<string | null>(null);
-    const [modalAbierto, setModalAbierto] = useState(false);
-    const [menuMovilAbierto, setMenuMovilAbierto] = useState(false);
-    const logueado = useAuthStore(s => s.logueado);
-    const logout = useAuthStore(s => s.logout);
-    const enPanel = esRutaActual('/panel');
-    const dropdownRef = useRef<HTMLDivElement>(null);
+    const {
+        dropdownAbierto, setDropdownAbierto,
+        modalAbierto, setModalAbierto,
+        menuMovilAbierto, setMenuMovilAbierto,
+        logueado, logout, enPanel,
+        dropdownRef,
+        handleKeyDownDropdown,
+        handleKeyDownSubmenu,
+    } = useHeader();
 
     /* Texto y destino del botón de sesión / panel */
     const textoAccion = logueado ? (enPanel ? t('nav.back') : t('nav.panel')) : null;
@@ -55,55 +51,13 @@ export const Header: React.FC = () => {
     const textoCta = logueado ? t('nav.chat') : t('nav.contact');
     const hrefCta = '/contacto/';
 
-    /* Cierra dropdown al hacer Escape */
-    const handleKeyDownDropdown = useCallback(
-        (e: React.KeyboardEvent, label: string) => {
-            if (e.key === 'Escape') {
-                setDropdownAbierto(null);
-            } else if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                setDropdownAbierto(prev => (prev === label ? null : label));
-            } else if (e.key === 'ArrowDown' && dropdownAbierto === label) {
-                e.preventDefault();
-                const submenu = dropdownRef.current?.querySelector('.subMenuEnlace') as HTMLElement | null;
-                submenu?.focus();
-            }
-        },
-        [dropdownAbierto]
-    );
-
-    /* Navegación por teclado dentro del submenú */
-    const handleKeyDownSubmenu = useCallback((e: React.KeyboardEvent) => {
-        const target = e.currentTarget as HTMLElement;
-        if (e.key === 'Escape') {
-            setDropdownAbierto(null);
-            (target.closest('.enlaceNavegacionWrapper')?.querySelector('.enlaceNavegacion') as HTMLElement)?.focus();
-        } else if (e.key === 'ArrowDown') {
-            e.preventDefault();
-            (target.nextElementSibling as HTMLElement)?.focus();
-        } else if (e.key === 'ArrowUp') {
-            e.preventDefault();
-            (target.previousElementSibling as HTMLElement)?.focus();
-        }
-    }, []);
-
-    /* Cerrar menú móvil con Escape */
-    useEffect(() => {
-        if (!menuMovilAbierto) return;
-        const handleEsc = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') setMenuMovilAbierto(false);
-        };
-        document.addEventListener('keydown', handleEsc);
-        return () => document.removeEventListener('keydown', handleEsc);
-    }, [menuMovilAbierto]);
-
     return (
         <>
             <header className="cabeceraPrincipal" role="banner">
                 <div className="logoContenedor">
-                    <a href="/" className="logoEnlace" aria-label={t('accessibility.logo_home')} onClick={e => spaClick(e, '/')}>
+                    <GloryLink to="/" className="logoEnlace" aria-label={t('accessibility.logo_home')}>
                         <Logo className="logoSvg" />
-                    </a>
+                    </GloryLink>
                 </div>
 
                 {/* Botón hamburguesa para móvil */}
@@ -114,16 +68,16 @@ export const Header: React.FC = () => {
                 <nav className={`navegacionPrincipal ${menuMovilAbierto ? 'navegacionAbierta' : ''}`} id="navegacion-principal" aria-label={t('accessibility.main_nav')}>
                     {ENLACES_HEADER.map(link => (
                         <div key={link.label} className="enlaceNavegacionWrapper" ref={link.hasDropdown ? dropdownRef : undefined} onMouseEnter={() => (link.hasDropdown ? setDropdownAbierto(link.label) : null)} onMouseLeave={() => setDropdownAbierto(null)}>
-                            <a href={link.href} className="enlaceNavegacion" aria-expanded={link.hasDropdown ? dropdownAbierto === link.label : undefined} aria-haspopup={link.hasDropdown ? 'true' : undefined} onKeyDown={link.hasDropdown ? e => handleKeyDownDropdown(e, link.label) : undefined} onClick={e => spaClick(e, link.href)}>
+                            <GloryLink to={link.href} className="enlaceNavegacion" aria-expanded={link.hasDropdown ? dropdownAbierto === link.label : undefined} aria-haspopup={link.hasDropdown ? 'true' : undefined} onKeyDown={link.hasDropdown ? e => handleKeyDownDropdown(e, link.label) : undefined}>
                                 {t(NAV_KEYS[link.label] || link.label)}
                                 {link.hasDropdown && <ChevronDown size={14} className="iconoDesplegable" aria-hidden="true" />}
-                            </a>
+                            </GloryLink>
                             {link.hasDropdown && link.subEnlaces && dropdownAbierto === link.label && (
                                 <div className="subMenuDesplegable" role="menu" aria-label={`${t('accessibility.main_nav')}: ${t(NAV_KEYS[link.label] || link.label)}`}>
                                     {link.subEnlaces.map(sub => (
-                                        <a key={sub.label} href={sub.href} className="subMenuEnlace" role="menuitem" tabIndex={0} onKeyDown={handleKeyDownSubmenu} onClick={e => spaClick(e, sub.href)}>
+                                        <GloryLink key={sub.label} to={sub.href} className="subMenuEnlace" role="menuitem" tabIndex={0} onKeyDown={handleKeyDownSubmenu}>
                                             {t(NAV_KEYS[sub.label] || sub.label)}
-                                        </a>
+                                        </GloryLink>
                                     ))}
                                 </div>
                             )}
@@ -135,9 +89,9 @@ export const Header: React.FC = () => {
                     {/* [044A-37] LanguageSelector removido del header por petición del usuario. Se mantiene en footer. */}
                     {logueado ? (
                         <>
-                            <a className="enlaceAcceder" href={hrefAccion!} onClick={e => spaClick(e, hrefAccion!)}>
+                            <GloryLink to={hrefAccion!} className="enlaceAcceder">
                                 {textoAccion}
-                            </a>
+                            </GloryLink>
                             <Button variante="texto" className="enlaceAcceder" onClick={logout}>
                                 {t('nav.logout')}
                             </Button>
