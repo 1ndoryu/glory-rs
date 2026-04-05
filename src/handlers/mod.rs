@@ -6,6 +6,7 @@ mod chat;
 mod dashboard;
 mod deliverables;
 mod health;
+mod profile;
 mod notes;
 mod notifications;
 mod orders;
@@ -94,6 +95,8 @@ impl utoipa::Modify for SecurityAddon {
         notifications::mark_read,
         notifications::mark_all_read,
         dashboard::get_dashboard,
+        profile::get_profile,
+        profile::upload_avatar,
     ),
     components(schemas(
         health::HealthResponse,
@@ -149,6 +152,7 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::OrderCounts,
         crate::models::EmployeePerformance,
         crate::models::DashboardAlerts,
+        profile::AvatarResponse,
         crate::errors::ErrorResponse,
     )),
     modifiers(&SecurityAddon),
@@ -191,6 +195,8 @@ pub fn create_router(pool: sqlx::PgPool, config: crate::config::AppConfig) -> Ro
         .merge(chat::ws_routes())
         /* [044A-38 Fase 9] WebSocket de notificaciones en tiempo real */
         .merge(notifications::ws_routes())
+        /* [044A-43] Servir archivos estáticos de uploads/ (avatares, etc.) */
+        .nest_service("/uploads", ServeDir::new("uploads"))
         .nest("/api", api_routes())
         .layer(TraceLayer::new_for_http())
         .layer(cors)
@@ -229,4 +235,5 @@ fn api_routes() -> Router<AppState> {
         .merge(reviews::routes())
         .merge(notifications::routes())
         .merge(dashboard::routes())
+        .merge(profile::routes())
 }

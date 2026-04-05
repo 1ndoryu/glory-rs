@@ -1,10 +1,7 @@
-/**
- * Componente: SeccionPerfil
- * Formulario de configuracion de perfil del usuario.
- * La logica de estado se delega al hook usePerfil (SRP).
- * TO-DO: Conectar con REST API backend para persistir cambios.
- */
-import React from 'react';
+/* [044A-43] Componente: SeccionPerfil
+ * Formulario de configuración de perfil. Conectado al backend via usePerfil.
+ * El botón "Cambiar foto" abre un input file oculto que sube el avatar al servidor. */
+import React, {useRef} from 'react';
 import {useTranslation} from 'react-i18next';
 import {Button} from '../ui/Button';
 import {usePerfil} from '../../hooks/usePerfil';
@@ -12,7 +9,28 @@ import './SeccionPerfil.css';
 
 export const SeccionPerfil: React.FC = () => {
     const {t} = useTranslation();
-    const {estado, guardado, actualizarCampo, handleGuardar, usuario} = usePerfil();
+    const {
+        estado, guardado, cargando, perfil, avatarUrl,
+        subiendoAvatar, actualizarCampo, handleGuardar, handleSubirAvatar
+    } = usePerfil();
+    const inputArchivoRef = useRef<HTMLInputElement>(null);
+
+    const abrirSelectorArchivo = () => {
+        inputArchivoRef.current?.click();
+    };
+
+    const alSeleccionarArchivo = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const archivo = e.target.files?.[0];
+        if (archivo) {
+            handleSubirAvatar(archivo);
+            /* Limpiar para permitir subir el mismo archivo de nuevo */
+            e.target.value = '';
+        }
+    };
+
+    if (cargando) {
+        return <div className="perfilSeccion"><p>{t('common.loading', 'Cargando...')}</p></div>;
+    }
 
     return (
         <div className="perfilSeccion">
@@ -25,12 +43,27 @@ export const SeccionPerfil: React.FC = () => {
                 <div className="perfilAvatarSeccion">
                     <div className="perfilAvatar">
                         <img
-                            src={usuario?.avatar || 'https://i.pravatar.cc/100?u=default'}
+                            src={avatarUrl}
                             alt={t('accessibility.profile_photo')}
                         />
                     </div>
                     <div className="perfilAvatarAcciones">
-                        <Button variante="outline" tamano="pequeno">{t('panel.change_photo')}</Button>
+                        <input
+                            ref={inputArchivoRef}
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp,image/gif"
+                            onChange={alSeleccionarArchivo}
+                            className="perfilArchivoOculto"
+                        />
+                        <Button
+                            variante="outline"
+                            tamano="pequeno"
+                            type="button"
+                            onClick={abrirSelectorArchivo}
+                            disabled={subiendoAvatar}
+                        >
+                            {subiendoAvatar ? t('common.uploading', 'Subiendo...') : t('panel.change_photo')}
+                        </Button>
                         <span className="perfilAvatarNota">{t('panel.photo_help')}</span>
                     </div>
                 </div>
@@ -52,7 +85,7 @@ export const SeccionPerfil: React.FC = () => {
                         <input
                             type="email"
                             id="perfilEmail"
-                            value={usuario?.email || ''}
+                            value={perfil?.email || ''}
                             className="perfilCampoInput"
                             disabled
                         />

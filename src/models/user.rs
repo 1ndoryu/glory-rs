@@ -38,6 +38,8 @@ pub struct User {
     pub active_role: Option<UserRole>,
     pub email_verified: bool,
     pub status: String,
+    pub avatar_url: Option<String>,
+    pub display_name: Option<String>,
     pub created_at: DateTime<Utc>,
 }
 
@@ -60,6 +62,8 @@ pub struct UserResponse {
     pub email: String,
     pub role: UserRole,
     pub effective_role: UserRole,
+    pub avatar_url: Option<String>,
+    pub display_name: Option<String>,
     pub created_at: DateTime<Utc>,
 }
 
@@ -71,6 +75,8 @@ impl From<User> for UserResponse {
             email: user.email,
             role: user.role,
             effective_role,
+            avatar_url: user.avatar_url,
+            display_name: user.display_name,
             created_at: user.created_at,
         }
     }

@@ -47,6 +47,11 @@
     gap: var(--spacing-xs);
 }
 
+/* [044A-43] Input file oculto para selección de avatar */
+.perfilArchivoOculto {
+    display: none;
+}
+
 .perfilAvatarNota {
     font-family: var(--font-serif);
     font-size: var(--text-xs);

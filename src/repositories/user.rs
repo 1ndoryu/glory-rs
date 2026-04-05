@@ -16,7 +16,7 @@ impl UserRepository {
         sqlx::query_as::<_, User>(
             "INSERT INTO users (id, email, password_hash) \
              VALUES ($1, $2, $3) \
-             RETURNING id, email, password_hash, role, active_role, email_verified, status, created_at",
+             RETURNING id, email, password_hash, role, active_role, email_verified, status, avatar_url, display_name, created_at",
         )
         .bind(id)
         .bind(email)
@@ -28,7 +28,7 @@ impl UserRepository {
     /// Busca un usuario por email
     pub async fn find_by_email(pool: &PgPool, email: &str) -> Result<Option<User>, sqlx::Error> {
         sqlx::query_as::<_, User>(
-            "SELECT id, email, password_hash, role, active_role, email_verified, status, created_at \
+            "SELECT id, email, password_hash, role, active_role, email_verified, status, avatar_url, display_name, created_at \
              FROM users WHERE email = $1",
         )
         .bind(email)
@@ -39,7 +39,7 @@ impl UserRepository {
     /// Busca un usuario por ID
     pub async fn find_by_id(pool: &PgPool, id: Uuid) -> Result<Option<User>, sqlx::Error> {
         sqlx::query_as::<_, User>(
-            "SELECT id, email, password_hash, role, active_role, email_verified, status, created_at \
+            "SELECT id, email, password_hash, role, active_role, email_verified, status, avatar_url, display_name, created_at \
              FROM users WHERE id = $1",
         )
         .bind(id)
@@ -56,11 +56,25 @@ impl UserRepository {
         sqlx::query_as::<_, User>(
             "UPDATE users SET active_role = $2 \
              WHERE id = $1 \
-             RETURNING id, email, password_hash, role, active_role, email_verified, status, created_at",
+             RETURNING id, email, password_hash, role, active_role, email_verified, status, avatar_url, display_name, created_at",
         )
         .bind(user_id)
         .bind(active_role)
         .fetch_one(pool)
         .await
+    }
+
+    /* [044A-43] Actualiza la URL del avatar del usuario */
+    pub async fn update_avatar(
+        pool: &PgPool,
+        user_id: Uuid,
+        avatar_url: &str,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query("UPDATE users SET avatar_url = $2 WHERE id = $1")
+            .bind(user_id)
+            .bind(avatar_url)
+            .execute(pool)
+            .await?;
+        Ok(())
     }
 }

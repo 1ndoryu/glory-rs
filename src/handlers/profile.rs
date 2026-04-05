@@ -1,0 +1,133 @@
+/* [044A-43] Endpoints de perfil de usuario: obtener perfil y subir avatar.
+   Upload multipart con validación MIME (image), max 2MB, guardado en uploads/avatars/. */
+use axum::extract::{Multipart, State};
+use axum::Json;
+use axum::Router;
+
+use crate::errors::AppError;
+use crate::AppState;
+use crate::middleware::AuthUser;
+use crate::models::UserResponse;
+use crate::repositories::UserRepository;
+
+const MAX_AVATAR_SIZE: usize = 2 * 1024 * 1024;
+const ALLOWED_MIME_PREFIXES: &[&str] = &["image/jpeg", "image/png", "image/webp", "image/gif"];
+
+/* GET /api/profile — obtiene el perfil del usuario autenticado */
+#[utoipa::path(
+    get,
+    path = "/api/profile",
+    responses(
+        (status = 200, description = "Perfil del usuario", body = UserResponse),
+        (status = 401, description = "No autenticado"),
+    ),
+    security(("bearer_auth" = [])),
+    tag = "profile"
+)]
+pub async fn get_profile(
+    auth: AuthUser,
+    State(state): State<AppState>,
+) -> Result<Json<UserResponse>, AppError> {
+    let user = UserRepository::find_by_id(&state.pool, auth.user_id)
+        .await?
+        .ok_or_else(|| AppError::NotFound("Usuario no encontrado".into()))?;
+    Ok(Json(user.into()))
+}
+
+/* POST /api/profile/avatar — sube imagen de avatar (multipart) */
+#[utoipa::path(
+    post,
+    path = "/api/profile/avatar",
+    responses(
+        (status = 200, description = "Avatar actualizado", body = AvatarResponse),
+        (status = 400, description = "Archivo inválido"),
+        (status = 401, description = "No autenticado"),
+    ),
+    security(("bearer_auth" = [])),
+    tag = "profile"
+)]
+pub async fn upload_avatar(
+    auth: AuthUser,
+    State(state): State<AppState>,
+    mut multipart: Multipart,
+) -> Result<Json<AvatarResponse>, AppError> {
+    let mut file_data: Option<(Vec<u8>, String)> = None;
+
+    while let Some(field) = multipart
+        .next_field()
+        .await
+        .map_err(|e| AppError::BadRequest(format!("Error leyendo multipart: {e}")))?
+    {
+        let name = field.name().unwrap_or("").to_string();
+        if name != "avatar" {
+            continue;
+        }
+
+        let content_type = field
+            .content_type()
+            .unwrap_or("application/octet-stream")
+            .to_string();
+
+        if !ALLOWED_MIME_PREFIXES
+            .iter()
+            .any(|m| content_type.starts_with(m))
+        {
+            return Err(AppError::BadRequest(
+                "Tipo de archivo no permitido. Usa JPG, PNG, WebP o GIF.".into(),
+            ));
+        }
+
+        let data = field
+            .bytes()
+            .await
+            .map_err(|e| AppError::BadRequest(format!("Error leyendo archivo: {e}")))?;
+
+        if data.len() > MAX_AVATAR_SIZE {
+            return Err(AppError::BadRequest(
+                "El archivo excede el límite de 2MB.".into(),
+            ));
+        }
+
+        let ext = match content_type.as_str() {
+            "image/png" => "png",
+            "image/webp" => "webp",
+            "image/gif" => "gif",
+            _ => "jpg",
+        };
+
+        file_data = Some((data.to_vec(), ext.to_string()));
+    }
+
+    let (data, ext) = file_data
+        .ok_or_else(|| AppError::BadRequest("No se encontró el campo 'avatar'.".into()))?;
+
+    /* Guardar en uploads/avatars/{user_id}.{ext} */
+    let dir = std::path::Path::new("uploads/avatars");
+    tokio::fs::create_dir_all(dir)
+        .await
+        .map_err(|e| AppError::Internal(format!("Error creando directorio: {e}")))?;
+
+    let filename = format!("{}.{ext}", auth.user_id);
+    let filepath = dir.join(&filename);
+    tokio::fs::write(&filepath, &data)
+        .await
+        .map_err(|e| AppError::Internal(format!("Error guardando archivo: {e}")))?;
+
+    let avatar_url = format!("/uploads/avatars/{filename}");
+    UserRepository::update_avatar(&state.pool, auth.user_id, &avatar_url).await?;
+
+    Ok(Json(AvatarResponse { avatar_url }))
+}
+
+#[derive(serde::Serialize, utoipa::ToSchema)]
+pub struct AvatarResponse {
+    pub avatar_url: String,
+}
+
+/* Rutas de perfil — montadas bajo /api en mod.rs */
+pub fn routes() -> Router<AppState> {
+    use axum::routing::{get, post};
+    Router::new()
+        .route("/profile", get(get_profile))
+        .route("/profile/avatar", post(upload_avatar))
+}
