@@ -66,12 +66,20 @@ export function useChat(sessionId?: string) {
    HOOK: WebSocket en tiempo real (staff panel)
    ============================================================ */
 
+/* [054A-4] Typing indicator: mapa session_id → info del que escribe */
+export interface TypingInfo {
+    sender: string;
+    content: string;
+}
+
 export function useChatWs() {
     const token = useAuthStore(s => s.token);
     const [connected, setConnected] = useState(false);
     const [sessions, setSessions] = useState<ChatSession[]>([]);
     const [messages, setMessages] = useState<ChatMessage[]>([]);
+    const [typingMap, setTypingMap] = useState<Record<string, TypingInfo>>({});
     const wsRef = useRef<WebSocket | null>(null);
+    const typingTimersRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
     const connect = useCallback(() => {
         if (!token || wsRef.current) return;
@@ -131,6 +139,27 @@ export function useChatWs() {
                             );
                         }
                         break;
+                    /* [054A-4] Typing preview: muestra indicador 3s, auto-limpia */
+                    case 'typing':
+                        if (msg.session_id && msg.sender) {
+                            const sid = msg.session_id;
+                            setTypingMap(prev => ({
+                                ...prev,
+                                [sid]: {sender: msg.sender!, content: msg.content || ''},
+                            }));
+                            if (typingTimersRef.current[sid]) {
+                                clearTimeout(typingTimersRef.current[sid]);
+                            }
+                            typingTimersRef.current[sid] = setTimeout(() => {
+                                setTypingMap(prev => {
+                                    const next = {...prev};
+                                    delete next[sid];
+                                    return next;
+                                });
+                                delete typingTimersRef.current[sid];
+                            }, 3000);
+                        }
+                        break;
                 }
             } catch {
                 /* Mensaje no JSON, ignorar */
@@ -143,6 +172,12 @@ export function useChatWs() {
             wsRef.current.close();
             wsRef.current = null;
         }
+        /* [054A-4] Limpiar timers de typing al desconectar */
+        for (const timer of Object.values(typingTimersRef.current)) {
+            clearTimeout(timer);
+        }
+        typingTimersRef.current = {};
+        setTypingMap({});
     }, []);
 
     const sendWsMessage = useCallback((data: Record<string, unknown>) => {
@@ -169,6 +204,7 @@ export function useChatWs() {
         connected,
         sessions,
         messages,
+        typingMap,
         connect,
         disconnect,
         joinSession,
