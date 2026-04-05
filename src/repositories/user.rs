@@ -3,6 +3,21 @@ use uuid::Uuid;
 
 use crate::models::{User, UserRole};
 
+/* [054A-1] Row intermedia para list_all con conteo total (paginación offset) */
+pub struct UserWithTotal {
+    pub id: Uuid,
+    pub email: String,
+    pub password_hash: String,
+    pub role: UserRole,
+    pub active_role: Option<UserRole>,
+    pub email_verified: bool,
+    pub status: String,
+    pub avatar_url: Option<String>,
+    pub display_name: Option<String>,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+    pub total_count: i64,
+}
+
 pub struct UserRepository;
 
 impl UserRepository {
@@ -86,5 +101,84 @@ impl UserRepository {
             .execute(pool)
             .await?;
         Ok(())
+    }
+
+    /* [054A-1] Lista paginada de usuarios con búsqueda y filtros para panel admin.
+     * Usa COUNT(*) OVER() para obtener el total sin query extra.
+     * Filtros: role, status, búsqueda por email/display_name (ILIKE). */
+    pub async fn list_all(
+        pool: &PgPool,
+        search: Option<&str>,
+        role_filter: Option<UserRole>,
+        status_filter: Option<&str>,
+        limit: i64,
+        offset: i64,
+    ) -> Result<Vec<UserWithTotal>, sqlx::Error> {
+        let search_pattern = search.map(|s| format!("%{s}%"));
+        let status_owned = status_filter.map(str::to_string);
+
+        sqlx::query_as!(
+            UserWithTotal,
+            r#"SELECT id, email, password_hash,
+                      role as "role: UserRole",
+                      active_role as "active_role: UserRole",
+                      email_verified, status, avatar_url, display_name, created_at,
+                      COUNT(*) OVER() as "total_count!: i64"
+             FROM users
+             WHERE ($1::text IS NULL OR email ILIKE $1 OR display_name ILIKE $1)
+               AND ($2::user_role IS NULL OR role = $2)
+               AND ($3::text IS NULL OR status = $3)
+             ORDER BY created_at DESC
+             LIMIT $4 OFFSET $5"#,
+            search_pattern as Option<String>,
+            role_filter as Option<UserRole>,
+            status_owned,
+            limit,
+            offset,
+        )
+        .fetch_all(pool)
+        .await
+    }
+
+    /* [054A-1] Cambia el role real de un usuario (admin action).
+     * No permite que un admin se cambie el rol a sí mismo por seguridad. */
+    pub async fn update_role(
+        pool: &PgPool,
+        user_id: Uuid,
+        new_role: UserRole,
+    ) -> Result<User, sqlx::Error> {
+        sqlx::query_as!(
+            User,
+            r#"UPDATE users SET role = $2, active_role = NULL
+             WHERE id = $1
+             RETURNING id, email, password_hash,
+                       role as "role: UserRole", active_role as "active_role: UserRole",
+                       email_verified, status, avatar_url, display_name, created_at"#,
+            user_id,
+            new_role as UserRole,
+        )
+        .fetch_one(pool)
+        .await
+    }
+
+    /* [054A-1] Cambia el status de un usuario (ban/reactivar).
+     * status = 'active' | 'banned' | 'suspended' */
+    pub async fn update_status(
+        pool: &PgPool,
+        user_id: Uuid,
+        status: &str,
+    ) -> Result<User, sqlx::Error> {
+        sqlx::query_as!(
+            User,
+            r#"UPDATE users SET status = $2
+             WHERE id = $1
+             RETURNING id, email, password_hash,
+                       role as "role: UserRole", active_role as "active_role: UserRole",
+                       email_verified, status, avatar_url, display_name, created_at"#,
+            user_id,
+            status,
+        )
+        .fetch_one(pool)
+        .await
     }
 }

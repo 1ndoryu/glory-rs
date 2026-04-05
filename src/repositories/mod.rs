@@ -20,4 +20,4 @@ pub use order::{OrderRepository, CreateOrderParams, CreatePhaseParams};
 pub use payment::{PaymentRepository, CreatePaymentParams};
 pub use refund::RefundRepository;
 pub use review::ReviewRepository;
-pub use user::UserRepository;
+pub use user::{UserRepository, UserWithTotal};

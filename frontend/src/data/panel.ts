@@ -8,7 +8,7 @@ import type {UserRole} from '../api/auth';
 export type SeccionPanel =
     | 'proyectos' | 'servicios' | 'pagos' | 'perfil' | 'metodos-pago' | 'mensajes'
     | 'asignados' | 'disponibles' | 'delegaciones'
-    | 'todos-ordenes' | 'empleados' | 'config-servicios' | 'dashboard' | 'reembolsos';
+    | 'todos-ordenes' | 'empleados' | 'config-servicios' | 'dashboard' | 'reembolsos' | 'usuarios';
 
 export interface TabConfig {
     id: SeccionPanel;
@@ -105,6 +105,11 @@ const TABS_ADMIN: TabConfig[] = [
         id: 'reembolsos',
         label: 'Reembolsos',
         descripcion: 'Gestiona solicitudes de reembolso: revisa, aprueba o rechaza pedidos de clientes.'
+    },
+    {
+        id: 'usuarios',
+        label: 'Usuarios',
+        descripcion: 'Busca, filtra y gestiona los usuarios registrados: cambia roles, banea o reactiva cuentas.'
     },
     {
         id: 'mensajes',

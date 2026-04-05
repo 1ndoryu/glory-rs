@@ -1,5 +1,6 @@
 #![allow(clippy::needless_for_each)] // Generado por utoipa OpenApi derive
 
+mod admin_users;
 mod assignment;
 mod auth;
 mod chat;
@@ -97,6 +98,9 @@ impl utoipa::Modify for SecurityAddon {
         dashboard::get_dashboard,
         profile::get_profile,
         profile::upload_avatar,
+        admin_users::list_users,
+        admin_users::change_role,
+        admin_users::change_status,
     ),
     components(schemas(
         health::HealthResponse,
@@ -152,6 +156,10 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::OrderCounts,
         crate::models::EmployeePerformance,
         crate::models::DashboardAlerts,
+        crate::models::AdminUserItem,
+        crate::models::PaginatedUsers,
+        crate::models::ChangeRoleRequest,
+        crate::models::ChangeStatusRequest,
         profile::AvatarResponse,
         crate::errors::ErrorResponse,
     )),
@@ -236,4 +244,5 @@ fn api_routes() -> Router<AppState> {
         .merge(notifications::routes())
         .merge(dashboard::routes())
         .merge(profile::routes())
+        .merge(admin_users::routes())
 }

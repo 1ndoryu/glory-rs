@@ -1,0 +1,461 @@
+/* [054A-1] Estilos para SeccionUsuarios (admin). */
+
+.usuariosContenedor {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    padding: var(--spacing-lg);
+}
+
+.usuariosVacio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-2xl) 0;
+    color: var(--brand-black);
+    opacity: 0.5;
+}
+
+.usuariosSpinner {
+    animation: spin 1s linear infinite;
+}
+
+.usuariosError {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    color: #991b1b;
+    background: #fee2e2;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: 8px;
+}
+
+/* ========== Filtros ========== */
+
+.usuariosFiltros {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+}
+
+.usuariosBusqueda {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+}
+
+.usuariosBusquedaIcono {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--brand-black);
+    opacity: 0.4;
+}
+
+.usuariosBusquedaInput {
+    width: 100%;
+    padding: 10px 12px 10px 36px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 8px;
+    font-size: var(--text-sm);
+    font-family: var(--font-primary);
+    background: var(--bg-primary);
+    color: var(--brand-black);
+    transition: border-color 0.2s;
+}
+
+.usuariosBusquedaInput:focus {
+    outline: none;
+    border-color: var(--brand-black);
+}
+
+.usuariosFiltroSelect {
+    padding: 10px 12px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 8px;
+    font-size: var(--text-sm);
+    font-family: var(--font-primary);
+    background: var(--bg-primary);
+    color: var(--brand-black);
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.usuariosFiltroSelect:focus {
+    outline: none;
+    border-color: var(--brand-black);
+}
+
+.usuariosTotal {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: var(--text-sm);
+    color: var(--brand-black);
+    opacity: 0.6;
+    white-space: nowrap;
+}
+
+/* ========== Tabla ========== */
+
+.usuariosTablaWrapper {
+    overflow-x: auto;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.usuariosTabla {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--text-sm);
+}
+
+.usuariosTabla th {
+    text-align: left;
+    padding: 12px 16px;
+    font-weight: 600;
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--brand-black);
+    opacity: 0.5;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.usuariosFila {
+    transition: background 0.15s;
+}
+
+.usuariosFila:hover {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.usuariosFila td {
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+    vertical-align: middle;
+}
+
+/* ========== Celda de usuario ========== */
+
+.usuariosCeldaUsuario {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.usuariosAvatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.usuariosAvatarImg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.usuariosAvatarPlaceholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background: var(--brand-black);
+    color: var(--brand-white);
+    font-size: var(--text-sm);
+    font-weight: 600;
+}
+
+.usuariosInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.usuariosNombre {
+    font-weight: 500;
+    color: var(--brand-black);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.usuariosEmail {
+    font-size: var(--text-xs);
+    color: var(--brand-black);
+    opacity: 0.5;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ========== Badges ========== */
+
+.usuariosRolBadge {
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.usuariosRoladmin {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.usuariosRolemployee {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.usuariosRolclient {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.usuariosStatusBadge {
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: var(--text-xs);
+    font-weight: 500;
+}
+
+.statusActivo {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.statusBaneado {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.statusSuspendido {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+/* ========== Fecha ========== */
+
+.usuariosFecha {
+    font-size: var(--text-xs);
+    color: var(--brand-black);
+    opacity: 0.6;
+    white-space: nowrap;
+}
+
+/* ========== Menú de acciones ========== */
+
+.usuariosAcciones {
+    position: relative;
+}
+
+.usuariosMenuWrapper {
+    position: relative;
+}
+
+.usuariosMenuBtn {
+    padding: 4px 8px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    background: transparent;
+    cursor: pointer;
+    font-size: var(--text-lg);
+    color: var(--brand-black);
+    line-height: 1;
+    transition: background 0.15s;
+}
+
+.usuariosMenuBtn:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.usuariosMenu {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    margin-top: 4px;
+    background: var(--bg-primary);
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    min-width: 180px;
+    z-index: 10;
+    padding: 4px;
+}
+
+.usuariosMenuItem {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 12px;
+    border: none;
+    background: transparent;
+    font-size: var(--text-sm);
+    font-family: var(--font-primary);
+    color: var(--brand-black);
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background 0.15s;
+}
+
+.usuariosMenuItem:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.usuariosMenuItemBan {
+    color: #991b1b;
+}
+
+.usuariosMenuItemBan:hover {
+    background: #fee2e2;
+}
+
+.usuariosMenuItemReactivar {
+    color: #065f46;
+}
+
+.usuariosMenuItemReactivar:hover {
+    background: #d1fae5;
+}
+
+.usuariosMenuDivider {
+    border: none;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    margin: 4px 0;
+}
+
+/* ========== Paginación ========== */
+
+.usuariosPaginacion {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-md);
+}
+
+.usuariosPaginacionBtn {
+    padding: 8px 16px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 8px;
+    background: var(--bg-primary);
+    font-size: var(--text-sm);
+    font-family: var(--font-primary);
+    color: var(--brand-black);
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.usuariosPaginacionBtn:hover:not(:disabled) {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: var(--brand-black);
+}
+
+.usuariosPaginacionBtn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.usuariosPaginacionInfo {
+    font-size: var(--text-sm);
+    color: var(--brand-black);
+    opacity: 0.6;
+}
+
+/* ========== Modal de confirmación (usa <Modal> base, estilos adicionales) ========== */
+
+.usuariosModal {
+    max-width: 400px;
+}
+
+.usuariosModalTitulo {
+    margin: 0 0 var(--spacing-sm);
+    font-family: var(--font-serif);
+    font-size: var(--text-lg);
+    color: var(--brand-black);
+}
+
+.usuariosModalTexto {
+    margin: 0 0 var(--spacing-lg);
+    font-size: var(--text-sm);
+    color: var(--brand-black);
+    opacity: 0.7;
+}
+
+.usuariosModalAcciones {
+    display: flex;
+    gap: var(--spacing-sm);
+    justify-content: flex-end;
+}
+
+.usuariosModalCancelar {
+    padding: 8px 16px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 8px;
+    background: transparent;
+    font-size: var(--text-sm);
+    font-family: var(--font-primary);
+    color: var(--brand-black);
+    cursor: pointer;
+}
+
+.usuariosModalConfirmar {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    background: var(--brand-black);
+    color: var(--brand-white);
+    font-size: var(--text-sm);
+    font-family: var(--font-primary);
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+
+.usuariosModalConfirmar:hover {
+    opacity: 0.85;
+}
+
+.usuariosModalConfirmar:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ========== Responsive ========== */
+
+@media (max-width: 768px) {
+    .usuariosContenedor {
+        padding: var(--spacing-md);
+    }
+
+    .usuariosFiltros {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .usuariosBusqueda {
+        min-width: 100%;
+    }
+
+    .usuariosTabla th:nth-child(4),
+    .usuariosFila td:nth-child(4) {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .usuariosTabla th:nth-child(3),
+    .usuariosFila td:nth-child(3) {
+        display: none;
+    }
+}

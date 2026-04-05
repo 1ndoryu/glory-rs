@@ -107,3 +107,51 @@ pub struct AuthResponse {
     pub role: UserRole,
     pub effective_role: UserRole,
 }
+
+/* [054A-1] Modelos para gestión de usuarios desde panel admin */
+
+/// Elemento de la lista de usuarios para admin
+#[derive(Debug, Serialize, ToSchema)]
+pub struct AdminUserItem {
+    pub id: Uuid,
+    pub email: String,
+    pub role: UserRole,
+    pub status: String,
+    pub email_verified: bool,
+    pub avatar_url: Option<String>,
+    pub display_name: Option<String>,
+    pub created_at: DateTime<Utc>,
+}
+
+/// Respuesta paginada de usuarios
+#[derive(Debug, Serialize, ToSchema)]
+pub struct PaginatedUsers {
+    pub users: Vec<AdminUserItem>,
+    pub total: i64,
+    pub page: i64,
+    pub per_page: i64,
+}
+
+/// Request para cambiar el rol de un usuario
+#[derive(Debug, Deserialize, Validate, ToSchema)]
+pub struct ChangeRoleRequest {
+    pub role: UserRole,
+}
+
+/// Request para cambiar el status de un usuario (ban/unban)
+#[derive(Debug, Deserialize, Validate, ToSchema)]
+pub struct ChangeStatusRequest {
+    #[validate(custom(function = "validate_user_status"))]
+    pub status: String,
+}
+
+fn validate_user_status(status: &str) -> Result<(), validator::ValidationError> {
+    match status {
+        "active" | "banned" | "suspended" => Ok(()),
+        _ => {
+            let mut err = validator::ValidationError::new("invalid_status");
+            err.message = Some("Status debe ser: active, banned o suspended".into());
+            Err(err)
+        }
+    }
+}

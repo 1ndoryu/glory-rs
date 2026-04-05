@@ -44,4 +44,7 @@ pub use notification::{
 pub use dashboard::{
     DashboardAlerts, DashboardResponse, EmployeePerformance, OrderCounts, RevenueStats,
 };
-pub use user::{AuthResponse, LoginRequest, RegisterRequest, User, UserResponse, UserRole};
+pub use user::{
+    AdminUserItem, AuthResponse, ChangeRoleRequest, ChangeStatusRequest, LoginRequest,
+    PaginatedUsers, RegisterRequest, User, UserResponse, UserRole,
+};

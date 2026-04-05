@@ -16,6 +16,7 @@ import {SeccionDelegaciones} from '../components/panel/SeccionDelegaciones';
 import {SeccionChat} from '../components/panel/SeccionChat';
 import {SeccionReembolsos} from '../components/panel/SeccionReembolsos';
 import SeccionDashboard from '../components/panel/SeccionDashboard';
+import {SeccionUsuarios} from '../components/panel/SeccionUsuarios';
 import {SidebarPanel} from '../components/panel/SidebarPanel';
 import {PlaceholderSeccion} from '../components/panel/PlaceholderSeccion';
 import {obtenerTabsPorRol, seccionInicialPorRol, type SeccionPanel} from '../data/panel';
@@ -77,6 +78,9 @@ export const PanelIsland: React.FC = () => {
             /* [044A-38 Fase 10] Dashboard admin — métricas, revenue, alertas */
             case 'dashboard':
                 return <SeccionDashboard />;
+            /* [054A-1] Gestión de usuarios registrados (admin) */
+            case 'usuarios':
+                return <SeccionUsuarios />;
             default:
                 return <PlaceholderSeccion tab={tabActual} />;
         }
