@@ -59,4 +59,8 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 - Respecto al diseño de ordenCard, quita la numeración, el nombre del plan, la barra de progreso y fases, falta imagen del servicio.
 
-- Cuando doy a cambiar foto no abre par cambiar la foto. 
+- Lo de que sentinel avise que input y textarea no son componentes no es un falso positivo, todo debe ser un componente!!!!
+
+- De .sidebarRol quita el font family especificado. 
+
+- 
