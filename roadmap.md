@@ -37,14 +37,8 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 ## Pendientes (por prioridad — lo más difícil primero)
 
-> Plan maestro: `Agente/planes/plan-marketplace-2026-04-04.md` (11 fases)
-> Plan de chat: `Agente/planes/plan-live-chat-2026-04-04.md` (5 fases)
-> Plan de hosting: `Agente/planes/plan-hosting-coolify-2026-04-04.md` (5 fases)
+> Plan maestro: `Agente/planes/plan-marketplace-2026-04-04.md` (11 fases) — ✅ completado
+> Plan de chat: `Agente/planes/plan-live-chat-2026-04-04.md` (5 fases) — ✅ completado (streaming IA = mejora futura)
+> Plan de hosting: `Agente/planes/plan-hosting-coolify-2026-04-04.md` (5 fases) — Fases 3-4 ✅, Fases 1-2-5 bloqueadas por infraestructura externa (VPS2, DNS, Google Drive OAuth)
 
-## Otras tareas
-
-- Termina todos los planes.
-
-- Con el plan de chat, revisa que pude haberme olvidado, tambien el plan de servicio de hosting que me olvide, queremos ofrecer hosting y que los clientes pueda comprar hosting y gestionarlos. Y trabaja en todo eso que posiblemente olvide.  
-
-- No tengo forma de probar el chat, otro usuario y que me mande un mensaje a mi admin@admin.com para ver como se ven los mensajes.
+(sin tareas pendientes)
