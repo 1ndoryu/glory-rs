@@ -45,8 +45,6 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 - Termina todos los planes.
 
-- Todos los repositories estan usando query_as sin macro, sin usar sqlx::query_as! Necesito que la verificación sea en compilacion en todos lados!!.
-
 - Con el plan de chat, revisa que pude haberme olvidado, tambien el plan de servicio de hosting que me olvide, queremos ofrecer hosting y que los clientes pueda comprar hosting y gestionarlos. Y trabaja en todo eso que posiblemente olvide. 
 
 - En el panel de admin hace falta algo para ver los usuarios registrados, con buscador, y filtro, con capacidad de banear, cambiar de cliente a empleado, etc.
