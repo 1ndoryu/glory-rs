@@ -107,9 +107,9 @@ export const Header: React.FC = () => {
                 </div>
 
                 {/* Botón hamburguesa para móvil */}
-                <button className="botonMenuMovil" onClick={() => setMenuMovilAbierto(!menuMovilAbierto)} aria-expanded={menuMovilAbierto} aria-controls="navegacion-principal" aria-label={menuMovilAbierto ? t('accessibility.close_menu') : t('accessibility.open_menu')}>
+                <Button variante="texto" className="botonMenuMovil" onClick={() => setMenuMovilAbierto(!menuMovilAbierto)} aria-expanded={menuMovilAbierto} aria-controls="navegacion-principal" aria-label={menuMovilAbierto ? t('accessibility.close_menu') : t('accessibility.open_menu')}>
                     {menuMovilAbierto ? <X size={24} /> : <Menu size={24} />}
-                </button>
+                </Button>
 
                 <nav className={`navegacionPrincipal ${menuMovilAbierto ? 'navegacionAbierta' : ''}`} id="navegacion-principal" aria-label={t('accessibility.main_nav')}>
                     {ENLACES_HEADER.map(link => (
@@ -138,14 +138,14 @@ export const Header: React.FC = () => {
                             <a className="enlaceAcceder" href={hrefAccion!} onClick={e => spaClick(e, hrefAccion!)}>
                                 {textoAccion}
                             </a>
-                            <button className="enlaceAcceder" onClick={logout}>
+                            <Button variante="texto" className="enlaceAcceder" onClick={logout}>
                                 {t('nav.logout')}
-                            </button>
+                            </Button>
                         </>
                     ) : (
-                        <button className="enlaceAcceder" onClick={() => setModalAbierto(true)}>
+                        <Button variante="texto" className="enlaceAcceder" onClick={() => setModalAbierto(true)}>
                             {t('nav.login')}
-                        </button>
+                        </Button>
                     )}
                     <Button variante="primario" tamano="pequeno" className="botonHeader" onClick={() => navegar(hrefCta)}>
                         {textoCta}

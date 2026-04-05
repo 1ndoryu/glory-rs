@@ -1,7 +1,7 @@
 /* [044A-38 Fase 9] API client de notificaciones.
  * REST + WebSocket para notificaciones en tiempo real. */
 
-import axiosInstance from './axios-instance';
+import axiosInstance, {getApiHost} from './axios-instance';
 
 /* ========== Types ========== */
 
@@ -56,7 +56,7 @@ export async function apiListNotifications(
   offset = 0
 ): Promise<NotificationResponse[]> {
   const { data } = await axiosInstance.get<NotificationResponse[]>(
-    '/notifications',
+    '/api/notifications',
     { params: { limit, offset } }
   );
   return data;
@@ -64,14 +64,14 @@ export async function apiListNotifications(
 
 export async function apiGetUnreadCount(): Promise<UnreadCountResponse> {
   const { data } = await axiosInstance.get<UnreadCountResponse>(
-    '/notifications/unread-count'
+    '/api/notifications/unread-count'
   );
   return data;
 }
 
 export async function apiMarkRead(ids: string[]): Promise<{ marked: number }> {
   const { data } = await axiosInstance.patch<{ marked: number }>(
-    '/notifications/read',
+    '/api/notifications/read',
     { ids }
   );
   return data;
@@ -79,7 +79,7 @@ export async function apiMarkRead(ids: string[]): Promise<{ marked: number }> {
 
 export async function apiMarkAllRead(): Promise<{ marked: number }> {
   const { data } = await axiosInstance.patch<{ marked: number }>(
-    '/notifications/read-all'
+    '/api/notifications/read-all'
   );
   return data;
 }
@@ -88,8 +88,6 @@ export async function apiMarkAllRead(): Promise<{ marked: number }> {
 
 export function buildNotificationsWsUrl(token: string): string {
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-  const host = import.meta.env.VITE_API_BASE_URL
-    ? new URL(import.meta.env.VITE_API_BASE_URL).host
-    : window.location.host;
+  const host = getApiHost();
   return `${protocol}//${host}/ws/notifications?token=${encodeURIComponent(token)}`;
 }

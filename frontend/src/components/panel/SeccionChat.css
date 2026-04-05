@@ -2,7 +2,6 @@
  * Layout de dos columnas: lista izquierda + area de mensajes derecha.
  * Responsive: en mobile se muestra una u otra con transicion. */
 
-/* ── Contenedor principal ─────────────────────── */
 .chatContenedor {
     display: flex;
     height: 100%;
@@ -13,7 +12,6 @@
     background: var(--bg-primary);
 }
 
-/* ── Lista de sesiones ────────────────────────── */
 .chatListaSesiones {
     width: 320px;
     min-width: 320px;
@@ -40,21 +38,6 @@
     color: var(--brand-black);
 }
 
-.chatBtnNuevo {
-    padding: var(--spacing-xs) var(--spacing-sm);
-    border: 1px solid var(--bg-accent);
-    border-radius: 6px;
-    background: var(--bg-secondary);
-    font-size: var(--text-xs);
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.chatBtnNuevo:hover {
-    background: var(--bg-accent);
-}
-
-/* ── Sesion individual ────────────────────────── */
 .chatSesionItem {
     display: flex;
     align-items: center;
@@ -67,6 +50,9 @@
     text-align: left;
     cursor: pointer;
     transition: background 0.15s;
+    justify-content: flex-start;
+    border-radius: 0;
+    text-decoration: none;
 }
 
 .chatSesionItem:hover {
@@ -121,7 +107,6 @@
     color: var(--brand-black);
 }
 
-/* ── Area de mensajes ─────────────────────────── */
 .chatAreaMensajes {
     flex: 1;
     display: flex;
@@ -144,6 +129,9 @@
     cursor: pointer;
     color: var(--brand-black);
     padding: 4px;
+    text-decoration: none;
+    min-width: auto;
+    min-height: auto;
 }
 
 .chatAreaTitulo {
@@ -165,6 +153,9 @@
     display: flex;
     align-items: center;
     transition: opacity 0.15s, color 0.15s;
+    text-decoration: none;
+    min-width: auto;
+    min-height: auto;
 }
 
 .chatBtnCerrar:hover {
@@ -177,7 +168,6 @@
     cursor: not-allowed;
 }
 
-/* ── Mensajes ─────────────────────────────────── */
 .chatMensajes {
     flex: 1;
     overflow-y: auto;
@@ -217,6 +207,34 @@
 .chatBurbujaPropia .chatBurbujaHeader {
     color: var(--brand-white);
     opacity: 0.7;
+}
+
+.chatRemitente {
+    font-weight: 600;
+}
+
+.chatRemitente--admin {
+    color: #1d4ed8;
+}
+
+.chatRemitente--employee {
+    color: #0f766e;
+}
+
+.chatRemitente--client {
+    color: #7c3aed;
+}
+
+.chatRemitente--ai {
+    color: #c2410c;
+}
+
+.chatRemitente--visitor {
+    color: #475569;
+}
+
+.chatRemitente--neutral {
+    color: #64748b;
 }
 
 .chatBurbujaHora {
@@ -271,7 +289,6 @@
     }
 }
 
-/* ── Input ────────────────────────────────────── */
 .chatInputArea {
     display: flex;
     align-items: flex-end;
@@ -318,7 +335,6 @@
     opacity: 0.85;
 }
 
-/* ── Loading + Vacio ──────────────────────────── */
 .chatLoading {
     display: flex;
     flex-direction: column;
@@ -358,7 +374,6 @@
     flex: 1;
 }
 
-/* ── Responsive ───────────────────────────────── */
 @media (max-width: 768px) {
     .chatListaSesiones {
         width: 100%;

@@ -7,17 +7,17 @@
 import React, {useCallback} from 'react';
 import {useTranslation} from 'react-i18next';
 import {useNavigate} from 'react-router-dom';
-import {obtenerUsuarioActual} from '../../data/panel';
+import {GloryLink} from '../../core/router';
 import {useAuthStore} from '../../stores/authStore';
+import {useCurrentProfile} from '../../hooks/useCurrentProfile';
+import {Button} from '../ui/Button';
 import {Logo} from '../ui/Logo';
-import {spaClick} from '../../navegacionSPA';
 import NotificationBell from './NotificationBell';
 import './HeaderPanel.css';
 
 export const HeaderPanel: React.FC = () => {
     const {t} = useTranslation();
-    const usuario = obtenerUsuarioActual();
-    const avatarUrl = usuario?.avatar || 'https://i.pravatar.cc/40?u=default';
+    const {avatarUrl} = useCurrentProfile();
     const logout = useAuthStore(s => s.logout);
     const navigate = useNavigate();
 
@@ -30,19 +30,19 @@ export const HeaderPanel: React.FC = () => {
         <header className="headerPanel" role="banner">
             <div className="headerPanelContenedor">
                 {/* Logo */}
-                <a href="/" className="headerPanelLogo" aria-label={t('accessibility.logo_home')} onClick={e => spaClick(e, '/')}>
+                <GloryLink to="/" className="headerPanelLogo" aria-label={t('accessibility.logo_home')}>
                     <Logo className="headerPanelLogoSvg" />
-                </a>
+                </GloryLink>
 
                 {/* Acciones: Chat, Salir, Avatar */}
                 <div className="headerPanelAcciones">
                     <NotificationBell />
-                    <a href="/contacto/" className="headerPanelEnlace" onClick={e => spaClick(e, '/contacto/')}>
+                    <GloryLink to="/contacto/" className="headerPanelEnlace">
                         {t('nav.chat')}
-                    </a>
-                    <button onClick={handleLogout} className="headerPanelEnlace headerPanelBtnLogout" type="button">
+                    </GloryLink>
+                    <Button onClick={handleLogout} className="headerPanelEnlace headerPanelBtnLogout" type="button" variante="texto">
                         {t('nav.logout')}
-                    </button>
+                    </Button>
                     <div className="headerPanelAvatar">
                         <img src={avatarUrl} alt={t('accessibility.profile_photo')} className="headerPanelAvatarImg" />
                     </div>

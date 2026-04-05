@@ -7,6 +7,7 @@ import React from 'react';
 import {useTranslation} from 'react-i18next';
 import {Search} from 'lucide-react';
 import {Input} from '../ui/Input';
+import {Button} from '../ui/Button';
 import {FiltroCategoria} from '../../types/navegacion';
 import './BarraFiltros.css';
 
@@ -37,9 +38,9 @@ export const BarraFiltros: React.FC<BarraFiltrosProps> = ({categorias, categoria
         <div className="barraFiltros">
             <div className="filtrosCategorias">
                 {categorias.map(cat => (
-                    <button key={cat.id} className={`filtroBoton ${categoriaActiva === cat.id ? 'activo' : ''}`} onClick={() => onCategoriaChange(cat.id)}>
+                    <Button variante="texto" key={cat.id} className={`filtroBoton ${categoriaActiva === cat.id ? 'activo' : ''}`} onClick={() => onCategoriaChange(cat.id)}>
                         {t(CAT_KEYS[cat.label] || cat.label)}
-                    </button>
+                    </Button>
                 ))}
             </div>
             <div className="filtroBusqueda">

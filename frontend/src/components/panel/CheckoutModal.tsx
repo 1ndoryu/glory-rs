@@ -13,6 +13,7 @@ import {
 import { X } from 'lucide-react';
 import { apiInitiatePayment } from '../../api/payments';
 import { formatPrice } from '../../api/orders';
+import { Button } from '../ui/Button';
 import './CheckoutModal.css';
 
 const stripePromise = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
@@ -56,9 +57,9 @@ export default function CheckoutModal(props: CheckoutModalProps) {
         return (
             <div className="checkoutOverlay">
                 <div className="checkoutModal">
-                    <button className="checkoutCerrar" onClick={onClose}>
+                    <Button variante="texto" className="checkoutCerrar" type="button" onClick={onClose}>
                         <X size={20} />
-                    </button>
+                    </Button>
                     <p className="checkoutError">
                         Stripe no está configurado. Agrega
                         VITE_STRIPE_PUBLISHABLE_KEY al .env
@@ -71,9 +72,9 @@ export default function CheckoutModal(props: CheckoutModalProps) {
     return (
         <div className="checkoutOverlay">
             <div className="checkoutModal">
-                <button className="checkoutCerrar" onClick={onClose}>
+                <Button variante="texto" className="checkoutCerrar" type="button" onClick={onClose}>
                     <X size={20} />
-                </button>
+                </Button>
 
                 <h3 className="checkoutTitulo">
                     Pagar Orden #{props.orderNumber}
@@ -85,13 +86,14 @@ export default function CheckoutModal(props: CheckoutModalProps) {
                 {error && <p className="checkoutError">{error}</p>}
 
                 {!clientSecret && (
-                    <button
+                    <Button
                         className="checkoutBoton"
+                        type="button"
                         onClick={iniciar}
                         disabled={loading}
                     >
                         {loading ? 'Preparando...' : 'Continuar al pago'}
-                    </button>
+                    </Button>
                 )}
 
                 {clientSecret && (
@@ -145,13 +147,13 @@ function FormularioPago({
     return (
         <form onSubmit={handleSubmit} className="checkoutForm">
             <PaymentElement />
-            <button
+            <Button
                 type="submit"
                 className="checkoutBoton"
                 disabled={!stripe || procesando}
             >
                 {procesando ? 'Procesando...' : 'Pagar ahora'}
-            </button>
+            </Button>
         </form>
     );
 }

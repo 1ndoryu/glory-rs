@@ -1,10 +1,11 @@
 /* [054A-2] Sección Hosting del panel admin.
  * Dashboard de suscripciones de hosting: lista, status, acciones.
- * Solo visible para admin. */
+ * Solo visible para admin.
+ * [054A-17] Corregidos: <button>→<Button>, inline styles→CSS classes, overlay→MenuContextual. */
 
 import React, {useState, useCallback} from 'react';
 import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
-import {Server, Plus, ChevronDown, History} from 'lucide-react';
+import {Server, Plus, History} from 'lucide-react';
 import {
     apiListHostingSubscriptions,
     apiCreateHostingSubscription,
@@ -12,7 +13,7 @@ import {
     apiListHostingEvents,
     HOSTING_PLAN_LABELS,
     HOSTING_STATUS_LABELS,
-    HOSTING_STATUS_COLORS,
+    HOSTING_STATUS_CLASS,
     type HostingSubscription,
     type HostingEvent,
     type CreateHostingRequest,
@@ -20,6 +21,8 @@ import {
 import {toast} from '../../stores/toastStore';
 import {Modal} from '../ui/Modal';
 import {Input} from '../ui/Input';
+import {Button} from '../ui/Button';
+import {MenuContextual, type MenuContextualItem} from '../ui/ContextMenu';
 import './SeccionHosting.css';
 
 export const SeccionHosting: React.FC = () => {
@@ -66,13 +69,13 @@ export const SeccionHosting: React.FC = () => {
         <div className="hostingContenedor">
             <div className="hostingHeader">
                 <h2>Hosting</h2>
-                <button
+                <Button
                     className="hostingBtnCrear"
                     onClick={() => setShowCreateModal(true)}
                     type="button"
                 >
                     <Plus size={16} /> Nueva suscripción
-                </button>
+                </Button>
             </div>
 
             {subscriptions.length === 0 ? (
@@ -140,7 +143,15 @@ function HostingRow({
     onViewEvents: () => void;
 }) {
     const [menuOpen, setMenuOpen] = useState(false);
-    const statusColor = HOSTING_STATUS_COLORS[sub.status] || '#888';
+
+    const statusItems: MenuContextualItem[] = (['pending', 'provisioning', 'active', 'suspended', 'cancelled'] as const)
+        .filter(s => s !== sub.status)
+        .map(s => ({
+            id: s,
+            label: HOSTING_STATUS_LABELS[s] || s,
+            onSelect: () => onStatusChange(s),
+            danger: s === 'suspended' || s === 'cancelled',
+        }));
 
     return (
         <div className="hostingFila">
@@ -150,74 +161,31 @@ function HostingRow({
             </div>
             <span>{HOSTING_PLAN_LABELS[sub.plan] || sub.plan}</span>
             <span className="hostingDominio">{sub.domain || '—'}</span>
-            <span className="hostingStatus" style={{color: statusColor}}>
+            <span className={`hostingStatus ${HOSTING_STATUS_CLASS[sub.status] || ''}`}>
                 {HOSTING_STATUS_LABELS[sub.status] || sub.status}
             </span>
             <span>${(sub.monthly_price_cents / 100).toFixed(0)}/mes</span>
             <div className="hostingAcciones">
-                <button
-                    type="button"
+                <Button
+                    variante="texto"
+                    tamano="pequeno"
                     className="hostingBtnAccion"
+                    type="button"
                     onClick={onViewEvents}
                     title="Ver historial"
                 >
                     <History size={16} />
-                </button>
-                <div className="hostingMenuWrapper">
-                    <button
-                        type="button"
-                        className="hostingBtnAccion"
-                        onClick={() => setMenuOpen(!menuOpen)}
-                        title="Cambiar status"
-                    >
-                        <ChevronDown size={16} />
-                    </button>
-                    {menuOpen && (
-                        <StatusMenu
-                            currentStatus={sub.status}
-                            onChange={(s) => {
-                                onStatusChange(s);
-                                setMenuOpen(false);
-                            }}
-                            onClose={() => setMenuOpen(false)}
-                        />
-                    )}
-                </div>
+                </Button>
+                <MenuContextual
+                    abierto={menuOpen}
+                    onToggle={() => setMenuOpen(prev => !prev)}
+                    onCerrar={() => setMenuOpen(false)}
+                    items={statusItems}
+                    ariaLabel="Cambiar status de suscripción"
+                    triggerClassName="hostingBtnAccion"
+                />
             </div>
         </div>
-    );
-}
-
-function StatusMenu({
-    currentStatus,
-    onChange,
-    onClose,
-}: {
-    currentStatus: string;
-    onChange: (status: string) => void;
-    onClose: () => void;
-}) {
-    const statuses = ['pending', 'provisioning', 'active', 'suspended', 'cancelled'];
-
-    return (
-        <>
-            <div className="hostingMenuOverlay" onClick={onClose} />
-            <div className="hostingMenu">
-                {statuses
-                    .filter(s => s !== currentStatus)
-                    .map(s => (
-                        <button
-                            key={s}
-                            type="button"
-                            className="hostingMenuItem"
-                            onClick={() => onChange(s)}
-                            style={{color: HOSTING_STATUS_COLORS[s]}}
-                        >
-                            {HOSTING_STATUS_LABELS[s]}
-                        </button>
-                    ))}
-            </div>
-        </>
     );
 }
 
@@ -278,9 +246,9 @@ function CreateHostingForm({
                 value={form.domain || ''}
                 onChange={e => setForm(prev => ({...prev, domain: e.target.value}))}
             />
-            <button type="submit" className="hostingBtnSubmit" disabled={submitting}>
+            <Button type="submit" className="hostingBtnSubmit" disabled={submitting}>
                 {submitting ? 'Creando...' : 'Crear suscripción'}
-            </button>
+            </Button>
         </form>
     );
 }

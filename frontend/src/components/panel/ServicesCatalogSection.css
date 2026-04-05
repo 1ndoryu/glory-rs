@@ -1,0 +1,159 @@
+.servicesCatalogSection {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.servicesCatalogSummary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--spacing-sm);
+}
+
+.servicesCatalogMetricCard,
+.servicesCatalogCard,
+.servicesCatalogIntro {
+    border: 1px solid var(--bg-accent);
+    border-radius: 16px;
+    background: var(--bg-primary);
+}
+
+.servicesCatalogMetricCard,
+.servicesCatalogIntro,
+.servicesCatalogCard {
+    padding: var(--spacing-md);
+}
+
+.servicesCatalogMetricCard {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.servicesCatalogMetricLabel,
+.servicesCatalogCardSlug,
+.servicesCatalogPlanMeta {
+    color: var(--text-secondary);
+}
+
+.servicesCatalogMetricLabel {
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.servicesCatalogMetricValue {
+    font-size: clamp(1.25rem, 2vw, 1.8rem);
+    color: var(--brand-black);
+}
+
+.servicesCatalogTitle,
+.servicesCatalogCardTitle {
+    margin: 0;
+    color: var(--brand-black);
+}
+
+.servicesCatalogText,
+.servicesCatalogCardDescription,
+.servicesCatalogEmptyPlans {
+    margin: 0;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.servicesCatalogGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--spacing-md);
+}
+
+.servicesCatalogCard {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.servicesCatalogCardHeader,
+.servicesCatalogPlanRow {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--spacing-sm);
+}
+
+.servicesCatalogCardCount,
+.servicesCatalogPlanBadge,
+.servicesCatalogTag {
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: var(--text-xs);
+}
+
+.servicesCatalogCardCount {
+    align-self: flex-start;
+    background: var(--bg-secondary);
+    color: var(--brand-black);
+}
+
+.servicesCatalogTags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.servicesCatalogTag {
+    background: #eef2ff;
+    color: #3730a3;
+}
+
+.servicesCatalogTag--muted,
+.servicesCatalogPlanBadge {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.servicesCatalogPlans {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.servicesCatalogPlanRow {
+    align-items: center;
+    padding: var(--spacing-sm);
+    border-radius: 12px;
+    background: var(--bg-secondary);
+}
+
+.servicesCatalogPlanName {
+    margin: 0;
+    font-weight: 600;
+    color: var(--brand-black);
+}
+
+.servicesCatalogLink {
+    color: var(--brand-black);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.servicesCatalogLink:hover {
+    opacity: 0.7;
+}
+
+@media (max-width: 1024px) {
+    .servicesCatalogSummary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .servicesCatalogSummary {
+        grid-template-columns: 1fr;
+    }
+
+    .servicesCatalogCardHeader,
+    .servicesCatalogPlanRow {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

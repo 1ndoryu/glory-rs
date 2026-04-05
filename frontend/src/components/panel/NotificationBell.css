@@ -7,7 +7,7 @@
   align-items: center;
 }
 
-.notificationBell__trigger {
+.notificationBell .menuContextualBoton.notificationBell__trigger {
   background: none;
   border: none;
   cursor: pointer;
@@ -20,10 +20,14 @@
   align-items: center;
   justify-content: center;
   line-height: 1;
+  min-width: auto;
+  min-height: auto;
+  text-decoration: none;
 }
 
-.notificationBell__trigger:hover {
+.notificationBell .menuContextualBoton.notificationBell__trigger:hover {
   opacity: 0.6;
+  background: none;
 }
 
 .notificationBell__badge {
@@ -52,7 +56,7 @@
   width: 340px;
   max-height: 420px;
   background: var(--brand-white);
-  border: 1px solid var(--bg-secondary);
+  border: 1px solid rgba(0, 0, 0, 0.06);
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   z-index: 100;
@@ -66,7 +70,7 @@
   align-items: center;
   justify-content: space-between;
   padding: var(--spacing-sm) var(--spacing-md);
-  border-bottom: 1px solid var(--bg-secondary);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .notificationBell__title {
@@ -76,13 +80,11 @@
 }
 
 .notificationBell__markAll {
-  background: none;
-  border: none;
-  cursor: pointer;
   color: var(--bg-accent);
   padding: 4px;
   border-radius: 4px;
   transition: background 0.2s;
+  text-decoration: none;
 }
 
 .notificationBell__markAll:hover {
@@ -106,7 +108,7 @@
   align-items: flex-start;
   gap: var(--spacing-xs);
   padding: var(--spacing-sm) var(--spacing-md);
-  border-bottom: 1px solid var(--bg-secondary);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   transition: background 0.15s;
 }
 
@@ -161,14 +163,12 @@
 }
 
 .notificationBell__markRead {
-  background: none;
-  border: none;
-  cursor: pointer;
   color: #999;
   padding: 2px;
   border-radius: 4px;
   transition: color 0.15s;
   flex-shrink: 0;
+  text-decoration: none;
 }
 
 .notificationBell__markRead:hover {

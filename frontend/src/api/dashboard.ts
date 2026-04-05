@@ -45,6 +45,6 @@ export interface DashboardResponse {
 /* ========== REST Function ========== */
 
 export async function apiGetDashboard(): Promise<DashboardResponse> {
-  const { data } = await axiosInstance.get<DashboardResponse>('/admin/dashboard');
+  const { data } = await axiosInstance.get<DashboardResponse>('/api/admin/dashboard');
   return data;
 }

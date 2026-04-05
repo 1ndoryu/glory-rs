@@ -1,8 +1,11 @@
 /* [044A-43] Hook de perfil: carga perfil desde backend, sube avatar.
  * Reemplaza la versión stub que usaba obtenerUsuarioActual (siempre null). */
-import {useState, useEffect, useRef, useCallback} from 'react';
-import {obtenerPerfil, subirAvatar} from '../api/profile';
+import {useState, useEffect} from 'react';
+import {useQueryClient} from '@tanstack/react-query';
+import {subirAvatar} from '../api/profile';
 import type {PerfilResponse} from '../api/profile';
+import {currentProfileKey, useCurrentProfile} from './useCurrentProfile';
+import {useAuthStore} from '../stores/authStore';
 
 interface EstadoPerfil {
     nombre: string;
@@ -25,10 +28,10 @@ interface RetornoUsePerfil {
 }
 
 export const usePerfil = (): RetornoUsePerfil => {
-    const [perfil, setPerfil] = useState<PerfilResponse | null>(null);
-    const [cargando, setCargando] = useState(true);
+    const queryClient = useQueryClient();
+    const userId = useAuthStore(s => s.user?.userId);
+    const {perfil, cargando: cargandoPerfil, avatarUrl} = useCurrentProfile();
     const [subiendoAvatar, setSubiendoAvatar] = useState(false);
-    const [avatarUrl, setAvatarUrl] = useState('https://i.pravatar.cc/100?u=default');
 
     const [estado, setEstado] = useState<EstadoPerfil>({
         nombre: '',
@@ -39,31 +42,15 @@ export const usePerfil = (): RetornoUsePerfil => {
     });
 
     const [guardado, setGuardado] = useState(false);
-    const abortRef = useRef<AbortController | null>(null);
 
-    /* Cargar perfil del backend al montar */
+    /* Sincroniza los datos editables cuando el backend devuelve el perfil actual */
     useEffect(() => {
-        const controller = new AbortController();
-        abortRef.current = controller;
-
-        obtenerPerfil()
-            .then((data) => {
-                if (!controller.signal.aborted) {
-                    setPerfil(data);
-                    setAvatarUrl(data.avatar_url || 'https://i.pravatar.cc/100?u=default');
-                    setEstado(prev => ({
-                        ...prev,
-                        nombre: data.display_name || ''
-                    }));
-                    setCargando(false);
-                }
-            })
-            .catch(() => {
-                if (!controller.signal.aborted) setCargando(false);
-            });
-
-        return () => { controller.abort(); };
-    }, []);
+        if (!perfil) return;
+        setEstado(prev => ({
+            ...prev,
+            nombre: prev.nombre || perfil.display_name || ''
+        }));
+    }, [perfil]);
 
     const actualizarCampo = (campo: keyof EstadoPerfil, valor: string) => {
         setEstado(prev => ({...prev, [campo]: valor}));
@@ -76,19 +63,21 @@ export const usePerfil = (): RetornoUsePerfil => {
         setTimeout(() => setGuardado(false), 3000);
     };
 
-    const handleSubirAvatar = useCallback(async (archivo: File) => {
+    const handleSubirAvatar = async (archivo: File) => {
         setSubiendoAvatar(true);
         try {
             const resp = await subirAvatar(archivo);
-            setAvatarUrl(resp.avatar_url);
-            setPerfil(prev => prev ? {...prev, avatar_url: resp.avatar_url} : prev);
+            queryClient.setQueryData<PerfilResponse | undefined>(
+                currentProfileKey(userId),
+                (prev) => prev ? {...prev, avatar_url: resp.avatar_url} : prev,
+            );
         } finally {
             setSubiendoAvatar(false);
         }
-    }, []);
+    };
 
     return {
-        estado, guardado, cargando, perfil, avatarUrl,
+        estado, guardado, cargando: cargandoPerfil, perfil, avatarUrl,
         subiendoAvatar, actualizarCampo, handleGuardar, handleSubirAvatar
     };
 };

@@ -113,6 +113,12 @@
     font-weight: 600;
 }
 
+.hostingStatus--pending     { color: #f59e0b; }
+.hostingStatus--provisioning { color: #3b82f6; }
+.hostingStatus--active       { color: #22c55e; }
+.hostingStatus--suspended    { color: #ef4444; }
+.hostingStatus--cancelled    { color: #6b7280; }
+
 /* ── Acciones ──────────────────────────────── */
 .hostingAcciones {
     display: flex;

@@ -2,91 +2,34 @@
  * Lista de conversaciones + chat activo. Soporta chat por orden y pre-venta.
  * Staff: ve todas las sesiones. Cliente: solo sus chats de órdenes. */
 
-import React, {useState, useRef, useEffect, useCallback} from 'react';
+import React from 'react';
 import {MessageCircle, Send, Bot, User, ChevronLeft, XCircle} from 'lucide-react';
-import {useChat, useChatWs} from '../../hooks/useChat';
-import {
-    apiCloseSession,
-    SENDER_LABELS,
-    SENDER_COLORS,
-    SESSION_STATUS_LABELS,
-    type ChatSession,
-    type ChatMessage,
-} from '../../api/chat';
-import {toast} from '../../stores/toastStore';
+import {SENDER_LABELS, SESSION_STATUS_LABELS, type ChatSession, type ChatMessage} from '../../api/chat';
+import {useSeccionChat} from '../../hooks/useSeccionChat';
+import {Button} from '../ui/Button';
 import {Textarea} from '../ui/Textarea';
 import './SeccionChat.css';
 
 export const SeccionChat: React.FC = () => {
-    const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
-    const {sessions, messages, cargandoSesiones, cargandoMensajes, enviarMensaje, enviando, crearSesion} =
-        useChat(activeSessionId ?? undefined);
-
-    /* [054A-3] WebSocket en tiempo real para typing + sesiones nuevas */
-    const ws = useChatWs();
-
-    /* Conectar WS al montar */
-    useEffect(() => {
-        ws.connect();
-        return () => ws.disconnect();
-    }, [ws.connect, ws.disconnect]);
-
-    const [input, setInput] = useState('');
-    const [closing, setClosing] = useState(false);
-    const messagesEndRef = useRef<HTMLDivElement>(null);
-
-    /* Auto-scroll al recibir mensajes */
-    useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({behavior: 'smooth'});
-    }, [messages]);
-
-    const handleSend = useCallback(async () => {
-        if (!input.trim() || !activeSessionId || enviando) return;
-        const content = input.trim();
-        setInput('');
-        try {
-            await enviarMensaje({sId: activeSessionId, content});
-        } catch {
-            setInput(content);
-        }
-    }, [input, activeSessionId, enviando, enviarMensaje]);
-
-    const handleKeyDown = useCallback(
-        (e: React.KeyboardEvent) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSend();
-            }
-        },
-        [handleSend],
-    );
-
-    const handleNewChat = useCallback(async () => {
-        try {
-            const session = await crearSesion(undefined);
-            setActiveSessionId(session.id);
-        } catch {
-            /* Error manejado internamente */
-        }
-    }, [crearSesion]);
-
-    /* [054A-9] Cerrar sesión activa */
-    const handleCloseSession = useCallback(async () => {
-        if (!activeSessionId || closing) return;
-        setClosing(true);
-        try {
-            await apiCloseSession(activeSessionId);
-            toast.success('Conversación cerrada');
-            setActiveSessionId(null);
-        } catch {
-            toast.error('Error al cerrar conversación');
-        } finally {
-            setClosing(false);
-        }
-    }, [activeSessionId, closing]);
-
-    /* Vista mobile: lista o chat */
-    const showingChat = activeSessionId !== null;
+    const {
+        activeSessionId,
+        sessions,
+        messages,
+        cargandoSesiones,
+        cargandoMensajes,
+        enviando,
+        closing,
+        input,
+        messagesEndRef,
+        typingMap,
+        showingChat,
+        setInput,
+        selectSession,
+        clearActiveSession,
+        handleKeyDown,
+        handleSend,
+        handleCloseSession,
+    } = useSeccionChat();
 
     if (cargandoSesiones) {
         return (
@@ -103,13 +46,6 @@ export const SeccionChat: React.FC = () => {
             <div className={`chatListaSesiones ${showingChat ? 'chatListaOculta' : ''}`}>
                 <div className="chatListaHeader">
                     <h3>Conversaciones</h3>
-                    <button
-                        className="chatBtnNuevo"
-                        onClick={handleNewChat}
-                        type="button"
-                    >
-                        + Nuevo
-                    </button>
                 </div>
                 {sessions.length === 0 ? (
                     <div className="chatVacio">
@@ -122,7 +58,7 @@ export const SeccionChat: React.FC = () => {
                             key={s.id}
                             session={s}
                             active={s.id === activeSessionId}
-                            onClick={() => setActiveSessionId(s.id)}
+                            onClick={() => selectSession(s.id)}
                         />
                     ))
                 )}
@@ -133,28 +69,32 @@ export const SeccionChat: React.FC = () => {
                 {activeSessionId ? (
                     <>
                         <div className="chatAreaHeader">
-                            <button
+                            <Button
                                 className="chatBtnVolver"
-                                onClick={() => setActiveSessionId(null)}
+                                onClick={clearActiveSession}
                                 type="button"
+                                variante="texto"
+                                tamano="pequeno"
                             >
                                 <ChevronLeft size={18} />
-                            </button>
+                            </Button>
                             <span className="chatAreaTitulo">
                                 {sessions.find(s => s.id === activeSessionId)?.order_id
                                     ? `Chat de orden`
                                     : 'Chat general'}
                             </span>
                             {/* [054A-9] Botón cerrar conversación */}
-                            <button
+                            <Button
                                 className="chatBtnCerrar"
                                 onClick={handleCloseSession}
                                 disabled={closing}
                                 type="button"
                                 title="Cerrar conversación"
+                                variante="texto"
+                                tamano="pequeno"
                             >
                                 <XCircle size={18} />
-                            </button>
+                            </Button>
                         </div>
 
                         <div className="chatMensajes">
@@ -165,11 +105,11 @@ export const SeccionChat: React.FC = () => {
                                 <MessageBubble key={m.id} message={m} />
                             ))}
                             {/* [054A-3] Typing indicator desde WebSocket */}
-                            {activeSessionId && ws.typingMap[activeSessionId] && (
+                            {activeSessionId && typingMap[activeSessionId] && (
                                 <div className="chatBurbuja chatBurbujaTyping">
                                     <div className="chatBurbujaHeader">
-                                        <span style={{color: SENDER_COLORS[ws.typingMap[activeSessionId].sender] || '#94a3b8'}}>
-                                            {SENDER_LABELS[ws.typingMap[activeSessionId].sender] || 'Visitante'} está escribiendo...
+                                        <span className={resolveSenderToneClass(typingMap[activeSessionId].sender)}>
+                                            {SENDER_LABELS[typingMap[activeSessionId].sender] || 'Visitante'} está escribiendo...
                                         </span>
                                     </div>
                                     <div className="chatBurbujaContenido chatTypingDots">
@@ -189,14 +129,16 @@ export const SeccionChat: React.FC = () => {
                                 placeholder="Escribe un mensaje..."
                                 rows={1}
                             />
-                            <button
+                            <Button
                                 className="chatBtnEnviar"
-                                onClick={handleSend}
+                                onClick={() => void handleSend()}
                                 disabled={!input.trim() || enviando}
                                 type="button"
+                                variante="primario"
+                                tamano="pequeno"
                             >
                                 <Send size={16} />
-                            </button>
+                            </Button>
                         </div>
                     </>
                 ) : (
@@ -210,10 +152,6 @@ export const SeccionChat: React.FC = () => {
     );
 };
 
-/* ============================================================
-   SUB-COMPONENTES
-   ============================================================ */
-
 function SessionItem({
     session,
     active,
@@ -224,10 +162,12 @@ function SessionItem({
     onClick: () => void;
 }) {
     return (
-        <button
+        <Button
             className={`chatSesionItem ${active ? 'chatSesionActiva' : ''}`}
             onClick={onClick}
             type="button"
+            variante="texto"
+            tamano="pequeno"
         >
             <div className="chatSesionIcono">
                 {session.ai_enabled ? <Bot size={18} /> : <User size={18} />}
@@ -245,20 +185,19 @@ function SessionItem({
                     {SESSION_STATUS_LABELS[session.status] || session.status}
                 </span>
             </div>
-        </button>
+        </Button>
     );
 }
 
 function MessageBubble({message}: {message: ChatMessage}) {
     const isAi = message.sender_type === 'ai';
     const isOwn = message.sender_type === 'client';
-    const color = SENDER_COLORS[message.sender_type] || '#94a3b8';
     const label = SENDER_LABELS[message.sender_type] || message.sender_type;
 
     return (
         <div className={`chatBurbuja ${isOwn ? 'chatBurbujaPropia' : ''} ${isAi ? 'chatBurbujaIA' : ''}`}>
             <div className="chatBurbujaHeader">
-                <span style={{color}}>{label}</span>
+                <span className={resolveSenderToneClass(message.sender_type)}>{label}</span>
                 <span className="chatBurbujaHora">
                     {new Date(message.created_at).toLocaleTimeString('es', {
                         hour: '2-digit',
@@ -269,4 +208,21 @@ function MessageBubble({message}: {message: ChatMessage}) {
             <div className="chatBurbujaContenido">{message.content}</div>
         </div>
     );
+}
+
+function resolveSenderToneClass(senderType: string) {
+    switch (senderType) {
+        case 'admin':
+            return 'chatRemitente chatRemitente--admin';
+        case 'employee':
+            return 'chatRemitente chatRemitente--employee';
+        case 'client':
+            return 'chatRemitente chatRemitente--client';
+        case 'ai':
+            return 'chatRemitente chatRemitente--ai';
+        case 'visitor':
+            return 'chatRemitente chatRemitente--visitor';
+        default:
+            return 'chatRemitente chatRemitente--neutral';
+    }
 }

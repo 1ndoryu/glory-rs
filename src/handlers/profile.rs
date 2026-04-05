@@ -3,6 +3,7 @@
 use axum::extract::{Multipart, State};
 use axum::Json;
 use axum::Router;
+use chrono::Utc;
 
 use crate::errors::AppError;
 use crate::AppState;
@@ -101,13 +102,36 @@ pub async fn upload_avatar(
     let (data, ext) = file_data
         .ok_or_else(|| AppError::BadRequest("No se encontró el campo 'avatar'.".into()))?;
 
-    /* Guardar en uploads/avatars/{user_id}.{ext} */
+    /* [054A-3] Guardar con nombre versionado para invalidar cache del navegador.
+     * Antes de escribir, eliminamos avatares anteriores del mismo usuario para no acumular basura. */
     let dir = std::path::Path::new("uploads/avatars");
     tokio::fs::create_dir_all(dir)
         .await
         .map_err(|e| AppError::Internal(format!("Error creando directorio: {e}")))?;
 
-    let filename = format!("{}.{ext}", auth.user_id);
+    let avatar_prefix = auth.user_id.to_string();
+    let mut entries = tokio::fs::read_dir(dir)
+        .await
+        .map_err(|e| AppError::Internal(format!("Error listando avatares previos: {e}")))?;
+
+    while let Some(entry) = entries
+        .next_entry()
+        .await
+        .map_err(|e| AppError::Internal(format!("Error leyendo avatar previo: {e}")))?
+    {
+        let file_name = entry.file_name();
+        if file_name.to_string_lossy().starts_with(&avatar_prefix) {
+            if let Err(error) = tokio::fs::remove_file(entry.path()).await {
+                tracing::warn!(
+                    user_id = %auth.user_id,
+                    %error,
+                    "No se pudo eliminar una version anterior del avatar"
+                );
+            }
+        }
+    }
+
+    let filename = format!("{}-{}.{ext}", auth.user_id, Utc::now().timestamp_millis());
     let filepath = dir.join(&filename);
     tokio::fs::write(&filepath, &data)
         .await

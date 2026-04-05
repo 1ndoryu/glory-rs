@@ -196,17 +196,16 @@ pub async fn download_deliverable(
         .ok_or_else(|| AppError::NotFound("Entregable no encontrado".into()))?;
 
     /* Verificar acceso: obtener la fase → orden → verificar */
-    let phase_row: Option<(Uuid,)> = sqlx::query_as(
+    let order_id: Option<Uuid> = sqlx::query_scalar!(
         "SELECT order_id FROM order_phases WHERE id = $1",
+        deliverable.phase_id
     )
-    .bind(deliverable.phase_id)
     .fetch_optional(&state.pool)
     .await
     .map_err(AppError::Database)?;
 
-    let order_id = phase_row
-        .ok_or_else(|| AppError::NotFound("Fase asociada no encontrada".into()))?
-        .0;
+    let order_id = order_id
+        .ok_or_else(|| AppError::NotFound("Fase asociada no encontrada".into()))?;
 
     let order = OrderRepository::find_order_by_id(&state.pool, order_id)
         .await?

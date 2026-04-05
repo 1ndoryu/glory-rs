@@ -14,6 +14,8 @@ import {
 import { formatPrice } from '../../api/orders';
 import { useAuthStore } from '../../stores/authStore';
 import { Textarea } from '../ui/Textarea';
+import { Button } from '../ui/Button';
+import { Modal } from '../ui/Modal';
 import './SeccionPagos.css';
 
 export function SeccionPagos() {
@@ -51,14 +53,16 @@ export function SeccionPagos() {
 
             <div className="pagosOrdenesLista">
                 {ordenes.map((o) => (
-                    <button
+                    <Button
                         key={o.id}
+                        variante="texto"
                         className={`pagosOrdenBtn ${
                             ordenSeleccionada === o.id
                                 ? 'pagosOrdenBtn--activo'
                                 : ''
                         }`}
                         onClick={() => setOrdenSeleccionada(o.id)}
+                        type="button"
                     >
                         <span className="pagosOrdenNumero">
                             #{o.order_number}
@@ -69,7 +73,7 @@ export function SeccionPagos() {
                         <span className="pagosOrdenPrecio">
                             {formatPrice(o.final_price_cents, o.currency)}
                         </span>
-                    </button>
+                    </Button>
                 ))}
                 {ordenes.length === 0 && (
                     <p className="pagosVacioTexto">No tienes órdenes</p>
@@ -124,13 +128,16 @@ export function SeccionPagos() {
                             {/* [044A-38 Fase 7] Botón reembolso si el pago es reembolsable */}
                             {effectiveRole === 'client' &&
                                 (p.status === 'held' || p.status === 'released') && (
-                                <button
+                                <Button
+                                    variante="texto"
+                                    tamano="pequeno"
                                     className="pagoBotonReembolso"
+                                    type="button"
                                     onClick={() => abrirModal(ordenSeleccionada!)}
                                 >
                                     <RotateCcw size={14} />
                                     Solicitar reembolso
-                                </button>
+                                </Button>
                             )}
                         </div>
                     ))}
@@ -138,39 +145,42 @@ export function SeccionPagos() {
             )}
 
             {/* [044A-38 Fase 7] Modal de solicitud de reembolso */}
-            {refundOrderId && (
-                <div className="pagoModalOverlay" onClick={cerrarModal}>
-                    <div className="pagoModalContenido" onClick={(e) => e.stopPropagation()}>
-                        <h3 className="pagoModalTitulo">Solicitar reembolso</h3>
-                        <p className="pagoModalDescripcion">
-                            Describe el motivo de tu solicitud de reembolso. Un administrador la revisará.
-                        </p>
-                        <Textarea
-                            className="pagoModalTextarea"
-                            placeholder="Motivo del reembolso..."
-                            value={refundRazon}
-                            onChange={(e) => setRefundRazon(e.target.value)}
-                            rows={4}
-                        />
-                        <div className="pagoModalBotones">
-                            <button
-                                className="pagoBotonEnviarReembolso"
-                                onClick={() => void enviarSolicitud()}
-                                disabled={refundEnCurso || !refundRazon.trim()}
-                            >
-                                {refundEnCurso ? 'Enviando…' : 'Enviar solicitud'}
-                            </button>
-                            <button
-                                className="pagoBotonCancelarReembolso"
-                                onClick={cerrarModal}
-                                disabled={refundEnCurso}
-                            >
-                                Cancelar
-                            </button>
-                        </div>
+            <Modal abierto={!!refundOrderId} onCerrar={cerrarModal}>
+                <div className="pagoModalContenido">
+                    <h3 className="pagoModalTitulo">Solicitar reembolso</h3>
+                    <p className="pagoModalDescripcion">
+                        Describe el motivo de tu solicitud de reembolso. Un administrador la revisará.
+                    </p>
+                    <Textarea
+                        className="pagoModalTextarea"
+                        placeholder="Motivo del reembolso..."
+                        value={refundRazon}
+                        onChange={(e) => setRefundRazon(e.target.value)}
+                        rows={4}
+                    />
+                    <div className="pagoModalBotones">
+                        <Button
+                            className="pagoBotonEnviarReembolso"
+                            tamano="pequeno"
+                            type="button"
+                            onClick={() => void enviarSolicitud()}
+                            disabled={refundEnCurso || !refundRazon.trim()}
+                        >
+                            {refundEnCurso ? 'Enviando…' : 'Enviar solicitud'}
+                        </Button>
+                        <Button
+                            variante="outline"
+                            tamano="pequeno"
+                            className="pagoBotonCancelarReembolso"
+                            type="button"
+                            onClick={cerrarModal}
+                            disabled={refundEnCurso}
+                        >
+                            Cancelar
+                        </Button>
                     </div>
                 </div>
-            )}
+            </Modal>
         </div>
     );
 }

@@ -8,6 +8,7 @@ import { REFUND_STATUS_LABELS, REFUND_STATUS_CLASS } from '../../api/refunds';
 import { formatPrice } from '../../api/orders';
 import type { RefundResponse } from '../../api/refunds';
 import { Textarea } from '../ui/Textarea';
+import { Button } from '../ui/Button';
 import './SeccionReembolsos.css';
 
 export function SeccionReembolsos() {
@@ -104,24 +105,33 @@ export function SeccionReembolsos() {
                                             rows={3}
                                         />
                                         <div className="reembolsoBotonesRevision">
-                                            <button
+                                            <Button
+                                                variante="texto"
+                                                tamano="pequeno"
                                                 className="reembolsoBotonAprobar"
+                                                type="button"
                                                 onClick={() => void handleRevisar('approve')}
                                                 disabled={accionEnCurso}
                                             >
                                                 <CheckCircle size={16} />
                                                 {accionEnCurso ? 'Procesando…' : 'Aprobar reembolso'}
-                                            </button>
-                                            <button
+                                            </Button>
+                                            <Button
+                                                variante="texto"
+                                                tamano="pequeno"
                                                 className="reembolsoBotonRechazar"
+                                                type="button"
                                                 onClick={() => void handleRevisar('reject')}
                                                 disabled={accionEnCurso}
                                             >
                                                 <XCircle size={16} />
                                                 Rechazar
-                                            </button>
-                                            <button
+                                            </Button>
+                                            <Button
+                                                variante="outline"
+                                                tamano="pequeno"
                                                 className="reembolsoBotonCancelar"
+                                                type="button"
                                                 onClick={() => {
                                                     setRefundActivo(null);
                                                     setRespuestaAdmin('');
@@ -129,16 +139,19 @@ export function SeccionReembolsos() {
                                                 disabled={accionEnCurso}
                                             >
                                                 Cancelar
-                                            </button>
+                                            </Button>
                                         </div>
                                     </div>
                                 ) : (
-                                    <button
+                                    <Button
+                                        variante="outline"
+                                        tamano="pequeno"
                                         className="reembolsoBotonRevisar"
+                                        type="button"
                                         onClick={() => setRefundActivo(r)}
                                     >
                                         Revisar
-                                    </button>
+                                    </Button>
                                 )}
                             </div>
                         )}

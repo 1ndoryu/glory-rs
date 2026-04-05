@@ -2,8 +2,8 @@
  * Muestra info general + fases con acciones según rol.
  * Fase 3: botón de pago Stripe integrado para pending_payment.
  * Fase 6: upload multipart de entregables + listado + descarga por fase. */
-import React, { useState } from 'react';
-import {Check, RotateCcw, CreditCard} from 'lucide-react';
+import React, {useState} from 'react';
+import {Check, RotateCcw, CreditCard, XCircle} from 'lucide-react';
 import {
     ORDER_STATUS_LABELS,
     PHASE_STATUS_LABELS,
@@ -16,6 +16,9 @@ import {
 } from '../../api/orders';
 import {EntregablesPanel} from './EntregablesPanel';
 import {ReviewPanel} from './ReviewPanel';
+import {Button} from '../ui/Button';
+import {MenuContextual, type MenuContextualItem} from '../ui/ContextMenu';
+import {Modal} from '../ui/Modal';
 import CheckoutModal from './CheckoutModal';
 import './SeccionProyectos.css';
 
@@ -55,19 +58,45 @@ export const OrdenDetalle: React.FC<OrdenDetalleProps> = ({
         amountCents: number;
         phaseNumber?: number;
     } | null>(null);
+    const [menuAbierto, setMenuAbierto] = useState(false);
+    const [modalCancelarAbierto, setModalCancelarAbierto] = useState(false);
 
     const canCancel = CANCELABLE_STATUSES.includes(order.status);
     const needsPayment = order.status === 'pending_payment';
     const isPhased = order.payment_mode === 'phased';
+    const shouldShowPhases = isPhased;
     const isEmployee = effectiveRole === 'employee';
     const isClient = effectiveRole === 'client' || effectiveRole === 'admin';
 
+    const abrirCancelacion = () => {
+        setModalCancelarAbierto(true);
+    };
+
+    const confirmarCancelacion = async () => {
+        await onCancelar(order.id);
+        setModalCancelarAbierto(false);
+    };
+
+    const menuItems: MenuContextualItem[] = canCancel
+        ? [{
+            id: 'cancel-order',
+            label: cancelando ? 'Cancelando...' : 'Cancelar orden',
+            onSelect: abrirCancelacion,
+            disabled: cancelando,
+            danger: true,
+            icon: <XCircle size={16} />,
+        }]
+        : [];
+
     return (
         <div className="ordenDetalle">
-            <div className="ordenDetalleHeader">
-                <button className="ordenDetalleVolver" onClick={onVolver} type="button">
+            <div className="ordenDetalleTopbar">
+                <Button className="ordenDetalleVolver" onClick={onVolver} type="button" variante="texto" tamano="pequeno">
                     ← Volver
-                </button>
+                </Button>
+            </div>
+
+            <div className="ordenDetalleHeader">
                 <div className="ordenDetalleResumen">
                     <h2 className="ordenDetalleTitulo">
                         #{order.order_number} — {order.service_title}
@@ -81,26 +110,66 @@ export const OrdenDetalle: React.FC<OrdenDetalleProps> = ({
                         <span className="ordenDetalleMeta">{formatPrice(order.final_price_cents, order.currency)}</span>
                     </div>
                 </div>
-                {canCancel && (
-                    <button
-                        className="ordenDetalleCancelar"
-                        onClick={() => onCancelar(order.id)}
-                        disabled={cancelando}
-                        type="button"
-                    >
-                        {cancelando ? 'Cancelando...' : 'Cancelar orden'}
-                    </button>
-                )}
-                {needsPayment && !isPhased && (
-                    <button
-                        className="ordenDetallePagar"
-                        onClick={() => setCheckout({ amountCents: order.final_price_cents })}
-                        type="button"
-                    >
-                        <CreditCard size={16} /> Pagar
-                    </button>
-                )}
+                <div className="ordenDetalleAcciones">
+                    {needsPayment && !isPhased && (
+                        <Button
+                            className="ordenDetallePagar"
+                            onClick={() => setCheckout({amountCents: order.final_price_cents})}
+                            type="button"
+                            variante="texto"
+                            tamano="pequeno"
+                        >
+                            <CreditCard size={16} /> Pagar
+                        </Button>
+                    )}
+
+                    {canCancel && (
+                        <MenuContextual
+                            abierto={menuAbierto}
+                            onToggle={() => setMenuAbierto(prev => !prev)}
+                            onCerrar={() => setMenuAbierto(false)}
+                            items={menuItems}
+                            ariaLabel="Opciones de la orden"
+                        />
+                    )}
+                </div>
             </div>
+
+            <Modal
+                abierto={modalCancelarAbierto}
+                onCerrar={() => {
+                    if (!cancelando) setModalCancelarAbierto(false);
+                }}
+                className="ordenDetalleModal"
+            >
+                <div className="ordenDetalleModalContenido">
+                    <h3 className="ordenDetalleModalTitulo">Cancelar orden</h3>
+                    <p className="ordenDetalleModalTexto">
+                        Esta acción no se puede deshacer. La orden #{order.order_number} quedará cancelada.
+                    </p>
+                    <div className="ordenDetalleModalAcciones">
+                        <Button
+                            variante="outline"
+                            tamano="pequeno"
+                            type="button"
+                            onClick={() => setModalCancelarAbierto(false)}
+                            disabled={cancelando}
+                        >
+                            Volver
+                        </Button>
+                        <Button
+                            className="ordenDetalleCancelarConfirmar"
+                            variante="texto"
+                            tamano="pequeno"
+                            type="button"
+                            onClick={confirmarCancelacion}
+                            disabled={cancelando}
+                        >
+                            {cancelando ? 'Cancelando...' : 'Sí, cancelar'}
+                        </Button>
+                    </div>
+                </div>
+            </Modal>
 
             {checkout && (
                 <CheckoutModal
@@ -123,25 +192,27 @@ export const OrdenDetalle: React.FC<OrdenDetalleProps> = ({
                 </div>
             )}
 
-            <div className="ordenDetalleFases">
-                <h3 className="ordenDetalleFasesTitulo">Fases del proyecto</h3>
-                <div className="fasesTimeline">
-                    {phases.map((phase, idx) => (
-                        <FaseCard
-                            key={phase.phase_number}
-                            phase={phase}
-                            orderId={order.id}
-                            isLast={idx === phases.length - 1}
-                            isClient={isClient}
-                            isEmployee={isEmployee}
-                            isPhased={isPhased}
-                            onAprobar={onAprobar}
-                            onRevision={onRevision}
-                            onPagarFase={(pn, amount) => setCheckout({ amountCents: amount, phaseNumber: pn })}
-                        />
-                    ))}
+            {shouldShowPhases && (
+                <div className="ordenDetalleFases">
+                    <h3 className="ordenDetalleFasesTitulo">Fases del proyecto</h3>
+                    <div className="fasesTimeline">
+                        {phases.map((phase, idx) => (
+                            <FaseCard
+                                key={phase.phase_number}
+                                phase={phase}
+                                orderId={order.id}
+                                isLast={idx === phases.length - 1}
+                                isClient={isClient}
+                                isEmployee={isEmployee}
+                                isPhased={isPhased}
+                                onAprobar={onAprobar}
+                                onRevision={onRevision}
+                                onPagarFase={(pn, amount) => setCheckout({amountCents: amount, phaseNumber: pn})}
+                            />
+                        ))}
+                    </div>
                 </div>
-            </div>
+            )}
 
             {/* [044A-38 Fase 8] Review panel para órdenes completadas */}
             {order.status === 'completed' && (
@@ -213,31 +284,37 @@ function FaseCard({phase, orderId, isLast, isClient, isEmployee, isPhased, onApr
                 {(canApprove || canRevise || canPayPhase) && (
                     <div className="faseAcciones">
                         {canPayPhase && (
-                            <button
+                            <Button
                                 className="faseBtn faseBtnPagar"
                                 onClick={() => onPagarFase(phase.phase_number, phase.price_cents)}
                                 type="button"
+                                variante="texto"
+                                tamano="pequeno"
                             >
                                 <CreditCard size={14} /> Pagar fase
-                            </button>
+                            </Button>
                         )}
                         {canApprove && (
-                            <button
+                            <Button
                                 className="faseBtn faseBtnAprobar"
                                 onClick={() => onAprobar(orderId, phase.phase_number)}
                                 type="button"
+                                variante="texto"
+                                tamano="pequeno"
                             >
                                 <Check size={14} /> Aprobar
-                            </button>
+                            </Button>
                         )}
                         {canRevise && (
-                            <button
+                            <Button
                                 className="faseBtn faseBtnRevision"
                                 onClick={() => onRevision(orderId, phase.phase_number)}
                                 type="button"
+                                variante="texto"
+                                tamano="pequeno"
                             >
                                 <RotateCcw size={14} /> Revisión
-                            </button>
+                            </Button>
                         )}
                     </div>
                 )}

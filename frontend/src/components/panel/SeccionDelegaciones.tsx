@@ -10,6 +10,7 @@ import {
     type DelegationResponse,
 } from '../../api/assignment';
 import {useAuthStore} from '../../stores/authStore';
+import {Button} from '../ui/Button';
 import './SeccionDelegaciones.css';
 
 export const SeccionDelegaciones: React.FC = () => {
@@ -110,7 +111,7 @@ function DelegacionCard({
 
             {puedeResponder && (
                 <div className="delegCardAcciones">
-                    <button
+                    <Button
                         className="delegBtnAceptar"
                         onClick={() => onResponder(delegacion.id, true)}
                         disabled={respondiendo}
@@ -118,8 +119,9 @@ function DelegacionCard({
                     >
                         <Check size={14} />
                         {esDelegacion ? 'Tomar orden' : 'Aceptar ayuda'}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                        variante="outline"
                         className="delegBtnRechazar"
                         onClick={() => onResponder(delegacion.id, false)}
                         disabled={respondiendo}
@@ -127,7 +129,7 @@ function DelegacionCard({
                     >
                         <X size={14} />
                         Rechazar
-                    </button>
+                    </Button>
                 </div>
             )}
         </div>

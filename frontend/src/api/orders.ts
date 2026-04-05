@@ -157,7 +157,7 @@ export const PHASE_STATUS_LABELS: Record<PhaseStatus, string> = {
 };
 
 export const PAYMENT_MODE_LABELS: Record<PaymentMode, string> = {
-    full: 'Pago completo',
+    full: 'Pago único',
     half_half: '50/50',
     phased: 'Por fases',
 };

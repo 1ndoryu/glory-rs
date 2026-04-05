@@ -10,6 +10,7 @@ import {useCarruselInfinito} from '../../hooks/useCarruselInfinito';
 import {SeccionHeader} from '../ui/SeccionHeader';
 import {TESTIMONIOS} from '../../data/testimonios';
 import {ModalTestimonio} from './ModalTestimonio';
+import {Button} from '../ui/Button';
 
 export const SeccionTestimonios: React.FC = () => {
     const items = TESTIMONIOS;
@@ -27,22 +28,23 @@ export const SeccionTestimonios: React.FC = () => {
             <div className="testimoniosContenedor">
                 <div className="testimoniosHeader">
                     <SeccionHeader titulo="Testimonials" />
-                    <button className="testimoniosBotonEscribir" onClick={() => setModalAbierto(true)}>
+                    <Button className="testimoniosBotonEscribir" onClick={() => setModalAbierto(true)} type="button">
                         Escribir un comentario
-                    </button>
+                    </Button>
                 </div>
 
                 <div
                     className="testimoniosCarruselWindow"
                     {...handlers}
-                    style={{touchAction: 'pan-y'}}
                 >
                     <div
                         className="testimoniosPista"
+                        /* eslint-disable-next-line react/forbid-dom-props -- valores dinamicos de JS, necesarios para CSS custom properties */
                         style={{
-                            transform: `translateX(calc( -1 * (var(--testimonio-slide-unit)) * ${indiceActual} + ${dragOffset}px))`,
-                            transition: conTransicion ? 'transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)' : 'none'
-                        }}>
+                            '--testimonio-idx': indiceActual,
+                            '--testimonio-drag': `${dragOffset}px`,
+                            '--testimonio-transition': conTransicion ? 'transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)' : 'none',
+                        } as React.CSSProperties}>
                         {itemsVisuales.map((item, index) => (
                             <article key={`${item.id}-${index}`} className="testimonioCard">
                                 <p className="testimonioTexto">{item.texto}</p>

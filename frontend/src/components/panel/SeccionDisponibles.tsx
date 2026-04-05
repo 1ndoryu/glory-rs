@@ -6,6 +6,7 @@ import {FolderOpen, UserPlus} from 'lucide-react';
 import {useDisponibles} from '../../hooks/useAsignaciones';
 import {ORDER_STATUS_LABELS, PAYMENT_MODE_LABELS, formatPrice} from '../../api/orders';
 import type {OrderResponse} from '../../api/orders';
+import {Button} from '../ui/Button';
 import './SeccionDisponibles.css';
 
 export const SeccionDisponibles: React.FC = () => {
@@ -91,7 +92,7 @@ function OrdenDisponibleCard({
                 <p className="disponibleCardNotas">{orden.client_notes}</p>
             )}
 
-            <button
+            <Button
                 className="disponibleBtnTomar"
                 onClick={() => onTomar(orden.id)}
                 disabled={tomando}
@@ -99,7 +100,7 @@ function OrdenDisponibleCard({
             >
                 <UserPlus size={16} />
                 {tomando ? 'Asignando...' : 'Tomar orden'}
-            </button>
+            </Button>
         </div>
     );
 }

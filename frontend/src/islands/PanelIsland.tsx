@@ -18,6 +18,8 @@ import {SeccionReembolsos} from '../components/panel/SeccionReembolsos';
 import SeccionDashboard from '../components/panel/SeccionDashboard';
 import {SeccionUsuarios} from '../components/panel/SeccionUsuarios';
 import {SeccionHosting} from '../components/panel/SeccionHosting';
+import {EmployeesSection} from '../components/panel/EmployeesSection';
+import {ServicesCatalogSection} from '../components/panel/ServicesCatalogSection';
 import {SidebarPanel} from '../components/panel/SidebarPanel';
 import {PlaceholderSeccion} from '../components/panel/PlaceholderSeccion';
 import {obtenerTabsPorRol, seccionInicialPorRol, type SeccionPanel} from '../data/panel';
@@ -56,6 +58,8 @@ export const PanelIsland: React.FC = () => {
                 return <SeccionPerfil />;
             case 'metodos-pago':
                 return <SeccionMetodosPago />;
+            case 'servicios':
+                return <ServicesCatalogSection mode="client" />;
             /* [044A-38 Fase 2] Mis Proyectos con lista de órdenes + detalle + acciones */
             case 'proyectos':
             case 'asignados':
@@ -79,6 +83,10 @@ export const PanelIsland: React.FC = () => {
             /* [044A-38 Fase 10] Dashboard admin — métricas, revenue, alertas */
             case 'dashboard':
                 return <SeccionDashboard />;
+            case 'empleados':
+                return <EmployeesSection />;
+            case 'config-servicios':
+                return <ServicesCatalogSection mode="admin" />;
             /* [054A-1] Gestión de usuarios registrados (admin) */
             case 'usuarios':
                 return <SeccionUsuarios />;

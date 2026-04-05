@@ -1,9 +1,13 @@
 /* [044A-38 Fase 2] Hook para gestión de órdenes en el panel.
  * Usa React Query para fetching + cache + invalidación.
  * Encapsula toda la lógica de estado de órdenes (SRP).
- * Max 3 useState → estado de UI mínimo, el resto en React Query. */
-import {useState, useCallback} from 'react';
+ * Max 3 useState → estado de UI mínimo, el resto en React Query.
+ * [054A-1] CRÍTICO: incluir effectiveRole en la query key para que el cache se invalide
+ * automáticamente al cambiar de rol (admin→client). Sin esto, el cache del admin (todas las
+ * órdenes) persiste en vista cliente y produce 403 al abrir órdenes ajenas. */
+import {useState, useCallback, useEffect} from 'react';
 import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
+import {useAuthStore} from '../stores/authStore';
 import {
     apiListOrders,
     apiGetOrder,
@@ -16,21 +20,27 @@ import {
     type CreateOrderRequest,
 } from '../api/orders';
 
-const ORDERS_KEY = ['orders'] as const;
-const orderDetailKey = (id: string) => ['order', id] as const;
+const ordersKey = (role: string) => ['orders', role] as const;
+const orderDetailKey = (role: string, id: string) => ['order', role, id] as const;
 
 export function useOrdenes() {
     const queryClient = useQueryClient();
+    const effectiveRole = useAuthStore(s => s.user?.effectiveRole) ?? 'client';
     const [ordenSeleccionada, setOrdenSeleccionada] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
 
-    /* Lista de órdenes del usuario */
+    useEffect(() => {
+        setOrdenSeleccionada(null);
+        setError(null);
+    }, [effectiveRole]);
+
+    /* Lista de órdenes del usuario — la key incluye effectiveRole para invalidar cache al cambiar rol */
     const {
         data: ordenes = [],
         isLoading: cargando,
         refetch: recargar,
     } = useQuery<OrderResponse[]>({
-        queryKey: ORDERS_KEY,
+        queryKey: ordersKey(effectiveRole),
         queryFn: apiListOrders,
     });
 
@@ -39,18 +49,18 @@ export function useOrdenes() {
         data: detalle,
         isLoading: cargandoDetalle,
     } = useQuery<OrderDetailResponse>({
-        queryKey: ordenSeleccionada ? orderDetailKey(ordenSeleccionada) : ['order', 'none'],
+        queryKey: ordenSeleccionada ? orderDetailKey(effectiveRole, ordenSeleccionada) : ['order', effectiveRole, 'none'],
         queryFn: () => apiGetOrder(ordenSeleccionada!),
         enabled: !!ordenSeleccionada,
     });
 
     /* Invalidar cache tras mutaciones */
     const invalidar = useCallback(() => {
-        queryClient.invalidateQueries({queryKey: ORDERS_KEY});
+        queryClient.invalidateQueries({queryKey: ordersKey(effectiveRole)});
         if (ordenSeleccionada) {
-            queryClient.invalidateQueries({queryKey: orderDetailKey(ordenSeleccionada)});
+            queryClient.invalidateQueries({queryKey: orderDetailKey(effectiveRole, ordenSeleccionada)});
         }
-    }, [queryClient, ordenSeleccionada]);
+    }, [queryClient, ordenSeleccionada, effectiveRole]);
 
     /* Crear orden */
     const crearMutation = useMutation({

@@ -9,6 +9,7 @@ import {useState, useEffect, useRef, useCallback} from 'react';
 import {useFocusTrap} from './useFocusTrap';
 import {apiLogin, apiRegister, extraerMensajeError} from '../api/auth';
 import {useAuthStore} from '../stores/authStore';
+import {toast} from '../stores/toastStore';
 
 export type VistaModal = 'login' | 'registro' | 'recuperar';
 
@@ -140,7 +141,7 @@ export const useAutenticacion = (abierto: boolean, onCerrar: () => void): Retorn
     }, []);
 
     const handleGoogleLogin = useCallback(() => {
-        alert('Inicio de sesion con Google pendiente de configuracion OAuth.');
+        toast.info('Inicio de sesión con Google pendiente de configuración OAuth.');
     }, []);
 
     const resetRecuperacion = useCallback(() => {

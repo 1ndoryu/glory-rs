@@ -97,3 +97,11 @@ export const HOSTING_STATUS_COLORS: Record<string, string> = {
     suspended: '#ef4444',
     cancelled: '#6b7280',
 };
+
+export const HOSTING_STATUS_CLASS: Record<string, string> = {
+    pending: 'hostingStatus--pending',
+    provisioning: 'hostingStatus--provisioning',
+    active: 'hostingStatus--active',
+    suspended: 'hostingStatus--suspended',
+    cancelled: 'hostingStatus--cancelled',
+};

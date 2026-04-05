@@ -29,12 +29,10 @@ async fn main() {
 
     let id = Uuid::new_v4();
 
-    let result = sqlx::query(
-        "INSERT INTO users (id, email, password_hash) VALUES ($1, $2, $3) ON CONFLICT (email) DO UPDATE SET password_hash = $3"
+    let result = sqlx::query!(
+        "INSERT INTO users (id, email, password_hash) VALUES ($1, $2, $3) ON CONFLICT (email) DO UPDATE SET password_hash = $3",
+        id, email, password_hash
     )
-    .bind(id)
-    .bind(email)
-    .bind(&password_hash)
     .execute(&pool)
     .await;
 

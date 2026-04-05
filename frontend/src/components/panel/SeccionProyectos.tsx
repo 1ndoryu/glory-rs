@@ -6,6 +6,7 @@ import {FolderOpen} from 'lucide-react';
 import {useAuthStore} from '../../stores/authStore';
 import {useOrdenes} from '../../hooks/useOrdenes';
 import {OrdenDetalle} from './OrdenDetalle';
+import {Button} from '../ui/Button';
 import {
     ORDER_STATUS_LABELS,
     PAYMENT_MODE_LABELS,
@@ -36,7 +37,6 @@ export const SeccionProyectos: React.FC = () => {
 
     const handleVolver = useCallback(() => seleccionarOrden(null), [seleccionarOrden]);
     const handleCancelar = useCallback(async (orderId: string) => {
-        if (!window.confirm('¿Cancelar esta orden? Esta acción no se puede deshacer.')) return;
         await cancelarOrden(orderId);
     }, [cancelarOrden]);
     const handleAprobar = useCallback(async (orderId: string, phase: number) => {
@@ -112,7 +112,7 @@ function OrdenCard({orden, onClick}: {orden: OrderResponse; onClick: () => void}
     const imgSrc = SERVICE_IMAGE[orden.service_slug] || '/assets/Servicios/diseno web.jpg';
 
     return (
-        <button className="ordenCard" onClick={onClick} type="button">
+        <Button className="ordenCard" onClick={onClick} type="button" variante="texto">
             <img
                 className="ordenCardImagen"
                 src={imgSrc}
@@ -132,6 +132,6 @@ function OrdenCard({orden, onClick}: {orden: OrderResponse; onClick: () => void}
                     <span className="ordenCardFecha">{new Date(orden.created_at).toLocaleDateString('es')}</span>
                 </div>
             </div>
-        </button>
+        </Button>
     );
 }

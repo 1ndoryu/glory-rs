@@ -5,6 +5,7 @@ import {Upload, Download, FileText, Package, X} from 'lucide-react';
 import {formatFileSize} from '../../api/deliverables';
 import {useEntregablesPanel} from '../../hooks/useEntregablesPanel';
 import {Textarea} from '../ui/Textarea';
+import {Button} from '../ui/Button';
 import './EntregablesPanel.css';
 
 interface EntregablesPanelProps {
@@ -43,9 +44,14 @@ export function EntregablesPanel({orderId, phaseNumber, canDeliver}: Entregables
                                     <FileText size={12} />
                                     <span className="entregablesFileName">{f.name}</span>
                                     <span className="entregablesFileSize">{formatFileSize(f.size)}</span>
-                                    <button className="entregablesFileRemove" onClick={() => removeFile(i)} type="button">
+                                    <Button
+                                        variante="texto"
+                                        className="entregablesFileRemove"
+                                        onClick={() => removeFile(i)}
+                                        type="button"
+                                    >
                                         <X size={12} />
-                                    </button>
+                                    </Button>
                                 </li>
                             ))}
                         </ul>
@@ -58,14 +64,16 @@ export function EntregablesPanel({orderId, phaseNumber, canDeliver}: Entregables
                         rows={2}
                     />
                     {error && <p className="entregablesError">{error}</p>}
-                    <button
+                    <Button
+                        variante="texto"
+                        tamano="pequeno"
                         className="faseBtn faseBtnEntregar"
                         onClick={handleDeliver}
                         disabled={entregando || files.length === 0}
                         type="button"
                     >
                         <Package size={14} /> {entregando ? 'Entregando...' : 'Entregar'}
-                    </button>
+                    </Button>
                 </div>
             )}
 
@@ -82,13 +90,14 @@ export function EntregablesPanel({orderId, phaseNumber, canDeliver}: Entregables
                                         <FileText size={12} />
                                         <span className="entregablesFileName">{d.file_name}</span>
                                         <span className="entregablesFileSize">{formatFileSize(d.file_size_bytes)}</span>
-                                        <button
+                                        <Button
+                                            variante="texto"
                                             className="entregablesDownloadBtn"
                                             onClick={() => handleDownload(d.id, d.file_name)}
                                             type="button"
                                         >
                                             <Download size={12} />
-                                        </button>
+                                        </Button>
                                     </li>
                                 ))}
                             </ul>

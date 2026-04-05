@@ -14,6 +14,7 @@ import {POSTS_BLOG} from '../data/blog';
 import {PostBlog} from '../types/contenido';
 import {obtenerImagenBlog} from '../hooks/useImagenes';
 import {navegar} from '../navegacionSPA';
+import {Button} from '../components/ui/Button';
 
 interface BlogIslandProps {
     titulo?: string;
@@ -77,13 +78,15 @@ export const BlogIsland = ({titulo}: BlogIslandProps): JSX.Element => {
                     {/* Filtros de categoría */}
                     <div className="blogFiltros">
                         {categorias.map(cat => (
-                            <button
+                            <Button
+                                variante="texto"
                                 key={cat}
                                 className={`blogFiltroBtn ${categoriaActiva === cat ? 'blogFiltroBtnActivo' : ''}`}
                                 onClick={() => setCategoriaActiva(cat)}
+                                type="button"
                             >
                                 {cat === 'todos' ? t('blog_page.all') : cat}
-                            </button>
+                            </Button>
                         ))}
                     </div>
 

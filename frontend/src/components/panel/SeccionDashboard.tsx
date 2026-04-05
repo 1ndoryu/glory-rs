@@ -3,6 +3,7 @@
 
 import { RefreshCw, AlertTriangle, DollarSign, ShoppingCart, Users, Star } from 'lucide-react';
 import { useDashboard } from '../../hooks/useDashboard';
+import { Button } from '../ui/Button';
 import './SeccionDashboard.css';
 
 export default function SeccionDashboard() {
@@ -16,7 +17,7 @@ export default function SeccionDashboard() {
     return (
       <div className="dashboard__error">
         Error cargando dashboard
-        <button className="dashboard__retry" onClick={() => refetch()}>Reintentar</button>
+        <Button variante="outline" tamano="pequeno" className="dashboard__retry" onClick={() => refetch()}>Reintentar</Button>
       </div>
     );
   }
@@ -28,9 +29,9 @@ export default function SeccionDashboard() {
     <div className="dashboard">
       <div className="dashboard__header">
         <h2 className="dashboard__title">Dashboard</h2>
-        <button className="dashboard__refresh" onClick={() => refetch()} title="Actualizar">
+        <Button variante="texto" className="dashboard__refresh" onClick={() => refetch()} title="Actualizar">
           <RefreshCw size={16} />
-        </button>
+        </Button>
       </div>
 
       {/* Alertas */}

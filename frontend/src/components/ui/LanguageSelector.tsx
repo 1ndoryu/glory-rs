@@ -1,7 +1,10 @@
 /* [044A-2] Selector de idioma compacto para el Header.
- * Muestra código del idioma actual y dropdown con opciones. */
-import {useState, useRef, useEffect} from 'react';
+ * Muestra código del idioma actual y dropdown con opciones.
+ * [054A-17] Refactorizado de dropdown artesanal a MenuContextual. */
+import {useState} from 'react';
 import {useTranslation} from 'react-i18next';
+import {MenuContextual} from './ContextMenu';
+import {Button} from './Button';
 import './LanguageSelector.css';
 
 const LANGUAGES = [
@@ -13,18 +16,6 @@ const LANGUAGES = [
 export const LanguageSelector = () => {
     const {i18n} = useTranslation();
     const [open, setOpen] = useState(false);
-    const ref = useRef<HTMLDivElement>(null);
-
-    /* Cerrar al hacer click fuera */
-    useEffect(() => {
-        const handler = (e: MouseEvent) => {
-            if (ref.current && !ref.current.contains(e.target as Node)) {
-                setOpen(false);
-            }
-        };
-        document.addEventListener('mousedown', handler);
-        return () => document.removeEventListener('mousedown', handler);
-    }, []);
 
     const currentLang = LANGUAGES.find(l => l.code === i18n.language) || LANGUAGES[0];
 
@@ -34,28 +25,27 @@ export const LanguageSelector = () => {
     };
 
     return (
-        <div className="selectorIdioma" ref={ref}>
-            <button
-                className="selectorIdiomaBoton"
-                onClick={() => setOpen(!open)}
-                aria-label="Change language"
-            >
-                {currentLang.label}
-            </button>
-            {open && (
-                <ul className="selectorIdiomaLista">
-                    {LANGUAGES.map(lang => (
-                        <li key={lang.code}>
-                            <button
-                                className={`selectorIdiomaOpcion ${lang.code === i18n.language ? 'activo' : ''}`}
-                                onClick={() => cambiarIdioma(lang.code)}
-                            >
-                                {lang.nombre}
-                            </button>
-                        </li>
-                    ))}
-                </ul>
-            )}
-        </div>
+        <MenuContextual
+            abierto={open}
+            onToggle={() => setOpen(o => !o)}
+            onCerrar={() => setOpen(false)}
+            ariaLabel="Seleccionar idioma"
+            triggerContent={currentLang.label}
+            triggerClassName="selectorIdiomaBoton"
+            panelClassName="selectorIdiomaLista"
+            className="selectorIdioma"
+        >
+            {LANGUAGES.map(lang => (
+                <Button
+                    key={lang.code}
+                    variante="texto"
+                    className={`selectorIdiomaOpcion ${lang.code === i18n.language ? 'activo' : ''}`}
+                    onClick={() => cambiarIdioma(lang.code)}
+                    type="button"
+                >
+                    {lang.nombre}
+                </Button>
+            ))}
+        </MenuContextual>
     );
 };

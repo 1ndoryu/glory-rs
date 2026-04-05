@@ -204,6 +204,13 @@
     opacity: 0.8;
 }
 
+/* Colores por rol del remitente (sustituyen el inline style={{color}}) */
+.chatWidgetSender--client  { color: #60a5fa; }
+.chatWidgetSender--visitor { color: #60a5fa; }
+.chatWidgetSender--ai      { color: #a78bfa; }
+.chatWidgetSender--employee { color: #34d399; }
+.chatWidgetSender--admin   { color: #f97316; }
+
 .chatWidgetMsgBubble {
     padding: var(--spacing-xs) var(--spacing-sm);
     border-radius: 12px;

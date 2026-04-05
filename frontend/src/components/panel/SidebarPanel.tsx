@@ -7,10 +7,12 @@
 import React, {useState, useCallback} from 'react';
 import {useTranslation} from 'react-i18next';
 import {FolderOpen, Briefcase, Receipt, User, CreditCard, ClipboardList, PackageOpen, Users, Settings, LayoutDashboard, ArrowLeftRight, ArrowRightLeft, MessageSquare, RotateCcw, UserCog, Server} from 'lucide-react';
-import {obtenerTabsPorRol, obtenerUsuarioActual, type SeccionPanel} from '../../data/panel';
+import {obtenerTabsPorRol, type SeccionPanel} from '../../data/panel';
+import {useCurrentProfile} from '../../hooks/useCurrentProfile';
 import {useAuthStore} from '../../stores/authStore';
 import {apiSwitchRole} from '../../api/auth';
 import type {UserRole} from '../../api/auth';
+import {Button} from '../ui/Button';
 import './SidebarPanel.css';
 
 interface SidebarPanelProps {
@@ -47,7 +49,7 @@ const ROLE_LABELS: Record<UserRole, string> = {
 
 export const SidebarPanel: React.FC<SidebarPanelProps> = ({seccionActiva, onCambiarSeccion}) => {
     const {t} = useTranslation();
-    const usuario = obtenerUsuarioActual();
+    const {perfil, avatarUrl} = useCurrentProfile();
     const authUser = useAuthStore(s => s.user);
     const actualizarRol = useAuthStore(s => s.actualizarRol);
     const [switchingRole, setSwitchingRole] = useState(false);
@@ -86,12 +88,12 @@ export const SidebarPanel: React.FC<SidebarPanelProps> = ({seccionActiva, onCamb
             <div className="sidebarUsuario">
                 <div className="sidebarAvatar">
                     <img
-                        src={usuario?.avatar || 'https://i.pravatar.cc/48?u=default'}
+                        src={avatarUrl}
                         alt="Avatar"
                     />
                 </div>
                 <div className="sidebarInfo">
-                    <span className="sidebarNombre">{authUser?.email || usuario?.nombre || 'Usuario'}</span>
+                    <span className="sidebarNombre">{perfil?.display_name || authUser?.email || 'Usuario'}</span>
                     <span className="sidebarRol">{ROLE_LABELS[effectiveRole]}</span>
                 </div>
             </div>
@@ -101,15 +103,16 @@ export const SidebarPanel: React.FC<SidebarPanelProps> = ({seccionActiva, onCamb
                 {tabs.map(tab => {
                     const Icono = ICONOS_SECCION[tab.id];
                     return (
-                        <button
+                        <Button
                             key={tab.id}
                             className={`sidebarItem ${seccionActiva === tab.id ? 'sidebarItemActivo' : ''}`}
                             onClick={() => onCambiarSeccion(tab.id)}
                             aria-current={seccionActiva === tab.id ? 'page' : undefined}
+                            variante="texto"
                         >
                             <Icono size={18} className="sidebarItemIcono" aria-hidden="true" />
                             <span className="sidebarItemTexto">{tab.label}</span>
-                        </button>
+                        </Button>
                     );
                 })}
             </nav>
@@ -117,15 +120,16 @@ export const SidebarPanel: React.FC<SidebarPanelProps> = ({seccionActiva, onCamb
             {/* [044A-38 Fase 1] Botón switch-role — solo visible para admin */}
             {isAdmin && (
                 <div className="sidebarSwitchRole">
-                    <button
+                    <Button
                         className="sidebarSwitchBtn"
                         onClick={handleSwitchRole}
                         disabled={switchingRole}
                         title={`Cambiar vista a otro rol (actual: ${ROLE_LABELS[effectiveRole]})`}
+                        variante="texto"
                     >
                         <ArrowLeftRight size={16} aria-hidden="true" />
                         <span>{switchingRole ? 'Cambiando...' : `Vista: ${ROLE_LABELS[effectiveRole]}`}</span>
-                    </button>
+                    </Button>
                 </div>
             )}
         </aside>

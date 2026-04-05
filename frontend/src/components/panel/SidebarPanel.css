@@ -68,6 +68,7 @@
 .sidebarItem {
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     gap: var(--spacing-sm);
     font-family: var(--font-primary);
     font-size: var(--text-sm);
@@ -80,6 +81,7 @@
     cursor: pointer;
     transition: all var(--transicion-rapida);
     text-align: left;
+    text-decoration: none;
     width: 100%;
 }
 
@@ -161,6 +163,7 @@
 .sidebarSwitchBtn {
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     gap: var(--spacing-xs);
     width: 100%;
     padding: var(--spacing-sm) var(--spacing-md);
@@ -173,6 +176,7 @@
     border-radius: 8px;
     cursor: pointer;
     transition: all var(--transicion-rapida);
+    text-decoration: none;
 }
 
 .sidebarSwitchBtn:hover {

@@ -8,6 +8,7 @@ import { Star, MessageSquare, Loader2 } from 'lucide-react';
 import { useOrderReview, useReviews } from '../../hooks/useReviews';
 import { useReviewForm } from '../../hooks/useReviewForm';
 import { Textarea } from '../ui/Textarea';
+import { Button } from '../ui/Button';
 import './ReviewPanel.css';
 
 interface ReviewPanelProps {
@@ -91,13 +92,15 @@ export function ReviewPanel({ orderId, effectiveRole }: ReviewPanelProps) {
                             onChange={(e) => setRespuesta(e.target.value)}
                             rows={3}
                         />
-                        <button
+                        <Button
+                            variante="texto"
                             className="reviewBotonResponder"
                             onClick={() => void handleResponder()}
                             disabled={respondiendo || !respuesta.trim()}
+                            type="button"
                         >
                             {respondiendo ? 'Enviando…' : 'Responder'}
-                        </button>
+                        </Button>
                     </div>
                 )}
             </div>
@@ -113,7 +116,8 @@ export function ReviewPanel({ orderId, effectiveRole }: ReviewPanelProps) {
                 </h4>
                 <div className="reviewEstrellas reviewEstrellasInput">
                     {[1, 2, 3, 4, 5].map((n) => (
-                        <button
+                        <Button
+                            variante="texto"
                             key={n}
                             className="reviewEstrellaBoton"
                             onClick={() => form.setRating(n)}
@@ -123,7 +127,7 @@ export function ReviewPanel({ orderId, effectiveRole }: ReviewPanelProps) {
                                 size={24}
                                 className={n <= form.rating ? 'reviewEstrellaLlena' : 'reviewEstrellaVacia'}
                             />
-                        </button>
+                        </Button>
                     ))}
                 </div>
                 <Textarea
@@ -133,13 +137,14 @@ export function ReviewPanel({ orderId, effectiveRole }: ReviewPanelProps) {
                     onChange={(e) => form.setComment(e.target.value)}
                     rows={3}
                 />
-                <button
+                <Button
                     className="reviewBotonEnviar"
                     onClick={() => void form.enviarReview()}
                     disabled={form.enviando || form.rating < 1}
+                    type="button"
                 >
                     {form.enviando ? 'Enviando…' : 'Enviar valoración'}
-                </button>
+                </Button>
             </div>
         );
     }

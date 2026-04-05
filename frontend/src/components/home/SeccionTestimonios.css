@@ -66,6 +66,7 @@
     width: 100%;
     overflow: visible; /* Permitir que se vean hasta el borde de la pantalla */
     position: relative;
+    touch-action: pan-y;
     /* Cursor para indicar interactividad */
     cursor: grab;
 }
@@ -79,7 +80,9 @@
     gap: var(--spacing-lg);
     width: max-content;
     will-change: transform;
-    /* Transicion controlada por React/JS */
+    /* Transform/transicion inyectados como CSS custom properties desde React */
+    transform: translateX(calc(-1 * var(--testimonio-slide-unit) * var(--testimonio-idx, 0) + var(--testimonio-drag, 0px)));
+    transition: var(--testimonio-transition, none);
 }
 
 /* Tarjeta de Testimonio */

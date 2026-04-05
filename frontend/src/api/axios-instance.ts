@@ -1,9 +1,15 @@
 import axios from 'axios';
 import type { AxiosRequestConfig } from 'axios';
 
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
 const instance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
+  baseURL: API_BASE_URL,
 });
+
+export function getApiHost(): string {
+  return new URL(API_BASE_URL, window.location.origin).host;
+}
 
 /* Interceptor: agrega el token JWT a cada request si existe */
 instance.interceptors.request.use((config) => {

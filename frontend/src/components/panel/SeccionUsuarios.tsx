@@ -9,6 +9,8 @@ import { ROLE_LABELS, STATUS_LABELS, STATUS_CLASS } from '../../api/admin-users'
 import type { AdminUserItem } from '../../api/admin-users';
 import { Input } from '../ui/Input';
 import { Modal } from '../ui/Modal';
+import { Button } from '../ui/Button';
+import { MenuContextual, type MenuContextualItem } from '../ui/ContextMenu';
 import './SeccionUsuarios.css';
 
 export function SeccionUsuarios() {
@@ -135,25 +137,29 @@ export function SeccionUsuarios() {
             {/* Paginación */}
             {totalPages > 1 && (
                 <div className="usuariosPaginacion">
-                    <button
+                    <Button
                         className="usuariosPaginacionBtn"
+                        variante="outline"
+                        tamano="pequeno"
                         disabled={page <= 1}
                         onClick={() => setPage(page - 1)}
                         type="button"
                     >
                         ← Anterior
-                    </button>
+                    </Button>
                     <span className="usuariosPaginacionInfo">
                         Página {page} de {totalPages}
                     </span>
-                    <button
+                    <Button
                         className="usuariosPaginacionBtn"
+                        variante="outline"
+                        tamano="pequeno"
                         disabled={page >= totalPages}
                         onClick={() => setPage(page + 1)}
                         type="button"
                     >
                         Siguiente →
-                    </button>
+                    </Button>
                 </div>
             )}
 
@@ -167,21 +173,24 @@ export function SeccionUsuarios() {
                     }
                 </p>
                 <div className="usuariosModalAcciones">
-                    <button
+                    <Button
                         className="usuariosModalCancelar"
+                        variante="outline"
+                        tamano="pequeno"
                         onClick={() => setConfirmAction(null)}
                         type="button"
                     >
                         Cancelar
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                         className="usuariosModalConfirmar"
+                        tamano="pequeno"
                         onClick={handleConfirm}
                         disabled={isChangingRole || isChangingStatus}
                         type="button"
                     >
                         {(isChangingRole || isChangingStatus) ? 'Procesando...' : 'Confirmar'}
-                    </button>
+                    </Button>
                 </div>
             </Modal>
         </div>
@@ -198,6 +207,29 @@ function UserRow({ user, onChangeRole, onChangeStatus }: {
 
     const rolesDisponibles = ['admin', 'employee', 'client'].filter(r => r !== user.role);
     const isBanned = user.status === 'banned';
+
+    const menuItems: MenuContextualItem[] = [
+        ...rolesDisponibles.map(r => ({
+            id: `role-${r}`,
+            label: `Cambiar a ${ROLE_LABELS[r]}`,
+            icon: <Shield size={14} />,
+            onSelect: () => onChangeRole(r),
+        })),
+        isBanned
+            ? {
+                id: 'reactivar',
+                label: 'Reactivar',
+                icon: <UserCheck size={14} />,
+                onSelect: () => onChangeStatus('active'),
+            }
+            : {
+                id: 'banear',
+                label: 'Banear',
+                icon: <Ban size={14} />,
+                onSelect: () => onChangeStatus('banned'),
+                danger: true,
+            },
+    ];
 
     return (
         <tr className="usuariosFila">
@@ -231,50 +263,14 @@ function UserRow({ user, onChangeRole, onChangeStatus }: {
                 })}
             </td>
             <td className="usuariosAcciones">
-                <div className="usuariosMenuWrapper">
-                    <button
-                        className="usuariosMenuBtn"
-                        onClick={() => setMenuAbierto(!menuAbierto)}
-                        type="button"
-                    >
-                        ⋯
-                    </button>
-                    {menuAbierto && (
-                        <div className="usuariosMenu" onMouseLeave={() => setMenuAbierto(false)}>
-                            {rolesDisponibles.map((r) => (
-                                <button
-                                    key={r}
-                                    className="usuariosMenuItem"
-                                    onClick={() => { onChangeRole(r); setMenuAbierto(false); }}
-                                    type="button"
-                                >
-                                    <Shield size={14} />
-                                    Cambiar a {ROLE_LABELS[r]}
-                                </button>
-                            ))}
-                            <hr className="usuariosMenuDivider" />
-                            {isBanned ? (
-                                <button
-                                    className="usuariosMenuItem usuariosMenuItemReactivar"
-                                    onClick={() => { onChangeStatus('active'); setMenuAbierto(false); }}
-                                    type="button"
-                                >
-                                    <UserCheck size={14} />
-                                    Reactivar
-                                </button>
-                            ) : (
-                                <button
-                                    className="usuariosMenuItem usuariosMenuItemBan"
-                                    onClick={() => { onChangeStatus('banned'); setMenuAbierto(false); }}
-                                    type="button"
-                                >
-                                    <Ban size={14} />
-                                    Banear
-                                </button>
-                            )}
-                        </div>
-                    )}
-                </div>
+                <MenuContextual
+                    abierto={menuAbierto}
+                    onToggle={() => setMenuAbierto(prev => !prev)}
+                    onCerrar={() => setMenuAbierto(false)}
+                    items={menuItems}
+                    ariaLabel="Acciones del usuario"
+                    triggerClassName="usuariosMenuBtn"
+                />
             </td>
         </tr>
     );

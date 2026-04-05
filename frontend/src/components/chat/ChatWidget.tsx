@@ -6,8 +6,9 @@ import React, {useState, useRef, useEffect} from 'react';
 import {useLocation} from 'react-router-dom';
 import {MessageCircle, X, Send, Bot, User, Minus} from 'lucide-react';
 import {useChatWidget} from '../../hooks/useChatWidget';
-import {SENDER_LABELS, SENDER_COLORS} from '../../api/chat';
+import {SENDER_LABELS} from '../../api/chat';
 import {Input} from '../ui/Input';
+import {Button} from '../ui/Button';
 import './ChatWidget.css';
 
 export const ChatWidget: React.FC = () => {
@@ -77,14 +78,15 @@ export const ChatWidget: React.FC = () => {
         <>
             {/* Burbuja flotante */}
             {!open && (
-                <button
+                <Button
+                    variante="texto"
                     className="chatWidgetBubble"
                     onClick={handleOpen}
                     aria-label="Abrir chat"
                     type="button"
                 >
                     <MessageCircle size={24} />
-                </button>
+                </Button>
             )}
 
             {/* Panel de chat expandido */}
@@ -156,22 +158,24 @@ function ChatWidgetHeader({
                 </div>
             </div>
             <div className="chatWidgetHeaderActions">
-                <button
+                <Button
+                    variante="texto"
                     type="button"
                     className="chatWidgetHeaderBtn"
                     onClick={onMinimize}
                     aria-label="Minimizar chat"
                 >
                     <Minus size={16} />
-                </button>
-                <button
+                </Button>
+                <Button
+                    variante="texto"
                     type="button"
                     className="chatWidgetHeaderBtn"
                     onClick={onClose}
                     aria-label="Cerrar chat"
                 >
                     <X size={16} />
-                </button>
+                </Button>
             </div>
         </div>
     );
@@ -189,7 +193,7 @@ function ChatWidgetNameForm({
     return (
         <form className="chatWidgetNameForm" onSubmit={onSubmit}>
             <p className="chatWidgetWelcome">
-                ¡Hola! 👋 ¿Cómo te podemos ayudar?
+                ¡Hola! ¿Cómo te podemos ayudar?
             </p>
             <Input
                 type="text"
@@ -198,9 +202,9 @@ function ChatWidgetNameForm({
                 onChange={(e) => onNameChange(e.target.value)}
                 className="chatWidgetNameInput"
             />
-            <button type="submit" className="chatWidgetStartBtn">
+            <Button type="submit" className="chatWidgetStartBtn">
                 Iniciar conversación
-            </button>
+            </Button>
         </form>
     );
 }
@@ -236,7 +240,6 @@ function ChatWidgetMessages({
             {messages.map((msg) => {
                 const isOwn = msg.sender_type === 'visitor' || msg.sender_type === 'client';
                 const label = SENDER_LABELS[msg.sender_type] || msg.sender_type;
-                const color = SENDER_COLORS[msg.sender_type] || '#888';
                 const icon = msg.sender_type === 'ai' ? <Bot size={14} /> : <User size={14} />;
 
                 return (
@@ -245,7 +248,7 @@ function ChatWidgetMessages({
                         className={`chatWidgetMsg ${isOwn ? 'chatWidgetMsgOwn' : 'chatWidgetMsgOther'}`}
                     >
                         {!isOwn && (
-                            <span className="chatWidgetMsgSender" style={{color}}>
+                            <span className={`chatWidgetMsgSender chatWidgetSender--${msg.sender_type}`}>
                                 {icon} {label}
                             </span>
                         )}
@@ -258,7 +261,7 @@ function ChatWidgetMessages({
 
             {typing && (
                 <div className="chatWidgetMsg chatWidgetMsgOther">
-                    <span className="chatWidgetMsgSender" style={{color: SENDER_COLORS[typing.sender] || '#888'}}>
+                    <span className={`chatWidgetMsgSender chatWidgetSender--${typing.sender}`}>
                         {typing.sender === 'ai' ? <Bot size={14} /> : <User size={14} />}
                         {' '}{SENDER_LABELS[typing.sender] || typing.sender}
                     </span>
@@ -301,7 +304,8 @@ function ChatWidgetInput({
                 disabled={!connected}
                 className="chatWidgetInput"
             />
-            <button
+            <Button
+                variante="texto"
                 type="button"
                 className="chatWidgetSendBtn"
                 onClick={onSend}
@@ -309,7 +313,7 @@ function ChatWidgetInput({
                 aria-label="Enviar mensaje"
             >
                 <Send size={18} />
-            </button>
+            </Button>
         </div>
     );
 }
