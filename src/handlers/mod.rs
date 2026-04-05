@@ -1,5 +1,6 @@
 #![allow(clippy::needless_for_each)] // Generado por utoipa OpenApi derive
 
+mod assignment;
 mod auth;
 mod health;
 mod notes;
@@ -61,6 +62,13 @@ impl utoipa::Modify for SecurityAddon {
         payments::initiate_payment,
         payments::stripe_webhook,
         payments::list_payments,
+        assignment::take_order,
+        assignment::list_unassigned,
+        assignment::list_employees,
+        assignment::create_delegation,
+        assignment::create_help_request,
+        assignment::respond_delegation,
+        assignment::list_delegations,
     ),
     components(schemas(
         health::HealthResponse,
@@ -86,6 +94,11 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::InitiatePaymentRequest,
         crate::models::PaymentIntentResponse,
         crate::models::PaymentResponse,
+        crate::models::DelegationStatus,
+        crate::models::DelegationResponse,
+        crate::models::EmployeeListItem,
+        crate::models::CreateDelegationRequest,
+        crate::models::RespondDelegationRequest,
         crate::errors::ErrorResponse,
     )),
     modifiers(&SecurityAddon),
@@ -144,6 +157,9 @@ fn api_routes() -> Router<AppState> {
         .merge(auth::routes())
         .merge(notes::routes())
         .merge(services::routes())
+        /* assignment routes ANTES de orders: /orders/unassigned (literal) debe
+         * registrarse antes de /orders/:order_id (parámetro) para evitar conflicto */
+        .merge(assignment::routes())
         .merge(orders::routes())
         .merge(payments::routes())
 }

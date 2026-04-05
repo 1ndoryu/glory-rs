@@ -7,7 +7,7 @@ import type {UserRole} from '../api/auth';
 
 export type SeccionPanel =
     | 'proyectos' | 'servicios' | 'pagos' | 'perfil' | 'metodos-pago'
-    | 'asignados' | 'disponibles'
+    | 'asignados' | 'disponibles' | 'delegaciones'
     | 'todos-ordenes' | 'empleados' | 'config-servicios' | 'dashboard';
 
 export interface TabConfig {
@@ -56,6 +56,11 @@ const TABS_EMPLOYEE: TabConfig[] = [
         id: 'disponibles',
         label: 'Disponibles',
         descripcion: 'Ordenes sin asignar disponibles para tomar. Revisa requisitos y acepta nuevos proyectos.'
+    },
+    {
+        id: 'delegaciones',
+        label: 'Delegaciones',
+        descripcion: 'Solicitudes de delegación y ayuda entre empleados. Acepta, rechaza o delega órdenes.'
     },
     {
         id: 'perfil',

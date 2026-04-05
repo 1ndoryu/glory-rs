@@ -361,12 +361,7 @@ impl PaymentService {
         match order.payment_mode {
             PaymentMode::Full => {
                 /* Pago completo → todas las fases a Paid, orden a awaiting_assignment */
-                OrderRepository::update_order_status(
-                    pool,
-                    order.id,
-                    OrderStatus::AwaitingAssignment,
-                )
-                .await?;
+                OrderRepository::set_awaiting_assignment(pool, order.id).await?;
                 let phases = OrderRepository::list_order_phases(pool, order.id).await?;
                 for phase in phases {
                     if phase.status == PhaseStatus::PendingPayment
@@ -386,12 +381,7 @@ impl PaymentService {
 
                 if held_count >= 1 && order.status == OrderStatus::PendingPayment {
                     /* Primer 50% → awaiting_assignment, desbloquear primera mitad de fases */
-                    OrderRepository::update_order_status(
-                        pool,
-                        order.id,
-                        OrderStatus::AwaitingAssignment,
-                    )
-                    .await?;
+                    OrderRepository::set_awaiting_assignment(pool, order.id).await?;
                     let phases = OrderRepository::list_order_phases(pool, order.id).await?;
                     let midpoint = phases.len().div_ceil(2);
                     for (i, phase) in phases.iter().enumerate() {
@@ -433,12 +423,7 @@ impl PaymentService {
                 }
                 /* Si la orden estaba en pending_payment y la primera fase se pagó, avanzar */
                 if order.status == OrderStatus::PendingPayment {
-                    OrderRepository::update_order_status(
-                        pool,
-                        order.id,
-                        OrderStatus::AwaitingAssignment,
-                    )
-                    .await?;
+                    OrderRepository::set_awaiting_assignment(pool, order.id).await?;
                 }
             }
         }

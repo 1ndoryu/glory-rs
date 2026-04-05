@@ -11,6 +11,8 @@ import {SeccionPerfil} from '../components/panel/SeccionPerfil';
 import {SeccionMetodosPago} from '../components/panel/SeccionMetodosPago';
 import {SeccionProyectos} from '../components/panel/SeccionProyectos';
 import {SeccionPagos} from '../components/panel/SeccionPagos';
+import {SeccionDisponibles} from '../components/panel/SeccionDisponibles';
+import {SeccionDelegaciones} from '../components/panel/SeccionDelegaciones';
 import {SidebarPanel} from '../components/panel/SidebarPanel';
 import {PlaceholderSeccion} from '../components/panel/PlaceholderSeccion';
 import {obtenerTabsPorRol, seccionInicialPorRol, type SeccionPanel} from '../data/panel';
@@ -57,6 +59,12 @@ export const PanelIsland: React.FC = () => {
             /* [044A-38 Fase 3] Historial de pagos por orden */
             case 'pagos':
                 return <SeccionPagos />;
+            /* [044A-38 Fase 4] Órdenes disponibles para tomar (empleado) */
+            case 'disponibles':
+                return <SeccionDisponibles />;
+            /* [044A-38 Fase 4] Delegaciones entre empleados */
+            case 'delegaciones':
+                return <SeccionDelegaciones />;
             default:
                 return <PlaceholderSeccion tab={tabActual} />;
         }

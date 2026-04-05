@@ -1,0 +1,221 @@
+/* [044A-38 Fase 4] Estilos para SeccionDelegaciones.
+ * Tarjetas de delegación con badges de estado, botones aceptar/rechazar, responsive. */
+
+.delegContenedor {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.delegLista {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.delegCard {
+    background: var(--bg-primary);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    padding: var(--spacing-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    transition: border-color 0.2s ease;
+}
+
+.delegCard:hover {
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.delegCardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+}
+
+.delegCardInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+}
+
+.delegCardTipo {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: var(--text-xs);
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.delegCardTitulo {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--brand-white);
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.delegCardBadge {
+    font-size: var(--text-xs);
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.delegBadgeRequested {
+    background: rgba(251, 191, 36, 0.15);
+    color: #fbbf24;
+}
+
+.delegBadgeAccepted {
+    background: rgba(34, 197, 94, 0.15);
+    color: #22c55e;
+}
+
+.delegBadgeRejected {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+}
+
+.delegBadgeCompleted {
+    background: rgba(99, 102, 241, 0.15);
+    color: #818cf8;
+}
+
+.delegCardRazon {
+    font-size: var(--text-sm);
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0;
+    line-height: 1.4;
+}
+
+.delegCardMeta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    font-size: var(--text-xs);
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.delegCardAcciones {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-xs);
+}
+
+.delegBtnAceptar,
+.delegBtnRechazar {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 14px;
+    border: none;
+    border-radius: 8px;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+}
+
+.delegBtnAceptar:disabled,
+.delegBtnRechazar:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.delegBtnAceptar {
+    background: rgba(34, 197, 94, 0.15);
+    color: #22c55e;
+}
+
+.delegBtnAceptar:hover:not(:disabled) {
+    background: rgba(34, 197, 94, 0.25);
+}
+
+.delegBtnRechazar {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.delegBtnRechazar:hover:not(:disabled) {
+    background: rgba(239, 68, 68, 0.2);
+}
+
+.delegError {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: 8px;
+    font-size: var(--text-sm);
+}
+
+.delegLoading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-3xl) 0;
+    color: rgba(255, 255, 255, 0.4);
+    gap: var(--spacing-sm);
+}
+
+.delegSpinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-top-color: var(--bg-accent);
+    border-radius: 50%;
+    animation: delegSpin 0.8s linear infinite;
+}
+
+@keyframes delegSpin {
+    to { transform: rotate(360deg); }
+}
+
+.delegVacio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-3xl) 0;
+    color: rgba(255, 255, 255, 0.3);
+    text-align: center;
+    gap: var(--spacing-sm);
+}
+
+.delegVacio h3 {
+    margin: 0;
+    font-size: var(--text-md);
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.delegVacio p {
+    margin: 0;
+    font-size: var(--text-sm);
+}
+
+@media (max-width: 640px) {
+    .delegCardHeader {
+        flex-direction: column;
+    }
+
+    .delegCardAcciones {
+        flex-direction: column;
+    }
+
+    .delegBtnAceptar,
+    .delegBtnRechazar {
+        justify-content: center;
+    }
+}

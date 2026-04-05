@@ -386,4 +386,48 @@ impl OrderRepository {
 
         Ok((service_title, plan_name))
     }
+
+    /* ============================================================
+       [044A-38 Fase 4] ASIGNACIÓN Y AUTO-ASIGNACIÓN
+       ============================================================ */
+
+    /// Transiciona orden a `awaiting_assignment` y establece deadline de 24h para auto-asignación
+    pub async fn set_awaiting_assignment(
+        pool: &PgPool,
+        order_id: Uuid,
+    ) -> Result<Order, sqlx::Error> {
+        sqlx::query_as::<_, Order>(
+            "UPDATE orders SET status = 'awaiting_assignment', \
+             auto_assign_deadline = NOW() + INTERVAL '24 hours', \
+             updated_at = NOW() WHERE id = $1 RETURNING *",
+        )
+        .bind(order_id)
+        .fetch_one(pool)
+        .await
+    }
+
+    /// Órdenes que pasaron su deadline de auto-asignación (24h en `awaiting_assignment`)
+    pub async fn list_overdue_unassigned(pool: &PgPool) -> Result<Vec<Order>, sqlx::Error> {
+        sqlx::query_as::<_, Order>(
+            "SELECT * FROM orders WHERE status = 'awaiting_assignment' \
+             AND auto_assign_deadline IS NOT NULL AND auto_assign_deadline < NOW() \
+             ORDER BY auto_assign_deadline ASC",
+        )
+        .fetch_all(pool)
+        .await
+    }
+
+    /// Busca servicio por UUID (para resolver slug en auto-asignación)
+    pub async fn find_service_by_id(
+        pool: &PgPool,
+        service_id: Uuid,
+    ) -> Result<Option<ServiceRecord>, sqlx::Error> {
+        sqlx::query_as::<_, ServiceRecord>(
+            "SELECT id, slug, title, description, base_price_cents, currency, is_active, sort_order, created_at \
+             FROM services WHERE id = $1",
+        )
+        .bind(service_id)
+        .fetch_optional(pool)
+        .await
+    }
 }

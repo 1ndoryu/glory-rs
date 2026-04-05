@@ -1,8 +1,13 @@
+mod delegation;
 mod note;
 mod order;
 mod payment;
 mod user;
 
+pub use delegation::{
+    CreateDelegationRequest, Delegation, DelegationResponse, DelegationStatus, EmployeeListItem,
+    EmployeeProfile, RespondDelegationRequest,
+};
 pub use note::{CreateNoteRequest, Note, PaginatedNotes, PaginationParams, UpdateNoteRequest};
 pub use order::{
     Order, OrderPhase, OrderStatus, PaymentMode, PhaseStatus, ServicePlan, ServiceRecord,

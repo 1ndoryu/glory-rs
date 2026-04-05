@@ -1,5 +1,6 @@
 use glory_backend::config::AppConfig;
 use glory_backend::handlers;
+use glory_backend::services::AssignmentService;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -22,6 +23,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
 
     sqlx::migrate!().run(&pool).await?;
+
+    /* [044A-38 Fase 4] Background task: auto-asigna órdenes sin empleado tras 24h */
+    let bg_pool = pool.clone();
+    tokio::spawn(async move {
+        AssignmentService::auto_assign_loop(bg_pool).await;
+    });
 
     let addr = format!("{}:{}", config.host, config.port);
     tracing::info!("Servidor iniciando en {addr}");

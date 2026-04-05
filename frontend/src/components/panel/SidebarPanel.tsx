@@ -6,7 +6,7 @@
  */
 import React, {useState, useCallback} from 'react';
 import {useTranslation} from 'react-i18next';
-import {FolderOpen, Briefcase, Receipt, User, CreditCard, ClipboardList, PackageOpen, Users, Settings, LayoutDashboard, ArrowLeftRight} from 'lucide-react';
+import {FolderOpen, Briefcase, Receipt, User, CreditCard, ClipboardList, PackageOpen, Users, Settings, LayoutDashboard, ArrowLeftRight, ArrowRightLeft} from 'lucide-react';
 import {obtenerTabsPorRol, obtenerUsuarioActual, type SeccionPanel} from '../../data/panel';
 import {useAuthStore} from '../../stores/authStore';
 import {apiSwitchRole} from '../../api/auth';
@@ -27,6 +27,7 @@ const ICONOS_SECCION: Record<SeccionPanel, React.ElementType> = {
     'metodos-pago': CreditCard,
     'asignados': ClipboardList,
     'disponibles': PackageOpen,
+    'delegaciones': ArrowRightLeft,
     'todos-ordenes': ClipboardList,
     'empleados': Users,
     'config-servicios': Settings,
