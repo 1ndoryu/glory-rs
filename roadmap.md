@@ -41,12 +41,6 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 > Plan de chat: `Agente/planes/plan-live-chat-2026-04-04.md` (5 fases)
 > Plan de hosting: `Agente/planes/plan-hosting-coolify-2026-04-04.md` (5 fases)
 
-### Marketplace — Fase 5: Chat integrado con órdenes
-- Vincular chat_sessions con orders
-- Chat específico por orden
-- Chat pre-venta (IA)
-- Contexto de orden en IA
-
 ### Marketplace — Fase 6: Entregables y revisiones
 - Upload de archivos
 - Entrega por fase
