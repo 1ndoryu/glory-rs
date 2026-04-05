@@ -1,53 +1,40 @@
-/**
- * Componente: SeccionPlanesServicio
- * Muestra las tarjetas de precios (pricing cards) de un servicio.
- * Recibe el slug del servicio y renderiza los 3 tiers.
- * Conecta con Stripe Checkout cuando el plan tiene stripePriceId.
- */
+/* [044A-40] Componente: SeccionPlanesServicio
+ * Muestra las tarjetas de precios de un servicio.
+ * Al hacer click en CTA abre ModalCompra en vez de redirigir a /contacto/.
+ * Incluye botón "Conversar" debajo de cada CTA. */
 import React, {useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {obtenerPlanesServicio, type PlanServicio} from '../../data/planes/index';
 import {Button} from '../ui/Button';
 import {navegar} from '../../navegacionSPA';
+import {ModalCompra} from './ModalCompra';
 import './SeccionPlanesServicio.css';
 
 interface SeccionPlanesServicioProps {
     slug: string;
 }
 
-/*
- * Inicia el checkout de Stripe llamando al endpoint REST.
- * Si el plan no tiene stripePriceId, redirige al link de contacto.
- */
-/* [044A-1] TO-DO: Conectar con API Rust para Stripe checkout */
-async function iniciarCheckout(plan: PlanServicio): Promise<void> {
-    if (!plan.stripePriceId) {
-        navegar(plan.ctaLink);
-        return;
-    }
-
-    /* TO-DO: Implementar checkout via API Rust */
-    navegar(plan.ctaLink);
+interface TarjetaPlanProps {
+    plan: PlanServicio;
+    onSeleccionar: (plan: PlanServicio) => void;
 }
 
-const TarjetaPlan: React.FC<{plan: PlanServicio}> = ({plan}) => {
+const TarjetaPlan: React.FC<TarjetaPlanProps> = ({plan, onSeleccionar}) => {
     const {t} = useTranslation();
-    const [cargando, setCargando] = useState(false);
     const claseDestacado = plan.destacado ? 'tarjetaPlanDestacado' : '';
-    const clasePersonalizado = plan.esPersonalizado ? 'tarjetaPlanPersonalizado' : '';
 
-    const handleClick = async () => {
-        if (cargando) return;
-        setCargando(true);
-        try {
-            await iniciarCheckout(plan);
-        } finally {
-            setCargando(false);
-        }
+    const handleClickCTA = () => {
+        onSeleccionar(plan);
+    };
+
+    /* [044A-40] Botón conversar: abre chat con contexto del plan seleccionado */
+    const handleConversar = () => {
+        /* TO-DO: Abrir chat con contexto de servicio/plan. Por ahora redirige a contacto. */
+        navegar('/contacto/');
     };
 
     return (
-        <div className={`tarjetaPlan ${claseDestacado} ${clasePersonalizado}`}>
+        <div className={`tarjetaPlan ${claseDestacado}`}>
             {plan.destacado && <div className="tarjetaPlanBadge">{t('plans.recommended')}</div>}
 
             <div className="tarjetaPlanCabecera">
@@ -83,10 +70,12 @@ const TarjetaPlan: React.FC<{plan: PlanServicio}> = ({plan}) => {
                 <Button
                     variante={plan.destacado ? 'primario' : 'outline'}
                     tamano="mediano"
-                    onClick={handleClick}
-                    disabled={cargando}
+                    onClick={handleClickCTA}
                 >
-                    {cargando ? t('plans.processing') : plan.ctaTexto}
+                    {plan.ctaTexto}
+                </Button>
+                <Button variante="texto" className="tarjetaPlanConversar" onClick={handleConversar}>
+                    {t('plans.chat_with_us', 'Conversar')}
                 </Button>
             </div>
         </div>
@@ -96,6 +85,7 @@ const TarjetaPlan: React.FC<{plan: PlanServicio}> = ({plan}) => {
 export const SeccionPlanesServicio: React.FC<SeccionPlanesServicioProps> = ({slug}) => {
     const {t} = useTranslation();
     const datos = obtenerPlanesServicio(slug);
+    const [planSeleccionado, setPlanSeleccionado] = useState<PlanServicio | null>(null);
 
     if (!datos) return null;
 
@@ -108,10 +98,19 @@ export const SeccionPlanesServicio: React.FC<SeccionPlanesServicioProps> = ({slu
                 </div>
                 <div className="planesGrid">
                     {datos.planes.map(plan => (
-                        <TarjetaPlan key={plan.id} plan={plan} />
+                        <TarjetaPlan key={plan.id} plan={plan} onSeleccionar={setPlanSeleccionado} />
                     ))}
                 </div>
             </div>
+
+            {planSeleccionado && (
+                <ModalCompra
+                    plan={planSeleccionado}
+                    servicioSlug={datos.servicioSlug}
+                    abierto
+                    onCerrar={() => setPlanSeleccionado(null)}
+                />
+            )}
         </section>
     );
 };

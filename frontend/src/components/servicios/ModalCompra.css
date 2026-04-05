@@ -1,0 +1,91 @@
+/* [044A-40] Estilos específicos del modal de compra.
+ * El overlay y contenedor base vienen de Modal.css (componente ui/Modal).
+ * Aquí solo van estilos internos del contenido de compra. */
+
+.modalCompraResumen {
+    text-align: center;
+    margin-bottom: var(--spacing-lg);
+}
+
+.modalCompraTitulo {
+    font-family: var(--font-serif);
+    font-size: var(--text-xl);
+    margin-bottom: var(--spacing-xs);
+}
+
+.modalCompraDescripcion {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-md);
+}
+
+.modalCompraPrecio {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 4px;
+}
+
+.modalCompraPrecioCifra {
+    font-family: var(--font-serif);
+    font-size: var(--text-2xl);
+    font-weight: 700;
+}
+
+.modalCompraPrecioPeriodo {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+}
+
+.modalCompraAcciones {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.modalCompraAcciones button {
+    width: 100%;
+}
+
+.modalCompraAviso {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+    text-align: center;
+}
+
+.modalCompraAuth {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.modalCompraAuthTexto {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    text-align: center;
+    margin-bottom: var(--spacing-xs);
+}
+
+.modalCompraAuth button {
+    width: 100%;
+}
+
+.modalCompraProcesando {
+    text-align: center;
+    padding: var(--spacing-xl) 0;
+    color: var(--text-secondary);
+}
+
+.modalCompraError {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.modalCompraErrorTexto {
+    color: var(--color-error, #e53e3e);
+    font-size: var(--text-sm);
+}

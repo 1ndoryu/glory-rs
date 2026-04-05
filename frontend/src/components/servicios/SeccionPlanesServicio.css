@@ -197,6 +197,9 @@
 /* Accion (boton) */
 .tarjetaPlanAccion {
     margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
 }
 
 .tarjetaPlanAccion .botonBase {
@@ -204,10 +207,21 @@
     justify-content: center;
 }
 
-/* Tarjeta personalizada (borde diferente) */
-.tarjetaPlanPersonalizado {
-    border-style: dashed;
-    border-color: var(--border-light);
+/* [044A-40] Botón "Conversar" debajo del CTA principal */
+.tarjetaPlanConversar {
+    background: none;
+    border: none;
+    font-family: var(--font-primary);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: color 0.2s;
+}
+
+.tarjetaPlanConversar:hover {
+    color: var(--text-primary);
 }
 
 /* Responsive */

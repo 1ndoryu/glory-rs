@@ -39,14 +39,12 @@ export const ServicioIndividualIsland = ({titulo, descripcion, precio_desde, slu
     /* ID del servicio actual para excluirlo de relacionados */
     const servicioId = slug || titulo?.toLowerCase().replace(/\s+/g, '-') || '';
 
-    /* [044A-11] Obtener precio mínimo real de los planes del servicio en lugar de hardcodear $997.
-     * Si no hay planes o precio_desde viene por prop, usa ese. Sino busca el menor precio numérico. */
+    /* [044A-40] Obtener precio mínimo real de los planes del servicio. */
     const datosPlanes = obtenerPlanesServicio(servicioId);
     const precioMinimo = (() => {
         if (precio_desde) return precio_desde;
         if (!datosPlanes || datosPlanes.planes.length === 0) return '';
         const precios = datosPlanes.planes
-            .filter(p => !p.esPersonalizado)
             .map(p => {
                 const num = parseFloat(p.precio.replace(/[^0-9.]/g, ''));
                 return isNaN(num) ? Infinity : num;

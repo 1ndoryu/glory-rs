@@ -1,6 +1,7 @@
 /**
  * [044A-32] Planes de precios unificados.
- * Todos los planes de todos los servicios en un solo archivo para edicion rapida.
+ * [044A-40] Eliminados tiers "A medida" — ahora solo 2 tiers por servicio.
+ * El botón "Conversar" reemplaza la funcionalidad personalizada.
  * Servicios activos: Web, Apps, IA, Branding, E-commerce, SEO, Marketing.
  */
 import {type PlanesDeServicio, incluida, noIncluida} from './tipos';
@@ -44,24 +45,6 @@ export const PLANES_WEB: PlanesDeServicio = {
                 incluida('SEO on-page completo'),
                 incluida('Panel administrable (CMS)'),
             ]
-        },
-        {
-            id: 'web-personalizado',
-            nombre: 'Personalizado',
-            precio: 'A medida',
-            descripcion: 'Definimos juntos el alcance y funcionalidades.',
-            ctaTexto: 'Hablar con nosotros',
-            ctaLink: '/contacto/',
-            esPersonalizado: true,
-            caracteristicas: [
-                incluida('Paginas ilimitadas'),
-                incluida('Diseno a medida'),
-                incluida('Integraciones custom'),
-                incluida('E-commerce opcional'),
-                incluida('Soporte prioritario'),
-                incluida('Mantenimiento mensual'),
-                incluida('Estrategia SEO completa'),
-            ]
         }
     ]
 };
@@ -104,24 +87,6 @@ export const PLANES_APPS: PlanesDeServicio = {
                 incluida('Panel de administracion'),
                 incluida('2 integraciones externas'),
                 incluida('1 mes soporte post-lanzamiento'),
-            ]
-        },
-        {
-            id: 'apps-personalizado',
-            nombre: 'Personalizado',
-            precio: 'A medida',
-            descripcion: 'Arquitectura y funcionalidades a tu medida.',
-            ctaTexto: 'Hablar con nosotros',
-            ctaLink: '/contacto/',
-            esPersonalizado: true,
-            caracteristicas: [
-                incluida('Multiplataforma'),
-                incluida('Funcionalidades ilimitadas'),
-                incluida('Arquitectura escalable'),
-                incluida('CI/CD y testing'),
-                incluida('Integraciones ilimitadas'),
-                incluida('Soporte y mantenimiento'),
-                incluida('Consultoria tecnica'),
             ]
         }
     ]
@@ -168,24 +133,6 @@ export const PLANES_IA: PlanesDeServicio = {
                 incluida('Dashboard de analisis'),
                 incluida('API personalizada'),
             ]
-        },
-        {
-            id: 'ia-personalizado',
-            nombre: 'Personalizado',
-            precio: 'A medida',
-            descripcion: 'Solucion de IA a la medida de tu negocio.',
-            ctaTexto: 'Hablar con nosotros',
-            ctaLink: '/contacto/',
-            esPersonalizado: true,
-            caracteristicas: [
-                incluida('Agentes ilimitados'),
-                incluida('Modelo fine-tuned'),
-                incluida('Integracion total'),
-                incluida('Datos propietarios'),
-                incluida('SLA garantizado'),
-                incluida('Soporte dedicado 24/7'),
-                incluida('Consultoria IA estrategica'),
-            ]
         }
     ]
 };
@@ -228,24 +175,6 @@ export const PLANES_BRANDING: PlanesDeServicio = {
                 incluida('Papeleria corporativa'),
                 incluida('Kit redes sociales'),
                 incluida('Iconografia personalizada'),
-            ]
-        },
-        {
-            id: 'branding-personalizado',
-            nombre: 'Personalizado',
-            precio: 'A medida',
-            descripcion: 'Estrategia de marca integral.',
-            ctaTexto: 'Hablar con nosotros',
-            ctaLink: '/contacto/',
-            esPersonalizado: true,
-            caracteristicas: [
-                incluida('Brand strategy completa'),
-                incluida('Naming y tagline'),
-                incluida('Identidad visual total'),
-                incluida('Guia de voz y tono'),
-                incluida('Templates editables'),
-                incluida('Fotografias de marca'),
-                incluida('Consultoria continua'),
             ]
         }
     ]
@@ -290,24 +219,6 @@ export const PLANES_ECOMMERCE: PlanesDeServicio = {
                 incluida('Cupones y descuentos'),
                 noIncluida('Marketplace multi-vendor'),
             ]
-        },
-        {
-            id: 'ecommerce-personalizado',
-            nombre: 'Personalizado',
-            precio: 'A medida',
-            descripcion: 'Solucion e-commerce a medida para operaciones complejas.',
-            ctaTexto: 'Hablar con nosotros',
-            ctaLink: '/contacto/',
-            esPersonalizado: true,
-            caracteristicas: [
-                incluida('Arquitectura personalizada'),
-                incluida('Integraciones ERP/CRM'),
-                incluida('Multi-idioma y multi-moneda'),
-                incluida('Marketplace multi-vendor'),
-                incluida('Analytics avanzado'),
-                incluida('Soporte prioritario 24/7'),
-                incluida('Migracion de datos'),
-            ]
         }
     ]
 };
@@ -351,24 +262,6 @@ export const PLANES_SEO: PlanesDeServicio = {
                 incluida('Reportes semanales'),
                 incluida('Analisis de competencia'),
             ]
-        },
-        {
-            id: 'seo-personalizado',
-            nombre: 'Personalizado',
-            precio: 'A medida',
-            descripcion: 'Programa SEO enterprise.',
-            ctaTexto: 'Hablar con nosotros',
-            ctaLink: '/contacto/',
-            esPersonalizado: true,
-            caracteristicas: [
-                incluida('Estrategia multi-pais'),
-                incluida('Content marketing integrado'),
-                incluida('Link building premium'),
-                incluida('SEO tecnico avanzado'),
-                incluida('CRO (optimizacion conversion)'),
-                incluida('Equipo SEO dedicado'),
-                incluida('Consultoria estrategica'),
-            ]
         }
     ]
 };
@@ -411,24 +304,6 @@ export const PLANES_MARKETING: PlanesDeServicio = {
                 incluida('Estrategia de contenidos'),
                 incluida('Reportes semanales'),
                 incluida('A/B testing campanas'),
-            ]
-        },
-        {
-            id: 'mkt-personalizado',
-            nombre: 'Personalizado',
-            precio: 'A medida',
-            descripcion: 'Marketing 360 para tu empresa.',
-            ctaTexto: 'Hablar con nosotros',
-            ctaLink: '/contacto/',
-            esPersonalizado: true,
-            caracteristicas: [
-                incluida('Omni-canal completo'),
-                incluida('Growth hacking'),
-                incluida('Influencer marketing'),
-                incluida('Video marketing'),
-                incluida('Automation funnels'),
-                incluida('Equipo dedicado'),
-                incluida('Consultoria estrategica'),
             ]
         }
     ]
