@@ -45,6 +45,6 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 - Termina todos los planes.
 
-- Con el plan de chat, revisa que pude haberme olvidado, tambien el plan de servicio de hosting que me olvide, queremos ofrecer hosting y que los clientes pueda comprar hosting y gestionarlos. Y trabaja en todo eso que posiblemente olvide. 
+- Con el plan de chat, revisa que pude haberme olvidado, tambien el plan de servicio de hosting que me olvide, queremos ofrecer hosting y que los clientes pueda comprar hosting y gestionarlos. Y trabaja en todo eso que posiblemente olvide.  
 
-- Revisa que en todo el codebase se usen los componentes Input y Textarea en vez de los nativos.
+- No tengo forma de probar el chat, otro usuario y que me mande un mensaje a mi admin@admin.com para ver como se ven los mensajes.
