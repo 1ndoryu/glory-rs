@@ -41,10 +41,6 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 > Plan de chat: `Agente/planes/plan-live-chat-2026-04-04.md` (5 fases)
 > Plan de hosting: `Agente/planes/plan-hosting-coolify-2026-04-04.md` (5 fases)
 
-### Marketplace — Fase 9: Notificaciones
-- BD + endpoints + WebSocket real-time
-- Email para críticas
-
 ### Marketplace — Fase 10: Dashboard admin
 - Revenue, métricas, alertas
 
@@ -61,3 +57,9 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 - Con el plan de chat, revisa que pude haberme olvidado, tambien el plan de servicio de hosting que me olvide, queremos ofrecer hosting y que los clientes pueda comprar hosting y gestionarlos. Y trabaja en todo eso que posiblemente olvide. 
 
 - En el panel de admin hace falta algo para ver los usuarios registrados, con buscador, y filtro, con capacidad de banear, cambiar de cliente a empleado, etc.
+
+- Parece que no hay mensajes claros de errores cuando se inicia sesion con la contraseña incorrecta. 
+
+- No se si ya existe pero hace falta un toast de notificaciones. 
+
+- Respecto al diseño de ordenCard, quita la numeración, el nombre del plan, la barra de progreso y fases, falta imagen del servicio, 
