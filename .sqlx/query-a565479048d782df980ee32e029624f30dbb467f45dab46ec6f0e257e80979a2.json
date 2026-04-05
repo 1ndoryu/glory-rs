@@ -1,0 +1,44 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n                u.id AS \"employee_id!\",\n                u.email AS \"email!\",\n                COALESCE(\n                    (SELECT COUNT(*) FROM orders o WHERE o.assigned_employee_id = u.id\n                     AND o.status IN ('in_progress', 'under_review', 'payment_held')),\n                    0\n                ) AS \"active_orders: i64\",\n                COALESCE(\n                    (SELECT COUNT(*) FROM orders o WHERE o.assigned_employee_id = u.id\n                     AND o.status = 'completed'),\n                    0\n                ) AS \"completed_orders: i64\",\n                ep.average_rating AS \"average_rating: f64\"\n            FROM users u\n            LEFT JOIN employee_profiles ep ON ep.user_id = u.id\n            WHERE u.role = 'employee'\n            ORDER BY u.email",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "employee_id!",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "email!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "active_orders: i64",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 3,
+        "name": "completed_orders: i64",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 4,
+        "name": "average_rating: f64",
+        "type_info": "Numeric"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      null,
+      null,
+      true
+    ]
+  },
+  "hash": "a565479048d782df980ee32e029624f30dbb467f45dab46ec6f0e257e80979a2"
+}

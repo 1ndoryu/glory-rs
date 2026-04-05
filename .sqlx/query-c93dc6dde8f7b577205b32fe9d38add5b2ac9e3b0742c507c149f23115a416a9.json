@@ -1,0 +1,44 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n                COUNT(*) AS \"total: i64\",\n                COUNT(*) FILTER (WHERE status IN ('in_progress', 'under_review', 'payment_held')) AS \"active: i64\",\n                COUNT(*) FILTER (WHERE status = 'completed') AS \"completed: i64\",\n                COUNT(*) FILTER (WHERE status = 'cancelled') AS \"cancelled: i64\",\n                COUNT(*) FILTER (WHERE status = 'awaiting_assignment') AS \"awaiting_assignment: i64\"\n            FROM orders",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "total: i64",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "active: i64",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 2,
+        "name": "completed: i64",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 3,
+        "name": "cancelled: i64",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 4,
+        "name": "awaiting_assignment: i64",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "c93dc6dde8f7b577205b32fe9d38add5b2ac9e3b0742c507c149f23115a416a9"
+}

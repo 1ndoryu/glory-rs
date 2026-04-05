@@ -1,4 +1,5 @@
 mod chat;
+mod dashboard;
 mod delegation;
 mod deliverable;
 mod note;
@@ -10,6 +11,7 @@ mod review;
 mod user;
 
 pub use chat::ChatRepository;
+pub use dashboard::DashboardRepository;
 pub use delegation::{DelegationRepository, EmployeeListItemRow};
 pub use deliverable::{CreateDeliverableParams, DeliverableRepository};
 pub use note::NoteRepository;

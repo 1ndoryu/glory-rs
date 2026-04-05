@@ -1,4 +1,5 @@
 mod chat;
+mod dashboard;
 mod delegation;
 mod deliverable;
 mod note;
@@ -39,5 +40,8 @@ pub use review::{
 pub use notification::{
     CreateNotification, MarkReadBody, Notification, NotificationResponse,
     UnreadCountResponse, WsNotification,
+};
+pub use dashboard::{
+    DashboardAlerts, DashboardResponse, EmployeePerformance, OrderCounts, RevenueStats,
 };
 pub use user::{AuthResponse, LoginRequest, RegisterRequest, User, UserResponse, UserRole};

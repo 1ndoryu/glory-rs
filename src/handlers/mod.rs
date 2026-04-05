@@ -3,6 +3,7 @@
 mod assignment;
 mod auth;
 mod chat;
+mod dashboard;
 mod deliverables;
 mod health;
 mod notes;
@@ -92,6 +93,7 @@ impl utoipa::Modify for SecurityAddon {
         notifications::get_unread_count,
         notifications::mark_read,
         notifications::mark_all_read,
+        dashboard::get_dashboard,
     ),
     components(schemas(
         health::HealthResponse,
@@ -142,6 +144,11 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::UnreadCountResponse,
         crate::models::MarkReadBody,
         crate::models::WsNotification,
+        crate::models::DashboardResponse,
+        crate::models::RevenueStats,
+        crate::models::OrderCounts,
+        crate::models::EmployeePerformance,
+        crate::models::DashboardAlerts,
         crate::errors::ErrorResponse,
     )),
     modifiers(&SecurityAddon),
@@ -221,4 +228,5 @@ fn api_routes() -> Router<AppState> {
         .merge(refunds::routes())
         .merge(reviews::routes())
         .merge(notifications::routes())
+        .merge(dashboard::routes())
 }
