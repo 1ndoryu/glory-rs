@@ -4,6 +4,8 @@
 import React, {useRef} from 'react';
 import {useTranslation} from 'react-i18next';
 import {Button} from '../ui/Button';
+import {Input} from '../ui/Input';
+import {Textarea} from '../ui/Textarea';
 import {usePerfil} from '../../hooks/usePerfil';
 import './SeccionPerfil.css';
 
@@ -71,7 +73,7 @@ export const SeccionPerfil: React.FC = () => {
                 <div className="perfilFormGrid">
                     <div className="perfilCampo">
                         <label htmlFor="perfilNombre" className="perfilCampoEtiqueta">{t('panel.display_name')}</label>
-                        <input
+                        <Input
                             type="text"
                             id="perfilNombre"
                             value={estado.nombre}
@@ -82,7 +84,7 @@ export const SeccionPerfil: React.FC = () => {
                     </div>
                     <div className="perfilCampo">
                         <label htmlFor="perfilEmail" className="perfilCampoEtiqueta">{t('panel.email')}</label>
-                        <input
+                        <Input
                             type="email"
                             id="perfilEmail"
                             value={perfil?.email || ''}
@@ -94,7 +96,7 @@ export const SeccionPerfil: React.FC = () => {
 
                 <div className="perfilCampo">
                     <label htmlFor="perfilDescripcion" className="perfilCampoEtiqueta">{t('panel.bio_label')}</label>
-                    <textarea
+                    <Textarea
                         id="perfilDescripcion"
                         value={estado.descripcion}
                         onChange={(e) => actualizarCampo('descripcion', e.target.value)}
@@ -108,7 +110,7 @@ export const SeccionPerfil: React.FC = () => {
                 <div className="perfilFormGrid">
                     <div className="perfilCampo">
                         <label htmlFor="perfilLinkedin" className="perfilCampoEtiqueta">LinkedIn</label>
-                        <input
+                        <Input
                             type="url"
                             id="perfilLinkedin"
                             value={estado.linkedin}
@@ -119,7 +121,7 @@ export const SeccionPerfil: React.FC = () => {
                     </div>
                     <div className="perfilCampo">
                         <label htmlFor="perfilTwitter" className="perfilCampoEtiqueta">Twitter / X</label>
-                        <input
+                        <Input
                             type="url"
                             id="perfilTwitter"
                             value={estado.twitter}
@@ -130,7 +132,7 @@ export const SeccionPerfil: React.FC = () => {
                     </div>
                     <div className="perfilCampo">
                         <label htmlFor="perfilWebsite" className="perfilCampoEtiqueta">{t('panel.website')}</label>
-                        <input
+                        <Input
                             type="url"
                             id="perfilWebsite"
                             value={estado.website}

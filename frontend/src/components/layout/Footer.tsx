@@ -7,6 +7,7 @@ import React, {useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {spaClick} from '../../navegacionSPA';
 import {Button} from '../ui/Button';
+import {Input} from '../ui/Input';
 import {LanguageSelector} from '../ui/LanguageSelector';
 import {ENLACES_FOOTER} from '../../data/navegacion';
 import './Footer.css';
@@ -94,7 +95,7 @@ export const Footer: React.FC = () => {
                             <>
                                 <form className="footerForm" onSubmit={handleSubscribe} aria-labelledby="newsletter-titulo">
                                     <label htmlFor="footer-email" className="soloLectores">Correo electrónico</label>
-                                    <input
+                                    <Input
                                         id="footer-email"
                                         type="email"
                                         placeholder={t('footer.newsletter_placeholder')}

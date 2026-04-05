@@ -10,6 +10,8 @@ import './ContactoIsland.css';
 import {LayoutPagina} from '../components/layout/LayoutPagina';
 import {SEOHead} from '../components/seo/SEOHead';
 import {Button} from '../components/ui/Button';
+import {Input} from '../components/ui/Input';
+import {Textarea} from '../components/ui/Textarea';
 import {INFO_CONTACTO} from '../data/contacto';
 
 interface ContactoIslandProps {
@@ -97,7 +99,7 @@ export const ContactoIsland = ({titulo}: ContactoIslandProps): JSX.Element => {
                                 {/* Nombre */}
                                 <div className="campoCampo">
                                     <label htmlFor="nombre" className="campoEtiqueta">{t('contact.name_label')}</label>
-                                    <input
+                                    <Input
                                         type="text"
                                         id="nombre"
                                         name="nombre"
@@ -112,7 +114,7 @@ export const ContactoIsland = ({titulo}: ContactoIslandProps): JSX.Element => {
                                 {/* Email */}
                                 <div className="campoCampo">
                                     <label htmlFor="email" className="campoEtiqueta">{t('contact.email_label')}</label>
-                                    <input
+                                    <Input
                                         type="email"
                                         id="email"
                                         name="email"
@@ -127,7 +129,7 @@ export const ContactoIsland = ({titulo}: ContactoIslandProps): JSX.Element => {
                                 {/* Teléfono */}
                                 <div className="campoCampo">
                                     <label htmlFor="telefono" className="campoEtiqueta">{t('contact.phone_label')}</label>
-                                    <input
+                                    <Input
                                         type="tel"
                                         id="telefono"
                                         name="telefono"
@@ -158,7 +160,7 @@ export const ContactoIsland = ({titulo}: ContactoIslandProps): JSX.Element => {
                             {/* Descripción - campo completo */}
                             <div className="campoCampo campoCompleto">
                                 <label htmlFor="descripcion" className="campoEtiqueta">{t('contact.project_label')}</label>
-                                <textarea
+                                <Textarea
                                     id="descripcion"
                                     name="descripcion"
                                     value={formulario.descripcion}

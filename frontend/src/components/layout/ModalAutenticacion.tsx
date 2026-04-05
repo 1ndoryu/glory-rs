@@ -9,6 +9,7 @@
 import React from 'react';
 import {useTranslation} from 'react-i18next';
 import {Button} from '../ui/Button';
+import {Input} from '../ui/Input';
 import {useAutenticacion} from '../../hooks/useAutenticacion';
 import './ModalAutenticacion.css';
 
@@ -68,7 +69,7 @@ export const ModalAutenticacion: React.FC<ModalAutenticacionProps> = ({abierto, 
                     <form className="modalFormulario" onSubmit={handleLogin}>
                         <div className="modalCampo">
                             <label htmlFor="loginEmail" className="modalEtiqueta">{t('auth.email_label')}</label>
-                            <input
+                            <Input
                                 type="email"
                                 id="loginEmail"
                                 value={login.email}
@@ -80,7 +81,7 @@ export const ModalAutenticacion: React.FC<ModalAutenticacionProps> = ({abierto, 
                         </div>
                         <div className="modalCampo">
                             <label htmlFor="loginPassword" className="modalEtiqueta">{t('auth.password_label')}</label>
-                            <input
+                            <Input
                                 type="password"
                                 id="loginPassword"
                                 value={login.password}
@@ -122,7 +123,7 @@ export const ModalAutenticacion: React.FC<ModalAutenticacionProps> = ({abierto, 
                     <form className="modalFormulario" onSubmit={handleRegistro}>
                         <div className="modalCampo">
                             <label htmlFor="regNombre" className="modalEtiqueta">{t('auth.name_label')}</label>
-                            <input
+                            <Input
                                 type="text"
                                 id="regNombre"
                                 value={registro.nombre}
@@ -134,7 +135,7 @@ export const ModalAutenticacion: React.FC<ModalAutenticacionProps> = ({abierto, 
                         </div>
                         <div className="modalCampo">
                             <label htmlFor="regEmail" className="modalEtiqueta">{t('auth.email_label')}</label>
-                            <input
+                            <Input
                                 type="email"
                                 id="regEmail"
                                 value={registro.email}
@@ -146,7 +147,7 @@ export const ModalAutenticacion: React.FC<ModalAutenticacionProps> = ({abierto, 
                         </div>
                         <div className="modalCampo">
                             <label htmlFor="regPassword" className="modalEtiqueta">{t('auth.password_label')}</label>
-                            <input
+                            <Input
                                 type="password"
                                 id="regPassword"
                                 value={registro.password}
@@ -159,7 +160,7 @@ export const ModalAutenticacion: React.FC<ModalAutenticacionProps> = ({abierto, 
                         </div>
                         <div className="modalCampo">
                             <label htmlFor="regConfirmar" className="modalEtiqueta">{t('auth.confirm_password')}</label>
-                            <input
+                            <Input
                                 type="password"
                                 id="regConfirmar"
                                 value={registro.confirmar}
@@ -207,7 +208,7 @@ export const ModalAutenticacion: React.FC<ModalAutenticacionProps> = ({abierto, 
                                 <p className="modalDescripcion">{t('auth.recover_desc')}</p>
                                 <div className="modalCampo">
                                     <label htmlFor="recEmail" className="modalEtiqueta">{t('auth.email_label')}</label>
-                                    <input
+                                    <Input
                                         type="email"
                                         id="recEmail"
                                         value={recuperar.email}

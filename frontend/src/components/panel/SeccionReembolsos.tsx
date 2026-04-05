@@ -7,6 +7,7 @@ import { useRefunds } from '../../hooks/useRefunds';
 import { REFUND_STATUS_LABELS, REFUND_STATUS_CLASS } from '../../api/refunds';
 import { formatPrice } from '../../api/orders';
 import type { RefundResponse } from '../../api/refunds';
+import { Textarea } from '../ui/Textarea';
 import './SeccionReembolsos.css';
 
 export function SeccionReembolsos() {
@@ -95,7 +96,7 @@ export function SeccionReembolsos() {
                             <div className="reembolsoAcciones">
                                 {refundActivo?.id === r.id ? (
                                     <div className="reembolsoFormRevision">
-                                        <textarea
+                                        <Textarea
                                             className="reembolsoTextarea"
                                             placeholder="Respuesta al cliente (opcional)..."
                                             value={respuestaAdmin}

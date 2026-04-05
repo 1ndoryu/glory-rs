@@ -6,6 +6,7 @@
 import React from 'react';
 import {useTranslation} from 'react-i18next';
 import {Search} from 'lucide-react';
+import {Input} from '../ui/Input';
 import {FiltroCategoria} from '../../types/navegacion';
 import './BarraFiltros.css';
 
@@ -43,7 +44,7 @@ export const BarraFiltros: React.FC<BarraFiltrosProps> = ({categorias, categoria
             </div>
             <div className="filtroBusqueda">
                 <Search className="busquedaIcono" />
-                <input type="text" className="busquedaInput" placeholder={t('services_page.search_placeholder')} value={busqueda} onChange={e => onBusquedaChange(e.target.value)} />
+                <Input type="text" className="busquedaInput" placeholder={t('services_page.search_placeholder')} value={busqueda} onChange={e => onBusquedaChange(e.target.value)} />
             </div>
         </div>
     );

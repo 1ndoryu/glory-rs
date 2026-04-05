@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import {Button} from '../ui/Button';
+import {Input} from '../ui/Input';
 import './SeccionMetodosPago.css';
 
 export const SeccionMetodosPago: React.FC = () => {
@@ -35,23 +36,23 @@ export const SeccionMetodosPago: React.FC = () => {
                 <div className="metodosPagoGrid">
                     <div className="metodosPagoCampo">
                         <label htmlFor="pagoNombre" className="metodosPagoEtiqueta">Nombre completo</label>
-                        <input type="text" id="pagoNombre" placeholder="Nombre en la tarjeta" className="metodosPagoInput" />
+                        <Input type="text" id="pagoNombre" placeholder="Nombre en la tarjeta" className="metodosPagoInput" />
                     </div>
                     <div className="metodosPagoCampo">
                         <label htmlFor="pagoPais" className="metodosPagoEtiqueta">Pais</label>
-                        <input type="text" id="pagoPais" placeholder="Pais" className="metodosPagoInput" />
+                        <Input type="text" id="pagoPais" placeholder="Pais" className="metodosPagoInput" />
                     </div>
                     <div className="metodosPagoCampo">
                         <label htmlFor="pagoDireccion" className="metodosPagoEtiqueta">Direccion</label>
-                        <input type="text" id="pagoDireccion" placeholder="Calle y numero" className="metodosPagoInput" />
+                        <Input type="text" id="pagoDireccion" placeholder="Calle y numero" className="metodosPagoInput" />
                     </div>
                     <div className="metodosPagoCampo">
                         <label htmlFor="pagoCiudad" className="metodosPagoEtiqueta">Ciudad</label>
-                        <input type="text" id="pagoCiudad" placeholder="Ciudad" className="metodosPagoInput" />
+                        <Input type="text" id="pagoCiudad" placeholder="Ciudad" className="metodosPagoInput" />
                     </div>
                     <div className="metodosPagoCampo">
                         <label htmlFor="pagoCodigoPostal" className="metodosPagoEtiqueta">Codigo postal</label>
-                        <input type="text" id="pagoCodigoPostal" placeholder="00000" className="metodosPagoInput" />
+                        <Input type="text" id="pagoCodigoPostal" placeholder="00000" className="metodosPagoInput" />
                     </div>
                 </div>
                 <div className="metodosPagoAcciones">

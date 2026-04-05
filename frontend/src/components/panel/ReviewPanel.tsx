@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { Star, MessageSquare, Loader2 } from 'lucide-react';
 import { useOrderReview, useReviews } from '../../hooks/useReviews';
 import { useReviewForm } from '../../hooks/useReviewForm';
+import { Textarea } from '../ui/Textarea';
 import './ReviewPanel.css';
 
 interface ReviewPanelProps {
@@ -83,7 +84,7 @@ export function ReviewPanel({ orderId, effectiveRole }: ReviewPanelProps) {
                 {/* Formulario de respuesta para empleado */}
                 {effectiveRole === 'employee' && !review.employee_response && (
                     <div className="reviewFormResponder">
-                        <textarea
+                        <Textarea
                             className="reviewTextarea"
                             placeholder="Escribe tu respuesta..."
                             value={respuesta}
@@ -125,7 +126,7 @@ export function ReviewPanel({ orderId, effectiveRole }: ReviewPanelProps) {
                         </button>
                     ))}
                 </div>
-                <textarea
+                <Textarea
                     className="reviewTextarea"
                     placeholder="Cuéntanos tu experiencia (opcional)..."
                     value={form.comment}

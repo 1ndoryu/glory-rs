@@ -13,6 +13,7 @@ import {
 } from '../../api/payments';
 import { formatPrice } from '../../api/orders';
 import { useAuthStore } from '../../stores/authStore';
+import { Textarea } from '../ui/Textarea';
 import './SeccionPagos.css';
 
 export function SeccionPagos() {
@@ -144,7 +145,7 @@ export function SeccionPagos() {
                         <p className="pagoModalDescripcion">
                             Describe el motivo de tu solicitud de reembolso. Un administrador la revisará.
                         </p>
-                        <textarea
+                        <Textarea
                             className="pagoModalTextarea"
                             placeholder="Motivo del reembolso..."
                             value={refundRazon}

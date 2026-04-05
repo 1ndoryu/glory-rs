@@ -4,6 +4,7 @@
 import {Upload, Download, FileText, Package, X} from 'lucide-react';
 import {formatFileSize} from '../../api/deliverables';
 import {useEntregablesPanel} from '../../hooks/useEntregablesPanel';
+import {Textarea} from '../ui/Textarea';
 import './EntregablesPanel.css';
 
 interface EntregablesPanelProps {
@@ -49,7 +50,7 @@ export function EntregablesPanel({orderId, phaseNumber, canDeliver}: Entregables
                             ))}
                         </ul>
                     )}
-                    <textarea
+                    <Textarea
                         className="entregablesNotes"
                         placeholder="Notas opcionales sobre la entrega..."
                         value={notes}

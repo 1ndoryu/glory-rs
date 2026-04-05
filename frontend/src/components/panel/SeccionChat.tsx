@@ -12,6 +12,7 @@ import {
     type ChatSession,
     type ChatMessage,
 } from '../../api/chat';
+import {Textarea} from '../ui/Textarea';
 import './SeccionChat.css';
 
 export const SeccionChat: React.FC = () => {
@@ -130,7 +131,7 @@ export const SeccionChat: React.FC = () => {
                         </div>
 
                         <div className="chatInputArea">
-                            <textarea
+                            <Textarea
                                 className="chatInput"
                                 value={input}
                                 onChange={e => setInput(e.target.value)}
