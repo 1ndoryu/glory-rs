@@ -41,9 +41,9 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 > Plan de chat: `Agente/planes/plan-live-chat-2026-04-04.md` (5 fases) — ✅ completado (streaming IA = mejora futura)
 > Plan de hosting: `Agente/planes/plan-hosting-coolify-2026-04-04.md` (5 fases) — Fases 3-4 ✅, Fases 1-2-5 bloqueadas por infraestructura externa (VPS2, DNS, Google Drive OAuth)
 
-(sin tareas pendientes)
-
-- El modal de chat de ia no tiene sentido que sea el fondo de color negro
-- Habia dicho antes que todos los servicios tienen que tener planes y a todos les falta 1 plan, tiene que ser Basico, Medio, y Avanzado. 
-- Nada en modalCompraResumen necesita (--font-serif)
-- Las cosas en modalCompraResumen deberían estar separadas gap y en columna, no con margenes.
+- 054A-19: Arregla todo lo que indica Code Sentinel - Reporte de Workspace, y los falsos positivos arreglalos en la extension
+- 054A-20: El modal de chat de ia no tiene sentido que sea el fondo de color negro
+- 054A-21: Todos los servicios tienen que tener 3 planes: Basico, Medio, y Avanzado (a todos les falta 1 plan)
+- 054A-22: Nada en modalCompraResumen necesita (--font-serif)
+- 054A-23: Las cosas en modalCompraResumen deberían estar separadas gap y en columna, no con margenes
+- Creo que la mejor forma que en vez pedir que el usuario se registre, simplemente se cree una cuanta apartir del correo con el que se ponga en la compra y al comprar, ya este logeado, luego el usuario puede elegir o cambiar su contraseña. 
