@@ -41,11 +41,6 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 > Plan de chat: `Agente/planes/plan-live-chat-2026-04-04.md` (5 fases)
 > Plan de hosting: `Agente/planes/plan-hosting-coolify-2026-04-04.md` (5 fases)
 
-### Marketplace — Fase 7: Reembolsos
-- Solicitud con razón
-- Admin aprueba/rechaza
-- Stripe refund automático
-
 ### Marketplace — Fase 8: Reviews
 - Rating 1-5 + comentario
 - Respuesta del empleado
