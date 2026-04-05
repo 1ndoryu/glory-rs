@@ -158,6 +158,7 @@ impl OrderService {
             id: order.id,
             order_number: order.order_number,
             service_title: svc.title,
+            service_slug: svc.slug,
             plan_name: plan.name,
             payment_mode: order.payment_mode,
             base_price_cents: order.base_price_cents,
@@ -187,13 +188,14 @@ impl OrderService {
         #[allow(clippy::cast_possible_truncation, clippy::cast_possible_wrap)]
         let total_phases = phases.len() as i32;
 
-        let (svc_title, plan_name) =
+        let (svc_title, svc_slug, plan_name) =
             OrderRepository::get_order_display_info(pool, order.service_id, order.plan_id).await?;
 
         let response = OrderResponse {
             id: order.id,
             order_number: order.order_number,
             service_title: svc_title,
+            service_slug: svc_slug,
             plan_name,
             payment_mode: order.payment_mode,
             base_price_cents: order.base_price_cents,
@@ -230,7 +232,7 @@ impl OrderService {
 
         let mut result = Vec::with_capacity(orders.len());
         for order in orders {
-            let (svc_title, plan_name) =
+            let (svc_title, svc_slug, plan_name) =
                 OrderRepository::get_order_display_info(pool, order.service_id, order.plan_id)
                     .await?;
             let phases = OrderRepository::list_order_phases(pool, order.id).await?;
@@ -239,6 +241,7 @@ impl OrderService {
                 id: order.id,
                 order_number: order.order_number,
                 service_title: svc_title,
+                service_slug: svc_slug,
                 plan_name,
                 payment_mode: order.payment_mode,
                 base_price_cents: order.base_price_cents,

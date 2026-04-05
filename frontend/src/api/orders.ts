@@ -33,6 +33,7 @@ export interface OrderResponse {
     id: string;
     order_number: number;
     service_title: string;
+    service_slug: string;
     plan_name: string;
     payment_mode: PaymentMode;
     base_price_cents: number;

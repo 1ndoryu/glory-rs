@@ -170,6 +170,7 @@ pub struct OrderResponse {
     pub id: Uuid,
     pub order_number: i32,
     pub service_title: String,
+    pub service_slug: String,
     pub plan_name: String,
     pub payment_mode: PaymentMode,
     pub base_price_cents: i32,

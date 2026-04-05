@@ -1,11 +1,16 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT title FROM services WHERE id = $1",
+  "query": "SELECT title, slug FROM services WHERE id = $1",
   "describe": {
     "columns": [
       {
         "ordinal": 0,
         "name": "title",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 1,
+        "name": "slug",
         "type_info": "Varchar"
       }
     ],
@@ -15,8 +20,9 @@
       ]
     },
     "nullable": [
+      false,
       false
     ]
   },
-  "hash": "c0eba5805edcecf7356a3ae34c6d015427c1e0107ddba169e08030c9463f830f"
+  "hash": "57cfeec2e4faf8fa5b8f912d6d4d449e0093b41f7deea4db689c9db249aaab97"
 }

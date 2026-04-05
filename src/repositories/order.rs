@@ -495,18 +495,21 @@ impl OrderRepository {
         .await
     }
 
-    /// Obtiene el título del servicio y nombre del plan para un order
+    /// Obtiene título, slug del servicio y nombre del plan para un order
     pub async fn get_order_display_info(
         pool: &PgPool,
         service_id: Uuid,
         plan_id: Uuid,
-    ) -> Result<(String, String), sqlx::Error> {
-        let service_title: String = sqlx::query_scalar!(
-            r#"SELECT title FROM services WHERE id = $1"#,
-            service_id,
-        )
-        .fetch_one(pool)
-        .await?;
+    ) -> Result<(String, String, String), sqlx::Error> {
+        let (service_title, service_slug): (String, String) = {
+            let row = sqlx::query!(
+                r#"SELECT title, slug FROM services WHERE id = $1"#,
+                service_id,
+            )
+            .fetch_one(pool)
+            .await?;
+            (row.title, row.slug)
+        };
 
         let plan_name: String = sqlx::query_scalar!(
             r#"SELECT name FROM service_plans WHERE id = $1"#,
@@ -515,7 +518,7 @@ impl OrderRepository {
         .fetch_one(pool)
         .await?;
 
-        Ok((service_title, plan_name))
+        Ok((service_title, service_slug, plan_name))
     }
 
     /* ============================================================

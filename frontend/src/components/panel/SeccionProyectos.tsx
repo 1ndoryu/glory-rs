@@ -95,36 +95,42 @@ export const SeccionProyectos: React.FC = () => {
     );
 };
 
+/* [054A-6] Mapa slug → imagen estática del servicio.
+ * Los servicios sin imagen en /public/assets/Servicios/ usan un fallback genérico. */
+const SERVICE_IMAGE: Record<string, string> = {
+    'diseno-web': '/assets/Servicios/diseno web.jpg',
+    'desarrollo-apps': '/assets/Servicios/diseno de aplicaciones.jpg',
+    'agentes-ia': '/assets/Servicios/agente ia.jpg',
+    'branding': '/assets/Servicios/Identidad de marca.jpg',
+    'ecommerce': '/assets/Servicios/ecommerce.jpg',
+};
+
 /* Sub-componente: card de orden en la lista */
+/* [054A-6] Rediseño: quita numeración, plan_name, barra de progreso.
+ * Agrega imagen del servicio resuelta por slug. */
 function OrdenCard({orden, onClick}: {orden: OrderResponse; onClick: () => void}) {
-    const progreso = orden.total_phases > 0 ? Math.round((orden.current_phase / orden.total_phases) * 100) : 0;
+    const imgSrc = SERVICE_IMAGE[orden.service_slug] || '/assets/Servicios/diseno web.jpg';
 
     return (
         <button className="ordenCard" onClick={onClick} type="button">
-            <div className="ordenCardHeader">
-                <div className="ordenCardInfo">
-                    <span className="ordenCardNumero">#{orden.order_number}</span>
+            <img
+                className="ordenCardImagen"
+                src={imgSrc}
+                alt={orden.service_title}
+                loading="lazy"
+            />
+            <div className="ordenCardBody">
+                <div className="ordenCardHeader">
                     <h3 className="ordenCardTitulo">{orden.service_title}</h3>
-                    <span className="ordenCardPlan">{orden.plan_name}</span>
-                </div>
-                <span className={`ordenCardBadge ${STATUS_CLASS[orden.status] || ''}`}>
-                    {ORDER_STATUS_LABELS[orden.status]}
-                </span>
-            </div>
-            {orden.total_phases > 0 && (
-                <div className="ordenCardProgreso">
-                    <div className="ordenCardProgresoBarra">
-                        <div className="ordenCardProgresoLleno" style={{width: `${progreso}%`}} />
-                    </div>
-                    <span className="ordenCardProgresoTexto">
-                        {orden.current_phase}/{orden.total_phases} fases · {progreso}%
+                    <span className={`ordenCardBadge ${STATUS_CLASS[orden.status] || ''}`}>
+                        {ORDER_STATUS_LABELS[orden.status]}
                     </span>
                 </div>
-            )}
-            <div className="ordenCardFooter">
-                <span className="ordenCardPrecio">{formatPrice(orden.final_price_cents, orden.currency)}</span>
-                <span className="ordenCardModo">{PAYMENT_MODE_LABELS[orden.payment_mode]}</span>
-                <span className="ordenCardFecha">{new Date(orden.created_at).toLocaleDateString('es')}</span>
+                <div className="ordenCardFooter">
+                    <span className="ordenCardPrecio">{formatPrice(orden.final_price_cents, orden.currency)}</span>
+                    <span className="ordenCardModo">{PAYMENT_MODE_LABELS[orden.payment_mode]}</span>
+                    <span className="ordenCardFecha">{new Date(orden.created_at).toLocaleDateString('es')}</span>
+                </div>
             </div>
         </button>
     );

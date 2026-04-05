@@ -170,7 +170,7 @@ async fn build_system_prompt(pool: &PgPool, session_id: Uuid) -> String {
     if let Ok(Some(session)) = ChatRepository::find_session_by_id(pool, session_id).await {
         if let Some(order_id) = session.order_id {
             if let Ok(Some(order)) = OrderRepository::find_order_by_id(pool, order_id).await {
-                if let Ok((svc_title, plan_name)) =
+                if let Ok((svc_title, _, plan_name)) =
                     OrderRepository::get_order_display_info(pool, order.service_id, order.plan_id)
                         .await
                 {

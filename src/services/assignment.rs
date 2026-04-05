@@ -57,7 +57,7 @@ impl AssignmentService {
         let assigned = OrderRepository::assign_order(pool, order_id, employee_id).await?;
 
         /* Construir response */
-        let (svc_title, plan_name) =
+        let (svc_title, svc_slug, plan_name) =
             OrderRepository::get_order_display_info(pool, assigned.service_id, assigned.plan_id)
                 .await?;
         let phases = OrderRepository::list_order_phases(pool, order_id).await?;
@@ -69,6 +69,7 @@ impl AssignmentService {
             id: assigned.id,
             order_number: assigned.order_number,
             service_title: svc_title,
+            service_slug: svc_slug,
             plan_name,
             payment_mode: assigned.payment_mode,
             base_price_cents: assigned.base_price_cents,
@@ -90,7 +91,7 @@ impl AssignmentService {
         let mut result = Vec::with_capacity(orders.len());
 
         for order in orders {
-            let (svc_title, plan_name) =
+            let (svc_title, svc_slug, plan_name) =
                 OrderRepository::get_order_display_info(pool, order.service_id, order.plan_id)
                     .await?;
             let phases = OrderRepository::list_order_phases(pool, order.id).await?;
@@ -102,6 +103,7 @@ impl AssignmentService {
                 id: order.id,
                 order_number: order.order_number,
                 service_title: svc_title,
+                service_slug: svc_slug,
                 plan_name,
                 payment_mode: order.payment_mode,
                 base_price_cents: order.base_price_cents,
@@ -169,7 +171,7 @@ impl AssignmentService {
         .await
         .map_err(|e| AppError::Internal(format!("Error creando delegación: {e}")))?;
 
-        let (svc_title, _) =
+        let (svc_title, _, _) =
             OrderRepository::get_order_display_info(pool, order.service_id, order.plan_id).await?;
 
         Ok(DelegationResponse {
@@ -252,7 +254,7 @@ impl AssignmentService {
         let order = OrderRepository::find_order_by_id(pool, deleg.order_id)
             .await?
             .ok_or_else(|| AppError::Internal("Orden de delegación no encontrada".into()))?;
-        let (svc_title, _) =
+        let (svc_title, _, _) =
             OrderRepository::get_order_display_info(pool, order.service_id, order.plan_id).await?;
 
         Ok(DelegationResponse {
@@ -293,7 +295,7 @@ impl AssignmentService {
         for d in delegations {
             let order = OrderRepository::find_order_by_id(pool, d.order_id).await?;
             let (order_number, svc_title) = if let Some(ref o) = order {
-                let (title, _) =
+                let (title, _, _) =
                     OrderRepository::get_order_display_info(pool, o.service_id, o.plan_id).await?;
                 (o.order_number, title)
             } else {
