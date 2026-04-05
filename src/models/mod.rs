@@ -2,6 +2,7 @@ mod chat;
 mod dashboard;
 mod delegation;
 mod deliverable;
+mod hosting;
 mod note;
 mod notification;
 mod order;
@@ -47,4 +48,8 @@ pub use dashboard::{
 pub use user::{
     AdminUserItem, AuthResponse, ChangeRoleRequest, ChangeStatusRequest, LoginRequest,
     PaginatedUsers, RegisterRequest, User, UserResponse, UserRole,
+};
+pub use hosting::{
+    CreateHostingRequest, HostingEvent, HostingSubscription,
+    HostingSubscriptionResponse, UpdateHostingStatusRequest,
 };

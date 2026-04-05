@@ -17,6 +17,7 @@ import {SeccionChat} from '../components/panel/SeccionChat';
 import {SeccionReembolsos} from '../components/panel/SeccionReembolsos';
 import SeccionDashboard from '../components/panel/SeccionDashboard';
 import {SeccionUsuarios} from '../components/panel/SeccionUsuarios';
+import {SeccionHosting} from '../components/panel/SeccionHosting';
 import {SidebarPanel} from '../components/panel/SidebarPanel';
 import {PlaceholderSeccion} from '../components/panel/PlaceholderSeccion';
 import {obtenerTabsPorRol, seccionInicialPorRol, type SeccionPanel} from '../data/panel';
@@ -81,6 +82,9 @@ export const PanelIsland: React.FC = () => {
             /* [054A-1] Gestión de usuarios registrados (admin) */
             case 'usuarios':
                 return <SeccionUsuarios />;
+            /* [054A-2] Hosting: suscripciones, planes, estados, eventos */
+            case 'hosting':
+                return <SeccionHosting />;
             default:
                 return <PlaceholderSeccion tab={tabActual} />;
         }

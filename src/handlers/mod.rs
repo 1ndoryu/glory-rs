@@ -7,6 +7,7 @@ mod chat;
 mod dashboard;
 mod deliverables;
 mod health;
+mod hosting;
 mod profile;
 mod notes;
 mod notifications;
@@ -245,4 +246,5 @@ fn api_routes() -> Router<AppState> {
         .merge(dashboard::routes())
         .merge(profile::routes())
         .merge(admin_users::routes())
+        .merge(hosting::hosting_routes())
 }

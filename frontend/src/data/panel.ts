@@ -8,7 +8,7 @@ import type {UserRole} from '../api/auth';
 export type SeccionPanel =
     | 'proyectos' | 'servicios' | 'pagos' | 'perfil' | 'metodos-pago' | 'mensajes'
     | 'asignados' | 'disponibles' | 'delegaciones'
-    | 'todos-ordenes' | 'empleados' | 'config-servicios' | 'dashboard' | 'reembolsos' | 'usuarios';
+    | 'todos-ordenes' | 'empleados' | 'config-servicios' | 'dashboard' | 'reembolsos' | 'usuarios' | 'hosting';
 
 export interface TabConfig {
     id: SeccionPanel;
@@ -110,6 +110,11 @@ const TABS_ADMIN: TabConfig[] = [
         id: 'usuarios',
         label: 'Usuarios',
         descripcion: 'Busca, filtra y gestiona los usuarios registrados: cambia roles, banea o reactiva cuentas.'
+    },
+    {
+        id: 'hosting',
+        label: 'Hosting',
+        descripcion: 'Gestiona suscripciones de hosting: planes, dominios, estados y eventos de cada cliente.'
     },
     {
         id: 'mensajes',

@@ -1,0 +1,134 @@
+/* [054A-2] Repositorio de hosting: CRUD para suscripciones y eventos.
+ * Queries verificadas con sqlx offline. */
+
+use sqlx::PgPool;
+use uuid::Uuid;
+
+use crate::errors::AppError;
+use crate::models::{HostingEvent, HostingSubscription};
+
+pub struct HostingRepository;
+
+/* [054A-2] Parámetros agrupados para crear suscripción (evita clippy::too_many_arguments) */
+pub struct CreateHostingParams<'a> {
+    pub user_id: Option<Uuid>,
+    pub client_name: &'a str,
+    pub client_email: &'a str,
+    pub plan: &'a str,
+    pub domain: Option<&'a str>,
+    pub monthly_price_cents: i32,
+    pub storage_limit_mb: i32,
+}
+
+impl HostingRepository {
+    pub async fn list_all(pool: &PgPool) -> Result<Vec<HostingSubscription>, AppError> {
+        let rows = sqlx::query_as!(
+            HostingSubscription,
+            "SELECT id, user_id, client_name, client_email, plan, domain,
+                    coolify_site_name, status, stripe_subscription_id,
+                    monthly_price_cents, storage_limit_mb, created_at, updated_at
+             FROM hosting_subscriptions
+             ORDER BY created_at DESC"
+        )
+        .fetch_all(pool)
+        .await?;
+        Ok(rows)
+    }
+
+    pub async fn find_by_id(
+        pool: &PgPool,
+        id: Uuid,
+    ) -> Result<Option<HostingSubscription>, AppError> {
+        let row = sqlx::query_as!(
+            HostingSubscription,
+            "SELECT id, user_id, client_name, client_email, plan, domain,
+                    coolify_site_name, status, stripe_subscription_id,
+                    monthly_price_cents, storage_limit_mb, created_at, updated_at
+             FROM hosting_subscriptions
+             WHERE id = $1",
+            id
+        )
+        .fetch_optional(pool)
+        .await?;
+        Ok(row)
+    }
+
+    pub async fn create(
+        pool: &PgPool,
+        params: CreateHostingParams<'_>,
+    ) -> Result<HostingSubscription, AppError> {
+        let row = sqlx::query_as!(
+            HostingSubscription,
+            "INSERT INTO hosting_subscriptions (user_id, client_name, client_email, plan, domain, monthly_price_cents, storage_limit_mb)
+             VALUES ($1, $2, $3, $4, $5, $6, $7)
+             RETURNING id, user_id, client_name, client_email, plan, domain,
+                       coolify_site_name, status, stripe_subscription_id,
+                       monthly_price_cents, storage_limit_mb, created_at, updated_at",
+            params.user_id,
+            params.client_name,
+            params.client_email,
+            params.plan,
+            params.domain,
+            params.monthly_price_cents,
+            params.storage_limit_mb
+        )
+        .fetch_one(pool)
+        .await?;
+        Ok(row)
+    }
+
+    pub async fn update_status(
+        pool: &PgPool,
+        id: Uuid,
+        status: &str,
+    ) -> Result<(), AppError> {
+        sqlx::query!(
+            "UPDATE hosting_subscriptions SET status = $1, updated_at = NOW() WHERE id = $2",
+            status,
+            id
+        )
+        .execute(pool)
+        .await?;
+        Ok(())
+    }
+
+    pub async fn add_event(
+        pool: &PgPool,
+        subscription_id: Uuid,
+        event_type: &str,
+        details: Option<serde_json::Value>,
+    ) -> Result<HostingEvent, AppError> {
+        let row = sqlx::query_as!(
+            HostingEvent,
+            "INSERT INTO hosting_events (subscription_id, event_type, details)
+             VALUES ($1, $2, $3)
+             RETURNING id, subscription_id, event_type, details, created_at",
+            subscription_id,
+            event_type,
+            details
+        )
+        .fetch_one(pool)
+        .await?;
+        Ok(row)
+    }
+
+    pub async fn list_events(
+        pool: &PgPool,
+        subscription_id: Uuid,
+        limit: i64,
+    ) -> Result<Vec<HostingEvent>, AppError> {
+        let rows = sqlx::query_as!(
+            HostingEvent,
+            "SELECT id, subscription_id, event_type, details, created_at
+             FROM hosting_events
+             WHERE subscription_id = $1
+             ORDER BY created_at DESC
+             LIMIT $2",
+            subscription_id,
+            limit
+        )
+        .fetch_all(pool)
+        .await?;
+        Ok(rows)
+    }
+}

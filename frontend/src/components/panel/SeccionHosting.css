@@ -1,0 +1,290 @@
+/* [054A-2] Estilos del panel de hosting.
+ * Dashboard de suscripciones con tabla responsive y menú de acciones. */
+
+.hostingContenedor {
+    padding: var(--spacing-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.hostingHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.hostingHeader h2 {
+    margin: 0;
+    font-family: var(--font-primary);
+    font-size: var(--text-lg);
+    color: var(--brand-black);
+}
+
+.hostingBtnCrear {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-xs) var(--spacing-md);
+    background: var(--brand-black);
+    color: var(--brand-white);
+    border: none;
+    border-radius: 8px;
+    font-size: var(--text-sm);
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+
+.hostingBtnCrear:hover {
+    opacity: 0.85;
+}
+
+/* ── Loading / Empty ───────────────────────── */
+.hostingLoading,
+.hostingVacio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-3xl);
+    color: rgba(0, 0, 0, 0.4);
+}
+
+/* ── Tabla ──────────────────────────────────── */
+.hostingTabla {
+    border: 1px solid var(--bg-accent);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.hostingTablaHeader {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1.5fr 1fr 0.8fr 1fr;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--bg-secondary);
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgba(0, 0, 0, 0.5);
+    font-weight: 600;
+}
+
+.hostingFila {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1.5fr 1fr 0.8fr 1fr;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    align-items: center;
+    font-size: var(--text-sm);
+    border-top: 1px solid var(--bg-accent);
+    transition: background 0.1s;
+}
+
+.hostingFila:hover {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.hostingFilaCelda {
+    display: flex;
+    flex-direction: column;
+}
+
+.hostingClientName {
+    font-weight: 600;
+    color: var(--brand-black);
+}
+
+.hostingClientEmail {
+    font-size: var(--text-xs);
+    color: rgba(0, 0, 0, 0.5);
+}
+
+.hostingDominio {
+    color: rgba(0, 0, 0, 0.6);
+    font-size: var(--text-xs);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.hostingStatus {
+    font-weight: 600;
+}
+
+/* ── Acciones ──────────────────────────────── */
+.hostingAcciones {
+    display: flex;
+    gap: var(--spacing-xs);
+    align-items: center;
+}
+
+.hostingBtnAccion {
+    background: none;
+    border: 1px solid var(--bg-accent);
+    border-radius: 6px;
+    padding: 4px 6px;
+    cursor: pointer;
+    color: var(--brand-black);
+    display: flex;
+    align-items: center;
+    transition: background 0.15s;
+}
+
+.hostingBtnAccion:hover {
+    background: var(--bg-secondary);
+}
+
+.hostingMenuWrapper {
+    position: relative;
+}
+
+.hostingMenuOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99;
+}
+
+.hostingMenu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--bg-primary);
+    border: 1px solid var(--bg-accent);
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    z-index: 100;
+    min-width: 140px;
+    overflow: hidden;
+}
+
+.hostingMenuItem {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    transition: background 0.1s;
+}
+
+.hostingMenuItem:hover {
+    background: var(--bg-secondary);
+}
+
+/* ── Form crear ────────────────────────────── */
+.hostingFormCrear {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md);
+    min-width: 340px;
+}
+
+.hostingFormCrear h3 {
+    margin: 0;
+    font-family: var(--font-primary);
+    color: var(--brand-black);
+}
+
+.hostingSelect {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border: 1px solid var(--bg-accent);
+    border-radius: 8px;
+    font-size: var(--text-sm);
+    background: var(--bg-primary);
+    color: var(--brand-black);
+}
+
+.hostingBtnSubmit {
+    padding: var(--spacing-xs) var(--spacing-md);
+    background: var(--brand-black);
+    color: var(--brand-white);
+    border: none;
+    border-radius: 8px;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+
+.hostingBtnSubmit:hover:not(:disabled) {
+    opacity: 0.85;
+}
+
+.hostingBtnSubmit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ── Eventos ──────────────────────────────── */
+.hostingEventos {
+    padding: var(--spacing-md);
+    min-width: 340px;
+}
+
+.hostingEventos h3 {
+    margin: 0 0 var(--spacing-sm);
+    font-family: var(--font-primary);
+    color: var(--brand-black);
+}
+
+.hostingEventosVacio {
+    color: rgba(0, 0, 0, 0.4);
+    text-align: center;
+    padding: var(--spacing-lg);
+}
+
+.hostingEventosLista {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.hostingEvento {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border: 1px solid var(--bg-accent);
+    border-radius: 6px;
+    font-size: var(--text-xs);
+}
+
+.hostingEventoTipo {
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--brand-black);
+}
+
+.hostingEventoFecha {
+    display: block;
+    color: rgba(0, 0, 0, 0.4);
+    margin-top: 2px;
+}
+
+.hostingEventoDetalles {
+    margin: var(--spacing-xs) 0 0;
+    padding: var(--spacing-xs);
+    background: var(--bg-secondary);
+    border-radius: 4px;
+    font-size: 11px;
+    overflow-x: auto;
+    white-space: pre-wrap;
+}
+
+/* ── Responsive ────────────────────────────── */
+@media (max-width: 768px) {
+    .hostingTablaHeader {
+        display: none;
+    }
+
+    .hostingFila {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-xs);
+        padding: var(--spacing-md);
+    }
+}
