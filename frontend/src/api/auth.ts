@@ -14,6 +14,7 @@ export interface AuthResponse {
 
 interface ApiError {
     error: string;
+    message?: string;
 }
 
 export async function apiLogin(email: string, password: string): Promise<AuthResponse> {
@@ -32,10 +33,13 @@ export async function apiSwitchRole(targetRole: UserRole): Promise<AuthResponse>
     return data;
 }
 
-/* Extrae mensaje de error legible desde respuestas del backend */
+/* [044A-46] Extrae mensaje de error legible desde respuestas del backend.
+ * El backend devuelve { error: "tipo", message: "texto legible" }.
+ * Prioriza message (legible) sobre error (tipo técnico). */
 export function extraerMensajeError(error: unknown): string {
     if (typeof error === 'object' && error !== null && 'response' in error) {
         const resp = (error as { response?: { data?: ApiError; status?: number } }).response;
+        if (resp?.data?.message) return resp.data.message;
         if (resp?.data?.error) return resp.data.error;
         if (resp?.status === 401) return 'Credenciales inválidas';
         if (resp?.status === 409) return 'El email ya está registrado';
