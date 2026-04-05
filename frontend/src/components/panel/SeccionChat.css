@@ -1,0 +1,319 @@
+/* [044A-38 Fase 5] Estilos de la seccion Chat.
+ * Layout de dos columnas: lista izquierda + area de mensajes derecha.
+ * Responsive: en mobile se muestra una u otra con transicion. */
+
+/* ── Contenedor principal ─────────────────────── */
+.chatContenedor {
+    display: flex;
+    height: 100%;
+    min-height: 0;
+    border: 1px solid var(--bg-accent);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--bg-primary);
+}
+
+/* ── Lista de sesiones ────────────────────────── */
+.chatListaSesiones {
+    width: 320px;
+    min-width: 320px;
+    border-right: 1px solid var(--bg-accent);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.chatListaHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-bottom: 1px solid var(--bg-accent);
+}
+
+.chatListaHeader h3 {
+    margin: 0;
+    font-family: var(--font-primary);
+    font-size: var(--text-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--brand-black);
+}
+
+.chatBtnNuevo {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border: 1px solid var(--bg-accent);
+    border-radius: 6px;
+    background: var(--bg-secondary);
+    font-size: var(--text-xs);
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.chatBtnNuevo:hover {
+    background: var(--bg-accent);
+}
+
+/* ── Sesion individual ────────────────────────── */
+.chatSesionItem {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    width: 100%;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: none;
+    border-bottom: 1px solid var(--bg-accent);
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.chatSesionItem:hover {
+    background: var(--bg-secondary);
+}
+
+.chatSesionActiva {
+    background: var(--bg-accent);
+}
+
+.chatSesionIcono {
+    color: var(--brand-black);
+    opacity: 0.6;
+    flex-shrink: 0;
+}
+
+.chatSesionInfo {
+    flex: 1;
+    min-width: 0;
+}
+
+.chatSesionTitulo {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--brand-black);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chatSesionPreview {
+    font-size: var(--text-xs);
+    color: var(--brand-black);
+    opacity: 0.5;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 2px;
+}
+
+.chatSesionMeta {
+    flex-shrink: 0;
+}
+
+.chatSesionEstado {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: var(--bg-accent);
+    color: var(--brand-black);
+}
+
+/* ── Area de mensajes ─────────────────────────── */
+.chatAreaMensajes {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.chatAreaHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-bottom: 1px solid var(--bg-accent);
+}
+
+.chatBtnVolver {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--brand-black);
+    padding: 4px;
+}
+
+.chatAreaTitulo {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--brand-black);
+}
+
+/* ── Mensajes ─────────────────────────────────── */
+.chatMensajes {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--spacing-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.chatBurbuja {
+    max-width: 75%;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: 12px;
+    background: var(--bg-secondary);
+    align-self: flex-start;
+}
+
+.chatBurbujaPropia {
+    align-self: flex-end;
+    background: var(--brand-black);
+    color: var(--brand-white);
+}
+
+.chatBurbujaIA {
+    border: 1px dashed var(--bg-accent);
+}
+
+.chatBurbujaHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-sm);
+    margin-bottom: 4px;
+    font-size: var(--text-xs);
+}
+
+.chatBurbujaPropia .chatBurbujaHeader {
+    color: var(--brand-white);
+    opacity: 0.7;
+}
+
+.chatBurbujaHora {
+    opacity: 0.5;
+    font-size: 10px;
+}
+
+.chatBurbujaContenido {
+    font-size: var(--text-sm);
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* ── Input ────────────────────────────────────── */
+.chatInputArea {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-top: 1px solid var(--bg-accent);
+}
+
+.chatInput {
+    flex: 1;
+    padding: var(--spacing-sm);
+    border: 1px solid var(--bg-accent);
+    border-radius: 8px;
+    font-size: var(--text-sm);
+    font-family: var(--font-primary);
+    resize: none;
+    background: var(--bg-secondary);
+    color: var(--brand-black);
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.chatInput:focus {
+    border-color: var(--brand-black);
+}
+
+.chatBtnEnviar {
+    padding: var(--spacing-sm);
+    border: none;
+    border-radius: 8px;
+    background: var(--brand-black);
+    color: var(--brand-white);
+    cursor: pointer;
+    transition: opacity 0.2s;
+    flex-shrink: 0;
+}
+
+.chatBtnEnviar:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.chatBtnEnviar:not(:disabled):hover {
+    opacity: 0.85;
+}
+
+/* ── Loading + Vacio ──────────────────────────── */
+.chatLoading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-xl);
+    color: var(--brand-black);
+    opacity: 0.5;
+}
+
+.chatSpinner {
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--bg-accent);
+    border-top-color: var(--brand-black);
+    border-radius: 50%;
+    animation: chatSpin 0.6s linear infinite;
+}
+
+@keyframes chatSpin {
+    to { transform: rotate(360deg); }
+}
+
+.chatVacio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-xl);
+    color: var(--brand-black);
+    opacity: 0.35;
+}
+
+.chatVacioCentrado {
+    flex: 1;
+}
+
+/* ── Responsive ───────────────────────────────── */
+@media (max-width: 768px) {
+    .chatListaSesiones {
+        width: 100%;
+        min-width: 0;
+        border-right: none;
+    }
+
+    .chatListaOculta {
+        display: none;
+    }
+
+    .chatAreaOculta {
+        display: none;
+    }
+
+    .chatBtnVolver {
+        display: flex;
+    }
+
+    .chatBurbuja {
+        max-width: 90%;
+    }
+}

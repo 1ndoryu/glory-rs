@@ -1,0 +1,178 @@
+/* [044A-38 Fase 5] Hook de chat: gestión de sesiones, mensajes y WebSocket.
+ * useChat para chat REST (sesiones, mensajes, envío).
+ * useChatWs para conexión WebSocket en tiempo real. */
+
+import {useState, useEffect, useCallback, useRef} from 'react';
+import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
+import {
+    apiListChatSessions,
+    apiGetMessages,
+    apiCreateChatSession,
+    apiSendMessage,
+    buildStaffWsUrl,
+    type ChatMessage,
+    type ChatSession,
+    type WsServerMessage,
+} from '../api/chat';
+import {useAuthStore} from '../stores/authStore';
+
+/* ============================================================
+   HOOK: Sesiones y mensajes REST
+   ============================================================ */
+
+export function useChat(sessionId?: string) {
+    const queryClient = useQueryClient();
+
+    const {data: sessions = [], isLoading: cargandoSesiones} = useQuery({
+        queryKey: ['chat-sessions'],
+        queryFn: apiListChatSessions,
+        refetchInterval: 15_000,
+    });
+
+    const {data: messages = [], isLoading: cargandoMensajes} = useQuery({
+        queryKey: ['chat-messages', sessionId],
+        queryFn: () => apiGetMessages(sessionId!, 100, 0),
+        enabled: !!sessionId,
+        refetchInterval: 5_000,
+    });
+
+    const {mutateAsync: crearSesion} = useMutation({
+        mutationFn: (orderId?: string) => apiCreateChatSession(orderId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey: ['chat-sessions']});
+        },
+    });
+
+    const {mutateAsync: enviarMensaje, isPending: enviando} = useMutation({
+        mutationFn: ({sId, content}: {sId: string; content: string}) =>
+            apiSendMessage(sId, content),
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey: ['chat-messages', sessionId]});
+        },
+    });
+
+    return {
+        sessions,
+        messages,
+        cargandoSesiones,
+        cargandoMensajes,
+        crearSesion,
+        enviarMensaje,
+        enviando,
+    };
+}
+
+/* ============================================================
+   HOOK: WebSocket en tiempo real (staff panel)
+   ============================================================ */
+
+export function useChatWs() {
+    const token = useAuthStore(s => s.token);
+    const [connected, setConnected] = useState(false);
+    const [sessions, setSessions] = useState<ChatSession[]>([]);
+    const [messages, setMessages] = useState<ChatMessage[]>([]);
+    const wsRef = useRef<WebSocket | null>(null);
+
+    const connect = useCallback(() => {
+        if (!token || wsRef.current) return;
+        const url = buildStaffWsUrl(token);
+        const ws = new WebSocket(url);
+        wsRef.current = ws;
+
+        ws.onopen = () => setConnected(true);
+        ws.onclose = () => {
+            setConnected(false);
+            wsRef.current = null;
+        };
+
+        ws.onmessage = (event) => {
+            try {
+                const msg: WsServerMessage = JSON.parse(event.data);
+
+                switch (msg.type) {
+                    case 'init':
+                        if (msg.sessions) setSessions(msg.sessions);
+                        break;
+                    case 'message':
+                        if (msg.id && msg.session_id && msg.content) {
+                            setMessages(prev => [
+                                ...prev,
+                                {
+                                    id: msg.id!,
+                                    session_id: msg.session_id!,
+                                    sender_type: msg.sender || 'unknown',
+                                    sender_id: msg.sender_id ?? null,
+                                    content: msg.content!,
+                                    created_at: msg.created_at || new Date().toISOString(),
+                                },
+                            ]);
+                        }
+                        break;
+                    case 'session_new':
+                        if (msg.session) {
+                            setSessions(prev => [msg.session!, ...prev]);
+                        }
+                        break;
+                    case 'session_closed':
+                        if (msg.session_id) {
+                            setSessions(prev =>
+                                prev.filter(s => s.id !== msg.session_id),
+                            );
+                        }
+                        break;
+                    case 'status':
+                        if (msg.session_id && msg.value) {
+                            setSessions(prev =>
+                                prev.map(s =>
+                                    s.id === msg.session_id
+                                        ? {...s, status: msg.value!}
+                                        : s,
+                                ),
+                            );
+                        }
+                        break;
+                }
+            } catch {
+                /* Mensaje no JSON, ignorar */
+            }
+        };
+    }, [token]);
+
+    const disconnect = useCallback(() => {
+        if (wsRef.current) {
+            wsRef.current.close();
+            wsRef.current = null;
+        }
+    }, []);
+
+    const sendWsMessage = useCallback((data: Record<string, unknown>) => {
+        if (wsRef.current?.readyState === WebSocket.OPEN) {
+            wsRef.current.send(JSON.stringify(data));
+        }
+    }, []);
+
+    const joinSession = useCallback(
+        (sessionId: string) => sendWsMessage({type: 'join', session_id: sessionId}),
+        [sendWsMessage],
+    );
+
+    const toggleAi = useCallback(
+        (sessionId: string, enabled: boolean) =>
+            sendWsMessage({type: 'toggle_ai', session_id: sessionId, enabled}),
+        [sendWsMessage],
+    );
+
+    /* Limpiar al desmontar */
+    useEffect(() => () => disconnect(), [disconnect]);
+
+    return {
+        connected,
+        sessions,
+        messages,
+        connect,
+        disconnect,
+        joinSession,
+        toggleAi,
+        sendWsMessage,
+    };
+}

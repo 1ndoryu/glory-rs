@@ -2,6 +2,7 @@
 
 mod assignment;
 mod auth;
+mod chat;
 mod health;
 mod notes;
 mod orders;
@@ -69,6 +70,10 @@ impl utoipa::Modify for SecurityAddon {
         assignment::create_help_request,
         assignment::respond_delegation,
         assignment::list_delegations,
+        chat::list_sessions,
+        chat::get_messages,
+        chat::create_session,
+        chat::send_message,
     ),
     components(schemas(
         health::HealthResponse,
@@ -99,6 +104,11 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::EmployeeListItem,
         crate::models::CreateDelegationRequest,
         crate::models::RespondDelegationRequest,
+        crate::models::ChatSession,
+        crate::models::ChatMessage,
+        crate::models::ChatSessionResponse,
+        crate::models::CreateChatSessionRequest,
+        crate::models::SendMessageRequest,
         crate::errors::ErrorResponse,
     )),
     modifiers(&SecurityAddon),
@@ -113,12 +123,17 @@ pub struct ApiDoc;
 
 /// Crea el router principal con CORS, tracing, Swagger UI y todas las rutas
 pub fn create_router(pool: sqlx::PgPool, config: crate::config::AppConfig) -> Router {
+    let chat_hub = crate::services::ChatHub::new(pool.clone());
+    let ai_config = crate::services::AiChatConfig::from_env();
+
     let state = AppState {
         pool,
         jwt_secret: config.jwt_secret,
         http_client: reqwest::Client::new(),
         stripe_secret_key: config.stripe_secret_key,
         stripe_webhook_secret: config.stripe_webhook_secret,
+        chat_hub,
+        ai_config,
     };
 
     /* CORS: en desarrollo se permite todo. En producción, restringir orígenes */
@@ -130,6 +145,8 @@ pub fn create_router(pool: sqlx::PgPool, config: crate::config::AppConfig) -> Ro
     Router::new()
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
         .merge(seo::routes())
+        /* [044A-38 Fase 5] WebSocket routes at root level (not under /api) */
+        .merge(chat::ws_routes())
         .nest("/api", api_routes())
         .layer(TraceLayer::new_for_http())
         .layer(cors)
@@ -162,4 +179,5 @@ fn api_routes() -> Router<AppState> {
         .merge(assignment::routes())
         .merge(orders::routes())
         .merge(payments::routes())
+        .merge(chat::rest_routes())
 }

@@ -14,6 +14,8 @@ pub mod services;
 
 use sqlx::PgPool;
 
+use crate::services::{AiChatConfig, ChatHub};
+
 /// Estado compartido de la aplicación — accesible desde handlers y middleware
 #[derive(Clone)]
 pub struct AppState {
@@ -22,4 +24,6 @@ pub struct AppState {
     pub http_client: reqwest::Client,
     pub stripe_secret_key: Option<String>,
     pub stripe_webhook_secret: Option<String>,
+    pub chat_hub: ChatHub,
+    pub ai_config: AiChatConfig,
 }

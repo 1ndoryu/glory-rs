@@ -1,9 +1,11 @@
+mod chat;
 mod delegation;
 mod note;
 mod order;
 mod payment;
 mod user;
 
+pub use chat::ChatRepository;
 pub use delegation::{DelegationRepository, EmployeeListItemRow};
 pub use note::NoteRepository;
 pub use order::{OrderRepository, CreateOrderParams, CreatePhaseParams};

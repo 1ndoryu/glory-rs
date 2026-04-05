@@ -1,9 +1,14 @@
+mod chat;
 mod delegation;
 mod note;
 mod order;
 mod payment;
 mod user;
 
+pub use chat::{
+    ChatMessage, ChatSession, ChatSessionResponse, CreateChatSessionRequest,
+    SendMessageRequest, WsClientMessage, WsServerMessage,
+};
 pub use delegation::{
     CreateDelegationRequest, Delegation, DelegationResponse, DelegationStatus, EmployeeListItem,
     EmployeeProfile, RespondDelegationRequest,

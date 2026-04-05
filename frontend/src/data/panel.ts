@@ -6,7 +6,7 @@
 import type {UserRole} from '../api/auth';
 
 export type SeccionPanel =
-    | 'proyectos' | 'servicios' | 'pagos' | 'perfil' | 'metodos-pago'
+    | 'proyectos' | 'servicios' | 'pagos' | 'perfil' | 'metodos-pago' | 'mensajes'
     | 'asignados' | 'disponibles' | 'delegaciones'
     | 'todos-ordenes' | 'empleados' | 'config-servicios' | 'dashboard';
 
@@ -42,6 +42,11 @@ const TABS_CLIENT: TabConfig[] = [
         id: 'metodos-pago',
         label: 'Metodos de Pago',
         descripcion: 'Administra tus tarjetas de credito, direccion de facturacion y metodos de pago registrados.'
+    },
+    {
+        id: 'mensajes',
+        label: 'Mensajes',
+        descripcion: 'Conversaciones con soporte, asistente IA y seguimiento de tus ordenes por chat.'
     }
 ];
 
@@ -61,6 +66,11 @@ const TABS_EMPLOYEE: TabConfig[] = [
         id: 'delegaciones',
         label: 'Delegaciones',
         descripcion: 'Solicitudes de delegación y ayuda entre empleados. Acepta, rechaza o delega órdenes.'
+    },
+    {
+        id: 'mensajes',
+        label: 'Mensajes',
+        descripcion: 'Conversaciones con clientes, delegaciones y chat de soporte en tiempo real.'
     },
     {
         id: 'perfil',
@@ -90,6 +100,11 @@ const TABS_ADMIN: TabConfig[] = [
         id: 'dashboard',
         label: 'Dashboard',
         descripcion: 'Metricas generales: revenue, ordenes activas, satisfaccion del cliente y alertas.'
+    },
+    {
+        id: 'mensajes',
+        label: 'Mensajes',
+        descripcion: 'Todas las conversaciones de soporte, chat IA y mensajes de ordenes.'
     },
     {
         id: 'perfil',
