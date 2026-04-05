@@ -25,6 +25,9 @@ import {ContactoIsland} from './islands/ContactoIsland';
 import {PanelIsland} from './islands/PanelIsland';
 import {NotFoundIsland} from './islands/NotFoundIsland';
 
+/* [054A-5] Toast system */
+import {ToastContainer} from './components/ui/ToastContainer';
+
 /* Data para resolver slugs */
 import {SERVICIOS_DATA} from './data/servicios';
 import {PROYECTOS_DATA} from './data/showcase';
@@ -99,6 +102,7 @@ function HomeOrPanel() {
 function App() {
     return (
         <QueryClientProvider client={queryClient}>
+            <ToastContainer />
             <BrowserRouter>
                 <NavigateRegistrar />
                 <Routes>
