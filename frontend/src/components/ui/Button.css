@@ -53,6 +53,18 @@
     background-color: var(--overlay-hover);
 }
 
+.botonTexto {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    text-decoration: underline;
+    padding: 0;
+}
+
+.botonTexto:hover {
+    color: var(--text-primary);
+}
+
 /* Tamaños */
 .botonPequeno {
     padding: var(--spacing-sm) var(--spacing-md);

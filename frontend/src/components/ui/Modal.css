@@ -1,0 +1,30 @@
+/* [044A-40] Estilos base del componente Modal.
+ * El overlay y contenedor son genéricos; cada modal especializado
+ * puede agregar su propia clase via prop className. */
+.modalBaseOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: var(--spacing-md);
+}
+
+.modalBaseContenedor {
+    background: var(--bg-primary);
+    border-radius: var(--radius-lg, 12px);
+    padding: var(--spacing-xl);
+    max-width: 420px;
+    width: 100%;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+@media (max-width: 480px) {
+    .modalBaseContenedor {
+        padding: var(--spacing-lg);
+        max-width: 100%;
+    }
+}
