@@ -59,6 +59,4 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 - Respecto al diseño de ordenCard, quita la numeración, el nombre del plan, la barra de progreso y fases, falta imagen del servicio.
 
-- El boton de notificaciones se ve mal ,porque tiene un hover background de color negro? Y no esta centrado respecto al texto que tiene al lado. 
-
 - Cuando doy a cambiar foto no abre par cambiar la foto. 
