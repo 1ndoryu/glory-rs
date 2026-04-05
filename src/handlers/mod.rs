@@ -9,6 +9,7 @@ mod notes;
 mod orders;
 mod payments;
 mod refunds;
+mod reviews;
 mod seo;
 mod services;
 
@@ -82,6 +83,10 @@ impl utoipa::Modify for SecurityAddon {
         refunds::review_refund,
         refunds::list_refunds,
         refunds::get_order_refund,
+        reviews::create_review,
+        reviews::respond_review,
+        reviews::get_order_review,
+        reviews::list_reviews,
     ),
     components(schemas(
         health::HealthResponse,
@@ -125,6 +130,9 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::RequestRefundBody,
         crate::models::ReviewRefundBody,
         crate::models::ReviewAction,
+        crate::models::CreateReviewBody,
+        crate::models::RespondReviewBody,
+        crate::models::ReviewResponse,
         crate::errors::ErrorResponse,
     )),
     modifiers(&SecurityAddon),
@@ -198,4 +206,5 @@ fn api_routes() -> Router<AppState> {
         .merge(chat::rest_routes())
         .merge(deliverables::routes())
         .merge(refunds::routes())
+        .merge(reviews::routes())
 }

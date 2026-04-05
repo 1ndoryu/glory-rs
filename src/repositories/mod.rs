@@ -5,6 +5,7 @@ mod note;
 mod order;
 mod payment;
 mod refund;
+mod review;
 mod user;
 
 pub use chat::ChatRepository;
@@ -14,4 +15,5 @@ pub use note::NoteRepository;
 pub use order::{OrderRepository, CreateOrderParams, CreatePhaseParams};
 pub use payment::{PaymentRepository, CreatePaymentParams};
 pub use refund::RefundRepository;
+pub use review::ReviewRepository;
 pub use user::UserRepository;

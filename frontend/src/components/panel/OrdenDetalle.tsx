@@ -15,6 +15,7 @@ import {
     type PhaseStatus,
 } from '../../api/orders';
 import {EntregablesPanel} from './EntregablesPanel';
+import {ReviewPanel} from './ReviewPanel';
 import CheckoutModal from './CheckoutModal';
 import './SeccionProyectos.css';
 
@@ -141,6 +142,11 @@ export const OrdenDetalle: React.FC<OrdenDetalleProps> = ({
                     ))}
                 </div>
             </div>
+
+            {/* [044A-38 Fase 8] Review panel para órdenes completadas */}
+            {order.status === 'completed' && (
+                <ReviewPanel orderId={order.id} effectiveRole={effectiveRole} />
+            )}
         </div>
     );
 };

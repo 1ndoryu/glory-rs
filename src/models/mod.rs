@@ -5,6 +5,7 @@ mod note;
 mod order;
 mod payment;
 mod refund;
+mod review;
 mod user;
 
 pub use chat::{
@@ -30,5 +31,8 @@ pub use payment::{
 };
 pub use refund::{
     OrderRefund, RefundResponse, RefundStatus, RequestRefundBody, ReviewAction, ReviewRefundBody,
+};
+pub use review::{
+    CreateReviewBody, OrderReview, RespondReviewBody, ReviewResponse,
 };
 pub use user::{AuthResponse, LoginRequest, RegisterRequest, User, UserResponse, UserRole};

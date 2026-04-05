@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE employee_profiles\n               SET average_rating = (\n                   SELECT CAST(AVG(rating) AS DOUBLE PRECISION)\n                   FROM order_reviews WHERE employee_id = $1\n               )\n               WHERE user_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "abb90a9e504fc334e4eab0353cd10d9b20eeb414d2e9062206377e183a4980e8"
+}
