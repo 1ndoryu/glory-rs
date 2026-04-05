@@ -4,6 +4,7 @@
  * Se reutiliza para /soluciones/hosting, /soluciones/vps, /soluciones/agentes-ia.
  */
 import {useTranslation} from 'react-i18next';
+import {spaClick} from '../navegacionSPA';
 import '../styles/variables.css';
 import './SolucionPlaceholderIsland.css';
 import {LayoutPagina} from '../components/layout/LayoutPagina';
@@ -34,7 +35,7 @@ export const SolucionPlaceholderIsland = ({
                     <h1 className="placeholderTitulo">{titulo || t('solutions_page.coming_soon')}</h1>
                     <p className="placeholderDescripcion">{descripcion || t('solutions_page.coming_soon_desc')}</p>
                     <div className="placeholderBotones">
-                        <a href="/soluciones" className="placeholderBoton">
+                        <a href="/soluciones" className="placeholderBoton" onClick={e => spaClick(e, '/soluciones')}>
                             {t('solutions_page.back_solutions')}
                         </a>
                         <a href="#contacto" className="placeholderBotonContacto">

@@ -5,6 +5,7 @@
  */
 import React, {useState} from 'react';
 import {useTranslation} from 'react-i18next';
+import {spaClick} from '../../navegacionSPA';
 import {Button} from '../ui/Button';
 import {LanguageSelector} from '../ui/LanguageSelector';
 import {ENLACES_FOOTER} from '../../data/navegacion';
@@ -120,7 +121,7 @@ export const Footer: React.FC = () => {
                 <div className="footerBottom">
                     <nav className="footerLinks" aria-label="Enlaces del pie de página">
                         {ENLACES_FOOTER.map(enlace => (
-                            <a key={enlace.label} href={enlace.href} className="footerLink">
+                            <a key={enlace.label} href={enlace.href} className="footerLink" onClick={e => spaClick(e, enlace.href)}>
                                 {t(FOOTER_NAV_KEYS[enlace.label] || enlace.label)}
                             </a>
                         ))}

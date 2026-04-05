@@ -5,6 +5,7 @@
  */
 import React from 'react';
 import {useTranslation} from 'react-i18next';
+import {spaClick} from '../navegacionSPA';
 import '../styles/variables.css';
 import './ProyectoIndividualIsland.css';
 import {LayoutPagina} from '../components/layout/LayoutPagina';
@@ -28,7 +29,7 @@ interface ProyectoIndividualIslandProps {
 
 /* Tarjeta de proyecto relacionado */
 const TarjetaRelacionado: React.FC<{proyecto: Proyecto}> = ({proyecto}) => (
-    <a href={proyecto.link || '#'} className="proyectoRelacionadoCard">
+    <a href={proyecto.link || '#'} className="proyectoRelacionadoCard" onClick={e => { if (proyecto.link) spaClick(e, proyecto.link); }}>
         <div className="proyectoRelacionadoImagen">{proyecto.imagen && <img src={proyecto.imagen} alt={proyecto.titulo} loading="lazy" />}</div>
         <div className="proyectoRelacionadoInfo">
             <h4 className="proyectoRelacionadoTitulo">{proyecto.titulo}</h4>

@@ -10,6 +10,7 @@ import {useNavigate} from 'react-router-dom';
 import {obtenerUsuarioActual} from '../../data/panel';
 import {useAuthStore} from '../../stores/authStore';
 import {Logo} from '../ui/Logo';
+import {spaClick} from '../../navegacionSPA';
 import NotificationBell from './NotificationBell';
 import './HeaderPanel.css';
 
@@ -29,14 +30,14 @@ export const HeaderPanel: React.FC = () => {
         <header className="headerPanel" role="banner">
             <div className="headerPanelContenedor">
                 {/* Logo */}
-                <a href="/" className="headerPanelLogo" aria-label={t('accessibility.logo_home')}>
+                <a href="/" className="headerPanelLogo" aria-label={t('accessibility.logo_home')} onClick={e => spaClick(e, '/')}>
                     <Logo className="headerPanelLogoSvg" />
                 </a>
 
                 {/* Acciones: Chat, Salir, Avatar */}
                 <div className="headerPanelAcciones">
                     <NotificationBell />
-                    <a href="/contacto/" className="headerPanelEnlace">
+                    <a href="/contacto/" className="headerPanelEnlace" onClick={e => spaClick(e, '/contacto/')}>
                         {t('nav.chat')}
                     </a>
                     <button onClick={handleLogout} className="headerPanelEnlace headerPanelBtnLogout" type="button">

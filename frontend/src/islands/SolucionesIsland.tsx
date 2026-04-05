@@ -4,6 +4,7 @@
  */
 import React from 'react';
 import {useTranslation} from 'react-i18next';
+import {spaClick} from '../navegacionSPA';
 import '../styles/variables.css';
 import './SolucionesIsland.css';
 import {LayoutPagina} from '../components/layout/LayoutPagina';
@@ -46,7 +47,7 @@ const SOLUCIONES: Solucion[] = [
 const TarjetaSolucion: React.FC<{solucion: Solucion}> = ({solucion}) => {
     const {t} = useTranslation();
     return (
-        <a href={solucion.enlace} className="tarjetaSolucion">
+        <a href={solucion.enlace} className="tarjetaSolucion" onClick={e => spaClick(e, solucion.enlace)}>
             <div className="solucionContenido">
                 <span className="solucionEtiqueta">{solucion.etiqueta}</span>
                 <h3 className="solucionTitulo">{solucion.titulo}</h3>

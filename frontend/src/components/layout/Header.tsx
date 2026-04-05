@@ -12,7 +12,7 @@ import {ChevronDown, ChevronRight, Menu, X} from 'lucide-react';
 import {Button} from '../ui/Button';
 import {ENLACES_HEADER} from '../../data/navegacion';
 import {ModalAutenticacion} from './ModalAutenticacion';
-import {navegar} from '../../navegacionSPA';
+import {navegar, spaClick} from '../../navegacionSPA';
 import {Logo} from '../ui/Logo';
 import {useAuthStore} from '../../stores/authStore';
 import '../../styles/header.css';
@@ -101,7 +101,7 @@ export const Header: React.FC = () => {
         <>
             <header className="cabeceraPrincipal" role="banner">
                 <div className="logoContenedor">
-                    <a href="/" className="logoEnlace" aria-label={t('accessibility.logo_home')}>
+                    <a href="/" className="logoEnlace" aria-label={t('accessibility.logo_home')} onClick={e => spaClick(e, '/')}>
                         <Logo className="logoSvg" />
                     </a>
                 </div>
@@ -114,14 +114,14 @@ export const Header: React.FC = () => {
                 <nav className={`navegacionPrincipal ${menuMovilAbierto ? 'navegacionAbierta' : ''}`} id="navegacion-principal" aria-label={t('accessibility.main_nav')}>
                     {ENLACES_HEADER.map(link => (
                         <div key={link.label} className="enlaceNavegacionWrapper" ref={link.hasDropdown ? dropdownRef : undefined} onMouseEnter={() => (link.hasDropdown ? setDropdownAbierto(link.label) : null)} onMouseLeave={() => setDropdownAbierto(null)}>
-                            <a href={link.href} className="enlaceNavegacion" aria-expanded={link.hasDropdown ? dropdownAbierto === link.label : undefined} aria-haspopup={link.hasDropdown ? 'true' : undefined} onKeyDown={link.hasDropdown ? e => handleKeyDownDropdown(e, link.label) : undefined}>
+                            <a href={link.href} className="enlaceNavegacion" aria-expanded={link.hasDropdown ? dropdownAbierto === link.label : undefined} aria-haspopup={link.hasDropdown ? 'true' : undefined} onKeyDown={link.hasDropdown ? e => handleKeyDownDropdown(e, link.label) : undefined} onClick={e => spaClick(e, link.href)}>
                                 {t(NAV_KEYS[link.label] || link.label)}
                                 {link.hasDropdown && <ChevronDown size={14} className="iconoDesplegable" aria-hidden="true" />}
                             </a>
                             {link.hasDropdown && link.subEnlaces && dropdownAbierto === link.label && (
                                 <div className="subMenuDesplegable" role="menu" aria-label={`${t('accessibility.main_nav')}: ${t(NAV_KEYS[link.label] || link.label)}`}>
                                     {link.subEnlaces.map(sub => (
-                                        <a key={sub.label} href={sub.href} className="subMenuEnlace" role="menuitem" tabIndex={0} onKeyDown={handleKeyDownSubmenu}>
+                                        <a key={sub.label} href={sub.href} className="subMenuEnlace" role="menuitem" tabIndex={0} onKeyDown={handleKeyDownSubmenu} onClick={e => spaClick(e, sub.href)}>
                                             {t(NAV_KEYS[sub.label] || sub.label)}
                                         </a>
                                     ))}
@@ -135,7 +135,7 @@ export const Header: React.FC = () => {
                     {/* [044A-37] LanguageSelector removido del header por petición del usuario. Se mantiene en footer. */}
                     {logueado ? (
                         <>
-                            <a className="enlaceAcceder" href={hrefAccion!}>
+                            <a className="enlaceAcceder" href={hrefAccion!} onClick={e => spaClick(e, hrefAccion!)}>
                                 {textoAccion}
                             </a>
                             <button className="enlaceAcceder" onClick={logout}>

@@ -1,6 +1,7 @@
 /* [044A-28] Página 404 — Not Found.
  * Reemplaza el catch-all silencioso que renderizaba la home. */
 import {useTranslation} from 'react-i18next';
+import {spaClick} from '../navegacionSPA';
 import '../styles/variables.css';
 import './NotFoundIsland.css';
 import {LayoutPagina} from '../components/layout/LayoutPagina';
@@ -17,7 +18,7 @@ export const NotFoundIsland = (): JSX.Element => {
                     <span className="notFoundCodigo">404</span>
                     <h1 className="notFoundTitulo">{t('error.not_found_title', 'Página no encontrada')}</h1>
                     <p className="notFoundDescripcion">{t('error.not_found_desc', 'La página que buscas no existe o ha sido movida.')}</p>
-                    <a href="/" className="notFoundEnlace">{t('error.go_home', 'Volver al inicio')}</a>
+                    <a href="/" className="notFoundEnlace" onClick={e => spaClick(e, '/')}>{t('error.go_home', 'Volver al inicio')}</a>
                 </div>
             </section>
         </LayoutPagina>

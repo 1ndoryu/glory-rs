@@ -4,6 +4,7 @@
  * Datos centralizados en data/showcase.ts (DRY).
  */
 import {useTranslation} from 'react-i18next';
+import {spaClick} from '../../navegacionSPA';
 import {SeccionHeader} from '../ui/SeccionHeader';
 import {Badge} from '../ui/Badge';
 import {CATEGORIAS_SHOWCASE} from '../../data/showcase';
@@ -25,7 +26,7 @@ export const SeccionShowcase = (): JSX.Element => {
 
                         <div className="showcaseGridProyectos">
                             {categoria.proyectos.map(proyecto => (
-                                <a key={proyecto.id} href={proyecto.link || '#'} className="proyectoCard">
+                                <a key={proyecto.id} href={proyecto.link || '#'} className="proyectoCard" onClick={e => { if (proyecto.link) spaClick(e, proyecto.link); }}>
                                     <div className="proyectoImagenWrapper">
                                         <img src={proyecto.imagen} alt={proyecto.titulo} className="proyectoImagen" loading="lazy" />
                                     </div>

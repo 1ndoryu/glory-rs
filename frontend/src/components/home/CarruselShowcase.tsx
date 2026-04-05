@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import {Badge} from '../ui/Badge';
+import {spaClick} from '../../navegacionSPA';
 import './CarruselShowcase.css';
 import {useCarruselInfinito} from '../../hooks/useCarruselInfinito';
 import {PROYECTOS_DATA} from '../../data/showcase';
@@ -50,7 +51,7 @@ export const CarruselShowcase: React.FC = () => {
                         : (proyecto.categorias ? [proyecto.categorias] : []);
 
                     return (
-                        <a key={`proj-${index}`} href={proyecto.link || '#'} className="carruselItem" draggable={false}>
+                        <a key={`proj-${index}`} href={proyecto.link || '#'} className="carruselItem" draggable={false} onClick={e => { if (proyecto.link) spaClick(e, proyecto.link); }}>
                             <div className="carruselImagenWrapper">
                                 {proyecto.imagen && (
                                     <img

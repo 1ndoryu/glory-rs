@@ -4,6 +4,7 @@
  */
 import React, {useState, useMemo} from 'react';
 import {useTranslation} from 'react-i18next';
+import {spaClick} from '../navegacionSPA';
 import '../styles/variables.css';
 import './ProyectosIsland.css';
 import {LayoutPagina} from '../components/layout/LayoutPagina';
@@ -27,7 +28,7 @@ const TarjetaProyecto: React.FC<{proyecto: Proyecto; indice: number}> = ({proyec
     const imagenSrc = proyecto.imagen || obtenerImagenShowcase(indice);
 
     return (
-        <a href={proyecto.link || '#'} className="tarjetaProyecto">
+        <a href={proyecto.link || '#'} className="tarjetaProyecto" onClick={e => { if (proyecto.link) spaClick(e, proyecto.link); }}>
             <div className="tarjetaProyectoImagen">
                 <img src={imagenSrc} alt={proyecto.titulo} loading="lazy" />
             </div>

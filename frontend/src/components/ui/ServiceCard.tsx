@@ -2,6 +2,7 @@ import React from 'react';
 import {ArrowRight} from 'lucide-react';
 import {Badge} from './Badge';
 import {Servicio} from '../../types/servicios';
+import {spaClick} from '../../navegacionSPA';
 import './ServiceCard.css';
 
 interface ServiceCardProps {
@@ -12,7 +13,7 @@ interface ServiceCardProps {
 export const ServiceCard: React.FC<ServiceCardProps> = ({servicio, variant = 'simple'}) => {
     if (variant === 'detailed') {
         return (
-            <a href={servicio.link} className="serviceCard detailed">
+            <a href={servicio.link} className="serviceCard detailed" onClick={e => spaClick(e, servicio.link)}>
                 <div className="cardImageWrapper">
                     <img src={servicio.imagen} alt={servicio.titulo} className="cardImage" loading="lazy" />
                     <div className="cardOverlay" />
@@ -34,7 +35,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({servicio, variant = 'si
 
     /* Variante simple (Home / Relacionados) */
     return (
-        <a href={servicio.link} className="serviceCard simple">
+        <a href={servicio.link} className="serviceCard simple" onClick={e => spaClick(e, servicio.link)}>
             <div className="simpleImageWrapper">
                 <img src={servicio.imagen} alt={servicio.titulo} className="simpleImage" loading="lazy" />
             </div>

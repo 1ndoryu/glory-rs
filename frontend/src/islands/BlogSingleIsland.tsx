@@ -5,6 +5,7 @@
  * TO-DO: Conectar con WP REST API para contenido real de posts.
  */
 import {useTranslation} from 'react-i18next';
+import {spaClick} from '../navegacionSPA';
 import {LayoutPagina} from '../components/layout/LayoutPagina';
 import {SEOHead} from '../components/seo/SEOHead';
 import {blogPostSchema} from '../components/seo/schemas';
@@ -120,7 +121,7 @@ export const BlogSingleIsland = ({
                                 const postSlug = p.link?.split('/').filter(Boolean).pop() || '';
                                 return postSlug !== slug;
                             }).slice(0, 2).map(post => (
-                                <a key={post.id} href={post.link} className="blogSingleRelacionadoCard">
+                                <a key={post.id} href={post.link} className="blogSingleRelacionadoCard" onClick={e => { if (post.link) spaClick(e, post.link); }}>
                                     <div className="blogSingleRelacionadoImagen">
                                         <img src={post.imagen || obtenerImagenBlog(post.id)} alt={post.titulo} loading="lazy" />
                                     </div>
