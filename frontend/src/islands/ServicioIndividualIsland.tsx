@@ -3,8 +3,10 @@
  * Página de detalle de un servicio individual.
  * Estructura: Hero -> Galeria -> CTA -> Skills -> Relacionados -> Contacto -> Footer
  * Skills y datos centralizados en data/ (DRY).
+ * [044A-38 Fase 1] CTA "Contratar" apunta a /panel si logueado (Fase 2 conecta con API de órdenes).
  */
 import {useTranslation} from 'react-i18next';
+import {useAuthStore} from '../stores/authStore';
 import '../styles/variables.css';
 import './ServicioIndividualIsland.css';
 import {LayoutPagina} from '../components/layout/LayoutPagina';
@@ -29,6 +31,10 @@ interface ServicioIndividualIslandProps {
 
 export const ServicioIndividualIsland = ({titulo, descripcion, precio_desde, slug}: ServicioIndividualIslandProps): JSX.Element => {
     const {t} = useTranslation();
+    const logueado = useAuthStore(s => s.logueado);
+
+    /* [044A-38 Fase 1] Si logueado, CTA lleva al panel. Fase 2 conectará con flujo de creación de orden. */
+    const ctaLink = logueado ? '/panel' : '/contacto/';
 
     /* ID del servicio actual para excluirlo de relacionados */
     const servicioId = slug || titulo?.toLowerCase().replace(/\s+/g, '-') || '';
@@ -61,7 +67,7 @@ export const ServicioIndividualIsland = ({titulo, descripcion, precio_desde, slu
             <SeccionHeroServicio titulo={titulo} descripcion={descripcion} />
             <SeccionGaleriaServicio />
             <SeccionPlanesServicio slug={servicioId} />
-            <SeccionCta descripcion={[t('service_detail.cta_1'), t('service_detail.cta_2')]} textoBotonPrimario={precioMinimo ? `${t('service_detail.cta_hire')} ${precioMinimo}` : t('service_detail.cta_hire')} linkBotonPrimario="/contacto/" textoBotonSecundario={t('service_detail.cta_contact')} linkBotonSecundario="/contacto/" />
+            <SeccionCta descripcion={[t('service_detail.cta_1'), t('service_detail.cta_2')]} textoBotonPrimario={precioMinimo ? `${t('service_detail.cta_hire')} ${precioMinimo}` : t('service_detail.cta_hire')} linkBotonPrimario={ctaLink} textoBotonSecundario={t('service_detail.cta_contact')} linkBotonSecundario="/contacto/" />
             <SeccionSkillsServicio skills={SKILLS_POR_DEFECTO} />
             <SeccionServiciosRelacionados servicioActualId={servicioId} />
             <SeccionContacto />

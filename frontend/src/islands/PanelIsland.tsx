@@ -1,23 +1,44 @@
 /**
  * Island: PanelIsland
  * Panel de usuario con header custom (sin header/footer global) y sidebar lateral.
- * Secciones: Proyectos, Servicios, Pagos, Perfil, Metodos de Pago.
- * TO-DO: Integrar con backend real (auth, Stripe, dashboards).
+ * [044A-38 Fase 1] Secciones dinámicas por rol (admin/employee/client).
+ * Redirige a / si no hay sesión activa. Tabs y sección inicial dependen del effectiveRole.
  */
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
+import {useNavigate} from 'react-router-dom';
 import {HeaderPanel} from '../components/panel/HeaderPanel';
 import {SeccionPerfil} from '../components/panel/SeccionPerfil';
 import {SeccionMetodosPago} from '../components/panel/SeccionMetodosPago';
 import {SidebarPanel} from '../components/panel/SidebarPanel';
 import {PlaceholderSeccion} from '../components/panel/PlaceholderSeccion';
-import {TABS_PANEL, type SeccionPanel} from '../data/panel';
+import {obtenerTabsPorRol, seccionInicialPorRol, type SeccionPanel} from '../data/panel';
+import {useAuthStore} from '../stores/authStore';
 import {SEOHead} from '../components/seo/SEOHead';
+import type {UserRole} from '../api/auth';
 import '../styles/variables.css';
 import './PanelIsland.css';
 
 export const PanelIsland: React.FC = () => {
-    const [seccionActiva, setSeccionActiva] = useState<SeccionPanel>('proyectos');
-    const tabActual = TABS_PANEL.find(t => t.id === seccionActiva) || TABS_PANEL[0];
+    const logueado = useAuthStore(s => s.logueado);
+    const effectiveRole: UserRole = useAuthStore(s => s.user?.effectiveRole) || 'client';
+    const navigate = useNavigate();
+
+    const tabs = obtenerTabsPorRol(effectiveRole);
+    const [seccionActiva, setSeccionActiva] = useState<SeccionPanel>(() => seccionInicialPorRol(effectiveRole));
+
+    /* [044A-38 Fase 1] Si no hay sesión, redirigir al home */
+    useEffect(() => {
+        if (!logueado) {
+            navigate('/', {replace: true});
+        }
+    }, [logueado, navigate]);
+
+    /* [044A-38 Fase 1] Cuando cambia el rol efectivo, resetear a la primera tab del nuevo rol */
+    useEffect(() => {
+        setSeccionActiva(seccionInicialPorRol(effectiveRole));
+    }, [effectiveRole]);
+
+    const tabActual = tabs.find(t => t.id === seccionActiva) || tabs[0];
 
     /* Renderizar contenido segun seccion activa */
     const renderContenido = () => {
@@ -30,6 +51,8 @@ export const PanelIsland: React.FC = () => {
                 return <PlaceholderSeccion tab={tabActual} />;
         }
     };
+
+    if (!logueado) return null;
 
     return (
         <>

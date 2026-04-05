@@ -1,10 +1,15 @@
 /* [044A-13] Servicio API de autenticación.
- * Conecta con POST /api/auth/login y POST /api/auth/register del backend Rust. */
+ * Conecta con POST /api/auth/login y POST /api/auth/register del backend Rust.
+ * [044A-38 Fase 1] Añadido role/effective_role en AuthResponse y switch-role endpoint. */
 import instance from './axios-instance';
 
-interface AuthResponse {
+export type UserRole = 'admin' | 'employee' | 'client';
+
+export interface AuthResponse {
     token: string;
     user_id: string;
+    role: UserRole;
+    effective_role: UserRole;
 }
 
 interface ApiError {
@@ -18,6 +23,12 @@ export async function apiLogin(email: string, password: string): Promise<AuthRes
 
 export async function apiRegister(email: string, password: string): Promise<AuthResponse> {
     const {data} = await instance.post<AuthResponse>('/api/auth/register', {email, password});
+    return data;
+}
+
+/* [044A-38 Fase 1] Cambia el active_role del admin y devuelve nuevo token */
+export async function apiSwitchRole(targetRole: UserRole): Promise<AuthResponse> {
+    const {data} = await instance.post<AuthResponse>('/api/auth/switch-role', {role: targetRole});
     return data;
 }
 

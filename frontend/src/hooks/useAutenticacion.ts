@@ -89,14 +89,15 @@ export const useAutenticacion = (abierto: boolean, onCerrar: () => void): Retorn
         setRecuperar(prev => ({...prev, [campo]: valor}));
     }, []);
 
-    /* [044A-13] Login real contra backend REST API */
+    /* [044A-13] Login real contra backend REST API
+     * [044A-38 Fase 1] Ahora pasa role/effective_role al store */
     const handleLogin = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
         setCargando(true);
         try {
             const resp = await apiLogin(login.email, login.password);
-            authLogin(resp.token, resp.user_id, login.email);
+            authLogin(resp.token, resp.user_id, login.email, resp.role, resp.effective_role);
             onCerrar();
         } catch (err) {
             setError(extraerMensajeError(err));
@@ -105,7 +106,8 @@ export const useAutenticacion = (abierto: boolean, onCerrar: () => void): Retorn
         }
     }, [login.email, login.password, authLogin, onCerrar]);
 
-    /* [044A-13] Registro real contra backend REST API */
+    /* [044A-13] Registro real contra backend REST API
+     * [044A-38 Fase 1] Ahora pasa role/effective_role al store */
     const handleRegistro = useCallback(
         async (e: React.FormEvent) => {
             e.preventDefault();
@@ -117,7 +119,7 @@ export const useAutenticacion = (abierto: boolean, onCerrar: () => void): Retorn
             setCargando(true);
             try {
                 const resp = await apiRegister(registro.email, registro.password);
-                authLogin(resp.token, resp.user_id, registro.email);
+                authLogin(resp.token, resp.user_id, registro.email, resp.role, resp.effective_role);
                 onCerrar();
             } catch (err) {
                 setError(extraerMensajeError(err));
