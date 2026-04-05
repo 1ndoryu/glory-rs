@@ -1,0 +1,83 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO phase_deliverables\n              (phase_id, uploaded_by, file_name, file_url, file_size_bytes, mime_type, revision_number, notes)\n              VALUES ($1, $2, $3, $4, $5, $6, $7, $8)\n              RETURNING id, phase_id, uploaded_by, file_name, file_url,\n                file_size_bytes, mime_type, revision_number, notes, created_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "phase_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "uploaded_by",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "file_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "file_url",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "file_size_bytes",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 6,
+        "name": "mime_type",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 7,
+        "name": "revision_number",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 8,
+        "name": "notes",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 9,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Varchar",
+        "Varchar",
+        "Int8",
+        "Varchar",
+        "Int4",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "a4b368540b9ea4dc3749f714655242552b23d1beed0b8b43873a5e4f04cf6230"
+}

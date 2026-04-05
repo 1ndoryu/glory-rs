@@ -1,11 +1,12 @@
 /* [044A-38 Fase 4] Repositorio de delegaciones y perfiles de empleados.
+ * [044A-44] Migrado a query_as!/query_scalar! con verificación en compilación.
  * CRUD sobre order_delegations y employee_profiles.
  * Todas las queries usan prepared statements vía sqlx. */
 
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::models::{Delegation, EmployeeProfile};
+use crate::models::{Delegation, DelegationStatus, EmployeeProfile};
 
 pub struct DelegationRepository;
 
@@ -21,14 +22,18 @@ impl DelegationRepository {
         reason: &str,
         delegation_type: &str,
     ) -> Result<Delegation, sqlx::Error> {
-        sqlx::query_as::<_, Delegation>(
-            "INSERT INTO order_delegations (order_id, from_employee_id, reason, delegation_type) \
-             VALUES ($1, $2, $3, $4) RETURNING *",
+        sqlx::query_as!(
+            Delegation,
+            r#"INSERT INTO order_delegations (order_id, from_employee_id, reason, delegation_type)
+             VALUES ($1, $2, $3, $4)
+             RETURNING id, order_id, from_employee_id, to_employee_id, reason,
+               delegation_type, status as "status: DelegationStatus",
+               created_at, resolved_at"#,
+            order_id,
+            from_employee_id,
+            reason,
+            delegation_type,
         )
-        .bind(order_id)
-        .bind(from_employee_id)
-        .bind(reason)
-        .bind(delegation_type)
         .fetch_one(pool)
         .await
     }
@@ -37,10 +42,16 @@ impl DelegationRepository {
         pool: &PgPool,
         id: Uuid,
     ) -> Result<Option<Delegation>, sqlx::Error> {
-        sqlx::query_as::<_, Delegation>("SELECT * FROM order_delegations WHERE id = $1")
-            .bind(id)
-            .fetch_optional(pool)
-            .await
+        sqlx::query_as!(
+            Delegation,
+            r#"SELECT id, order_id, from_employee_id, to_employee_id, reason,
+               delegation_type, status as "status: DelegationStatus",
+               created_at, resolved_at
+             FROM order_delegations WHERE id = $1"#,
+            id,
+        )
+        .fetch_optional(pool)
+        .await
     }
 
     /// Delegaciones donde este empleado puede responder (incoming abiertas o dirigidas a él)
@@ -48,13 +59,17 @@ impl DelegationRepository {
         pool: &PgPool,
         employee_id: Uuid,
     ) -> Result<Vec<Delegation>, sqlx::Error> {
-        sqlx::query_as::<_, Delegation>(
-            "SELECT * FROM order_delegations \
-             WHERE (to_employee_id = $1 OR (to_employee_id IS NULL AND status = 'requested')) \
-             AND from_employee_id != $1 \
-             ORDER BY created_at DESC",
+        sqlx::query_as!(
+            Delegation,
+            r#"SELECT id, order_id, from_employee_id, to_employee_id, reason,
+               delegation_type, status as "status: DelegationStatus",
+               created_at, resolved_at
+             FROM order_delegations
+             WHERE (to_employee_id = $1 OR (to_employee_id IS NULL AND status = 'requested'))
+             AND from_employee_id != $1
+             ORDER BY created_at DESC"#,
+            employee_id,
         )
-        .bind(employee_id)
         .fetch_all(pool)
         .await
     }
@@ -64,18 +79,26 @@ impl DelegationRepository {
         pool: &PgPool,
         employee_id: Uuid,
     ) -> Result<Vec<Delegation>, sqlx::Error> {
-        sqlx::query_as::<_, Delegation>(
-            "SELECT * FROM order_delegations WHERE from_employee_id = $1 ORDER BY created_at DESC",
+        sqlx::query_as!(
+            Delegation,
+            r#"SELECT id, order_id, from_employee_id, to_employee_id, reason,
+               delegation_type, status as "status: DelegationStatus",
+               created_at, resolved_at
+             FROM order_delegations WHERE from_employee_id = $1 ORDER BY created_at DESC"#,
+            employee_id,
         )
-        .bind(employee_id)
         .fetch_all(pool)
         .await
     }
 
     /// Todas las delegaciones (admin)
     pub async fn list_all(pool: &PgPool) -> Result<Vec<Delegation>, sqlx::Error> {
-        sqlx::query_as::<_, Delegation>(
-            "SELECT * FROM order_delegations ORDER BY created_at DESC",
+        sqlx::query_as!(
+            Delegation,
+            r#"SELECT id, order_id, from_employee_id, to_employee_id, reason,
+               delegation_type, status as "status: DelegationStatus",
+               created_at, resolved_at
+             FROM order_delegations ORDER BY created_at DESC"#,
         )
         .fetch_all(pool)
         .await
@@ -86,12 +109,16 @@ impl DelegationRepository {
         delegation_id: Uuid,
         to_employee_id: Uuid,
     ) -> Result<Delegation, sqlx::Error> {
-        sqlx::query_as::<_, Delegation>(
-            "UPDATE order_delegations SET to_employee_id = $2, status = 'accepted', \
-             resolved_at = NOW() WHERE id = $1 RETURNING *",
+        sqlx::query_as!(
+            Delegation,
+            r#"UPDATE order_delegations SET to_employee_id = $2, status = 'accepted',
+             resolved_at = NOW() WHERE id = $1
+             RETURNING id, order_id, from_employee_id, to_employee_id, reason,
+               delegation_type, status as "status: DelegationStatus",
+               created_at, resolved_at"#,
+            delegation_id,
+            to_employee_id,
         )
-        .bind(delegation_id)
-        .bind(to_employee_id)
         .fetch_one(pool)
         .await
     }
@@ -100,11 +127,15 @@ impl DelegationRepository {
         pool: &PgPool,
         delegation_id: Uuid,
     ) -> Result<Delegation, sqlx::Error> {
-        sqlx::query_as::<_, Delegation>(
-            "UPDATE order_delegations SET status = 'rejected', resolved_at = NOW() \
-             WHERE id = $1 RETURNING *",
+        sqlx::query_as!(
+            Delegation,
+            r#"UPDATE order_delegations SET status = 'rejected', resolved_at = NOW()
+             WHERE id = $1
+             RETURNING id, order_id, from_employee_id, to_employee_id, reason,
+               delegation_type, status as "status: DelegationStatus",
+               created_at, resolved_at"#,
+            delegation_id,
         )
-        .bind(delegation_id)
         .fetch_one(pool)
         .await
     }
@@ -113,11 +144,15 @@ impl DelegationRepository {
         pool: &PgPool,
         delegation_id: Uuid,
     ) -> Result<Delegation, sqlx::Error> {
-        sqlx::query_as::<_, Delegation>(
-            "UPDATE order_delegations SET status = 'completed', resolved_at = NOW() \
-             WHERE id = $1 RETURNING *",
+        sqlx::query_as!(
+            Delegation,
+            r#"UPDATE order_delegations SET status = 'completed', resolved_at = NOW()
+             WHERE id = $1
+             RETURNING id, order_id, from_employee_id, to_employee_id, reason,
+               delegation_type, status as "status: DelegationStatus",
+               created_at, resolved_at"#,
+            delegation_id,
         )
-        .bind(delegation_id)
         .fetch_one(pool)
         .await
     }
@@ -131,13 +166,14 @@ impl DelegationRepository {
         pool: &PgPool,
         user_id: Uuid,
     ) -> Result<Option<EmployeeProfile>, sqlx::Error> {
-        sqlx::query_as::<_, EmployeeProfile>(
-            "SELECT user_id, specialties, availability, max_concurrent_orders, \
-             last_activity_at, total_completed_orders, \
-             CAST(average_rating AS DOUBLE PRECISION) AS average_rating \
-             FROM employee_profiles WHERE user_id = $1",
+        sqlx::query_as!(
+            EmployeeProfile,
+            r#"SELECT user_id, specialties, availability, max_concurrent_orders,
+             last_activity_at, total_completed_orders,
+             CAST(average_rating AS DOUBLE PRECISION) AS average_rating
+             FROM employee_profiles WHERE user_id = $1"#,
+            user_id,
         )
-        .bind(user_id)
         .fetch_optional(pool)
         .await
     }
@@ -147,14 +183,15 @@ impl DelegationRepository {
         pool: &PgPool,
         user_id: Uuid,
     ) -> Result<EmployeeProfile, sqlx::Error> {
-        sqlx::query_as::<_, EmployeeProfile>(
-            "INSERT INTO employee_profiles (user_id) VALUES ($1) \
-             ON CONFLICT (user_id) DO UPDATE SET last_activity_at = NOW() \
-             RETURNING user_id, specialties, availability, max_concurrent_orders, \
-             last_activity_at, total_completed_orders, \
-             CAST(average_rating AS DOUBLE PRECISION) AS average_rating",
+        sqlx::query_as!(
+            EmployeeProfile,
+            r#"INSERT INTO employee_profiles (user_id) VALUES ($1)
+             ON CONFLICT (user_id) DO UPDATE SET last_activity_at = NOW()
+             RETURNING user_id, specialties, availability, max_concurrent_orders,
+             last_activity_at, total_completed_orders,
+             CAST(average_rating AS DOUBLE PRECISION) AS average_rating"#,
+            user_id,
         )
-        .bind(user_id)
         .fetch_one(pool)
         .await
     }
@@ -164,12 +201,12 @@ impl DelegationRepository {
         pool: &PgPool,
         employee_id: Uuid,
     ) -> Result<i64, sqlx::Error> {
-        sqlx::query_scalar::<_, i64>(
-            "SELECT COUNT(*) FROM orders \
-             WHERE assigned_employee_id = $1 \
-             AND status IN ('in_progress', 'under_review')",
+        sqlx::query_scalar!(
+            r#"SELECT COUNT(*) as "count!: i64" FROM orders
+             WHERE assigned_employee_id = $1
+             AND status IN ('in_progress', 'under_review')"#,
+            employee_id,
         )
-        .bind(employee_id)
         .fetch_one(pool)
         .await
     }
@@ -178,19 +215,20 @@ impl DelegationRepository {
     pub async fn list_employees_with_stats(
         pool: &PgPool,
     ) -> Result<Vec<EmployeeListItemRow>, sqlx::Error> {
-        sqlx::query_as::<_, EmployeeListItemRow>(
-            "SELECT u.id AS user_id, u.email, \
-             COALESCE(ep.specialties, ARRAY[]::TEXT[]) AS specialties, \
-             COALESCE(ep.availability, 'available') AS availability, \
-             COALESCE(ep.max_concurrent_orders, 3) AS max_concurrent_orders, \
-             COALESCE(ep.total_completed_orders, 0) AS total_completed_orders, \
-             CAST(ep.average_rating AS DOUBLE PRECISION) AS average_rating, \
-             (SELECT COUNT(*) FROM orders o WHERE o.assigned_employee_id = u.id \
-              AND o.status IN ('in_progress', 'under_review')) AS current_orders \
-             FROM users u \
-             LEFT JOIN employee_profiles ep ON ep.user_id = u.id \
-             WHERE u.role = 'employee' OR u.role = 'admin' \
-             ORDER BY u.email",
+        sqlx::query_as!(
+            EmployeeListItemRow,
+            r#"SELECT u.id AS user_id, u.email,
+             COALESCE(ep.specialties, ARRAY[]::TEXT[]) AS "specialties!: Vec<String>",
+             COALESCE(ep.availability, 'available') AS "availability!: String",
+             COALESCE(ep.max_concurrent_orders, 3) AS "max_concurrent_orders!: i32",
+             COALESCE(ep.total_completed_orders, 0) AS "total_completed_orders!: i32",
+             CAST(ep.average_rating AS DOUBLE PRECISION) AS average_rating,
+             (SELECT COUNT(*) FROM orders o WHERE o.assigned_employee_id = u.id
+              AND o.status IN ('in_progress', 'under_review')) AS "current_orders!: i64"
+             FROM users u
+             LEFT JOIN employee_profiles ep ON ep.user_id = u.id
+             WHERE u.role = 'employee' OR u.role = 'admin'
+             ORDER BY u.email"#,
         )
         .fetch_all(pool)
         .await
@@ -202,21 +240,22 @@ impl DelegationRepository {
         pool: &PgPool,
         service_slug: &str,
     ) -> Result<Vec<EmployeeProfile>, sqlx::Error> {
-        sqlx::query_as::<_, EmployeeProfile>(
-            "SELECT ep.user_id, ep.specialties, ep.availability, ep.max_concurrent_orders, \
-             ep.last_activity_at, ep.total_completed_orders, \
-             CAST(ep.average_rating AS DOUBLE PRECISION) AS average_rating \
-             FROM employee_profiles ep \
-             JOIN users u ON u.id = ep.user_id \
-             WHERE u.role = 'employee' \
-             AND ep.availability = 'available' \
-             AND (ep.specialties @> ARRAY[$1]::TEXT[] OR ep.specialties = '{}') \
-             AND (SELECT COUNT(*) FROM orders o \
-                  WHERE o.assigned_employee_id = ep.user_id \
-                  AND o.status IN ('in_progress', 'under_review')) < ep.max_concurrent_orders \
-             ORDER BY ep.total_completed_orders DESC, ep.last_activity_at DESC",
+        sqlx::query_as!(
+            EmployeeProfile,
+            r#"SELECT ep.user_id, ep.specialties, ep.availability, ep.max_concurrent_orders,
+             ep.last_activity_at, ep.total_completed_orders,
+             CAST(ep.average_rating AS DOUBLE PRECISION) AS average_rating
+             FROM employee_profiles ep
+             JOIN users u ON u.id = ep.user_id
+             WHERE u.role = 'employee'
+             AND ep.availability = 'available'
+             AND (ep.specialties @> ARRAY[$1]::TEXT[] OR ep.specialties = '{}')
+             AND (SELECT COUNT(*) FROM orders o
+                  WHERE o.assigned_employee_id = ep.user_id
+                  AND o.status IN ('in_progress', 'under_review')) < ep.max_concurrent_orders
+             ORDER BY ep.total_completed_orders DESC, ep.last_activity_at DESC"#,
+            service_slug,
         )
-        .bind(service_slug)
         .fetch_all(pool)
         .await
     }

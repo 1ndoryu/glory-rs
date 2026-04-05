@@ -1,0 +1,76 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, phase_id, uploaded_by, file_name, file_url,\n              file_size_bytes, mime_type, revision_number, notes, created_at\n              FROM phase_deliverables\n              WHERE phase_id = $1\n              ORDER BY revision_number DESC, created_at DESC",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "phase_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "uploaded_by",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "file_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "file_url",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "file_size_bytes",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 6,
+        "name": "mime_type",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 7,
+        "name": "revision_number",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 8,
+        "name": "notes",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 9,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "dec89e4db4e06a325982ba23988b29005049b1464fc0af2062599184eb7696df"
+}

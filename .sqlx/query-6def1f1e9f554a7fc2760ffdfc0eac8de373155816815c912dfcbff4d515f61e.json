@@ -1,0 +1,58 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO employee_profiles (user_id) VALUES ($1)\n             ON CONFLICT (user_id) DO UPDATE SET last_activity_at = NOW()\n             RETURNING user_id, specialties, availability, max_concurrent_orders,\n             last_activity_at, total_completed_orders,\n             CAST(average_rating AS DOUBLE PRECISION) AS average_rating",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "specialties",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 2,
+        "name": "availability",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "max_concurrent_orders",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "last_activity_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 5,
+        "name": "total_completed_orders",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 6,
+        "name": "average_rating",
+        "type_info": "Float8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "6def1f1e9f554a7fc2760ffdfc0eac8de373155816815c912dfcbff4d515f61e"
+}

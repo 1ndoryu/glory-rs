@@ -1,0 +1,125 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE order_payments SET stripe_charge_id = $2, updated_at = NOW()\n             WHERE id = $1\n             RETURNING id, order_id, phase_id, amount_cents, currency,\n                       status as \"status: PaymentStatus\", payment_mode as \"payment_mode: PaymentMode\",\n                       stripe_payment_intent_id, stripe_charge_id, held_at, released_at,\n                       description, created_at, updated_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "order_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "phase_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "amount_cents",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "currency",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "status: PaymentStatus",
+        "type_info": {
+          "Custom": {
+            "name": "payment_status",
+            "kind": {
+              "Enum": [
+                "pending",
+                "held",
+                "released",
+                "refunded",
+                "failed"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "payment_mode: PaymentMode",
+        "type_info": {
+          "Custom": {
+            "name": "payment_mode",
+            "kind": {
+              "Enum": [
+                "full",
+                "half_half",
+                "phased"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "stripe_payment_intent_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 8,
+        "name": "stripe_charge_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 9,
+        "name": "held_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 10,
+        "name": "released_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 11,
+        "name": "description",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 12,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 13,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Varchar"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "b67ca6926651cc686237a101f679d79e72e26656623eeee1c1b65059dca6342f"
+}

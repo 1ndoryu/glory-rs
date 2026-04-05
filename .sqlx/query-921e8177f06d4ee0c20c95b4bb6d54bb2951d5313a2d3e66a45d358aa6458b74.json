@@ -1,0 +1,77 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE chat_sessions SET assigned_staff_id = $2,\n             status = 'staff_handling', ai_enabled = false,\n             updated_at = NOW() WHERE id = $1\n             RETURNING id, visitor_id, visitor_name, user_id, order_id, status,\n               assigned_staff_id, ai_enabled, created_at, updated_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "visitor_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "visitor_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 4,
+        "name": "order_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 5,
+        "name": "status",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "assigned_staff_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 7,
+        "name": "ai_enabled",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 8,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 9,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      true,
+      true,
+      true,
+      false,
+      true,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "921e8177f06d4ee0c20c95b4bb6d54bb2951d5313a2d3e66a45d358aa6458b74"
+}

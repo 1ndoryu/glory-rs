@@ -1,5 +1,5 @@
 /* [044A-38] Repositorio de órdenes: CRUD sobre orders, order_phases, services, service_plans.
- * Todas las queries usan prepared statements vía sqlx::query_as. */
+ * [044A-44] Migrado a query_as! con verificación en compilación. */
 
 use sqlx::PgPool;
 use uuid::Uuid;
@@ -41,9 +41,10 @@ impl OrderRepository {
        ============================================================ */
 
     pub async fn list_services(pool: &PgPool) -> Result<Vec<ServiceRecord>, sqlx::Error> {
-        sqlx::query_as::<_, ServiceRecord>(
-            "SELECT id, slug, title, description, base_price_cents, currency, is_active, sort_order, created_at \
-             FROM services WHERE is_active = true ORDER BY sort_order",
+        sqlx::query_as!(
+            ServiceRecord,
+            r#"SELECT id, slug, title, description, base_price_cents, currency, is_active, sort_order, created_at
+             FROM services WHERE is_active = true ORDER BY sort_order"#,
         )
         .fetch_all(pool)
         .await
@@ -53,11 +54,12 @@ impl OrderRepository {
         pool: &PgPool,
         slug: &str,
     ) -> Result<Option<ServiceRecord>, sqlx::Error> {
-        sqlx::query_as::<_, ServiceRecord>(
-            "SELECT id, slug, title, description, base_price_cents, currency, is_active, sort_order, created_at \
-             FROM services WHERE slug = $1 AND is_active = true",
+        sqlx::query_as!(
+            ServiceRecord,
+            r#"SELECT id, slug, title, description, base_price_cents, currency, is_active, sort_order, created_at
+             FROM services WHERE slug = $1 AND is_active = true"#,
+            slug,
         )
-        .bind(slug)
         .fetch_optional(pool)
         .await
     }
@@ -66,12 +68,13 @@ impl OrderRepository {
         pool: &PgPool,
         service_id: Uuid,
     ) -> Result<Vec<ServicePlan>, sqlx::Error> {
-        sqlx::query_as::<_, ServicePlan>(
-            "SELECT id, service_id, slug, name, price_cents, description, features, \
-             is_highlighted, is_custom, stripe_price_id, sort_order \
-             FROM service_plans WHERE service_id = $1 ORDER BY sort_order",
+        sqlx::query_as!(
+            ServicePlan,
+            r#"SELECT id, service_id, slug, name, price_cents, description, features,
+             is_highlighted, is_custom, stripe_price_id, sort_order
+             FROM service_plans WHERE service_id = $1 ORDER BY sort_order"#,
+            service_id,
         )
-        .bind(service_id)
         .fetch_all(pool)
         .await
     }
@@ -81,13 +84,14 @@ impl OrderRepository {
         service_id: Uuid,
         plan_slug: &str,
     ) -> Result<Option<ServicePlan>, sqlx::Error> {
-        sqlx::query_as::<_, ServicePlan>(
-            "SELECT id, service_id, slug, name, price_cents, description, features, \
-             is_highlighted, is_custom, stripe_price_id, sort_order \
-             FROM service_plans WHERE service_id = $1 AND slug = $2",
+        sqlx::query_as!(
+            ServicePlan,
+            r#"SELECT id, service_id, slug, name, price_cents, description, features,
+             is_highlighted, is_custom, stripe_price_id, sort_order
+             FROM service_plans WHERE service_id = $1 AND slug = $2"#,
+            service_id,
+            plan_slug,
         )
-        .bind(service_id)
-        .bind(plan_slug)
         .fetch_all(pool)
         .await
         .map(|mut v| v.pop())
@@ -97,12 +101,13 @@ impl OrderRepository {
         pool: &PgPool,
         plan_id: Uuid,
     ) -> Result<Vec<ServicePlanPhase>, sqlx::Error> {
-        sqlx::query_as::<_, ServicePlanPhase>(
-            "SELECT id, plan_id, phase_number, title, description, \
-             percentage_of_total, estimated_days, max_revisions \
-             FROM service_plan_phases WHERE plan_id = $1 ORDER BY phase_number",
+        sqlx::query_as!(
+            ServicePlanPhase,
+            r#"SELECT id, plan_id, phase_number, title, description,
+             percentage_of_total, estimated_days, max_revisions
+             FROM service_plan_phases WHERE plan_id = $1 ORDER BY phase_number"#,
+            plan_id,
         )
-        .bind(plan_id)
         .fetch_all(pool)
         .await
     }
@@ -115,20 +120,27 @@ impl OrderRepository {
         pool: &PgPool,
         params: CreateOrderParams<'_>,
     ) -> Result<Order, sqlx::Error> {
-        sqlx::query_as::<_, Order>(
-            "INSERT INTO orders (client_id, service_id, plan_id, payment_mode, \
-             base_price_cents, discount_percent, final_price_cents, client_notes) \
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8) \
-             RETURNING *",
+        sqlx::query_as!(
+            Order,
+            r#"INSERT INTO orders (client_id, service_id, plan_id, payment_mode,
+             base_price_cents, discount_percent, final_price_cents, client_notes)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+             RETURNING id, order_number, client_id, service_id, plan_id,
+               payment_mode as "payment_mode: PaymentMode",
+               base_price_cents, discount_percent, final_price_cents, currency,
+               status as "status: OrderStatus",
+               assigned_employee_id, assigned_at, auto_assign_deadline, current_phase,
+               started_at, completed_at, cancelled_at, client_notes, internal_notes,
+               created_at, updated_at"#,
+            params.client_id,
+            params.service_id,
+            params.plan_id,
+            params.payment_mode as PaymentMode,
+            params.base_price_cents,
+            params.discount_percent,
+            params.final_price_cents,
+            params.client_notes,
         )
-        .bind(params.client_id)
-        .bind(params.service_id)
-        .bind(params.plan_id)
-        .bind(params.payment_mode)
-        .bind(params.base_price_cents)
-        .bind(params.discount_percent)
-        .bind(params.final_price_cents)
-        .bind(params.client_notes)
         .fetch_one(pool)
         .await
     }
@@ -137,20 +149,38 @@ impl OrderRepository {
         pool: &PgPool,
         order_id: Uuid,
     ) -> Result<Option<Order>, sqlx::Error> {
-        sqlx::query_as::<_, Order>("SELECT * FROM orders WHERE id = $1")
-            .bind(order_id)
-            .fetch_optional(pool)
-            .await
+        sqlx::query_as!(
+            Order,
+            r#"SELECT id, order_number, client_id, service_id, plan_id,
+               payment_mode as "payment_mode: PaymentMode",
+               base_price_cents, discount_percent, final_price_cents, currency,
+               status as "status: OrderStatus",
+               assigned_employee_id, assigned_at, auto_assign_deadline, current_phase,
+               started_at, completed_at, cancelled_at, client_notes, internal_notes,
+               created_at, updated_at
+             FROM orders WHERE id = $1"#,
+            order_id,
+        )
+        .fetch_optional(pool)
+        .await
     }
 
     pub async fn list_orders_for_client(
         pool: &PgPool,
         client_id: Uuid,
     ) -> Result<Vec<Order>, sqlx::Error> {
-        sqlx::query_as::<_, Order>(
-            "SELECT * FROM orders WHERE client_id = $1 ORDER BY created_at DESC",
+        sqlx::query_as!(
+            Order,
+            r#"SELECT id, order_number, client_id, service_id, plan_id,
+               payment_mode as "payment_mode: PaymentMode",
+               base_price_cents, discount_percent, final_price_cents, currency,
+               status as "status: OrderStatus",
+               assigned_employee_id, assigned_at, auto_assign_deadline, current_phase,
+               started_at, completed_at, cancelled_at, client_notes, internal_notes,
+               created_at, updated_at
+             FROM orders WHERE client_id = $1 ORDER BY created_at DESC"#,
+            client_id,
         )
-        .bind(client_id)
         .fetch_all(pool)
         .await
     }
@@ -159,23 +189,49 @@ impl OrderRepository {
         pool: &PgPool,
         employee_id: Uuid,
     ) -> Result<Vec<Order>, sqlx::Error> {
-        sqlx::query_as::<_, Order>(
-            "SELECT * FROM orders WHERE assigned_employee_id = $1 ORDER BY created_at DESC",
+        sqlx::query_as!(
+            Order,
+            r#"SELECT id, order_number, client_id, service_id, plan_id,
+               payment_mode as "payment_mode: PaymentMode",
+               base_price_cents, discount_percent, final_price_cents, currency,
+               status as "status: OrderStatus",
+               assigned_employee_id, assigned_at, auto_assign_deadline, current_phase,
+               started_at, completed_at, cancelled_at, client_notes, internal_notes,
+               created_at, updated_at
+             FROM orders WHERE assigned_employee_id = $1 ORDER BY created_at DESC"#,
+            employee_id,
         )
-        .bind(employee_id)
         .fetch_all(pool)
         .await
     }
 
     pub async fn list_all_orders(pool: &PgPool) -> Result<Vec<Order>, sqlx::Error> {
-        sqlx::query_as::<_, Order>("SELECT * FROM orders ORDER BY created_at DESC")
-            .fetch_all(pool)
-            .await
+        sqlx::query_as!(
+            Order,
+            r#"SELECT id, order_number, client_id, service_id, plan_id,
+               payment_mode as "payment_mode: PaymentMode",
+               base_price_cents, discount_percent, final_price_cents, currency,
+               status as "status: OrderStatus",
+               assigned_employee_id, assigned_at, auto_assign_deadline, current_phase,
+               started_at, completed_at, cancelled_at, client_notes, internal_notes,
+               created_at, updated_at
+             FROM orders ORDER BY created_at DESC"#,
+        )
+        .fetch_all(pool)
+        .await
     }
 
     pub async fn list_unassigned_orders(pool: &PgPool) -> Result<Vec<Order>, sqlx::Error> {
-        sqlx::query_as::<_, Order>(
-            "SELECT * FROM orders WHERE status = 'awaiting_assignment' ORDER BY created_at ASC",
+        sqlx::query_as!(
+            Order,
+            r#"SELECT id, order_number, client_id, service_id, plan_id,
+               payment_mode as "payment_mode: PaymentMode",
+               base_price_cents, discount_percent, final_price_cents, currency,
+               status as "status: OrderStatus",
+               assigned_employee_id, assigned_at, auto_assign_deadline, current_phase,
+               started_at, completed_at, cancelled_at, client_notes, internal_notes,
+               created_at, updated_at
+             FROM orders WHERE status = 'awaiting_assignment' ORDER BY created_at ASC"#,
         )
         .fetch_all(pool)
         .await
@@ -186,11 +242,19 @@ impl OrderRepository {
         order_id: Uuid,
         status: OrderStatus,
     ) -> Result<Order, sqlx::Error> {
-        sqlx::query_as::<_, Order>(
-            "UPDATE orders SET status = $2, updated_at = NOW() WHERE id = $1 RETURNING *",
+        sqlx::query_as!(
+            Order,
+            r#"UPDATE orders SET status = $2, updated_at = NOW() WHERE id = $1
+             RETURNING id, order_number, client_id, service_id, plan_id,
+               payment_mode as "payment_mode: PaymentMode",
+               base_price_cents, discount_percent, final_price_cents, currency,
+               status as "status: OrderStatus",
+               assigned_employee_id, assigned_at, auto_assign_deadline, current_phase,
+               started_at, completed_at, cancelled_at, client_notes, internal_notes,
+               created_at, updated_at"#,
+            order_id,
+            status as OrderStatus,
         )
-        .bind(order_id)
-        .bind(status)
         .fetch_one(pool)
         .await
     }
@@ -200,13 +264,21 @@ impl OrderRepository {
         order_id: Uuid,
         employee_id: Uuid,
     ) -> Result<Order, sqlx::Error> {
-        sqlx::query_as::<_, Order>(
-            "UPDATE orders SET assigned_employee_id = $2, assigned_at = NOW(), \
-             status = 'in_progress', started_at = COALESCE(started_at, NOW()), updated_at = NOW() \
-             WHERE id = $1 RETURNING *",
+        sqlx::query_as!(
+            Order,
+            r#"UPDATE orders SET assigned_employee_id = $2, assigned_at = NOW(),
+             status = 'in_progress', started_at = COALESCE(started_at, NOW()), updated_at = NOW()
+             WHERE id = $1
+             RETURNING id, order_number, client_id, service_id, plan_id,
+               payment_mode as "payment_mode: PaymentMode",
+               base_price_cents, discount_percent, final_price_cents, currency,
+               status as "status: OrderStatus",
+               assigned_employee_id, assigned_at, auto_assign_deadline, current_phase,
+               started_at, completed_at, cancelled_at, client_notes, internal_notes,
+               created_at, updated_at"#,
+            order_id,
+            employee_id,
         )
-        .bind(order_id)
-        .bind(employee_id)
         .fetch_one(pool)
         .await
     }
@@ -219,19 +291,24 @@ impl OrderRepository {
         pool: &PgPool,
         params: CreatePhaseParams<'_>,
     ) -> Result<OrderPhase, sqlx::Error> {
-        sqlx::query_as::<_, OrderPhase>(
-            "INSERT INTO order_phases (order_id, phase_number, title, description, \
-             price_cents, status, max_revisions, estimated_days) \
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *",
+        sqlx::query_as!(
+            OrderPhase,
+            r#"INSERT INTO order_phases (order_id, phase_number, title, description,
+             price_cents, status, max_revisions, estimated_days)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+             RETURNING id, order_id, phase_number, title, description, price_cents,
+               status as "status: PhaseStatus",
+               max_revisions, revisions_used, estimated_days,
+               started_at, delivered_at, approved_at, deadline, created_at, updated_at"#,
+            params.order_id,
+            params.phase_number,
+            params.title,
+            params.description,
+            params.price_cents,
+            params.status as PhaseStatus,
+            params.max_revisions,
+            params.estimated_days,
         )
-        .bind(params.order_id)
-        .bind(params.phase_number)
-        .bind(params.title)
-        .bind(params.description)
-        .bind(params.price_cents)
-        .bind(params.status)
-        .bind(params.max_revisions)
-        .bind(params.estimated_days)
         .fetch_one(pool)
         .await
     }
@@ -240,10 +317,15 @@ impl OrderRepository {
         pool: &PgPool,
         order_id: Uuid,
     ) -> Result<Vec<OrderPhase>, sqlx::Error> {
-        sqlx::query_as::<_, OrderPhase>(
-            "SELECT * FROM order_phases WHERE order_id = $1 ORDER BY phase_number",
+        sqlx::query_as!(
+            OrderPhase,
+            r#"SELECT id, order_id, phase_number, title, description, price_cents,
+               status as "status: PhaseStatus",
+               max_revisions, revisions_used, estimated_days,
+               started_at, delivered_at, approved_at, deadline, created_at, updated_at
+             FROM order_phases WHERE order_id = $1 ORDER BY phase_number"#,
+            order_id,
         )
-        .bind(order_id)
         .fetch_all(pool)
         .await
     }
@@ -253,11 +335,16 @@ impl OrderRepository {
         phase_id: Uuid,
         status: PhaseStatus,
     ) -> Result<OrderPhase, sqlx::Error> {
-        sqlx::query_as::<_, OrderPhase>(
-            "UPDATE order_phases SET status = $2, updated_at = NOW() WHERE id = $1 RETURNING *",
+        sqlx::query_as!(
+            OrderPhase,
+            r#"UPDATE order_phases SET status = $2, updated_at = NOW() WHERE id = $1
+             RETURNING id, order_id, phase_number, title, description, price_cents,
+               status as "status: PhaseStatus",
+               max_revisions, revisions_used, estimated_days,
+               started_at, delivered_at, approved_at, deadline, created_at, updated_at"#,
+            phase_id,
+            status as PhaseStatus,
         )
-        .bind(phase_id)
-        .bind(status)
         .fetch_one(pool)
         .await
     }
@@ -268,11 +355,16 @@ impl OrderRepository {
         order_id: Uuid,
         phase_number: i32,
     ) -> Result<Option<OrderPhase>, sqlx::Error> {
-        sqlx::query_as::<_, OrderPhase>(
-            "SELECT * FROM order_phases WHERE order_id = $1 AND phase_number = $2",
+        sqlx::query_as!(
+            OrderPhase,
+            r#"SELECT id, order_id, phase_number, title, description, price_cents,
+               status as "status: PhaseStatus",
+               max_revisions, revisions_used, estimated_days,
+               started_at, delivered_at, approved_at, deadline, created_at, updated_at
+             FROM order_phases WHERE order_id = $1 AND phase_number = $2"#,
+            order_id,
+            phase_number,
         )
-        .bind(order_id)
-        .bind(phase_number)
         .fetch_optional(pool)
         .await
     }
@@ -282,11 +374,16 @@ impl OrderRepository {
         pool: &PgPool,
         phase_id: Uuid,
     ) -> Result<OrderPhase, sqlx::Error> {
-        sqlx::query_as::<_, OrderPhase>(
-            "UPDATE order_phases SET status = 'delivered', delivered_at = NOW(), updated_at = NOW() \
-             WHERE id = $1 RETURNING *",
+        sqlx::query_as!(
+            OrderPhase,
+            r#"UPDATE order_phases SET status = 'delivered', delivered_at = NOW(), updated_at = NOW()
+             WHERE id = $1
+             RETURNING id, order_id, phase_number, title, description, price_cents,
+               status as "status: PhaseStatus",
+               max_revisions, revisions_used, estimated_days,
+               started_at, delivered_at, approved_at, deadline, created_at, updated_at"#,
+            phase_id,
         )
-        .bind(phase_id)
         .fetch_one(pool)
         .await
     }
@@ -296,11 +393,16 @@ impl OrderRepository {
         pool: &PgPool,
         phase_id: Uuid,
     ) -> Result<OrderPhase, sqlx::Error> {
-        sqlx::query_as::<_, OrderPhase>(
-            "UPDATE order_phases SET status = 'approved', approved_at = NOW(), updated_at = NOW() \
-             WHERE id = $1 RETURNING *",
+        sqlx::query_as!(
+            OrderPhase,
+            r#"UPDATE order_phases SET status = 'approved', approved_at = NOW(), updated_at = NOW()
+             WHERE id = $1
+             RETURNING id, order_id, phase_number, title, description, price_cents,
+               status as "status: PhaseStatus",
+               max_revisions, revisions_used, estimated_days,
+               started_at, delivered_at, approved_at, deadline, created_at, updated_at"#,
+            phase_id,
         )
-        .bind(phase_id)
         .fetch_one(pool)
         .await
     }
@@ -310,12 +412,17 @@ impl OrderRepository {
         pool: &PgPool,
         phase_id: Uuid,
     ) -> Result<OrderPhase, sqlx::Error> {
-        sqlx::query_as::<_, OrderPhase>(
-            "UPDATE order_phases SET status = 'revision_requested', \
-             revisions_used = revisions_used + 1, updated_at = NOW() \
-             WHERE id = $1 RETURNING *",
+        sqlx::query_as!(
+            OrderPhase,
+            r#"UPDATE order_phases SET status = 'revision_requested',
+             revisions_used = revisions_used + 1, updated_at = NOW()
+             WHERE id = $1
+             RETURNING id, order_id, phase_number, title, description, price_cents,
+               status as "status: PhaseStatus",
+               max_revisions, revisions_used, estimated_days,
+               started_at, delivered_at, approved_at, deadline, created_at, updated_at"#,
+            phase_id,
         )
-        .bind(phase_id)
         .fetch_one(pool)
         .await
     }
@@ -325,11 +432,19 @@ impl OrderRepository {
         pool: &PgPool,
         order_id: Uuid,
     ) -> Result<Order, sqlx::Error> {
-        sqlx::query_as::<_, Order>(
-            "UPDATE orders SET status = 'cancelled', cancelled_at = NOW(), updated_at = NOW() \
-             WHERE id = $1 RETURNING *",
+        sqlx::query_as!(
+            Order,
+            r#"UPDATE orders SET status = 'cancelled', cancelled_at = NOW(), updated_at = NOW()
+             WHERE id = $1
+             RETURNING id, order_number, client_id, service_id, plan_id,
+               payment_mode as "payment_mode: PaymentMode",
+               base_price_cents, discount_percent, final_price_cents, currency,
+               status as "status: OrderStatus",
+               assigned_employee_id, assigned_at, auto_assign_deadline, current_phase,
+               started_at, completed_at, cancelled_at, client_notes, internal_notes,
+               created_at, updated_at"#,
+            order_id,
         )
-        .bind(order_id)
         .fetch_one(pool)
         .await
     }
@@ -340,12 +455,20 @@ impl OrderRepository {
         order_id: Uuid,
         phase_number: i32,
     ) -> Result<Order, sqlx::Error> {
-        sqlx::query_as::<_, Order>(
-            "UPDATE orders SET current_phase = $2, updated_at = NOW() \
-             WHERE id = $1 RETURNING *",
+        sqlx::query_as!(
+            Order,
+            r#"UPDATE orders SET current_phase = $2, updated_at = NOW()
+             WHERE id = $1
+             RETURNING id, order_number, client_id, service_id, plan_id,
+               payment_mode as "payment_mode: PaymentMode",
+               base_price_cents, discount_percent, final_price_cents, currency,
+               status as "status: OrderStatus",
+               assigned_employee_id, assigned_at, auto_assign_deadline, current_phase,
+               started_at, completed_at, cancelled_at, client_notes, internal_notes,
+               created_at, updated_at"#,
+            order_id,
+            phase_number,
         )
-        .bind(order_id)
-        .bind(phase_number)
         .fetch_one(pool)
         .await
     }
@@ -355,11 +478,19 @@ impl OrderRepository {
         pool: &PgPool,
         order_id: Uuid,
     ) -> Result<Order, sqlx::Error> {
-        sqlx::query_as::<_, Order>(
-            "UPDATE orders SET status = 'completed', completed_at = NOW(), updated_at = NOW() \
-             WHERE id = $1 RETURNING *",
+        sqlx::query_as!(
+            Order,
+            r#"UPDATE orders SET status = 'completed', completed_at = NOW(), updated_at = NOW()
+             WHERE id = $1
+             RETURNING id, order_number, client_id, service_id, plan_id,
+               payment_mode as "payment_mode: PaymentMode",
+               base_price_cents, discount_percent, final_price_cents, currency,
+               status as "status: OrderStatus",
+               assigned_employee_id, assigned_at, auto_assign_deadline, current_phase,
+               started_at, completed_at, cancelled_at, client_notes, internal_notes,
+               created_at, updated_at"#,
+            order_id,
         )
-        .bind(order_id)
         .fetch_one(pool)
         .await
     }
@@ -370,17 +501,17 @@ impl OrderRepository {
         service_id: Uuid,
         plan_id: Uuid,
     ) -> Result<(String, String), sqlx::Error> {
-        let service_title: String = sqlx::query_scalar(
-            "SELECT title FROM services WHERE id = $1",
+        let service_title: String = sqlx::query_scalar!(
+            r#"SELECT title FROM services WHERE id = $1"#,
+            service_id,
         )
-        .bind(service_id)
         .fetch_one(pool)
         .await?;
 
-        let plan_name: String = sqlx::query_scalar(
-            "SELECT name FROM service_plans WHERE id = $1",
+        let plan_name: String = sqlx::query_scalar!(
+            r#"SELECT name FROM service_plans WHERE id = $1"#,
+            plan_id,
         )
-        .bind(plan_id)
         .fetch_one(pool)
         .await?;
 
@@ -396,22 +527,38 @@ impl OrderRepository {
         pool: &PgPool,
         order_id: Uuid,
     ) -> Result<Order, sqlx::Error> {
-        sqlx::query_as::<_, Order>(
-            "UPDATE orders SET status = 'awaiting_assignment', \
-             auto_assign_deadline = NOW() + INTERVAL '24 hours', \
-             updated_at = NOW() WHERE id = $1 RETURNING *",
+        sqlx::query_as!(
+            Order,
+            r#"UPDATE orders SET status = 'awaiting_assignment',
+             auto_assign_deadline = NOW() + INTERVAL '24 hours',
+             updated_at = NOW() WHERE id = $1
+             RETURNING id, order_number, client_id, service_id, plan_id,
+               payment_mode as "payment_mode: PaymentMode",
+               base_price_cents, discount_percent, final_price_cents, currency,
+               status as "status: OrderStatus",
+               assigned_employee_id, assigned_at, auto_assign_deadline, current_phase,
+               started_at, completed_at, cancelled_at, client_notes, internal_notes,
+               created_at, updated_at"#,
+            order_id,
         )
-        .bind(order_id)
         .fetch_one(pool)
         .await
     }
 
     /// Órdenes que pasaron su deadline de auto-asignación (24h en `awaiting_assignment`)
     pub async fn list_overdue_unassigned(pool: &PgPool) -> Result<Vec<Order>, sqlx::Error> {
-        sqlx::query_as::<_, Order>(
-            "SELECT * FROM orders WHERE status = 'awaiting_assignment' \
-             AND auto_assign_deadline IS NOT NULL AND auto_assign_deadline < NOW() \
-             ORDER BY auto_assign_deadline ASC",
+        sqlx::query_as!(
+            Order,
+            r#"SELECT id, order_number, client_id, service_id, plan_id,
+               payment_mode as "payment_mode: PaymentMode",
+               base_price_cents, discount_percent, final_price_cents, currency,
+               status as "status: OrderStatus",
+               assigned_employee_id, assigned_at, auto_assign_deadline, current_phase,
+               started_at, completed_at, cancelled_at, client_notes, internal_notes,
+               created_at, updated_at
+             FROM orders WHERE status = 'awaiting_assignment'
+             AND auto_assign_deadline IS NOT NULL AND auto_assign_deadline < NOW()
+             ORDER BY auto_assign_deadline ASC"#,
         )
         .fetch_all(pool)
         .await
@@ -422,11 +569,12 @@ impl OrderRepository {
         pool: &PgPool,
         service_id: Uuid,
     ) -> Result<Option<ServiceRecord>, sqlx::Error> {
-        sqlx::query_as::<_, ServiceRecord>(
-            "SELECT id, slug, title, description, base_price_cents, currency, is_active, sort_order, created_at \
-             FROM services WHERE id = $1",
+        sqlx::query_as!(
+            ServiceRecord,
+            r#"SELECT id, slug, title, description, base_price_cents, currency, is_active, sort_order, created_at
+             FROM services WHERE id = $1"#,
+            service_id,
         )
-        .bind(service_id)
         .fetch_optional(pool)
         .await
     }

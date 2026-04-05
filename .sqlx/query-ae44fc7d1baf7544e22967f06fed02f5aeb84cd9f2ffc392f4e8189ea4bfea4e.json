@@ -1,0 +1,83 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, service_id, slug, name, price_cents, description, features,\n             is_highlighted, is_custom, stripe_price_id, sort_order\n             FROM service_plans WHERE service_id = $1 AND slug = $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "service_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "slug",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "price_cents",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 5,
+        "name": "description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "features",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 7,
+        "name": "is_highlighted",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 8,
+        "name": "is_custom",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 9,
+        "name": "stripe_price_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 10,
+        "name": "sort_order",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "ae44fc7d1baf7544e22967f06fed02f5aeb84cd9f2ffc392f4e8189ea4bfea4e"
+}

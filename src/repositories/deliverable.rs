@@ -1,4 +1,5 @@
 /* [044A-38 Fase 6] Repositorio de entregables (phase_deliverables).
+ * [044A-44] Migrado a query_as!/query_scalar! con verificación en compilación.
  * CRUD sobre archivos asociados a fases de órdenes. */
 
 use sqlx::PgPool;
@@ -27,20 +28,22 @@ impl DeliverableRepository {
         pool: &PgPool,
         params: CreateDeliverableParams<'_>,
     ) -> Result<PhaseDeliverable, AppError> {
-        let row = sqlx::query_as::<_, PhaseDeliverable>(
-            r"INSERT INTO phase_deliverables
+        let row = sqlx::query_as!(
+            PhaseDeliverable,
+            r#"INSERT INTO phase_deliverables
               (phase_id, uploaded_by, file_name, file_url, file_size_bytes, mime_type, revision_number, notes)
               VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-              RETURNING *"
+              RETURNING id, phase_id, uploaded_by, file_name, file_url,
+                file_size_bytes, mime_type, revision_number, notes, created_at"#,
+            params.phase_id,
+            params.uploaded_by,
+            params.file_name,
+            params.file_url,
+            params.file_size_bytes,
+            params.mime_type,
+            params.revision_number,
+            params.notes,
         )
-        .bind(params.phase_id)
-        .bind(params.uploaded_by)
-        .bind(params.file_name)
-        .bind(params.file_url)
-        .bind(params.file_size_bytes)
-        .bind(params.mime_type)
-        .bind(params.revision_number)
-        .bind(params.notes)
         .fetch_one(pool)
         .await
         .map_err(AppError::Database)?;
@@ -53,12 +56,15 @@ impl DeliverableRepository {
         pool: &PgPool,
         phase_id: Uuid,
     ) -> Result<Vec<PhaseDeliverable>, AppError> {
-        let rows = sqlx::query_as::<_, PhaseDeliverable>(
-            r"SELECT * FROM phase_deliverables
+        let rows = sqlx::query_as!(
+            PhaseDeliverable,
+            r#"SELECT id, phase_id, uploaded_by, file_name, file_url,
+              file_size_bytes, mime_type, revision_number, notes, created_at
+              FROM phase_deliverables
               WHERE phase_id = $1
-              ORDER BY revision_number DESC, created_at DESC"
+              ORDER BY revision_number DESC, created_at DESC"#,
+            phase_id,
         )
-        .bind(phase_id)
         .fetch_all(pool)
         .await
         .map_err(AppError::Database)?;
@@ -72,13 +78,16 @@ impl DeliverableRepository {
         phase_id: Uuid,
         revision_number: i32,
     ) -> Result<Vec<PhaseDeliverable>, AppError> {
-        let rows = sqlx::query_as::<_, PhaseDeliverable>(
-            r"SELECT * FROM phase_deliverables
+        let rows = sqlx::query_as!(
+            PhaseDeliverable,
+            r#"SELECT id, phase_id, uploaded_by, file_name, file_url,
+              file_size_bytes, mime_type, revision_number, notes, created_at
+              FROM phase_deliverables
               WHERE phase_id = $1 AND revision_number = $2
-              ORDER BY created_at ASC"
+              ORDER BY created_at ASC"#,
+            phase_id,
+            revision_number,
         )
-        .bind(phase_id)
-        .bind(revision_number)
         .fetch_all(pool)
         .await
         .map_err(AppError::Database)?;
@@ -91,10 +100,13 @@ impl DeliverableRepository {
         pool: &PgPool,
         deliverable_id: Uuid,
     ) -> Result<Option<PhaseDeliverable>, AppError> {
-        let row = sqlx::query_as::<_, PhaseDeliverable>(
-            "SELECT * FROM phase_deliverables WHERE id = $1"
+        let row = sqlx::query_as!(
+            PhaseDeliverable,
+            r#"SELECT id, phase_id, uploaded_by, file_name, file_url,
+              file_size_bytes, mime_type, revision_number, notes, created_at
+              FROM phase_deliverables WHERE id = $1"#,
+            deliverable_id,
         )
-        .bind(deliverable_id)
         .fetch_optional(pool)
         .await
         .map_err(AppError::Database)?;
@@ -107,14 +119,14 @@ impl DeliverableRepository {
         pool: &PgPool,
         phase_id: Uuid,
     ) -> Result<i32, AppError> {
-        let row: (Option<i32>,) = sqlx::query_as(
-            "SELECT MAX(revision_number) FROM phase_deliverables WHERE phase_id = $1"
+        let val: Option<i32> = sqlx::query_scalar!(
+            r#"SELECT MAX(revision_number) FROM phase_deliverables WHERE phase_id = $1"#,
+            phase_id,
         )
-        .bind(phase_id)
         .fetch_one(pool)
         .await
         .map_err(AppError::Database)?;
 
-        Ok(row.0.unwrap_or(0))
+        Ok(val.unwrap_or(0))
     }
 }

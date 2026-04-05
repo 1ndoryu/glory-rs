@@ -1,0 +1,58 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT ep.user_id, ep.specialties, ep.availability, ep.max_concurrent_orders,\n             ep.last_activity_at, ep.total_completed_orders,\n             CAST(ep.average_rating AS DOUBLE PRECISION) AS average_rating\n             FROM employee_profiles ep\n             JOIN users u ON u.id = ep.user_id\n             WHERE u.role = 'employee'\n             AND ep.availability = 'available'\n             AND (ep.specialties @> ARRAY[$1]::TEXT[] OR ep.specialties = '{}')\n             AND (SELECT COUNT(*) FROM orders o\n                  WHERE o.assigned_employee_id = ep.user_id\n                  AND o.status IN ('in_progress', 'under_review')) < ep.max_concurrent_orders\n             ORDER BY ep.total_completed_orders DESC, ep.last_activity_at DESC",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "specialties",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 2,
+        "name": "availability",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "max_concurrent_orders",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "last_activity_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 5,
+        "name": "total_completed_orders",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 6,
+        "name": "average_rating",
+        "type_info": "Float8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "41f9778742f85782d4814ff03b3f35b1dc6d2376714153171a1f6ba4f4257d3c"
+}

@@ -1,0 +1,85 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO order_delegations (order_id, from_employee_id, reason, delegation_type)\n             VALUES ($1, $2, $3, $4)\n             RETURNING id, order_id, from_employee_id, to_employee_id, reason,\n               delegation_type, status as \"status: DelegationStatus\",\n               created_at, resolved_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "order_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "from_employee_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "to_employee_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 4,
+        "name": "reason",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "delegation_type",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "status: DelegationStatus",
+        "type_info": {
+          "Custom": {
+            "name": "delegation_status",
+            "kind": {
+              "Enum": [
+                "requested",
+                "accepted",
+                "rejected",
+                "completed"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 8,
+        "name": "resolved_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Varchar"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "c85a3b7851d54393a8d8d047ecf0a6532fbe58a547cc527c094c7be64a309e2b"
+}

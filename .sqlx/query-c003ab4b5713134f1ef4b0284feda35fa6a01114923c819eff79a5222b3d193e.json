@@ -1,0 +1,128 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE order_phases SET status = 'revision_requested',\n             revisions_used = revisions_used + 1, updated_at = NOW()\n             WHERE id = $1\n             RETURNING id, order_id, phase_number, title, description, price_cents,\n               status as \"status: PhaseStatus\",\n               max_revisions, revisions_used, estimated_days,\n               started_at, delivered_at, approved_at, deadline, created_at, updated_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "order_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "phase_number",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "title",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "price_cents",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 6,
+        "name": "status: PhaseStatus",
+        "type_info": {
+          "Custom": {
+            "name": "phase_status",
+            "kind": {
+              "Enum": [
+                "locked",
+                "pending_payment",
+                "paid",
+                "in_progress",
+                "delivered",
+                "revision_requested",
+                "approved",
+                "skipped"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "max_revisions",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 8,
+        "name": "revisions_used",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 9,
+        "name": "estimated_days",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 10,
+        "name": "started_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 11,
+        "name": "delivered_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 12,
+        "name": "approved_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 13,
+        "name": "deadline",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 14,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 15,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "c003ab4b5713134f1ef4b0284feda35fa6a01114923c819eff79a5222b3d193e"
+}

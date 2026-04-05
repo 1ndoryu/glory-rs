@@ -1,0 +1,82 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, order_id, from_employee_id, to_employee_id, reason,\n               delegation_type, status as \"status: DelegationStatus\",\n               created_at, resolved_at\n             FROM order_delegations WHERE from_employee_id = $1 ORDER BY created_at DESC",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "order_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "from_employee_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "to_employee_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 4,
+        "name": "reason",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "delegation_type",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "status: DelegationStatus",
+        "type_info": {
+          "Custom": {
+            "name": "delegation_status",
+            "kind": {
+              "Enum": [
+                "requested",
+                "accepted",
+                "rejected",
+                "completed"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 8,
+        "name": "resolved_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "79bd5e5998c1d12d494608c54f5b7ae6806be3cce65002df717030da59b35c52"
+}

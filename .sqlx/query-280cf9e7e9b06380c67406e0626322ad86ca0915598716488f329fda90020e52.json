@@ -1,0 +1,55 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO chat_messages (session_id, sender_type, sender_id, content)\n             VALUES ($1, $2, $3, $4)\n             RETURNING id, session_id, sender_type, sender_id, content, created_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "session_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "sender_type",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "sender_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "content",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Varchar",
+        "Varchar",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "280cf9e7e9b06380c67406e0626322ad86ca0915598716488f329fda90020e52"
+}

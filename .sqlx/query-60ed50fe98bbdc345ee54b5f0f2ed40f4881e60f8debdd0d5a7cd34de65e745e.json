@@ -1,0 +1,62 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT u.id AS user_id, u.email,\n             COALESCE(ep.specialties, ARRAY[]::TEXT[]) AS \"specialties!: Vec<String>\",\n             COALESCE(ep.availability, 'available') AS \"availability!: String\",\n             COALESCE(ep.max_concurrent_orders, 3) AS \"max_concurrent_orders!: i32\",\n             COALESCE(ep.total_completed_orders, 0) AS \"total_completed_orders!: i32\",\n             CAST(ep.average_rating AS DOUBLE PRECISION) AS average_rating,\n             (SELECT COUNT(*) FROM orders o WHERE o.assigned_employee_id = u.id\n              AND o.status IN ('in_progress', 'under_review')) AS \"current_orders!: i64\"\n             FROM users u\n             LEFT JOIN employee_profiles ep ON ep.user_id = u.id\n             WHERE u.role = 'employee' OR u.role = 'admin'\n             ORDER BY u.email",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "email",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "specialties!: Vec<String>",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 3,
+        "name": "availability!: String",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "max_concurrent_orders!: i32",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 5,
+        "name": "total_completed_orders!: i32",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 6,
+        "name": "average_rating",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 7,
+        "name": "current_orders!: i64",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "60ed50fe98bbdc345ee54b5f0f2ed40f4881e60f8debdd0d5a7cd34de65e745e"
+}

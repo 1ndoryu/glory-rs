@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COUNT(*) as \"count!: i64\" FROM orders\n             WHERE assigned_employee_id = $1\n             AND status IN ('in_progress', 'under_review')",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "count!: i64",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "708fcef7825b28457880b9c363063665b1d83fa81346c77daba14068578d2e22"
+}

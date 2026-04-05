@@ -1,0 +1,52 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT DISTINCT ON (session_id)\n               id, session_id, sender_type, sender_id, content, created_at\n             FROM chat_messages\n             WHERE session_id = ANY($1)\n             ORDER BY session_id, created_at DESC",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "session_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "sender_type",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "sender_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "content",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "UuidArray"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "b4832029b7cf1a509f46398c0e16fb70b00ca8dde16e9e097a2512884410b1f3"
+}

@@ -1,11 +1,12 @@
 /* [044A-38 Fase 7] Repositorio de reembolsos.
+ * [044A-44] Migrado a query_as! con verificación en compilación.
  * CRUD sobre order_refunds: crear solicitud, listar, aprobar/rechazar/completar.
  * Solo un reembolso activo por orden (constraint en handler). */
 
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::models::OrderRefund;
+use crate::models::{OrderRefund, RefundStatus};
 
 pub struct RefundRepository;
 
@@ -19,16 +20,20 @@ impl RefundRepository {
         amount_cents: i32,
         reason: &str,
     ) -> Result<OrderRefund, sqlx::Error> {
-        sqlx::query_as::<_, OrderRefund>(
-            "INSERT INTO order_refunds (order_id, payment_id, requested_by, amount_cents, reason)
+        sqlx::query_as!(
+            OrderRefund,
+            r#"INSERT INTO order_refunds (order_id, payment_id, requested_by, amount_cents, reason)
              VALUES ($1, $2, $3, $4, $5)
-             RETURNING *",
+             RETURNING id, order_id, payment_id, requested_by, reviewed_by,
+               amount_cents, reason, admin_response,
+               status as "status: RefundStatus",
+               stripe_refund_id, requested_at, reviewed_at, completed_at"#,
+            order_id,
+            payment_id,
+            requested_by,
+            amount_cents,
+            reason,
         )
-        .bind(order_id)
-        .bind(payment_id)
-        .bind(requested_by)
-        .bind(amount_cents)
-        .bind(reason)
         .fetch_one(pool)
         .await
     }
@@ -38,10 +43,15 @@ impl RefundRepository {
         pool: &PgPool,
         refund_id: Uuid,
     ) -> Result<Option<OrderRefund>, sqlx::Error> {
-        sqlx::query_as::<_, OrderRefund>(
-            "SELECT * FROM order_refunds WHERE id = $1",
+        sqlx::query_as!(
+            OrderRefund,
+            r#"SELECT id, order_id, payment_id, requested_by, reviewed_by,
+               amount_cents, reason, admin_response,
+               status as "status: RefundStatus",
+               stripe_refund_id, requested_at, reviewed_at, completed_at
+             FROM order_refunds WHERE id = $1"#,
+            refund_id,
         )
-        .bind(refund_id)
         .fetch_optional(pool)
         .await
     }
@@ -51,14 +61,19 @@ impl RefundRepository {
         pool: &PgPool,
         order_id: Uuid,
     ) -> Result<Option<OrderRefund>, sqlx::Error> {
-        sqlx::query_as::<_, OrderRefund>(
-            "SELECT * FROM order_refunds
+        sqlx::query_as!(
+            OrderRefund,
+            r#"SELECT id, order_id, payment_id, requested_by, reviewed_by,
+               amount_cents, reason, admin_response,
+               status as "status: RefundStatus",
+               stripe_refund_id, requested_at, reviewed_at, completed_at
+             FROM order_refunds
              WHERE order_id = $1
                AND status NOT IN ('rejected', 'completed')
              ORDER BY requested_at DESC
-             LIMIT 1",
+             LIMIT 1"#,
+            order_id,
         )
-        .bind(order_id)
         .fetch_optional(pool)
         .await
     }
@@ -67,10 +82,15 @@ impl RefundRepository {
     pub async fn list_pending(
         pool: &PgPool,
     ) -> Result<Vec<OrderRefund>, sqlx::Error> {
-        sqlx::query_as::<_, OrderRefund>(
-            "SELECT * FROM order_refunds
+        sqlx::query_as!(
+            OrderRefund,
+            r#"SELECT id, order_id, payment_id, requested_by, reviewed_by,
+               amount_cents, reason, admin_response,
+               status as "status: RefundStatus",
+               stripe_refund_id, requested_at, reviewed_at, completed_at
+             FROM order_refunds
              WHERE status IN ('requested', 'under_review', 'approved')
-             ORDER BY requested_at ASC",
+             ORDER BY requested_at ASC"#,
         )
         .fetch_all(pool)
         .await
@@ -81,12 +101,17 @@ impl RefundRepository {
         pool: &PgPool,
         user_id: Uuid,
     ) -> Result<Vec<OrderRefund>, sqlx::Error> {
-        sqlx::query_as::<_, OrderRefund>(
-            "SELECT * FROM order_refunds
+        sqlx::query_as!(
+            OrderRefund,
+            r#"SELECT id, order_id, payment_id, requested_by, reviewed_by,
+               amount_cents, reason, admin_response,
+               status as "status: RefundStatus",
+               stripe_refund_id, requested_at, reviewed_at, completed_at
+             FROM order_refunds
              WHERE requested_by = $1
-             ORDER BY requested_at DESC",
+             ORDER BY requested_at DESC"#,
+            user_id,
         )
-        .bind(user_id)
         .fetch_all(pool)
         .await
     }
@@ -96,13 +121,18 @@ impl RefundRepository {
         pool: &PgPool,
         order_id: Uuid,
     ) -> Result<Option<OrderRefund>, sqlx::Error> {
-        sqlx::query_as::<_, OrderRefund>(
-            "SELECT * FROM order_refunds
+        sqlx::query_as!(
+            OrderRefund,
+            r#"SELECT id, order_id, payment_id, requested_by, reviewed_by,
+               amount_cents, reason, admin_response,
+               status as "status: RefundStatus",
+               stripe_refund_id, requested_at, reviewed_at, completed_at
+             FROM order_refunds
              WHERE order_id = $1
              ORDER BY requested_at DESC
-             LIMIT 1",
+             LIMIT 1"#,
+            order_id,
         )
-        .bind(order_id)
         .fetch_optional(pool)
         .await
     }
@@ -114,18 +144,22 @@ impl RefundRepository {
         admin_id: Uuid,
         admin_response: Option<&str>,
     ) -> Result<OrderRefund, sqlx::Error> {
-        sqlx::query_as::<_, OrderRefund>(
-            "UPDATE order_refunds
+        sqlx::query_as!(
+            OrderRefund,
+            r#"UPDATE order_refunds
              SET status = 'approved',
                  reviewed_by = $2,
                  admin_response = $3,
                  reviewed_at = NOW()
              WHERE id = $1
-             RETURNING *",
+             RETURNING id, order_id, payment_id, requested_by, reviewed_by,
+               amount_cents, reason, admin_response,
+               status as "status: RefundStatus",
+               stripe_refund_id, requested_at, reviewed_at, completed_at"#,
+            refund_id,
+            admin_id,
+            admin_response,
         )
-        .bind(refund_id)
-        .bind(admin_id)
-        .bind(admin_response)
         .fetch_one(pool)
         .await
     }
@@ -137,18 +171,22 @@ impl RefundRepository {
         admin_id: Uuid,
         admin_response: Option<&str>,
     ) -> Result<OrderRefund, sqlx::Error> {
-        sqlx::query_as::<_, OrderRefund>(
-            "UPDATE order_refunds
+        sqlx::query_as!(
+            OrderRefund,
+            r#"UPDATE order_refunds
              SET status = 'rejected',
                  reviewed_by = $2,
                  admin_response = $3,
                  reviewed_at = NOW()
              WHERE id = $1
-             RETURNING *",
+             RETURNING id, order_id, payment_id, requested_by, reviewed_by,
+               amount_cents, reason, admin_response,
+               status as "status: RefundStatus",
+               stripe_refund_id, requested_at, reviewed_at, completed_at"#,
+            refund_id,
+            admin_id,
+            admin_response,
         )
-        .bind(refund_id)
-        .bind(admin_id)
-        .bind(admin_response)
         .fetch_one(pool)
         .await
     }
@@ -159,16 +197,20 @@ impl RefundRepository {
         refund_id: Uuid,
         stripe_refund_id: &str,
     ) -> Result<OrderRefund, sqlx::Error> {
-        sqlx::query_as::<_, OrderRefund>(
-            "UPDATE order_refunds
+        sqlx::query_as!(
+            OrderRefund,
+            r#"UPDATE order_refunds
              SET status = 'completed',
                  stripe_refund_id = $2,
                  completed_at = NOW()
              WHERE id = $1
-             RETURNING *",
+             RETURNING id, order_id, payment_id, requested_by, reviewed_by,
+               amount_cents, reason, admin_response,
+               status as "status: RefundStatus",
+               stripe_refund_id, requested_at, reviewed_at, completed_at"#,
+            refund_id,
+            stripe_refund_id,
         )
-        .bind(refund_id)
-        .bind(stripe_refund_id)
         .fetch_one(pool)
         .await
     }
@@ -178,13 +220,17 @@ impl RefundRepository {
         pool: &PgPool,
         refund_id: Uuid,
     ) -> Result<OrderRefund, sqlx::Error> {
-        sqlx::query_as::<_, OrderRefund>(
-            "UPDATE order_refunds
+        sqlx::query_as!(
+            OrderRefund,
+            r#"UPDATE order_refunds
              SET status = 'under_review'
              WHERE id = $1
-             RETURNING *",
+             RETURNING id, order_id, payment_id, requested_by, reviewed_by,
+               amount_cents, reason, admin_response,
+               status as "status: RefundStatus",
+               stripe_refund_id, requested_at, reviewed_at, completed_at"#,
+            refund_id,
         )
-        .bind(refund_id)
         .fetch_one(pool)
         .await
     }
