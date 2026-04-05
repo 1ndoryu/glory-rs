@@ -1,8 +1,10 @@
-/* [044A-38 Fase 9] Estilos de la campana de notificaciones */
+/* [044A-38 Fase 9] Estilos de la campana de notificaciones
+ * [044A-42] Fix hover negro + alineación vertical con texto adyacente */
 
 .notificationBell {
   position: relative;
   display: inline-flex;
+  align-items: center;
 }
 
 .notificationBell__trigger {
@@ -10,14 +12,18 @@
   border: none;
   cursor: pointer;
   position: relative;
-  padding: var(--spacing-xs);
+  padding: 4px;
   color: var(--brand-black);
   border-radius: 50%;
-  transition: background 0.2s;
+  transition: opacity 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .notificationBell__trigger:hover {
-  background: var(--bg-secondary);
+  opacity: 0.6;
 }
 
 .notificationBell__badge {
