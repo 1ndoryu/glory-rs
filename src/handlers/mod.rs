@@ -8,6 +8,7 @@ mod health;
 mod notes;
 mod orders;
 mod payments;
+mod refunds;
 mod seo;
 mod services;
 
@@ -77,6 +78,10 @@ impl utoipa::Modify for SecurityAddon {
         deliverables::deliver_phase_with_files,
         deliverables::list_deliverables,
         deliverables::download_deliverable,
+        refunds::request_refund,
+        refunds::review_refund,
+        refunds::list_refunds,
+        refunds::get_order_refund,
     ),
     components(schemas(
         health::HealthResponse,
@@ -115,6 +120,11 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::PhaseDeliverable,
         crate::models::DeliverPhaseResponse,
         crate::models::PhaseDeliverablesResponse,
+        crate::models::RefundStatus,
+        crate::models::RefundResponse,
+        crate::models::RequestRefundBody,
+        crate::models::ReviewRefundBody,
+        crate::models::ReviewAction,
         crate::errors::ErrorResponse,
     )),
     modifiers(&SecurityAddon),
@@ -187,4 +197,5 @@ fn api_routes() -> Router<AppState> {
         .merge(payments::routes())
         .merge(chat::rest_routes())
         .merge(deliverables::routes())
+        .merge(refunds::routes())
 }

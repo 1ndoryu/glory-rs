@@ -14,6 +14,7 @@ import {SeccionPagos} from '../components/panel/SeccionPagos';
 import {SeccionDisponibles} from '../components/panel/SeccionDisponibles';
 import {SeccionDelegaciones} from '../components/panel/SeccionDelegaciones';
 import {SeccionChat} from '../components/panel/SeccionChat';
+import {SeccionReembolsos} from '../components/panel/SeccionReembolsos';
 import {SidebarPanel} from '../components/panel/SidebarPanel';
 import {PlaceholderSeccion} from '../components/panel/PlaceholderSeccion';
 import {obtenerTabsPorRol, seccionInicialPorRol, type SeccionPanel} from '../data/panel';
@@ -69,6 +70,9 @@ export const PanelIsland: React.FC = () => {
             /* [044A-38 Fase 5] Chat integrado con ordenes */
             case 'mensajes':
                 return <SeccionChat />;
+            /* [044A-38 Fase 7] Reembolsos (admin) */
+            case 'reembolsos':
+                return <SeccionReembolsos />;
             default:
                 return <PlaceholderSeccion tab={tabActual} />;
         }

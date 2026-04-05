@@ -1,15 +1,18 @@
 /* [044A-38 Fase 3] Sección de historial de pagos en el panel.
- * Muestra pagos por orden con estado, monto y descripción. */
+ * Muestra pagos por orden con estado, monto y descripción.
+ * [044A-38 Fase 7] Botón "Solicitar reembolso" para pagos held/released. */
 
 import { useState } from 'react';
-import { Loader2, CreditCard, AlertCircle } from 'lucide-react';
+import { Loader2, CreditCard, AlertCircle, RotateCcw } from 'lucide-react';
 import { useOrdenes } from '../../hooks/useOrdenes';
 import { usePagos } from '../../hooks/usePagos';
+import { useRefundModal } from '../../hooks/useRefundModal';
 import {
     PAYMENT_STATUS_LABELS,
     PAYMENT_STATUS_CLASS,
 } from '../../api/payments';
 import { formatPrice } from '../../api/orders';
+import { useAuthStore } from '../../stores/authStore';
 import './SeccionPagos.css';
 
 export function SeccionPagos() {
@@ -18,6 +21,11 @@ export function SeccionPagos() {
         null
     );
     const { pagos, cargandoPagos, errorPagos } = usePagos(ordenSeleccionada);
+    const {
+        refundOrderId, refundRazon, refundEnCurso,
+        setRefundRazon, abrirModal, cerrarModal, enviarSolicitud,
+    } = useRefundModal();
+    const effectiveRole = useAuthStore(s => s.user?.effectiveRole) || 'client';
 
     if (cargando) {
         return (
@@ -112,8 +120,54 @@ export function SeccionPagos() {
                                     }
                                 )}
                             </p>
+                            {/* [044A-38 Fase 7] Botón reembolso si el pago es reembolsable */}
+                            {effectiveRole === 'client' &&
+                                (p.status === 'held' || p.status === 'released') && (
+                                <button
+                                    className="pagoBotonReembolso"
+                                    onClick={() => abrirModal(ordenSeleccionada!)}
+                                >
+                                    <RotateCcw size={14} />
+                                    Solicitar reembolso
+                                </button>
+                            )}
                         </div>
                     ))}
+                </div>
+            )}
+
+            {/* [044A-38 Fase 7] Modal de solicitud de reembolso */}
+            {refundOrderId && (
+                <div className="pagoModalOverlay" onClick={cerrarModal}>
+                    <div className="pagoModalContenido" onClick={(e) => e.stopPropagation()}>
+                        <h3 className="pagoModalTitulo">Solicitar reembolso</h3>
+                        <p className="pagoModalDescripcion">
+                            Describe el motivo de tu solicitud de reembolso. Un administrador la revisará.
+                        </p>
+                        <textarea
+                            className="pagoModalTextarea"
+                            placeholder="Motivo del reembolso..."
+                            value={refundRazon}
+                            onChange={(e) => setRefundRazon(e.target.value)}
+                            rows={4}
+                        />
+                        <div className="pagoModalBotones">
+                            <button
+                                className="pagoBotonEnviarReembolso"
+                                onClick={() => void enviarSolicitud()}
+                                disabled={refundEnCurso || !refundRazon.trim()}
+                            >
+                                {refundEnCurso ? 'Enviando…' : 'Enviar solicitud'}
+                            </button>
+                            <button
+                                className="pagoBotonCancelarReembolso"
+                                onClick={cerrarModal}
+                                disabled={refundEnCurso}
+                            >
+                                Cancelar
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

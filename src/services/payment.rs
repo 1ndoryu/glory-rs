@@ -429,6 +429,75 @@ impl PaymentService {
         }
         Ok(())
     }
+
+    /// [044A-38 Fase 7] Ejecutar reembolso en Stripe.
+    /// Para pagos con `capture_method=manual` (held): cancela el `PaymentIntent`.
+    /// Para pagos ya capturados (released): crea un `Refund`.
+    pub async fn refund_payment(
+        http_client: &Client,
+        stripe_key: &str,
+        payment: &OrderPayment,
+    ) -> Result<String, AppError> {
+        let pi_id = payment
+            .stripe_payment_intent_id
+            .as_deref()
+            .ok_or_else(|| {
+                AppError::Internal("Pago sin PaymentIntent de Stripe".into())
+            })?;
+
+        match payment.status {
+            PaymentStatus::Held => {
+                /* Fondos retenidos → cancelar PaymentIntent libera el dinero */
+                let url = format!(
+                    "https://api.stripe.com/v1/payment_intents/{pi_id}/cancel"
+                );
+                let resp = http_client
+                    .post(&url)
+                    .basic_auth(stripe_key, None::<&str>)
+                    .send()
+                    .await
+                    .map_err(|e| {
+                        AppError::Internal(format!("Error cancelando PaymentIntent Stripe: {e}"))
+                    })?;
+
+                if !resp.status().is_success() {
+                    let body = resp.text().await.unwrap_or_default();
+                    return Err(AppError::Internal(format!(
+                        "Stripe cancel error: {body}"
+                    )));
+                }
+                /* Para cancel, el refund_id es el PI id mismo */
+                Ok(format!("cancel_{pi_id}"))
+            }
+            PaymentStatus::Released => {
+                /* Fondos ya capturados → crear Refund en Stripe */
+                let resp = http_client
+                    .post("https://api.stripe.com/v1/refunds")
+                    .basic_auth(stripe_key, None::<&str>)
+                    .form(&[("payment_intent", pi_id)])
+                    .send()
+                    .await
+                    .map_err(|e| {
+                        AppError::Internal(format!("Error creando refund Stripe: {e}"))
+                    })?;
+
+                if !resp.status().is_success() {
+                    let body = resp.text().await.unwrap_or_default();
+                    return Err(AppError::Internal(format!(
+                        "Stripe refund error: {body}"
+                    )));
+                }
+
+                let refund_resp = resp.json::<StripeRefundMin>().await.map_err(|e| {
+                    AppError::Internal(format!("Error parseando refund Stripe: {e}"))
+                })?;
+                Ok(refund_resp.id)
+            }
+            _ => Err(AppError::BadRequest(
+                "El pago no está en un estado reembolsable".into(),
+            )),
+        }
+    }
 }
 
 /* Tipo mínimo para parsear la respuesta de Stripe PaymentIntent */
@@ -436,4 +505,10 @@ impl PaymentService {
 struct StripePaymentIntentMin {
     id: String,
     client_secret: String,
+}
+
+/* [044A-38 Fase 7] Tipo mínimo para parsear respuesta de Stripe Refund */
+#[derive(Debug, serde::Deserialize)]
+struct StripeRefundMin {
+    id: String,
 }

@@ -163,3 +163,104 @@
 .pagosSpinner {
     animation: spin 1s linear infinite;
 }
+
+/* [044A-38 Fase 7] Botón de solicitar reembolso en pago card */
+.pagoBotonReembolso {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: var(--spacing-xs);
+    background: transparent;
+    color: #5b21b6;
+    border: 1px solid #5b21b6;
+    border-radius: 6px;
+    padding: 4px 12px;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.pagoBotonReembolso:hover {
+    background: #5b21b6;
+    color: #fff;
+}
+
+/* [044A-38 Fase 7] Modal de solicitud de reembolso */
+.pagoModalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.pagoModalContenido {
+    background: var(--bg-primary);
+    border-radius: 12px;
+    padding: var(--spacing-lg);
+    width: 90%;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.pagoModalTitulo {
+    font-family: var(--font-serif);
+    font-size: var(--text-lg);
+    color: var(--brand-black);
+    margin: 0;
+}
+
+.pagoModalDescripcion {
+    font-size: var(--text-sm);
+    color: var(--brand-black);
+    opacity: 0.7;
+    margin: 0;
+}
+
+.pagoModalTextarea {
+    width: 100%;
+    font-family: var(--font-primary);
+    font-size: var(--text-sm);
+    padding: var(--spacing-sm);
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    resize: vertical;
+    box-sizing: border-box;
+}
+
+.pagoModalBotones {
+    display: flex;
+    gap: var(--spacing-sm);
+    justify-content: flex-end;
+}
+
+.pagoBotonEnviarReembolso {
+    background: #5b21b6;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: var(--spacing-xs) var(--spacing-md);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.pagoBotonEnviarReembolso:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagoBotonCancelarReembolso {
+    background: transparent;
+    color: var(--brand-black);
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    padding: var(--spacing-xs) var(--spacing-md);
+    font-size: var(--text-sm);
+    cursor: pointer;
+}

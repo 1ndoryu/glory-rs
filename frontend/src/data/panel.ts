@@ -8,7 +8,7 @@ import type {UserRole} from '../api/auth';
 export type SeccionPanel =
     | 'proyectos' | 'servicios' | 'pagos' | 'perfil' | 'metodos-pago' | 'mensajes'
     | 'asignados' | 'disponibles' | 'delegaciones'
-    | 'todos-ordenes' | 'empleados' | 'config-servicios' | 'dashboard';
+    | 'todos-ordenes' | 'empleados' | 'config-servicios' | 'dashboard' | 'reembolsos';
 
 export interface TabConfig {
     id: SeccionPanel;
@@ -100,6 +100,11 @@ const TABS_ADMIN: TabConfig[] = [
         id: 'dashboard',
         label: 'Dashboard',
         descripcion: 'Metricas generales: revenue, ordenes activas, satisfaccion del cliente y alertas.'
+    },
+    {
+        id: 'reembolsos',
+        label: 'Reembolsos',
+        descripcion: 'Gestiona solicitudes de reembolso: revisa, aprueba o rechaza pedidos de clientes.'
     },
     {
         id: 'mensajes',
