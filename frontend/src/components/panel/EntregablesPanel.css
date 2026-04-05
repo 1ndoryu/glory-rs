@@ -61,7 +61,7 @@
 
 .entregablesFileSize {
     color: var(--text-tertiary);
-    font-size: 11px;
+    font-size: var(--text-mini);
     flex-shrink: 0;
 }
 

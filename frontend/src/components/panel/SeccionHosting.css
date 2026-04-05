@@ -276,7 +276,7 @@
     padding: var(--spacing-xs);
     background: var(--bg-secondary);
     border-radius: var(--radius-sm);
-    font-size: 11px;
+    font-size: var(--text-mini);
     overflow-x: auto;
     white-space: pre-wrap;
 }

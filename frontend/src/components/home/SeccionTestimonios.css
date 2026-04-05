@@ -81,8 +81,8 @@
     width: max-content;
     will-change: transform;
     /* Transform/transicion inyectados como CSS custom properties desde React */
-    transform: translateX(calc(-1 * var(--testimonio-slide-unit) * var(--testimonio-idx, 0) + var(--testimonio-drag, 0px)));
-    transition: var(--testimonio-transition, none);
+    transform: translateX(calc(-1 * var(--testimonio-slide-unit) * var(--testimonio-idx) + var(--testimonio-drag)));
+    transition: var(--testimonio-transition);
 }
 
 /* Tarjeta de Testimonio */

@@ -463,7 +463,7 @@
 /* Badges de estado de fase */
 .faseBadge {
     font-family: var(--font-primary);
-    font-size: 10px;
+    font-size: var(--text-2xs);
     font-weight: 600;
     padding: 2px 8px;
     border-radius: var(--radius-full);
@@ -655,7 +655,7 @@
     border: none;
     border-radius: var(--radius-md);
     background: var(--color-success);
-    color: white;
+    color: var(--brand-white);
     font-family: var(--font-primary);
     font-weight: 600;
     cursor: pointer;
@@ -700,7 +700,7 @@
 
 .ordenDetalleCancelarConfirmar {
     background: var(--color-error-text);
-    color: white;
+    color: var(--brand-white);
     padding: var(--spacing-sm) var(--spacing-lg);
     border-radius: var(--radius-md);
     text-decoration: none;
@@ -712,5 +712,5 @@
 
 .faseBtnPagar {
     background: var(--color-success);
-    color: white;
+    color: var(--brand-white);
 }

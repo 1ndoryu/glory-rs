@@ -83,7 +83,7 @@
 /* [044A-13] Mensaje de error de autenticación */
 .modalError {
     color: var(--color-error);
-    font-size: 0.875rem;
+    font-size: var(--text-sm);
     text-align: center;
     padding: var(--spacing-xs) var(--spacing-sm);
     background: var(--color-error-bg-soft);

@@ -13,8 +13,8 @@
     width: 56px;
     height: 56px;
     border-radius: 50%;
-    background: var(--brand-primary, #c8a97e);
-    color: var(--brand-black, #1a1a19);
+    background: var(--brand-primary);
+    color: var(--brand-black);
     border: none;
     cursor: pointer;
     display: flex;
@@ -40,7 +40,7 @@
     right: var(--spacing-lg);
     width: 380px;
     max-height: 520px;
-    background: var(--bg-secondary, #141413);
+    background: var(--bg-secondary);
     border: 1px solid var(--white-10);
     border-radius: var(--radius-xl);
     display: flex;
@@ -79,14 +79,14 @@
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
-    color: var(--brand-white, #f5f0e8);
+    color: var(--brand-white);
 }
 
 .chatWidgetTitle {
     display: block;
     font-weight: 600;
     font-size: var(--text-sm);
-    color: var(--brand-white, #f5f0e8);
+    color: var(--brand-white);
 }
 
 .chatWidgetStatus {
@@ -97,7 +97,7 @@
 
 .chatWidgetHeaderActions {
     display: flex;
-    gap: var(--spacing-2xs, 4px);
+    gap: var(--spacing-2xs);
 }
 
 .chatWidgetHeaderBtn {
@@ -114,7 +114,7 @@
 }
 
 .chatWidgetHeaderBtn:hover {
-    color: var(--brand-white, #f5f0e8);
+    color: var(--brand-white);
     background: var(--white-10);
 }
 
@@ -130,7 +130,7 @@
 }
 
 .chatWidgetWelcome {
-    color: var(--brand-white, #f5f0e8);
+    color: var(--brand-white);
     font-size: var(--text-sm);
     margin: 0;
     text-align: center;
@@ -141,8 +141,8 @@
 }
 
 .chatWidgetStartBtn {
-    background: var(--brand-primary, #c8a97e);
-    color: var(--brand-black, #1a1a19);
+    background: var(--brand-primary);
+    color: var(--brand-black);
     border: none;
     padding: var(--spacing-xs) var(--spacing-md);
     border-radius: var(--radius-md);
@@ -221,14 +221,14 @@
 }
 
 .chatWidgetMsgBubbleOwn {
-    background: var(--brand-primary, #c8a97e);
-    color: var(--brand-black, #1a1a19);
+    background: var(--brand-primary);
+    color: var(--brand-black);
     border-bottom-right-radius: 4px;
 }
 
 .chatWidgetMsgBubbleOther {
     background: var(--white-10);
-    color: var(--brand-white, #f5f0e8);
+    color: var(--brand-white);
     border-bottom-left-radius: 4px;
 }
 
@@ -290,8 +290,8 @@
 }
 
 .chatWidgetSendBtn {
-    background: var(--brand-primary, #c8a97e);
-    color: var(--brand-black, #1a1a19);
+    background: var(--brand-primary);
+    color: var(--brand-black);
     border: none;
     width: 36px;
     height: 36px;

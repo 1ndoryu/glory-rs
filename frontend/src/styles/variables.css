@@ -140,8 +140,17 @@
     --border-default: #e5e7eb;
 
     /* Text extras */
+    --text-2xs: 0.625rem;
+    --text-mini: 0.6875rem;
+    --text-caption: 0.75rem;
     --text-md: 0.9375rem;
+    --text-body-lg: 1.0625rem;
 
     /* Spacing extras */
     --spacing-2xs: 0.25rem;
+
+    /* Runtime CSS custom properties (defaults — overridden via React style prop) */
+    --testimonio-idx: 0;
+    --testimonio-drag: 0px;
+    --testimonio-transition: none;
 }

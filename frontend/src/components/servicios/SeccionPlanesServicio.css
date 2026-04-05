@@ -142,7 +142,7 @@
 /* [044A-11] font-size cambiado a 17px por solicitud del usuario */
 .tarjetaPlanDescripcion {
     font-family: var(--font-serif);
-    font-size: 17px;
+    font-size: var(--text-body-lg);
     color: var(--text-muted);
     line-height: 1.5;
     margin: 0;

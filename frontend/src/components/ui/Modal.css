@@ -14,7 +14,7 @@
 
 .modalBaseContenedor {
     background: var(--bg-primary);
-    border-radius: var(--radius-lg, 12px);
+    border-radius: var(--radius-lg);
     padding: var(--spacing-xl);
     max-width: 420px;
     width: 100%;
