@@ -41,11 +41,6 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 > Plan de chat: `Agente/planes/plan-live-chat-2026-04-04.md` (5 fases)
 > Plan de hosting: `Agente/planes/plan-hosting-coolify-2026-04-04.md` (5 fases)
 
-### Marketplace — Fase 6: Entregables y revisiones
-- Upload de archivos
-- Entrega por fase
-- Aprobación / revisión con límite
-
 ### Marketplace — Fase 7: Reembolsos
 - Solicitud con razón
 - Admin aprueba/rechaza
@@ -61,3 +56,10 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 ### Marketplace — Fase 10: Dashboard admin
 - Revenue, métricas, alertas
+
+## Otras tareas
+
+- Cuando le doy a empezar en los planes de cualquier servicio debería empezar algo similar a fiver. Esto requiere restructurar un poco como se ven la pagina de los servicios, principalmente al principio debería verse la portada, tambien abajo de los botones de comenzar el plan tiene que ir el boton de conversar. Todos los servicios deben tener un plan basico, uno medio y uno pro, quita los de "A medida", se va a resumir con el boton de conversar, obviamente se tiene entender que el cliente dio click en ese boton porque es informacion util para cuando se abra el chat y la IA lo atendienda en primer lugar.
+
+- Cuando se de a comprar un servicio abre un modal que muestre la info brevemente del servicio, y con un boton abajo de continuar ($Precio), abajo un pequeño texto de Aun no se te cobrara. Luego de continuar va a la pasarela de pago. Al volver su el servicio aparecera en su panel, 
+
