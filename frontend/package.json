@@ -11,6 +11,8 @@
     "codegen": "orval"
   },
   "dependencies": {
+    "@stripe/react-stripe-js": "^6.1.0",
+    "@stripe/stripe-js": "^9.0.1",
     "@tanstack/react-query": "^5.56.0",
     "axios": "^1.7.0",
     "i18next": "^26.0.3",

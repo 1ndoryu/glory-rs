@@ -605,3 +605,31 @@
         gap: var(--spacing-xs);
     }
 }
+
+/* ============================================================
+   [044A-38 Fase 3] Botones de pago
+   ============================================================ */
+
+.ordenDetallePagar {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border: none;
+    border-radius: 8px;
+    background: #16a34a;
+    color: white;
+    font-family: var(--font-primary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+
+.ordenDetallePagar:hover {
+    opacity: 0.85;
+}
+
+.faseBtnPagar {
+    background: #16a34a;
+    color: white;
+}

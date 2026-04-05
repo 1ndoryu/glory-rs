@@ -1,0 +1,82 @@
+/* [044A-38 Fase 3] Estilos del modal de checkout Stripe */
+
+.checkoutOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.checkoutModal {
+    background: var(--bg-primary);
+    border-radius: 12px;
+    padding: var(--spacing-xl);
+    width: 90%;
+    max-width: 480px;
+    position: relative;
+}
+
+.checkoutCerrar {
+    position: absolute;
+    top: var(--spacing-sm);
+    right: var(--spacing-sm);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--brand-black);
+    padding: var(--spacing-xs);
+}
+
+.checkoutTitulo {
+    font-family: var(--font-primary);
+    font-size: var(--text-xl);
+    margin-bottom: var(--spacing-xs);
+}
+
+.checkoutMonto {
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    color: var(--brand-black);
+    margin-bottom: var(--spacing-lg);
+}
+
+.checkoutError {
+    background: #fef2f2;
+    color: #b91c1c;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: 8px;
+    margin-bottom: var(--spacing-md);
+    font-size: var(--text-sm);
+}
+
+.checkoutForm {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.checkoutBoton {
+    width: 100%;
+    padding: var(--spacing-md);
+    border: none;
+    border-radius: 8px;
+    background: var(--brand-black);
+    color: var(--brand-white);
+    font-family: var(--font-primary);
+    font-size: var(--text-base);
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.checkoutBoton:hover:not(:disabled) {
+    opacity: 0.85;
+}
+
+.checkoutBoton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

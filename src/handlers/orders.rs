@@ -11,10 +11,10 @@ use validator::Validate;
 use crate::errors::AppError;
 use crate::middleware::AuthUser;
 use crate::models::{
-    CreateOrderRequest, OrderResponse, SwitchRoleRequest, UserRole,
+    CreateOrderRequest, OrderResponse, OrderStatus, SwitchRoleRequest, UserRole,
 };
-use crate::repositories::UserRepository;
-use crate::services::{AuthService, OrderService};
+use crate::repositories::{OrderRepository, UserRepository};
+use crate::services::{AuthService, OrderService, PaymentService};
 use crate::AppState;
 
 /* ============================================================
@@ -256,6 +256,25 @@ pub async fn approve_phase(
 ) -> Result<Json<crate::models::OrderPhaseResponse>, AppError> {
     auth.require_role(&[UserRole::Client, UserRole::Admin])?;
     let phase = OrderService::approve_phase(&state.pool, order_id, phase_number, auth.user_id).await?;
+
+    /* [044A-38 Fase 3] Si la orden se completó, capturar los pagos retenidos en Stripe */
+    if let Some(order) = OrderRepository::find_order_by_id(&state.pool, order_id).await? {
+        if order.status == OrderStatus::Completed {
+            if let Some(ref stripe_key) = state.stripe_secret_key {
+                if let Err(e) = PaymentService::capture_held_payments(
+                    &state.pool,
+                    &state.http_client,
+                    stripe_key,
+                    order_id,
+                )
+                .await
+                {
+                    tracing::error!("Error capturando pagos de orden {order_id}: {e}");
+                }
+            }
+        }
+    }
+
     Ok(Json(crate::models::OrderPhaseResponse::from(phase)))
 }
 

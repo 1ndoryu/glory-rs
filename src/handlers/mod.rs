@@ -4,6 +4,7 @@ mod auth;
 mod health;
 mod notes;
 mod orders;
+mod payments;
 mod seo;
 mod services;
 
@@ -57,6 +58,9 @@ impl utoipa::Modify for SecurityAddon {
         orders::deliver_phase,
         orders::approve_phase,
         orders::request_revision,
+        payments::initiate_payment,
+        payments::stripe_webhook,
+        payments::list_payments,
     ),
     components(schemas(
         health::HealthResponse,
@@ -78,6 +82,10 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::PaymentMode,
         crate::models::OrderStatus,
         crate::models::PhaseStatus,
+        crate::models::PaymentStatus,
+        crate::models::InitiatePaymentRequest,
+        crate::models::PaymentIntentResponse,
+        crate::models::PaymentResponse,
         crate::errors::ErrorResponse,
     )),
     modifiers(&SecurityAddon),
@@ -95,6 +103,9 @@ pub fn create_router(pool: sqlx::PgPool, config: crate::config::AppConfig) -> Ro
     let state = AppState {
         pool,
         jwt_secret: config.jwt_secret,
+        http_client: reqwest::Client::new(),
+        stripe_secret_key: config.stripe_secret_key,
+        stripe_webhook_secret: config.stripe_webhook_secret,
     };
 
     /* CORS: en desarrollo se permite todo. En producción, restringir orígenes */
@@ -134,4 +145,5 @@ fn api_routes() -> Router<AppState> {
         .merge(notes::routes())
         .merge(services::routes())
         .merge(orders::routes())
+        .merge(payments::routes())
 }

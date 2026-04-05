@@ -1,5 +1,6 @@
 mod note;
 mod order;
+mod payment;
 mod user;
 
 pub use note::{CreateNoteRequest, Note, PaginatedNotes, PaginationParams, UpdateNoteRequest};
@@ -7,5 +8,8 @@ pub use order::{
     Order, OrderPhase, OrderStatus, PaymentMode, PhaseStatus, ServicePlan, ServiceRecord,
     ServicePlanPhase, CreateOrderRequest, OrderResponse, OrderPhaseResponse, SwitchRoleRequest,
     ServiceDetailResponse, ServicePlanResponse, ServicePlanPhaseResponse,
+};
+pub use payment::{
+    InitiatePaymentRequest, OrderPayment, PaymentIntentResponse, PaymentResponse, PaymentStatus,
 };
 pub use user::{AuthResponse, LoginRequest, RegisterRequest, User, UserResponse, UserRole};

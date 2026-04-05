@@ -30,7 +30,7 @@ export const SeccionProyectos: React.FC = () => {
     const effectiveRole = useAuthStore(s => s.user?.effectiveRole) || 'client';
     const {
         ordenes, cargando, detalle, cargandoDetalle,
-        ordenSeleccionada, error, seleccionarOrden,
+        ordenSeleccionada, error, seleccionarOrden, recargar,
         cancelarOrden, aprobarFase, solicitarRevision, entregarFase, cancelando,
     } = useOrdenes();
 
@@ -68,6 +68,7 @@ export const SeccionProyectos: React.FC = () => {
                 onAprobar={handleAprobar}
                 onRevision={handleRevision}
                 onEntregar={handleEntregar}
+                onPagoExitoso={recargar}
                 cancelando={cancelando}
             />
         );

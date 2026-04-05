@@ -10,6 +10,7 @@ import {HeaderPanel} from '../components/panel/HeaderPanel';
 import {SeccionPerfil} from '../components/panel/SeccionPerfil';
 import {SeccionMetodosPago} from '../components/panel/SeccionMetodosPago';
 import {SeccionProyectos} from '../components/panel/SeccionProyectos';
+import {SeccionPagos} from '../components/panel/SeccionPagos';
 import {SidebarPanel} from '../components/panel/SidebarPanel';
 import {PlaceholderSeccion} from '../components/panel/PlaceholderSeccion';
 import {obtenerTabsPorRol, seccionInicialPorRol, type SeccionPanel} from '../data/panel';
@@ -53,6 +54,9 @@ export const PanelIsland: React.FC = () => {
             case 'asignados':
             case 'todos-ordenes':
                 return <SeccionProyectos />;
+            /* [044A-38 Fase 3] Historial de pagos por orden */
+            case 'pagos':
+                return <SeccionPagos />;
             default:
                 return <PlaceholderSeccion tab={tabActual} />;
         }
