@@ -1,0 +1,423 @@
+/* [044A-38 Fase 6] Handlers de entregables: upload multipart, listado y descarga.
+ * El upload guarda archivos en disco (uploads/) y registra en phase_deliverables.
+ * Seguridad: whitelist MIME, max 10 MB por archivo, max 5 archivos por entrega,
+ * detección de extensión doble. */
+
+use axum::body::Body;
+use axum::extract::{Multipart, Path, State};
+use axum::http::{header, StatusCode};
+use axum::response::Response;
+use axum::routing::{get, post};
+use axum::{Json, Router};
+use std::path::PathBuf;
+use tokio::fs;
+use uuid::Uuid;
+
+use crate::errors::AppError;
+use crate::middleware::AuthUser;
+use crate::models::{
+    DeliverPhaseResponse, OrderStatus, PhaseDeliverablesResponse, PhaseStatus, UserRole,
+    ALLOWED_MIME_TYPES, MAX_FILES_PER_DELIVERY, MAX_FILE_SIZE,
+};
+use crate::repositories::{CreateDeliverableParams, DeliverableRepository, OrderRepository};
+use crate::AppState;
+
+/// Directorio base para uploads (relativo al CWD del servidor)
+const UPLOAD_DIR: &str = "uploads/deliverables";
+
+/* ============================================================
+   ENTREGAR FASE CON ARCHIVOS (multipart)
+   ============================================================ */
+
+/// Empleado entrega una fase con archivos adjuntos (multipart/form-data).
+/// Campos: `notes` (text, opcional), `files` (file, hasta 5).
+#[utoipa::path(
+    post,
+    path = "/api/orders/{order_id}/phases/{phase_number}/deliver",
+    params(
+        ("order_id" = Uuid, Path, description = "ID de la orden"),
+        ("phase_number" = i32, Path, description = "Número de fase"),
+    ),
+    responses(
+        (status = 200, description = "Fase entregada con archivos", body = DeliverPhaseResponse),
+        (status = 400, description = "Datos inválidos o estado no permite entrega"),
+        (status = 401, description = "No autorizado"),
+        (status = 403, description = "Solo el empleado asignado"),
+    ),
+    security(("bearer_auth" = [])),
+    tag = "deliverables"
+)]
+pub async fn deliver_phase_with_files(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    Path((order_id, phase_number)): Path<(Uuid, i32)>,
+    mut multipart: Multipart,
+) -> Result<Json<DeliverPhaseResponse>, AppError> {
+    auth.require_role(&[UserRole::Employee, UserRole::Admin])?;
+
+    /* Validar orden y permisos */
+    let order = OrderRepository::find_order_by_id(&state.pool, order_id)
+        .await?
+        .ok_or_else(|| AppError::NotFound("Orden no encontrada".into()))?;
+
+    if auth.effective_role != UserRole::Admin && order.assigned_employee_id != Some(auth.user_id) {
+        return Err(AppError::Forbidden(
+            "Solo el empleado asignado puede entregar".into(),
+        ));
+    }
+
+    /* Validar fase */
+    let phase = OrderRepository::find_phase_by_number(&state.pool, order_id, phase_number)
+        .await?
+        .ok_or_else(|| AppError::NotFound(format!("Fase {phase_number} no encontrada")))?;
+
+    match phase.status {
+        PhaseStatus::InProgress | PhaseStatus::Paid | PhaseStatus::RevisionRequested => {}
+        _ => {
+            return Err(AppError::BadRequest(format!(
+                "No se puede entregar una fase en estado {:?}",
+                phase.status
+            )));
+        }
+    }
+
+    /* Calcular revision_number */
+    let current_rev =
+        DeliverableRepository::current_revision_number(&state.pool, phase.id).await?;
+    let revision_number = current_rev + 1;
+
+    /* Crear directorio de uploads */
+    let upload_path = PathBuf::from(UPLOAD_DIR)
+        .join(order_id.to_string())
+        .join(phase_number.to_string());
+    fs::create_dir_all(&upload_path)
+        .await
+        .map_err(|e| AppError::Internal(format!("Error creando directorio: {e}")))?;
+
+    /* Procesar multipart: extraer notas y archivos */
+    let (_notes, saved_files) = process_multipart_files(
+        &mut multipart,
+        &state.pool,
+        &upload_path,
+        phase.id,
+        auth.user_id,
+        order_id,
+        phase_number,
+        revision_number,
+    )
+    .await?;
+
+    /* Marcar fase como entregada */
+    OrderRepository::deliver_phase(&state.pool, phase.id).await?;
+
+    /* Actualizar estado de orden si estaba en InProgress */
+    if order.status == OrderStatus::InProgress {
+        OrderRepository::update_order_status(&state.pool, order_id, OrderStatus::UnderReview)
+            .await?;
+    }
+
+    Ok(Json(DeliverPhaseResponse {
+        phase_id: phase.id,
+        revision_number,
+        deliverables: saved_files,
+    }))
+}
+
+/* ============================================================
+   LISTAR ENTREGABLES DE UNA FASE
+   ============================================================ */
+
+/// Listar entregables de una fase con estado de aprobación
+#[utoipa::path(
+    get,
+    path = "/api/orders/{order_id}/phases/{phase_number}/deliverables",
+    params(
+        ("order_id" = Uuid, Path, description = "ID de la orden"),
+        ("phase_number" = i32, Path, description = "Número de fase"),
+    ),
+    responses(
+        (status = 200, description = "Lista de entregables", body = PhaseDeliverablesResponse),
+        (status = 401, description = "No autorizado"),
+        (status = 404, description = "Fase no encontrada"),
+    ),
+    security(("bearer_auth" = [])),
+    tag = "deliverables"
+)]
+pub async fn list_deliverables(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    Path((order_id, phase_number)): Path<(Uuid, i32)>,
+) -> Result<Json<PhaseDeliverablesResponse>, AppError> {
+    /* Verificar acceso a la orden */
+    let order = OrderRepository::find_order_by_id(&state.pool, order_id)
+        .await?
+        .ok_or_else(|| AppError::NotFound("Orden no encontrada".into()))?;
+
+    verify_order_access(&order, &auth)?;
+
+    let phase = OrderRepository::find_phase_by_number(&state.pool, order_id, phase_number)
+        .await?
+        .ok_or_else(|| AppError::NotFound(format!("Fase {phase_number} no encontrada")))?;
+
+    let deliverables = DeliverableRepository::list_by_phase(&state.pool, phase.id).await?;
+
+    Ok(Json(PhaseDeliverablesResponse {
+        deliverables,
+        approval_status: format!("{:?}", phase.status),
+        revisions_used: phase.revisions_used,
+        max_revisions: phase.max_revisions,
+    }))
+}
+
+/* ============================================================
+   DESCARGAR ENTREGABLE
+   ============================================================ */
+
+/// Descargar un archivo entregable
+#[utoipa::path(
+    get,
+    path = "/api/deliverables/{deliverable_id}/download",
+    params(("deliverable_id" = Uuid, Path, description = "ID del entregable")),
+    responses(
+        (status = 200, description = "Archivo descargado"),
+        (status = 401, description = "No autorizado"),
+        (status = 404, description = "Archivo no encontrado"),
+    ),
+    security(("bearer_auth" = [])),
+    tag = "deliverables"
+)]
+pub async fn download_deliverable(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    Path(deliverable_id): Path<Uuid>,
+) -> Result<Response, AppError> {
+    let deliverable = DeliverableRepository::find_by_id(&state.pool, deliverable_id)
+        .await?
+        .ok_or_else(|| AppError::NotFound("Entregable no encontrado".into()))?;
+
+    /* Verificar acceso: obtener la fase → orden → verificar */
+    let phase_row: Option<(Uuid,)> = sqlx::query_as(
+        "SELECT order_id FROM order_phases WHERE id = $1",
+    )
+    .bind(deliverable.phase_id)
+    .fetch_optional(&state.pool)
+    .await
+    .map_err(AppError::Database)?;
+
+    let order_id = phase_row
+        .ok_or_else(|| AppError::NotFound("Fase asociada no encontrada".into()))?
+        .0;
+
+    let order = OrderRepository::find_order_by_id(&state.pool, order_id)
+        .await?
+        .ok_or_else(|| AppError::NotFound("Orden no encontrada".into()))?;
+
+    verify_order_access(&order, &auth)?;
+
+    /* Leer archivo de disco */
+    let file_path = format!(".{}", deliverable.file_url);
+    let data = fs::read(&file_path)
+        .await
+        .map_err(|_| AppError::NotFound("Archivo no encontrado en disco".into()))?;
+
+    let content_type = deliverable
+        .mime_type
+        .as_deref()
+        .unwrap_or("application/octet-stream");
+    let file_name = &deliverable.file_name;
+
+    let response = Response::builder()
+        .status(StatusCode::OK)
+        .header(header::CONTENT_TYPE, content_type)
+        .header(
+            header::CONTENT_DISPOSITION,
+            format!("attachment; filename=\"{file_name}\""),
+        )
+        .body(Body::from(data))
+        .map_err(|e| AppError::Internal(format!("Error construyendo respuesta: {e}")))?;
+
+    Ok(response)
+}
+
+/* ============================================================
+   RUTAS
+   ============================================================ */
+
+pub fn routes() -> Router<AppState> {
+    Router::new()
+        .route(
+            "/orders/:order_id/phases/:phase_number/deliver",
+            post(deliver_phase_with_files),
+        )
+        .route(
+            "/orders/:order_id/phases/:phase_number/deliverables",
+            get(list_deliverables),
+        )
+        .route(
+            "/deliverables/:deliverable_id/download",
+            get(download_deliverable),
+        )
+}
+
+/* ============================================================
+   UTILIDADES
+   ============================================================ */
+
+/// Verifica que el usuario tiene acceso a una orden
+fn verify_order_access(order: &crate::models::Order, auth: &AuthUser) -> Result<(), AppError> {
+    match auth.effective_role {
+        UserRole::Admin => {}
+        UserRole::Client => {
+            if order.client_id != auth.user_id {
+                return Err(AppError::Forbidden("No tienes acceso a esta orden".into()));
+            }
+        }
+        UserRole::Employee => {
+            if order.assigned_employee_id != Some(auth.user_id) {
+                return Err(AppError::Forbidden("No tienes acceso a esta orden".into()));
+            }
+        }
+    }
+    Ok(())
+}
+
+/// Procesa campos multipart: extrae `notes` (texto) y `files` (binarios).
+/// Valida MIME, tamaño, extensiones dobles. Guarda en disco y BD.
+#[allow(clippy::too_many_arguments)]
+async fn process_multipart_files(
+    multipart: &mut Multipart,
+    pool: &sqlx::PgPool,
+    upload_path: &std::path::Path,
+    phase_id: Uuid,
+    uploaded_by: Uuid,
+    order_id: Uuid,
+    phase_number: i32,
+    revision_number: i32,
+) -> Result<(Option<String>, Vec<crate::models::PhaseDeliverable>), AppError> {
+    let mut notes: Option<String> = None;
+    let mut saved_files: Vec<crate::models::PhaseDeliverable> = Vec::new();
+
+    while let Some(field) = multipart
+        .next_field()
+        .await
+        .map_err(|e| AppError::BadRequest(format!("Error leyendo multipart: {e}")))?
+    {
+        let field_name = field.name().unwrap_or("").to_string();
+
+        if field_name == "notes" {
+            let text = field
+                .text()
+                .await
+                .map_err(|e| AppError::BadRequest(format!("Error leyendo notas: {e}")))?;
+            if !text.is_empty() {
+                notes = Some(text);
+            }
+            continue;
+        }
+
+        if field_name == "files" {
+            if saved_files.len() >= MAX_FILES_PER_DELIVERY {
+                return Err(AppError::BadRequest(format!(
+                    "Máximo {MAX_FILES_PER_DELIVERY} archivos por entrega"
+                )));
+            }
+
+            let original_name = field.file_name().unwrap_or("archivo").to_string();
+            let content_type = field
+                .content_type()
+                .unwrap_or("application/octet-stream")
+                .to_string();
+
+            if !ALLOWED_MIME_TYPES.contains(&content_type.as_str()) {
+                return Err(AppError::BadRequest(format!(
+                    "Tipo de archivo no permitido: {content_type}"
+                )));
+            }
+
+            if has_suspicious_extension(&original_name) {
+                return Err(AppError::BadRequest(
+                    "Nombre de archivo sospechoso: extensión doble detectada".into(),
+                ));
+            }
+
+            let data = field
+                .bytes()
+                .await
+                .map_err(|e| AppError::BadRequest(format!("Error leyendo archivo: {e}")))?;
+
+            #[allow(clippy::cast_possible_truncation)]
+            let file_size = data.len() as u64;
+            if file_size > MAX_FILE_SIZE {
+                return Err(AppError::BadRequest(format!(
+                    "Archivo demasiado grande: {file_size} bytes (máx {} MB)",
+                    MAX_FILE_SIZE / 1024 / 1024
+                )));
+            }
+
+            let safe_name = sanitize_filename(&original_name);
+            let unique_name = format!("{phase_id}-{revision_number}-{safe_name}");
+            let file_path = upload_path.join(&unique_name);
+
+            fs::write(&file_path, &data)
+                .await
+                .map_err(|e| AppError::Internal(format!("Error guardando archivo: {e}")))?;
+
+            let file_url = format!(
+                "/uploads/deliverables/{order_id}/{phase_number}/{unique_name}"
+            );
+
+            #[allow(clippy::cast_possible_wrap)]
+            let deliverable = DeliverableRepository::create(
+                pool,
+                CreateDeliverableParams {
+                    phase_id,
+                    uploaded_by,
+                    file_name: &original_name,
+                    file_url: &file_url,
+                    file_size_bytes: Some(file_size as i64),
+                    mime_type: Some(&content_type),
+                    revision_number,
+                    notes: notes.as_deref(),
+                },
+            )
+            .await?;
+
+            saved_files.push(deliverable);
+        }
+    }
+
+    Ok((notes, saved_files))
+}
+
+/// Sanitiza nombre de archivo: quita path traversal y caracteres peligrosos
+fn sanitize_filename(name: &str) -> String {
+    let name = name
+        .replace(['/', '\\'], "")
+        .replace("..", "")
+        .replace(char::is_control, "");
+
+    if name.is_empty() {
+        "archivo".to_string()
+    } else {
+        name
+    }
+}
+
+/// Detecta extensiones dobles sospechosas (ej: script.exe.pdf, virus.bat.jpg)
+fn has_suspicious_extension(name: &str) -> bool {
+    let dangerous = [
+        ".exe", ".bat", ".cmd", ".com", ".msi", ".scr", ".pif", ".vbs", ".js", ".ws", ".wsf",
+        ".ps1", ".sh",
+    ];
+    let lower = name.to_lowercase();
+    for ext in &dangerous {
+        /* Buscar extensión peligrosa que no esté al final (hidden extension) */
+        if let Some(pos) = lower.find(ext) {
+            let after = pos + ext.len();
+            if after < lower.len() && lower.as_bytes().get(after) == Some(&b'.') {
+                return true;
+            }
+        }
+    }
+    false
+}

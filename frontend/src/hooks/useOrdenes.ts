@@ -11,7 +11,6 @@ import {
     apiCancelOrder,
     apiApprovePhase,
     apiRequestRevision,
-    apiDeliverPhase,
     type OrderResponse,
     type OrderDetailResponse,
     type CreateOrderRequest,
@@ -103,18 +102,8 @@ export function useOrdenes() {
         },
     });
 
-    /* Entregar fase (empleado) */
-    const entregarFaseMutation = useMutation({
-        mutationFn: ({orderId, phase}: {orderId: string; phase: number}) =>
-            apiDeliverPhase(orderId, phase),
-        onSuccess: () => {
-            invalidar();
-            setError(null);
-        },
-        onError: (err: unknown) => {
-            setError(extraerError(err));
-        },
-    });
+    /* [044A-38 Fase 6] entregarFase eliminada de useOrdenes:
+     * la entrega ahora se maneja en useDeliverables con upload multipart. */
 
     return {
         ordenes,
@@ -129,7 +118,6 @@ export function useOrdenes() {
         cancelarOrden: cancelarMutation.mutateAsync,
         aprobarFase: aprobarFaseMutation.mutateAsync,
         solicitarRevision: revisionMutation.mutateAsync,
-        entregarFase: entregarFaseMutation.mutateAsync,
         creando: crearMutation.isPending,
         cancelando: cancelarMutation.isPending,
     };

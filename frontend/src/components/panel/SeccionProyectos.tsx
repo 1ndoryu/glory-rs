@@ -31,7 +31,7 @@ export const SeccionProyectos: React.FC = () => {
     const {
         ordenes, cargando, detalle, cargandoDetalle,
         ordenSeleccionada, error, seleccionarOrden, recargar,
-        cancelarOrden, aprobarFase, solicitarRevision, entregarFase, cancelando,
+        cancelarOrden, aprobarFase, solicitarRevision, cancelando,
     } = useOrdenes();
 
     const handleVolver = useCallback(() => seleccionarOrden(null), [seleccionarOrden]);
@@ -45,10 +45,6 @@ export const SeccionProyectos: React.FC = () => {
     const handleRevision = useCallback(async (orderId: string, phase: number) => {
         await solicitarRevision({orderId, phase});
     }, [solicitarRevision]);
-    const handleEntregar = useCallback(async (orderId: string, phase: number) => {
-        await entregarFase({orderId, phase});
-    }, [entregarFase]);
-
     if (cargando) {
         return <div className="proyectosLoading"><div className="proyectosSpinner" /><p>Cargando proyectos...</p></div>;
     }
@@ -67,7 +63,6 @@ export const SeccionProyectos: React.FC = () => {
                 onCancelar={handleCancelar}
                 onAprobar={handleAprobar}
                 onRevision={handleRevision}
-                onEntregar={handleEntregar}
                 onPagoExitoso={recargar}
                 cancelando={cancelando}
             />

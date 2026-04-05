@@ -1,5 +1,6 @@
 mod chat;
 mod delegation;
+mod deliverable;
 mod note;
 mod order;
 mod payment;
@@ -12,6 +13,10 @@ pub use chat::{
 pub use delegation::{
     CreateDelegationRequest, Delegation, DelegationResponse, DelegationStatus, EmployeeListItem,
     EmployeeProfile, RespondDelegationRequest,
+};
+pub use deliverable::{
+    DeliverPhaseRequest, DeliverPhaseResponse, PhaseDeliverable, PhaseDeliverablesResponse,
+    ALLOWED_MIME_TYPES, MAX_FILE_SIZE, MAX_FILES_PER_DELIVERY,
 };
 pub use note::{CreateNoteRequest, Note, PaginatedNotes, PaginationParams, UpdateNoteRequest};
 pub use order::{

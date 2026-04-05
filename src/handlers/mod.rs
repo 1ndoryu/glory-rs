@@ -3,6 +3,7 @@
 mod assignment;
 mod auth;
 mod chat;
+mod deliverables;
 mod health;
 mod notes;
 mod orders;
@@ -57,7 +58,6 @@ impl utoipa::Modify for SecurityAddon {
         orders::assign_order,
         orders::switch_role,
         orders::cancel_order_handler,
-        orders::deliver_phase,
         orders::approve_phase,
         orders::request_revision,
         payments::initiate_payment,
@@ -74,6 +74,9 @@ impl utoipa::Modify for SecurityAddon {
         chat::get_messages,
         chat::create_session,
         chat::send_message,
+        deliverables::deliver_phase_with_files,
+        deliverables::list_deliverables,
+        deliverables::download_deliverable,
     ),
     components(schemas(
         health::HealthResponse,
@@ -109,6 +112,9 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::ChatSessionResponse,
         crate::models::CreateChatSessionRequest,
         crate::models::SendMessageRequest,
+        crate::models::PhaseDeliverable,
+        crate::models::DeliverPhaseResponse,
+        crate::models::PhaseDeliverablesResponse,
         crate::errors::ErrorResponse,
     )),
     modifiers(&SecurityAddon),
@@ -180,4 +186,5 @@ fn api_routes() -> Router<AppState> {
         .merge(orders::routes())
         .merge(payments::routes())
         .merge(chat::rest_routes())
+        .merge(deliverables::routes())
 }

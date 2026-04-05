@@ -115,15 +115,8 @@ export async function apiRequestRevision(
     return data;
 }
 
-export async function apiDeliverPhase(
-    orderId: string,
-    phaseNumber: number,
-): Promise<OrderPhaseResponse> {
-    const {data} = await instance.put<OrderPhaseResponse>(
-        `/api/orders/${orderId}/phases/${phaseNumber}/deliver`,
-    );
-    return data;
-}
+/* [044A-38 Fase 6] apiDeliverPhase eliminada: la entrega ahora es multipart
+ * y vive en api/deliverables.ts (apiDeliverPhase con FormData). */
 
 /* ============================================================
    HELPERS — labels y colores para UI

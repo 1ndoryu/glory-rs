@@ -1,8 +1,9 @@
-/* [044A-38 Fase 2+3] Detalle de una orden con timeline de fases.
+/* [044A-38 Fase 2+3+6] Detalle de una orden con timeline de fases.
  * Muestra info general + fases con acciones según rol.
- * Fase 3: botón de pago Stripe integrado para pending_payment. */
+ * Fase 3: botón de pago Stripe integrado para pending_payment.
+ * Fase 6: upload multipart de entregables + listado + descarga por fase. */
 import React, { useState } from 'react';
-import {Check, RotateCcw, Package, CreditCard} from 'lucide-react';
+import {Check, RotateCcw, CreditCard} from 'lucide-react';
 import {
     ORDER_STATUS_LABELS,
     PHASE_STATUS_LABELS,
@@ -13,6 +14,7 @@ import {
     type OrderStatus,
     type PhaseStatus,
 } from '../../api/orders';
+import {EntregablesPanel} from './EntregablesPanel';
 import CheckoutModal from './CheckoutModal';
 import './SeccionProyectos.css';
 
@@ -41,13 +43,12 @@ interface OrdenDetalleProps {
     onCancelar: (orderId: string) => Promise<void>;
     onAprobar: (orderId: string, phase: number) => Promise<void>;
     onRevision: (orderId: string, phase: number) => Promise<void>;
-    onEntregar: (orderId: string, phase: number) => Promise<void>;
     onPagoExitoso: () => void;
     cancelando: boolean;
 }
 
 export const OrdenDetalle: React.FC<OrdenDetalleProps> = ({
-    order, phases, effectiveRole, onVolver, onCancelar, onAprobar, onRevision, onEntregar, onPagoExitoso, cancelando,
+    order, phases, effectiveRole, onVolver, onCancelar, onAprobar, onRevision, onPagoExitoso, cancelando,
 }) => {
     const [checkout, setCheckout] = useState<{
         amountCents: number;
@@ -135,7 +136,6 @@ export const OrdenDetalle: React.FC<OrdenDetalleProps> = ({
                             isPhased={isPhased}
                             onAprobar={onAprobar}
                             onRevision={onRevision}
-                            onEntregar={onEntregar}
                             onPagarFase={(pn, amount) => setCheckout({ amountCents: amount, phaseNumber: pn })}
                         />
                     ))}
@@ -145,8 +145,9 @@ export const OrdenDetalle: React.FC<OrdenDetalleProps> = ({
     );
 };
 
-/* Componente privado: card de una fase dentro del timeline */
-function FaseCard({phase, orderId, isLast, isClient, isEmployee, isPhased, onAprobar, onRevision, onEntregar, onPagarFase}: {
+/* Componente privado: card de una fase dentro del timeline.
+ * [044A-38 Fase 6] Integra upload multipart de entregables y listado de archivos. */
+function FaseCard({phase, orderId, isLast, isClient, isEmployee, isPhased, onAprobar, onRevision, onPagarFase}: {
     phase: OrderPhaseResponse;
     orderId: string;
     isLast: boolean;
@@ -155,7 +156,6 @@ function FaseCard({phase, orderId, isLast, isClient, isEmployee, isPhased, onApr
     isPhased: boolean;
     onAprobar: (orderId: string, phase: number) => Promise<void>;
     onRevision: (orderId: string, phase: number) => Promise<void>;
-    onEntregar: (orderId: string, phase: number) => Promise<void>;
     onPagarFase: (phaseNumber: number, amountCents: number) => void;
 }) {
     const canApprove = isClient && APPROVABLE_PHASE.includes(phase.status);
@@ -163,6 +163,11 @@ function FaseCard({phase, orderId, isLast, isClient, isEmployee, isPhased, onApr
     const canDeliver = isEmployee && (phase.status === 'in_progress' || phase.status === 'paid' || phase.status === 'revision_requested');
     const canPayPhase = isClient && isPhased && phase.status === 'pending_payment';
     const isActive = phase.status !== 'locked' && phase.status !== 'approved' && phase.status !== 'skipped';
+
+    /* Determinar si la fase tiene o puede tener entregables */
+    const hasDeliverableHistory = ['delivered', 'approved', 'revision_requested', 'in_progress']
+        .includes(phase.status) && phase.revisions_used > 0;
+    const showDeliverables = canDeliver || hasDeliverableHistory;
 
     return (
         <div className={`faseCard ${isActive ? 'faseCardActiva' : ''} ${phase.status === 'approved' ? 'faseCardAprobada' : ''}`}>
@@ -190,7 +195,16 @@ function FaseCard({phase, orderId, isLast, isClient, isEmployee, isPhased, onApr
                     <span>Revisiones: {phase.revisions_used}/{phase.max_revisions}</span>
                 </div>
 
-                {(canApprove || canRevise || canDeliver || canPayPhase) && (
+                {/* [044A-38 Fase 6] Panel de entregables: upload + historial */}
+                {showDeliverables && (
+                    <EntregablesPanel
+                        orderId={orderId}
+                        phaseNumber={phase.phase_number}
+                        canDeliver={canDeliver}
+                    />
+                )}
+
+                {(canApprove || canRevise || canPayPhase) && (
                     <div className="faseAcciones">
                         {canPayPhase && (
                             <button
@@ -217,15 +231,6 @@ function FaseCard({phase, orderId, isLast, isClient, isEmployee, isPhased, onApr
                                 type="button"
                             >
                                 <RotateCcw size={14} /> Revisión
-                            </button>
-                        )}
-                        {canDeliver && (
-                            <button
-                                className="faseBtn faseBtnEntregar"
-                                onClick={() => onEntregar(orderId, phase.phase_number)}
-                                type="button"
-                            >
-                                <Package size={14} /> Entregar
                             </button>
                         )}
                     </div>
