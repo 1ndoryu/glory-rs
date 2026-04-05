@@ -1,45 +1,13 @@
-/* Estilos para ModalTestimonio */
+/* Estilos para ModalTestimonio.
+ * [044A-40] Overlay y contenedor base migrados a ui/Modal.css.
+ * Aquí solo estilos específicos del contenido del testimonio. */
 
-.modalTestimonioOverlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    padding: var(--spacing-md);
-}
-
+/* El contenedor hereda de modalBaseContenedor vía className prop.
+ * Solo overrides específicos del testimonio van aquí. */
 .modalTestimonioContenedor {
-    background: var(--bg-primary);
-    border-radius: 12px;
     max-width: 560px;
-    width: 100%;
     max-height: 90vh;
     overflow-y: auto;
-    padding: var(--spacing-xl);
-    position: relative;
-    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.15);
-}
-
-.modalTestimonioCerrar {
-    position: absolute;
-    top: var(--spacing-md);
-    right: var(--spacing-md);
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    color: var(--text-tertiary);
-    cursor: pointer;
-    line-height: 1;
-    padding: 4px 8px;
-    transition: color var(--transicion-rapida);
-}
-
-.modalTestimonioCerrar:hover {
-    color: var(--brand-black);
 }
 
 .modalTestimonioTitulo {

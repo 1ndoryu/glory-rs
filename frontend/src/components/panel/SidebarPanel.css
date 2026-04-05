@@ -52,7 +52,6 @@
 }
 
 .sidebarRol {
-    font-family: var(--font-serif);
     font-size: var(--text-xs);
     color: var(--text-tertiary);
     text-transform: capitalize;

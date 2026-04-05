@@ -3,10 +3,13 @@
  * Modal para que un visitante escriba un testimonio/comentario.
  * Campos: foto, nombre, puesto, servicio/proyecto relacionado, red social, comentario.
  * El testimonio queda pendiente de aprobación (no se muestra en tiempo real).
+ * [044A-40] Refactorizado para usar componente <Modal> base. Sin botón X por diseño.
  */
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState} from 'react';
 import {Button} from '../ui/Button';
-import {useFocusTrap} from '../../hooks/useFocusTrap';
+import {Input} from '../ui/Input';
+import {Textarea} from '../ui/Textarea';
+import {Modal} from '../ui/Modal';
 import './ModalTestimonio.css';
 
 interface ModalTestimonioProps {
@@ -36,27 +39,6 @@ export const ModalTestimonio: React.FC<ModalTestimonioProps> = ({abierto, onCerr
     const [formulario, setFormulario] = useState<FormularioTestimonio>(ESTADO_INICIAL);
     const [previewFoto, setPreviewFoto] = useState<string | null>(null);
     const [estado, setEstado] = useState<'idle' | 'enviando' | 'exito' | 'error'>('idle');
-    const modalRef = useRef<HTMLDivElement>(null);
-
-    /* Focus trap: atrapa Tab dentro del modal */
-    useFocusTrap(modalRef, abierto);
-
-    /* Cerrar con Escape y bloquear scroll */
-    useEffect(() => {
-        if (!abierto) return;
-
-        const handleEscape = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') onCerrar();
-        };
-
-        document.addEventListener('keydown', handleEscape);
-        document.body.style.overflow = 'hidden';
-
-        return () => {
-            document.removeEventListener('keydown', handleEscape);
-            document.body.style.overflow = '';
-        };
-    }, [abierto, onCerrar]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const {name, value} = e.target;
@@ -95,18 +77,9 @@ export const ModalTestimonio: React.FC<ModalTestimonioProps> = ({abierto, onCerr
         }
     };
 
-    const handleOverlayClick = (e: React.MouseEvent) => {
-        if (e.target === e.currentTarget) onCerrar();
-    };
-
-    if (!abierto) return null;
-
     return (
-        <div className="modalTestimonioOverlay" onClick={handleOverlayClick}>
-            <div className="modalTestimonioContenedor" ref={modalRef} role="dialog" aria-modal="true">
-                <button className="modalTestimonioCerrar" onClick={onCerrar} aria-label="Cerrar">×</button>
-
-                {estado === 'exito' ? (
+        <Modal abierto={abierto} onCerrar={onCerrar} className="modalTestimonioContenedor">
+            {estado === 'exito' ? (
                     <div className="modalTestimonioExito">
                         <h2 className="modalTestimonioExitoTitulo">Gracias por tu comentario</h2>
                         <p className="modalTestimonioExitoTexto">
@@ -148,7 +121,7 @@ export const ModalTestimonio: React.FC<ModalTestimonioProps> = ({abierto, onCerr
                                 {/* Nombre */}
                                 <div className="testimonioCampo">
                                     <label htmlFor="testimonioNombre">Nombre completo *</label>
-                                    <input
+                                    <Input
                                         type="text"
                                         id="testimonioNombre"
                                         name="nombre"
@@ -162,7 +135,7 @@ export const ModalTestimonio: React.FC<ModalTestimonioProps> = ({abierto, onCerr
                                 {/* Cargo / Puesto */}
                                 <div className="testimonioCampo">
                                     <label htmlFor="testimonioCargo">Puesto / Empresa</label>
-                                    <input
+                                    <Input
                                         type="text"
                                         id="testimonioCargo"
                                         name="cargo"
@@ -175,7 +148,7 @@ export const ModalTestimonio: React.FC<ModalTestimonioProps> = ({abierto, onCerr
                                 {/* Proyecto / Servicio relacionado */}
                                 <div className="testimonioCampo">
                                     <label htmlFor="testimonioProyecto">Servicio o proyecto relacionado</label>
-                                    <input
+                                    <Input
                                         type="text"
                                         id="testimonioProyecto"
                                         name="proyectoRelacionado"
@@ -188,7 +161,7 @@ export const ModalTestimonio: React.FC<ModalTestimonioProps> = ({abierto, onCerr
                                 {/* Red social */}
                                 <div className="testimonioCampo">
                                     <label htmlFor="testimonioRedSocial">Red social (perfil)</label>
-                                    <input
+                                    <Input
                                         type="url"
                                         id="testimonioRedSocial"
                                         name="redSocial"
@@ -202,7 +175,7 @@ export const ModalTestimonio: React.FC<ModalTestimonioProps> = ({abierto, onCerr
                             {/* Comentario */}
                             <div className="testimonioCampo testimonioCampoCompleto">
                                 <label htmlFor="testimonioComentario">Tu comentario *</label>
-                                <textarea
+                                <Textarea
                                     id="testimonioComentario"
                                     name="comentario"
                                     value={formulario.comentario}
@@ -227,7 +200,6 @@ export const ModalTestimonio: React.FC<ModalTestimonioProps> = ({abierto, onCerr
                         </form>
                     </>
                 )}
-            </div>
-        </div>
+        </Modal>
     );
 };
