@@ -48,7 +48,7 @@
     text-decoration: none;
     color: inherit;
     overflow: hidden;
-    border-radius: 12px;
+    border-radius: var(--radius-lg);
     aspect-ratio: 3 / 4;
     cursor: pointer;
 }
@@ -70,7 +70,7 @@
     left: 0;
     right: 0;
     padding: var(--spacing-xl) var(--spacing-lg);
-    background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+    background: linear-gradient(transparent, var(--overlay-dark));
     display: flex;
     flex-direction: column;
     gap: var(--spacing-xs);
@@ -81,13 +81,13 @@
     font-size: var(--text-xs);
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--white-85);
 }
 
 .blogTitulo {
     font-family: var(--font-primary);
     font-size: var(--text-xl);
-    color: #fff;
+    color: var(--brand-white);
     font-weight: 500;
     margin: 0;
     line-height: 1.2;

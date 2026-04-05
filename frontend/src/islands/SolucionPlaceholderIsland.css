@@ -30,7 +30,7 @@
     color: var(--text-tertiary);
     background-color: var(--bg-accent);
     padding: var(--spacing-xs) var(--spacing-md);
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
 }
 
 .placeholderTitulo {
@@ -64,8 +64,8 @@
     color: var(--text-tertiary);
     text-decoration: none;
     padding: var(--spacing-sm) var(--spacing-md);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 6px;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-sm);
     transition:
         color var(--transicion-rapida),
         border-color var(--transicion-rapida);
@@ -84,7 +84,7 @@
     padding: var(--spacing-sm) var(--spacing-md);
     background-color: var(--brand-black);
     border: 1px solid var(--brand-black);
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
     transition: opacity var(--transicion-rapida);
 }
 

@@ -7,7 +7,7 @@
 .employeesSectionState {
     padding: var(--spacing-xl);
     border: 1px solid var(--bg-accent);
-    border-radius: 16px;
+    border-radius: var(--radius-xl);
     background: var(--bg-primary);
     color: var(--text-secondary);
 }
@@ -21,7 +21,7 @@
 .employeesMetricCard,
 .employeesCard {
     border: 1px solid var(--bg-accent);
-    border-radius: 16px;
+    border-radius: var(--radius-xl);
     background: var(--bg-primary);
 }
 
@@ -79,7 +79,7 @@
 .employeesStatus {
     align-self: flex-start;
     padding: 6px 10px;
-    border-radius: 999px;
+    border-radius: var(--radius-full);
     font-size: var(--text-xs);
     font-weight: 600;
     text-transform: uppercase;
@@ -87,19 +87,19 @@
 }
 
 .employeesStatus--available {
-    background: #dcfce7;
-    color: #166534;
+    background: var(--color-success-bg);
+    color: var(--color-success-text);
 }
 
 .employeesStatus--busy {
-    background: #fef3c7;
-    color: #92400e;
+    background: var(--color-warning-bg);
+    color: var(--color-warning-text);
 }
 
 .employeesStatus--away,
 .employeesStatus--offline {
-    background: #e5e7eb;
-    color: #374151;
+    background: var(--border-default);
+    color: var(--text-muted);
 }
 
 .employeesStats {
@@ -111,7 +111,7 @@
 
 .employeesStats div {
     padding: var(--spacing-sm);
-    border-radius: 12px;
+    border-radius: var(--radius-lg);
     background: var(--bg-accent);
 }
 
@@ -149,7 +149,7 @@
 
 .employeesSkillBadge {
     padding: 6px 10px;
-    border-radius: 999px;
+    border-radius: var(--radius-full);
     background: var(--bg-secondary);
     color: var(--brand-black);
     font-size: var(--text-xs);

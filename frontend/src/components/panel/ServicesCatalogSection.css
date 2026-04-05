@@ -14,7 +14,7 @@
 .servicesCatalogCard,
 .servicesCatalogIntro {
     border: 1px solid var(--bg-accent);
-    border-radius: 16px;
+    border-radius: var(--radius-xl);
     background: var(--bg-primary);
 }
 
@@ -84,7 +84,7 @@
 .servicesCatalogPlanBadge,
 .servicesCatalogTag {
     padding: 6px 10px;
-    border-radius: 999px;
+    border-radius: var(--radius-full);
     font-size: var(--text-xs);
 }
 
@@ -101,14 +101,14 @@
 }
 
 .servicesCatalogTag {
-    background: #eef2ff;
-    color: #3730a3;
+    background: var(--color-purple-bg);
+    color: var(--color-info-text);
 }
 
 .servicesCatalogTag--muted,
 .servicesCatalogPlanBadge {
-    background: #f3f4f6;
-    color: #374151;
+    background: var(--color-neutral-bg);
+    color: var(--text-muted);
 }
 
 .servicesCatalogPlans {
@@ -120,7 +120,7 @@
 .servicesCatalogPlanRow {
     align-items: center;
     padding: var(--spacing-sm);
-    border-radius: 12px;
+    border-radius: var(--radius-lg);
     background: var(--bg-secondary);
 }
 

@@ -20,14 +20,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 16px var(--border-hover-strong);
     z-index: 9990;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .chatWidgetBubble:hover {
     transform: scale(1.08);
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 6px 24px var(--overlay-medium);
 }
 
 /* ============================================================
@@ -41,12 +41,12 @@
     width: 380px;
     max-height: 520px;
     background: var(--bg-secondary, #141413);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
+    border: 1px solid var(--white-10);
+    border-radius: var(--radius-xl);
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 8px 32px var(--overlay-medium);
     z-index: 9990;
     animation: chatWidgetSlideUp 0.25s ease-out;
 }
@@ -71,8 +71,8 @@
     align-items: center;
     justify-content: space-between;
     padding: var(--spacing-sm) var(--spacing-md);
-    background: rgba(255, 255, 255, 0.05);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--white-5);
+    border-bottom: 1px solid var(--white-10);
 }
 
 .chatWidgetHeaderInfo {
@@ -92,7 +92,7 @@
 .chatWidgetStatus {
     display: block;
     font-size: var(--text-xs);
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--white-40);
 }
 
 .chatWidgetHeaderActions {
@@ -103,10 +103,10 @@
 .chatWidgetHeaderBtn {
     background: none;
     border: none;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--white-40);
     cursor: pointer;
     padding: 4px;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -115,7 +115,7 @@
 
 .chatWidgetHeaderBtn:hover {
     color: var(--brand-white, #f5f0e8);
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--white-10);
 }
 
 /* ============================================================
@@ -145,7 +145,7 @@
     color: var(--brand-black, #1a1a19);
     border: none;
     padding: var(--spacing-xs) var(--spacing-md);
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     font-weight: 600;
     font-size: var(--text-sm);
     cursor: pointer;
@@ -172,7 +172,7 @@
 }
 
 .chatWidgetEmpty {
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--white-40);
     font-size: var(--text-xs);
     text-align: center;
     padding: var(--spacing-lg) var(--spacing-sm);
@@ -205,15 +205,15 @@
 }
 
 /* Colores por rol del remitente (sustituyen el inline style={{color}}) */
-.chatWidgetSender--client  { color: #60a5fa; }
-.chatWidgetSender--visitor { color: #60a5fa; }
-.chatWidgetSender--ai      { color: #a78bfa; }
-.chatWidgetSender--employee { color: #34d399; }
-.chatWidgetSender--admin   { color: #f97316; }
+.chatWidgetSender--client  { color: var(--color-info); }
+.chatWidgetSender--visitor { color: var(--color-info); }
+.chatWidgetSender--ai      { color: var(--color-purple); }
+.chatWidgetSender--employee { color: var(--color-success); }
+.chatWidgetSender--admin   { color: var(--color-warning); }
 
 .chatWidgetMsgBubble {
     padding: var(--spacing-xs) var(--spacing-sm);
-    border-radius: 12px;
+    border-radius: var(--radius-lg);
     font-size: var(--text-sm);
     line-height: 1.4;
     word-break: break-word;
@@ -227,7 +227,7 @@
 }
 
 .chatWidgetMsgBubbleOther {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--white-10);
     color: var(--brand-white, #f5f0e8);
     border-bottom-left-radius: 4px;
 }
@@ -250,7 +250,7 @@
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.4);
+    background: var(--white-40);
     animation: chatWidgetDotBounce 1.2s infinite ease-in-out;
 }
 
@@ -282,7 +282,7 @@
     align-items: center;
     gap: var(--spacing-xs);
     padding: var(--spacing-xs) var(--spacing-sm);
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid var(--white-10);
 }
 
 .chatWidgetInput {

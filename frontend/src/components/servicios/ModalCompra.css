@@ -86,6 +86,6 @@
 }
 
 .modalCompraErrorTexto {
-    color: var(--color-error, #e53e3e);
+    color: var(--color-error, var(--color-error));
     font-size: var(--text-sm);
 }

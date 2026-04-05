@@ -56,8 +56,8 @@
     display: flex;
     flex-direction: column;
     background-color: var(--bg-accent);
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 16px;
+    border: 1px solid var(--bg-item-active);
+    border-radius: var(--radius-xl);
     padding: var(--spacing-xl);
     position: relative;
     transition:
@@ -67,7 +67,7 @@
 
 .tarjetaPlan:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 12px 40px var(--bg-item-active);
 }
 
 /* Tarjeta destacada (plan recomendado) */
@@ -95,7 +95,7 @@
     color: var(--brand-white);
     background-color: var(--brand-black);
     padding: 6px var(--spacing-md);
-    border-radius: 100px;
+    border-radius: var(--radius-full);
     white-space: nowrap;
 }
 
@@ -103,7 +103,7 @@
 .tarjetaPlanCabecera {
     text-align: center;
     padding-bottom: var(--spacing-lg);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    border-bottom: 1px solid var(--bg-item-active);
     margin-bottom: var(--spacing-lg);
 }
 

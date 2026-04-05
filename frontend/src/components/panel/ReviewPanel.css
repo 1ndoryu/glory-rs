@@ -2,8 +2,8 @@
 
 .reviewContenedor {
     background: var(--bg-secondary);
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 12px;
+    border: 1px solid var(--bg-item-active);
+    border-radius: var(--radius-lg);
     padding: var(--spacing-md);
     display: flex;
     flex-direction: column;
@@ -46,12 +46,12 @@
 }
 
 .reviewEstrellaLlena {
-    color: #f59e0b;
-    fill: #f59e0b;
+    color: var(--color-warning);
+    fill: var(--color-warning);
 }
 
 .reviewEstrellaVacia {
-    color: #d1d5db;
+    color: var(--border-default);
     fill: none;
 }
 
@@ -89,8 +89,8 @@
 }
 
 .reviewRespuesta {
-    background: rgba(0, 0, 0, 0.03);
-    border-radius: 8px;
+    background: var(--bg-card-subtle);
+    border-radius: var(--radius-md);
     padding: var(--spacing-sm);
     margin-top: var(--spacing-xs);
 }
@@ -117,8 +117,8 @@
     font-family: var(--font-primary);
     font-size: var(--text-sm);
     padding: var(--spacing-sm);
-    border: 1px solid rgba(0, 0, 0, 0.15);
-    border-radius: 8px;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
     resize: vertical;
     box-sizing: border-box;
 }
@@ -136,7 +136,7 @@
     background: var(--bg-accent);
     color: var(--brand-white);
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     padding: var(--spacing-xs) var(--spacing-md);
     font-size: var(--text-sm);
     font-weight: 600;

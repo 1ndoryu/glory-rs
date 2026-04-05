@@ -14,7 +14,7 @@
 
 /* Override para SeccionHeader dentro de este contexto oscuro */
 .seccionServicios .seccionHeader {
-    border-bottom-color: rgba(255, 255, 255, 0.2);
+    border-bottom-color: var(--white-20);
 }
 
 .seccionServicios .seccionTitulo {
@@ -42,7 +42,7 @@
     display: flex;
     align-items: center;
     padding: var(--spacing-md) 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    border-bottom: 1px solid var(--white-15);
     cursor: pointer;
     transition:
         background-color 0.2s ease,
@@ -60,7 +60,7 @@
 .servicioImagenWrapper {
     width: 120px;
     height: 80px;
-    border-radius: 12px;
+    border-radius: var(--radius-lg);
     overflow: hidden;
     flex-shrink: 0;
     background-color: var(--bg-secondary);

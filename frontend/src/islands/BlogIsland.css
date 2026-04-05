@@ -61,7 +61,7 @@
     display: flex;
     gap: var(--spacing-sm);
     flex-wrap: wrap;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    border-bottom: 1px solid var(--bg-item-active);
     padding-bottom: var(--spacing-md);
 }
 
@@ -93,7 +93,7 @@
     text-decoration: none;
     color: inherit;
     overflow: hidden;
-    border-radius: 12px;
+    border-radius: var(--radius-lg);
     aspect-ratio: 3 / 4;
 }
 
@@ -114,7 +114,7 @@
     left: 0;
     right: 0;
     padding: var(--spacing-xl) var(--spacing-lg);
-    background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+    background: linear-gradient(transparent, var(--overlay-dark));
     display: flex;
     flex-direction: column;
     gap: var(--spacing-xs);
@@ -125,14 +125,14 @@
     font-size: var(--text-xs);
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--white-85);
 }
 
 .articuloTitulo {
     font-family: var(--font-primary);
     font-size: var(--text-xl);
     font-weight: 500;
-    color: #fff;
+    color: var(--brand-white);
     margin: 0;
     line-height: 1.2;
 }

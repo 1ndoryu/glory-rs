@@ -86,4 +86,62 @@
     /* Transitions */
     --transicion-rapida: 0.2s ease;
     --transicion-media: 0.3s ease;
+
+    /* Radius Scale */
+    --radius-xs: 2px;
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-full: 9999px;
+
+    /* Brand */
+    --brand-primary: #c8a97e;
+
+    /* Status - Error */
+    --color-error: #ef4444;
+    --color-error-text: #991b1b;
+    --color-error-bg: #fee2e2;
+    --color-error-bg-soft: #fef2f2;
+
+    /* Status - Success */
+    --color-success: #22c55e;
+    --color-success-text: #166534;
+    --color-success-bg: #dcfce7;
+    --color-success-bg-soft: #ecfdf5;
+
+    /* Status - Warning */
+    --color-warning: #f59e0b;
+    --color-warning-text: #92400e;
+    --color-warning-bg: #fef3c7;
+
+    /* Status - Info */
+    --color-info: #3b82f6;
+    --color-info-text: #1e40af;
+    --color-info-bg: #dbeafe;
+
+    /* Status - Purple */
+    --color-purple: #7c3aed;
+    --color-purple-text: #5b21b6;
+    --color-purple-bg: #ede9fe;
+
+    /* Status - Orange (revision) */
+    --color-orange-text: #c2410c;
+    --color-orange-bg: #fff7ed;
+
+    /* Neutral (cancelled, inactive) */
+    --color-neutral-bg: #f3f4f6;
+
+    /* Overlays */
+    --overlay-medium: rgba(0, 0, 0, 0.5);
+    --overlay-dark: rgba(0, 0, 0, 0.6);
+
+    /* Border */
+    --border-default: #e5e7eb;
+
+    /* Text extras */
+    --text-md: 0.9375rem;
+
+    /* Spacing extras */
+    --spacing-2xs: 0.25rem;
 }

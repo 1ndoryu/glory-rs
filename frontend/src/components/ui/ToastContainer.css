@@ -18,10 +18,10 @@
     align-items: center;
     gap: var(--spacing-sm);
     padding: 12px 16px;
-    border-radius: 10px;
+    border-radius: var(--radius-lg);
     font-size: var(--text-sm);
     font-family: var(--font-primary);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 8px 24px var(--border-light);
     pointer-events: auto;
     animation: toastSlideIn 0.3s ease-out;
 }
@@ -40,13 +40,13 @@
 /* Variantes por tipo */
 
 .toastItemsuccess {
-    background: #065f46;
-    color: #ecfdf5;
+    background: var(--color-success-text);
+    color: var(--color-success-bg-soft);
 }
 
 .toastItemerror {
-    background: #991b1b;
-    color: #fef2f2;
+    background: var(--color-error-text);
+    color: var(--color-error-bg-soft);
 }
 
 .toastIteminfo {
@@ -55,8 +55,8 @@
 }
 
 .toastItemwarning {
-    background: #92400e;
-    color: #fffbeb;
+    background: var(--color-warning-text);
+    color: var(--color-warning-bg);
 }
 
 .toastIcono {
@@ -77,7 +77,7 @@
     color: inherit;
     opacity: 0.6;
     cursor: pointer;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     display: flex;
     align-items: center;
     justify-content: center;

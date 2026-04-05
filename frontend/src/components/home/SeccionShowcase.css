@@ -79,7 +79,7 @@
 .proyectoImagenWrapper {
     width: 100%;
     /* Altura libre eliminando aspect-ratio */
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     overflow: hidden;
     background-color: var(--bg-secondary);
 }

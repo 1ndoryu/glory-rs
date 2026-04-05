@@ -29,7 +29,7 @@
     background: var(--brand-black);
     color: var(--brand-white);
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     font-size: var(--text-sm);
     cursor: pointer;
     transition: opacity 0.15s;
@@ -48,13 +48,13 @@
     justify-content: center;
     gap: var(--spacing-sm);
     padding: var(--spacing-3xl);
-    color: rgba(0, 0, 0, 0.4);
+    color: var(--overlay-medium);
 }
 
 /* ── Tabla ──────────────────────────────────── */
 .hostingTabla {
     border: 1px solid var(--bg-accent);
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     overflow: hidden;
 }
 
@@ -67,7 +67,7 @@
     font-size: var(--text-xs);
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: rgba(0, 0, 0, 0.5);
+    color: var(--overlay-medium);
     font-weight: 600;
 }
 
@@ -83,7 +83,7 @@
 }
 
 .hostingFila:hover {
-    background: rgba(0, 0, 0, 0.02);
+    background: var(--bg-card-subtle);
 }
 
 .hostingFilaCelda {
@@ -98,11 +98,11 @@
 
 .hostingClientEmail {
     font-size: var(--text-xs);
-    color: rgba(0, 0, 0, 0.5);
+    color: var(--overlay-medium);
 }
 
 .hostingDominio {
-    color: rgba(0, 0, 0, 0.6);
+    color: var(--overlay-dark);
     font-size: var(--text-xs);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -113,11 +113,11 @@
     font-weight: 600;
 }
 
-.hostingStatus--pending     { color: #f59e0b; }
-.hostingStatus--provisioning { color: #3b82f6; }
-.hostingStatus--active       { color: #22c55e; }
-.hostingStatus--suspended    { color: #ef4444; }
-.hostingStatus--cancelled    { color: #6b7280; }
+.hostingStatus--pending     { color: var(--color-warning); }
+.hostingStatus--provisioning { color: var(--color-info); }
+.hostingStatus--active       { color: var(--color-success); }
+.hostingStatus--suspended    { color: var(--color-error); }
+.hostingStatus--cancelled    { color: var(--text-tertiary); }
 
 /* ── Acciones ──────────────────────────────── */
 .hostingAcciones {
@@ -129,7 +129,7 @@
 .hostingBtnAccion {
     background: none;
     border: 1px solid var(--bg-accent);
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
     padding: 4px 6px;
     cursor: pointer;
     color: var(--brand-black);
@@ -158,8 +158,8 @@
     right: 0;
     background: var(--bg-primary);
     border: 1px solid var(--bg-accent);
-    border-radius: 8px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    border-radius: var(--radius-md);
+    box-shadow: 0 4px 16px var(--border-light);
     z-index: 100;
     min-width: 140px;
     overflow: hidden;
@@ -199,7 +199,7 @@
 .hostingSelect {
     padding: var(--spacing-xs) var(--spacing-sm);
     border: 1px solid var(--bg-accent);
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     font-size: var(--text-sm);
     background: var(--bg-primary);
     color: var(--brand-black);
@@ -210,7 +210,7 @@
     background: var(--brand-black);
     color: var(--brand-white);
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     font-size: var(--text-sm);
     font-weight: 600;
     cursor: pointer;
@@ -239,7 +239,7 @@
 }
 
 .hostingEventosVacio {
-    color: rgba(0, 0, 0, 0.4);
+    color: var(--overlay-medium);
     text-align: center;
     padding: var(--spacing-lg);
 }
@@ -255,7 +255,7 @@
 .hostingEvento {
     padding: var(--spacing-xs) var(--spacing-sm);
     border: 1px solid var(--bg-accent);
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
     font-size: var(--text-xs);
 }
 
@@ -267,7 +267,7 @@
 
 .hostingEventoFecha {
     display: block;
-    color: rgba(0, 0, 0, 0.4);
+    color: var(--overlay-medium);
     margin-top: 2px;
 }
 
@@ -275,7 +275,7 @@
     margin: var(--spacing-xs) 0 0;
     padding: var(--spacing-xs);
     background: var(--bg-secondary);
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     font-size: 11px;
     overflow-x: auto;
     white-space: pre-wrap;

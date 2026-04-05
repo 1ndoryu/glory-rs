@@ -7,7 +7,7 @@
 }
 
 .seccionServiciosRelacionados .seccionHeader {
-    border-bottom-color: rgba(0, 0, 0, 0.1); /* Borde sutil */
+    border-bottom-color: var(--border-light); /* Borde sutil */
 }
 
 .relacionadosContenedor {
@@ -29,7 +29,7 @@
     display: flex;
     align-items: center;
     padding: var(--spacing-lg) 0;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid var(--border-light);
     transition: all 0.2s ease;
     gap: var(--spacing-lg);
     text-decoration: none;
@@ -43,7 +43,7 @@
 .relacionadoImagenWrapper {
     width: 120px;
     height: 80px;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     overflow: hidden;
     background-color: var(--bg-secondary);
     /* Mostrar imagen en este caso para diferenciar de skills */

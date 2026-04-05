@@ -114,7 +114,7 @@
     width: 100%;
     aspect-ratio: 1;
     overflow: hidden;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     background-color: var(--bg-accent);
 }
 
@@ -181,7 +181,7 @@
 /* Sección Marcas */
 .nosotrosMarcas {
     padding: var(--spacing-2xl) 0;
-    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    border-top: 1px solid var(--bg-item-active);
 }
 
 .nosotrosMarcasContenedor {

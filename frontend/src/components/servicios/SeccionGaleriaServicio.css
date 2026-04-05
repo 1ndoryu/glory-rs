@@ -60,7 +60,7 @@
 
 .galeriaImagenWrapper {
     width: 100%;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     overflow: hidden;
     background-color: var(--bg-secondary);
     position: relative;

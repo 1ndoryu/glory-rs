@@ -45,7 +45,7 @@
     color: var(--text-tertiary);
     background-color: var(--bg-card-subtle);
     padding: var(--spacing-xs) var(--spacing-md);
-    border-radius: 100px;
+    border-radius: var(--radius-full);
 }
 
 .placeholderNota {

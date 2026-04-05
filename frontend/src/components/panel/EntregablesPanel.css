@@ -3,7 +3,7 @@
 
 .entregablesPanel {
     margin-top: var(--spacing-sm);
-    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    border-top: 1px solid var(--bg-item-active);
     padding-top: var(--spacing-sm);
 }
 
@@ -12,9 +12,9 @@
     flex-direction: column;
     gap: var(--spacing-xs);
     padding: var(--spacing-sm);
-    background-color: rgba(59, 130, 246, 0.04);
-    border: 1px dashed rgba(59, 130, 246, 0.25);
-    border-radius: 8px;
+    background-color: var(--color-info-bg);
+    border: 1px dashed var(--color-info-bg);
+    border-radius: var(--radius-md);
     margin-bottom: var(--spacing-sm);
 }
 
@@ -48,7 +48,7 @@
     font-size: var(--text-xs);
     padding: 4px 8px;
     background-color: var(--bg-secondary);
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
 }
 
 .entregablesFileName {
@@ -60,7 +60,7 @@
 }
 
 .entregablesFileSize {
-    color: #64748b;
+    color: var(--text-tertiary);
     font-size: 11px;
     flex-shrink: 0;
 }
@@ -69,24 +69,24 @@
     background: none;
     border: none;
     cursor: pointer;
-    color: #ef4444;
+    color: var(--color-error);
     padding: 2px;
     display: flex;
     align-items: center;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     transition: background-color var(--transicion-rapida);
 }
 
 .entregablesFileRemove:hover {
-    background-color: rgba(239, 68, 68, 0.1);
+    background-color: var(--color-error-bg);
 }
 
 .entregablesNotes {
     font-family: var(--font-primary);
     font-size: var(--text-xs);
     padding: var(--spacing-xs) var(--spacing-sm);
-    border: 1px solid rgba(0, 0, 0, 0.12);
-    border-radius: 6px;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-sm);
     resize: vertical;
     min-height: 40px;
 }
@@ -97,14 +97,14 @@
 }
 
 .entregablesError {
-    color: #ef4444;
+    color: var(--color-error);
     font-size: var(--text-xs);
     margin: 0;
 }
 
 .entregablesCargando {
     font-size: var(--text-xs);
-    color: #64748b;
+    color: var(--text-tertiary);
     margin: var(--spacing-xs) 0;
 }
 
@@ -123,12 +123,12 @@
 .entregablesRevisionLabel {
     font-size: var(--text-xs);
     font-weight: 600;
-    color: #6366f1;
+    color: var(--primary-500);
 }
 
 .entregablesRevisionNotes {
     font-size: var(--text-xs);
-    color: #64748b;
+    color: var(--text-tertiary);
     font-style: italic;
     margin: 2px 0 0;
 }
@@ -137,15 +137,15 @@
     background: none;
     border: none;
     cursor: pointer;
-    color: #3b82f6;
+    color: var(--color-info);
     padding: 2px;
     display: flex;
     align-items: center;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     transition: background-color var(--transicion-rapida);
     flex-shrink: 0;
 }
 
 .entregablesDownloadBtn:hover {
-    background-color: rgba(59, 130, 246, 0.1);
+    background-color: var(--color-info-bg);
 }

@@ -52,7 +52,7 @@
     width: 72px;
     height: 72px;
     border-radius: 50%;
-    border: 2px dashed rgba(0, 0, 0, 0.15);
+    border: 2px dashed var(--border-light);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -73,7 +73,7 @@
     height: 72px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid rgba(0, 0, 0, 0.08);
+    border: 2px solid var(--bg-item-active);
 }
 
 /* Grid de campos */
@@ -105,8 +105,8 @@
     font-family: var(--font-primary);
     font-size: var(--text-base);
     padding: var(--spacing-sm) var(--spacing-md);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 6px;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-sm);
     background: transparent;
     color: var(--text-primary);
     outline: none;
@@ -135,7 +135,7 @@
 .testimonioError {
     font-family: var(--font-primary);
     font-size: var(--text-sm);
-    color: #dc2626;
+    color: var(--color-error);
     margin: 0;
 }
 

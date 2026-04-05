@@ -61,7 +61,7 @@
     max-width: var(--container-width);
     margin: 0 auto;
     padding: 0 var(--spacing-lg) var(--spacing-xl);
-    border-radius: 12px;
+    border-radius: var(--radius-lg);
     overflow: hidden;
     aspect-ratio: 4 / 3;
 }
@@ -135,14 +135,14 @@
 
 .blogSingleTexto img {
     width: 100%;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     margin: var(--spacing-lg) 0;
 }
 
 /* Articulos relacionados */
 .blogSingleRelacionados {
     padding: var(--spacing-xl) 0;
-    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    border-top: 1px solid var(--bg-item-active);
 }
 
 .blogSingleRelacionadosContenedor {
@@ -176,7 +176,7 @@
 
 .blogSingleRelacionadoImagen {
     aspect-ratio: 4 / 3;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     overflow: hidden;
     background-color: var(--bg-secondary);
 }
@@ -222,7 +222,7 @@
     }
 
     .blogSingleImagenWrapper {
-        border-radius: 8px;
+        border-radius: var(--radius-md);
         aspect-ratio: 3 / 2;
     }
 

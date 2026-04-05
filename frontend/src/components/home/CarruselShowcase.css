@@ -57,7 +57,7 @@
 .carruselImagenWrapper {
     width: 100%;
     height: var(--carrusel-item-height);
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
     overflow: hidden;
 }
 

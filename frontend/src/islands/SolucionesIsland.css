@@ -70,8 +70,8 @@
     text-decoration: none;
     color: inherit;
     padding: var(--spacing-xl);
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 12px;
+    border: 1px solid var(--bg-item-active);
+    border-radius: var(--radius-lg);
     background-color: var(--bg-accent);
     transition:
         border-color var(--transicion-media),
@@ -82,7 +82,7 @@
 
 .tarjetaSolucion:hover {
     border-color: var(--border-hover);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 8px 32px var(--bg-item-active);
     transform: translateY(-4px);
 }
 

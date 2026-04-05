@@ -10,7 +10,7 @@
 
 /* Override para SeccionHeader dentro de este contexto oscuro */
 .seccionClientes .seccionHeader {
-    border-bottom-color: rgba(255, 255, 255, 0.2);
+    border-bottom-color: var(--white-20);
 }
 
 .seccionClientes .seccionTitulo {
@@ -35,7 +35,7 @@
     gap: var(--spacing-sm);
     padding: var(--spacing-sm) var(--spacing-md);
     border: 1px solid var(--border-color); /* o un color mas suave */
-    border-radius: 4px; /* Ajustar segun variables globales si hay radius */
+    border-radius: var(--radius-sm); /* Ajustar segun variables globales si hay radius */
     background-color: transparent;
     cursor: pointer;
     transition: background-color 0.2s;
@@ -55,7 +55,7 @@
     height: 24px;
     background-color: var(--text-primary);
     color: var(--bg-primary);
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
 }
 
 .clientesBotonTexto {
@@ -100,15 +100,15 @@
     align-items: center;
     justify-content: center;
     aspect-ratio: 3/2;
-    background-color: rgba(255, 255, 255, 0.05);
-    border-radius: 4px;
+    background-color: var(--white-5);
+    border-radius: var(--radius-sm);
     padding: var(--spacing-md);
     transition: background-color 0.3s ease;
     overflow: hidden; /* Necesario para el hack de color SVG */
 }
 
 .clienteLogoCard:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: var(--white-10);
 }
 
 .clienteLogoImg {

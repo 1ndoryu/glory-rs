@@ -4,7 +4,7 @@
 .modalBaseOverlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.6);
+    background: var(--overlay-dark);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -19,7 +19,7 @@
     max-width: 420px;
     width: 100%;
     position: relative;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 20px 60px var(--border-hover-strong);
 }
 
 @media (max-width: 480px) {

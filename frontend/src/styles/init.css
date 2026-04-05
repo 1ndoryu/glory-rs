@@ -89,7 +89,7 @@
     background: var(--bg-primary);
     color: var(--text-primary);
     border: 2px solid var(--accent-primary);
-    border-radius: 0.5rem;
+    border-radius: var(--radius-md);
     font-size: var(--text-sm);
     font-weight: 500;
     text-decoration: none;

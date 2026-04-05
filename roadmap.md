@@ -42,3 +42,8 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 > Plan de hosting: `Agente/planes/plan-hosting-coolify-2026-04-04.md` (5 fases) — Fases 3-4 ✅, Fases 1-2-5 bloqueadas por infraestructura externa (VPS2, DNS, Google Drive OAuth)
 
 (sin tareas pendientes)
+
+- El modal de chat de ia no tiene sentido que sea el fondo de color negro
+- Habia dicho antes que todos los servicios tienen que tener planes y a todos les falta 1 plan, tiene que ser Basico, Medio, y Avanzado. 
+- Nada en modalCompraResumen necesita (--font-serif)
+- Las cosas en modalCompraResumen deberían estar separadas gap y en columna, no con margenes.
