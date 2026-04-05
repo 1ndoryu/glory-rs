@@ -10,6 +10,7 @@ import {useNavigate} from 'react-router-dom';
 import {obtenerUsuarioActual} from '../../data/panel';
 import {useAuthStore} from '../../stores/authStore';
 import {Logo} from '../ui/Logo';
+import NotificationBell from './NotificationBell';
 import './HeaderPanel.css';
 
 export const HeaderPanel: React.FC = () => {
@@ -34,6 +35,7 @@ export const HeaderPanel: React.FC = () => {
 
                 {/* Acciones: Chat, Salir, Avatar */}
                 <div className="headerPanelAcciones">
+                    <NotificationBell />
                     <a href="/contacto/" className="headerPanelEnlace">
                         {t('nav.chat')}
                     </a>

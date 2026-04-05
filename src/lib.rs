@@ -14,7 +14,7 @@ pub mod services;
 
 use sqlx::PgPool;
 
-use crate::services::{AiChatConfig, ChatHub};
+use crate::services::{AiChatConfig, ChatHub, NotificationHub};
 
 /// Estado compartido de la aplicación — accesible desde handlers y middleware
 #[derive(Clone)]
@@ -26,4 +26,5 @@ pub struct AppState {
     pub stripe_webhook_secret: Option<String>,
     pub chat_hub: ChatHub,
     pub ai_config: AiChatConfig,
+    pub notification_hub: NotificationHub,
 }

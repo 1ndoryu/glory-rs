@@ -6,6 +6,7 @@ mod chat;
 mod deliverables;
 mod health;
 mod notes;
+mod notifications;
 mod orders;
 mod payments;
 mod refunds;
@@ -87,6 +88,10 @@ impl utoipa::Modify for SecurityAddon {
         reviews::respond_review,
         reviews::get_order_review,
         reviews::list_reviews,
+        notifications::list_notifications,
+        notifications::get_unread_count,
+        notifications::mark_read,
+        notifications::mark_all_read,
     ),
     components(schemas(
         health::HealthResponse,
@@ -133,6 +138,10 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::CreateReviewBody,
         crate::models::RespondReviewBody,
         crate::models::ReviewResponse,
+        crate::models::NotificationResponse,
+        crate::models::UnreadCountResponse,
+        crate::models::MarkReadBody,
+        crate::models::WsNotification,
         crate::errors::ErrorResponse,
     )),
     modifiers(&SecurityAddon),
@@ -148,6 +157,7 @@ pub struct ApiDoc;
 /// Crea el router principal con CORS, tracing, Swagger UI y todas las rutas
 pub fn create_router(pool: sqlx::PgPool, config: crate::config::AppConfig) -> Router {
     let chat_hub = crate::services::ChatHub::new(pool.clone());
+    let notification_hub = crate::services::NotificationHub::new(pool.clone());
     let ai_config = crate::services::AiChatConfig::from_env();
 
     let state = AppState {
@@ -158,6 +168,7 @@ pub fn create_router(pool: sqlx::PgPool, config: crate::config::AppConfig) -> Ro
         stripe_webhook_secret: config.stripe_webhook_secret,
         chat_hub,
         ai_config,
+        notification_hub,
     };
 
     /* CORS: en desarrollo se permite todo. En producción, restringir orígenes */
@@ -171,6 +182,8 @@ pub fn create_router(pool: sqlx::PgPool, config: crate::config::AppConfig) -> Ro
         .merge(seo::routes())
         /* [044A-38 Fase 5] WebSocket routes at root level (not under /api) */
         .merge(chat::ws_routes())
+        /* [044A-38 Fase 9] WebSocket de notificaciones en tiempo real */
+        .merge(notifications::ws_routes())
         .nest("/api", api_routes())
         .layer(TraceLayer::new_for_http())
         .layer(cors)
@@ -207,4 +220,5 @@ fn api_routes() -> Router<AppState> {
         .merge(deliverables::routes())
         .merge(refunds::routes())
         .merge(reviews::routes())
+        .merge(notifications::routes())
 }

@@ -2,6 +2,7 @@ mod chat;
 mod delegation;
 mod deliverable;
 mod note;
+mod notification;
 mod order;
 mod payment;
 mod refund;
@@ -34,5 +35,9 @@ pub use refund::{
 };
 pub use review::{
     CreateReviewBody, OrderReview, RespondReviewBody, ReviewResponse,
+};
+pub use notification::{
+    CreateNotification, MarkReadBody, Notification, NotificationResponse,
+    UnreadCountResponse, WsNotification,
 };
 pub use user::{AuthResponse, LoginRequest, RegisterRequest, User, UserResponse, UserRole};
