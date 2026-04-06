@@ -41,9 +41,7 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 > Plan de chat: `Agente/planes/plan-live-chat-2026-04-04.md` (5 fases) — ✅ completado (streaming IA = mejora futura)
 > Plan de hosting: `Agente/planes/plan-hosting-coolify-2026-04-04.md` (5 fases) — Fases 3-4 ✅, Fases 1-2-5 bloqueadas por infraestructura externa (VPS2, DNS, Google Drive OAuth)
 
-- 054A-20: El modal de chat de ia no tiene sentido que sea el fondo de color negro
 - 064A-4: El globo de chat no se ve redondo y esta vacío, y el bton de botonBase botonTexto botonMediano chatWidgetSendBtn tambien se ve vacío, estirado, con un color que no va y horrible.
-- 064A-5: La pagina de contacto ya no tiene sentido, todos los botones de contacto deben abrir el chat. 
 - 064A-7: Las imagenes de galería de los proyectos tienen que ser mas grande. 
 - 064A-8: proyectoHero, alli se podría colocar detalles tecnicos, tecnología, enlaces (con iconos de donde este disponible, github, web, etc). 
 - 064A-11: ¿Cual es el status de Hosting administrado? Sigue diciendo "Próximamente -Estamos trabajando en esta solución. Pronto tendrás toda la información que necesitas." Crea un md con todo lo que falta para tenerlo listo. 

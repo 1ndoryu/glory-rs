@@ -7,6 +7,7 @@
  */
 import {useTranslation} from 'react-i18next';
 import {useAuthStore} from '../stores/authStore';
+import {useChatStore} from '../stores/chatStore';
 import '../styles/variables.css';
 import './ServicioIndividualIsland.css';
 import {LayoutPagina} from '../components/layout/LayoutPagina';
@@ -32,9 +33,10 @@ interface ServicioIndividualIslandProps {
 export const ServicioIndividualIsland = ({titulo, descripcion, precio_desde, slug}: ServicioIndividualIslandProps): JSX.Element => {
     const {t} = useTranslation();
     const logueado = useAuthStore(s => s.logueado);
+    const abrirChat = useChatStore(s => s.abrir);
 
-    /* [044A-38 Fase 1] Si logueado, CTA lleva al panel. Fase 2 conectará con flujo de creación de orden. */
-    const ctaLink = logueado ? '/panel' : '/contacto/';
+    /* [064A-5] Si logueado, CTA lleva al panel. Si no, abre el chat. */
+    const ctaLink = logueado ? '/panel' : undefined;
 
     /* ID del servicio actual para excluirlo de relacionados */
     const servicioId = slug || titulo?.toLowerCase().replace(/\s+/g, '-') || '';
@@ -65,7 +67,7 @@ export const ServicioIndividualIsland = ({titulo, descripcion, precio_desde, slu
             <SeccionHeroServicio titulo={titulo} descripcion={descripcion} />
             <SeccionGaleriaServicio />
             <SeccionPlanesServicio slug={servicioId} />
-            <SeccionCta descripcion={[t('service_detail.cta_1'), t('service_detail.cta_2')]} textoBotonPrimario={precioMinimo ? `${t('service_detail.cta_hire')} ${precioMinimo}` : t('service_detail.cta_hire')} linkBotonPrimario={ctaLink} textoBotonSecundario={t('service_detail.cta_contact')} linkBotonSecundario="/contacto/" />
+            <SeccionCta descripcion={[t('service_detail.cta_1'), t('service_detail.cta_2')]} textoBotonPrimario={precioMinimo ? `${t('service_detail.cta_hire')} ${precioMinimo}` : t('service_detail.cta_hire')} linkBotonPrimario={ctaLink} onBotonPrimarioClick={logueado ? undefined : abrirChat} textoBotonSecundario={t('service_detail.cta_contact')} onBotonSecundarioClick={abrirChat} />
             <SeccionSkillsServicio skills={SKILLS_POR_DEFECTO} />
             <SeccionServiciosRelacionados servicioActualId={servicioId} />
             <SeccionContacto />

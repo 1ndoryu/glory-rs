@@ -6,6 +6,7 @@
 import React from 'react';
 import {useTranslation} from 'react-i18next';
 import {spaClick} from '../navegacionSPA';
+import {useChatStore} from '../stores/chatStore';
 import '../styles/variables.css';
 import './ProyectoIndividualIsland.css';
 import {LayoutPagina} from '../components/layout/LayoutPagina';
@@ -40,6 +41,7 @@ const TarjetaRelacionado: React.FC<{proyecto: Proyecto}> = ({proyecto}) => (
 
 export const ProyectoIndividualIsland = ({titulo = 'Proyecto', descripcion = '', cliente = '', categorias = '', slug = ''}: ProyectoIndividualIslandProps): JSX.Element => {
     const {t} = useTranslation();
+    const abrirChat = useChatStore(s => s.abrir);
 
     /* Buscar datos enriquecidos desde el contexto */
     const proyectoContexto = PROYECTOS_DATA.find(p => p.titulo.toLowerCase() === titulo.toLowerCase() || String(p.id) === slug);
@@ -83,7 +85,7 @@ export const ProyectoIndividualIsland = ({titulo = 'Proyecto', descripcion = '',
             {skills.length > 0 && <SeccionSkillsServicio skills={skills} />}
 
             {/* CTA */}
-            <SeccionCta descripcion={[t('project_detail.cta_1'), t('project_detail.cta_2')]} textoBotonPrimario={t('project_detail.cta_start')} linkBotonPrimario="/contacto/" textoBotonSecundario={t('project_detail.cta_more')} linkBotonSecundario="/proyectos/" />
+            <SeccionCta descripcion={[t('project_detail.cta_1'), t('project_detail.cta_2')]} textoBotonPrimario={t('project_detail.cta_start')} onBotonPrimarioClick={abrirChat} textoBotonSecundario={t('project_detail.cta_more')} linkBotonSecundario="/proyectos/" />
 
             {/* Proyectos relacionados */}
             {relacionados.length > 0 && (

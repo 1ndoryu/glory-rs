@@ -37,9 +37,10 @@ export const HeaderPanel: React.FC = () => {
                 {/* Acciones: Chat, Salir, Avatar */}
                 <div className="headerPanelAcciones">
                     <NotificationBell />
-                    <GloryLink to="/contacto/" className="headerPanelEnlace">
+                    {/* [064A-5] Enlace de Chat abre la sección mensajes del panel */}
+                    <Button variante="texto" className="headerPanelEnlace" type="button" onClick={() => window.dispatchEvent(new CustomEvent('panel-cambiar-tab', {detail: 'mensajes'}))}>
                         {t('nav.chat')}
-                    </GloryLink>
+                    </Button>
                     <Button onClick={handleLogout} className="headerPanelEnlace headerPanelBtnLogout" type="button" variante="texto">
                         {t('nav.logout')}
                     </Button>

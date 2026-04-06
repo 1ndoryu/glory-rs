@@ -2,11 +2,13 @@
  * Componente: SeccionContacto (CTA)
  * Section "Have a project in mind?" reutilizable.
  * Acepta prop compacto para reducir padding cuando el contenedor padre ya tiene gap.
+ * [064A-5] El botón primario abre el ChatWidget via useChatStore.
  */
 import React from 'react';
 import {useTranslation} from 'react-i18next';
 import {SeccionHeader} from '../ui/SeccionHeader';
 import {Button} from '../ui/Button';
+import {useChatStore} from '../../stores/chatStore';
 import {navegar} from '../../navegacionSPA';
 import './SeccionContacto.css';
 
@@ -16,6 +18,7 @@ interface SeccionContactoProps {
 
 export const SeccionContacto: React.FC<SeccionContactoProps> = ({compacto = false}) => {
     const {t} = useTranslation();
+    const abrirChat = useChatStore(s => s.abrir);
     const claseExtra = compacto ? 'seccionContactoCompacta' : '';
 
     return (
@@ -29,7 +32,7 @@ export const SeccionContacto: React.FC<SeccionContactoProps> = ({compacto = fals
                 </div>
 
                 <div className="contactoBotones">
-                    <Button variante="primario" onClick={() => navegar('/contacto/')}>
+                    <Button variante="primario" onClick={abrirChat}>
                         {t('contact.btn_contact')}
                     </Button>
                     <Button variante="outline" onClick={() => navegar('/servicios/')}>

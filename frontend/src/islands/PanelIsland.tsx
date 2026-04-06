@@ -48,6 +48,16 @@ export const PanelIsland: React.FC = () => {
         setSeccionActiva(seccionInicialPorRol(effectiveRole));
     }, [effectiveRole]);
 
+    /* [064A-5] Escuchar custom event desde HeaderPanel para cambiar tab */
+    useEffect(() => {
+        const handler = (e: Event) => {
+            const tab = (e as CustomEvent).detail as SeccionPanel;
+            if (tab) setSeccionActiva(tab);
+        };
+        window.addEventListener('panel-cambiar-tab', handler);
+        return () => window.removeEventListener('panel-cambiar-tab', handler);
+    }, []);
+
     const tabActual = tabs.find(t => t.id === seccionActiva) || tabs[0];
 
     /* Renderizar contenido segun seccion activa */

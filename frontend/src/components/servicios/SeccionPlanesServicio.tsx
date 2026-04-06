@@ -6,7 +6,7 @@ import React, {useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {obtenerPlanesServicio, type PlanServicio} from '../../data/planes/index';
 import {Button} from '../ui/Button';
-import {navegar} from '../../navegacionSPA';
+import {useChatStore} from '../../stores/chatStore';
 import {ModalCompra} from './ModalCompra';
 import './SeccionPlanesServicio.css';
 
@@ -27,10 +27,10 @@ const TarjetaPlan: React.FC<TarjetaPlanProps> = ({plan, onSeleccionar}) => {
         onSeleccionar(plan);
     };
 
-    /* [044A-40] Botón conversar: abre chat con contexto del plan seleccionado */
+    /* [064A-5] Botón conversar: abre el chat widget */
+    const abrirChat = useChatStore(s => s.abrir);
     const handleConversar = () => {
-        /* TO-DO: Abrir chat con contexto de servicio/plan. Por ahora redirige a contacto. */
-        navegar('/contacto/');
+        abrirChat();
     };
 
     return (

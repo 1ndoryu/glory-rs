@@ -1,19 +1,24 @@
 /* [054A-3] ChatWidget: burbuja flotante de chat para visitantes.
  * Aparece en todas las páginas públicas (no en /panel).
- * Usa WebSocket de visitante anónimo. Persiste visitor_id en localStorage. */
+ * Usa WebSocket de visitante anónimo. Persiste visitor_id en localStorage.
+ * [064A-5] Estado abierto/cerrado via useChatStore (global) para poder
+ * abrir el chat desde CTAs, header, etc. */
 
 import React, {useState, useRef, useEffect} from 'react';
 import {useLocation} from 'react-router-dom';
 import {MessageCircle, X, Send, Bot, User, Minus} from 'lucide-react';
 import {useChatWidget} from '../../hooks/useChatWidget';
 import {SENDER_LABELS} from '../../api/chat';
+import {useChatStore} from '../../stores/chatStore';
 import {Input} from '../ui/Input';
 import {Button} from '../ui/Button';
 import './ChatWidget.css';
 
 export const ChatWidget: React.FC = () => {
     const location = useLocation();
-    const [open, setOpen] = useState(false);
+    const abierto = useChatStore(s => s.abierto);
+    const abrir = useChatStore(s => s.abrir);
+    const cerrar = useChatStore(s => s.cerrar);
     const [input, setInput] = useState('');
     const [visitorName, setVisitorName] = useState('');
     const [nameSubmitted, setNameSubmitted] = useState(false);
@@ -33,18 +38,18 @@ export const ChatWidget: React.FC = () => {
     if (location.pathname.startsWith('/panel')) return null;
 
     const handleOpen = () => {
-        setOpen(true);
+        abrir();
         if (!connected && !connecting && nameSubmitted) {
             connect(visitorName || undefined);
         }
     };
 
     const handleClose = () => {
-        setOpen(false);
+        cerrar();
     };
 
     const handleMinimize = () => {
-        setOpen(false);
+        cerrar();
     };
 
     const handleNameSubmit = (e: React.FormEvent) => {
@@ -77,7 +82,7 @@ export const ChatWidget: React.FC = () => {
     return (
         <>
             {/* Burbuja flotante */}
-            {!open && (
+            {!abierto && (
                 <Button
                     variante="marca"
                     className="chatWidgetBubble"
@@ -90,7 +95,7 @@ export const ChatWidget: React.FC = () => {
             )}
 
             {/* Panel de chat expandido */}
-            {open && (
+            {abierto && (
                 <div className="chatWidgetPanel">
                     <ChatWidgetHeader
                         connected={connected}

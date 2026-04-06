@@ -22,7 +22,6 @@ import {BlogIsland} from './islands/BlogIsland';
 import {BlogSingleIsland} from './islands/BlogSingleIsland';
 import {SolucionesIsland} from './islands/SolucionesIsland';
 import {SolucionPlaceholderIsland} from './islands/SolucionPlaceholderIsland';
-import {ContactoIsland} from './islands/ContactoIsland';
 import {PanelIsland} from './islands/PanelIsland';
 import {NotFoundIsland} from './islands/NotFoundIsland';
 
@@ -121,7 +120,7 @@ function App() {
                     <Route path="/blog/:slug" element={<BlogDetallePage />} />
                     <Route path="/soluciones" element={<SolucionesIsland />} />
                     <Route path="/soluciones/:slug" element={<SolucionPlaceholderIsland />} />
-                    <Route path="/contacto" element={<ContactoIsland />} />
+                    {/* [064A-5] Ruta /contacto eliminada — todos los CTAs abren el chat */}
                     <Route path="/panel" element={<PanelIsland />} />
                     {/* [044A-28] Página 404 real en vez de redirigir silenciosamente al home */}
                     <Route path="*" element={<NotFoundIsland />} />

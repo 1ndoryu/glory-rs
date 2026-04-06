@@ -13,7 +13,7 @@ import {ChevronDown, ChevronRight, Menu, X} from 'lucide-react';
 import {Button} from '../ui/Button';
 import {ENLACES_HEADER} from '../../data/navegacion';
 import {ModalAutenticacion} from './ModalAutenticacion';
-import {navegar} from '../../navegacionSPA';
+import {useChatStore} from '../../stores/chatStore';
 import {GloryLink} from '../../core/router';
 import {Logo} from '../ui/Logo';
 import {useHeader} from '../../hooks/useHeader';
@@ -47,9 +47,9 @@ export const Header: React.FC = () => {
     const textoAccion = logueado ? (enPanel ? t('nav.back') : t('nav.panel')) : null;
     const hrefAccion = logueado ? (enPanel ? '/' : '/panel/') : null;
 
-    /* Botón secundario: Chat (logueado) o Contacto */
+    /* [064A-5] Botón secundario: abre el chat en vez de navegar a /contacto */
     const textoCta = logueado ? t('nav.chat') : t('nav.contact');
-    const hrefCta = '/contacto/';
+    const abrirChat = useChatStore(s => s.abrir);
 
     return (
         <>
@@ -101,7 +101,7 @@ export const Header: React.FC = () => {
                             {t('nav.login')}
                         </Button>
                     )}
-                    <Button variante="primario" tamano="pequeno" className="botonHeader" onClick={() => navegar(hrefCta)}>
+                    <Button variante="primario" tamano="pequeno" className="botonHeader" onClick={abrirChat}>
                         {textoCta}
                         <ChevronRight size={14} strokeWidth={3} aria-hidden="true" />
                     </Button>
