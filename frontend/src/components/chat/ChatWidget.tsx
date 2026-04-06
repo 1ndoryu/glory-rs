@@ -1,18 +1,19 @@
-/* [054A-3] ChatWidget: burbuja flotante de chat para visitantes.
- * Aparece en todas las páginas públicas (no en /panel).
- * Usa WebSocket de visitante anónimo. Persiste visitor_id en localStorage.
- * [064A-5] Estado abierto/cerrado via useChatStore (global) para poder
- * abrir el chat desde CTAs, header, etc. */
+/* [064A-28] ChatWidget: redesign completo. Sin header, burbuja con avatar,
+ * fondo semi-transparente rgba(245,242,239,0.8), sombra especifica del usuario,
+ * animacion suave open/close via CSS transitions. Botones #e8e6e2/#e9e7e4.
+ * Requisitos explicitos del usuario — no modificar sin instruccion. */
 
 import React, {useState, useRef, useEffect} from 'react';
 import {useLocation} from 'react-router-dom';
-import {MessageCircle, X, Send, Bot, User, Minus} from 'lucide-react';
+import {Send, Bot, User, Minus} from 'lucide-react';
 import {useChatWidget} from '../../hooks/useChatWidget';
 import {SENDER_LABELS} from '../../api/chat';
 import {useChatStore} from '../../stores/chatStore';
 import {Input} from '../ui/Input';
 import {Button} from '../ui/Button';
 import './ChatWidget.css';
+
+const AVATAR_SRC = '/assets/random/85a51ba9a4233272662e744b48f97d67.jpg';
 
 export const ChatWidget: React.FC = () => {
     const location = useLocation();
@@ -34,7 +35,6 @@ export const ChatWidget: React.FC = () => {
         sendTyping,
     } = useChatWidget();
 
-    /* No mostrar en /panel */
     if (location.pathname.startsWith('/panel')) return null;
 
     const handleOpen = () => {
@@ -42,10 +42,6 @@ export const ChatWidget: React.FC = () => {
         if (!connected && !connecting && nameSubmitted) {
             connect(visitorName || undefined);
         }
-    };
-
-    const handleClose = () => {
-        cerrar();
     };
 
     const handleMinimize = () => {
@@ -81,111 +77,60 @@ export const ChatWidget: React.FC = () => {
 
     return (
         <>
-            {/* Burbuja flotante */}
-            {!abierto && (
+            {/* [064A-28] Burbuja flotante con avatar + texto "Chat" */}
+            <Button
+                variante="texto"
+                tamano="pequeno"
+                className={`chatWidgetBubble ${abierto ? 'chatWidgetBubbleOculta' : ''}`}
+                onClick={handleOpen}
+                aria-label="Abrir chat"
+                type="button"
+            >
+                <img src={AVATAR_SRC} alt="" className="chatWidgetBubbleAvatar" />
+                <span className="chatWidgetBubbleTexto">Chat</span>
+            </Button>
+
+            {/* [064A-28] Panel sin header, con minimize btn flotante */}
+            <div className={`chatWidgetPanel ${abierto ? 'chatWidgetPanelAbierto' : ''}`}>
                 <Button
-                    variante="marca"
+                    variante="texto"
                     tamano="pequeno"
-                    className="chatWidgetBubble"
-                    onClick={handleOpen}
-                    aria-label="Abrir chat"
+                    className="chatWidgetMinimizeBtn"
+                    onClick={handleMinimize}
+                    aria-label="Minimizar chat"
                     type="button"
                 >
-                    <MessageCircle size={24} />
+                    <Minus size={16} />
                 </Button>
-            )}
 
-            {/* Panel de chat expandido */}
-            {abierto && (
-                <div className="chatWidgetPanel">
-                    <ChatWidgetHeader
-                        connected={connected}
-                        connecting={connecting}
-                        onMinimize={handleMinimize}
-                        onClose={handleClose}
+                {!nameSubmitted ? (
+                    <ChatWidgetNameForm
+                        visitorName={visitorName}
+                        onNameChange={setVisitorName}
+                        onSubmit={handleNameSubmit}
                     />
-
-                    {!nameSubmitted ? (
-                        <ChatWidgetNameForm
-                            visitorName={visitorName}
-                            onNameChange={setVisitorName}
-                            onSubmit={handleNameSubmit}
+                ) : (
+                    <>
+                        <ChatWidgetMessages
+                            messages={messages}
+                            typing={typing}
+                            messagesEndRef={messagesEndRef}
                         />
-                    ) : (
-                        <>
-                            <ChatWidgetMessages
-                                messages={messages}
-                                typing={typing}
-                                messagesEndRef={messagesEndRef}
-                            />
-                            <ChatWidgetInput
-                                input={input}
-                                connected={connected}
-                                onInputChange={handleInputChange}
-                                onKeyDown={handleKeyDown}
-                                onSend={handleSend}
-                            />
-                        </>
-                    )}
-                </div>
-            )}
+                        <ChatWidgetInput
+                            input={input}
+                            connected={connected}
+                            onInputChange={handleInputChange}
+                            onKeyDown={handleKeyDown}
+                            onSend={handleSend}
+                        />
+                    </>
+                )}
+            </div>
         </>
     );
 };
 
-/* ============================================================
-   SUB-COMPONENTES (SRP — cada uno con una responsabilidad)
-   ============================================================ */
-
-function ChatWidgetHeader({
-    connected,
-    connecting,
-    onMinimize,
-    onClose,
-}: {
-    connected: boolean;
-    connecting: boolean;
-    onMinimize: () => void;
-    onClose: () => void;
-}) {
-    return (
-        <div className="chatWidgetHeader">
-            <div className="chatWidgetHeaderInfo">
-                <Bot size={20} />
-                <div>
-                    <span className="chatWidgetTitle">Nakomi Studio</span>
-                    <span className="chatWidgetStatus">
-                        {connecting
-                            ? 'Conectando...'
-                            : connected
-                                ? 'En línea'
-                                : 'Desconectado'}
-                    </span>
-                </div>
-            </div>
-            <div className="chatWidgetHeaderActions">
-                <Button
-                    variante="texto"
-                    type="button"
-                    className="chatWidgetHeaderBtn"
-                    onClick={onMinimize}
-                    aria-label="Minimizar chat"
-                >
-                    <Minus size={16} />
-                </Button>
-                <Button
-                    variante="texto"
-                    type="button"
-                    className="chatWidgetHeaderBtn"
-                    onClick={onClose}
-                    aria-label="Cerrar chat"
-                >
-                    <X size={16} />
-                </Button>
-            </div>
-        </div>
-    );
-}
+/* Sub-componentes (SRP) */
 
 function ChatWidgetNameForm({
     visitorName,
@@ -198,6 +143,7 @@ function ChatWidgetNameForm({
 }) {
     return (
         <form className="chatWidgetNameForm" onSubmit={onSubmit}>
+            <img src={AVATAR_SRC} alt="" className="chatWidgetFormAvatar" />
             <p className="chatWidgetWelcome">
                 ¡Hola! ¿Cómo te podemos ayudar?
             </p>
@@ -208,7 +154,7 @@ function ChatWidgetNameForm({
                 onChange={(e) => onNameChange(e.target.value)}
                 className="chatWidgetNameInput"
             />
-            <Button type="submit" variante="marca" tamano="pequeno" className="chatWidgetStartBtn">
+            <Button type="submit" variante="texto" tamano="pequeno" className="chatWidgetStartBtn">
                 Iniciar conversación
             </Button>
         </form>
@@ -230,7 +176,6 @@ function ChatWidgetMessages({
     typing: {sender: string; content: string} | null;
     messagesEndRef: React.RefObject<HTMLDivElement>;
 }) {
-    /* Auto-scroll al recibir mensajes */
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({behavior: 'smooth'});
     }, [messages, typing, messagesEndRef]);
@@ -311,13 +256,13 @@ function ChatWidgetInput({
                 className="chatWidgetInput"
             />
             <Button
-                variante="marca"
+                variante="texto"
                 tamano="pequeno"
-                type="button"
                 className="chatWidgetSendBtn"
                 onClick={onSend}
                 disabled={!connected || !input.trim()}
                 aria-label="Enviar mensaje"
+                type="button"
             >
                 <Send size={18} />
             </Button>

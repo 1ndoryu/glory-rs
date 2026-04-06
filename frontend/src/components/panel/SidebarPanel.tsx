@@ -123,7 +123,7 @@ export const SidebarPanel: React.FC<SidebarPanelProps> = ({seccionActiva, onCamb
                         title={`Cambiar vista a otro rol (actual: ${ROLE_LABELS[effectiveRole]})`}
                         variante="texto"
                     >
-                        <ArrowLeftRight size={16} aria-hidden="true" />
+                        <ArrowRightLeft size={16} aria-hidden="true" />
                         <span>{switchingRole ? 'Cambiando...' : `Vista: ${ROLE_LABELS[effectiveRole]}`}</span>
                     </Button>
                 </div>

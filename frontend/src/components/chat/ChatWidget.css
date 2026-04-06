@@ -1,131 +1,124 @@
-/* [054A-3] Estilos del chat widget flotante.
- * Burbuja esquina inferior derecha + panel expandible.
- * [054A-20] Panel con fondo claro en vez de negro.
- * Responsive: en mobile ocupa más ancho. */
+/* [064A-28] Estilos del chat widget flotante — redesign completo.
+ * Sin header, burbuja con avatar + texto, fondo semi-transparente,
+ * sombra especifica del usuario, animacion suave open/close.
+ * Requisitos explicitos — no modificar sin instruccion del usuario. */
 
-/* ============================================================
-   BURBUJA FLOTANTE
-   ============================================================ */
-
-/* [064A-4] La burbuja es un circulo fijo de 56px. botonBase/botonMediano
- * añaden padding y width:fit-content que rompen el circulo — los overrideamos. */
+/* Burbuja flotante: avatar + "Chat", pill shape */
 .chatWidgetBubble {
     position: fixed;
     bottom: var(--spacing-lg);
     right: var(--spacing-lg);
-    width: 56px;
-    height: 56px;
-    min-width: 56px;
-    padding: 0;
-    border-radius: 50%;
-    background: var(--brand-primary);
-    color: var(--brand-black);
-    border: none;
-    cursor: pointer;
     display: flex;
     align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 16px var(--border-hover-strong);
+    gap: var(--spacing-xs);
+    padding: 6px 16px 6px 6px;
+    border-radius: 999px;
+    background: #e8e6e2;
+    color: var(--text-dark);
+    border: 1px solid var(--bg-item-active);
+    cursor: pointer;
     z-index: 9990;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    font-family: inherit;
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
 }
 
 .chatWidgetBubble:hover {
-    transform: scale(1.08);
-    box-shadow: 0 6px 24px var(--overlay-medium);
+    background: #e0deda;
 }
 
-/* ============================================================
-   PANEL EXPANDIDO
-   ============================================================ */
+.chatWidgetBubbleOculta {
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.8);
+    pointer-events: none;
+}
 
+.chatWidgetBubbleAvatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.chatWidgetBubbleTexto {
+    line-height: 1;
+}
+
+/* Panel expandido */
 .chatWidgetPanel {
     position: fixed;
     bottom: var(--spacing-lg);
     right: var(--spacing-lg);
     width: 380px;
+    min-height: 440px;
     max-height: 520px;
-    background: var(--bg-primary);
-    border: 1px solid var(--border-default);
+    background: rgba(245, 242, 239, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--bg-item-active);
     border-radius: var(--radius-xl);
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    box-shadow: 0 8px 32px var(--overlay-medium);
+    box-shadow: rgba(78, 50, 23, 0.04) 0px 6px 16px 0px, rgba(0, 0, 0, 0.1) 0px 0px 0px 1px;
     z-index: 9990;
-    animation: chatWidgetSlideUp 0.25s ease-out;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(16px);
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
 }
 
-@keyframes chatWidgetSlideUp {
-    from {
-        opacity: 0;
-        transform: translateY(16px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.chatWidgetPanelAbierto {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto;
 }
 
-/* ============================================================
-   HEADER
-   ============================================================ */
-
-.chatWidgetHeader {
+/* Boton minimizar: redondo, flotante top-right dentro del panel */
+.chatWidgetMinimizeBtn {
+    position: absolute;
+    top: var(--spacing-sm);
+    right: var(--spacing-sm);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #e8e6e2;
+    color: var(--text-dark);
+    border: none;
+    cursor: pointer;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: var(--spacing-sm) var(--spacing-md);
-    background: var(--bg-primary);
-    border-bottom: 1px solid var(--border-default);
+    justify-content: center;
+    z-index: 1;
+    transition: background 0.15s ease;
+    font-family: inherit;
 }
 
-.chatWidgetHeaderInfo {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-    color: var(--text-dark);
+.chatWidgetMinimizeBtn:hover {
+    background: #d9d7d3;
 }
 
-.chatWidgetTitle {
-    display: block;
-    font-weight: 600;
-    font-size: var(--text-sm);
-    color: var(--text-dark);
-}
-
-.chatWidgetStatus {
-    display: block;
-    font-size: var(--text-xs);
-    color: var(--text-muted);
-}
-
-.chatWidgetHeaderActions {
-    display: flex;
-    gap: var(--spacing-2xs);
-}
-
-/* [064A-1] chatWidgetHeaderBtn: usa Button variante="texto".
- * Override mínimo: colores para contexto dark (panel de chat). */
-.chatWidgetHeaderBtn {
-    color: var(--text-muted);
-    padding: 4px;
-}
-
-.chatWidgetHeaderBtn:hover {
-    color: var(--text-dark);
-    background: var(--bg-item-hover);
-}
-
-/* ============================================================
-   FORMULARIO DE NOMBRE
-   ============================================================ */
-
+/* Formulario de nombre */
 .chatWidgetNameForm {
     padding: var(--spacing-lg);
+    padding-top: calc(var(--spacing-lg) + 16px);
     display: flex;
     flex-direction: column;
+    align-items: center;
     gap: var(--spacing-sm);
+    flex: 1;
+    justify-content: center;
+}
+
+.chatWidgetFormAvatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
 }
 
 .chatWidgetWelcome {
@@ -139,21 +132,31 @@
     width: 100%;
 }
 
-/* [064A-1] chatWidgetStartBtn: ahora usa variante="marca" tamano="pequeno".
- * Solo queda ajuste de border-radius contextual. */
+/* [064A-28] Boton iniciar: bg #e8e6e2, sin borde, estilo secundario */
 .chatWidgetStartBtn {
-    border-radius: var(--radius-md);
     width: 100%;
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: var(--radius-md);
+    background: #e8e6e2;
+    color: var(--text-dark);
+    border: none;
+    cursor: pointer;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    font-family: inherit;
+    transition: background 0.15s ease;
 }
 
-/* ============================================================
-   MENSAJES
-   ============================================================ */
+.chatWidgetStartBtn:hover {
+    background: #d9d7d3;
+}
 
+/* Mensajes */
 .chatWidgetMessages {
     flex: 1;
     overflow-y: auto;
     padding: var(--spacing-sm);
+    padding-top: calc(var(--spacing-sm) + 32px);
     display: flex;
     flex-direction: column;
     gap: var(--spacing-xs);
@@ -194,7 +197,6 @@
     opacity: 0.8;
 }
 
-/* Colores por rol del remitente (sustituyen el inline style={{color}}) */
 .chatWidgetSender--client  { color: var(--color-info); }
 .chatWidgetSender--visitor { color: var(--color-info); }
 .chatWidgetSender--ai      { color: var(--color-purple); }
@@ -210,22 +212,21 @@
     white-space: pre-wrap;
 }
 
+/* [064A-28] Burbujas propias: crema, ajenas: blanco. Ambas sobre fondo
+ * semi-transparente del panel para contraste sutil. */
 .chatWidgetMsgBubbleOwn {
-    background: var(--brand-primary);
-    color: var(--brand-black);
+    background: #e9e7e4;
+    color: var(--text-dark);
     border-bottom-right-radius: 4px;
 }
 
 .chatWidgetMsgBubbleOther {
-    background: var(--bg-accent);
+    background: var(--bg-primary);
     color: var(--text-dark);
     border-bottom-left-radius: 4px;
 }
 
-/* ============================================================
-   TYPING INDICATOR
-   ============================================================ */
-
+/* Typing indicator */
 .chatWidgetTyping {
     padding: var(--spacing-xs) var(--spacing-sm);
 }
@@ -263,24 +264,25 @@
     }
 }
 
-/* ============================================================
-   INPUT AREA
-   ============================================================ */
-
+/* Input area */
 .chatWidgetInputArea {
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
     padding: var(--spacing-xs) var(--spacing-sm);
-    border-top: 1px solid var(--border-default);
+    border-top: 1px solid var(--bg-item-active);
 }
 
 .chatWidgetInput {
     flex: 1;
 }
 
-/* [064A-4] Botón de envío circular. padding:0 y min-width
- * previenen que botonBase/botonMediano deformen el circulo. */
+/* [064A-28] Input border override: var(--bg-item-active) en vez de --border-default */
+.chatWidgetInput.inputBase {
+    border-color: var(--bg-item-active);
+}
+
+/* [064A-28] Send button: bg #e9e7e4, circular, sin borde */
 .chatWidgetSendBtn {
     width: 36px;
     height: 36px;
@@ -288,6 +290,19 @@
     border-radius: 50%;
     padding: 0;
     flex-shrink: 0;
+    background: #e9e7e4;
+    color: var(--text-dark);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: inherit;
+    transition: background 0.15s ease;
+}
+
+.chatWidgetSendBtn:hover {
+    background: #d9d7d3;
 }
 
 .chatWidgetSendBtn:disabled {
@@ -295,10 +310,7 @@
     cursor: not-allowed;
 }
 
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
-
+/* Responsive */
 @media (max-width: 480px) {
     .chatWidgetPanel {
         width: calc(100vw - var(--spacing-md) * 2);
