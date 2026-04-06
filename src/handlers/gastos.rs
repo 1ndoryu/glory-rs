@@ -89,6 +89,8 @@ pub async fn listar_gastos(
         params.hasta,
         params.categoria_id,
         params.busqueda,
+        params.tipo_documento,
+        params.metodo_pago,
         params.sort_by,
         params.sort_order,
     )

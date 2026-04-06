@@ -77,7 +77,8 @@ impl GastoRepository {
         .await
     }
 
-    /* [044A-8+9] Whitelist de columnas — previene SQL injection */
+    /* [044A-8+9] Whitelist de columnas — previene SQL injection.
+     * [064A-3] Añadidos filtros por columna: tipo_documento, metodo_pago (multi-valor separado por coma). */
     #[allow(clippy::too_many_arguments)]
     pub async fn list(
         pool: &PgPool,
@@ -88,6 +89,8 @@ impl GastoRepository {
         hasta: Option<chrono::NaiveDate>,
         categoria_id: Option<Uuid>,
         busqueda: Option<&str>,
+        tipo_documento: Option<&str>,
+        metodo_pago: Option<&str>,
         sort_by: Option<&str>,
         sort_order: Option<&str>,
     ) -> Result<(Vec<Gasto>, i64), sqlx::Error> {
@@ -107,6 +110,10 @@ impl GastoRepository {
             .filter(|b| !b.is_empty())
             .map(|b| format!("%{b}%"));
 
+        /* Normalizar filtros vacíos a None */
+        let tipo_doc_filter = tipo_documento.filter(|t| !t.is_empty());
+        let metodo_filter = metodo_pago.filter(|m| !m.is_empty());
+
         let query_str = format!(
             "SELECT * FROM gastos WHERE user_id = $1 \
              AND ($4::DATE IS NULL OR fecha >= $4) \
@@ -116,6 +123,8 @@ impl GastoRepository {
                   OR proveedor ILIKE $7 \
                   OR tipo_documento ILIKE $7 \
                   OR numero_documento ILIKE $7) \
+             AND ($8::TEXT IS NULL OR tipo_documento = ANY(string_to_array($8, ','))) \
+             AND ($9::TEXT IS NULL OR metodo_pago = ANY(string_to_array($9, ','))) \
              ORDER BY {order_col} {order_dir}, created_at DESC \
              LIMIT $2 OFFSET $3"
         );
@@ -128,25 +137,35 @@ impl GastoRepository {
             .bind(hasta)
             .bind(categoria_id)
             .bind(busqueda_pattern.as_deref())
+            .bind(tipo_doc_filter)
+            .bind(metodo_filter)
             .fetch_all(pool)
             .await?;
 
         /* COUNT con los mismos filtros */
-        let count = if busqueda_pattern.is_some() {
+        let has_text_filter = busqueda_pattern.is_some();
+        let has_column_filters = tipo_doc_filter.is_some() || metodo_filter.is_some();
+
+        let count = if has_text_filter || has_column_filters {
             let rec = sqlx::query_scalar::<_, Option<i64>>(
                 "SELECT COUNT(*) FROM gastos WHERE user_id = $1 \
                  AND ($2::DATE IS NULL OR fecha >= $2) \
                  AND ($3::DATE IS NULL OR fecha <= $3) \
                  AND ($4::UUID IS NULL OR categoria_id = $4) \
-                 AND (proveedor ILIKE $5 \
+                 AND ($5::TEXT IS NULL \
+                      OR proveedor ILIKE $5 \
                       OR tipo_documento ILIKE $5 \
-                      OR numero_documento ILIKE $5)",
+                      OR numero_documento ILIKE $5) \
+                 AND ($6::TEXT IS NULL OR tipo_documento = ANY(string_to_array($6, ','))) \
+                 AND ($7::TEXT IS NULL OR metodo_pago = ANY(string_to_array($7, ',')))",
             )
             .bind(user_id)
             .bind(desde)
             .bind(hasta)
             .bind(categoria_id)
             .bind(busqueda_pattern.as_deref())
+            .bind(tipo_doc_filter)
+            .bind(metodo_filter)
             .fetch_one(pool)
             .await?;
             rec.unwrap_or(0)

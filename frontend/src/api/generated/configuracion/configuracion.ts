@@ -40,7 +40,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 /**
- * @summary Obtener la configuración del restaurante (crea defaults si es primera vez)
+ * @summary Obtener la configuraci├│n del restaurante (crea defaults si es primera vez)
  */
 export type obtenerConfiguracionResponse200 = {
   data: ConfiguracionRestaurante
@@ -138,7 +138,7 @@ export function useObtenerConfiguracion<TData = Awaited<ReturnType<typeof obtene
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary Obtener la configuración del restaurante (crea defaults si es primera vez)
+ * @summary Obtener la configuraci├│n del restaurante (crea defaults si es primera vez)
  */
 
 export function useObtenerConfiguracion<TData = Awaited<ReturnType<typeof obtenerConfiguracion>>, TError = ErrorResponse>(
@@ -157,7 +157,7 @@ export function useObtenerConfiguracion<TData = Awaited<ReturnType<typeof obtene
 
 
 /**
- * @summary Actualizar la configuración del restaurante (parcial)
+ * @summary Actualizar la configuraci├│n del restaurante (parcial)
  */
 export type actualizarConfiguracionResponse200 = {
   data: ConfiguracionRestaurante
@@ -238,7 +238,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type ActualizarConfiguracionMutationError = ErrorResponse
 
     /**
- * @summary Actualizar la configuración del restaurante (parcial)
+ * @summary Actualizar la configuraci├│n del restaurante (parcial)
  */
 export const useActualizarConfiguracion = <TError = ErrorResponse,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof actualizarConfiguracion>>, TError,{data: ActualizarConfiguracionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}

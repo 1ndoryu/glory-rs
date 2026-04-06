@@ -65,11 +65,18 @@ impl VentaService {
         desde: Option<chrono::NaiveDate>,
         hasta: Option<chrono::NaiveDate>,
         busqueda: Option<String>,
+        turno: Option<String>,
+        canal: Option<String>,
+        metodo_pago: Option<String>,
         sort_by: Option<String>,
         sort_order: Option<String>,
     ) -> Result<VentasPaginadas, AppError> {
         let (items, total) =
-            VentaRepository::list(pool, user_id, page, per_page, desde, hasta, busqueda.as_deref(), sort_by.as_deref(), sort_order.as_deref()).await?;
+            VentaRepository::list(
+                pool, user_id, page, per_page, desde, hasta,
+                busqueda.as_deref(), turno.as_deref(), canal.as_deref(), metodo_pago.as_deref(),
+                sort_by.as_deref(), sort_order.as_deref(),
+            ).await?;
         Ok(VentasPaginadas {
             items,
             total,

@@ -2,7 +2,8 @@
  * Iconos para eliminar (tarea 17). Columnas en flex (tarea 18).
  * [283A-22] Botón de edición con Dialog reutilizando FormularioGasto.
  * [283A-34] Filtros de fecha (desde/hasta) via hook useListaGastos.
- * [044A-8+9] Buscador + cabeceras de columna clicables para ordenar. */
+ * [044A-8+9] Buscador + cabeceras de columna clicables para ordenar.
+ * [064A-3] Filtros por columna en Tipo doc y Método con ColumnFilterHeader. */
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -11,6 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Trash2, Pencil } from 'lucide-react';
 import FormularioGasto from './FormularioGasto';
 import useListaGastos from '@/hooks/useListaGastos';
+import ColumnFilterHeader from '@/components/column-filter-header';
 
 function formatearMoneda(valor: string): string {
   return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(parseFloat(valor));
@@ -18,7 +20,7 @@ function formatearMoneda(valor: string): string {
 
 function ListaGastos() {
   const {
-    filtros, cambiarFiltro, toggleSort,
+    filtros, cambiarFiltro, toggleSort, cambiarFiltroColumna,
     modalAbierto, setModalAbierto,
     gastoEditando, setGastoEditando,
     porPagina, gastos, isLoading,
@@ -86,11 +88,37 @@ function ListaGastos() {
                   <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('proveedor')}>
                     Proveedor {filtros.sortBy === 'proveedor' && (filtros.sortOrder === 'asc' ? '↑' : '↓')}
                   </TableHead>
-                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('tipo_documento')}>
-                    Tipo doc. {filtros.sortBy === 'tipo_documento' && (filtros.sortOrder === 'asc' ? '↑' : '↓')}
+                  <TableHead>
+                    <ColumnFilterHeader
+                      title="Tipo doc."
+                      sortKey="tipo_documento"
+                      currentSortBy={filtros.sortBy}
+                      currentSortOrder={filtros.sortOrder}
+                      onSort={() => toggleSort('tipo_documento')}
+                      options={[
+                        { value: 'factura', label: 'Factura' },
+                        { value: 'albaran', label: 'Albarán' },
+                        { value: 'ticket', label: 'Ticket' },
+                      ]}
+                      selectedValues={filtros.tipoDocumento}
+                      onFilterChange={(v) => cambiarFiltroColumna('tipoDocumento', v)}
+                    />
                   </TableHead>
-                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('metodo_pago')}>
-                    Método {filtros.sortBy === 'metodo_pago' && (filtros.sortOrder === 'asc' ? '↑' : '↓')}
+                  <TableHead>
+                    <ColumnFilterHeader
+                      title="Método"
+                      sortKey="metodo_pago"
+                      currentSortBy={filtros.sortBy}
+                      currentSortOrder={filtros.sortOrder}
+                      onSort={() => toggleSort('metodo_pago')}
+                      options={[
+                        { value: 'efectivo', label: 'Efectivo' },
+                        { value: 'tarjeta', label: 'Tarjeta' },
+                        { value: 'transferencia', label: 'Transferencia' },
+                      ]}
+                      selectedValues={filtros.metodoPago}
+                      onFilterChange={(v) => cambiarFiltroColumna('metodoPago', v)}
+                    />
                   </TableHead>
                   <TableHead className="text-right cursor-pointer select-none" onClick={() => toggleSort('importe_base')}>
                     Base {filtros.sortBy === 'importe_base' && (filtros.sortOrder === 'asc' ? '↑' : '↓')}

@@ -6,7 +6,8 @@
    [024A-3] Invalidar TODAS las queries de reservas tras mutaciones (no solo la actual).
    [024A-5] Modal de edición con reserva seleccionada.
    [034A-6] Visor de ficha de cliente al hacer click en nombre.
-   [044A-8] Ordenamiento por columna (sort_by/sort_order). */
+   [044A-8] Ordenamiento por columna (sort_by/sort_order).
+   [064A-3] Estado como array multi-valor para filtro por columna. */
 
 import { useState, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
@@ -25,7 +26,7 @@ interface FiltrosReservas {
   fecha: string;
   fechaHasta: string;
   turno: string;
-  estado: string;
+  estado: string[];
   busqueda: string;
   pagina: number;
   sortBy: string;
@@ -43,7 +44,7 @@ function useVistaReservas() {
     fecha: fechaUrl || new Date().toISOString().split('T')[0],
     fechaHasta: '',
     turno: '',
-    estado: '',
+    estado: [],
     busqueda: '',
     pagina: 1,
     sortBy: '',
@@ -65,7 +66,7 @@ function useVistaReservas() {
     fecha: usaRango ? undefined : (filtros.fecha || undefined),
     fecha_desde: usaRango ? (filtros.fecha || undefined) : undefined,
     fecha_hasta: usaRango ? (filtros.fechaHasta || undefined) : undefined,
-    estado: filtros.estado || undefined,
+    estado: filtros.estado.length > 0 ? filtros.estado.join(',') : undefined,
     turno: filtros.turno || undefined,
     busqueda: filtros.busqueda || undefined,
     sort_by: filtros.sortBy || undefined,
@@ -137,10 +138,16 @@ function useVistaReservas() {
     }));
   }, []);
 
+  /* [064A-3] Actualizar filtro de columna (array de valores seleccionados) */
+  const cambiarFiltroColumna = useCallback((campo: 'estado', valores: string[]) => {
+    setFiltros(prev => ({ ...prev, [campo]: valores, pagina: 1 }));
+  }, []);
+
   return {
     filtros,
     cambiarFiltro,
     toggleSort,
+    cambiarFiltroColumna,
     modalAbierto,
     setModalAbierto,
     reservas,

@@ -1,6 +1,7 @@
 /* [283A-34] Hook para ListaGastos — filtros de fecha (desde/hasta) y paginación.
  * Reduce useState count en el componente.
- * [044A-8+9] Búsqueda y ordenamiento por columnas (sort_by/sort_order). */
+ * [044A-8+9] Búsqueda y ordenamiento por columnas (sort_by/sort_order).
+ * [064A-3] Filtros por columna: tipo_documento, metodo_pago (multi-valor). */
 
 import { useState } from 'react';
 import { useListarGastos, useEliminarGasto, Gasto } from '../api/generated';
@@ -10,6 +11,8 @@ interface FiltrosGastos {
   desde: string;
   hasta: string;
   busqueda: string;
+  tipoDocumento: string[];
+  metodoPago: string[];
   sortBy: string;
   sortOrder: 'asc' | 'desc';
 }
@@ -22,6 +25,8 @@ function useListaGastos() {
     desde: '',
     hasta: '',
     busqueda: '',
+    tipoDocumento: [],
+    metodoPago: [],
     sortBy: '',
     sortOrder: 'desc',
   });
@@ -34,6 +39,8 @@ function useListaGastos() {
     desde: filtros.desde || undefined,
     hasta: filtros.hasta || undefined,
     busqueda: filtros.busqueda || undefined,
+    tipo_documento: filtros.tipoDocumento.length > 0 ? filtros.tipoDocumento.join(',') : undefined,
+    metodo_pago: filtros.metodoPago.length > 0 ? filtros.metodoPago.join(',') : undefined,
     sort_by: filtros.sortBy || undefined,
     sort_order: filtros.sortOrder || undefined,
   });
@@ -75,10 +82,16 @@ function useListaGastos() {
     }));
   };
 
+  /* [064A-3] Actualizar filtro de columna (array de valores seleccionados) */
+  const cambiarFiltroColumna = (campo: 'tipoDocumento' | 'metodoPago', valores: string[]) => {
+    setFiltros(prev => ({ ...prev, [campo]: valores, pagina: 1 }));
+  };
+
   return {
     filtros,
     cambiarFiltro,
     toggleSort,
+    cambiarFiltroColumna,
     modalAbierto,
     setModalAbierto,
     gastoEditando,

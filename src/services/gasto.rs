@@ -62,11 +62,17 @@ impl GastoService {
         hasta: Option<chrono::NaiveDate>,
         categoria_id: Option<Uuid>,
         busqueda: Option<String>,
+        tipo_documento: Option<String>,
+        metodo_pago: Option<String>,
         sort_by: Option<String>,
         sort_order: Option<String>,
     ) -> Result<GastosPaginados, AppError> {
         let (items, total) =
-            GastoRepository::list(pool, user_id, page, per_page, desde, hasta, categoria_id, busqueda.as_deref(), sort_by.as_deref(), sort_order.as_deref())
+            GastoRepository::list(
+                pool, user_id, page, per_page, desde, hasta, categoria_id,
+                busqueda.as_deref(), tipo_documento.as_deref(), metodo_pago.as_deref(),
+                sort_by.as_deref(), sort_order.as_deref(),
+            )
                 .await?;
         Ok(GastosPaginados {
             items,

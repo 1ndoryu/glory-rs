@@ -100,6 +100,7 @@ pub struct GastosPaginados {
 }
 
 /// Query para listar gastos con filtros
+/* [064A-3] Añadidos tipo_documento y metodo_pago como filtros por columna (multi-valor separado por coma). */
 #[derive(Debug, Deserialize, IntoParams)]
 pub struct GastosQuery {
     #[serde(default = "default_page")]
@@ -111,6 +112,10 @@ pub struct GastosQuery {
     pub categoria_id: Option<Uuid>,
     /// Búsqueda por texto: proveedor, tipo documento, número documento
     pub busqueda: Option<String>,
+    /// Filtro por tipo de documento (valores separados por coma: `factura,albaran,ticket`)
+    pub tipo_documento: Option<String>,
+    /// Filtro por método de pago (valores separados por coma: `efectivo,tarjeta,transferencia`)
+    pub metodo_pago: Option<String>,
     /// Campo de ordenamiento: `fecha`, `proveedor`, `importe_base`, `tipo_documento`, `metodo_pago`
     pub sort_by: Option<String>,
     /// Dirección de orden: asc o desc. Por defecto desc

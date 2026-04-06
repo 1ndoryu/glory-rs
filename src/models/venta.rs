@@ -128,7 +128,8 @@ pub struct VentaConCliente {
 }
 
 /// Query params para listar ventas con filtro por fecha
-/* [044A-8+9] Añadidos busqueda, sort_by, sort_order para buscador y ordenamiento */
+/* [044A-8+9] Añadidos busqueda, sort_by, sort_order para buscador y ordenamiento.
+ * [064A-3] Añadidos turno, canal, metodo_pago como filtros por columna (multi-valor separado por coma). */
 #[derive(Debug, Deserialize, IntoParams)]
 pub struct VentasQuery {
     #[serde(default = "default_page")]
@@ -141,6 +142,12 @@ pub struct VentasQuery {
     pub hasta: Option<NaiveDate>,
     /// Búsqueda por texto (descripción, cliente, canal)
     pub busqueda: Option<String>,
+    /// Filtro por turno (valores separados por coma: `manana,mediodia,noche`)
+    pub turno: Option<String>,
+    /// Filtro por canal (valores separados por coma: `comedor,barra,terraza,delivery,just_eat,eventos`)
+    pub canal: Option<String>,
+    /// Filtro por método de pago (valores separados por coma: `efectivo,tarjeta,transferencia`)
+    pub metodo_pago: Option<String>,
     /// Campo de ordenamiento: `fecha`, `importe_base`, `turno`, `canal`, `metodo_pago`
     pub sort_by: Option<String>,
     /// Dirección de orden: asc o desc. Por defecto desc

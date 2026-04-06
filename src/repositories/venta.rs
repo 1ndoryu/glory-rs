@@ -81,7 +81,8 @@ impl VentaRepository {
         .await
     }
 
-    /* [044A-8+9] Whitelist de columnas — previene SQL injection */
+    /* [044A-8+9] Whitelist de columnas — previene SQL injection.
+     * [064A-3] Añadidos filtros por columna: turno, canal, metodo_pago (multi-valor separado por coma). */
     #[allow(clippy::too_many_arguments)]
     pub async fn list(
         pool: &PgPool,
@@ -91,6 +92,9 @@ impl VentaRepository {
         desde: Option<chrono::NaiveDate>,
         hasta: Option<chrono::NaiveDate>,
         busqueda: Option<&str>,
+        turno: Option<&str>,
+        canal: Option<&str>,
+        metodo_pago: Option<&str>,
         sort_by: Option<&str>,
         sort_order: Option<&str>,
     ) -> Result<(Vec<VentaConCliente>, i64), sqlx::Error> {
@@ -110,6 +114,11 @@ impl VentaRepository {
         let busqueda_pattern = busqueda
             .filter(|b| !b.is_empty())
             .map(|b| format!("%{b}%"));
+
+        /* Normalizar filtros vacíos a None */
+        let turno_filter = turno.filter(|t| !t.is_empty());
+        let canal_filter = canal.filter(|c| !c.is_empty());
+        let metodo_filter = metodo_pago.filter(|m| !m.is_empty());
 
         let query_str = format!(
             "SELECT v.id, v.user_id, v.fecha, v.comensales, v.descripcion, \
@@ -131,6 +140,9 @@ impl VentaRepository {
                   OR v.canal ILIKE $6 \
                   OR c.nombre ILIKE $6 \
                   OR c.apellidos ILIKE $6) \
+             AND ($7::TEXT IS NULL OR v.turno = ANY(string_to_array($7, ','))) \
+             AND ($8::TEXT IS NULL OR v.canal = ANY(string_to_array($8, ','))) \
+             AND ($9::TEXT IS NULL OR v.metodo_pago = ANY(string_to_array($9, ','))) \
              ORDER BY {order_col} {order_dir}, v.created_at DESC \
              LIMIT $2 OFFSET $3"
         );
@@ -142,27 +154,40 @@ impl VentaRepository {
             .bind(desde)
             .bind(hasta)
             .bind(busqueda_pattern.as_deref())
+            .bind(turno_filter)
+            .bind(canal_filter)
+            .bind(metodo_filter)
             .fetch_all(pool)
             .await?;
 
-        /* COUNT con los mismos filtros (sin JOIN si no hay búsqueda para eficiencia) */
-        let count = if busqueda_pattern.is_some() {
+        /* COUNT con los mismos filtros */
+        let has_text_filter = busqueda_pattern.is_some();
+        let has_column_filters = turno_filter.is_some() || canal_filter.is_some() || metodo_filter.is_some();
+
+        let count = if has_text_filter || has_column_filters {
             let rec = sqlx::query_scalar::<_, Option<i64>>(
                 "SELECT COUNT(*) FROM ventas v \
                  LEFT JOIN clientes c ON c.id = v.cliente_id \
                  WHERE v.user_id = $1 \
                  AND ($2::DATE IS NULL OR v.fecha >= $2) \
                  AND ($3::DATE IS NULL OR v.fecha <= $3) \
-                 AND (v.descripcion ILIKE $4 \
+                 AND ($4::TEXT IS NULL \
+                      OR v.descripcion ILIKE $4 \
                       OR v.turno ILIKE $4 \
                       OR v.canal ILIKE $4 \
                       OR c.nombre ILIKE $4 \
-                      OR c.apellidos ILIKE $4)",
+                      OR c.apellidos ILIKE $4) \
+                 AND ($5::TEXT IS NULL OR v.turno = ANY(string_to_array($5, ','))) \
+                 AND ($6::TEXT IS NULL OR v.canal = ANY(string_to_array($6, ','))) \
+                 AND ($7::TEXT IS NULL OR v.metodo_pago = ANY(string_to_array($7, ',')))",
             )
             .bind(user_id)
             .bind(desde)
             .bind(hasta)
             .bind(busqueda_pattern.as_deref())
+            .bind(turno_filter)
+            .bind(canal_filter)
+            .bind(metodo_filter)
             .fetch_one(pool)
             .await?;
             rec.unwrap_or(0)

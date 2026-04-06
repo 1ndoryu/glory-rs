@@ -131,13 +131,14 @@ impl ReservaRepository {
 
         /* [303A-4] Cuando no hay filtro explícito de estado, excluir canceladas.
          * [303A-15] Soporte rango de fechas.
-         * [044A-8] Convertido a query_as runtime para ORDER BY dinámico. */
+         * [044A-8] Convertido a query_as runtime para ORDER BY dinámico.
+         * [064A-3] estado soporta multi-valor separado por coma (string_to_array). */
         let query_str = format!(
             "SELECT * FROM reservas WHERE user_id = $1 \
              AND ($4::DATE IS NULL OR fecha = $4) \
              AND ($9::DATE IS NULL OR fecha >= $9) \
              AND ($10::DATE IS NULL OR fecha <= $10) \
-             AND (($5::VARCHAR IS NULL AND estado != 'cancelada') OR estado = $5) \
+             AND (($5::TEXT IS NULL AND estado != 'cancelada') OR estado = ANY(string_to_array($5, ','))) \
              AND ($6::TIME IS NULL OR hora >= $6) \
              AND ($7::TIME IS NULL OR hora < $7) \
              AND ($8::TEXT IS NULL \
@@ -161,27 +162,28 @@ impl ReservaRepository {
             .fetch_all(pool)
             .await?;
 
-        let rec = sqlx::query_scalar!(
+        /* [064A-3] Convertido a query_scalar runtime para soportar string_to_array en estado */
+        let rec = sqlx::query_scalar::<_, Option<i64>>(
             "SELECT COUNT(*) FROM reservas WHERE user_id = $1 \
              AND ($2::DATE IS NULL OR fecha = $2) \
              AND ($7::DATE IS NULL OR fecha >= $7) \
              AND ($8::DATE IS NULL OR fecha <= $8) \
-             AND (($3::VARCHAR IS NULL AND estado != 'cancelada') OR estado = $3) \
+             AND (($3::TEXT IS NULL AND estado != 'cancelada') OR estado = ANY(string_to_array($3, ','))) \
              AND ($4::TIME IS NULL OR hora >= $4) \
              AND ($5::TIME IS NULL OR hora < $5) \
              AND ($6::TEXT IS NULL \
                   OR nombre_cliente ILIKE $6 \
                   OR apellidos_cliente ILIKE $6 \
                   OR telefono ILIKE $6)",
-            filtros.user_id,
-            filtros.fecha,
-            filtros.estado.as_deref(),
-            filtros.hora_desde,
-            filtros.hora_hasta,
-            patron.as_deref(),
-            filtros.fecha_desde,
-            filtros.fecha_hasta
         )
+        .bind(filtros.user_id)
+        .bind(filtros.fecha)
+        .bind(filtros.estado.as_deref())
+        .bind(filtros.hora_desde)
+        .bind(filtros.hora_hasta)
+        .bind(patron.as_deref())
+        .bind(filtros.fecha_desde)
+        .bind(filtros.fecha_hasta)
         .fetch_one(pool)
         .await?;
 

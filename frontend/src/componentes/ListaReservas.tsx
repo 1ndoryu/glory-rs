@@ -2,7 +2,8 @@
  * Filtros con shadcn Input y select nativo. Plano de ocupación integrado.
  * [024A-10] Estado usa DropdownMenu en vez de Select para evitar confusión visual.
  * [034A-6] Click en nombre del cliente abre ficha del cliente (si tiene cliente_id).
- * [044A-8] Cabeceras de columna clicables para ordenar (sort_by/sort_order). */
+ * [044A-8] Cabeceras de columna clicables para ordenar (sort_by/sort_order).
+ * [064A-3] Filtro por columna en Estado con ColumnFilterHeader. */
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -16,6 +17,7 @@ import FormularioReserva from './FormularioReserva';
 import DialogoFichaCliente from './DialogoFichaCliente';
 import PlanoOcupacion from './PlanoOcupacion';
 import useVistaReservas from '../hooks/useVistaReservas';
+import ColumnFilterHeader from '@/components/column-filter-header';
 
 const ETIQUETA_ESTADO: Record<string, string> = {
   pendiente: 'Pendiente',
@@ -40,6 +42,7 @@ function ListaReservas() {
     filtros,
     cambiarFiltro,
     toggleSort,
+    cambiarFiltroColumna,
     modalAbierto,
     setModalAbierto,
     reservas,
@@ -96,18 +99,6 @@ function ListaReservas() {
             <SelectItem value="cena">Cena</SelectItem>
           </SelectContent>
         </Select>
-        <Select value={filtros.estado || '__all__'} onValueChange={v => cambiarFiltro('estado', v === '__all__' ? '' : v)}>
-          <SelectTrigger className="max-w-44"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="__all__">Todos los estados</SelectItem>
-            <SelectItem value="confirmada">Confirmadas</SelectItem>
-            <SelectItem value="pendiente">Pendientes</SelectItem>
-            <SelectItem value="lista_espera">Lista de espera</SelectItem>
-            <SelectItem value="completada">Completadas</SelectItem>
-            <SelectItem value="no_show">No Show</SelectItem>
-            <SelectItem value="cancelada">Canceladas</SelectItem>
-          </SelectContent>
-        </Select>
       </div>
 
       <Dialog open={modalAbierto} onOpenChange={(open) => {
@@ -161,8 +152,24 @@ function ListaReservas() {
                   <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('num_personas')}>
                     Personas {filtros.sortBy === 'num_personas' && (filtros.sortOrder === 'asc' ? '↑' : '↓')}
                   </TableHead>
-                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('estado')}>
-                    Estado {filtros.sortBy === 'estado' && (filtros.sortOrder === 'asc' ? '↑' : '↓')}
+                  <TableHead>
+                    <ColumnFilterHeader
+                      title="Estado"
+                      sortKey="estado"
+                      currentSortBy={filtros.sortBy}
+                      currentSortOrder={filtros.sortOrder}
+                      onSort={() => toggleSort('estado')}
+                      options={[
+                        { value: 'confirmada', label: 'Confirmada' },
+                        { value: 'pendiente', label: 'Pendiente' },
+                        { value: 'lista_espera', label: 'Lista de espera' },
+                        { value: 'completada', label: 'Completada' },
+                        { value: 'no_show', label: 'No Show' },
+                        { value: 'cancelada', label: 'Cancelada' },
+                      ]}
+                      selectedValues={filtros.estado}
+                      onFilterChange={(v) => cambiarFiltroColumna('estado', v)}
+                    />
                   </TableHead>
                   <TableHead>Teléfono</TableHead>
                   <TableHead className="w-10"></TableHead>

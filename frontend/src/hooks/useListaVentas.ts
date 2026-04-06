@@ -1,7 +1,8 @@
 /* [283A-28] Hook para ListaVentas — reduce useState count en el componente.
  * Maneja paginación, filtros de fecha (desde/hasta) y modales.
  * [034A-5] VentaConCliente con nombre_cliente + visor de reserva asociada.
- * [044A-8+9] Búsqueda y ordenamiento por columnas (sort_by/sort_order). */
+ * [044A-8+9] Búsqueda y ordenamiento por columnas (sort_by/sort_order).
+ * [064A-3] Filtros por columna: turno, canal, metodo_pago (multi-valor). */
 
 import { useState } from 'react';
 import { useListarVentas, useEliminarVenta, useObtenerReserva, VentaConCliente } from '../api/generated';
@@ -11,6 +12,9 @@ interface FiltrosVentas {
   desde: string;
   hasta: string;
   busqueda: string;
+  turno: string[];
+  canal: string[];
+  metodoPago: string[];
   sortBy: string;
   sortOrder: 'asc' | 'desc';
 }
@@ -23,6 +27,9 @@ function useListaVentas() {
     desde: '',
     hasta: '',
     busqueda: '',
+    turno: [],
+    canal: [],
+    metodoPago: [],
     sortBy: '',
     sortOrder: 'desc',
   });
@@ -37,6 +44,9 @@ function useListaVentas() {
     desde: filtros.desde || undefined,
     hasta: filtros.hasta || undefined,
     busqueda: filtros.busqueda || undefined,
+    turno: filtros.turno.length > 0 ? filtros.turno.join(',') : undefined,
+    canal: filtros.canal.length > 0 ? filtros.canal.join(',') : undefined,
+    metodo_pago: filtros.metodoPago.length > 0 ? filtros.metodoPago.join(',') : undefined,
     sort_by: filtros.sortBy || undefined,
     sort_order: filtros.sortOrder || undefined,
   });
@@ -84,10 +94,16 @@ function useListaVentas() {
     }));
   };
 
+  /* [064A-3] Actualizar filtro de columna (array de valores seleccionados) */
+  const cambiarFiltroColumna = (campo: 'turno' | 'canal' | 'metodoPago', valores: string[]) => {
+    setFiltros(prev => ({ ...prev, [campo]: valores, pagina: 1 }));
+  };
+
   return {
     filtros,
     cambiarFiltro,
     toggleSort,
+    cambiarFiltroColumna,
     modalAbierto,
     setModalAbierto,
     ventaEditando,
