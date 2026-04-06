@@ -49,7 +49,6 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 - Creo que la mejor forma que en vez pedir que el usuario se registre, simplemente se cree una cuanta apartir del correo con el que se ponga en la compra y al comprar, ya este logeado, luego el usuario puede elegir o cambiar su contraseña. 
 - El globo de chat no se ve redondo y esta vacío, y el bton de botonBase botonTexto botonMediano chatWidgetSendBtn tambien se ve vacío, estirado, con un color que no va y horrible.
 - La pagina de contacto ya no tiene sentido, todos los botones de contacto deben abrir el chat. 
-- Cuando se navegue a una pagina tiene que ir el scroll hacia arriba, no quedarse en la misma posicion. 
 - Las imagenes de galería de los proyectos tienen que ser mas grande. 
 - proyectoHero, alli se podría colocar detalles tecnicos, tecnología, enlaces (con iconos de donde este disponible, github, web, etc). 
 - Quitar la sesion de clientes en "nosotros" y tambien quitar Testimonials.
