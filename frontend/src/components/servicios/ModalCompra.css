@@ -1,22 +1,26 @@
 /* [044A-40] Estilos específicos del modal de compra.
  * El overlay y contenedor base vienen de Modal.css (componente ui/Modal).
- * Aquí solo van estilos internos del contenido de compra. */
+ * [054A-22] Eliminado font-serif innecesario.
+ * [054A-23] Resumen usa gap/column en vez de margins. */
 
+/* [054A-23] Layout columna con gap uniforme */
 .modalCompraResumen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-sm);
     text-align: center;
-    margin-bottom: var(--spacing-lg);
 }
 
+/* [054A-22] Sin font-serif — usa font-primary del proyecto */
 .modalCompraTitulo {
-    font-family: var(--font-serif);
     font-size: var(--text-xl);
-    margin-bottom: var(--spacing-xs);
+    font-weight: 600;
 }
 
 .modalCompraDescripcion {
     font-size: var(--text-sm);
     color: var(--text-dark);
-    margin-bottom: var(--spacing-md);
 }
 
 .modalCompraPrecio {
@@ -27,7 +31,6 @@
 }
 
 .modalCompraPrecioCifra {
-    font-family: var(--font-serif);
     font-size: var(--text-2xl);
     font-weight: 700;
 }
