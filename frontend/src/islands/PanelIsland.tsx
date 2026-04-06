@@ -15,7 +15,6 @@ import {SeccionDisponibles} from '../components/panel/SeccionDisponibles';
 import {SeccionDelegaciones} from '../components/panel/SeccionDelegaciones';
 import {SeccionChat} from '../components/panel/SeccionChat';
 import {SeccionReembolsos} from '../components/panel/SeccionReembolsos';
-import SeccionDashboard from '../components/panel/SeccionDashboard';
 import {SeccionUsuarios} from '../components/panel/SeccionUsuarios';
 import {SeccionHosting} from '../components/panel/SeccionHosting';
 import {EmployeesSection} from '../components/panel/EmployeesSection';
@@ -80,9 +79,6 @@ export const PanelIsland: React.FC = () => {
             /* [044A-38 Fase 7] Reembolsos (admin) */
             case 'reembolsos':
                 return <SeccionReembolsos />;
-            /* [044A-38 Fase 10] Dashboard admin — métricas, revenue, alertas */
-            case 'dashboard':
-                return <SeccionDashboard />;
             case 'empleados':
                 return <EmployeesSection />;
             case 'config-servicios':

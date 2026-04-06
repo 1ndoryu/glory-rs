@@ -72,21 +72,12 @@
     border-color: var(--brand-black);
 }
 
-.usuariosFiltroSelect {
-    padding: 10px 12px;
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-md);
-    font-size: var(--text-sm);
-    font-family: var(--font-primary);
-    background: var(--bg-primary);
-    color: var(--brand-black);
-    cursor: pointer;
-    transition: border-color 0.2s;
-}
-
-.usuariosFiltroSelect:focus {
-    outline: none;
-    border-color: var(--brand-black);
+/* [064A-17] Boton de filtro personalizado (reemplaza <select> nativo) */
+.usuariosFiltroBtn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
 }
 
 .usuariosTotal {
@@ -101,8 +92,9 @@
 
 /* ========== Tabla ========== */
 
+/* [064A-18] overflow:visible para que MenuContextual no quede clippeado.
+ * La tabla tiene pocas columnas y no necesita scroll horizontal. */
 .usuariosTablaWrapper {
-    overflow-x: auto;
     border-radius: var(--radius-md);
     border: 1px solid var(--bg-item-active);
 }

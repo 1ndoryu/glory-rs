@@ -3,12 +3,11 @@
  * Acciones: cambiar rol, banear/reactivar. */
 
 import { useState } from 'react';
-import { Loader2, AlertCircle, Search, Users, Shield, Ban, UserCheck } from 'lucide-react';
+import { Loader2, AlertCircle, Search, Users, Shield, Ban, UserCheck, ChevronDown } from 'lucide-react';
 import { useAdminUsers } from '../../hooks/useAdminUsers';
 import { ROLE_LABELS, STATUS_LABELS, STATUS_CLASS } from '../../api/admin-users';
 import type { AdminUserItem } from '../../api/admin-users';
 import { Input } from '../ui/Input';
-import { Select } from '../ui/Select';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { MenuContextual, type MenuContextualItem } from '../ui/ContextMenu';
@@ -21,6 +20,10 @@ export function SeccionUsuarios() {
         setSearch, setRoleFilter, setStatusFilter, setPage,
         changeRole, changeStatus, isChangingRole, isChangingStatus,
     } = useAdminUsers();
+
+    /* [064A-17] Menus de filtro personalizados en vez de <select> nativo */
+    const [rolMenuAbierto, setRolMenuAbierto] = useState(false);
+    const [statusMenuAbierto, setStatusMenuAbierto] = useState(false);
 
     const [confirmAction, setConfirmAction] = useState<{
         userId: string;
@@ -58,7 +61,7 @@ export function SeccionUsuarios() {
 
     return (
         <div className="usuariosContenedor">
-            {/* Filtros y búsqueda */}
+            {/* [064A-17] Filtros con MenuContextual personalizado */}
             <div className="usuariosFiltros">
                 <div className="usuariosBusqueda">
                     <Search size={16} className="usuariosBusquedaIcono" />
@@ -71,27 +74,39 @@ export function SeccionUsuarios() {
                     />
                 </div>
 
-                <Select
-                    className="usuariosFiltroSelect"
-                    value={roleFilter}
-                    onChange={(e) => setRoleFilter(e.target.value)}
-                >
-                    <option value="">Todos los roles</option>
-                    <option value="admin">Admin</option>
-                    <option value="employee">Empleado</option>
-                    <option value="client">Cliente</option>
-                </Select>
+                <MenuContextual
+                    abierto={rolMenuAbierto}
+                    onToggle={() => setRolMenuAbierto(prev => !prev)}
+                    onCerrar={() => setRolMenuAbierto(false)}
+                    ariaLabel="Filtrar por rol"
+                    triggerClassName="usuariosFiltroBtn"
+                    triggerVariante="outline"
+                    triggerTamano="pequeno"
+                    triggerContent={<>{roleFilter ? ROLE_LABELS[roleFilter] : 'Todos los roles'} <ChevronDown size={14} /></>}
+                    items={[
+                        {id: 'all', label: 'Todos los roles', onSelect: () => setRoleFilter('')},
+                        {id: 'admin', label: 'Admin', onSelect: () => setRoleFilter('admin')},
+                        {id: 'employee', label: 'Empleado', onSelect: () => setRoleFilter('employee')},
+                        {id: 'client', label: 'Cliente', onSelect: () => setRoleFilter('client')},
+                    ]}
+                />
 
-                <Select
-                    className="usuariosFiltroSelect"
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                >
-                    <option value="">Todos los status</option>
-                    <option value="active">Activo</option>
-                    <option value="banned">Baneado</option>
-                    <option value="suspended">Suspendido</option>
-                </Select>
+                <MenuContextual
+                    abierto={statusMenuAbierto}
+                    onToggle={() => setStatusMenuAbierto(prev => !prev)}
+                    onCerrar={() => setStatusMenuAbierto(false)}
+                    ariaLabel="Filtrar por status"
+                    triggerClassName="usuariosFiltroBtn"
+                    triggerVariante="outline"
+                    triggerTamano="pequeno"
+                    triggerContent={<>{statusFilter ? STATUS_LABELS[statusFilter] : 'Todos los status'} <ChevronDown size={14} /></>}
+                    items={[
+                        {id: 'all', label: 'Todos los status', onSelect: () => setStatusFilter('')},
+                        {id: 'active', label: 'Activo', onSelect: () => setStatusFilter('active')},
+                        {id: 'banned', label: 'Baneado', onSelect: () => setStatusFilter('banned')},
+                        {id: 'suspended', label: 'Suspendido', onSelect: () => setStatusFilter('suspended')},
+                    ]}
+                />
 
                 <span className="usuariosTotal">
                     <Users size={14} />
