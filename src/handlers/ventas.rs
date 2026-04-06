@@ -143,6 +143,29 @@ pub async fn eliminar_venta(
     Ok(StatusCode::NO_CONTENT)
 }
 
+/// Reintentar sincronización con Haddock
+#[utoipa::path(
+    post,
+    path = "/api/ventas/{id}/haddock-sync",
+    tag = "Ventas",
+    params(("id" = Uuid, Path, description = "ID de la venta")),
+    responses(
+        (status = 200, description = "Sincronización completada", body = Venta),
+        (status = 404, description = "Venta no encontrada", body = ErrorResponse),
+        (status = 401, description = "No autorizado", body = ErrorResponse),
+        (status = 422, description = "Sync no habilitado o sin token", body = ErrorResponse)
+    ),
+    security(("bearer_auth" = []))
+)]
+pub async fn reintentar_sync_haddock(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    Path(id): Path<Uuid>,
+) -> Result<Json<Venta>, AppError> {
+    let venta = VentaService::retry_haddock_sync(&state.pool, id, auth.user_id).await?;
+    Ok(Json(venta))
+}
+
 /* [263A-15] Axum 0.7 (matchit 0.7.x) usa :param, no {param}.
  * Todas las rutas con path params corregidas de {id} a :id.
  * Las anotaciones #[utoipa::path] mantienen {id} (sintaxis OpenAPI, no afecta routing). */
@@ -150,4 +173,5 @@ pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/ventas", post(crear_venta).get(listar_ventas))
         .route("/ventas/:id", get(obtener_venta).put(actualizar_venta).delete(eliminar_venta))
+        .route("/ventas/:id/haddock-sync", post(reintentar_sync_haddock))
 }

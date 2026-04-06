@@ -7,7 +7,7 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { useListarVentas, useEliminarVenta, useObtenerReserva, VentaConCliente } from '../api/generated';
+import { useListarVentas, useEliminarVenta, useObtenerReserva, useReintentarSyncHaddock, VentaConCliente } from '../api/generated';
 import { useObtenerConfiguracion } from '../api/generated/configuracion/configuracion';
 
 interface FiltrosVentas {
@@ -79,6 +79,20 @@ function useListaVentas() {
   const haddockSyncEnabled = configData?.status === 200
     ? configData.data.haddock_sync_enabled
     : false;
+
+  /* [064A-10] Retry manual de sincronización Haddock */
+  const retryHaddockMutation = useReintentarSyncHaddock({
+    mutation: {
+      onSuccess: () => {
+        toast.success('Sincronización Haddock completada');
+        refetch();
+      },
+      onError: () => {
+        toast.error('Error al reintentar sincronización Haddock');
+        refetch();
+      },
+    },
+  });
 
   const ventas = data?.status === 200 ? data.data : null;
 
@@ -163,6 +177,7 @@ function useListaVentas() {
     isLoading,
     eliminarMutation,
     haddockSyncEnabled,
+    retryHaddockMutation,
     cerrarModalYRefrescar,
     cerrarEdicionYRefrescar,
     reservaIdViewer,

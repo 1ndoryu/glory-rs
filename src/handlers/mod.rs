@@ -72,6 +72,7 @@ impl utoipa::Modify for SecurityAddon {
         ventas::listar_ventas,
         ventas::actualizar_venta,
         ventas::eliminar_venta,
+        ventas::reintentar_sync_haddock,
         gastos::crear_gasto,
         gastos::obtener_gasto,
         gastos::listar_gastos,

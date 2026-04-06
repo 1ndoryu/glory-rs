@@ -13,8 +13,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Trash2, Pencil, Eye, AlertTriangle } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import HaddockSyncBadge from '@/components/haddock-sync-badge';
+import VentaRowActions from '@/components/venta-row-actions';
 import FormularioVenta from './FormularioVenta';
 import ReservaViewer from './ReservaViewer';
 import ColumnFilterHeader from '@/components/column-filter-header';
@@ -50,6 +51,7 @@ function ListaVentas() {
     isLoading,
     eliminarMutation,
     haddockSyncEnabled,
+    retryHaddockMutation,
     cerrarModalYRefrescar,
     cerrarEdicionYRefrescar,
     reservaIdViewer,
@@ -234,41 +236,16 @@ function ListaVentas() {
                       </TableCell>
                     )}
                     <TableCell>
-                      <div className="flex gap-1">
-                        {/* [034A-5] Botón para ver la reserva de origen (solo si existe) */}
-                        {v.reserva_id && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => setReservaIdViewer(v.reserva_id!)}
-                            title="Ver reserva"
-                          >
-                            <Eye className="size-4" />
-                          </Button>
-                        )}
-                        {/* [064A-9] Botón editar usa iniciarEdicion para mostrar confirmación si synced */}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => iniciarEdicion(v)}
-                          title="Editar"
-                        >
-                          <Pencil className="size-4" />
-                        </Button>
-                        {/* [064A-8] Botón de eliminar bloqueado cuando sync Haddock activo.
-                         * El backend también rechaza con 409, pero mejor prevenir en UI. */}
-                        {!haddockSyncEnabled && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => eliminarMutation.mutate({ id: v.id })}
-                            disabled={eliminarMutation.isPending}
-                            title="Eliminar"
-                          >
-                            <Trash2 className="size-4 text-destructive" />
-                          </Button>
-                        )}
-                      </div>
+                      <VentaRowActions
+                        venta={v}
+                        haddockSyncEnabled={haddockSyncEnabled}
+                        onVerReserva={(id) => setReservaIdViewer(id)}
+                        onEditar={iniciarEdicion}
+                        onEliminar={(id) => eliminarMutation.mutate({ id })}
+                        onRetrySync={(id) => retryHaddockMutation.mutate({ id })}
+                        eliminarPending={eliminarMutation.isPending}
+                        retryPending={retryHaddockMutation.isPending}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}

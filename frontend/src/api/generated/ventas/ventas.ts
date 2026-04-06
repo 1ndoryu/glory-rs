@@ -573,3 +573,101 @@ export const useEliminarVenta = <TError = ErrorResponse,
       > => {
       return useMutation(getEliminarVentaMutationOptions(options), queryClient);
     }
+    /**
+ * @summary Reintentar sincronizaci├│n con Haddock
+ */
+export type reintentarSyncHaddockResponse200 = {
+  data: Venta
+  status: 200
+}
+
+export type reintentarSyncHaddockResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type reintentarSyncHaddockResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type reintentarSyncHaddockResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type reintentarSyncHaddockResponseSuccess = (reintentarSyncHaddockResponse200) & {
+  headers: Headers;
+};
+export type reintentarSyncHaddockResponseError = (reintentarSyncHaddockResponse401 | reintentarSyncHaddockResponse404 | reintentarSyncHaddockResponse422) & {
+  headers: Headers;
+};
+
+export type reintentarSyncHaddockResponse = (reintentarSyncHaddockResponseSuccess | reintentarSyncHaddockResponseError)
+
+export const getReintentarSyncHaddockUrl = (id: string,) => {
+
+
+
+
+  return `/api/ventas/${id}/haddock-sync`
+}
+
+export const reintentarSyncHaddock = async (id: string, options?: RequestInit): Promise<reintentarSyncHaddockResponse> => {
+
+  return customInstance<reintentarSyncHaddockResponse>(getReintentarSyncHaddockUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getReintentarSyncHaddockMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reintentarSyncHaddock>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof reintentarSyncHaddock>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['reintentarSyncHaddock'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof reintentarSyncHaddock>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  reintentarSyncHaddock(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReintentarSyncHaddockMutationResult = NonNullable<Awaited<ReturnType<typeof reintentarSyncHaddock>>>
+
+    export type ReintentarSyncHaddockMutationError = ErrorResponse
+
+    /**
+ * @summary Reintentar sincronizaci├│n con Haddock
+ */
+export const useReintentarSyncHaddock = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reintentarSyncHaddock>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof reintentarSyncHaddock>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+      return useMutation(getReintentarSyncHaddockMutationOptions(options), queryClient);
+    }

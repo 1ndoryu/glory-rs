@@ -175,4 +175,34 @@ impl VentaService {
         }
         Ok(())
     }
+
+    /* [064A-10] Retry manual de sincronización Haddock.
+     * A diferencia del spawn automático, este se ejecuta sincrónicamente
+     * y retorna la venta actualizada con el nuevo estado sync.
+     * Falla si sync deshabilitado o token vacío. */
+    pub async fn retry_haddock_sync(pool: &PgPool, id: Uuid, user_id: Uuid) -> Result<Venta, AppError> {
+        let venta = VentaRepository::find_by_id(pool, id, user_id)
+            .await?
+            .ok_or_else(|| AppError::NotFound("Venta no encontrada".into()))?;
+
+        let config = ConfiguracionRepository::obtener_o_crear(pool, user_id).await?;
+        if !config.haddock_sync_enabled {
+            return Err(AppError::Validation(
+                "La sincronización con Haddock no está habilitada.".into(),
+            ));
+        }
+        if config.haddock_api_token.is_empty() {
+            return Err(AppError::Validation(
+                "No hay token de API de Haddock configurado.".into(),
+            ));
+        }
+
+        /* Ejecuta sync sincrónicamente (is_update=false: no se editó, se reintenta) */
+        HaddockService::sync_order(pool, &venta, &config, false).await;
+
+        /* Re-leer venta con estado sync actualizado */
+        VentaRepository::find_by_id(pool, id, user_id)
+            .await?
+            .ok_or_else(|| AppError::NotFound("Venta no encontrada tras sync".into()))
+    }
 }
