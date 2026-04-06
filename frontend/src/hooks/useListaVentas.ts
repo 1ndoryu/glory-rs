@@ -38,6 +38,8 @@ function useListaVentas() {
   });
   const [modalAbierto, setModalAbierto] = useState(false);
   const [ventaEditando, setVentaEditando] = useState<VentaConCliente | null>(null);
+  /* [064A-9] Venta pendiente de confirmación antes de editar (cuando ya está sincronizada) */
+  const [ventaPendienteEdicion, setVentaPendienteEdicion] = useState<VentaConCliente | null>(null);
   /* [034A-5] ID de reserva para el diálogo de detalle */
   const [reservaIdViewer, setReservaIdViewer] = useState<string | null>(null);
 
@@ -107,6 +109,27 @@ function useListaVentas() {
     refetch();
   };
 
+  /* [064A-9] Inicia edición de venta. Si está sincronizada con Haddock,
+   * muestra diálogo de confirmación antes de abrir el formulario. */
+  const iniciarEdicion = (venta: VentaConCliente) => {
+    if (haddockSyncEnabled && venta.haddock_synced) {
+      setVentaPendienteEdicion(venta);
+    } else {
+      setVentaEditando(venta);
+    }
+  };
+
+  const confirmarEdicion = () => {
+    if (ventaPendienteEdicion) {
+      setVentaEditando(ventaPendienteEdicion);
+      setVentaPendienteEdicion(null);
+    }
+  };
+
+  const cancelarEdicion = () => {
+    setVentaPendienteEdicion(null);
+  };
+
   /* [044A-8] Alterna ordenamiento por columna — click en la misma columna invierte dirección */
   const toggleSort = (columna: string) => {
     setFiltros(prev => ({
@@ -131,6 +154,10 @@ function useListaVentas() {
     setModalAbierto,
     ventaEditando,
     setVentaEditando,
+    ventaPendienteEdicion,
+    iniciarEdicion,
+    confirmarEdicion,
+    cancelarEdicion,
     porPagina: POR_PAGINA,
     ventas,
     isLoading,

@@ -31,6 +31,7 @@
 ## Tareas pendientes
 
 ### Robustez Haddock (plan: Agente/planes/plan-haddock-robustez-2026-04-06.md)
-- 064A-9: Alertas UI edición — dialog confirmación al editar venta sincronizada, badge estado sync en lista, tooltips
 - 064A-10: Retry manual + log visible — endpoint POST /api/ventas/{id}/haddock-sync, botón reintentar, filtro por estado
 - 064A-11: Tests simulación exhaustivos — 10 tests de flujo completo con wiremock
+
+- Vuelve a hacer un repaso de "# Plan: Robustez integral de sincronización Haddock" para ver que otras cosas se pudieron dejar por fuera y faltan aplicar robustez.

@@ -5,18 +5,18 @@
  * [034A-5] Columna "Cliente" con nombre_cliente + botón para ver reserva asociada.
  * [044A-8+9] Buscador + cabeceras de columna clicables para ordenar (sort_by/sort_order).
  * [064A-3] Filtros por columna en Turno, Canal y Método de pago con ColumnFilterHeader.
- * [064A-8] Botón eliminar oculto cuando sync Haddock activo (petición cliente). */
+ * [064A-8] Botón eliminar oculto cuando sync Haddock activo (petición cliente).
+ * [064A-9] Badge estado sync Haddock + dialog confirmación al editar venta sincronizada. */
 
-import { useState } from 'react';
 import useListaVentas from '../hooks/useListaVentas';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Trash2, Pencil, Eye } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { Trash2, Pencil, Eye, AlertTriangle } from 'lucide-react';
+import HaddockSyncBadge from '@/components/haddock-sync-badge';
 import FormularioVenta from './FormularioVenta';
-import FormularioReserva from './FormularioReserva';
+import ReservaViewer from './ReservaViewer';
 import ColumnFilterHeader from '@/components/column-filter-header';
 
 /* [283A-47] Mapa de etiquetas para turnos — el enum backend usa ascii ("manana")
@@ -41,6 +41,10 @@ function ListaVentas() {
     setModalAbierto,
     ventaEditando,
     setVentaEditando,
+    ventaPendienteEdicion,
+    iniciarEdicion,
+    confirmarEdicion,
+    cancelarEdicion,
     porPagina,
     ventas,
     isLoading,
@@ -53,9 +57,6 @@ function ListaVentas() {
     reservaDetalle,
     reservaCargando,
   } = useListaVentas();
-
-  /* [044A-11] Estado para alternar entre vista y edición en el dialog de Reserva Asociada */
-  const [editandoReserva, setEditandoReserva] = useState(false);
 
   return (
     <div className="flex flex-col gap-4">
@@ -111,69 +112,28 @@ function ListaVentas() {
         </DialogContent>
       </Dialog>
 
-      {/* [034A-5] Diálogo de detalle de la reserva asociada a una venta
-         [044A-11] Con botón para editar la reserva directamente desde aquí */}
-      <Dialog open={!!reservaIdViewer} onOpenChange={(open) => { if (!open) { setReservaIdViewer(null); setEditandoReserva(false); } }}>
-        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+      {/* [034A-5] Diálogo de detalle de la reserva asociada a una venta */}
+      <ReservaViewer
+        reservaId={reservaIdViewer}
+        onClose={() => { setReservaIdViewer(null); }}
+        reserva={reservaDetalle}
+        cargando={reservaCargando}
+      />
+
+      {/* [064A-9] Diálogo de confirmación al editar venta sincronizada con Haddock */}
+      <Dialog open={!!ventaPendienteEdicion} onOpenChange={(open) => { if (!open) cancelarEdicion(); }}>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{editandoReserva ? 'Editar Reserva' : 'Reserva Asociada'}</DialogTitle>
+            <DialogTitle><AlertTriangle className="inline size-4 text-amber-500 mr-1.5" />Venta sincronizada con Haddock</DialogTitle>
+            <DialogDescription>
+              Esta venta ya fue enviada a Haddock. Si guardas los cambios, se re-enviará con los datos actualizados.
+              Los datos anteriores en Haddock serán reemplazados.
+            </DialogDescription>
           </DialogHeader>
-          {editandoReserva && reservaDetalle ? (
-            <FormularioReserva
-              reserva={reservaDetalle}
-              onExito={() => { setEditandoReserva(false); setReservaIdViewer(null); }}
-            />
-          ) : reservaCargando ? (
-            <p className="text-sm text-muted-foreground">Cargando reserva...</p>
-          ) : reservaDetalle ? (
-            <div className="flex flex-col gap-3 text-sm">
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <span className="text-muted-foreground">Cliente</span>
-                  <p className="font-medium">{reservaDetalle.nombre_cliente} {reservaDetalle.apellidos_cliente}</p>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Teléfono</span>
-                  <p className="font-medium">{reservaDetalle.telefono || '—'}</p>
-                </div>
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                <div>
-                  <span className="text-muted-foreground">Fecha</span>
-                  <p className="font-medium">{reservaDetalle.fecha}</p>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Hora</span>
-                  <p className="font-medium">{reservaDetalle.hora}</p>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Personas</span>
-                  <p className="font-medium">{reservaDetalle.num_personas}</p>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <span className="text-muted-foreground">Estado</span>
-                  <p><Badge variant="outline">{reservaDetalle.estado}</Badge></p>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Mesa</span>
-                  <p className="font-medium">{reservaDetalle.num_mesa ?? '—'}</p>
-                </div>
-              </div>
-              {reservaDetalle.notas && (
-                <div>
-                  <span className="text-muted-foreground">Notas</span>
-                  <p className="font-medium">{reservaDetalle.notas}</p>
-                </div>
-              )}
-              <Button variant="outline" size="sm" className="self-end mt-2" onClick={() => setEditandoReserva(true)}>
-                <Pencil className="size-3.5 mr-1.5" /> Editar reserva
-              </Button>
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">No se encontró la reserva</p>
-          )}
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={cancelarEdicion}>Cancelar</Button>
+            <Button onClick={confirmarEdicion}>Continuar y actualizar</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
@@ -247,6 +207,8 @@ function ListaVentas() {
                   </TableHead>
                   <TableHead className="text-right">IVA</TableHead>
                   <TableHead className="text-right">Total</TableHead>
+                  {/* [064A-9] Columna de estado sync Haddock — solo visible cuando sync habilitado */}
+                  {haddockSyncEnabled && <TableHead className="w-20 text-center">Haddock</TableHead>}
                   <TableHead className="w-28"></TableHead>
                 </TableRow>
               </TableHeader>
@@ -261,6 +223,16 @@ function ListaVentas() {
                     <TableCell className="text-right">{formatearMoneda(v.importe_base)}</TableCell>
                     <TableCell className="text-right">{formatearMoneda(v.importe_iva)}</TableCell>
                     <TableCell className="text-right font-medium">{formatearMoneda((parseFloat(v.importe_base) + parseFloat(v.importe_iva)).toFixed(2))}</TableCell>
+                    {/* [064A-9] Badge de estado sync Haddock con tooltip informativo */}
+                    {haddockSyncEnabled && (
+                      <TableCell className="text-center">
+                        <HaddockSyncBadge
+                          synced={v.haddock_synced}
+                          syncedAt={v.haddock_synced_at}
+                          syncError={v.haddock_sync_error}
+                        />
+                      </TableCell>
+                    )}
                     <TableCell>
                       <div className="flex gap-1">
                         {/* [034A-5] Botón para ver la reserva de origen (solo si existe) */}
@@ -274,10 +246,11 @@ function ListaVentas() {
                             <Eye className="size-4" />
                           </Button>
                         )}
+                        {/* [064A-9] Botón editar usa iniciarEdicion para mostrar confirmación si synced */}
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => setVentaEditando(v)}
+                          onClick={() => iniciarEdicion(v)}
                           title="Editar"
                         >
                           <Pencil className="size-4" />
