@@ -246,8 +246,6 @@ async fn seed_reservas(
     clientes: &[ClienteCreado],
     mesa_ids: &[Uuid],
 ) -> Vec<ReservaCreada> {
-    let nombres = ["Elena", "Sergio", "Teresa", "Raúl", "Isabel", "Alejandro"];
-    let apellidos = ["Díaz", "Muñoz", "Alonso", "Gutiérrez", "Herrera", "Castro"];
     let horas = [
         NaiveTime::from_hms_opt(13, 0, 0).unwrap(),
         NaiveTime::from_hms_opt(13, 30, 0).unwrap(),
@@ -288,13 +286,12 @@ async fn seed_reservas(
                 }
             };
 
-            /* ~50% vinculadas a un cliente del CRM — usar nombre real del cliente */
-            let (nombre_r, apellidos_r, cliente_id) = if i % 2 == 0 {
-                let c = &clientes[idx % clientes.len()];
-                (c.nombre.as_str(), c.apellidos.as_str(), Some(c.id))
-            } else {
-                (nombres[idx], apellidos[idx], None)
-            };
+            /* [064A-1] Todas las reservas vinculadas a un cliente del CRM.
+             * Antes solo ~50% tenían cliente_id (i % 2 == 0). Ahora todas lo tienen
+             * para que la Ficha del Cliente aparezca siempre en reservas y ventas. */
+            let c = &clientes[idx % clientes.len()];
+            let (nombre_r, apellidos_r, cliente_id) =
+                (c.nombre.as_str(), c.apellidos.as_str(), Some(c.id));
 
             /* Asignar mesa FK a 4 de cada 6 reservas */
             let mesa_id = if i < 4 {
