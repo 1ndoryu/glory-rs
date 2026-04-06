@@ -36,6 +36,9 @@ struct HaddockOrdersPayload {
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 struct HaddockOrder {
+    /* [064A-15] Haddock espera "externalID" (capital ID), no "externalId" (camelCase).
+     * serde rename_all=camelCase produce "externalId" — override explícito obligatorio. */
+    #[serde(rename = "externalID")]
     external_id: String,
     date: String,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -58,6 +61,8 @@ struct HaddockPayment {
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 struct HaddockItem {
+    /* [064A-15] Mismo override que HaddockOrder: Haddock exige "externalID". */
+    #[serde(rename = "externalID")]
     external_id: String,
     name: String,
     quantity: i32,
@@ -145,9 +150,16 @@ impl HaddockService {
                 }
             }
             Err(error_msg) => {
-                if let Err(e) = VentaRepository::update_haddock_status(pool, venta.id, false, Some(&error_msg)).await {
+                /* [064A-15] Sanitizar mensaje antes de persistir en BD.
+                 * Los errores crudos de Haddock pueden contener info interna
+                 * (nombres de merchant, tokens parciales). Solo guardamos
+                 * el código HTTP o tipo de error genérico. */
+                let safe_msg = Self::sanitize_error_msg(&error_msg);
+                if let Err(e) = VentaRepository::update_haddock_status(pool, venta.id, false, Some(&safe_msg)).await {
                     warn!("[064A-6] Error actualizando status sync fallido de venta {}: {e}", venta.id);
                 }
+                /* El error completo solo vive en logs del servidor */
+                warn!("[064A-15] Error completo de sync venta {}: {error_msg}", venta.id);
             }
         }
 
@@ -162,6 +174,28 @@ impl HaddockService {
             if Arc::strong_count(entry) <= 2 {
                 map.remove(&venta_id);
             }
+        }
+    }
+
+    /* [064A-15] Sanitiza errores de Haddock antes de guardarlos en BD.
+     * Extrae solo el tipo/código de error sin detalles internos de Haddock. */
+    fn sanitize_error_msg(raw: &str) -> String {
+        if raw.contains("401") {
+            "Error de autenticación con Haddock (401)".to_string()
+        } else if raw.contains("403") {
+            "Acceso denegado por Haddock (403)".to_string()
+        } else if raw.contains("400") {
+            "Datos rechazados por Haddock (400)".to_string()
+        } else if raw.contains("429") {
+            "Límite de requests excedido en Haddock (429)".to_string()
+        } else if raw.contains("500") || raw.contains("502") || raw.contains("503") {
+            "Error interno de Haddock (servidor)".to_string()
+        } else if raw.contains("Error de red") {
+            "Error de conexión con Haddock".to_string()
+        } else {
+            /* Fallback genérico — truncar a 120 chars por seguridad */
+            let truncated: String = raw.chars().take(120).collect();
+            format!("Error de sincronización: {truncated}")
         }
     }
 
@@ -193,6 +227,17 @@ impl HaddockService {
                         attempt + 1
                     );
                     return Ok(());
+                }
+                /* [064A-15] 401/403 son fallos permanentes de autenticación.
+                 * Reintentar no los va a resolver — abortar inmediatamente
+                 * para no desperdiciar requests contra la API de Haddock. */
+                Ok(status) if status.as_u16() == 401 || status.as_u16() == 403 => {
+                    let msg = format!("Haddock rechazó credenciales (HTTP {status})");
+                    warn!(
+                        "[064A-15] {msg} para venta {} — no se reintenta",
+                        venta.id
+                    );
+                    return Err(msg);
                 }
                 Ok(status) => {
                     last_error = format!("Haddock respondió HTTP {status}");
@@ -289,18 +334,29 @@ impl HaddockService {
         .to_string()
     }
 
+    /* [064A-15] Conversión Decimal→f64 con log en caso de fallo.
+     * rust_decimal::to_string() es fiable, pero si algún edge case falla,
+     * logueamos warning en vez de enviar silenciosamente 0.0 a Haddock. */
     fn decimal_to_f64(d: &rust_decimal::Decimal) -> f64 {
         use std::str::FromStr;
-        f64::from_str(&d.to_string()).unwrap_or(0.0)
+        match f64::from_str(&d.to_string()) {
+            Ok(v) => v,
+            Err(e) => {
+                warn!("[064A-15] Error convirtiendo Decimal '{d}' a f64: {e} — usando 0.0");
+                0.0
+            }
+        }
     }
 
+    /* [064A-15] Cliente HTTP reutilizable — LazyLock garantiza un solo Client
+     * con connection pool persistente en vez de crear uno por cada request. */
     async fn send_request(
         url: &str,
         token: &str,
         payload: &HaddockOrdersPayload,
     ) -> Result<reqwest::StatusCode, reqwest::Error> {
-        let client = Client::new();
-        let resp = client
+        static HTTP_CLIENT: LazyLock<Client> = LazyLock::new(Client::new);
+        let resp = HTTP_CLIENT
             .post(url)
             .header("Authorization", format!("Basic {token}"))
             .header("Content-Type", "application/json")
@@ -561,13 +617,14 @@ mod tests {
         let _ = HaddockService::send_order_http(&venta, &config, &url).await;
     }
 
+    /* [064A-15] 401 ya NO reintenta — aborta de inmediato */
     #[tokio::test]
-    async fn test_401_unauthorized_retries_3_times() {
+    async fn test_401_unauthorized_aborts_no_retry() {
         let server = MockServer::start().await;
         Mock::given(method("POST"))
             .and(path("/orders/"))
             .respond_with(ResponseTemplate::new(401).set_body_string(r#"{"error":"Invalid credentials"}"#))
-            .expect(3)
+            .expect(1) /* [064A-15] 1 request, no 3 */
             .mount(&server)
             .await;
 
@@ -575,8 +632,8 @@ mod tests {
         let config = mock_config("token-malo", true);
         let url = format!("{}/orders/", server.uri());
 
-        let _ = HaddockService::send_order_http(&venta, &config, &url).await;
-        /* wiremock verifica que hubo exactamente 3 intentos */
+        let result = HaddockService::send_order_http(&venta, &config, &url).await;
+        assert!(result.is_err(), "401 debe retornar Err");
     }
 
     #[tokio::test]
@@ -657,8 +714,11 @@ mod tests {
         let _ = HaddockService::send_order_http(&venta, &config, &url).await;
     }
 
+    /* [064A-15] Verifica que el JSON usa los nombres exactos que espera Haddock.
+     * "externalID" (capital ID) — NO "externalId" (camelCase genérico).
+     * "pricePerUnit" (camelCase normal) — NO "price_per_unit" (snake_case). */
     #[tokio::test]
-    async fn test_json_has_camel_case_keys() {
+    async fn test_json_has_correct_haddock_field_names() {
         let venta = mock_venta();
         let order = HaddockService::map_venta_to_order(&venta);
         let payload = HaddockOrdersPayload {
@@ -666,9 +726,11 @@ mod tests {
         };
         let json = serde_json::to_string(&payload).unwrap();
 
-        /* Haddock espera camelCase, no snake_case */
-        assert!(json.contains("externalId"), "Debe usar camelCase: externalId");
+        /* Haddock exige "externalID" con ID en mayúsculas */
+        assert!(json.contains("externalID"), "Debe usar externalID (capital ID): {json}");
         assert!(json.contains("pricePerUnit"), "Debe usar camelCase: pricePerUnit");
+        /* No debe contener las variantes incorrectas */
+        assert!(!json.contains("\"externalId\""), "No debe usar externalId (lowercase d)");
         assert!(!json.contains("external_id"), "No debe usar snake_case");
         assert!(!json.contains("price_per_unit"), "No debe usar snake_case");
     }
@@ -742,14 +804,14 @@ mod tests {
     }
 
     /* Test 3: Token inválido → 401 → error con mensaje que incluye "401".
-     * Simula: token malo configurado, todos los syncs fallan con unauthorized. */
+     * [064A-15] Actualizado: ya no reintenta en 401 — solo 1 request. */
     #[tokio::test]
     async fn test_invalid_token_401_returns_error_msg() {
         let server = MockServer::start().await;
         Mock::given(method("POST"))
             .and(path("/orders/"))
             .respond_with(ResponseTemplate::new(401))
-            .expect(3)
+            .expect(1) /* [064A-15] 1, no 3 — auth failures no se reintentan */
             .mount(&server)
             .await;
 
@@ -798,15 +860,14 @@ mod tests {
         assert!(result.is_ok(), "Token vacío → Ok, no Err");
     }
 
-    /* Test 7: HTTP 403 Forbidden también se reintenta 3 veces.
-     * Cubre respuestas no-estándar de Haddock. */
+    /* Test 7: HTTP 403 Forbidden — [064A-15] ya NO se reintenta (error permanente). */
     #[tokio::test]
-    async fn test_403_forbidden_retries_3_times() {
+    async fn test_403_forbidden_aborts_no_retry() {
         let server = MockServer::start().await;
         Mock::given(method("POST"))
             .and(path("/orders/"))
             .respond_with(ResponseTemplate::new(403))
-            .expect(3)
+            .expect(1) /* [064A-15] 1 request, no 3 */
             .mount(&server)
             .await;
 
@@ -883,6 +944,98 @@ mod tests {
             let map = SYNC_LOCKS.lock().expect("SYNC_LOCKS poisoned");
             assert!(!map.contains_key(&venta_id), "Lock debe eliminarse tras cleanup con 1 referencia");
         }
+    }
+
+    /* ── [064A-15] Tests de auditoría — correcciones críticas ──── */
+
+    /* Test 064A-15-1: 401 no se reintenta — aborta inmediatamente.
+     * Haddock devuelve 401 = credenciales inválidas, reintentar no sirve. */
+    #[tokio::test]
+    async fn test_401_aborts_immediately_no_retry() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/orders/"))
+            .respond_with(ResponseTemplate::new(401))
+            .expect(1) /* Solo 1 request, no 3 */
+            .mount(&server)
+            .await;
+
+        let venta = mock_venta();
+        let config = mock_config("token-malo", true);
+        let url = format!("{}/orders/", server.uri());
+
+        let result = HaddockService::send_order_http(&venta, &config, &url).await;
+        assert!(result.is_err());
+        let msg = result.unwrap_err();
+        assert!(msg.contains("401"), "Error debe contener código: {msg}");
+        assert!(msg.contains("credenciales"), "Error debe mencionar credenciales: {msg}");
+    }
+
+    /* Test 064A-15-2: 403 no se reintenta — aborta inmediatamente. */
+    #[tokio::test]
+    async fn test_403_aborts_immediately_no_retry() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/orders/"))
+            .respond_with(ResponseTemplate::new(403))
+            .expect(1) /* Solo 1 request, no 3 */
+            .mount(&server)
+            .await;
+
+        let venta = mock_venta();
+        let config = mock_config("dG9rZW46c2VjcmV0", true);
+        let url = format!("{}/orders/", server.uri());
+
+        let result = HaddockService::send_order_http(&venta, &config, &url).await;
+        assert!(result.is_err());
+        let msg = result.unwrap_err();
+        assert!(msg.contains("403"), "Error debe contener código: {msg}");
+    }
+
+    /* Test 064A-15-3: 500 SÍ se reintenta 3 veces (transient server error). */
+    #[tokio::test]
+    async fn test_500_still_retries_3_times() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/orders/"))
+            .respond_with(ResponseTemplate::new(500))
+            .expect(3)
+            .mount(&server)
+            .await;
+
+        let venta = mock_venta();
+        let config = mock_config("dG9rZW46c2VjcmV0", true);
+        let url = format!("{}/orders/", server.uri());
+
+        let result = HaddockService::send_order_http(&venta, &config, &url).await;
+        assert!(result.is_err());
+    }
+
+    /* Test 064A-15-4: Sanitización de errores — 401 genera mensaje genérico. */
+    #[test]
+    fn test_sanitize_error_401() {
+        let raw = "Haddock rechazó credenciales (HTTP 401 Unauthorized)";
+        let sanitized = HaddockService::sanitize_error_msg(raw);
+        assert!(sanitized.contains("401"), "Debe incluir código");
+        assert!(sanitized.contains("autenticación"), "Debe ser genérico");
+        assert!(!sanitized.contains("Unauthorized"), "No debe filtrar detalle HTTP");
+    }
+
+    /* Test 064A-15-5: Sanitización de errores — 500 genera mensaje genérico. */
+    #[test]
+    fn test_sanitize_error_500() {
+        let raw = "Haddock respondió HTTP 500 Internal Server Error con body: {\"detail\":\"merchant xyz\"}";
+        let sanitized = HaddockService::sanitize_error_msg(raw);
+        assert!(sanitized.contains("servidor"), "Debe ser genérico");
+        assert!(!sanitized.contains("merchant"), "No debe filtrar info del merchant");
+    }
+
+    /* Test 064A-15-6: Sanitización trunca errores desconocidos a 120 chars. */
+    #[test]
+    fn test_sanitize_error_truncates_unknown() {
+        let raw = "X".repeat(300);
+        let sanitized = HaddockService::sanitize_error_msg(&raw);
+        assert!(sanitized.len() <= 150, "Debe estar truncado: {} chars", sanitized.len());
     }
 
     /* ── [064A-13] Tests de flujo completo con BD real ─────────── */
@@ -1005,9 +1158,12 @@ mod tests {
             .await.unwrap().unwrap();
         assert!(!updated.haddock_synced, "sync fallido → synced=false");
         assert!(updated.haddock_sync_error.is_some(), "Debe registrar error en BD");
+        /* [064A-15] El error ahora está sanitizado — no contiene código HTTP crudo,
+         * sino un mensaje genérico. Verificamos que menciona "servidor". */
         assert!(
-            updated.haddock_sync_error.as_deref().unwrap().contains("500"),
-            "Error debe incluir código HTTP"
+            updated.haddock_sync_error.as_deref().unwrap().contains("servidor"),
+            "Error sanitizado debe mencionar 'servidor': {:?}",
+            updated.haddock_sync_error
         );
     }
 
