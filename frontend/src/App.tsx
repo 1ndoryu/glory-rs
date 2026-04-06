@@ -9,6 +9,7 @@ import {BrowserRouter, Routes, Route, Navigate, useNavigate, useParams} from 're
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import {registrarNavigate} from './navegacionSPA';
 import {useAuthStore} from './stores/authStore';
+import {ScrollToTop} from './components/ui/ScrollToTop';
 
 /* Pages (ex-islands) */
 import {BienvenidaIsland} from './islands/BienvenidaIsland';
@@ -107,6 +108,7 @@ function App() {
         <QueryClientProvider client={queryClient}>
             <ToastContainer />
             <BrowserRouter>
+                <ScrollToTop />
                 <NavigateRegistrar />
                 <Routes>
                     <Route path="/" element={<HomeOrPanel />} />
