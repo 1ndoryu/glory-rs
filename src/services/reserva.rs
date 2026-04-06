@@ -534,10 +534,12 @@ impl ReservaService {
         match VentaRepository::create(pool, &data).await {
             Ok(venta) => {
                 /* [064A-5] Sincronizar venta automática con Haddock.
+                 * [064A-6] Ahora pasa pool para tracking de estado sync.
                  * La config ya está cargada — reutilizamos. */
                 let config_clone = config.clone();
+                let pool_clone = pool.clone();
                 tokio::spawn(async move {
-                    super::HaddockService::sync_order(&venta, &config_clone).await;
+                    super::HaddockService::sync_order(&pool_clone, &venta, &config_clone).await;
                 });
             }
             Err(e) => {

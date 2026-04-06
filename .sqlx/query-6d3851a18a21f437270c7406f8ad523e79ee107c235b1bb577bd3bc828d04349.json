@@ -77,6 +77,21 @@
         "ordinal": 14,
         "name": "cliente_id",
         "type_info": "Uuid"
+      },
+      {
+        "ordinal": 15,
+        "name": "haddock_synced",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 16,
+        "name": "haddock_synced_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 17,
+        "name": "haddock_sync_error",
+        "type_info": "Text"
       }
     ],
     "parameters": {
@@ -109,6 +124,9 @@
       false,
       false,
       false,
+      false,
+      true,
+      true,
       false,
       true,
       true

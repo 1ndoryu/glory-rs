@@ -128,7 +128,8 @@ impl VentaRepository {
                          THEN CONCAT(c.nombre, CASE WHEN c.apellidos != '' THEN CONCAT(' ', c.apellidos) ELSE '' END) \
                          ELSE NULL \
                     END AS nombre_cliente, \
-                    v.created_at, v.updated_at \
+                    v.created_at, v.updated_at, \
+                    v.haddock_synced, v.haddock_synced_at, v.haddock_sync_error \
              FROM ventas v \
              LEFT JOIN clientes c ON c.id = v.cliente_id \
              WHERE v.user_id = $1 \
@@ -274,5 +275,28 @@ impl VentaRepository {
         .fetch_one(pool)
         .await?;
         Ok(rec.total.unwrap_or_default())
+    }
+
+    /* [064A-6] Actualiza el estado de sincronización Haddock de una venta.
+     * Llamado por HaddockService después de cada intento de sync. */
+    pub async fn update_haddock_status(
+        pool: &PgPool,
+        id: Uuid,
+        synced: bool,
+        error_msg: Option<&str>,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query!(
+            "UPDATE ventas SET \
+             haddock_synced = $2, \
+             haddock_synced_at = CASE WHEN $2 THEN NOW() ELSE haddock_synced_at END, \
+             haddock_sync_error = $3 \
+             WHERE id = $1",
+            id,
+            synced,
+            error_msg
+        )
+        .execute(pool)
+        .await?;
+        Ok(())
     }
 }

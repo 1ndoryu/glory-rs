@@ -62,6 +62,10 @@ pub struct Venta {
     pub cliente_id: Option<Uuid>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
+    /* [064A-6] Tracking de sincronización con Haddock POS */
+    pub haddock_synced: bool,
+    pub haddock_synced_at: Option<DateTime<Utc>>,
+    pub haddock_sync_error: Option<String>,
 }
 
 /// Request para crear una venta
@@ -125,6 +129,10 @@ pub struct VentaConCliente {
     pub nombre_cliente: Option<String>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
+    /* [064A-6] Tracking de sincronización con Haddock POS */
+    pub haddock_synced: bool,
+    pub haddock_synced_at: Option<DateTime<Utc>>,
+    pub haddock_sync_error: Option<String>,
 }
 
 /// Query params para listar ventas con filtro por fecha

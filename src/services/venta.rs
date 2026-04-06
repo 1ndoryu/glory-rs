@@ -142,6 +142,7 @@ impl VentaService {
     }
 
     /* [064A-5] Lanza sincronización con Haddock en un task independiente.
+     * [064A-6] Ahora pasa pool para actualizar estado sync en BD.
      * No bloquea ni falla la operación principal. */
     fn spawn_haddock_sync(pool: PgPool, user_id: Uuid, venta: Venta) {
         tokio::spawn(async move {
@@ -152,7 +153,7 @@ impl VentaService {
                     return;
                 }
             };
-            HaddockService::sync_order(&venta, &config).await;
+            HaddockService::sync_order(&pool, &venta, &config).await;
         });
     }
 

@@ -1430,6 +1430,11 @@ export interface Venta {
   created_at: string;
   descripcion: string;
   fecha: string;
+  /** @nullable */
+  haddock_sync_error?: string | null;
+  haddock_synced: boolean;
+  /** @nullable */
+  haddock_synced_at?: string | null;
   id: string;
   importe_base: string;
   importe_iva: string;
@@ -1451,6 +1456,11 @@ export interface VentaConCliente {
   created_at: string;
   descripcion: string;
   fecha: string;
+  /** @nullable */
+  haddock_sync_error?: string | null;
+  haddock_synced: boolean;
+  /** @nullable */
+  haddock_synced_at?: string | null;
   id: string;
   importe_base: string;
   importe_iva: string;

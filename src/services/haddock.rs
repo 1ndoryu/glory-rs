@@ -5,9 +5,11 @@
 
 use reqwest::Client;
 use serde::Serialize;
+use sqlx::PgPool;
 use tracing::{info, warn};
 
 use crate::models::{ConfiguracionRestaurante, Venta};
+use crate::repositories::VentaRepository;
 
 const HADDOCK_API_BASE: &str = "https://pos-api.haddock.app";
 const MAX_RETRIES: u32 = 3;
@@ -55,18 +57,47 @@ pub struct HaddockService;
 
 impl HaddockService {
     /// Sincroniza una venta con Haddock. Se ejecuta en background (`tokio::spawn`).
-    /// No falla la operación principal — solo loguea errores.
-    pub async fn sync_order(venta: &Venta, config: &ConfiguracionRestaurante) {
+    /// Actualiza `haddock_synced`/`haddock_sync_error` en BD tras cada intento.
+    pub async fn sync_order(pool: &PgPool, venta: &Venta, config: &ConfiguracionRestaurante) {
         let url = format!("{HADDOCK_API_BASE}/orders/");
-        Self::sync_order_to_url(venta, config, &url).await;
+        Self::sync_order_to_url(pool, venta, config, &url).await;
     }
 
-    /* [064A-5] Núcleo de sincronización con URL inyectable para testing.
-     * En producción se llama vía sync_order() con la URL real de Haddock.
-     * En tests se llama directamente con la URL del mock server. */
-    async fn sync_order_to_url(venta: &Venta, config: &ConfiguracionRestaurante, url: &str) {
+    /* [064A-6] Orquesta sync + actualización de estado en BD.
+     * Separa HTTP (send_order_http) de persistencia para testabilidad. */
+    async fn sync_order_to_url(
+        pool: &PgPool,
+        venta: &Venta,
+        config: &ConfiguracionRestaurante,
+        url: &str,
+    ) {
         if !config.haddock_sync_enabled || config.haddock_api_token.is_empty() {
             return;
+        }
+
+        match Self::send_order_http(venta, config, url).await {
+            Ok(()) => {
+                if let Err(e) = VentaRepository::update_haddock_status(pool, venta.id, true, None).await {
+                    warn!("[064A-6] Error actualizando status sync de venta {}: {e}", venta.id);
+                }
+            }
+            Err(error_msg) => {
+                if let Err(e) = VentaRepository::update_haddock_status(pool, venta.id, false, Some(&error_msg)).await {
+                    warn!("[064A-6] Error actualizando status sync fallido de venta {}: {e}", venta.id);
+                }
+            }
+        }
+    }
+
+    /* [064A-6] Lógica HTTP pura: mapea, envía con retry, retorna Ok/Err.
+     * No toca BD — testeable con wiremock sin PgPool. */
+    async fn send_order_http(
+        venta: &Venta,
+        config: &ConfiguracionRestaurante,
+        url: &str,
+    ) -> Result<(), String> {
+        if !config.haddock_sync_enabled || config.haddock_api_token.is_empty() {
+            return Ok(());
         }
 
         let order = Self::map_venta_to_order(venta);
@@ -75,29 +106,30 @@ impl HaddockService {
         };
 
         let token = &config.haddock_api_token;
+        let mut last_error = String::new();
 
-        /* Retry con backoff exponencial: 1s, 2s, 4s */
         for attempt in 0..MAX_RETRIES {
             match Self::send_request(url, token, &payload).await {
                 Ok(status) if status.is_success() => {
                     info!(
-                        "[064A-5] Venta {} sincronizada con Haddock (intento {})",
+                        "[064A-6] Venta {} sincronizada con Haddock (intento {})",
                         venta.id,
                         attempt + 1
                     );
-                    return;
+                    return Ok(());
                 }
                 Ok(status) => {
+                    last_error = format!("Haddock respondió HTTP {status}");
                     warn!(
-                        "[064A-5] Haddock respondió {} para venta {} (intento {})",
-                        status,
+                        "[064A-6] {last_error} para venta {} (intento {})",
                         venta.id,
                         attempt + 1
                     );
                 }
                 Err(e) => {
+                    last_error = format!("Error de red: {e}");
                     warn!(
-                        "[064A-5] Error de red sincronizando venta {} con Haddock (intento {}): {e}",
+                        "[064A-6] {last_error} sincronizando venta {} (intento {})",
                         venta.id,
                         attempt + 1
                     );
@@ -111,9 +143,10 @@ impl HaddockService {
         }
 
         warn!(
-            "[064A-5] Fallo definitivo sincronizando venta {} con Haddock después de {MAX_RETRIES} intentos",
+            "[064A-6] Fallo definitivo sincronizando venta {} con Haddock después de {MAX_RETRIES} intentos",
             venta.id
         );
+        Err(last_error)
     }
 
     /// Mapea una Venta de nuestra plataforma al formato que espera Haddock
@@ -231,6 +264,10 @@ mod tests {
             cliente_id: None,
             created_at: Utc::now(),
             updated_at: Utc::now(),
+            /* [064A-6] Campos de tracking Haddock */
+            haddock_synced: false,
+            haddock_synced_at: None,
+            haddock_sync_error: None,
         }
     }
 
@@ -360,7 +397,7 @@ mod tests {
         let config = mock_config("dG9rZW46c2VjcmV0", false);
         let url = format!("{}/orders/", server.uri());
 
-        HaddockService::sync_order_to_url(&venta, &config, &url).await;
+        let _ = HaddockService::send_order_http(&venta, &config, &url).await;
 
         /* Verificar que NO se hizo ningún request */
         let received = server.received_requests().await.unwrap();
@@ -374,7 +411,7 @@ mod tests {
         let config = mock_config("", true);
         let url = format!("{}/orders/", server.uri());
 
-        HaddockService::sync_order_to_url(&venta, &config, &url).await;
+        let _ = HaddockService::send_order_http(&venta, &config, &url).await;
 
         let received = server.received_requests().await.unwrap();
         assert!(received.is_empty(), "No debería enviar requests con token vacío");
@@ -387,7 +424,7 @@ mod tests {
         let config = mock_config("", false);
         let url = format!("{}/orders/", server.uri());
 
-        HaddockService::sync_order_to_url(&venta, &config, &url).await;
+        let _ = HaddockService::send_order_http(&venta, &config, &url).await;
 
         let received = server.received_requests().await.unwrap();
         assert!(received.is_empty(), "No debería enviar requests con ambos desactivados");
@@ -407,7 +444,7 @@ mod tests {
         let config = mock_config("dG9rZW46c2VjcmV0", true);
         let url = format!("{}/orders/", server.uri());
 
-        HaddockService::sync_order_to_url(&venta, &config, &url).await;
+        let _ = HaddockService::send_order_http(&venta, &config, &url).await;
         /* wiremock verifica automáticamente que se recibió exactamente 1 request */
     }
 
@@ -427,7 +464,7 @@ mod tests {
         let config = mock_config(token, true);
         let url = format!("{}/orders/", server.uri());
 
-        HaddockService::sync_order_to_url(&venta, &config, &url).await;
+        let _ = HaddockService::send_order_http(&venta, &config, &url).await;
     }
 
     #[tokio::test]
@@ -445,7 +482,7 @@ mod tests {
         let config = mock_config("dG9rZW46c2VjcmV0", true);
         let url = format!("{}/orders/", server.uri());
 
-        HaddockService::sync_order_to_url(&venta, &config, &url).await;
+        let _ = HaddockService::send_order_http(&venta, &config, &url).await;
     }
 
     #[tokio::test]
@@ -462,7 +499,7 @@ mod tests {
         let config = mock_config("token-malo", true);
         let url = format!("{}/orders/", server.uri());
 
-        HaddockService::sync_order_to_url(&venta, &config, &url).await;
+        let _ = HaddockService::send_order_http(&venta, &config, &url).await;
         /* wiremock verifica que hubo exactamente 3 intentos */
     }
 
@@ -480,7 +517,7 @@ mod tests {
         let config = mock_config("dG9rZW46c2VjcmV0", true);
         let url = format!("{}/orders/", server.uri());
 
-        HaddockService::sync_order_to_url(&venta, &config, &url).await;
+        let _ = HaddockService::send_order_http(&venta, &config, &url).await;
     }
 
     #[tokio::test]
@@ -506,7 +543,7 @@ mod tests {
         let config = mock_config("dG9rZW46c2VjcmV0", true);
         let url = format!("{}/orders/", server.uri());
 
-        HaddockService::sync_order_to_url(&venta, &config, &url).await;
+        let _ = HaddockService::send_order_http(&venta, &config, &url).await;
         /* Total: 2 requests (1 fallo + 1 éxito) */
     }
 
@@ -518,7 +555,7 @@ mod tests {
         let url = "http://127.0.0.1:1/orders/";
 
         /* Esto NO debe hacer panic — solo loguear el error */
-        HaddockService::sync_order_to_url(&venta, &config, url).await;
+        let _ = HaddockService::send_order_http(&venta, &config, url).await;
     }
 
     #[tokio::test]
@@ -541,7 +578,7 @@ mod tests {
         let config = mock_config("dG9rZW46c2VjcmV0", true);
         let url = format!("{}/orders/", server.uri());
 
-        HaddockService::sync_order_to_url(&venta, &config, &url).await;
+        let _ = HaddockService::send_order_http(&venta, &config, &url).await;
     }
 
     #[tokio::test]

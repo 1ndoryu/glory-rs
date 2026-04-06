@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE ventas SET haddock_synced = $2, haddock_synced_at = CASE WHEN $2 THEN NOW() ELSE haddock_synced_at END, haddock_sync_error = $3 WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Bool",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "57eb4837966590bc2af36b0c969c9334cbe811b96708376bc7751012b5125230"
+}
