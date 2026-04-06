@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import {useTranslation} from 'react-i18next';
-import {Github, Globe, ExternalLink, Package} from 'lucide-react';
+import {GitBranch, Globe, ExternalLink, Package} from 'lucide-react';
 import {spaClick} from '../navegacionSPA';
 import {useChatStore} from '../stores/chatStore';
 import '../styles/variables.css';
@@ -31,7 +31,7 @@ interface ProyectoIndividualIslandProps {
 
 /* [064A-8] Icono según tipo de enlace */
 const ICONOS_ENLACE: Record<string, React.FC<{size?: number}>> = {
-    github: Github,
+    github: GitBranch,
     web: Globe,
     npm: Package,
     demo: ExternalLink
