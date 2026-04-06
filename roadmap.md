@@ -31,9 +31,7 @@
 ## Tareas pendientes
 
 ### Robustez Haddock (plan: Agente/planes/plan-haddock-robustez-2026-04-06.md)
-- 064A-6: Tracking de sincronización — migración BD (haddock_synced, haddock_synced_at, haddock_sync_error en ventas), modelo, repo, servicio actualiza estado post-sync
 - 064A-7: Prevención de duplicados — guard synced=true, distinguir CREATE/UPDATE, mutex por venta
-- 064A-8: Bloquear eliminación de ventas cuando sync Haddock activo (petición cliente) — backend 409 + frontend ocultar botón
 - 064A-9: Alertas UI edición — dialog confirmación al editar venta sincronizada, badge estado sync en lista, tooltips
 - 064A-10: Retry manual + log visible — endpoint POST /api/ventas/{id}/haddock-sync, botón reintentar, filtro por estado
 - 064A-11: Tests simulación exhaustivos — 10 tests de flujo completo con wiremock

@@ -4,7 +4,8 @@
  * [283A-28] Filtros de fecha (desde/hasta) extraídos a useListaVentas hook.
  * [034A-5] Columna "Cliente" con nombre_cliente + botón para ver reserva asociada.
  * [044A-8+9] Buscador + cabeceras de columna clicables para ordenar (sort_by/sort_order).
- * [064A-3] Filtros por columna en Turno, Canal y Método de pago con ColumnFilterHeader. */
+ * [064A-3] Filtros por columna en Turno, Canal y Método de pago con ColumnFilterHeader.
+ * [064A-8] Botón eliminar oculto cuando sync Haddock activo (petición cliente). */
 
 import { useState } from 'react';
 import useListaVentas from '../hooks/useListaVentas';
@@ -44,6 +45,7 @@ function ListaVentas() {
     ventas,
     isLoading,
     eliminarMutation,
+    haddockSyncEnabled,
     cerrarModalYRefrescar,
     cerrarEdicionYRefrescar,
     reservaIdViewer,
@@ -280,15 +282,19 @@ function ListaVentas() {
                         >
                           <Pencil className="size-4" />
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => eliminarMutation.mutate({ id: v.id })}
-                          disabled={eliminarMutation.isPending}
-                          title="Eliminar"
-                        >
-                          <Trash2 className="size-4 text-destructive" />
-                        </Button>
+                        {/* [064A-8] Botón de eliminar bloqueado cuando sync Haddock activo.
+                         * El backend también rechaza con 409, pero mejor prevenir en UI. */}
+                        {!haddockSyncEnabled && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => eliminarMutation.mutate({ id: v.id })}
+                            disabled={eliminarMutation.isPending}
+                            title="Eliminar"
+                          >
+                            <Trash2 className="size-4 text-destructive" />
+                          </Button>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>

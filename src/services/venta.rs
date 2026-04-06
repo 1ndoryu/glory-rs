@@ -157,7 +157,18 @@ impl VentaService {
         });
     }
 
+    /* [064A-8] Eliminar venta — bloqueado si sincronización Haddock está activa.
+     * Haddock no tiene endpoint DELETE, así que eliminar localmente
+     * crearía inconsistencia. El cliente pide explícitamente bloquear. */
     pub async fn delete(pool: &PgPool, id: Uuid, user_id: Uuid) -> Result<(), AppError> {
+        let config = ConfiguracionRepository::obtener_o_crear(pool, user_id).await?;
+        if config.haddock_sync_enabled {
+            return Err(AppError::Conflict(
+                "No se pueden eliminar ventas mientras la sincronización con Haddock está activa. \
+                 Desactívela primero en Configuración.".into()
+            ));
+        }
+
         if !VentaRepository::delete(pool, id, user_id).await? {
             return Err(AppError::NotFound("Venta no encontrada".into()));
         }

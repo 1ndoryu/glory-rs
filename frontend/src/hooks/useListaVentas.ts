@@ -2,10 +2,13 @@
  * Maneja paginación, filtros de fecha (desde/hasta) y modales.
  * [034A-5] VentaConCliente con nombre_cliente + visor de reserva asociada.
  * [044A-8+9] Búsqueda y ordenamiento por columnas (sort_by/sort_order).
- * [064A-3] Filtros por columna: turno, canal, metodo_pago (multi-valor). */
+ * [064A-3] Filtros por columna: turno, canal, metodo_pago (multi-valor).
+ * [064A-8] Bloqueo de eliminación: expone haddockSyncEnabled, toast 409. */
 
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { useListarVentas, useEliminarVenta, useObtenerReserva, VentaConCliente } from '../api/generated';
+import { useObtenerConfiguracion } from '../api/generated/configuracion/configuracion';
 
 interface FiltrosVentas {
   pagina: number;
@@ -52,8 +55,28 @@ function useListaVentas() {
   });
 
   const eliminarMutation = useEliminarVenta({
-    mutation: { onSuccess: () => { refetch(); } },
+    mutation: {
+      onSuccess: () => { refetch(); },
+      /* [064A-8] Manejo de error 409 — Haddock sync activo bloquea eliminación */
+      onError: (err: unknown) => {
+        const status = (err as { status?: number })?.status
+          ?? (err as { response?: { status?: number } })?.response?.status;
+        if (status === 409) {
+          toast.error('Eliminación bloqueada', {
+            description: 'La sincronización con Haddock está activa. Desactívela en Configuración para poder eliminar ventas.',
+          });
+        } else {
+          toast.error('Error al eliminar la venta');
+        }
+      },
+    },
   });
+
+  /* [064A-8] Leer config para saber si sync Haddock está habilitado */
+  const { data: configData } = useObtenerConfiguracion();
+  const haddockSyncEnabled = configData?.status === 200
+    ? configData.data.haddock_sync_enabled
+    : false;
 
   const ventas = data?.status === 200 ? data.data : null;
 
@@ -112,6 +135,7 @@ function useListaVentas() {
     ventas,
     isLoading,
     eliminarMutation,
+    haddockSyncEnabled,
     cerrarModalYRefrescar,
     cerrarEdicionYRefrescar,
     reservaIdViewer,
