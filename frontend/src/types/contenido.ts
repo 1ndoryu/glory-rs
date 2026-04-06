@@ -22,6 +22,12 @@ export interface PostBlog {
     imagen?: string;
 }
 
+export interface EnlaceProyecto {
+    tipo: 'github' | 'web' | 'npm' | 'demo';
+    url: string;
+    etiqueta?: string;
+}
+
 export interface Proyecto {
     id: number | string;
     titulo: string;
@@ -33,6 +39,9 @@ export interface Proyecto {
     link?: string;
     skills?: Skill[];
     galeria?: string[];
+    /* [064A-8] Detalles técnicos y enlaces del proyecto */
+    tecnologias?: string[];
+    enlaces?: EnlaceProyecto[];
 }
 
 export interface CategoriaShowcase {

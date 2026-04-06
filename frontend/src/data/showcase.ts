@@ -19,7 +19,13 @@ const PROYECTOS_FALLBACK: Proyecto[] = [
             {id: 3, titulo: 'DAW Integrado', descripcion: 'Workstation de audio embebida para previsualizar y mezclar samples.'},
             {id: 4, titulo: 'Red Social', descripcion: 'Colecciones, tableros, "ver más ideas" y perfiles de usuario.'}
         ],
-        galeria: ['/assets/Kamples/1.jpg', '/assets/Kamples/2.jpg', '/assets/Kamples/3.jpg']
+        galeria: ['/assets/Kamples/1.jpg', '/assets/Kamples/2.jpg', '/assets/Kamples/3.jpg'],
+        /* [064A-8] Detalles técnicos del proyecto */
+        tecnologias: ['React', 'Node.js', 'PostgreSQL', 'Web Audio API', 'Redis'],
+        enlaces: [
+            {tipo: 'github', url: 'https://github.com/1ndoryu/kamples'},
+            {tipo: 'web', url: 'https://kamples.com'}
+        ]
     },
     {
         id: 'mabuhay',
@@ -34,7 +40,11 @@ const PROYECTOS_FALLBACK: Proyecto[] = [
             {id: 2, titulo: 'Branding', descripcion: 'Identidad visual inspirada en la hospitalidad filipina.'},
             {id: 3, titulo: 'Content Strategy', descripcion: 'Fotografía y textos que invitan a explorar.'}
         ],
-        galeria: ['/assets/Mabuhay/1.png', '/assets/Mabuhay/2.jpg', '/assets/Mabuhay/3.jpg']
+        galeria: ['/assets/Mabuhay/1.png', '/assets/Mabuhay/2.jpg', '/assets/Mabuhay/3.jpg'],
+        tecnologias: ['WordPress', 'PHP', 'JavaScript', 'Figma'],
+        enlaces: [
+            {tipo: 'web', url: 'https://mabuhay.es'}
+        ]
     },
     {
         id: 'guillermochatbot',
@@ -47,6 +57,10 @@ const PROYECTOS_FALLBACK: Proyecto[] = [
         skills: [
             {id: 1, titulo: 'AI Chatbot', descripcion: 'Asistente conversacional entrenado con contexto personal.'},
             {id: 2, titulo: 'Web Design', descripcion: 'Portfolio moderno con interacciones fluidas.'}
+        ],
+        tecnologias: ['React', 'OpenAI API', 'Vercel', 'TypeScript'],
+        enlaces: [
+            {tipo: 'web', url: 'https://guillermochatbot.es'}
         ]
     },
     {
@@ -60,7 +74,9 @@ const PROYECTOS_FALLBACK: Proyecto[] = [
         skills: [
             {id: 1, titulo: 'Product Design', descripcion: 'UX centrada en flujos de productividad real.'},
             {id: 2, titulo: 'App Development', descripcion: 'Desarrollo mobile-first con sincronización en tiempo real.'}
-        ]
+        ],
+        tecnologias: ['React Native', 'Firebase', 'TypeScript'],
+        enlaces: []
     },
     {
         id: 'material-de-padel',
@@ -73,6 +89,10 @@ const PROYECTOS_FALLBACK: Proyecto[] = [
         skills: [
             {id: 1, titulo: 'E-commerce', descripcion: 'Tienda con catálogo filtrable y checkout optimizado.'},
             {id: 2, titulo: 'SEO & Content', descripcion: 'Estrategia de contenido para posicionamiento orgánico.'}
+        ],
+        tecnologias: ['WordPress', 'WooCommerce', 'PHP', 'SEO'],
+        enlaces: [
+            {tipo: 'web', url: 'https://materialdepadel.com'}
         ]
     }
 ];

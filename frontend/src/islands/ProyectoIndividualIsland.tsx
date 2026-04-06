@@ -5,6 +5,7 @@
  */
 import React from 'react';
 import {useTranslation} from 'react-i18next';
+import {Github, Globe, ExternalLink, Package} from 'lucide-react';
 import {spaClick} from '../navegacionSPA';
 import {useChatStore} from '../stores/chatStore';
 import '../styles/variables.css';
@@ -28,6 +29,14 @@ interface ProyectoIndividualIslandProps {
     slug?: string;
 }
 
+/* [064A-8] Icono según tipo de enlace */
+const ICONOS_ENLACE: Record<string, React.FC<{size?: number}>> = {
+    github: Github,
+    web: Globe,
+    npm: Package,
+    demo: ExternalLink
+};
+
 /* Tarjeta de proyecto relacionado */
 const TarjetaRelacionado: React.FC<{proyecto: Proyecto}> = ({proyecto}) => (
     <a href={proyecto.link || '#'} className="proyectoRelacionadoCard" onClick={e => { if (proyecto.link) spaClick(e, proyecto.link); }}>
@@ -50,6 +59,8 @@ export const ProyectoIndividualIsland = ({titulo = 'Proyecto', descripcion = '',
     const desc = descripcion || proyectoContexto?.descripcion || '';
     const cats = categorias || (Array.isArray(proyectoContexto?.categorias) ? proyectoContexto.categorias.join(', ') : proyectoContexto?.categorias || '');
     const galeria = proyectoContexto?.galeria || [];
+    const tecnologias = proyectoContexto?.tecnologias || [];
+    const enlaces = proyectoContexto?.enlaces || [];
 
     /* Proyectos relacionados: misma categoría, excluyendo el actual */
     const categoriasArray = cats.split(',').map(c => c.trim().toLowerCase());
@@ -75,6 +86,32 @@ export const ProyectoIndividualIsland = ({titulo = 'Proyecto', descripcion = '',
                     </div>
                     <h1 className="proyectoHeroTitulo">{titulo}</h1>
                     {desc && <p className="proyectoHeroDescripcion">{desc}</p>}
+
+                    {/* [064A-8] Detalles técnicos: tecnologías y enlaces */}
+                    {(tecnologias.length > 0 || enlaces.length > 0) && (
+                        <div className="proyectoHeroDetalles">
+                            {tecnologias.length > 0 && (
+                                <div className="proyectoHeroTecnologias">
+                                    {tecnologias.map(tech => (
+                                        <span key={tech} className="proyectoHeroTechTag">{tech}</span>
+                                    ))}
+                                </div>
+                            )}
+                            {enlaces.length > 0 && (
+                                <div className="proyectoHeroEnlaces">
+                                    {enlaces.map(enlace => {
+                                        const Icono = ICONOS_ENLACE[enlace.tipo] || ExternalLink;
+                                        return (
+                                            <a key={enlace.url} href={enlace.url} target="_blank" rel="noopener noreferrer" className="proyectoHeroEnlace">
+                                                <Icono size={16} />
+                                                <span>{enlace.etiqueta || enlace.tipo}</span>
+                                            </a>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             </section>
 

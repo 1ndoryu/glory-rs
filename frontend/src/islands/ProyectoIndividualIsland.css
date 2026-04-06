@@ -59,6 +59,54 @@
     margin: var(--spacing-md) 0 0;
 }
 
+/* [064A-8] Detalles técnicos en el hero: tecnologías y enlaces */
+.proyectoHeroDetalles {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-md);
+}
+
+.proyectoHeroTecnologias {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+}
+
+.proyectoHeroTechTag {
+    font-family: var(--font-primary);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    background: var(--bg-accent);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+}
+
+.proyectoHeroEnlaces {
+    display: flex;
+    gap: var(--spacing-md);
+}
+
+.proyectoHeroEnlace {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-family: var(--font-primary);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--text-dark);
+    text-decoration: none;
+    text-transform: capitalize;
+    transition: color var(--transicion-rapida);
+}
+
+.proyectoHeroEnlace:hover {
+    color: var(--brand-primary);
+}
+
 /* Imagen principal */
 .proyectoImagenPrincipal {
     padding: 0;
@@ -163,5 +211,9 @@
 
     .proyectoRelacionadosGrid {
         grid-template-columns: 1fr;
+    }
+
+    .proyectoHeroEnlaces {
+        flex-wrap: wrap;
     }
 }
