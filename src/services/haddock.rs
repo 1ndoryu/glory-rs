@@ -884,4 +884,158 @@ mod tests {
             assert!(!map.contains_key(&venta_id), "Lock debe eliminarse tras cleanup con 1 referencia");
         }
     }
+
+    /* ── [064A-13] Tests de flujo completo con BD real ─────────── */
+    /* Estos tests usan #[sqlx::test] para crear una BD temporal con migraciones.
+     * Necesitan acceso a sync_order_to_url (privado) para inyectar URL de wiremock.
+     * Flujo: crear usuario → crear venta en BD → sync con wiremock → verificar BD. */
+
+    async fn create_test_user(pool: &sqlx::PgPool) -> Uuid {
+        let id = Uuid::new_v4();
+        let email = format!("test-{id}@example.com");
+        sqlx::query("INSERT INTO users (id, email, password_hash) VALUES ($1, $2, $3)")
+            .bind(id)
+            .bind(&email)
+            .bind("argon2_hash_placeholder")
+            .execute(pool)
+            .await
+            .expect("create_test_user falló");
+        id
+    }
+
+    async fn create_test_config(
+        pool: &sqlx::PgPool,
+        user_id: Uuid,
+        token: &str,
+        enabled: bool,
+    ) -> ConfiguracionRestaurante {
+        use crate::repositories::ConfiguracionRepository;
+        use crate::models::ActualizarConfiguracionRequest;
+
+        ConfiguracionRepository::obtener_o_crear(pool, user_id).await.unwrap();
+        let req = ActualizarConfiguracionRequest {
+            haddock_sync_enabled: Some(enabled),
+            haddock_api_token: Some(token.to_string()),
+            url_haddock: None,
+            reserva_email_obligatorio: None,
+            reserva_telefono_obligatorio: None,
+            reserva_nombre_obligatorio: None,
+            reserva_apellidos_obligatorio: None,
+            iva_por_defecto: None,
+            nombre_restaurante: None,
+            groq_api_key: None,
+            auto_venta_reserva: None,
+            hora_desayuno_inicio: None,
+            hora_desayuno_fin: None,
+            hora_comida_inicio: None,
+            hora_comida_fin: None,
+            hora_cena_inicio: None,
+            hora_cena_fin: None,
+        };
+        ConfiguracionRepository::actualizar(pool, user_id, &req).await.unwrap()
+    }
+
+    async fn create_test_venta(pool: &sqlx::PgPool, user_id: Uuid) -> Venta {
+        use crate::repositories::venta::{NuevaVenta, VentaRepository};
+
+        let data = NuevaVenta {
+            user_id,
+            fecha: NaiveDate::from_ymd_opt(2026, 4, 6).unwrap(),
+            comensales: Some(2),
+            descripcion: "Test DB flow",
+            iva_porcentaje: Decimal::from(10),
+            turno: "mediodia",
+            canal: "comedor",
+            metodo_pago: "tarjeta",
+            importe_base: Decimal::from_str("30.00").unwrap(),
+            importe_iva: Decimal::from_str("3.00").unwrap(),
+            reserva_id: None,
+            cliente_id: None,
+        };
+        VentaRepository::create(pool, &data).await.unwrap()
+    }
+
+    /* Test DB-1: Flujo completo sync exitoso → haddock_synced=true en BD.
+     * Crea venta real → wiremock responde 200 → verifica que update_haddock_status
+     * persistió synced=true y timestamp en la BD real. */
+    #[sqlx::test(migrations = "./migrations")]
+    async fn test_db_sync_success_updates_haddock_status(pool: sqlx::PgPool) {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/orders/"))
+            .respond_with(ResponseTemplate::new(200))
+            .expect(1)
+            .mount(&server)
+            .await;
+
+        let user_id = create_test_user(&pool).await;
+        let config = create_test_config(&pool, user_id, "dG9rZW46c2VjcmV0", true).await;
+        let venta = create_test_venta(&pool, user_id).await;
+        let url = format!("{}/orders/", server.uri());
+
+        HaddockService::sync_order_to_url(&pool, &venta, &config, &url, false).await;
+
+        let updated = VentaRepository::find_by_id(&pool, venta.id, user_id)
+            .await.unwrap().unwrap();
+        assert!(updated.haddock_synced, "sync exitoso → synced=true en BD");
+        assert!(updated.haddock_synced_at.is_some(), "Debe persistir timestamp");
+        assert!(updated.haddock_sync_error.is_none(), "Sin error en BD");
+    }
+
+    /* Test DB-2: Flujo completo sync fallido → error registrado en BD.
+     * Wiremock responde 500 3 veces → verifica que haddock_sync_error se persistió. */
+    #[sqlx::test(migrations = "./migrations")]
+    async fn test_db_sync_failure_records_error_in_db(pool: sqlx::PgPool) {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/orders/"))
+            .respond_with(ResponseTemplate::new(500))
+            .expect(3)
+            .mount(&server)
+            .await;
+
+        let user_id = create_test_user(&pool).await;
+        let config = create_test_config(&pool, user_id, "dG9rZW46c2VjcmV0", true).await;
+        let venta = create_test_venta(&pool, user_id).await;
+        let url = format!("{}/orders/", server.uri());
+
+        HaddockService::sync_order_to_url(&pool, &venta, &config, &url, false).await;
+
+        let updated = VentaRepository::find_by_id(&pool, venta.id, user_id)
+            .await.unwrap().unwrap();
+        assert!(!updated.haddock_synced, "sync fallido → synced=false");
+        assert!(updated.haddock_sync_error.is_some(), "Debe registrar error en BD");
+        assert!(
+            updated.haddock_sync_error.as_deref().unwrap().contains("500"),
+            "Error debe incluir código HTTP"
+        );
+    }
+
+    /* Test DB-3: Guard de duplicados — venta ya synced + is_update=false → no HTTP.
+     * Verifica flujo real: BD marca synced → segundo sync con create → skip. */
+    #[sqlx::test(migrations = "./migrations")]
+    async fn test_db_dedup_guard_skips_already_synced(pool: sqlx::PgPool) {
+        let server = MockServer::start().await;
+        /* Si se hace algún request, el test falla (expect 0) */
+        Mock::given(method("POST"))
+            .and(path("/orders/"))
+            .respond_with(ResponseTemplate::new(200))
+            .expect(0)
+            .mount(&server)
+            .await;
+
+        let user_id = create_test_user(&pool).await;
+        let config = create_test_config(&pool, user_id, "dG9rZW46c2VjcmV0", true).await;
+        let venta = create_test_venta(&pool, user_id).await;
+
+        /* Marcar como synced manualmente */
+        VentaRepository::update_haddock_status(&pool, venta.id, true, None)
+            .await
+            .unwrap();
+
+        let url = format!("{}/orders/", server.uri());
+        /* is_update=false → guard de duplicados lee BD y encuentra synced=true → skip */
+        HaddockService::sync_order_to_url(&pool, &venta, &config, &url, false).await;
+        /* wiremock verifica que no se hizo ningún request */
+    }
 }

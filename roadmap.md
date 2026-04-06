@@ -31,8 +31,6 @@
 ## Tareas pendientes
 
 ### Robustez Haddock (plan: Agente/planes/plan-haddock-robustez-2026-04-06.md)
-(todas las fases completadas — 064A-6 a 064A-12, incluido filtro por estado detectado en revisión)
-
-- Sobre "Sin DB local (SQLx offline), los tests de flujo completo (create→sync→check DB) no son posibles" Entonces haz algo para que se pueda testear, claro que tenemos DB local.
+(todas las fases completadas — 064A-6 a 064A-13, incluido filtro por estado + tests DB con #[sqlx::test])
 
 - La tarea final sube todo al servidor.
