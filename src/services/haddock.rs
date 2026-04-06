@@ -1,11 +1,16 @@
 /* [064A-5] Servicio de sincronización unidireccional con Haddock POS API.
  * Envía ventas a Haddock cuando se crean o actualizan en nuestra plataforma.
  * API: https://pos-api.haddock.app (Basic Auth, POST /orders/, POST /catalog/)
- * Limitaciones: sin DELETE, sin GET, sin webhooks — solo push. */
+ * Limitaciones: sin DELETE, sin GET, sin webhooks — solo push.
+ * [064A-7] Prevención de duplicados: mutex por venta + guard en create si ya sincronizada. */
+
+use std::collections::HashMap;
+use std::sync::{Arc, LazyLock, Mutex as StdMutex};
 
 use reqwest::Client;
 use serde::Serialize;
 use sqlx::PgPool;
+use tokio::sync::Mutex as TokioMutex;
 use tracing::{info, warn};
 
 use crate::models::{ConfiguracionRestaurante, Venta};
@@ -13,6 +18,13 @@ use crate::repositories::VentaRepository;
 
 const HADDOCK_API_BASE: &str = "https://pos-api.haddock.app";
 const MAX_RETRIES: u32 = 3;
+
+/* [064A-7] Mapa de locks por venta. Evita que dos syncs concurrentes
+ * de la misma venta envíen duplicados a Haddock.
+ * El StdMutex exterior solo protege el HashMap (lock brevísimo).
+ * El TokioMutex interior se sostiene durante toda la operación HTTP. */
+static SYNC_LOCKS: LazyLock<StdMutex<HashMap<uuid::Uuid, Arc<TokioMutex<()>>>>> =
+    LazyLock::new(|| StdMutex::new(HashMap::new()));
 
 /* Estructuras que replica el schema OpenAPI de Haddock */
 
@@ -58,21 +70,72 @@ pub struct HaddockService;
 impl HaddockService {
     /// Sincroniza una venta con Haddock. Se ejecuta en background (`tokio::spawn`).
     /// Actualiza `haddock_synced`/`haddock_sync_error` en BD tras cada intento.
-    pub async fn sync_order(pool: &PgPool, venta: &Venta, config: &ConfiguracionRestaurante) {
+    /// `is_update`: true si la venta fue editada (siempre re-envía),
+    ///              false si es creación (skip si ya sincronizada).
+    pub async fn sync_order(
+        pool: &PgPool,
+        venta: &Venta,
+        config: &ConfiguracionRestaurante,
+        is_update: bool,
+    ) {
         let url = format!("{HADDOCK_API_BASE}/orders/");
-        Self::sync_order_to_url(pool, venta, config, &url).await;
+        Self::sync_order_to_url(pool, venta, config, &url, is_update).await;
     }
 
     /* [064A-6] Orquesta sync + actualización de estado en BD.
+     * [064A-7] Mutex por venta para evitar syncs concurrentes.
+     *          Guard: en create, si la venta ya está synced en BD, skip.
      * Separa HTTP (send_order_http) de persistencia para testabilidad. */
     async fn sync_order_to_url(
         pool: &PgPool,
         venta: &Venta,
         config: &ConfiguracionRestaurante,
         url: &str,
+        is_update: bool,
     ) {
         if !config.haddock_sync_enabled || config.haddock_api_token.is_empty() {
             return;
+        }
+
+        /* [064A-7] Adquirir lock exclusivo por venta. Si otro sync está en progreso
+         * para esta misma venta, skip silencioso — se evitan duplicados. */
+        let lock = {
+            let mut map = SYNC_LOCKS.lock().expect("SYNC_LOCKS poisoned");
+            map.entry(venta.id)
+                .or_insert_with(|| Arc::new(TokioMutex::new(())))
+                .clone()
+        };
+        let Ok(_guard) = lock.try_lock() else {
+            info!(
+                "[064A-7] Sync ya en progreso para venta {}, saltando duplicado",
+                venta.id
+            );
+            return;
+        };
+
+        /* [064A-7] Guard de duplicados en creación: re-leer venta de BD para verificar
+         * si otro sync ya la marcó como sincronizada mientras esperábamos. */
+        if !is_update {
+            match VentaRepository::find_by_id(pool, venta.id, venta.user_id).await {
+                Ok(Some(fresh)) if fresh.haddock_synced => {
+                    info!(
+                        "[064A-7] Venta {} ya sincronizada con Haddock, saltando create duplicado",
+                        venta.id
+                    );
+                    Self::cleanup_lock(venta.id);
+                    return;
+                }
+                Ok(None) => {
+                    warn!("[064A-7] Venta {} no encontrada en BD, abortando sync", venta.id);
+                    Self::cleanup_lock(venta.id);
+                    return;
+                }
+                Err(e) => {
+                    warn!("[064A-7] Error leyendo venta {} para guard: {e}", venta.id);
+                    /* Continuar con sync — es mejor intentar que silenciar */
+                }
+                _ => {} /* venta existe, no synced → continuar */
+            }
         }
 
         match Self::send_order_http(venta, config, url).await {
@@ -85,6 +148,19 @@ impl HaddockService {
                 if let Err(e) = VentaRepository::update_haddock_status(pool, venta.id, false, Some(&error_msg)).await {
                     warn!("[064A-6] Error actualizando status sync fallido de venta {}: {e}", venta.id);
                 }
+            }
+        }
+
+        Self::cleanup_lock(venta.id);
+    }
+
+    /* [064A-7] Limpia la entrada del mapa de locks si no hay otros usuarios.
+     * Previene memory leak en el HashMap estático. */
+    fn cleanup_lock(venta_id: uuid::Uuid) {
+        let mut map = SYNC_LOCKS.lock().expect("SYNC_LOCKS poisoned");
+        if let Some(entry) = map.get(&venta_id) {
+            if Arc::strong_count(entry) <= 2 {
+                map.remove(&venta_id);
             }
         }
     }

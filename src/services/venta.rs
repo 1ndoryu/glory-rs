@@ -53,7 +53,7 @@ impl VentaService {
         let venta = VentaRepository::create(pool, &data).await?;
 
         /* [064A-5] Sincronizar con Haddock en background (no bloquea la respuesta) */
-        Self::spawn_haddock_sync(pool.clone(), user_id, venta.clone());
+        Self::spawn_haddock_sync(pool.clone(), user_id, venta.clone(), false);
 
         Ok(venta)
     }
@@ -136,15 +136,16 @@ impl VentaService {
             .ok_or_else(|| AppError::NotFound("Venta no encontrada".into()))?;
 
         /* [064A-5] Re-sincronizar con Haddock tras actualización */
-        Self::spawn_haddock_sync(pool.clone(), user_id, venta.clone());
+        Self::spawn_haddock_sync(pool.clone(), user_id, venta.clone(), true);
 
         Ok(venta)
     }
 
     /* [064A-5] Lanza sincronización con Haddock en un task independiente.
      * [064A-6] Ahora pasa pool para actualizar estado sync en BD.
+     * [064A-7] is_update distingue create/update para prevención de duplicados.
      * No bloquea ni falla la operación principal. */
-    fn spawn_haddock_sync(pool: PgPool, user_id: Uuid, venta: Venta) {
+    fn spawn_haddock_sync(pool: PgPool, user_id: Uuid, venta: Venta, is_update: bool) {
         tokio::spawn(async move {
             let config = match ConfiguracionRepository::obtener_o_crear(&pool, user_id).await {
                 Ok(c) => c,
@@ -153,7 +154,7 @@ impl VentaService {
                     return;
                 }
             };
-            HaddockService::sync_order(&pool, &venta, &config).await;
+            HaddockService::sync_order(&pool, &venta, &config, is_update).await;
         });
     }
 

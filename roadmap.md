@@ -31,7 +31,6 @@
 ## Tareas pendientes
 
 ### Robustez Haddock (plan: Agente/planes/plan-haddock-robustez-2026-04-06.md)
-- 064A-7: Prevención de duplicados — guard synced=true, distinguir CREATE/UPDATE, mutex por venta
 - 064A-9: Alertas UI edición — dialog confirmación al editar venta sincronizada, badge estado sync en lista, tooltips
 - 064A-10: Retry manual + log visible — endpoint POST /api/ventas/{id}/haddock-sync, botón reintentar, filtro por estado
 - 064A-11: Tests simulación exhaustivos — 10 tests de flujo completo con wiremock
