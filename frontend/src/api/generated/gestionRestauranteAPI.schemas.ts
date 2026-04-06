@@ -1775,6 +1775,11 @@ canal?: string | null;
  */
 metodo_pago?: string | null;
 /**
+ * Filtro por estado Haddock (valores separados por coma: `synced,error,pending`)
+ * @nullable
+ */
+estado_haddock?: string | null;
+/**
  * Campo de ordenamiento: `fecha`, `importe_base`, `turno`, `canal`, `metodo_pago`
  * @nullable
  */

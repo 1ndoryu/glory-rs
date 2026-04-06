@@ -209,8 +209,25 @@ function ListaVentas() {
                   </TableHead>
                   <TableHead className="text-right">IVA</TableHead>
                   <TableHead className="text-right">Total</TableHead>
-                  {/* [064A-9] Columna de estado sync Haddock — solo visible cuando sync habilitado */}
-                  {haddockSyncEnabled && <TableHead className="w-20 text-center">Haddock</TableHead>}
+                  {/* [064A-9+12] Columna Haddock con filtro por estado (synced/error/pending) */}
+                  {haddockSyncEnabled && (
+                    <TableHead className="w-24">
+                      <ColumnFilterHeader
+                        title="Haddock"
+                        sortKey="haddock"
+                        currentSortBy={filtros.sortBy}
+                        currentSortOrder={filtros.sortOrder}
+                        onSort={() => {}}
+                        options={[
+                          { value: 'synced', label: 'Sincronizada' },
+                          { value: 'error', label: 'Con error' },
+                          { value: 'pending', label: 'Pendiente' },
+                        ]}
+                        selectedValues={filtros.estadoHaddock}
+                        onFilterChange={(v) => cambiarFiltroColumna('estadoHaddock', v)}
+                      />
+                    </TableHead>
+                  )}
                   <TableHead className="w-28"></TableHead>
                 </TableRow>
               </TableHeader>

@@ -76,6 +76,7 @@ impl VentaService {
         turno: Option<String>,
         canal: Option<String>,
         metodo_pago: Option<String>,
+        estado_haddock: Option<String>,
         sort_by: Option<String>,
         sort_order: Option<String>,
     ) -> Result<VentasPaginadas, AppError> {
@@ -83,7 +84,7 @@ impl VentaService {
             VentaRepository::list(
                 pool, user_id, page, per_page, desde, hasta,
                 busqueda.as_deref(), turno.as_deref(), canal.as_deref(), metodo_pago.as_deref(),
-                sort_by.as_deref(), sort_order.as_deref(),
+                estado_haddock.as_deref(), sort_by.as_deref(), sort_order.as_deref(),
             ).await?;
         Ok(VentasPaginadas {
             items,

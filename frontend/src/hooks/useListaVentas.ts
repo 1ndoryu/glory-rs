@@ -18,6 +18,7 @@ interface FiltrosVentas {
   turno: string[];
   canal: string[];
   metodoPago: string[];
+  estadoHaddock: string[];
   sortBy: string;
   sortOrder: 'asc' | 'desc';
 }
@@ -33,6 +34,7 @@ function useListaVentas() {
     turno: [],
     canal: [],
     metodoPago: [],
+    estadoHaddock: [],
     sortBy: '',
     sortOrder: 'desc',
   });
@@ -52,6 +54,7 @@ function useListaVentas() {
     turno: filtros.turno.length > 0 ? filtros.turno.join(',') : undefined,
     canal: filtros.canal.length > 0 ? filtros.canal.join(',') : undefined,
     metodo_pago: filtros.metodoPago.length > 0 ? filtros.metodoPago.join(',') : undefined,
+    estado_haddock: filtros.estadoHaddock.length > 0 ? filtros.estadoHaddock.join(',') : undefined,
     sort_by: filtros.sortBy || undefined,
     sort_order: filtros.sortOrder || undefined,
   });
@@ -154,8 +157,9 @@ function useListaVentas() {
     }));
   };
 
-  /* [064A-3] Actualizar filtro de columna (array de valores seleccionados) */
-  const cambiarFiltroColumna = (campo: 'turno' | 'canal' | 'metodoPago', valores: string[]) => {
+  /* [064A-3] Actualizar filtro de columna (array de valores seleccionados)
+   * [064A-12] Añadido estadoHaddock como filtro de columna. */
+  const cambiarFiltroColumna = (campo: 'turno' | 'canal' | 'metodoPago' | 'estadoHaddock', valores: string[]) => {
     setFiltros(prev => ({ ...prev, [campo]: valores, pagina: 1 }));
   };
 

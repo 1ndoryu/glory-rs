@@ -137,7 +137,8 @@ pub struct VentaConCliente {
 
 /// Query params para listar ventas con filtro por fecha
 /* [044A-8+9] Añadidos busqueda, sort_by, sort_order para buscador y ordenamiento.
- * [064A-3] Añadidos turno, canal, metodo_pago como filtros por columna (multi-valor separado por coma). */
+ * [064A-3] Añadidos turno, canal, metodo_pago como filtros por columna (multi-valor separado por coma).
+ * [064A-12] Filtro estado_haddock (multi-valor: synced, error, pending). */
 #[derive(Debug, Deserialize, IntoParams)]
 pub struct VentasQuery {
     #[serde(default = "default_page")]
@@ -156,6 +157,8 @@ pub struct VentasQuery {
     pub canal: Option<String>,
     /// Filtro por método de pago (valores separados por coma: `efectivo,tarjeta,transferencia`)
     pub metodo_pago: Option<String>,
+    /// Filtro por estado Haddock (valores separados por coma: `synced,error,pending`)
+    pub estado_haddock: Option<String>,
     /// Campo de ordenamiento: `fecha`, `importe_base`, `turno`, `canal`, `metodo_pago`
     pub sort_by: Option<String>,
     /// Dirección de orden: asc o desc. Por defecto desc
