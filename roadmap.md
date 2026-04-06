@@ -30,4 +30,4 @@
 
 ## Tareas pendientes
 
-- Revisa las tareas completadas y cosas que se hicieron despues de cliente\cliente\Proyecto restaurante\Data VII\Conversacion.md para responderle al cliente con un resumen de lo que se corrigio, y las mejoras, un mensaje resumido, algo como, hola Guillermo, feliz inicio de semana, disculpa la demora, tuve que arreglar unas cosas pero aproveche para hacer algunas mejoras, son varias cosas pero te dejo un resumen, blabla y resumes en una lista breve, luego aclaras que para lo de Haddock necesito acceso a una cuenta para revisar como manejan su servicio, yo he intentado registrarme pero no me deja. 
+(Sin tareas pendientes)
