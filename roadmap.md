@@ -43,7 +43,6 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 - 054A-19: Arregla todo lo que indica Code Sentinel - Reporte de Workspace, y los falsos positivos arreglalos en la extension
 - 054A-20: El modal de chat de ia no tiene sentido que sea el fondo de color negro
-- 054A-21: Todos los servicios tienen que tener 3 planes: Basico, Medio, y Avanzado (a todos les falta 1 plan)
 - 064A-4: El globo de chat no se ve redondo y esta vacío, y el bton de botonBase botonTexto botonMediano chatWidgetSendBtn tambien se ve vacío, estirado, con un color que no va y horrible.
 - 064A-5: La pagina de contacto ya no tiene sentido, todos los botones de contacto deben abrir el chat. 
 - 064A-7: Las imagenes de galería de los proyectos tienen que ser mas grande. 

@@ -1,6 +1,6 @@
 /**
  * [044A-32] Planes de precios unificados.
- * [044A-40] Eliminados tiers "A medida" — ahora solo 2 tiers por servicio.
+ * [054A-21] 3 tiers por servicio: Basico, Medio, Avanzado.
  * El botón "Conversar" reemplaza la funcionalidad personalizada.
  * Servicios activos: Web, Apps, IA, Branding, E-commerce, SEO, Marketing.
  */
@@ -29,13 +29,30 @@ export const PLANES_WEB: PlanesDeServicio = {
             ]
         },
         {
+            id: 'web-medio',
+            nombre: 'Medio',
+            precio: '$175',
+            descripcion: 'Sitio multi-pagina con blog y SEO basico incluido.',
+            ctaTexto: 'Elegir plan',
+            ctaLink: '/contacto/',
+            destacado: true,
+            caracteristicas: [
+                incluida('Hasta 3 paginas'),
+                incluida('Diseno responsive'),
+                incluida('Formulario de contacto'),
+                incluida('Hosting 6 meses incluido'),
+                incluida('Blog integrado'),
+                incluida('SEO on-page basico'),
+                noIncluida('Panel administrable'),
+            ]
+        },
+        {
             id: 'web-avanzado',
             nombre: 'Avanzado',
             precio: '$250',
             descripcion: 'Sitio completo con CMS, blog y optimizacion SEO.',
             ctaTexto: 'Elegir plan',
             ctaLink: '/contacto/',
-            destacado: true,
             caracteristicas: [
                 incluida('Hasta 5 paginas'),
                 incluida('Diseno responsive premium'),
@@ -72,13 +89,30 @@ export const PLANES_APPS: PlanesDeServicio = {
             ]
         },
         {
+            id: 'apps-medio',
+            nombre: 'Medio',
+            precio: '$350',
+            descripcion: 'App completa con panel de admin y autenticacion avanzada.',
+            ctaTexto: 'Elegir plan',
+            ctaLink: '/contacto/',
+            destacado: true,
+            caracteristicas: [
+                incluida('1 plataforma (web o movil)'),
+                incluida('Hasta 5 funcionalidades'),
+                incluida('Auth + roles de usuario'),
+                incluida('API REST completa'),
+                incluida('Panel de administracion'),
+                incluida('1 integracion externa'),
+                noIncluida('Soporte post-lanzamiento'),
+            ]
+        },
+        {
             id: 'apps-avanzado',
             nombre: 'Avanzado',
             precio: '$500',
             descripcion: 'App completa multi-plataforma con backend robusto.',
             ctaTexto: 'Elegir plan',
             ctaLink: '/contacto/',
-            destacado: true,
             caracteristicas: [
                 incluida('Web + Movil (React Native)'),
                 incluida('Hasta 8 funcionalidades'),
@@ -116,6 +150,25 @@ export const PLANES_IA: PlanesDeServicio = {
             ]
         },
         {
+            id: 'ia-medio',
+            nombre: 'Medio',
+            precio: '$150',
+            periodo: '/mes',
+            descripcion: 'Agente con IA generativa y analisis de conversaciones.',
+            ctaTexto: 'Elegir plan',
+            ctaLink: '/contacto/',
+            destacado: true,
+            caracteristicas: [
+                incluida('Hasta 2 agentes'),
+                incluida('Hasta 5,000 interacciones/mes'),
+                incluida('Multi-plataforma'),
+                incluida('IA generativa (GPT/Gemini)'),
+                incluida('Aprendizaje continuo'),
+                noIncluida('Dashboard de analisis'),
+                noIncluida('API personalizada'),
+            ]
+        },
+        {
             id: 'ia-avanzado',
             nombre: 'Avanzado',
             precio: '$300',
@@ -123,7 +176,6 @@ export const PLANES_IA: PlanesDeServicio = {
             descripcion: 'Agente inteligente con IA generativa y analisis.',
             ctaTexto: 'Elegir plan',
             ctaLink: '/contacto/',
-            destacado: true,
             caracteristicas: [
                 incluida('Hasta 3 agentes'),
                 incluida('Interacciones ilimitadas'),
@@ -160,13 +212,30 @@ export const PLANES_BRANDING: PlanesDeServicio = {
             ]
         },
         {
+            id: 'branding-medio',
+            nombre: 'Medio',
+            precio: '$275',
+            descripcion: 'Identidad visual con manual de marca y papeleria.',
+            ctaTexto: 'Elegir plan',
+            ctaLink: '/contacto/',
+            destacado: true,
+            caracteristicas: [
+                incluida('Diseno de logo (4 propuestas)'),
+                incluida('Paleta de colores extendida'),
+                incluida('Sistema tipografico'),
+                incluida('Manual de marca (PDF)'),
+                incluida('Papeleria corporativa'),
+                noIncluida('Kit redes sociales'),
+                noIncluida('Iconografia personalizada'),
+            ]
+        },
+        {
             id: 'branding-avanzado',
             nombre: 'Avanzado',
             precio: '$400',
             descripcion: 'Identidad visual completa con manual de marca.',
             ctaTexto: 'Elegir plan',
             ctaLink: '/contacto/',
-            destacado: true,
             caracteristicas: [
                 incluida('Diseno de logo (5 propuestas)'),
                 incluida('Paleta de colores extendida'),
@@ -203,13 +272,30 @@ export const PLANES_ECOMMERCE: PlanesDeServicio = {
             ]
         },
         {
+            id: 'ecommerce-medio',
+            nombre: 'Medio',
+            precio: '$350',
+            descripcion: 'Tienda con inventario, analytics y cupones.',
+            ctaTexto: 'Elegir plan',
+            ctaLink: '/contacto/',
+            destacado: true,
+            caracteristicas: [
+                incluida('Hasta 200 productos'),
+                incluida('Multi-pasarela de pago'),
+                incluida('Gestion de inventario'),
+                incluida('Panel de analytics'),
+                incluida('Cupones y descuentos'),
+                noIncluida('Email marketing integrado'),
+                noIncluida('Marketplace multi-vendor'),
+            ]
+        },
+        {
             id: 'ecommerce-avanzado',
             nombre: 'Avanzado',
             precio: '$500',
             descripcion: 'Tienda completa con inventario y marketing integrado.',
             ctaTexto: 'Elegir plan',
             ctaLink: '/contacto/',
-            destacado: true,
             caracteristicas: [
                 incluida('Productos ilimitados'),
                 incluida('Multi-pasarela de pago'),
@@ -246,13 +332,30 @@ export const PLANES_SEO: PlanesDeServicio = {
             ]
         },
         {
+            id: 'seo-medio',
+            nombre: 'Medio',
+            precio: '$275',
+            descripcion: 'SEO con contenido optimizado y link building basico.',
+            ctaTexto: 'Elegir plan',
+            ctaLink: '/contacto/',
+            destacado: true,
+            caracteristicas: [
+                incluida('Estrategia SEO integral'),
+                incluida('Optimizacion de 15 paginas'),
+                incluida('2 articulos SEO/mes'),
+                incluida('Link building basico'),
+                incluida('SEO local + Google My Business'),
+                noIncluida('Reportes semanales'),
+                noIncluida('Analisis de competencia'),
+            ]
+        },
+        {
             id: 'seo-avanzado',
             nombre: 'Avanzado',
             precio: '$400',
             descripcion: 'Estrategia SEO completa con contenido y links.',
             ctaTexto: 'Elegir plan',
             ctaLink: '/contacto/',
-            destacado: true,
             caracteristicas: [
                 incluida('Estrategia SEO integral'),
                 incluida('Optimizacion paginas ilimitadas'),
@@ -289,13 +392,30 @@ export const PLANES_MARKETING: PlanesDeServicio = {
             ]
         },
         {
+            id: 'mkt-medio',
+            nombre: 'Medio',
+            precio: '$275',
+            descripcion: 'Marketing con email, contenido y ads avanzados.',
+            ctaTexto: 'Elegir plan',
+            ctaLink: '/contacto/',
+            destacado: true,
+            caracteristicas: [
+                incluida('Gestion de 3 redes sociales'),
+                incluida('15 publicaciones/mes'),
+                incluida('Campanas ads ilimitadas'),
+                incluida('Email marketing (newsletters)'),
+                incluida('Estrategia de contenidos'),
+                noIncluida('Reportes semanales'),
+                noIncluida('A/B testing campanas'),
+            ]
+        },
+        {
             id: 'mkt-avanzado',
             nombre: 'Avanzado',
             precio: '$400',
             descripcion: 'Estrategia de marketing digital integral.',
             ctaTexto: 'Elegir plan',
             ctaLink: '/contacto/',
-            destacado: true,
             caracteristicas: [
                 incluida('Gestion de 4 redes sociales'),
                 incluida('20 publicaciones/mes'),
