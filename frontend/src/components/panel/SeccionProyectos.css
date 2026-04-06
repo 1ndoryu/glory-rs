@@ -70,58 +70,25 @@
 }
 
 /* ============================================================
-   STATUS BADGES (evita inline style={{}} — usa clases CSS)
+   STATUS BADGES
+   [064A-19] Rediseñados: todos gris oscuro + blanco, sin colores.
+   padding 6px 10px según requisito del usuario.
    ============================================================ */
 
 .ordenCardBadge,
 .ordenDetalleBadge {
     font-size: var(--text-xs);
     font-weight: 600;
-    padding: 4px 10px;
+    padding: 6px 10px;
     border-radius: var(--radius-full);
     white-space: nowrap;
     flex-shrink: 0;
+    background-color: #161616;
+    color: #ffffff;
 }
 
-.ordenBadge--pendingPayment {
-    background-color: var(--color-warning-bg);
-    color: var(--color-warning-text);
-}
-
-.ordenBadge--paymentHeld {
-    background-color: var(--color-info-bg);
-    color: var(--color-info-text);
-}
-
-.ordenBadge--awaiting {
-    background-color: var(--color-purple-bg);
-    color: var(--color-purple-text);
-}
-
-.ordenBadge--inProgress {
-    background-color: var(--color-info-bg);
-    color: var(--color-info-text);
-}
-
-.ordenBadge--underReview {
-    background-color: var(--color-warning-bg);
-    color: var(--color-warning-text);
-}
-
-.ordenBadge--completed {
-    background-color: var(--color-success-bg);
-    color: var(--color-success-text);
-}
-
-.ordenBadge--cancelled {
-    background-color: var(--color-neutral-bg);
-    color: var(--text-tertiary);
-}
-
-.ordenBadge--disputed {
-    background-color: var(--color-error-bg-soft);
-    color: var(--color-error-text);
-}
+/* [064A-19] Todos los status usan el mismo estilo gris oscuro.
+ * Si en el futuro se necesitan colores, se agregan variantes aquí. */
 
 /* ============================================================
    LISTA DE ÓRDENES
