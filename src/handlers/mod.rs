@@ -51,6 +51,7 @@ impl utoipa::Modify for SecurityAddon {
     paths(
         health::health_check,
         auth::register,
+        auth::quick_register,
         auth::login,
         notes::create_note,
         notes::get_note,
@@ -106,6 +107,7 @@ impl utoipa::Modify for SecurityAddon {
     components(schemas(
         health::HealthResponse,
         crate::models::RegisterRequest,
+        crate::models::QuickRegisterRequest,
         crate::models::LoginRequest,
         crate::models::AuthResponse,
         crate::models::Note,

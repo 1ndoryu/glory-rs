@@ -1,5 +1,6 @@
 /* [044A-40] Modal de compra de servicio.
- * Flujo: muestra resumen del plan → si no logueado pide email+contraseña → crea orden → redirige a pago.
+ * Flujo: muestra resumen del plan → si no logueado pide email → crea cuenta → orden → pago.
+ * [064A-3] Simplificado: solo pide email. Si ya existe, pide password.
  * Se abre al hacer click en CTA de un plan (SeccionPlanesServicio).
  * Usa componente <Modal> base y hook useModalCompra para la lógica. */
 import React from 'react';
@@ -22,7 +23,7 @@ export const ModalCompra: React.FC<ModalCompraProps> = ({plan, servicioSlug, abi
     const {t} = useTranslation();
     const {
         paso, email, setEmail, password, setPassword,
-        errorMsg, handleContinuar, handleAuth, reintentar
+        emailExiste, errorMsg, handleContinuar, handleAuth, reintentar
     } = useModalCompra({plan, servicioSlug, onClose: onCerrar});
 
     return (
@@ -49,27 +50,33 @@ export const ModalCompra: React.FC<ModalCompraProps> = ({plan, servicioSlug, abi
                 </div>
             )}
 
-            {/* Paso auth: email + contraseña para guest checkout */}
+            {/* [064A-3] Paso auth: solo email. Si email ya existe, muestra password */}
             {paso === 'auth' && (
                 <form className="modalCompraAuth" onSubmit={handleAuth}>
                     <p className="modalCompraAuthTexto">
-                        {t('purchase.create_account', 'Crea una cuenta o inicia sesión para continuar')}
+                        {emailExiste
+                            ? t('purchase.existing_account', 'Ya tienes cuenta. Introduce tu contraseña para continuar.')
+                            : t('purchase.enter_email', 'Introduce tu email para continuar')}
                     </p>
+                    {errorMsg && <p className="modalCompraErrorTexto">{errorMsg}</p>}
                     <Input
                         type="email"
                         placeholder={t('auth.email_placeholder', 'tu@email.com')}
                         value={email}
                         onChange={e => setEmail(e.target.value)}
                         required
+                        disabled={emailExiste}
                     />
-                    <Input
-                        type="password"
-                        placeholder={t('auth.password_placeholder', 'Contraseña (mín. 8 caracteres)')}
-                        value={password}
-                        onChange={e => setPassword(e.target.value)}
-                        required
-                        minLength={8}
-                    />
+                    {emailExiste && (
+                        <Input
+                            type="password"
+                            placeholder={t('auth.password_placeholder', 'Contraseña')}
+                            value={password}
+                            onChange={e => setPassword(e.target.value)}
+                            required
+                            minLength={8}
+                        />
+                    )}
                     <Button variante="primario" tamano="mediano" type="submit">
                         {t('purchase.continue_pay', 'Continuar al pago')} ({plan.precio})
                     </Button>

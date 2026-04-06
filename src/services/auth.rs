@@ -8,7 +8,7 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::errors::AppError;
-use crate::models::{AuthResponse, LoginRequest, RegisterRequest, UserRole};
+use crate::models::{AuthResponse, LoginRequest, QuickRegisterRequest, RegisterRequest, UserRole};
 use crate::repositories::UserRepository;
 
 /* [044A-38] Claims extendidos con role y effective_role.
@@ -42,6 +42,46 @@ impl AuthService {
         let salt = SaltString::generate(&mut OsRng);
         let password_hash = Argon2::default()
             .hash_password(req.password.as_bytes(), &salt)
+            .map_err(|e| AppError::Internal(format!("Error al hashear contraseña: {e}")))?
+            .to_string();
+
+        let user = UserRepository::create(pool, &req.email, &password_hash).await?;
+        let effective = user.effective_role();
+        let token = Self::generate_token(user.id, user.role, effective, jwt_secret)?;
+
+        Ok(AuthResponse {
+            token,
+            user_id: user.id,
+            role: user.role,
+            effective_role: effective,
+        })
+    }
+
+    /* [064A-3] Registro rapido solo con email (flujo de compra).
+     * Genera password aleatorio; el usuario puede cambiarlo desde el panel.
+     * Si el email ya existe retorna Conflict(409) para que el frontend pida password. */
+    pub async fn quick_register(
+        pool: &PgPool,
+        req: QuickRegisterRequest,
+        jwt_secret: &str,
+    ) -> Result<AuthResponse, AppError> {
+        if UserRepository::find_by_email(pool, &req.email)
+            .await?
+            .is_some()
+        {
+            return Err(AppError::Conflict("Email ya registrado".into()));
+        }
+
+        let random_password: String = {
+            use argon2::password_hash::rand_core::RngCore;
+            let mut buf = [0u8; 32];
+            OsRng.fill_bytes(&mut buf);
+            hex::encode(buf)
+        };
+
+        let salt = SaltString::generate(&mut OsRng);
+        let password_hash = Argon2::default()
+            .hash_password(random_password.as_bytes(), &salt)
             .map_err(|e| AppError::Internal(format!("Error al hashear contraseña: {e}")))?
             .to_string();
 

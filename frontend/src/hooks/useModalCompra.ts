@@ -1,9 +1,10 @@
 /* [044A-40] Hook para la lógica del modal de compra.
  * Maneja: pasos del modal, auth inline, creación de orden e inicio de pago.
- * Extraído de ModalCompra.tsx para cumplir SRP (max 3 useState en componente). */
+ * Extraído de ModalCompra.tsx para cumplir SRP (max 3 useState en componente).
+ * [064A-3] Flujo simplificado: solo pide email. Si el email ya existe, pide password. */
 import {useState} from 'react';
 import {useAuthStore} from '../stores/authStore';
-import {apiRegister, apiLogin} from '../api/auth';
+import {apiQuickRegister, apiLogin} from '../api/auth';
 import {apiCreateOrder} from '../api/orders';
 import {apiInitiatePayment} from '../api/payments';
 import {navegar} from '../navegacionSPA';
@@ -24,6 +25,8 @@ export function useModalCompra({plan, servicioSlug, onClose}: UseModalCompraPara
     const [paso, setPaso] = useState<PasoModal>('resumen');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    /* [064A-3] Si el email ya existe, mostramos campo password */
+    const [emailExiste, setEmailExiste] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
 
     /* Crear orden y redirigir a pasarela de pago */
@@ -64,29 +67,53 @@ export function useModalCompra({plan, servicioSlug, onClose}: UseModalCompraPara
         }
     };
 
-    /* Paso 2 (solo si no logueado): registrar o login + crear orden */
+    /* [064A-3] Paso 2: solo email → quick-register. Si 409 → pedir password → login */
     const handleAuth = async (e: React.FormEvent) => {
         e.preventDefault();
         setErrorMsg('');
-        setPaso('procesando');
 
-        try {
-            let authResp;
+        /* Si ya sabemos que el email existe, hacer login con password */
+        if (emailExiste) {
+            setPaso('procesando');
             try {
-                authResp = await apiLogin(email, password);
-            } catch {
-                authResp = await apiRegister(email, password);
+                const authResp = await apiLogin(email, password);
+                login(authResp.token, authResp.user_id, email, authResp.role, authResp.effective_role);
+                await crearOrdenYPagar();
+            } catch (err: unknown) {
+                setPaso('auth');
+                const msg = err instanceof Error ? err.message : 'Credenciales inválidas.';
+                setErrorMsg(msg);
             }
+            return;
+        }
+
+        /* Intentar registro rapido solo con email */
+        setPaso('procesando');
+        try {
+            const authResp = await apiQuickRegister(email);
             login(authResp.token, authResp.user_id, email, authResp.role, authResp.effective_role);
             await crearOrdenYPagar();
         } catch (err: unknown) {
-            setPaso('error');
-            const msg = err instanceof Error ? err.message : 'Error al procesar. Intenta de nuevo.';
-            setErrorMsg(msg);
+            /* 409 = email ya registrado → pedir password */
+            const is409 = typeof err === 'object' && err !== null && 'response' in err
+                && (err as {response?: {status?: number}}).response?.status === 409;
+            if (is409) {
+                setEmailExiste(true);
+                setPaso('auth');
+                setErrorMsg('Ya tienes cuenta. Introduce tu contraseña para continuar.');
+            } else {
+                setPaso('error');
+                const msg = err instanceof Error ? err.message : 'Error al procesar. Intenta de nuevo.';
+                setErrorMsg(msg);
+            }
         }
     };
 
-    const reintentar = () => setPaso('resumen');
+    const reintentar = () => {
+        setPaso('resumen');
+        setEmailExiste(false);
+        setErrorMsg('');
+    };
 
     return {
         paso,
@@ -94,6 +121,7 @@ export function useModalCompra({plan, servicioSlug, onClose}: UseModalCompraPara
         setEmail,
         password,
         setPassword,
+        emailExiste,
         errorMsg,
         handleContinuar,
         handleAuth,

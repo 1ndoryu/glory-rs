@@ -91,6 +91,14 @@ pub struct RegisterRequest {
     pub password: String,
 }
 
+/* [064A-3] Request para registro rapido solo con email (flujo de compra).
+ * No requiere password — se genera uno aleatorio en el backend. */
+#[derive(Debug, Deserialize, Validate, ToSchema)]
+pub struct QuickRegisterRequest {
+    #[validate(email(message = "Formato de email inválido"))]
+    pub email: String,
+}
+
 /// Request body para iniciar sesión
 #[derive(Debug, Deserialize, Validate, ToSchema)]
 pub struct LoginRequest {

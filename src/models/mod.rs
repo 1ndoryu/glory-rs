@@ -47,7 +47,7 @@ pub use dashboard::{
 };
 pub use user::{
     AdminUserItem, AuthResponse, ChangeRoleRequest, ChangeStatusRequest, LoginRequest,
-    PaginatedUsers, RegisterRequest, User, UserResponse, UserRole,
+    PaginatedUsers, QuickRegisterRequest, RegisterRequest, User, UserResponse, UserRole,
 };
 pub use hosting::{
     CreateHostingRequest, HostingEvent, HostingSubscription,

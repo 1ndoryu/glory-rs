@@ -5,7 +5,7 @@ use axum::{Json, Router};
 use validator::Validate;
 
 use crate::errors::AppError;
-use crate::models::{AuthResponse, LoginRequest, RegisterRequest};
+use crate::models::{AuthResponse, LoginRequest, QuickRegisterRequest, RegisterRequest};
 use crate::services::AuthService;
 use crate::AppState;
 
@@ -55,5 +55,30 @@ pub async fn login(
 pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/auth/register", post(register))
+        .route("/auth/quick-register", post(quick_register))
         .route("/auth/login", post(login))
+}
+
+/* [064A-3] Registro rapido: solo email, sin password.
+ * Pensado para el flujo de compra — crea cuenta con password aleatorio.
+ * Si el email ya existe retorna 409 para que el frontend pida password. */
+#[utoipa::path(
+    post,
+    path = "/api/auth/quick-register",
+    request_body = QuickRegisterRequest,
+    responses(
+        (status = 201, description = "Usuario registrado (sin password)", body = AuthResponse),
+        (status = 409, description = "Email ya registrado", body = crate::errors::ErrorResponse),
+        (status = 422, description = "Error de validación", body = crate::errors::ErrorResponse)
+    )
+)]
+pub async fn quick_register(
+    State(state): State<AppState>,
+    Json(req): Json<QuickRegisterRequest>,
+) -> Result<(StatusCode, Json<AuthResponse>), AppError> {
+    req.validate()
+        .map_err(|e| AppError::Validation(e.to_string()))?;
+
+    let response = AuthService::quick_register(&state.pool, req, &state.jwt_secret).await?;
+    Ok((StatusCode::CREATED, Json(response)))
 }

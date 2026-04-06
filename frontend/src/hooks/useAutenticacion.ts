@@ -6,6 +6,7 @@
  * Pendiente: OAuth Google, recuperación de contraseña.
  */
 import {useState, useCallback} from 'react';
+import {useNavigate} from 'react-router-dom';
 import {apiLogin, apiRegister, extraerMensajeError} from '../api/auth';
 import {useAuthStore} from '../stores/authStore';
 import {toast} from '../stores/toastStore';
@@ -52,6 +53,7 @@ export const useAutenticacion = (onCerrar: () => void): RetornoUseAutenticacion 
     const [cargando, setCargando] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const authLogin = useAuthStore(s => s.login);
+    const navigate = useNavigate();
 
     const [login, setLogin] = useState<EstadoLogin>({email: '', password: ''});
 
@@ -71,7 +73,8 @@ export const useAutenticacion = (onCerrar: () => void): RetornoUseAutenticacion 
     }, []);
 
     /* [044A-13] Login real contra backend REST API
-     * [044A-38 Fase 1] Ahora pasa role/effective_role al store */
+     * [044A-38 Fase 1] Ahora pasa role/effective_role al store
+     * [064A-14] Navega a /panel tras login exitoso */
     const handleLogin = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
@@ -80,15 +83,17 @@ export const useAutenticacion = (onCerrar: () => void): RetornoUseAutenticacion 
             const resp = await apiLogin(login.email, login.password);
             authLogin(resp.token, resp.user_id, login.email, resp.role, resp.effective_role);
             onCerrar();
+            navigate('/panel');
         } catch (err) {
             setError(extraerMensajeError(err));
         } finally {
             setCargando(false);
         }
-    }, [login.email, login.password, authLogin, onCerrar]);
+    }, [login.email, login.password, authLogin, onCerrar, navigate]);
 
     /* [044A-13] Registro real contra backend REST API
-     * [044A-38 Fase 1] Ahora pasa role/effective_role al store */
+     * [044A-38 Fase 1] Ahora pasa role/effective_role al store
+     * [064A-14] Navega a /panel tras registro exitoso */
     const handleRegistro = useCallback(
         async (e: React.FormEvent) => {
             e.preventDefault();
@@ -102,13 +107,14 @@ export const useAutenticacion = (onCerrar: () => void): RetornoUseAutenticacion 
                 const resp = await apiRegister(registro.email, registro.password);
                 authLogin(resp.token, resp.user_id, registro.email, resp.role, resp.effective_role);
                 onCerrar();
+                navigate('/panel');
             } catch (err) {
                 setError(extraerMensajeError(err));
             } finally {
                 setCargando(false);
             }
         },
-        [registro.email, registro.password, registro.confirmar, authLogin, onCerrar]
+        [registro.email, registro.password, registro.confirmar, authLogin, onCerrar, navigate]
     );
 
     const handleRecuperar = useCallback((e: React.FormEvent) => {

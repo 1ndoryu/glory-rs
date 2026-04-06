@@ -27,6 +27,14 @@ export async function apiRegister(email: string, password: string): Promise<Auth
     return data;
 }
 
+/* [064A-3] Registro rapido solo con email (flujo de compra).
+ * El backend genera password aleatorio; el usuario puede cambiarlo desde el panel.
+ * Retorna 409 si el email ya existe — el frontend debe pedir password. */
+export async function apiQuickRegister(email: string): Promise<AuthResponse> {
+    const {data} = await instance.post<AuthResponse>('/api/auth/quick-register', {email});
+    return data;
+}
+
 /* [044A-38 Fase 1] Cambia el active_role del admin y devuelve nuevo token */
 export async function apiSwitchRole(targetRole: UserRole): Promise<AuthResponse> {
     const {data} = await instance.post<AuthResponse>('/api/auth/switch-role', {role: targetRole});
