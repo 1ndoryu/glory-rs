@@ -336,17 +336,21 @@
 .fasesTimeline {
     display: flex;
     flex-direction: column;
-    gap: 0;
+    gap: var(--spacing-sm);
 }
 
+/* [064A-25] Padding y borde para separar mejor las fases. */
 .faseCard {
     display: flex;
     gap: var(--spacing-md);
-    padding: var(--spacing-md) 0;
+    padding: var(--spacing-md);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
 }
 
 .faseCardActiva {
     opacity: 1;
+    border-color: var(--brand-black);
 }
 
 .faseCard:not(.faseCardActiva):not(.faseCardAprobada) {

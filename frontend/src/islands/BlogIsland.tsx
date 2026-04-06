@@ -9,7 +9,6 @@ import '../styles/variables.css';
 import './BlogIsland.css';
 import {LayoutPagina} from '../components/layout/LayoutPagina';
 import {SEOHead} from '../components/seo/SEOHead';
-import {SeccionContacto} from '../components/home/SeccionContacto';
 import {POSTS_BLOG} from '../data/blog';
 import {PostBlog} from '../types/contenido';
 import {obtenerImagenBlog} from '../hooks/useImagenes';
@@ -105,7 +104,6 @@ export const BlogIsland = ({titulo}: BlogIslandProps): JSX.Element => {
                 </div>
             </section>
 
-            <SeccionContacto />
         </LayoutPagina>
     );
 };

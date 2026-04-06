@@ -8,9 +8,7 @@ import '../styles/variables.css';
 import './NosotrosIsland.css';
 import {LayoutPagina} from '../components/layout/LayoutPagina';
 import {SEOHead} from '../components/seo/SEOHead';
-import {SeccionTestimonios} from '../components/home/SeccionTestimonios';
 import {SeccionHeader} from '../components/ui/SeccionHeader';
-import {SeccionClientes} from '../components/home/SeccionClientes';
 import {SeccionContacto} from '../components/home/SeccionContacto';
 import {MIEMBROS_DATA} from '../data/miembros';
 import {Miembro} from '../types/contenido';
@@ -98,12 +96,6 @@ export const NosotrosIsland = ({titulo}: NosotrosIslandProps): JSX.Element => {
                     </div>
                 </div>
             </section>
-
-            {/* Marcas / Clientes - Reutiliza el mismo componente del home para consistencia */}
-            <SeccionClientes />
-
-            {/* Testimonios reutilizado del home */}
-            <SeccionTestimonios />
 
             {/* Contacto */}
             <SeccionContacto />
