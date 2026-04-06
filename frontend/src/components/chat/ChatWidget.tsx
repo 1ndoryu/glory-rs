@@ -22,7 +22,6 @@ export const ChatWidget: React.FC = () => {
     const cerrar = useChatStore(s => s.cerrar);
     const [input, setInput] = useState('');
     const [visitorName, setVisitorName] = useState('');
-    const [nameSubmitted, setNameSubmitted] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const {
@@ -30,17 +29,25 @@ export const ChatWidget: React.FC = () => {
         connecting,
         messages,
         typing,
+        sessionId,
         connect,
         sendMessage,
         sendTyping,
     } = useChatWidget();
 
+    /* [064A-29] Si hay sesion previa (sessionId en localStorage), saltar
+     * formulario de nombre y reconectar automaticamente al abrir. */
+    const [nameSubmitted, setNameSubmitted] = useState(() => !!sessionId);
+
     if (location.pathname.startsWith('/panel')) return null;
 
     const handleOpen = () => {
         abrir();
-        if (!connected && !connecting && nameSubmitted) {
-            connect(visitorName || undefined);
+        if (!connected && !connecting) {
+            if (nameSubmitted || sessionId) {
+                setNameSubmitted(true);
+                connect(visitorName || undefined);
+            }
         }
     };
 

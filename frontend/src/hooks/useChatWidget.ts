@@ -1,6 +1,7 @@
-/* [054A-3] Hook para el chat widget de visitantes.
- * Gestiona conexión WebSocket como visitante anónimo, envío/recepción de mensajes,
- * y persistencia de visitor_id en localStorage. Independiente del hook useChat (que es para staff). */
+/* [064A-29] Hook para el chat widget de visitantes.
+ * Gestiona conexión WebSocket, persistencia de visitor_id/session_id en localStorage,
+ * y carga de historial de mensajes al reconectar (via WS — el backend envia history).
+ * Independiente del hook useChat (que es para staff). */
 
 import {useState, useCallback, useRef, useEffect} from 'react';
 import {buildVisitorWsUrl, type WsServerMessage, type ChatMessage} from '../api/chat';
@@ -52,6 +53,9 @@ export function useChatWidget() {
         ws.onopen = () => {
             setConnected(true);
             setConnecting(false);
+            /* [064A-29] El backend envia historial de mensajes automaticamente
+             * al reconectar (via WsServerMessage::Message). El hook los recibe
+             * en onmessage y deduplica por ID. */
         };
 
         ws.onclose = () => {
@@ -73,22 +77,26 @@ export function useChatWidget() {
                 switch (msg.type) {
                     case 'message':
                         if (msg.id && msg.session_id && msg.content) {
-                            /* Guardar session_id para reconexiones */
                             if (!sessionId) {
                                 setSessionId(msg.session_id);
                                 saveSessionId(msg.session_id);
                             }
-                            setMessages(prev => [
-                                ...prev,
-                                {
-                                    id: msg.id!,
-                                    session_id: msg.session_id!,
-                                    sender_type: msg.sender || 'unknown',
-                                    sender_id: msg.sender_id ?? null,
-                                    content: msg.content!,
-                                    created_at: msg.created_at || new Date().toISOString(),
-                                },
-                            ]);
+                            /* [064A-29] Deduplicar: el backend envia historial al reconectar,
+                             * y puede duplicar con mensajes que llegan por broadcast. */
+                            setMessages(prev => {
+                                if (prev.some(m => m.id === msg.id)) return prev;
+                                return [
+                                    ...prev,
+                                    {
+                                        id: msg.id!,
+                                        session_id: msg.session_id!,
+                                        sender_type: msg.sender || 'unknown',
+                                        sender_id: msg.sender_id ?? null,
+                                        content: msg.content!,
+                                        created_at: msg.created_at || new Date().toISOString(),
+                                    },
+                                ];
+                            });
                             /* Limpiar typing al recibir mensaje */
                             setTyping(null);
                             if (typingTimerRef.current) {

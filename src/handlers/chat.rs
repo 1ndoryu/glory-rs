@@ -66,6 +66,28 @@ async fn handle_visitor_ws(socket: WebSocket, state: AppState, params: VisitorWs
     let mut rx = state.chat_hub.subscribe(session_id);
     let (mut sender, mut receiver) = socket.split();
 
+    /* [064A-29] Enviar historial de mensajes previos al reconectar.
+     * El frontend deduplica por ID, asi que no hay riesgo de duplicados. */
+    if let Ok(history) =
+        crate::repositories::ChatRepository::list_messages(&state.pool, session_id, 50, 0).await
+    {
+        for msg in history {
+            let ws_msg = WsServerMessage::Message {
+                id: msg.id,
+                session_id: msg.session_id,
+                sender: msg.sender_type,
+                sender_id: msg.sender_id,
+                content: msg.content,
+                created_at: msg.created_at,
+            };
+            if let Ok(json) = serde_json::to_string(&ws_msg) {
+                if sender.send(Message::Text(json)).await.is_err() {
+                    return;
+                }
+            }
+        }
+    }
+
     /* Notificar a staff de nueva sesión */
     state.chat_hub.broadcast(
         session_id,

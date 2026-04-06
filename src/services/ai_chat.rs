@@ -1,39 +1,62 @@
-/* [044A-38 Fase 5] AI Chat Service: integración con API de IA (Gemini/OpenAI).
+/* [064A-29] AI Chat Service: integración con Groq API (OpenAI-compatible).
+ * Rotacion de 3 API keys por mensaje (round-robin via AtomicUsize).
  * System prompt dinámico: pre-venta (servicios, precios) vs soporte de orden
  * (contexto de orden, fase actual, historial). Usa reqwest HTTP client. */
 
 use std::fmt::Write;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::repositories::{ChatRepository, OrderRepository};
 
-/// Configuración del servicio de IA
+/* [064A-29] Contador global para rotacion round-robin de API keys.
+ * Cada llamada a generate_response incrementa y usa mod num_keys. */
+static KEY_COUNTER: AtomicUsize = AtomicUsize::new(0);
+
+/// Configuración del servicio de IA (Groq con rotación de keys)
 #[derive(Clone)]
 pub struct AiChatConfig {
-    pub api_key: Option<String>,
+    pub api_keys: Vec<String>,
     pub model: String,
     pub api_url: String,
 }
 
 impl AiChatConfig {
-    /// Intenta cargar config desde variables de entorno
+    /// Carga config desde variables de entorno. Soporta GROQ_API_1, GROQ_API_2, GROQ_API_3.
+    /// Fallback a AI_API_KEY/GEMINI_API_KEY/OPENAI_API_KEY si no hay keys Groq.
     #[must_use]
     pub fn from_env() -> Self {
-        let api_key = std::env::var("AI_API_KEY").ok()
-            .or_else(|| std::env::var("GEMINI_API_KEY").ok())
-            .or_else(|| std::env::var("OPENAI_API_KEY").ok());
+        let mut keys = Vec::new();
+        for var in ["GROQ_API_1", "GROQ_API_2", "GROQ_API_3", "GROQ_API"] {
+            if let Ok(k) = std::env::var(var) {
+                if !k.is_empty() && !keys.contains(&k) {
+                    keys.push(k);
+                }
+            }
+        }
+        /* Fallback a keys genéricas si no hay Groq */
+        if keys.is_empty() {
+            for var in ["AI_API_KEY", "GEMINI_API_KEY", "OPENAI_API_KEY"] {
+                if let Ok(k) = std::env::var(var) {
+                    if !k.is_empty() {
+                        keys.push(k);
+                        break;
+                    }
+                }
+            }
+        }
 
         let model = std::env::var("AI_MODEL")
-            .unwrap_or_else(|_| "gemini-2.0-flash".to_string());
+            .unwrap_or_else(|_| "llama-3.3-70b-versatile".to_string());
 
         let api_url = std::env::var("AI_API_URL").unwrap_or_else(|_| {
-            "https://generativelanguage.googleapis.com/v1beta/models".to_string()
+            "https://api.groq.com/openai/v1/chat/completions".to_string()
         });
 
         Self {
-            api_key,
+            api_keys: keys,
             model,
             api_url,
         }
@@ -41,21 +64,31 @@ impl AiChatConfig {
 
     #[must_use]
     pub fn is_configured(&self) -> bool {
-        self.api_key.is_some()
+        !self.api_keys.is_empty()
+    }
+
+    /* [064A-29] Selecciona la siguiente API key en rotacion round-robin */
+    fn next_key(&self) -> Option<&str> {
+        if self.api_keys.is_empty() {
+            return None;
+        }
+        let idx = KEY_COUNTER.fetch_add(1, Ordering::Relaxed) % self.api_keys.len();
+        Some(&self.api_keys[idx])
     }
 }
 
 pub struct AiChatService;
 
 impl AiChatService {
-    /// Genera respuesta de IA para un mensaje en una sesión
+    /// Genera respuesta de IA para un mensaje en una sesión.
+    /// Usa Groq API (OpenAI-compatible) con rotacion de keys.
     pub async fn generate_response(
         pool: &PgPool,
         config: &AiChatConfig,
         session_id: Uuid,
         user_message: &str,
     ) -> Result<String, String> {
-        let Some(ref api_key) = config.api_key else {
+        let Some(api_key) = config.next_key() else {
             return Ok(
                 "Un miembro del equipo se conectará pronto para ayudarte. \
                  Mientras tanto, ¿en qué puedo orientarte?"
@@ -63,56 +96,48 @@ impl AiChatService {
             );
         };
 
-        /* Construir system prompt dinámico */
         let system_prompt = build_system_prompt(pool, session_id).await;
 
-        /* Obtener historial reciente para contexto */
         let history = ChatRepository::list_messages(pool, session_id, 20, 0)
             .await
             .unwrap_or_default();
 
-        /* Armar messages para la API */
-        let mut contents = Vec::new();
+        /* [064A-29] Formato OpenAI-compatible para Groq API */
+        let mut messages = vec![serde_json::json!({
+            "role": "system",
+            "content": system_prompt
+        })];
 
         for msg in &history {
             let role = if msg.sender_type == "ai" {
-                "model"
+                "assistant"
             } else {
                 "user"
             };
-            contents.push(serde_json::json!({
+            messages.push(serde_json::json!({
                 "role": role,
-                "parts": [{"text": msg.content}]
+                "content": msg.content
             }));
         }
 
-        /* Agregar el mensaje actual */
-        contents.push(serde_json::json!({
+        messages.push(serde_json::json!({
             "role": "user",
-            "parts": [{"text": user_message}]
+            "content": user_message
         }));
 
-        /* Llamar a Gemini API */
-        let url = format!(
-            "{}/{}:generateContent?key={}",
-            config.api_url, config.model, api_key
-        );
-
         let body = serde_json::json!({
-            "system_instruction": {
-                "parts": [{"text": system_prompt}]
-            },
-            "contents": contents,
-            "generationConfig": {
-                "temperature": 0.7,
-                "maxOutputTokens": 800,
-                "topP": 0.9
-            }
+            "model": config.model,
+            "messages": messages,
+            "temperature": 0.7,
+            "max_tokens": 800,
+            "top_p": 0.9
         });
 
         let client = reqwest::Client::new();
         let response = client
-            .post(&url)
+            .post(&config.api_url)
+            .header("Authorization", format!("Bearer {api_key}"))
+            .header("Content-Type", "application/json")
             .json(&body)
             .send()
             .await
@@ -134,8 +159,8 @@ impl AiChatService {
             .await
             .map_err(|e| format!("Error parseando respuesta IA: {e}"))?;
 
-        /* Extraer texto de la respuesta Gemini */
-        let text = json["candidates"][0]["content"]["parts"][0]["text"]
+        /* [064A-29] Formato OpenAI: choices[0].message.content */
+        let text = json["choices"][0]["message"]["content"]
             .as_str()
             .unwrap_or("No pude generar una respuesta. Un miembro del equipo te ayudará.");
 
