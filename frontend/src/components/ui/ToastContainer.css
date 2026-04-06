@@ -1,11 +1,12 @@
 /* [054A-5] Estilos del sistema de toasts. */
 
+/* [064A-55] Toast: posición abajo-derecha, fondo siempre var(--bg-accent). */
 .toastContenedor {
     position: fixed;
-    top: var(--spacing-lg);
+    bottom: var(--spacing-lg);
     right: var(--spacing-lg);
     display: flex;
-    flex-direction: column;
+    flex-direction: column-reverse;
     gap: var(--spacing-sm);
     z-index: 9999;
     pointer-events: none;
@@ -13,6 +14,7 @@
     width: calc(100% - 2 * var(--spacing-lg));
 }
 
+/* [064A-55] Toast: fondo siempre var(--bg-accent), sin sombra, borde sutil. */
 .toastItem {
     display: flex;
     align-items: center;
@@ -21,9 +23,11 @@
     border-radius: var(--radius-lg);
     font-size: var(--text-sm);
     font-family: var(--font-primary);
-    box-shadow: 0 8px 24px var(--border-light);
+    border: 1px solid var(--border-default);
     pointer-events: auto;
     animation: toastSlideIn 0.3s ease-out;
+    background: var(--bg-accent);
+    color: var(--text-primary);
 }
 
 @keyframes toastSlideIn {
@@ -37,26 +41,26 @@
     }
 }
 
-/* Variantes por tipo */
+/* [064A-55] Todas las variantes usan mismo fondo (--bg-accent). */
 
 .toastItemsuccess {
-    background: var(--color-success-text);
-    color: var(--color-success-bg-soft);
+    background: var(--bg-accent);
+    color: var(--text-primary);
 }
 
 .toastItemerror {
-    background: var(--color-error-text);
-    color: var(--color-error-bg-soft);
+    background: var(--bg-accent);
+    color: var(--text-primary);
 }
 
 .toastIteminfo {
-    background: var(--brand-black);
-    color: var(--brand-white);
+    background: var(--bg-accent);
+    color: var(--text-primary);
 }
 
 .toastItemwarning {
-    background: var(--color-warning-text);
-    color: var(--color-warning-bg);
+    background: var(--bg-accent);
+    color: var(--text-primary);
 }
 
 .toastIcono {

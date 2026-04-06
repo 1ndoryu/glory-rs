@@ -2,13 +2,18 @@
  * CSS: SidebarPanel
  * Barra lateral del panel de usuario con iconos.
  */
+/* [064A-54] Sidebar altura completa: sticky + min-height del viewport. */
 .panelSidebar {
     display: flex;
     flex-direction: column;
     width: 260px;
     min-width: 260px;
+    min-height: calc(100vh - 80px);
     padding: var(--spacing-lg);
     gap: var(--spacing-lg);
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
 }
 
 /* Info usuario en sidebar */

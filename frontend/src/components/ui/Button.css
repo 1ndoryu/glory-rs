@@ -3,10 +3,12 @@
  * Estilos base reutilizables
  */
 
+/* [064A-56] gap para separar icono de texto. */
 .botonBase {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: var(--spacing-xs);
     border: none;
     border-radius: var(--radius-sm);
     cursor: pointer;

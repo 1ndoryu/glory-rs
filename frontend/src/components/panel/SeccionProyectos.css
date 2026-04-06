@@ -408,7 +408,7 @@
     margin: 0;
 }
 
-/* Badges de estado de fase */
+/* [064A-56] Badges de fase: escala de grises para todos los estados. */
 .faseBadge {
     font-family: var(--font-primary);
     font-size: var(--text-2xs);
@@ -418,48 +418,20 @@
     white-space: nowrap;
     text-transform: uppercase;
     letter-spacing: 0.02em;
-    background-color: var(--bg-item-active);
+    background-color: var(--bg-accent);
     color: var(--text-muted);
 }
 
-.faseBadge--locked {
-    background-color: var(--bg-item-hover);
-    color: var(--text-tertiary);
-}
-
-.faseBadge--pending-payment {
-    background-color: var(--color-warning-bg);
-    color: var(--color-warning-text);
-}
-
-.faseBadge--paid {
-    background-color: var(--color-info-bg);
-    color: var(--color-info-text);
-}
-
-.faseBadge--in-progress {
-    background-color: var(--color-info-bg);
-    color: var(--color-info-text);
-}
-
-.faseBadge--delivered {
-    background-color: var(--color-purple-bg);
-    color: var(--color-purple-text);
-}
-
-.faseBadge--revision-requested {
-    background-color: var(--color-orange-bg);
-    color: var(--color-orange-text);
-}
-
-.faseBadge--approved {
-    background-color: var(--color-success-bg);
-    color: var(--color-success-text);
-}
-
+.faseBadge--locked,
+.faseBadge--pending-payment,
+.faseBadge--paid,
+.faseBadge--in-progress,
+.faseBadge--delivered,
+.faseBadge--revision-requested,
+.faseBadge--approved,
 .faseBadge--skipped {
-    background-color: var(--bg-item-hover);
-    color: var(--text-tertiary);
+    background-color: var(--bg-accent);
+    color: var(--text-muted);
 }
 
 .faseDescripcion {
