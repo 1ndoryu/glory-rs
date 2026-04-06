@@ -1,21 +1,22 @@
 /* Estilos para la Galeria de Servicio
  * [044A-5] Proporciones alineadas con CarruselShowcase para consistencia visual.
- * [044A-25] Eliminado aspect-ratio 1:1 — las imagenes se adaptan a su relación de aspecto natural. */
+ * [044A-25] Eliminado aspect-ratio 1:1 — las imagenes se adaptan a su relación de aspecto natural.
+ * [064A-7] Aumentado tamaño de items en tablet y desktop para mejor impacto visual. */
 :root {
-    --galeria-item-width: 300px;
+    --galeria-item-width: 320px;
     --galeria-item-gap: 20px;
 }
 
 @media (min-width: 768px) {
     :root {
-        --galeria-item-width: 450px;
+        --galeria-item-width: 560px;
         --galeria-item-gap: 32px;
     }
 }
 
 @media (min-width: 1440px) {
     :root {
-        --galeria-item-width: 450px;
+        --galeria-item-width: 680px;
         --galeria-item-gap: 48px;
     }
 }
