@@ -7,12 +7,16 @@
    BURBUJA FLOTANTE
    ============================================================ */
 
+/* [064A-4] La burbuja es un circulo fijo de 56px. botonBase/botonMediano
+ * añaden padding y width:fit-content que rompen el circulo — los overrideamos. */
 .chatWidgetBubble {
     position: fixed;
     bottom: var(--spacing-lg);
     right: var(--spacing-lg);
     width: 56px;
     height: 56px;
+    min-width: 56px;
+    padding: 0;
     border-radius: 50%;
     background: var(--brand-primary);
     color: var(--brand-black);
@@ -275,11 +279,12 @@
     flex: 1;
 }
 
-/* [064A-1] chatWidgetSendBtn: ahora usa variante="marca".
- * Solo quedan propiedades de forma (círculo) y tamaño fijo. */
+/* [064A-4] Botón de envío circular. padding:0 y min-width
+ * previenen que botonBase/botonMediano deformen el circulo. */
 .chatWidgetSendBtn {
     width: 36px;
     height: 36px;
+    min-width: 36px;
     border-radius: 50%;
     padding: 0;
     flex-shrink: 0;

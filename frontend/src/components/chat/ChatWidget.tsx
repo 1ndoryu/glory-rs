@@ -85,6 +85,7 @@ export const ChatWidget: React.FC = () => {
             {!abierto && (
                 <Button
                     variante="marca"
+                    tamano="pequeno"
                     className="chatWidgetBubble"
                     onClick={handleOpen}
                     aria-label="Abrir chat"
@@ -311,6 +312,7 @@ function ChatWidgetInput({
             />
             <Button
                 variante="marca"
+                tamano="pequeno"
                 type="button"
                 className="chatWidgetSendBtn"
                 onClick={onSend}
