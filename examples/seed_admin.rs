@@ -30,9 +30,10 @@ async fn main() {
     let id = Uuid::new_v4();
 
     /* [054A-19] Usa query runtime (no macro) para no depender de .sqlx/ offline cache.
-     * Los seeds son scripts de desarrollo, no código de producción. */
+     * Los seeds son scripts de desarrollo, no código de producción.
+     * [064A-42] Incluye display_name para que aparezca en la UI. */
     let result = sqlx::query(
-        "INSERT INTO users (id, email, password_hash) VALUES ($1, $2, $3) ON CONFLICT (email) DO UPDATE SET password_hash = $3"
+        "INSERT INTO users (id, email, password_hash, display_name) VALUES ($1, $2, $3, 'Admin') ON CONFLICT (email) DO UPDATE SET password_hash = $3, display_name = 'Admin'"
     )
     .bind(id)
     .bind(email)

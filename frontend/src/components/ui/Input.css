@@ -1,9 +1,10 @@
-/* [044A-43] Estilos base del componente Input */
+/* [044A-43] Estilos base del componente Input
+ * [064A-40] border-color cambiado de --border-color (gris oscuro) a --border-default (gris claro). */
 .inputBase {
     font-family: var(--font-primary);
     font-size: var(--text-sm);
     padding: var(--spacing-sm) var(--spacing-md);
-    border: 1px solid var(--border-color, var(--border-default));
+    border: 1px solid var(--border-default);
     border-radius: var(--radius-sm);
     background: var(--bg-primary);
     color: var(--text-primary);

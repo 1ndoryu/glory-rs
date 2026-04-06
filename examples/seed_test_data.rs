@@ -29,6 +29,20 @@ async fn main() {
 
     println!("Usuarios creados: cliente={client_id}, empleado={employee_id}");
 
+    /* [064A-33] Limpiar órdenes previas del cliente de prueba para idempotencia.
+     * Borra fases primero (FK), luego órdenes. Solo afecta al usuario de test. */
+    sqlx::query("DELETE FROM order_phases WHERE order_id IN (SELECT id FROM orders WHERE client_id = $1)")
+        .bind(client_id)
+        .execute(&pool)
+        .await
+        .expect("Error al limpiar fases previas");
+    sqlx::query("DELETE FROM orders WHERE client_id = $1")
+        .bind(client_id)
+        .execute(&pool)
+        .await
+        .expect("Error al limpiar órdenes previas");
+    println!("Órdenes previas del cliente de prueba eliminadas.");
+
     /* 2. Obtener servicios y planes existentes */
     let plans = sqlx::query_as::<_, PlanRow>(
         "SELECT sp.id, sp.slug, sp.name, sp.price_cents, s.id as service_id, s.title as service_title
@@ -158,16 +172,21 @@ async fn upsert_user(pool: &PgPool, email: &str, password: &str, role: &str) -> 
 
     let id = Uuid::new_v4();
 
+    /* [064A-42] display_name derivado del email para que se muestre en la UI. */
+    let display_name = email.split('@').next().unwrap_or(email);
+    let display_name = display_name[..1].to_uppercase() + &display_name[1..];
+
     sqlx::query_scalar::<_, Uuid>(
-        "INSERT INTO users (id, email, password_hash, role)
-         VALUES ($1, $2, $3, $4::user_role)
-         ON CONFLICT (email) DO UPDATE SET password_hash = $3, role = $4::user_role
+        "INSERT INTO users (id, email, password_hash, role, display_name)
+         VALUES ($1, $2, $3, $4::user_role, $5)
+         ON CONFLICT (email) DO UPDATE SET password_hash = $3, role = $4::user_role, display_name = $5
          RETURNING id"
     )
     .bind(id)
     .bind(email)
     .bind(&password_hash)
     .bind(role)
+    .bind(&display_name)
     .fetch_one(pool)
     .await
     .expect("Error al crear usuario")

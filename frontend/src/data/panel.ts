@@ -5,10 +5,11 @@
  */
 import type {UserRole} from '../api/auth';
 
+/* [064A-34] Eliminados: servicios, empleados, config-servicios (páginas innecesarias). */
 export type SeccionPanel =
-    | 'proyectos' | 'servicios' | 'pagos' | 'perfil' | 'metodos-pago' | 'mensajes'
+    | 'proyectos' | 'pagos' | 'perfil' | 'metodos-pago' | 'mensajes'
     | 'asignados' | 'disponibles' | 'delegaciones'
-    | 'todos-ordenes' | 'empleados' | 'config-servicios' | 'reembolsos' | 'usuarios' | 'hosting';
+    | 'todos-ordenes' | 'reembolsos' | 'usuarios' | 'hosting';
 
 export interface TabConfig {
     id: SeccionPanel;
@@ -16,17 +17,13 @@ export interface TabConfig {
     descripcion: string;
 }
 
-/* [044A-38 Fase 1] Tabs para cliente */
+/* [044A-38 Fase 1] Tabs para cliente
+ * [064A-34] Tab 'servicios' eliminado. */
 const TABS_CLIENT: TabConfig[] = [
     {
         id: 'proyectos',
         label: 'Mis Proyectos',
         descripcion: 'Aqui podras ver el estado de tus proyectos en progreso y los finalizados. Seguimiento en tiempo real del avance de cada servicio contratado.'
-    },
-    {
-        id: 'servicios',
-        label: 'Servicios',
-        descripcion: 'Gestiona tus servicios contratados: hosting, VPS, desarrollo web y mas. Consulta detalles, renueva o amplia tus planes.'
     },
     {
         id: 'pagos',
@@ -79,22 +76,13 @@ const TABS_EMPLOYEE: TabConfig[] = [
     }
 ];
 
-/* [044A-38 Fase 1] Tabs para admin: todo el sistema */
+/* [044A-38 Fase 1] Tabs para admin: todo el sistema
+ * [064A-34] Tabs 'empleados' y 'config-servicios' eliminados. */
 const TABS_ADMIN: TabConfig[] = [
     {
         id: 'todos-ordenes',
         label: 'Todas las Ordenes',
         descripcion: 'Vista completa de todas las ordenes del sistema. Filtra por estado, cliente o empleado.'
-    },
-    {
-        id: 'empleados',
-        label: 'Empleados',
-        descripcion: 'Gestiona el equipo: asigna ordenes, revisa carga de trabajo y metricas de rendimiento.'
-    },
-    {
-        id: 'config-servicios',
-        label: 'Servicios',
-        descripcion: 'Configura el catalogo de servicios: planes, precios, fases y visibilidad.'
     },
     {
         id: 'reembolsos',

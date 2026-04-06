@@ -6,7 +6,7 @@
  */
 import React, {useState, useCallback} from 'react';
 import {useTranslation} from 'react-i18next';
-import {FolderOpen, Briefcase, Receipt, User, CreditCard, ClipboardList, PackageOpen, Users, Settings, ArrowLeftRight, ArrowRightLeft, MessageSquare, RotateCcw, UserCog, Server} from 'lucide-react';
+import {FolderOpen, Receipt, User, CreditCard, ClipboardList, PackageOpen, ArrowRightLeft, MessageSquare, RotateCcw, UserCog, Server} from 'lucide-react';
 import {obtenerTabsPorRol, type SeccionPanel} from '../../data/panel';
 import {useCurrentProfile} from '../../hooks/useCurrentProfile';
 import {useAuthStore} from '../../stores/authStore';
@@ -20,10 +20,9 @@ interface SidebarPanelProps {
     onCambiarSeccion: (seccion: SeccionPanel) => void;
 }
 
-/* Mapa de iconos por seccion */
+/* [064A-34] Mapa de iconos por seccion. Eliminados: servicios, empleados, config-servicios. */
 const ICONOS_SECCION: Record<SeccionPanel, React.ElementType> = {
     'proyectos': FolderOpen,
-    'servicios': Briefcase,
     'pagos': Receipt,
     'perfil': User,
     'metodos-pago': CreditCard,
@@ -32,8 +31,6 @@ const ICONOS_SECCION: Record<SeccionPanel, React.ElementType> = {
     'delegaciones': ArrowRightLeft,
     'mensajes': MessageSquare,
     'todos-ordenes': ClipboardList,
-    'empleados': Users,
-    'config-servicios': Settings,
     'reembolsos': RotateCcw,
     'usuarios': UserCog,
     'hosting': Server,

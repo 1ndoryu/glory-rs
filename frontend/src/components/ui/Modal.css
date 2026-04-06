@@ -12,14 +12,16 @@
     padding: var(--spacing-md);
 }
 
+/* [064A-39] padding ~30px (--spacing-lg = 2rem ≈ 32px).
+ * [064A-28] Sombras prohibidas — border sutil en su lugar. */
 .modalBaseContenedor {
     background: var(--bg-primary);
     border-radius: var(--radius-lg);
-    padding: var(--spacing-xl);
+    padding: var(--spacing-lg);
     max-width: 420px;
     width: 100%;
     position: relative;
-    box-shadow: 0 20px 60px var(--border-hover-strong);
+    border: 1px solid var(--border-default);
 }
 
 @media (max-width: 480px) {

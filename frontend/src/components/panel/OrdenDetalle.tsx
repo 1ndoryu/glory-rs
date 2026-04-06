@@ -132,6 +132,7 @@ export const OrdenDetalle: React.FC<OrdenDetalleProps> = ({
                             onCerrar={() => setMenuAbierto(false)}
                             items={menuItems}
                             ariaLabel="Opciones de la orden"
+                            triggerClassName="ordenDetalleOpcionesBoton"
                         />
                     )}
                 </div>

@@ -17,8 +17,7 @@ import {SeccionChat} from '../components/panel/SeccionChat';
 import {SeccionReembolsos} from '../components/panel/SeccionReembolsos';
 import {SeccionUsuarios} from '../components/panel/SeccionUsuarios';
 import {SeccionHosting} from '../components/panel/SeccionHosting';
-import {EmployeesSection} from '../components/panel/EmployeesSection';
-import {ServicesCatalogSection} from '../components/panel/ServicesCatalogSection';
+/* [064A-34] EmployeesSection y ServicesCatalogSection eliminados del panel. */
 import {SidebarPanel} from '../components/panel/SidebarPanel';
 import {PlaceholderSeccion} from '../components/panel/PlaceholderSeccion';
 import {obtenerTabsPorRol, seccionInicialPorRol, type SeccionPanel} from '../data/panel';
@@ -67,8 +66,6 @@ export const PanelIsland: React.FC = () => {
                 return <SeccionPerfil />;
             case 'metodos-pago':
                 return <SeccionMetodosPago />;
-            case 'servicios':
-                return <ServicesCatalogSection mode="client" />;
             /* [044A-38 Fase 2] Mis Proyectos con lista de órdenes + detalle + acciones */
             case 'proyectos':
             case 'asignados':
@@ -89,10 +86,6 @@ export const PanelIsland: React.FC = () => {
             /* [044A-38 Fase 7] Reembolsos (admin) */
             case 'reembolsos':
                 return <SeccionReembolsos />;
-            case 'empleados':
-                return <EmployeesSection />;
-            case 'config-servicios':
-                return <ServicesCatalogSection mode="admin" />;
             /* [054A-1] Gestión de usuarios registrados (admin) */
             case 'usuarios':
                 return <SeccionUsuarios />;
