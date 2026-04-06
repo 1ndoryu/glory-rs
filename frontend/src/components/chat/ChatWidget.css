@@ -11,7 +11,7 @@
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
-    padding: 6px 16px 6px 6px;
+    padding: 6px 20px 6px 8px;
     border-radius: 999px;
     background: #e8e6e2;
     color: var(--text-dark);
@@ -85,6 +85,7 @@
     right: var(--spacing-sm);
     width: 32px;
     height: 32px;
+    min-width: 32px;
     border-radius: 50%;
     background: #e8e6e2;
     color: var(--text-dark);
@@ -94,6 +95,7 @@
     align-items: center;
     justify-content: center;
     z-index: 1;
+    padding: 0;
     transition: background 0.15s ease;
     font-family: inherit;
 }
@@ -103,65 +105,16 @@
 }
 
 /* Formulario de nombre */
-.chatWidgetNameForm {
-    padding: var(--spacing-lg);
-    padding-top: calc(var(--spacing-lg) + 16px);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--spacing-sm);
-    flex: 1;
-    justify-content: center;
-}
-
-.chatWidgetFormAvatar {
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-.chatWidgetWelcome {
-    color: var(--text-dark);
-    font-size: var(--text-sm);
-    margin: 0;
-    text-align: center;
-}
-
-.chatWidgetNameInput {
-    width: 100%;
-}
-
-/* [064A-28] Boton iniciar: bg #e8e6e2, sin borde, estilo secundario */
-.chatWidgetStartBtn {
-    width: 100%;
-    padding: var(--spacing-xs) var(--spacing-md);
-    border-radius: var(--radius-md);
-    background: #e8e6e2;
-    color: var(--text-dark);
-    border: none;
-    cursor: pointer;
-    font-size: var(--text-sm);
-    font-weight: 500;
-    font-family: inherit;
-    transition: background 0.15s ease;
-}
-
-.chatWidgetStartBtn:hover {
-    background: #d9d7d3;
-}
-
 /* Mensajes */
 .chatWidgetMessages {
     flex: 1;
     overflow-y: auto;
-    padding: var(--spacing-sm);
-    padding-top: calc(var(--spacing-sm) + 32px);
+    padding: var(--spacing-md);
+    padding-top: calc(var(--spacing-md) + 40px);
     display: flex;
     flex-direction: column;
     gap: var(--spacing-xs);
-    min-height: 280px;
-    max-height: 350px;
+    max-height: 400px;
 }
 
 .chatWidgetEmpty {
@@ -203,6 +156,22 @@
 .chatWidgetSender--employee { color: var(--color-success); }
 .chatWidgetSender--admin   { color: var(--color-warning); }
 
+/* [064A-52] Row layout para mensajes de AI: avatar al lado del bubble */
+.chatWidgetAiRow {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+}
+
+.chatWidgetAiAvatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
 .chatWidgetMsgBubble {
     padding: var(--spacing-xs) var(--spacing-sm);
     border-radius: var(--radius-lg);
@@ -220,8 +189,9 @@
     border-bottom-right-radius: 4px;
 }
 
+/* [064A-52] 60% transparente según indicación del usuario */
 .chatWidgetMsgBubbleOther {
-    background: var(--bg-primary);
+    background: rgba(253, 252, 252, 0.4);
     color: var(--text-dark);
     border-bottom-left-radius: 4px;
 }
@@ -265,31 +235,35 @@
 }
 
 /* Input area */
+/* [064A-52] Input area sin border-top, position relative para send btn overlaid */
 .chatWidgetInputArea {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
+    position: relative;
     padding: var(--spacing-xs) var(--spacing-sm);
-    border-top: 1px solid var(--bg-item-active);
 }
 
+/* [064A-52] Input: bg unset, radius 104px, full width. Espacio derecho para el send button. */
 .chatWidgetInput {
-    flex: 1;
+    width: 100%;
 }
 
-/* [064A-28] Input border override: var(--bg-item-active) en vez de --border-default */
 .chatWidgetInput.inputBase {
+    background: unset;
     border-color: var(--bg-item-active);
+    border-radius: 104px;
+    padding-right: 48px;
 }
 
-/* [064A-28] Send button: bg #e9e7e4, circular, sin borde */
+/* [064A-52] Send button: overlaid a la derecha dentro del input */
 .chatWidgetSendBtn {
-    width: 36px;
-    height: 36px;
-    min-width: 36px;
+    position: absolute;
+    right: calc(var(--spacing-sm) + 4px);
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
     border-radius: 50%;
     padding: 0;
-    flex-shrink: 0;
     background: #e9e7e4;
     color: var(--text-dark);
     border: none;

@@ -1,11 +1,12 @@
-/* [064A-28] ChatWidget: redesign completo. Sin header, burbuja con avatar,
- * fondo semi-transparente rgba(245,242,239,0.8), sombra especifica del usuario,
- * animacion suave open/close via CSS transitions. Botones #e8e6e2/#e9e7e4.
- * Requisitos explicitos del usuario — no modificar sin instruccion. */
+/* [064A-28+064A-52] ChatWidget: redesign completo. Sin header, burbuja con avatar,
+ * fondo semi-transparente, sombra especifica del usuario, animacion suave.
+ * [064A-52] Eliminada lógica de pedir nombre — el agente IA lo pide directamente.
+ * Input 100% ancho con send button overlaid, bg unset, radius 104px.
+ * Avatar de AI al lado de los mensajes en vez de icono Bot. */
 
 import React, {useState, useRef, useEffect} from 'react';
 import {useLocation} from 'react-router-dom';
-import {Send, Bot, User, Minus} from 'lucide-react';
+import {Send, User, Minus} from 'lucide-react';
 import {useChatWidget} from '../../hooks/useChatWidget';
 import {SENDER_LABELS} from '../../api/chat';
 import {useChatStore} from '../../stores/chatStore';
@@ -21,7 +22,6 @@ export const ChatWidget: React.FC = () => {
     const abrir = useChatStore(s => s.abrir);
     const cerrar = useChatStore(s => s.cerrar);
     const [input, setInput] = useState('');
-    const [visitorName, setVisitorName] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const {
@@ -29,36 +29,24 @@ export const ChatWidget: React.FC = () => {
         connecting,
         messages,
         typing,
-        sessionId,
         connect,
         sendMessage,
         sendTyping,
     } = useChatWidget();
 
-    /* [064A-29] Si hay sesion previa (sessionId en localStorage), saltar
-     * formulario de nombre y reconectar automaticamente al abrir. */
-    const [nameSubmitted, setNameSubmitted] = useState(() => !!sessionId);
-
     if (location.pathname.startsWith('/panel')) return null;
 
+    /* [064A-52] Al abrir, conectar directamente sin pedir nombre.
+     * El agente IA pedirá el nombre al usuario si lo necesita. */
     const handleOpen = () => {
         abrir();
         if (!connected && !connecting) {
-            if (nameSubmitted || sessionId) {
-                setNameSubmitted(true);
-                connect(visitorName || undefined);
-            }
+            connect();
         }
     };
 
     const handleMinimize = () => {
         cerrar();
-    };
-
-    const handleNameSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        setNameSubmitted(true);
-        connect(visitorName || undefined);
     };
 
     const handleSend = () => {
@@ -84,7 +72,6 @@ export const ChatWidget: React.FC = () => {
 
     return (
         <>
-            {/* [064A-28] Burbuja flotante con avatar + texto "Chat" */}
             <Button
                 variante="texto"
                 tamano="pequeno"
@@ -97,7 +84,6 @@ export const ChatWidget: React.FC = () => {
                 <span className="chatWidgetBubbleTexto">Chat</span>
             </Button>
 
-            {/* [064A-28] Panel sin header, con minimize btn flotante */}
             <div className={`chatWidgetPanel ${abierto ? 'chatWidgetPanelAbierto' : ''}`}>
                 <Button
                     variante="texto"
@@ -107,66 +93,27 @@ export const ChatWidget: React.FC = () => {
                     aria-label="Minimizar chat"
                     type="button"
                 >
-                    <Minus size={16} />
+                    <Minus size={18} />
                 </Button>
 
-                {!nameSubmitted ? (
-                    <ChatWidgetNameForm
-                        visitorName={visitorName}
-                        onNameChange={setVisitorName}
-                        onSubmit={handleNameSubmit}
-                    />
-                ) : (
-                    <>
-                        <ChatWidgetMessages
-                            messages={messages}
-                            typing={typing}
-                            messagesEndRef={messagesEndRef}
-                        />
-                        <ChatWidgetInput
-                            input={input}
-                            connected={connected}
-                            onInputChange={handleInputChange}
-                            onKeyDown={handleKeyDown}
-                            onSend={handleSend}
-                        />
-                    </>
-                )}
+                <ChatWidgetMessages
+                    messages={messages}
+                    typing={typing}
+                    messagesEndRef={messagesEndRef}
+                />
+                <ChatWidgetInput
+                    input={input}
+                    connected={connected}
+                    onInputChange={handleInputChange}
+                    onKeyDown={handleKeyDown}
+                    onSend={handleSend}
+                />
             </div>
         </>
     );
 };
 
 /* Sub-componentes (SRP) */
-
-function ChatWidgetNameForm({
-    visitorName,
-    onNameChange,
-    onSubmit,
-}: {
-    visitorName: string;
-    onNameChange: (name: string) => void;
-    onSubmit: (e: React.FormEvent) => void;
-}) {
-    return (
-        <form className="chatWidgetNameForm" onSubmit={onSubmit}>
-            <img src={AVATAR_SRC} alt="" className="chatWidgetFormAvatar" />
-            <p className="chatWidgetWelcome">
-                ¡Hola! ¿Cómo te podemos ayudar?
-            </p>
-            <Input
-                type="text"
-                placeholder="Tu nombre (opcional)"
-                value={visitorName}
-                onChange={(e) => onNameChange(e.target.value)}
-                className="chatWidgetNameInput"
-            />
-            <Button type="submit" variante="texto" tamano="pequeno" className="chatWidgetStartBtn">
-                Iniciar conversación
-            </Button>
-        </form>
-    );
-}
 
 function ChatWidgetMessages({
     messages,
@@ -197,39 +144,65 @@ function ChatWidgetMessages({
             )}
             {messages.map((msg) => {
                 const isOwn = msg.sender_type === 'visitor' || msg.sender_type === 'client';
+                const isAi = msg.sender_type === 'ai';
                 const label = SENDER_LABELS[msg.sender_type] || msg.sender_type;
-                const icon = msg.sender_type === 'ai' ? <Bot size={14} /> : <User size={14} />;
+
+                /* [064A-52] AI: avatar al lado de la burbuja. Otros: icono User + label. */
+                const bubble = (
+                    <div className={`chatWidgetMsgBubble ${isOwn ? 'chatWidgetMsgBubbleOwn' : 'chatWidgetMsgBubbleOther'}`}>
+                        {msg.content}
+                    </div>
+                );
 
                 return (
                     <div
                         key={msg.id}
                         className={`chatWidgetMsg ${isOwn ? 'chatWidgetMsgOwn' : 'chatWidgetMsgOther'}`}
                     >
-                        {!isOwn && (
+                        {!isOwn && !isAi && (
                             <span className={`chatWidgetMsgSender chatWidgetSender--${msg.sender_type}`}>
-                                {icon} {label}
+                                <User size={14} /> {label}
                             </span>
                         )}
-                        <div className={`chatWidgetMsgBubble ${isOwn ? 'chatWidgetMsgBubbleOwn' : 'chatWidgetMsgBubbleOther'}`}>
-                            {msg.content}
-                        </div>
+                        {isAi ? (
+                            <div className="chatWidgetAiRow">
+                                <img src={AVATAR_SRC} alt="" className="chatWidgetAiAvatar" />
+                                {bubble}
+                            </div>
+                        ) : (
+                            bubble
+                        )}
                     </div>
                 );
             })}
 
             {typing && (
                 <div className="chatWidgetMsg chatWidgetMsgOther">
-                    <span className={`chatWidgetMsgSender chatWidgetSender--${typing.sender}`}>
-                        {typing.sender === 'ai' ? <Bot size={14} /> : <User size={14} />}
-                        {' '}{SENDER_LABELS[typing.sender] || typing.sender}
-                    </span>
-                    <div className="chatWidgetMsgBubble chatWidgetMsgBubbleOther chatWidgetTyping">
-                        <span className="chatWidgetTypingDots">
-                            <span />
-                            <span />
-                            <span />
+                    {typing.sender !== 'ai' && (
+                        <span className={`chatWidgetMsgSender chatWidgetSender--${typing.sender}`}>
+                            <User size={14} /> {SENDER_LABELS[typing.sender] || typing.sender}
                         </span>
-                    </div>
+                    )}
+                    {typing.sender === 'ai' ? (
+                        <div className="chatWidgetAiRow">
+                            <img src={AVATAR_SRC} alt="" className="chatWidgetAiAvatar" />
+                            <div className="chatWidgetMsgBubble chatWidgetMsgBubbleOther chatWidgetTyping">
+                                <span className="chatWidgetTypingDots">
+                                    <span />
+                                    <span />
+                                    <span />
+                                </span>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="chatWidgetMsgBubble chatWidgetMsgBubbleOther chatWidgetTyping">
+                            <span className="chatWidgetTypingDots">
+                                <span />
+                                <span />
+                                <span />
+                            </span>
+                        </div>
+                    )}
                 </div>
             )}
 

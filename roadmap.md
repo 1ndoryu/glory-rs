@@ -62,24 +62,13 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 ###
 
-- El icono de minimizar en el chat no se ve.
-- En el chat hay un espacio vacío abajo del input de chat
-- El input del chat debería tener 
-    background: unset;
-    border-radius: 104px;
-En realidad ningún input debe tener background
-El input debe estar 100% expandido haciendo que el boton de enviar mensaje este encima. 
-- Quita el borde top de chatWidgetInputArea.
-- Quita el del chat la logica de perdir el nombre y que abra el chat directamente, el nombre se lo pedira el agente al usuario. 
-- Agrega un poquito mas de padding a los lados en .chatWidgetBubble
 - La imagen por defecto de cuando se crea un usuario no me gusta, elige otra.
 - No debería preguntar el correo en el modal para continuar con el pedido, el correo tiene que el que se use en la compra de stripe, si la contraseña se puede pedir en el formulario de stripe, mejor, sino, debe aparecer para elegirse en el panel al regresar. Tambien hay que revisar que falta para que funcione con stripe porque hice una prueba y da 404, haz un plan sobre esto.
 - parece que panelUsuario tiene un padding botton innecesario.
 - Que fatal que hayas borrado alguans tareas, habia dicho que los select en usuariosFiltros se ven fatal, no usan el color de borde correcto, no tienen padding a los lados, el texto n ose ve centrado. Ningun menu tiene que usar sombras.
 - Noto que cuando se elige un servicio, no se esta eligiendo si pagar completo, por fases o 50/50. ¿Donde se elige esto?
 - sidebarUsuario es redundante que aparezca sabiendo que ya aparezce la foto perfil en el nav del panel, la foto de perfil debería ser un poquito mas pequeña, 2 px mas pequeña.
-- chatWidgetMessages necesito un poco mas de padding y mas padding top. 
-- El fondo de .chatWidgetMsgBubbleOther necesita 60% de transparente. En vez de chatWidgetMsgSender chatWidgetSender--ai necesito que la iamgen este al lado, la que aparece al principio que te comente que esta en la carpeta random. 
 - En movil hay que quitar accionCabecera y dejar solo el boton de hamburgueza, tambien ajustar lo que se ve al abrir el boton de hamburgueza, tiene que ser un modal con el estilo de .chatWidgetPanel pero centrado, con los botones de menu en el centrol tiene que soportar los botones con menu y mostrar las opciones internas en vez de navegar directamente, agregar un boton para ver el menu porque tambien se puede navegar directamente una pagina con submenu.
-- Parece que los datos de prueba estan duplicados, borra todos datos y vuelve a ponerlos, esto no tiene que borrar el usuario admin.
-- Agrega una tab en el panel de configuracion. 
+- Agrega una tab en el panel de configuracion. Alli habra opciones para recrear los datos de prueba, borrarlos. 
+- Para el admin, todos los contenidos deben ser editables en el front, esto es una tarea gigantezca, requiere un plan detallado. Nos podemos enfocar en los servicios, habrá un boton en la esquina para editar, abrira un modal con tab lateral para modificar cada cosa, titulo, descripción, planes, precios, fases, etc, todo lo que sea modificable, enlaces. Tambien para los blog, y proyectos. 
+- En el chat el boton de enviar dejalo sin fondo. 
