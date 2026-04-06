@@ -51,10 +51,8 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 - La pagina de contacto ya no tiene sentido, todos los botones de contacto deben abrir el chat. 
 - Las imagenes de galería de los proyectos tienen que ser mas grande. 
 - proyectoHero, alli se podría colocar detalles tecnicos, tecnología, enlaces (con iconos de donde este disponible, github, web, etc). 
-- Quitar la sesion de clientes en "nosotros" y tambien quitar Testimonials.
 - seccionContacto en la pagian de nosotros necesita mas padding botton y tambien en soluciones.
 - ¿Cual es el status de Hosting administrado? Sigue diciendo "Próximamente -Estamos trabajando en esta solución. Pronto tendrás toda la información que necesitas." Crea un md con todo lo que falta para tenerlo listo. 
-- Quita el hablemos del blog.
 - los tarjetaArticulo tarjetaArticuloDestacado se ven mal, deberían verse como las tarjetas ende blog en el inicio.
 - Cuando inicie sesion no me redirigio al panel. 
 - En la vista de cliente no tengo proyectos para ver ni en la vista de empleado, tienen que ser cosas legitimas para probar la funcionalidad real. 
@@ -65,6 +63,4 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 - Repito, esto lo vuelvo a repetir, en los datos de prueba hay una inconsistencia, porque hay ordenes con pago unico pendiente de pagar si un pago unico no debe generar pendiente de pagos pues se paga una sola vez para iniciar el pedido.
 - Lo de ordenDetalleNotas no se para que sirve pero no le veo mucho sentido. 
 - Los titulos no deben estar enumerados si es que se hizo automaticamente, no debe ordenDetalleTitulo
-- La info en ordenDetalleMetaRow toda debería estar separada por badges. 
-- agrega un padding y un borde con radius a faseCard faseCardActiva  para separar mejor las fases.
-- ordenDetalleAcciones es inconsistente los botones en cuanto a tamaño.
+- La info en ordenDetalleMetaRow toda debería estar separada por badges.
