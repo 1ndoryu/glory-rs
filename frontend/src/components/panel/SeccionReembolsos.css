@@ -49,7 +49,7 @@
 }
 
 .reembolsoCard {
-    background: var(--bg-secondary);
+    background: var(--bg-dark);
     border: 1px solid var(--bg-item-active);
     border-radius: var(--radius-lg);
     padding: var(--spacing-md);

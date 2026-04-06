@@ -45,7 +45,7 @@
     height: 80px;
     border-radius: var(--radius-md);
     overflow: hidden;
-    background-color: var(--bg-secondary);
+    background-color: var(--bg-dark);
     /* Mostrar imagen en este caso para diferenciar de skills */
     display: block;
 }

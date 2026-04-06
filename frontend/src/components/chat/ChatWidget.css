@@ -40,7 +40,7 @@
     right: var(--spacing-lg);
     width: 380px;
     max-height: 520px;
-    background: var(--bg-secondary);
+    background: var(--bg-dark);
     border: 1px solid var(--white-10);
     border-radius: var(--radius-xl);
     display: flex;

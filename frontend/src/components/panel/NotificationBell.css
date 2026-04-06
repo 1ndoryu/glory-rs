@@ -88,7 +88,7 @@
 }
 
 .notificationBell__markAll:hover {
-  background: var(--bg-secondary);
+  background: var(--bg-dark);
 }
 
 .notificationBell__list {
@@ -117,7 +117,7 @@
 }
 
 .notificationBell__item:hover {
-  background: var(--bg-secondary);
+  background: var(--bg-dark);
 }
 
 .notificationBell__item--unread {

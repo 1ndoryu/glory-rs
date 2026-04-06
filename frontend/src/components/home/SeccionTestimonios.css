@@ -128,5 +128,5 @@
 .autorCargo {
     font-family: var(--font-sans-alt);
     font-size: var(--text-xs);
-    color: var(--text-secondary);
+    color: var(--text-dark);
 }

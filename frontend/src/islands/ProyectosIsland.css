@@ -43,7 +43,7 @@
 .proyectosHero .heroDescripcion p {
     font-family: var(--font-serif);
     font-size: var(--text-xl);
-    color: var(--text-secondary);
+    color: var(--text-dark);
     line-height: 1.6;
     margin: 0;
     max-width: 50ch;

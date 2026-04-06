@@ -8,7 +8,9 @@
 :root {
     /* Colors - Backgrounds */
     --bg-primary: #fdfcfc;
-    --bg-secondary: #141413;
+    /* [064A-2] Renombrado de bg-secondary → bg-dark para evitar confusión.
+     * El valor es negro: úsalo solo en secciones oscuras (footer, hero dark). */
+    --bg-dark: #141413;
     --bg-accent: #f5f3f1;
     --overlay-hover: rgba(0, 0, 0, 0.05);
 
@@ -18,7 +20,9 @@
 
     /* Colors - Text */
     --text-primary: #151411;
-    --text-secondary: #141413;
+    /* [064A-2] Renombrado de text-secondary → text-dark. Era idéntico a text-primary.
+     * Úsalo para texto oscuro sobre fondos claros donde text-primary ya se usa. */
+    --text-dark: #141413;
     --text-tertiary: #6b7280;
     --text-muted: #414141;
 

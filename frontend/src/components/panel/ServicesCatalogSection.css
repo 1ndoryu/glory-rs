@@ -33,7 +33,7 @@
 .servicesCatalogMetricLabel,
 .servicesCatalogCardSlug,
 .servicesCatalogPlanMeta {
-    color: var(--text-secondary);
+    color: var(--text-dark);
 }
 
 .servicesCatalogMetricLabel {
@@ -57,7 +57,7 @@
 .servicesCatalogCardDescription,
 .servicesCatalogEmptyPlans {
     margin: 0;
-    color: var(--text-secondary);
+    color: var(--text-dark);
     line-height: 1.6;
 }
 
@@ -90,7 +90,7 @@
 
 .servicesCatalogCardCount {
     align-self: flex-start;
-    background: var(--bg-secondary);
+    background: var(--bg-dark);
     color: var(--brand-black);
 }
 
@@ -121,7 +121,7 @@
     align-items: center;
     padding: var(--spacing-sm);
     border-radius: var(--radius-lg);
-    background: var(--bg-secondary);
+    background: var(--bg-dark);
 }
 
 .servicesCatalogPlanName {

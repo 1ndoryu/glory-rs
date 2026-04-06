@@ -1,6 +1,6 @@
 /* Componente Footer */
 .footer {
-    background-color: var(--bg-secondary);
+    background-color: var(--bg-dark);
     color: var(--bg-primary);
     padding: var(--spacing-xl) 0 var(--spacing-lg);
     width: 100%;

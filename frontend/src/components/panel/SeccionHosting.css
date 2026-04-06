@@ -52,7 +52,7 @@
     grid-template-columns: 2fr 1fr 1.5fr 1fr 0.8fr 1fr;
     gap: var(--spacing-sm);
     padding: var(--spacing-sm) var(--spacing-md);
-    background: var(--bg-secondary);
+    background: var(--bg-dark);
     font-size: var(--text-xs);
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -157,7 +157,7 @@
 }
 
 .hostingMenuItem:hover {
-    background: var(--bg-secondary);
+    background: var(--bg-dark);
 }
 
 /* ── Form crear ────────────────────────────── */
@@ -253,7 +253,7 @@
 .hostingEventoDetalles {
     margin: var(--spacing-xs) 0 0;
     padding: var(--spacing-xs);
-    background: var(--bg-secondary);
+    background: var(--bg-dark);
     border-radius: var(--radius-sm);
     font-size: var(--text-mini);
     overflow-x: auto;

@@ -1,7 +1,7 @@
 /* [044A-38 Fase 8] Estilos para ReviewPanel. */
 
 .reviewContenedor {
-    background: var(--bg-secondary);
+    background: var(--bg-dark);
     border: 1px solid var(--bg-item-active);
     border-radius: var(--radius-lg);
     padding: var(--spacing-md);

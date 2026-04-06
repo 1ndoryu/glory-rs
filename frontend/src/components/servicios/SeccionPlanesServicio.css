@@ -213,7 +213,7 @@
     border: none;
     font-family: var(--font-primary);
     font-size: var(--text-sm);
-    color: var(--text-secondary);
+    color: var(--text-dark);
     cursor: pointer;
     text-decoration: underline;
     text-underline-offset: 2px;

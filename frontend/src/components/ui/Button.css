@@ -35,7 +35,7 @@
 }
 
 .botonSecundario {
-    background-color: var(--bg-secondary);
+    background-color: var(--bg-dark);
     color: var(--text-primary);
 }
 
@@ -56,7 +56,7 @@
 .botonTexto {
     background: none;
     border: none;
-    color: var(--text-secondary);
+    color: var(--text-dark);
     text-decoration: none;
     padding: 0;
 }

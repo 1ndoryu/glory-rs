@@ -43,7 +43,7 @@
 .contactoDescripcion {
     font-family: var(--font-sans-alt);
     font-size: var(--text-lg);
-    color: var(--text-secondary);
+    color: var(--text-dark);
     max-width: 60ch;
     line-height: 1.6;
     margin: 0;
