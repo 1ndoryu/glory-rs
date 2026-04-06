@@ -137,20 +137,21 @@
     line-height: 1.2;
 }
 
-/* Destacado ocupa más espacio */
+/* [064A-13] Destacado ocupa la fila completa con aspect-ratio panorámico */
 .tarjetaArticuloDestacado {
-    aspect-ratio: 16 / 9;
+    grid-column: 1 / -1;
+    aspect-ratio: 21 / 9;
 }
 
 .tarjetaArticuloDestacado .articuloTitulo {
     font-size: var(--text-3xl);
 }
 
-/* Grid de blog cards */
+/* [064A-13] Grid igualado al de SeccionBlog (home): 3 columnas, gap xl */
 .blogListaArticulos {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: var(--spacing-lg);
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-xl);
 }
 
 .blogSinResultados {
@@ -175,7 +176,18 @@
         grid-template-columns: 1fr;
     }
 
+    .tarjetaArticuloDestacado {
+        aspect-ratio: 3 / 4;
+    }
+
     .tarjetaArticuloDestacado .articuloTitulo {
         font-size: var(--text-2xl);
+    }
+}
+
+@media (min-width: 769px) and (max-width: 900px) {
+    .blogListaArticulos {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-lg);
     }
 }
