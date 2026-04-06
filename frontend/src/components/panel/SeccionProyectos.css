@@ -465,6 +465,93 @@
 }
 
 /* ============================================================
+   [064A-30] INFO CARD — cuadro de detalles del pedido
+   ============================================================ */
+
+.ordenInfoCard {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    padding: var(--spacing-lg);
+    border: 1px solid var(--bg-item-active);
+    border-radius: var(--radius-lg);
+    background: var(--brand-white);
+}
+
+.ordenInfoCardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.ordenInfoCardAcciones {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.ordenInfoGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: var(--spacing-md);
+}
+
+.ordenInfoItem {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.ordenInfoLabel {
+    font-family: var(--font-primary);
+    font-size: var(--text-2xs);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-tertiary);
+}
+
+.ordenInfoValue {
+    font-family: var(--font-primary);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--brand-black);
+}
+
+.ordenInfoFreelancer {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.ordenInfoPrecio {
+    font-weight: 600;
+}
+
+/* ============================================================
+   [064A-30] HISTORIAL CARD — progreso, entregas, revisiones
+   ============================================================ */
+
+.ordenHistorialCard {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    padding: var(--spacing-lg);
+    border: 1px solid var(--bg-item-active);
+    border-radius: var(--radius-lg);
+    background: var(--brand-white);
+}
+
+.ordenHistorialTitulo {
+    font-family: var(--font-primary);
+    font-size: var(--text-lg);
+    font-weight: 500;
+    color: var(--brand-black);
+    margin: 0;
+}
+
+/* ============================================================
    RESPONSIVE
    ============================================================ */
 
@@ -524,6 +611,15 @@
     .faseMeta {
         flex-wrap: wrap;
         gap: var(--spacing-xs);
+    }
+
+    /* [064A-30] Info card responsive */
+    .ordenInfoGrid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .ordenInfoCardHeader {
+        flex-wrap: wrap;
     }
 }
 

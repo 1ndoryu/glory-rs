@@ -521,6 +521,26 @@ impl OrderRepository {
         Ok((service_title, service_slug, plan_name))
     }
 
+    /* [064A-30] Obtiene display_name del empleado asignado a una orden.
+     * Retorna None si employee_id es None o si el usuario no tiene display_name.
+     * Usa query_scalar sin macro para no depender del cache offline. */
+    pub async fn get_employee_display_name(
+        pool: &PgPool,
+        employee_id: Option<Uuid>,
+    ) -> Result<Option<String>, sqlx::Error> {
+        let Some(eid) = employee_id else {
+            return Ok(None);
+        };
+        let name: Option<String> = sqlx::query_scalar(
+            "SELECT display_name FROM users WHERE id = $1",
+        )
+        .bind(eid)
+        .fetch_optional(pool)
+        .await?
+        .flatten();
+        Ok(name)
+    }
+
     /* ============================================================
        [044A-38 Fase 4] ASIGNACIÓN Y AUTO-ASIGNACIÓN
        ============================================================ */

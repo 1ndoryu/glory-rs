@@ -179,9 +179,11 @@ pub struct OrderResponse {
     pub currency: String,
     pub status: OrderStatus,
     pub assigned_employee_id: Option<Uuid>,
+    pub assigned_employee_name: Option<String>,
     pub current_phase: i32,
     pub total_phases: i32,
     pub client_notes: Option<String>,
+    pub started_at: Option<DateTime<Utc>>,
     pub created_at: DateTime<Utc>,
 }
 

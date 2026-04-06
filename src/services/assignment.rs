@@ -61,6 +61,7 @@ impl AssignmentService {
             OrderRepository::get_order_display_info(pool, assigned.service_id, assigned.plan_id)
                 .await?;
         let phases = OrderRepository::list_order_phases(pool, order_id).await?;
+        let employee_name = OrderRepository::get_employee_display_name(pool, assigned.assigned_employee_id).await?;
 
         #[allow(clippy::cast_possible_truncation, clippy::cast_possible_wrap)]
         let total_phases = phases.len() as i32;
@@ -78,9 +79,11 @@ impl AssignmentService {
             currency: assigned.currency,
             status: assigned.status,
             assigned_employee_id: assigned.assigned_employee_id,
+            assigned_employee_name: employee_name,
             current_phase: assigned.current_phase,
             total_phases,
             client_notes: assigned.client_notes,
+            started_at: assigned.started_at,
             created_at: assigned.created_at,
         })
     }
@@ -112,9 +115,11 @@ impl AssignmentService {
                 currency: order.currency,
                 status: order.status,
                 assigned_employee_id: order.assigned_employee_id,
+                assigned_employee_name: None,
                 current_phase: order.current_phase,
                 total_phases,
                 client_notes: order.client_notes,
+                started_at: order.started_at,
                 created_at: order.created_at,
             });
         }

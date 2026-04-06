@@ -167,9 +167,11 @@ impl OrderService {
             currency: order.currency,
             status: order.status,
             assigned_employee_id: order.assigned_employee_id,
+            assigned_employee_name: None,
             current_phase: order.current_phase,
             total_phases,
             client_notes: order.client_notes,
+            started_at: order.started_at,
             created_at: order.created_at,
         })
     }
@@ -191,6 +193,8 @@ impl OrderService {
         let (svc_title, svc_slug, plan_name) =
             OrderRepository::get_order_display_info(pool, order.service_id, order.plan_id).await?;
 
+        let employee_name = OrderRepository::get_employee_display_name(pool, order.assigned_employee_id).await?;
+
         let response = OrderResponse {
             id: order.id,
             order_number: order.order_number,
@@ -204,9 +208,11 @@ impl OrderService {
             currency: order.currency,
             status: order.status,
             assigned_employee_id: order.assigned_employee_id,
+            assigned_employee_name: employee_name,
             current_phase: order.current_phase,
             total_phases,
             client_notes: order.client_notes,
+            started_at: order.started_at,
             created_at: order.created_at,
         };
 
@@ -236,6 +242,7 @@ impl OrderService {
                 OrderRepository::get_order_display_info(pool, order.service_id, order.plan_id)
                     .await?;
             let phases = OrderRepository::list_order_phases(pool, order.id).await?;
+            let employee_name = OrderRepository::get_employee_display_name(pool, order.assigned_employee_id).await?;
 
             result.push(OrderResponse {
                 id: order.id,
@@ -250,12 +257,14 @@ impl OrderService {
                 currency: order.currency,
                 status: order.status,
                 assigned_employee_id: order.assigned_employee_id,
+                assigned_employee_name: employee_name,
                 current_phase: order.current_phase,
                 total_phases: {
                     #[allow(clippy::cast_possible_truncation, clippy::cast_possible_wrap)]
                     { phases.len() as i32 }
                 },
                 client_notes: order.client_notes,
+                started_at: order.started_at,
                 created_at: order.created_at,
             });
         }

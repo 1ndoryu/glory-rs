@@ -1,33 +1,28 @@
-/* [044A-38 Fase 2+3+6] Detalle de una orden con timeline de fases.
- * Muestra info general + fases con acciones según rol.
- * Fase 3: botón de pago Stripe integrado para pending_payment.
- * Fase 6: upload multipart de entregables + listado + descarga por fase. */
-import React, {useState} from 'react';
-import {Check, RotateCcw, CreditCard, XCircle, ArrowLeft} from 'lucide-react';
+/* [064A-30] Detalle de orden rediseñado: cuadro de info (freelancer, servicio,
+ * número, fecha inicio, precio, 3 puntos) + historial de fases con entregas y
+ * revisiones. Clientes solicitan revisiones al recibir entrega.
+ * Opciones: reportar, extensión de tiempo (empleado), cancelar. */
+import React from 'react';
+import {CreditCard, XCircle, ArrowLeft, AlertTriangle, User} from 'lucide-react';
 import {
     ORDER_STATUS_LABELS,
-    PHASE_STATUS_LABELS,
     PAYMENT_MODE_LABELS,
     formatPrice,
     type OrderResponse,
     type OrderPhaseResponse,
     type OrderStatus,
-    type PhaseStatus,
 } from '../../api/orders';
-import {EntregablesPanel} from './EntregablesPanel';
 import {ReviewPanel} from './ReviewPanel';
+import {FaseCard} from './FaseCard';
 import {Button} from '../ui/Button';
 import {MenuContextual, type MenuContextualItem} from '../ui/ContextMenu';
 import {Modal} from '../ui/Modal';
 import CheckoutModal from './CheckoutModal';
+import {useOrdenDetalle} from '../../hooks/useOrdenDetalle';
 import './SeccionProyectos.css';
 
-/* Fases que el cliente puede cancelar */
 const CANCELABLE_STATUSES: OrderStatus[] = ['pending_payment', 'payment_held', 'awaiting_assignment'];
-const APPROVABLE_PHASE: PhaseStatus[] = ['delivered'];
-const REVISABLE_PHASE: PhaseStatus[] = ['delivered'];
 
-/* Mapa status → clase CSS para colores */
 const STATUS_CLASS: Record<OrderStatus, string> = {
     pending_payment: 'ordenBadge--pendingPayment',
     payment_held: 'ordenBadge--paymentHeld',
@@ -38,6 +33,12 @@ const STATUS_CLASS: Record<OrderStatus, string> = {
     cancelled: 'ordenBadge--cancelled',
     disputed: 'ordenBadge--disputed',
 };
+
+/* [064A-30] Formatea fecha ISO a "DD mes YYYY" legible */
+function formatFecha(iso: string): string {
+    const d = new Date(iso);
+    return d.toLocaleDateString('es-ES', {day: 'numeric', month: 'short', year: 'numeric'});
+}
 
 interface OrdenDetalleProps {
     order: OrderResponse;
@@ -54,90 +55,123 @@ interface OrdenDetalleProps {
 export const OrdenDetalle: React.FC<OrdenDetalleProps> = ({
     order, phases, effectiveRole, onVolver, onCancelar, onAprobar, onRevision, onPagoExitoso, cancelando,
 }) => {
-    const [checkout, setCheckout] = useState<{
-        amountCents: number;
-        phaseNumber?: number;
-    } | null>(null);
-    const [menuAbierto, setMenuAbierto] = useState(false);
-    const [modalCancelarAbierto, setModalCancelarAbierto] = useState(false);
+    const {
+        checkout, menuAbierto, setMenuAbierto,
+        modalCancelarAbierto, setModalCancelarAbierto,
+        modalReportarAbierto, setModalReportarAbierto,
+        confirmarCancelacion, abrirCheckout, cerrarCheckout,
+    } = useOrdenDetalle(order, onCancelar);
 
     const canCancel = CANCELABLE_STATUSES.includes(order.status);
     const needsPayment = order.status === 'pending_payment';
     const isPhased = order.payment_mode === 'phased';
-    const shouldShowPhases = isPhased;
     const isEmployee = effectiveRole === 'employee';
     const isClient = effectiveRole === 'client' || effectiveRole === 'admin';
 
-    const abrirCancelacion = () => {
-        setModalCancelarAbierto(true);
-    };
+    /* [064A-30] Menú contextual con más opciones según rol */
+    const menuItems: MenuContextualItem[] = [];
 
-    const confirmarCancelacion = async () => {
-        await onCancelar(order.id);
-        setModalCancelarAbierto(false);
-    };
-
-    const menuItems: MenuContextualItem[] = canCancel
-        ? [{
+    if (canCancel) {
+        menuItems.push({
             id: 'cancel-order',
             label: cancelando ? 'Cancelando...' : 'Cancelar orden',
-            onSelect: abrirCancelacion,
+            onSelect: () => setModalCancelarAbierto(true),
             disabled: cancelando,
             danger: true,
             icon: <XCircle size={16} />,
-        }]
-        : [];
+        });
+    }
+
+    /* Reportar: disponible para cliente cuando hay empleado asignado */
+    if (isClient && order.assigned_employee_id && order.status !== 'cancelled' && order.status !== 'completed') {
+        menuItems.push({
+            id: 'report-order',
+            label: 'Reportar problema',
+            onSelect: () => setModalReportarAbierto(true),
+            icon: <AlertTriangle size={16} />,
+        });
+    }
 
     return (
         <div className="ordenDetalle">
             <div className="ordenDetalleTopbar">
-                {/* [064A-20] Botón volver con icono SVG */}
                 <Button className="ordenDetalleVolver" onClick={onVolver} type="button" variante="texto" tamano="pequeno">
                     <ArrowLeft size={16} /> Volver
                 </Button>
             </div>
 
-            <div className="ordenDetalleHeader">
-                <div className="ordenDetalleResumen">
-                    <h2 className="ordenDetalleTitulo">
-                        #{order.order_number} — {order.service_title}
-                    </h2>
-                    {/* [064A-24] Toda la info en badges uniformes */}
-                    <div className="ordenDetalleMetaRow">
-                        <span className={`ordenDetalleBadge ${STATUS_CLASS[order.status]}`}>
-                            {ORDER_STATUS_LABELS[order.status]}
-                        </span>
-                        <span className="ordenDetalleBadge">{order.plan_name}</span>
-                        <span className="ordenDetalleBadge">{PAYMENT_MODE_LABELS[order.payment_mode]}</span>
-                        <span className="ordenDetalleBadge">{formatPrice(order.final_price_cents, order.currency)}</span>
+            {/* [064A-30] Cuadro de información del pedido */}
+            <div className="ordenInfoCard">
+                <div className="ordenInfoCardHeader">
+                    <span className={`ordenDetalleBadge ${STATUS_CLASS[order.status]}`}>
+                        {ORDER_STATUS_LABELS[order.status]}
+                    </span>
+                    <div className="ordenInfoCardAcciones">
+                        {needsPayment && !isPhased && (
+                            <Button
+                                onClick={() => abrirCheckout(order.final_price_cents)}
+                                type="button"
+                                variante="exito"
+                                tamano="pequeno"
+                            >
+                                <CreditCard size={16} /> Pagar
+                            </Button>
+                        )}
+                        {menuItems.length > 0 && (
+                            <MenuContextual
+                                abierto={menuAbierto}
+                                onToggle={() => setMenuAbierto(prev => !prev)}
+                                onCerrar={() => setMenuAbierto(false)}
+                                items={menuItems}
+                                ariaLabel="Opciones de la orden"
+                                triggerClassName="ordenDetalleOpcionesBoton"
+                            />
+                        )}
                     </div>
                 </div>
-                <div className="ordenDetalleAcciones">
-                    {needsPayment && !isPhased && (
-                        <Button
-                            className="ordenDetallePagar"
-                            onClick={() => setCheckout({amountCents: order.final_price_cents})}
-                            type="button"
-                            variante="exito"
-                            tamano="pequeno"
-                        >
-                            <CreditCard size={16} /> Pagar
-                        </Button>
-                    )}
 
-                    {canCancel && (
-                        <MenuContextual
-                            abierto={menuAbierto}
-                            onToggle={() => setMenuAbierto(prev => !prev)}
-                            onCerrar={() => setMenuAbierto(false)}
-                            items={menuItems}
-                            ariaLabel="Opciones de la orden"
-                            triggerClassName="ordenDetalleOpcionesBoton"
-                        />
-                    )}
+                <div className="ordenInfoGrid">
+                    <div className="ordenInfoItem">
+                        <span className="ordenInfoLabel">Servicio</span>
+                        <span className="ordenInfoValue">{order.service_title}</span>
+                    </div>
+                    <div className="ordenInfoItem">
+                        <span className="ordenInfoLabel">Plan</span>
+                        <span className="ordenInfoValue">{order.plan_name}</span>
+                    </div>
+                    <div className="ordenInfoItem">
+                        <span className="ordenInfoLabel">Número de orden</span>
+                        <span className="ordenInfoValue">#{order.order_number}</span>
+                    </div>
+                    <div className="ordenInfoItem">
+                        <span className="ordenInfoLabel">Freelancer</span>
+                        <span className="ordenInfoValue ordenInfoFreelancer">
+                            <User size={14} />
+                            {order.assigned_employee_name ?? 'Sin asignar'}
+                        </span>
+                    </div>
+                    <div className="ordenInfoItem">
+                        <span className="ordenInfoLabel">
+                            {order.started_at ? 'Fecha de inicio' : 'Fecha de creación'}
+                        </span>
+                        <span className="ordenInfoValue">
+                            {formatFecha(order.started_at ?? order.created_at)}
+                        </span>
+                    </div>
+                    <div className="ordenInfoItem">
+                        <span className="ordenInfoLabel">Precio</span>
+                        <span className="ordenInfoValue ordenInfoPrecio">
+                            {formatPrice(order.final_price_cents, order.currency)}
+                        </span>
+                    </div>
+                    <div className="ordenInfoItem">
+                        <span className="ordenInfoLabel">Modo de pago</span>
+                        <span className="ordenInfoValue">{PAYMENT_MODE_LABELS[order.payment_mode]}</span>
+                    </div>
                 </div>
             </div>
 
+            {/* [064A-30] Modales */}
             <Modal
                 abierto={modalCancelarAbierto}
                 onCerrar={() => {
@@ -151,23 +185,32 @@ export const OrdenDetalle: React.FC<OrdenDetalleProps> = ({
                         Esta acción no se puede deshacer. La orden #{order.order_number} quedará cancelada.
                     </p>
                     <div className="ordenDetalleModalAcciones">
-                        <Button
-                            variante="outline"
-                            tamano="pequeno"
-                            type="button"
-                            onClick={() => setModalCancelarAbierto(false)}
-                            disabled={cancelando}
-                        >
+                        <Button variante="outline" tamano="pequeno" type="button"
+                            onClick={() => setModalCancelarAbierto(false)} disabled={cancelando}>
                             Volver
                         </Button>
-                        <Button
-                            variante="peligro"
-                            tamano="pequeno"
-                            type="button"
-                            onClick={confirmarCancelacion}
-                            disabled={cancelando}
-                        >
+                        <Button variante="peligro" tamano="pequeno" type="button"
+                            onClick={confirmarCancelacion} disabled={cancelando}>
                             {cancelando ? 'Cancelando...' : 'Sí, cancelar'}
+                        </Button>
+                    </div>
+                </div>
+            </Modal>
+
+            <Modal
+                abierto={modalReportarAbierto}
+                onCerrar={() => setModalReportarAbierto(false)}
+                className="ordenDetalleModal"
+            >
+                <div className="ordenDetalleModalContenido">
+                    <h3 className="ordenDetalleModalTitulo">Reportar problema</h3>
+                    <p className="ordenDetalleModalTexto">
+                        El equipo de soporte revisará tu caso y se comunicará contigo. Por ahora, contacta por chat.
+                    </p>
+                    <div className="ordenDetalleModalAcciones">
+                        <Button variante="outline" tamano="pequeno" type="button"
+                            onClick={() => setModalReportarAbierto(false)}>
+                            Entendido
                         </Button>
                     </div>
                 </div>
@@ -180,19 +223,18 @@ export const OrdenDetalle: React.FC<OrdenDetalleProps> = ({
                     amountCents={checkout.amountCents}
                     currency={order.currency}
                     phaseNumber={checkout.phaseNumber}
-                    onClose={() => setCheckout(null)}
+                    onClose={cerrarCheckout}
                     onSuccess={() => {
-                        setCheckout(null);
+                        cerrarCheckout();
                         onPagoExitoso();
                     }}
                 />
             )}
 
-            {/* [064A-22] Notas de cliente removidas — sin valor visible para el usuario */}
-
-            {shouldShowPhases && (
-                <div className="ordenDetalleFases">
-                    <h3 className="ordenDetalleFasesTitulo">Fases del proyecto</h3>
+            {/* [064A-30] Cuadro de historial: fases con progreso, entregas, revisiones */}
+            {phases.length > 0 && (
+                <div className="ordenHistorialCard">
+                    <h3 className="ordenHistorialTitulo">Historial del proyecto</h3>
                     <div className="fasesTimeline">
                         {phases.map((phase, idx) => (
                             <FaseCard
@@ -205,116 +247,16 @@ export const OrdenDetalle: React.FC<OrdenDetalleProps> = ({
                                 isPhased={isPhased}
                                 onAprobar={onAprobar}
                                 onRevision={onRevision}
-                                onPagarFase={(pn, amount) => setCheckout({amountCents: amount, phaseNumber: pn})}
+                                onPagarFase={(pn, amount) => abrirCheckout(amount, pn)}
                             />
                         ))}
                     </div>
                 </div>
             )}
 
-            {/* [044A-38 Fase 8] Review panel para órdenes completadas */}
             {order.status === 'completed' && (
                 <ReviewPanel orderId={order.id} effectiveRole={effectiveRole} />
             )}
         </div>
     );
 };
-
-/* Componente privado: card de una fase dentro del timeline.
- * [044A-38 Fase 6] Integra upload multipart de entregables y listado de archivos. */
-function FaseCard({phase, orderId, isLast, isClient, isEmployee, isPhased, onAprobar, onRevision, onPagarFase}: {
-    phase: OrderPhaseResponse;
-    orderId: string;
-    isLast: boolean;
-    isClient: boolean;
-    isEmployee: boolean;
-    isPhased: boolean;
-    onAprobar: (orderId: string, phase: number) => Promise<void>;
-    onRevision: (orderId: string, phase: number) => Promise<void>;
-    onPagarFase: (phaseNumber: number, amountCents: number) => void;
-}) {
-    const canApprove = isClient && APPROVABLE_PHASE.includes(phase.status);
-    const canRevise = isClient && REVISABLE_PHASE.includes(phase.status) && phase.revisions_used < phase.max_revisions;
-    const canDeliver = isEmployee && (phase.status === 'in_progress' || phase.status === 'paid' || phase.status === 'revision_requested');
-    const canPayPhase = isClient && isPhased && phase.status === 'pending_payment';
-    const isActive = phase.status !== 'locked' && phase.status !== 'approved' && phase.status !== 'skipped';
-
-    /* Determinar si la fase tiene o puede tener entregables */
-    const hasDeliverableHistory = ['delivered', 'approved', 'revision_requested', 'in_progress']
-        .includes(phase.status) && phase.revisions_used > 0;
-    const showDeliverables = canDeliver || hasDeliverableHistory;
-
-    return (
-        <div className={`faseCard ${isActive ? 'faseCardActiva' : ''} ${phase.status === 'approved' ? 'faseCardAprobada' : ''}`}>
-            <div className="faseTimelineDot">
-                <div className={`faseDot ${phase.status === 'approved' ? 'faseDotAprobada' : ''} ${isActive ? 'faseDotActiva' : ''}`} />
-                {!isLast && <div className="faseTimelineLine" />}
-            </div>
-
-            <div className="faseCardContenido">
-                <div className="faseCardHeader">
-                    {/* [064A-23] Eliminado "Fase N" enumerado — solo el título de la fase */}
-                    <h4 className="faseNombre">{phase.title}</h4>
-                    <span className={`faseBadge faseBadge--${phase.status.replace('_', '-')}`}>
-                        {PHASE_STATUS_LABELS[phase.status]}
-                    </span>
-                </div>
-
-                {phase.description && <p className="faseDescripcion">{phase.description}</p>}
-
-                <div className="faseMeta">
-                    <span>{formatPrice(phase.price_cents)}</span>
-                    <span>{phase.estimated_days} días est.</span>
-                    <span>Revisiones: {phase.revisions_used}/{phase.max_revisions}</span>
-                </div>
-
-                {/* [044A-38 Fase 6] Panel de entregables: upload + historial */}
-                {showDeliverables && (
-                    <EntregablesPanel
-                        orderId={orderId}
-                        phaseNumber={phase.phase_number}
-                        canDeliver={canDeliver}
-                    />
-                )}
-
-                {(canApprove || canRevise || canPayPhase) && (
-                    <div className="faseAcciones">
-                        {canPayPhase && (
-                            <Button
-                                className="faseBtn"
-                                onClick={() => onPagarFase(phase.phase_number, phase.price_cents)}
-                                type="button"
-                                variante="exito"
-                                tamano="pequeno"
-                            >
-                                <CreditCard size={14} /> Pagar fase
-                            </Button>
-                        )}
-                        {canApprove && (
-                            <Button
-                                className="faseBtn"
-                                onClick={() => onAprobar(orderId, phase.phase_number)}
-                                type="button"
-                                variante="exitoSuave"
-                                tamano="pequeno"
-                            >
-                                <Check size={14} /> Aprobar
-                            </Button>
-                        )}
-                        {canRevise && (
-                            <Button
-                                className="faseBtn"
-                                onClick={() => onRevision(orderId, phase.phase_number)}
-                                type="button"
-                                variante="advertenciaSuave"
-                                tamano="pequeno"
-                            >
-                                <RotateCcw size={14} /> Revisión
-                            </Button>
-                        )}
-                    </div>
-                )}
-            </div>
-        </div>
-    );
-}

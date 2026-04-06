@@ -42,9 +42,11 @@ export interface OrderResponse {
     currency: string;
     status: OrderStatus;
     assigned_employee_id: string | null;
+    assigned_employee_name: string | null;
     current_phase: number;
     total_phases: number;
     client_notes: string | null;
+    started_at: string | null;
     created_at: string;
 }
 

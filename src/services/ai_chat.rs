@@ -24,8 +24,8 @@ pub struct AiChatConfig {
 }
 
 impl AiChatConfig {
-    /// Carga config desde variables de entorno. Soporta GROQ_API_1, GROQ_API_2, GROQ_API_3.
-    /// Fallback a AI_API_KEY/GEMINI_API_KEY/OPENAI_API_KEY si no hay keys Groq.
+    /// Carga config desde variables de entorno. Soporta `GROQ_API_1`, `GROQ_API_2`, `GROQ_API_3`.
+    /// Fallback a `AI_API_KEY`/`GEMINI_API_KEY`/`OPENAI_API_KEY` si no hay keys Groq.
     #[must_use]
     pub fn from_env() -> Self {
         let mut keys = Vec::new();
