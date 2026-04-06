@@ -79,7 +79,7 @@ export const ChatWidget: React.FC = () => {
             {/* Burbuja flotante */}
             {!open && (
                 <Button
-                    variante="texto"
+                    variante="marca"
                     className="chatWidgetBubble"
                     onClick={handleOpen}
                     aria-label="Abrir chat"
@@ -202,7 +202,7 @@ function ChatWidgetNameForm({
                 onChange={(e) => onNameChange(e.target.value)}
                 className="chatWidgetNameInput"
             />
-            <Button type="submit" className="chatWidgetStartBtn">
+            <Button type="submit" variante="marca" tamano="pequeno" className="chatWidgetStartBtn">
                 Iniciar conversación
             </Button>
         </form>
@@ -305,7 +305,7 @@ function ChatWidgetInput({
                 className="chatWidgetInput"
             />
             <Button
-                variante="texto"
+                variante="marca"
                 type="button"
                 className="chatWidgetSendBtn"
                 onClick={onSend}

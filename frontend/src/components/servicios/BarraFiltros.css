@@ -27,16 +27,14 @@
     gap: var(--spacing-sm);
 }
 
+/* [064A-1] Pill filter: usa Button variante="texto" como base.
+ * Solo overrides para estilo pill (radius-full, colores de filtro). */
 .filtroBoton {
-    font-family: var(--font-primary);
     font-size: var(--text-sm);
     padding: var(--spacing-sm) var(--spacing-md);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-full);
-    background: transparent;
     color: var(--text-muted);
-    cursor: pointer;
-    transition: all 0.2s ease;
 }
 
 .filtroBoton:hover {

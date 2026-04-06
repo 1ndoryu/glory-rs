@@ -29,23 +29,7 @@
 
 /* Header manejado por SeccionHeader.css */
 
-.clientesBotonBox {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    padding: var(--spacing-sm) var(--spacing-md);
-    border: 1px solid var(--border-color); /* o un color mas suave */
-    border-radius: var(--radius-sm); /* Ajustar segun variables globales si hay radius */
-    background-color: transparent;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    text-decoration: none;
-    color: var(--text-primary);
-}
-
-.clientesBotonBox:hover {
-    background-color: var(--overlay-hover);
-}
+/* [064A-1] CSS muerto eliminado: clientesBotonBox (no se usa en TSX). */
 
 .clientesBotonIcono {
     display: flex;

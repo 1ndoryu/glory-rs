@@ -1,8 +1,19 @@
 import React from 'react';
 import './Button.css';
 
+/* [064A-1] Variantes semánticas: cubren estados (exito, peligro, advertencia, info)
+ * y variantes suaves (Suave) para acciones secundarias. 'marca' = brand primary.
+ * Esto elimina la necesidad de crear estilos ad-hoc de botón en cada componente. */
+type ButtonVariante =
+    | 'primario' | 'secundario' | 'outline' | 'texto'
+    | 'exito' | 'exitoSuave'
+    | 'peligro' | 'peligroSuave'
+    | 'advertencia' | 'advertenciaSuave'
+    | 'info' | 'infoSuave'
+    | 'marca';
+
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-    variante?: 'primario' | 'secundario' | 'outline' | 'texto';
+    variante?: ButtonVariante;
     tamano?: 'pequeno' | 'mediano' | 'grande';
 }
 
@@ -11,7 +22,6 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
  * Soporta variantes y tamaños configurables via props.
  */
 export const Button: React.FC<ButtonProps> = ({children, className = '', variante = 'primario', tamano = 'mediano', ...props}) => {
-    // Construccion de clases CSS basadas en props
     const claseVariante = `boton${variante.charAt(0).toUpperCase() + variante.slice(1)}`;
     const claseTamano = `boton${tamano.charAt(0).toUpperCase() + tamano.slice(1)}`;
 

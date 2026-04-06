@@ -43,22 +43,9 @@
     gap: var(--spacing-md);
 }
 
+/* [064A-1] Usa Button variante="outline" tamano="pequeno". Solo white-space contextual. */
 .testimoniosBotonEscribir {
-    font-family: var(--font-primary);
-    font-size: var(--text-sm);
-    color: var(--text-tertiary);
-    background: none;
-    border: 1px solid var(--border-light);
-    padding: var(--spacing-xs) var(--spacing-md);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
     white-space: nowrap;
-    transition: color var(--transicion-rapida), border-color var(--transicion-rapida);
-}
-
-.testimoniosBotonEscribir:hover {
-    color: var(--brand-black);
-    border-color: var(--border-hover-strong);
 }
 
 /* Pista del Carrusel */

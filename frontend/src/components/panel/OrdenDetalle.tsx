@@ -116,7 +116,7 @@ export const OrdenDetalle: React.FC<OrdenDetalleProps> = ({
                             className="ordenDetallePagar"
                             onClick={() => setCheckout({amountCents: order.final_price_cents})}
                             type="button"
-                            variante="texto"
+                            variante="exito"
                             tamano="pequeno"
                         >
                             <CreditCard size={16} /> Pagar
@@ -158,8 +158,7 @@ export const OrdenDetalle: React.FC<OrdenDetalleProps> = ({
                             Volver
                         </Button>
                         <Button
-                            className="ordenDetalleCancelarConfirmar"
-                            variante="texto"
+                            variante="peligro"
                             tamano="pequeno"
                             type="button"
                             onClick={confirmarCancelacion}
@@ -285,10 +284,10 @@ function FaseCard({phase, orderId, isLast, isClient, isEmployee, isPhased, onApr
                     <div className="faseAcciones">
                         {canPayPhase && (
                             <Button
-                                className="faseBtn faseBtnPagar"
+                                className="faseBtn"
                                 onClick={() => onPagarFase(phase.phase_number, phase.price_cents)}
                                 type="button"
-                                variante="texto"
+                                variante="exito"
                                 tamano="pequeno"
                             >
                                 <CreditCard size={14} /> Pagar fase
@@ -296,10 +295,10 @@ function FaseCard({phase, orderId, isLast, isClient, isEmployee, isPhased, onApr
                         )}
                         {canApprove && (
                             <Button
-                                className="faseBtn faseBtnAprobar"
+                                className="faseBtn"
                                 onClick={() => onAprobar(orderId, phase.phase_number)}
                                 type="button"
-                                variante="texto"
+                                variante="exitoSuave"
                                 tamano="pequeno"
                             >
                                 <Check size={14} /> Aprobar
@@ -307,10 +306,10 @@ function FaseCard({phase, orderId, isLast, isClient, isEmployee, isPhased, onApr
                         )}
                         {canRevise && (
                             <Button
-                                className="faseBtn faseBtnRevision"
+                                className="faseBtn"
                                 onClick={() => onRevision(orderId, phase.phase_number)}
                                 type="button"
-                                variante="texto"
+                                variante="advertenciaSuave"
                                 tamano="pequeno"
                             >
                                 <RotateCcw size={14} /> Revisión

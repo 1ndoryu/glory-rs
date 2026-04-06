@@ -57,41 +57,8 @@
     justify-content: center;
 }
 
-.contactoBotonLink {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--spacing-md) var(--spacing-lg);
-    border-radius: var(--radius-sm); /* Standard radius */
-    font-family: var(--font-primary);
-    font-weight: 500;
-    text-decoration: none;
-    transition: all 0.2s ease;
-    font-size: var(--text-base);
-    cursor: pointer;
-}
-
-.contactoBotonPrimario {
-    background-color: var(--text-primary); /* Dark button */
-    color: var(--bg-primary); /* Light text */
-    border: 1px solid var(--text-primary);
-}
-
-.contactoBotonPrimario:hover {
-    opacity: 0.9;
-    transform: translateY(-2px);
-}
-
-.contactoBotonSecundario {
-    background-color: transparent;
-    color: var(--text-primary);
-    border: 1px solid var(--border-color); /* Using border variable */
-}
-
-.contactoBotonSecundario:hover {
-    background-color: var(--overlay-hover);
-    transform: translateY(-2px);
-}
+/* [064A-1] CSS muerto eliminado: contactoBotonLink, contactoBotonPrimario,
+ * contactoBotonSecundario. El TSX usa Button component directamente. */
 
 /* Mobile adjustments */
 @media (max-width: 768px) {

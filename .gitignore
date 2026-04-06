@@ -42,3 +42,4 @@ frontend/openapi-debug.json
 /glory-rs/
 .sentinel-report.md
 frontend/tsconfig.tsbuildinfo
+/uploads

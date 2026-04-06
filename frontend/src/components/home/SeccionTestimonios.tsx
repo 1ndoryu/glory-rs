@@ -28,7 +28,7 @@ export const SeccionTestimonios: React.FC = () => {
             <div className="testimoniosContenedor">
                 <div className="testimoniosHeader">
                     <SeccionHeader titulo="Testimonials" />
-                    <Button className="testimoniosBotonEscribir" onClick={() => setModalAbierto(true)} type="button">
+                    <Button variante="outline" tamano="pequeno" className="testimoniosBotonEscribir" onClick={() => setModalAbierto(true)} type="button">
                         Escribir un comentario
                     </Button>
                 </div>

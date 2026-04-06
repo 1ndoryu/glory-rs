@@ -100,17 +100,11 @@
     gap: var(--spacing-2xs);
 }
 
+/* [064A-1] chatWidgetHeaderBtn: usa Button variante="texto".
+ * Override mínimo: colores para contexto dark (panel de chat). */
 .chatWidgetHeaderBtn {
-    background: none;
-    border: none;
     color: var(--white-40);
-    cursor: pointer;
     padding: 4px;
-    border-radius: var(--radius-sm);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: color 0.15s, background 0.15s;
 }
 
 .chatWidgetHeaderBtn:hover {
@@ -140,20 +134,11 @@
     width: 100%;
 }
 
+/* [064A-1] chatWidgetStartBtn: ahora usa variante="marca" tamano="pequeno".
+ * Solo queda ajuste de border-radius contextual. */
 .chatWidgetStartBtn {
-    background: var(--brand-primary);
-    color: var(--brand-black);
-    border: none;
-    padding: var(--spacing-xs) var(--spacing-md);
     border-radius: var(--radius-md);
-    font-weight: 600;
-    font-size: var(--text-sm);
-    cursor: pointer;
-    transition: opacity 0.15s;
-}
-
-.chatWidgetStartBtn:hover {
-    opacity: 0.9;
+    width: 100%;
 }
 
 /* ============================================================
@@ -289,23 +274,14 @@
     flex: 1;
 }
 
+/* [064A-1] chatWidgetSendBtn: ahora usa variante="marca".
+ * Solo quedan propiedades de forma (círculo) y tamaño fijo. */
 .chatWidgetSendBtn {
-    background: var(--brand-primary);
-    color: var(--brand-black);
-    border: none;
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    padding: 0;
     flex-shrink: 0;
-    transition: opacity 0.15s;
-}
-
-.chatWidgetSendBtn:hover:not(:disabled) {
-    opacity: 0.9;
 }
 
 .chatWidgetSendBtn:disabled {

@@ -71,6 +71,8 @@ export const SeccionHosting: React.FC = () => {
             <div className="hostingHeader">
                 <h2>Hosting</h2>
                 <Button
+                    variante="primario"
+                    tamano="pequeno"
                     className="hostingBtnCrear"
                     onClick={() => setShowCreateModal(true)}
                     type="button"
@@ -168,7 +170,7 @@ function HostingRow({
             <span>${(sub.monthly_price_cents / 100).toFixed(0)}/mes</span>
             <div className="hostingAcciones">
                 <Button
-                    variante="texto"
+                    variante="outline"
                     tamano="pequeno"
                     className="hostingBtnAccion"
                     type="button"

@@ -65,9 +65,9 @@ export function EntregablesPanel({orderId, phaseNumber, canDeliver}: Entregables
                     />
                     {error && <p className="entregablesError">{error}</p>}
                     <Button
-                        variante="texto"
+                        variante="exito"
                         tamano="pequeno"
-                        className="faseBtn faseBtnEntregar"
+                        className="faseBtn"
                         onClick={handleDeliver}
                         disabled={entregando || files.length === 0}
                         type="button"

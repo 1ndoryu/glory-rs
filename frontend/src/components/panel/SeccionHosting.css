@@ -21,22 +21,11 @@
     color: var(--brand-black);
 }
 
+/* [064A-1] hostingBtnCrear: usa Button variante="primario". Solo gap contextual. */
 .hostingBtnCrear {
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
-    padding: var(--spacing-xs) var(--spacing-md);
-    background: var(--brand-black);
-    color: var(--brand-white);
-    border: none;
-    border-radius: var(--radius-md);
-    font-size: var(--text-sm);
-    cursor: pointer;
-    transition: opacity 0.15s;
-}
-
-.hostingBtnCrear:hover {
-    opacity: 0.85;
 }
 
 /* ── Loading / Empty ───────────────────────── */
@@ -126,20 +115,10 @@
     align-items: center;
 }
 
+/* [064A-1] hostingBtnAccion: usa Button variante="outline" tamano="pequeno".
+ * Solo ajuste mínimo de padding. */
 .hostingBtnAccion {
-    background: none;
-    border: 1px solid var(--bg-accent);
-    border-radius: var(--radius-sm);
     padding: 4px 6px;
-    cursor: pointer;
-    color: var(--brand-black);
-    display: flex;
-    align-items: center;
-    transition: background 0.15s;
-}
-
-.hostingBtnAccion:hover {
-    background: var(--bg-secondary);
 }
 
 .hostingMenuWrapper {

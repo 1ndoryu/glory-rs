@@ -38,21 +38,17 @@
     color: var(--brand-black);
 }
 
+/* [064A-1] Botón de sesión: usa Button variante="texto". Solo layout contextual. */
 .chatSesionItem {
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
     width: 100%;
     padding: var(--spacing-sm) var(--spacing-md);
-    border: none;
     border-bottom: 1px solid var(--bg-accent);
-    background: transparent;
     text-align: left;
-    cursor: pointer;
-    transition: background 0.15s;
     justify-content: flex-start;
     border-radius: 0;
-    text-decoration: none;
 }
 
 .chatSesionItem:hover {
@@ -122,16 +118,12 @@
     border-bottom: 1px solid var(--bg-accent);
 }
 
+/* [064A-1] Botón volver: usa Button variante="texto". Solo display contextual. */
 .chatBtnVolver {
     display: none;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--brand-black);
-    padding: 4px;
-    text-decoration: none;
     min-width: auto;
     min-height: auto;
+    padding: 4px;
 }
 
 .chatAreaTitulo {
@@ -141,19 +133,10 @@
     flex: 1;
 }
 
-/* [054A-9] Botón cerrar conversación */
+/* [064A-1] Botón cerrar: usa Button variante="texto". Solo opacidad y hover contextual. */
 .chatBtnCerrar {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--brand-black);
     opacity: 0.5;
     padding: 4px;
-    border-radius: var(--radius-sm);
-    display: flex;
-    align-items: center;
-    transition: opacity 0.15s, color 0.15s;
-    text-decoration: none;
     min-width: auto;
     min-height: auto;
 }
@@ -165,7 +148,6 @@
 
 .chatBtnCerrar:disabled {
     opacity: 0.3;
-    cursor: not-allowed;
 }
 
 .chatMensajes {
@@ -315,24 +297,13 @@
     border-color: var(--brand-black);
 }
 
+/* [064A-1] Botón enviar: usa Button variante="primario". Solo flex-shrink contextual. */
 .chatBtnEnviar {
-    padding: var(--spacing-sm);
-    border: none;
-    border-radius: var(--radius-md);
-    background: var(--brand-black);
-    color: var(--brand-white);
-    cursor: pointer;
-    transition: opacity 0.2s;
     flex-shrink: 0;
 }
 
 .chatBtnEnviar:disabled {
     opacity: 0.3;
-    cursor: not-allowed;
-}
-
-.chatBtnEnviar:not(:disabled):hover {
-    opacity: 0.85;
 }
 
 .chatLoading {
