@@ -23,14 +23,16 @@ import {SeccionContacto} from '../components/home/SeccionContacto';
 import {SKILLS_POR_DEFECTO} from '../data/skills';
 import {obtenerPlanesServicio} from '../data/planes/index';
 
+/* [064A-47] Imagen del servicio añadida al hero. */
 interface ServicioIndividualIslandProps {
     titulo?: string;
     descripcion?: string;
     precio_desde?: string;
     slug?: string;
+    imagen?: string;
 }
 
-export const ServicioIndividualIsland = ({titulo, descripcion, precio_desde, slug}: ServicioIndividualIslandProps): JSX.Element => {
+export const ServicioIndividualIsland = ({titulo, descripcion, precio_desde, slug, imagen}: ServicioIndividualIslandProps): JSX.Element => {
     const {t} = useTranslation();
     const logueado = useAuthStore(s => s.logueado);
     const abrirChat = useChatStore(s => s.abrir);
@@ -64,7 +66,7 @@ export const ServicioIndividualIsland = ({titulo, descripcion, precio_desde, slu
                 path={`/servicios/${slug || ''}`}
                 jsonLd={titulo && descripcion && slug ? serviceSchema(titulo, descripcion, slug) : undefined}
             />
-            <SeccionHeroServicio titulo={titulo} descripcion={descripcion} />
+            <SeccionHeroServicio titulo={titulo} descripcion={descripcion} imagen={imagen} />
             <SeccionGaleriaServicio />
             <SeccionPlanesServicio slug={servicioId} />
             <SeccionCta descripcion={[t('service_detail.cta_1'), t('service_detail.cta_2')]} textoBotonPrimario={precioMinimo ? `${t('service_detail.cta_hire')} ${precioMinimo}` : t('service_detail.cta_hire')} linkBotonPrimario={ctaLink} onBotonPrimarioClick={logueado ? undefined : abrirChat} textoBotonSecundario={t('service_detail.cta_contact')} onBotonSecundarioClick={abrirChat} />

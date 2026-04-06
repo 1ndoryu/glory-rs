@@ -28,19 +28,15 @@ export const ModalCompra: React.FC<ModalCompraProps> = ({plan, servicioSlug, abi
 
     return (
         <Modal abierto={abierto} onCerrar={onCerrar} className="modalCompraContenido">
-            {/* Resumen del plan */}
+            {/* [064A-46] Resumen: precio solo en botón, no en texto. */}
             {(paso === 'resumen' || paso === 'auth') && (
                 <div className="modalCompraResumen">
                     <h2 className="modalCompraTitulo">{plan.nombre}</h2>
                     <p className="modalCompraDescripcion">{plan.descripcion}</p>
-                    <div className="modalCompraPrecio">
-                        <span className="modalCompraPrecioCifra">{plan.precio}</span>
-                        {plan.periodo && <span className="modalCompraPrecioPeriodo">{plan.periodo}</span>}
-                    </div>
                 </div>
             )}
 
-            {/* Paso resumen: botón continuar */}
+            {/* Paso resumen: botón continuar con precio */}
             {paso === 'resumen' && (
                 <div className="modalCompraAcciones">
                     <Button variante="primario" tamano="mediano" onClick={handleContinuar}>

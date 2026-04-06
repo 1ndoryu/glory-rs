@@ -66,6 +66,7 @@ function ServicioDetallePage() {
         <ServicioIndividualIsland
             titulo={servicio?.titulo}
             descripcion={servicio?.descripcion}
+            imagen={servicio?.imagen}
             slug={slug}
         />
     );

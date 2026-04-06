@@ -49,6 +49,22 @@
     margin: 0;
 }
 
+/* [064A-47] Imagen grande del servicio — proporción pantalla laptop 16:10.
+ * Ocupa ambas columnas del grid, esquinas redondeadas. */
+.heroServicioImagenWrapper {
+    grid-column: 1 / -1;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+}
+
+.heroServicioImagen {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .heroServicioContenedor {
