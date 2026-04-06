@@ -697,4 +697,191 @@ mod tests {
         assert!((order.payments[0].base - 99_999.99).abs() < 0.01);
         assert!((order.payments[0].total - 120_999.99).abs() < 0.01);
     }
+
+    /* ── [064A-11] Tests de flujo y robustez ───────────────────── */
+
+    /* Test 1: send_order_http retorna Ok(()) cuando Haddock responde 200.
+     * Verifica el contrato de retorno, no solo que no paniquee. */
+    #[tokio::test]
+    async fn test_sync_success_returns_ok() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/orders/"))
+            .respond_with(ResponseTemplate::new(200))
+            .mount(&server)
+            .await;
+
+        let venta = mock_venta();
+        let config = mock_config("dG9rZW46c2VjcmV0", true);
+        let url = format!("{}/orders/", server.uri());
+
+        let result = HaddockService::send_order_http(&venta, &config, &url).await;
+        assert!(result.is_ok(), "Sync exitoso debe retornar Ok(())");
+    }
+
+    /* Test 2: send_order_http retorna Err con mensaje descriptivo tras 3 reintentos con 500.
+     * Simula: crear venta → sync falla 3x → error con HTTP status en mensaje. */
+    #[tokio::test]
+    async fn test_sync_failure_returns_error_with_status() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/orders/"))
+            .respond_with(ResponseTemplate::new(500))
+            .expect(3)
+            .mount(&server)
+            .await;
+
+        let venta = mock_venta();
+        let config = mock_config("dG9rZW46c2VjcmV0", true);
+        let url = format!("{}/orders/", server.uri());
+
+        let result = HaddockService::send_order_http(&venta, &config, &url).await;
+        assert!(result.is_err(), "3 fallos deben retornar Err");
+        let msg = result.unwrap_err();
+        assert!(msg.contains("500"), "Mensaje de error debe incluir código HTTP: {msg}");
+    }
+
+    /* Test 3: Token inválido → 401 → error con mensaje que incluye "401".
+     * Simula: token malo configurado, todos los syncs fallan con unauthorized. */
+    #[tokio::test]
+    async fn test_invalid_token_401_returns_error_msg() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/orders/"))
+            .respond_with(ResponseTemplate::new(401))
+            .expect(3)
+            .mount(&server)
+            .await;
+
+        let venta = mock_venta();
+        let config = mock_config("token-invalido", true);
+        let url = format!("{}/orders/", server.uri());
+
+        let result = HaddockService::send_order_http(&venta, &config, &url).await;
+        assert!(result.is_err());
+        let msg = result.unwrap_err();
+        assert!(msg.contains("401"), "Error de auth debe reportar 401: {msg}");
+    }
+
+    /* Test 4: Error de red retorna Err con "Error de red" en el mensaje.
+     * Cubre el caso donde Haddock está caído o hay problemas de conectividad. */
+    #[tokio::test]
+    async fn test_network_error_returns_error_msg() {
+        let venta = mock_venta();
+        let config = mock_config("dG9rZW46c2VjcmV0", true);
+
+        let result = HaddockService::send_order_http(&venta, &config, "http://127.0.0.1:1/orders/").await;
+        assert!(result.is_err());
+        let msg = result.unwrap_err();
+        assert!(msg.contains("Error de red"), "Debe ser error de red: {msg}");
+    }
+
+    /* Test 5: Guard de config deshabilitada retorna Ok (no Err).
+     * Importante: no es un error, es un skip legítimo. */
+    #[tokio::test]
+    async fn test_guard_disabled_config_returns_ok_not_err() {
+        let venta = mock_venta();
+        let config = mock_config("dG9rZW46c2VjcmV0", false);
+
+        let result = HaddockService::send_order_http(&venta, &config, "http://should-not-be-called/orders/").await;
+        assert!(result.is_ok(), "Config deshabilitada → Ok, no Err");
+    }
+
+    /* Test 6: Guard de token vacío retorna Ok (no Err).
+     * El empty token es condición de skip, no error. */
+    #[tokio::test]
+    async fn test_guard_empty_token_returns_ok_not_err() {
+        let venta = mock_venta();
+        let config = mock_config("", true);
+
+        let result = HaddockService::send_order_http(&venta, &config, "http://should-not-be-called/orders/").await;
+        assert!(result.is_ok(), "Token vacío → Ok, no Err");
+    }
+
+    /* Test 7: HTTP 403 Forbidden también se reintenta 3 veces.
+     * Cubre respuestas no-estándar de Haddock. */
+    #[tokio::test]
+    async fn test_403_forbidden_retries_3_times() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/orders/"))
+            .respond_with(ResponseTemplate::new(403))
+            .expect(3)
+            .mount(&server)
+            .await;
+
+        let venta = mock_venta();
+        let config = mock_config("dG9rZW46c2VjcmV0", true);
+        let url = format!("{}/orders/", server.uri());
+
+        let result = HaddockService::send_order_http(&venta, &config, &url).await;
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("403"));
+    }
+
+    /* Test 8: Payload NO incluye campos internos de tracking (haddock_synced, etc.).
+     * Estos campos son de BD interna, nunca deben filtrarse a la API de Haddock. */
+    #[tokio::test]
+    async fn test_payload_excludes_internal_tracking_fields() {
+        let mut venta = mock_venta();
+        venta.haddock_synced = true;
+        venta.haddock_sync_error = Some("error previo".to_string());
+
+        let order = HaddockService::map_venta_to_order(&venta);
+        let payload = HaddockOrdersPayload { orders: vec![order] };
+        let json = serde_json::to_string(&payload).unwrap();
+
+        assert!(!json.contains("haddock_synced"), "haddock_synced no debe filtrarse al payload");
+        assert!(!json.contains("haddockSynced"), "haddockSynced no debe filtrarse al payload");
+        assert!(!json.contains("sync_error"), "sync_error no debe filtrarse al payload");
+        assert!(!json.contains("syncError"), "syncError no debe filtrarse al payload");
+        assert!(!json.contains("error previo"), "Contenido de sync_error no debe filtrarse");
+    }
+
+    /* Test 9: Payload NO incluye reserva_id, cliente_id ni user_id.
+     * Estos son IDs internos que no pertenecen al schema de Haddock. */
+    #[tokio::test]
+    async fn test_payload_excludes_internal_ids() {
+        let mut venta = mock_venta();
+        venta.reserva_id = Some(Uuid::new_v4());
+        venta.cliente_id = Some(Uuid::new_v4());
+
+        let order = HaddockService::map_venta_to_order(&venta);
+        let payload = HaddockOrdersPayload { orders: vec![order] };
+        let json = serde_json::to_string(&payload).unwrap();
+
+        assert!(!json.contains("reserva_id"), "reserva_id no debe filtrarse");
+        assert!(!json.contains("reservaId"), "reservaId no debe filtrarse");
+        assert!(!json.contains("cliente_id"), "cliente_id no debe filtrarse");
+        assert!(!json.contains("clienteId"), "clienteId no debe filtrarse");
+        assert!(!json.contains("user_id"), "user_id no debe filtrarse");
+        assert!(!json.contains("userId"), "userId no debe filtrarse");
+    }
+
+    /* Test 10: El lock estático SYNC_LOCKS se adquiere y limpia correctamente.
+     * Verifica que cleanup_lock elimina la entrada cuando solo queda 1 referencia. */
+    #[tokio::test]
+    async fn test_sync_lock_acquire_and_cleanup() {
+        let venta_id = Uuid::new_v4();
+
+        /* Insertar lock manualmente */
+        {
+            let mut map = SYNC_LOCKS.lock().expect("SYNC_LOCKS poisoned");
+            map.insert(venta_id, Arc::new(TokioMutex::new(())));
+        }
+
+        /* Verificar que existe */
+        {
+            let map = SYNC_LOCKS.lock().expect("SYNC_LOCKS poisoned");
+            assert!(map.contains_key(&venta_id), "Lock debe existir tras inserción");
+        }
+
+        /* Cleanup debe eliminarlo (strong_count = 1, solo el HashMap lo tiene) */
+        HaddockService::cleanup_lock(venta_id);
+
+        {
+            let map = SYNC_LOCKS.lock().expect("SYNC_LOCKS poisoned");
+            assert!(!map.contains_key(&venta_id), "Lock debe eliminarse tras cleanup con 1 referencia");
+        }
+    }
 }
