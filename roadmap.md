@@ -59,7 +59,6 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 - los tarjetaArticulo tarjetaArticuloDestacado se ven mal, deberían verse como las tarjetas ende blog en el inicio.
 - Cuando inicie sesion no me redirigio al panel. 
 - En la vista de cliente no tengo proyectos para ver ni en la vista de empleado, tienen que ser cosas legitimas para probar la funcionalidad real. 
-- El var(--bg-secondary); se esta usando fatal en el chat, es un background negro y se se esta usando sobre letras blancas y esta confucion es recurrente, arregla una vez por todas las todas las variables para que tengan nombres claros sin dañar visualmente la pagina. 
 - Despues de cambiar la imagen de perfil la imagen no carga 
 - Empleados en el panel se ve falta, elimina eso, no es lo que espero, espero una tabla de usuarios, usuariosFiltros se ve falta, sebería los select ser componentes personalizados y usar el componente de menu para mostrar las opciones, glory sentinel debería reportar esto para que no vuelva a suceder, siempre sucede.
 - El submenu que se abre de 3 puntos en la lista de usuario se ve dentro de la tabla y genera un scroll, no debe generar sobra ningun menu y algunos botones del submenu se ven con texto centrado, no debería.
