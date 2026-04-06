@@ -51,8 +51,4 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 - 064A-11: ¿Cual es el status de Hosting administrado? Sigue diciendo "Próximamente -Estamos trabajando en esta solución. Pronto tendrás toda la información que necesitas." Crea un md con todo lo que falta para tenerlo listo. 
 - 064A-13: los tarjetaArticulo tarjetaArticuloDestacado se ven mal, deberían verse como las tarjetas ende blog en el inicio.
 - 064A-15: En la vista de cliente no tengo proyectos para ver ni en la vista de empleado, tienen que ser cosas legitimas para probar la funcionalidad real. 
-- 064A-20: El boton ordenDetalleTopbar no me parece un componente, se ve mal, no esta usando icono svg parece. 
 - 064A-21: Repito, esto lo vuelvo a repetir, en los datos de prueba hay una inconsistencia, porque hay ordenes con pago unico pendiente de pagar si un pago unico no debe generar pendiente de pagos pues se paga una sola vez para iniciar el pedido.
-- 064A-22: Lo de ordenDetalleNotas no se para que sirve pero no le veo mucho sentido. 
-- 064A-23: Los titulos no deben estar enumerados si es que se hizo automaticamente, no debe ordenDetalleTitulo
-- 064A-24: La info en ordenDetalleMetaRow toda debería estar separada por badges.

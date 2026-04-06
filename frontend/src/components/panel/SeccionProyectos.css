@@ -83,8 +83,8 @@
     border-radius: var(--radius-full);
     white-space: nowrap;
     flex-shrink: 0;
-    background-color: #161616;
-    color: #ffffff;
+    background-color: var(--bg-dark);
+    color: var(--brand-white);
 }
 
 /* [064A-19] Todos los status usan el mismo estilo gris oscuro.
@@ -244,11 +244,7 @@
     flex-wrap: wrap;
 }
 
-.ordenDetalleMeta {
-    font-family: inherit;
-    font-size: var(--text-sm);
-    color: var(--text-muted);
-}
+/* [064A-24] .ordenDetalleMeta eliminado — todo usa .ordenDetalleBadge */
 
 .ordenDetalleMenu {
     position: relative;
@@ -304,16 +300,7 @@
     cursor: not-allowed;
 }
 
-/* Notas */
-.ordenDetalleNotas {
-    font-family: inherit;
-    font-size: var(--text-sm);
-    color: var(--text-muted);
-    padding: var(--spacing-md);
-    background-color: var(--bg-card-subtle);
-    border-radius: var(--radius-md);
-    line-height: 1.5;
-}
+/* [064A-22] .ordenDetalleNotas eliminado */
 
 /* ============================================================
    TIMELINE DE FASES
@@ -410,18 +397,7 @@
     gap: var(--spacing-sm);
 }
 
-.faseCardTitulo {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-}
-
-.faseNumero {
-    font-family: var(--font-primary);
-    font-size: var(--text-xs);
-    color: var(--text-tertiary);
-    font-weight: 500;
-}
+/* [064A-23] .faseCardTitulo y .faseNumero eliminados — sin numeración automática */
 
 .faseNombre {
     font-family: var(--font-primary);

@@ -3,7 +3,7 @@
  * Fase 3: botón de pago Stripe integrado para pending_payment.
  * Fase 6: upload multipart de entregables + listado + descarga por fase. */
 import React, {useState} from 'react';
-import {Check, RotateCcw, CreditCard, XCircle} from 'lucide-react';
+import {Check, RotateCcw, CreditCard, XCircle, ArrowLeft} from 'lucide-react';
 import {
     ORDER_STATUS_LABELS,
     PHASE_STATUS_LABELS,
@@ -91,8 +91,9 @@ export const OrdenDetalle: React.FC<OrdenDetalleProps> = ({
     return (
         <div className="ordenDetalle">
             <div className="ordenDetalleTopbar">
+                {/* [064A-20] Botón volver con icono SVG */}
                 <Button className="ordenDetalleVolver" onClick={onVolver} type="button" variante="texto" tamano="pequeno">
-                    ← Volver
+                    <ArrowLeft size={16} /> Volver
                 </Button>
             </div>
 
@@ -101,13 +102,14 @@ export const OrdenDetalle: React.FC<OrdenDetalleProps> = ({
                     <h2 className="ordenDetalleTitulo">
                         #{order.order_number} — {order.service_title}
                     </h2>
+                    {/* [064A-24] Toda la info en badges uniformes */}
                     <div className="ordenDetalleMetaRow">
                         <span className={`ordenDetalleBadge ${STATUS_CLASS[order.status]}`}>
                             {ORDER_STATUS_LABELS[order.status]}
                         </span>
-                        <span className="ordenDetalleMeta">{order.plan_name}</span>
-                        <span className="ordenDetalleMeta">{PAYMENT_MODE_LABELS[order.payment_mode]}</span>
-                        <span className="ordenDetalleMeta">{formatPrice(order.final_price_cents, order.currency)}</span>
+                        <span className="ordenDetalleBadge">{order.plan_name}</span>
+                        <span className="ordenDetalleBadge">{PAYMENT_MODE_LABELS[order.payment_mode]}</span>
+                        <span className="ordenDetalleBadge">{formatPrice(order.final_price_cents, order.currency)}</span>
                     </div>
                 </div>
                 <div className="ordenDetalleAcciones">
@@ -185,11 +187,7 @@ export const OrdenDetalle: React.FC<OrdenDetalleProps> = ({
                 />
             )}
 
-            {order.client_notes && (
-                <div className="ordenDetalleNotas">
-                    <strong>Notas:</strong> {order.client_notes}
-                </div>
-            )}
+            {/* [064A-22] Notas de cliente removidas — sin valor visible para el usuario */}
 
             {shouldShowPhases && (
                 <div className="ordenDetalleFases">
@@ -254,10 +252,8 @@ function FaseCard({phase, orderId, isLast, isClient, isEmployee, isPhased, onApr
 
             <div className="faseCardContenido">
                 <div className="faseCardHeader">
-                    <div className="faseCardTitulo">
-                        <span className="faseNumero">Fase {phase.phase_number}</span>
-                        <h4 className="faseNombre">{phase.title}</h4>
-                    </div>
+                    {/* [064A-23] Eliminado "Fase N" enumerado — solo el título de la fase */}
+                    <h4 className="faseNombre">{phase.title}</h4>
                     <span className={`faseBadge faseBadge--${phase.status.replace('_', '-')}`}>
                         {PHASE_STATUS_LABELS[phase.status]}
                     </span>
