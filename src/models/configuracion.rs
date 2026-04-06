@@ -37,6 +37,12 @@ pub struct ConfiguracionRestaurante {
     pub hora_cena_fin: NaiveTime,
     /* [034A-3] URL de la plataforma Haddock para vista detallada */
     pub url_haddock: String,
+    /* [064A-5] Token Base64 de autenticación para Haddock POS API (Basic Auth).
+     * Se obtiene desde Haddock > Configuración > Integraciones > POS API. */
+    #[serde(skip_serializing)]
+    pub haddock_api_token: String,
+    /* [064A-5] Toggle para activar/desactivar la sincronización de ventas con Haddock */
+    pub haddock_sync_enabled: bool,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -67,6 +73,11 @@ pub struct ActualizarConfiguracionRequest {
     /* [034A-3] URL de la plataforma Haddock (vacía = sin enlace) */
     #[validate(length(max = 500))]
     pub url_haddock: Option<String>,
+    /* [064A-5] Token API de Haddock (Basic Auth, Base64) */
+    #[validate(length(max = 500))]
+    pub haddock_api_token: Option<String>,
+    /* [064A-5] Activar sincronización de ventas con Haddock */
+    pub haddock_sync_enabled: Option<bool>,
 }
 
 fn validar_iva(valor: &rust_decimal::Decimal) -> Result<(), validator::ValidationError> {

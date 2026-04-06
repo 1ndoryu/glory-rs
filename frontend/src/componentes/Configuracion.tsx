@@ -208,13 +208,14 @@ function Configuracion() {
         </CardContent>
       </Card>
 
-      {/* [034A-3] URL de Haddock para vista detallada */}
+      {/* [034A-3] URL de Haddock para vista detallada
+        * [064A-5] Token API y toggle de sincronización con Haddock POS API */}
       <Card>
         <CardHeader>
           <CardTitle>Plataforma Haddock</CardTitle>
-          <CardDescription>Enlace a Haddock para ver gestión financiera detallada. Si se configura, aparecerá un botón en la barra lateral.</CardDescription>
+          <CardDescription>Enlace a Haddock y sincronización automática de ventas vía POS API</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <Label htmlFor="url-haddock">URL de Haddock</Label>
             <Input
@@ -227,6 +228,27 @@ function Configuracion() {
             <p className="text-xs text-muted-foreground">
               Si tu restaurante usa <a href="https://haddock.com" target="_blank" rel="noopener noreferrer" className="underline">Haddock</a> para gestión financiera detallada, pega aquí la URL de tu cuenta.
             </p>
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="haddock-api-token">Token API de Haddock</Label>
+            <Input
+              id="haddock-api-token"
+              type="password"
+              value={config.haddock_api_token}
+              onChange={(e) => cambiarCampo('haddock_api_token', e.target.value)}
+              placeholder="Token Base64..."
+            />
+            <p className="text-xs text-muted-foreground">
+              Se obtiene en Haddock → Configuración → Integraciones → POS API → Conectar.
+            </p>
+          </div>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="haddock-sync">Sincronizar ventas automáticamente</Label>
+            <Switch
+              id="haddock-sync"
+              checked={config.haddock_sync_enabled}
+              onCheckedChange={(checked) => cambiarCampo('haddock_sync_enabled', checked)}
+            />
           </div>
         </CardContent>
       </Card>

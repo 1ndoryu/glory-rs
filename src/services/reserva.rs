@@ -531,8 +531,18 @@ impl ReservaService {
             cliente_id: reserva.cliente_id,
         };
 
-        if let Err(e) = VentaRepository::create(pool, &data).await {
-            warn!("[014A-1] Error creando venta automática para reserva {}: {e}", reserva.id);
+        match VentaRepository::create(pool, &data).await {
+            Ok(venta) => {
+                /* [064A-5] Sincronizar venta automática con Haddock.
+                 * La config ya está cargada — reutilizamos. */
+                let config_clone = config.clone();
+                tokio::spawn(async move {
+                    super::HaddockService::sync_order(&venta, &config_clone).await;
+                });
+            }
+            Err(e) => {
+                warn!("[014A-1] Error creando venta automática para reserva {}: {e}", reserva.id);
+            }
         }
     }
 }

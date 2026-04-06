@@ -1,6 +1,7 @@
 /* [263A-17] Hook para el formulario de configuración del restaurante.
  * Gestiona estado local, carga inicial y guardado vía API.
- * [283A-8] Añadido groq_api_key para digitalización de documentos. */
+ * [283A-8] Añadido groq_api_key para digitalización de documentos.
+ * [064A-5] Añadidos haddock_api_token y haddock_sync_enabled para sincronización con Haddock POS API. */
 
 import { useState, useEffect, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
@@ -30,6 +31,9 @@ interface EstadoConfiguracion {
   hora_cena_fin: string;
   /* [034A-3] URL de Haddock */
   url_haddock: string;
+  /* [064A-5] Token API y toggle de sincronización Haddock */
+  haddock_api_token: string;
+  haddock_sync_enabled: boolean;
 }
 
 const DEFAULTS: EstadoConfiguracion = {
@@ -48,6 +52,8 @@ const DEFAULTS: EstadoConfiguracion = {
   hora_cena_inicio: '18:00:00',
   hora_cena_fin: '23:59:59',
   url_haddock: '',
+  haddock_api_token: '',
+  haddock_sync_enabled: false,
 };
 
 export function useConfiguracion() {
@@ -82,6 +88,10 @@ export function useConfiguracion() {
         hora_cena_inicio: d.hora_cena_inicio,
         hora_cena_fin: d.hora_cena_fin,
         url_haddock: d.url_haddock ?? '',
+        /* [064A-5] haddock_api_token no viene en la respuesta (skip_serializing),
+         * mantener valor local si ya fue editado */
+        haddock_api_token: config.haddock_api_token || '',
+        haddock_sync_enabled: d.haddock_sync_enabled,
       });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -116,6 +126,9 @@ export function useConfiguracion() {
       hora_cena_fin: config.hora_cena_fin,
       /* [034A-3] URL de Haddock */
       url_haddock: config.url_haddock || undefined,
+      /* [064A-5] Haddock POS API sync */
+      ...(config.haddock_api_token ? { haddock_api_token: config.haddock_api_token } : {}),
+      haddock_sync_enabled: config.haddock_sync_enabled,
     };
     try {
       await mutacion.mutateAsync({ data: body });

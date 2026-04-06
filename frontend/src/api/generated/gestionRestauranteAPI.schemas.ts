@@ -67,6 +67,10 @@ export interface ActualizarConfiguracionRequest {
   /** @nullable */
   groq_api_key?: string | null;
   /** @nullable */
+  haddock_api_token?: string | null;
+  /** @nullable */
+  haddock_sync_enabled?: boolean | null;
+  /** @nullable */
   hora_cena_fin?: string | null;
   /** @nullable */
   hora_cena_inicio?: string | null;
@@ -631,6 +635,7 @@ export interface CombinacionExport {
 export interface ConfiguracionRestaurante {
   auto_venta_reserva: boolean;
   created_at: string;
+  haddock_sync_enabled: boolean;
   hora_cena_fin: string;
   hora_cena_inicio: string;
   hora_comida_fin: string;

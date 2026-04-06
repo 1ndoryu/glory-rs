@@ -1,12 +1,16 @@
-/* 253A-5: Servicio de ventas — lógica de negocio */
+/* 253A-5: Servicio de ventas — lógica de negocio
+ * [064A-5] Añadido hook post-create/update para sincronización con Haddock POS API */
 
 use sqlx::PgPool;
+use tracing::warn;
 use uuid::Uuid;
 
 use crate::errors::AppError;
 use crate::models::{ActualizarVentaRequest, CrearVentaRequest, Venta, VentasPaginadas};
 use crate::repositories::venta::{ActualizarVentaData, NuevaVenta};
-use crate::repositories::VentaRepository;
+use crate::repositories::{ConfiguracionRepository, VentaRepository};
+
+use super::HaddockService;
 
 pub struct VentaService;
 
@@ -47,6 +51,10 @@ impl VentaService {
         };
 
         let venta = VentaRepository::create(pool, &data).await?;
+
+        /* [064A-5] Sincronizar con Haddock en background (no bloquea la respuesta) */
+        Self::spawn_haddock_sync(pool.clone(), user_id, venta.clone());
+
         Ok(venta)
     }
 
@@ -123,9 +131,29 @@ impl VentaService {
             importe_iva: req.importe_iva,
         };
 
-        VentaRepository::update(pool, &data)
+        let venta = VentaRepository::update(pool, &data)
             .await?
-            .ok_or_else(|| AppError::NotFound("Venta no encontrada".into()))
+            .ok_or_else(|| AppError::NotFound("Venta no encontrada".into()))?;
+
+        /* [064A-5] Re-sincronizar con Haddock tras actualización */
+        Self::spawn_haddock_sync(pool.clone(), user_id, venta.clone());
+
+        Ok(venta)
+    }
+
+    /* [064A-5] Lanza sincronización con Haddock en un task independiente.
+     * No bloquea ni falla la operación principal. */
+    fn spawn_haddock_sync(pool: PgPool, user_id: Uuid, venta: Venta) {
+        tokio::spawn(async move {
+            let config = match ConfiguracionRepository::obtener_o_crear(&pool, user_id).await {
+                Ok(c) => c,
+                Err(e) => {
+                    warn!("[064A-5] Error obteniendo config para Haddock sync: {e}");
+                    return;
+                }
+            };
+            HaddockService::sync_order(&venta, &config).await;
+        });
     }
 
     pub async fn delete(pool: &PgPool, id: Uuid, user_id: Uuid) -> Result<(), AppError> {

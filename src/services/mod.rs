@@ -38,3 +38,5 @@ pub use reserva::ReservaService;
 pub use venta::VentaService;
 mod integracion_marketing;
 pub use integracion_marketing::IntegracionMarketingService;
+mod haddock;
+pub use haddock::HaddockService;

@@ -63,6 +63,8 @@ impl ConfiguracionRepository {
                 hora_cena_inicio = COALESCE($14, hora_cena_inicio),
                 hora_cena_fin = COALESCE($15, hora_cena_fin),
                 url_haddock = COALESCE($16, url_haddock),
+                haddock_api_token = COALESCE($17, haddock_api_token),
+                haddock_sync_enabled = COALESCE($18, haddock_sync_enabled),
                 updated_at = NOW()
                WHERE user_id = $1 RETURNING *",
             user_id,
@@ -80,7 +82,9 @@ impl ConfiguracionRepository {
             req.hora_comida_fin,
             req.hora_cena_inicio,
             req.hora_cena_fin,
-            req.url_haddock.as_deref()
+            req.url_haddock.as_deref(),
+            req.haddock_api_token.as_deref(),
+            req.haddock_sync_enabled
         )
         .fetch_one(pool)
         .await

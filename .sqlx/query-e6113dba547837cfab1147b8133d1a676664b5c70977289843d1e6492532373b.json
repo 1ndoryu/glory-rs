@@ -97,6 +97,16 @@
         "ordinal": 18,
         "name": "url_haddock",
         "type_info": "Text"
+      },
+      {
+        "ordinal": 19,
+        "name": "haddock_api_token",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 20,
+        "name": "haddock_sync_enabled",
+        "type_info": "Bool"
       }
     ],
     "parameters": {
@@ -116,6 +126,8 @@
       false,
       false,
       true,
+      false,
+      false,
       false,
       false,
       false,
