@@ -13,6 +13,7 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 #[tokio::main]
+#[allow(clippy::too_many_lines)]
 async fn main() {
     dotenvy::dotenv().ok();
 
@@ -48,8 +49,7 @@ async fn main() {
         "SELECT sp.id, sp.slug, sp.name, sp.price_cents, s.id as service_id, s.title as service_title
          FROM service_plans sp JOIN services s ON sp.service_id = s.id
          WHERE sp.is_custom = false
-         ORDER BY s.sort_order, sp.sort_order
-         LIMIT 10"
+         ORDER BY s.sort_order, sp.sort_order"
     )
     .fetch_all(&pool)
     .await
@@ -79,6 +79,8 @@ async fn main() {
         ).await;
         create_phases_from_template(&pool, order_id, plan.id, "full", "in_progress").await;
         println!("Orden 1 creada: Diseño Web Básico (full, in_progress)");
+    } else {
+        eprintln!("WARN: No se encontró plan Diseño de Sitios Web / basico");
     }
 
     /* Orden 2: Desarrollo Apps Avanzado — phased, in_progress (fase 1 pagada y en ejecución) */
@@ -90,6 +92,8 @@ async fn main() {
         ).await;
         create_phases_from_template(&pool, order_id, plan.id, "phased", "in_progress").await;
         println!("Orden 2 creada: Desarrollo Apps Avanzado (phased, in_progress)");
+    } else {
+        eprintln!("WARN: No se encontró plan Desarrollo de Aplicaciones / avanzado");
     }
 
     /* Orden 3: Agentes IA Básico — full, completed */
@@ -101,6 +105,8 @@ async fn main() {
         ).await;
         create_phases_from_template(&pool, order_id, plan.id, "full", "completed").await;
         println!("Orden 3 creada: Agentes IA Básico (full, completed)");
+    } else {
+        eprintln!("WARN: No se encontró plan Agentes de IA / basico");
     }
 
     /* Orden 4: Branding Avanzado — half_half, awaiting_assignment (primer pago hecho) */
@@ -112,6 +118,8 @@ async fn main() {
         ).await;
         create_phases_from_template(&pool, order_id, plan.id, "half_half", "awaiting_assignment").await;
         println!("Orden 4 creada: Branding Avanzado (half_half, awaiting_assignment)");
+    } else {
+        eprintln!("WARN: No se encontró plan Identidad de Marca / avanzado");
     }
 
     /* Orden 5: SEO Básico — phased, pending_payment (recién creada, sin pagar) */
@@ -123,6 +131,8 @@ async fn main() {
         ).await;
         create_phases_from_template(&pool, order_id, plan.id, "phased", "pending_payment").await;
         println!("Orden 5 creada: SEO Básico (phased, pending_payment)");
+    } else {
+        eprintln!("WARN: No se encontró plan SEO / basico");
     }
 
     /* Orden 6: E-commerce Avanzado — full, under_review (empleado entregó, cliente revisa) */
@@ -134,6 +144,8 @@ async fn main() {
         ).await;
         create_phases_from_template(&pool, order_id, plan.id, "full", "under_review").await;
         println!("Orden 6 creada: E-commerce Avanzado (full, under_review)");
+    } else {
+        eprintln!("WARN: No se encontró plan E-commerce / avanzado");
     }
 
     println!("\nSeed completado. Credenciales:");
@@ -192,6 +204,7 @@ async fn upsert_user(pool: &PgPool, email: &str, password: &str, role: &str) -> 
     .expect("Error al crear usuario")
 }
 
+#[allow(clippy::too_many_arguments)]
 async fn create_order(
     pool: &PgPool,
     client_id: Uuid,
@@ -298,38 +311,34 @@ async fn create_phases_from_template(
 
 /* [064A-21] Determina el estado de cada fase según el modo de pago y estado de la orden.
  * Regla principal: payment_mode=full → TODAS las fases están pagadas (nunca pending_payment). */
+#[allow(clippy::too_many_lines)]
 fn determine_phase_status(payment_mode: &str, order_status: &str, phase_idx: usize, total_phases: usize) -> &'static str {
     match (payment_mode, order_status) {
+        /* Todos los modos: completed → approved */
+        (_, "completed") => "approved",
+
         /* Full: todo pagado de entrada */
-        ("full", "completed") => "approved",
         ("full", "under_review") => {
             if phase_idx < total_phases - 1 { "approved" } else { "delivered" }
         }
-        ("full", "in_progress") => {
+        ("full" | "half_half", "in_progress") => {
             if phase_idx == 0 { "in_progress" } else { "paid" }
         }
         ("full", _) => "paid",
 
         /* Half-half: primeras fases pagadas, últimas pending */
-        ("half_half", "completed") => "approved",
         ("half_half", "awaiting_assignment") => {
             let half = total_phases / 2;
             if phase_idx < half.max(1) { "paid" } else { "pending_payment" }
         }
-        ("half_half", "in_progress") => {
-            if phase_idx == 0 { "in_progress" } else { "paid" }
-        }
-        ("half_half", _) => "locked",
 
         /* Phased: solo la fase actual está activa, el resto locked o pending */
-        ("phased", "completed") => "approved",
         ("phased", "in_progress") => {
             if phase_idx == 0 { "in_progress" } else if phase_idx == 1 { "pending_payment" } else { "locked" }
         }
         ("phased", "pending_payment") => {
             if phase_idx == 0 { "pending_payment" } else { "locked" }
         }
-        ("phased", _) => "locked",
 
         _ => "locked",
     }
