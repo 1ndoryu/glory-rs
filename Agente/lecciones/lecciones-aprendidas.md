@@ -186,3 +186,10 @@ Cada lección debe ser concisa y accionable.
 **Causa raíz:** `--no-cache` solo invalida layer cache, pero `--mount=type=cache` es una cache mount de BuildKit que persiste entre builds. Cargo no siempre detecta cambios si el fingerprint del target coincide.
 **Solución:** Se eliminó `--mount=type=cache,target=/app/target` del Dockerfile inline permanentemente. `docker builder prune -af` puede tardar >30s y si se interrumpe, las caches persisten. Sin el mount de target, la compilación toma ~8 min en vez de ~1 min, pero garantiza binario fresco.
 **Prevención:** No usar `--mount=type=cache,target=/app/target` en Dockerfiles con `git clone` como fuente. Los caches de registry/git sí son seguros (solo almacenan crates descargados).
+
+## 2026-04-06 — serde rename_all=camelCase NO produce "ID" (capital)
+
+**Problema:** Haddock API exige `externalID` (capital ID) pero `#[serde(rename_all = "camelCase")]` convierte `external_id` → `externalId` (lowercase d). Todos los syncs habrían fallado con 400 "Bad Request".
+**Causa raíz:** `camelCase` trata cada segmento entre guiones bajos como una palabra → "external" + "id" → "externalId". Para acrónimos como "ID", "URL", "API", camelCase no los detecta.
+**Solución:** Añadir `#[serde(rename = "externalID")]` override explícito en los campos afectados. El `rename` tiene prioridad sobre `rename_all`.
+**Prevención:** Al integrar APIs de terceros, SIEMPRE comparar el JSON serializado contra la spec OpenAPI/Swagger real antes del primer deploy. Nunca confiar en que camelCase coincida con los nombres exactos de la API. Especial cuidado con campos que contienen acrónimos (ID, URL, API, HTML).

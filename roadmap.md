@@ -30,9 +30,4 @@
 
 ## Tareas pendientes
 
-- 064A-15: Auditoría Haddock — correcciones críticas tras comparar con spec real de Haddock API (https://pos-api.haddock.app/docs/json)
-  - CRÍTICO: Haddock espera `externalID` (capital ID) pero enviamos `externalId` (camelCase). Todos los syncs fallarán con 400 o crearán orders sin ID rastreable.
-  - ALTO: Retry en 401/403 es inútil — son errores permanentes de autenticación, no transitorios. No gastar 3 intentos.
-  - MEDIO: Se crea un nuevo `reqwest::Client` por cada request (sin connection pooling).
-  - MEDIO: Errores crudos de Haddock se almacenan en BD y se muestran al frontend (info disclosure potencial).
-  - BAJO: `decimal_to_f64` convierte errores de parsing silenciosamente a 0.0 (enviaría importe 0 a Haddock).
+(sin tareas pendientes)
