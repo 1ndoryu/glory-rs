@@ -15,6 +15,11 @@ export default defineConfig({
         target: 'http://localhost:3000',
         changeOrigin: true,
       },
+      /* [064A-16] Proxy uploads para que avatares se sirvan desde el backend */
+      '/uploads': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+      },
       '/swagger-ui': {
         target: 'http://localhost:3000',
         changeOrigin: true,
