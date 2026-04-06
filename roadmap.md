@@ -83,7 +83,6 @@ yo espero que esto sea un componente .ordenCardBadge, .ordenDetalleBadge, y el p
 - Repito, esto lo vuelvo a repetir, en los datos de prueba hay una inconsistencia, porque hay ordenes con pago unico pendiente de pagar si un pago unico no debe generar pendiente de pagos pues se paga una sola vez para iniciar el pedido.
 - Lo de ordenDetalleNotas no se para que sirve pero no le veo mucho sentido. 
 - Los titulos no deben estar enumerados si es que se hizo automaticamente, no debe ordenDetalleTitulo
-- Porque por ejemlo hay botones con estilos especificos si todo debe ser un componente botonBase botonTexto botonPequeno faseBtn faseBtnPagar, dios esto es un error frecuente acaso glory sentinel no avisa??????? HAY QUE BORRAR TODOS LOS ESTILOS ESPECIFICOS DE TODO LO QUE DEBERIA SER UN FUCKING COMPONENTE; Y PARA SE NECESITA UNA SOLUCION RADICAL QUE IMPEDIDA VOLVER A COMETER ESTE ERROR ES QUE SIEMPRE LO COMETES; EVITALO DE ALGUNA FORMA. 
 - La info en ordenDetalleMetaRow toda debería estar separada por badges. 
 - agrega un padding y un borde con radius a faseCard faseCardActiva  para separar mejor las fases.
 - ordenDetalleAcciones es inconsistente los botones en cuanto a tamaño.
