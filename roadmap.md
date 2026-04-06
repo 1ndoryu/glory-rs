@@ -44,23 +44,15 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 - 054A-19: Arregla todo lo que indica Code Sentinel - Reporte de Workspace, y los falsos positivos arreglalos en la extension
 - 054A-20: El modal de chat de ia no tiene sentido que sea el fondo de color negro
 - 054A-21: Todos los servicios tienen que tener 3 planes: Basico, Medio, y Avanzado (a todos les falta 1 plan)
-- 054A-22: Nada en modalCompraResumen necesita (--font-serif)
-- 054A-23: Las cosas en modalCompraResumen deberían estar separadas gap y en columna, no con margenes
-- Creo que la mejor forma que en vez pedir que el usuario se registre, simplemente se cree una cuanta apartir del correo con el que se ponga en la compra y al comprar, ya este logeado, luego el usuario puede elegir o cambiar su contraseña. 
-- El globo de chat no se ve redondo y esta vacío, y el bton de botonBase botonTexto botonMediano chatWidgetSendBtn tambien se ve vacío, estirado, con un color que no va y horrible.
-- La pagina de contacto ya no tiene sentido, todos los botones de contacto deben abrir el chat. 
-- Las imagenes de galería de los proyectos tienen que ser mas grande. 
-- proyectoHero, alli se podría colocar detalles tecnicos, tecnología, enlaces (con iconos de donde este disponible, github, web, etc). 
-- seccionContacto en la pagian de nosotros necesita mas padding botton y tambien en soluciones.
-- ¿Cual es el status de Hosting administrado? Sigue diciendo "Próximamente -Estamos trabajando en esta solución. Pronto tendrás toda la información que necesitas." Crea un md con todo lo que falta para tenerlo listo. 
-- los tarjetaArticulo tarjetaArticuloDestacado se ven mal, deberían verse como las tarjetas ende blog en el inicio.
-- Cuando inicie sesion no me redirigio al panel. 
-- En la vista de cliente no tengo proyectos para ver ni en la vista de empleado, tienen que ser cosas legitimas para probar la funcionalidad real. 
-- Despues de cambiar la imagen de perfil la imagen no carga 
-- Empleados en el panel se ve falta, elimina eso, no es lo que espero, espero una tabla de usuarios, usuariosFiltros se ve falta, sebería los select ser componentes personalizados y usar el componente de menu para mostrar las opciones, glory sentinel debería reportar esto para que no vuelva a suceder, siempre sucede.
-- El submenu que se abre de 3 puntos en la lista de usuario se ve dentro de la tabla y genera un scroll, no debe generar sobra ningun menu y algunos botones del submenu se ven con texto centrado, no debería.
-- El boton ordenDetalleTopbar no me parece un componente, se ve mal, no esta usando icono svg parece. 
-- Repito, esto lo vuelvo a repetir, en los datos de prueba hay una inconsistencia, porque hay ordenes con pago unico pendiente de pagar si un pago unico no debe generar pendiente de pagos pues se paga una sola vez para iniciar el pedido.
-- Lo de ordenDetalleNotas no se para que sirve pero no le veo mucho sentido. 
-- Los titulos no deben estar enumerados si es que se hizo automaticamente, no debe ordenDetalleTitulo
-- La info en ordenDetalleMetaRow toda debería estar separada por badges.
+- 064A-4: El globo de chat no se ve redondo y esta vacío, y el bton de botonBase botonTexto botonMediano chatWidgetSendBtn tambien se ve vacío, estirado, con un color que no va y horrible.
+- 064A-5: La pagina de contacto ya no tiene sentido, todos los botones de contacto deben abrir el chat. 
+- 064A-7: Las imagenes de galería de los proyectos tienen que ser mas grande. 
+- 064A-8: proyectoHero, alli se podría colocar detalles tecnicos, tecnología, enlaces (con iconos de donde este disponible, github, web, etc). 
+- 064A-11: ¿Cual es el status de Hosting administrado? Sigue diciendo "Próximamente -Estamos trabajando en esta solución. Pronto tendrás toda la información que necesitas." Crea un md con todo lo que falta para tenerlo listo. 
+- 064A-13: los tarjetaArticulo tarjetaArticuloDestacado se ven mal, deberían verse como las tarjetas ende blog en el inicio.
+- 064A-15: En la vista de cliente no tengo proyectos para ver ni en la vista de empleado, tienen que ser cosas legitimas para probar la funcionalidad real. 
+- 064A-20: El boton ordenDetalleTopbar no me parece un componente, se ve mal, no esta usando icono svg parece. 
+- 064A-21: Repito, esto lo vuelvo a repetir, en los datos de prueba hay una inconsistencia, porque hay ordenes con pago unico pendiente de pagar si un pago unico no debe generar pendiente de pagos pues se paga una sola vez para iniciar el pedido.
+- 064A-22: Lo de ordenDetalleNotas no se para que sirve pero no le veo mucho sentido. 
+- 064A-23: Los titulos no deben estar enumerados si es que se hizo automaticamente, no debe ordenDetalleTitulo
+- 064A-24: La info en ordenDetalleMetaRow toda debería estar separada por badges.
