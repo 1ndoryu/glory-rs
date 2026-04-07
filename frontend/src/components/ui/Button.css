@@ -176,14 +176,3 @@
 .botonInfoSuave:hover {
     opacity: 0.85;
 }
-
-/* Marca — CTA principal de la marca (dorado/brand-primary) */
-.botonMarca {
-    background-color: var(--brand-primary);
-    color: var(--brand-black);
-    border: none;
-}
-
-.botonMarca:hover {
-    opacity: 0.9;
-}

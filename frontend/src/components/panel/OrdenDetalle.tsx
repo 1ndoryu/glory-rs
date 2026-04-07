@@ -121,7 +121,7 @@ export const OrdenDetalle: React.FC<OrdenDetalleProps> = ({
                             <Button
                                 onClick={() => setChatAbierto(prev => !prev)}
                                 type="button"
-                                variante={chatAbierto ? 'marca' : 'outline'}
+                                variante={chatAbierto ? 'primario' : 'outline'}
                                 tamano="pequeno"
                             >
                                 <MessageCircle size={16} /> Chat

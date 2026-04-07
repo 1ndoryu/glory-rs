@@ -2,15 +2,13 @@ import React from 'react';
 import './Button.css';
 
 /* [064A-1] Variantes semánticas: cubren estados (exito, peligro, advertencia, info)
- * y variantes suaves (Suave) para acciones secundarias. 'marca' = brand primary.
- * Esto elimina la necesidad de crear estilos ad-hoc de botón en cada componente. */
+ * y variantes suaves (Suave) para acciones secundarias. */
 type ButtonVariante =
     | 'primario' | 'secundario' | 'outline' | 'texto'
     | 'exito' | 'exitoSuave'
     | 'peligro' | 'peligroSuave'
     | 'advertencia' | 'advertenciaSuave'
-    | 'info' | 'infoSuave'
-    | 'marca';
+    | 'info' | 'infoSuave';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     variante?: ButtonVariante;
