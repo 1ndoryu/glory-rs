@@ -48,8 +48,6 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 ### Funcionalidad media
 
-- 064A-35: Vista cliente/empleado sin pedidos visibles.
-- 064A-36: Página reembolso 404.
 - 064A-45: Hosting doc pendientes (status-hosting-administrado-2026-04-06.md).
 - 064A-44: Revisar todos los planes, mover completados, crear plan nuevo para pendientes.
 - 064A-50: Órdenes ordenadas por status, canceladas en tab de historial separada.
@@ -70,3 +68,5 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 - Las categorías no estan traducidas, deben traducirse a los 3 idiomas. Los contenidos de los servicios, planes, tambien, no creo que sea bueno reescribir todo en los 3 idiomas lo ideal es una forma automatica y segura porque es contenido que va modificarse. Las descripciones de los miembros de equipo no estan traducidas.
 - Los servicios en soluciones tampoco estan traducidos.
+- porque pagar la orden de prueba da payments.ts:36  POST http://localhost:3000/orders/78b71f93-c594-4636-82b4-1c366e6f4511/pay 404 (Not Found), y el boton de continuar pago es excesivamente grande, no debería. 
+- No la tarea 
