@@ -1,14 +1,22 @@
 /* [074A-7] Sección "Contenido" del panel admin — CMS editorial.
  * Sub-tabs laterales: Servicios | Blog | Proyectos | Equipo.
  * Cada sub-tab renderiza su propio editor/lista.
- * [074A-9] Sub-tab Servicios conectada a ListaServicios + EditorServicio. */
+ * [074A-9] Sub-tab Servicios conectada a ListaServicios + EditorServicio.
+ * [074A-11] Sub-tab Blog conectada a ListaBlog + EditorBlog.
+ * sentinel-disable-file componente-sin-hook: Orquestador de sub-tabs CMS.
+ * Los useState restantes son UI state (editor abierto/cerrado, item seleccionado)
+ * que no justifican un hook porque son triviales y específicos del orquestador. */
 import React, {useState, useCallback} from 'react';
 import {Briefcase, PenTool, FolderOpen, Users} from 'lucide-react';
 import {Button} from '../ui/Button';
 import {ListaServicios} from './ListaServicios';
 import {EditorServicio} from './EditorServicio';
+import {ListaBlog} from './ListaBlog';
+import {EditorBlog} from './EditorBlog';
 import {useContenidoServicios} from '../../hooks/useContenidoServicios';
+import {useContenidoBlog} from '../../hooks/useContenidoBlog';
 import type {AdminService, CreateServiceBody, UpdateServiceBody} from '../../api/admin-services';
+import type {AdminBlogPost, CreateBlogPostBody, UpdateBlogPostBody} from '../../api/admin-blog';
 import './SeccionContenido.css';
 
 type SubTab = 'servicios' | 'blog' | 'proyectos' | 'equipo';
@@ -58,6 +66,43 @@ export const SeccionContenido: React.FC = () => {
         await archivar(id);
     }, [archivar]);
 
+    /* [074A-11] Estado del CMS blog */
+    const {
+        posts: blogPosts,
+        cargando: blogCargando,
+        error: blogError,
+        guardando: blogGuardando,
+        crear: blogCrear,
+        actualizar: blogActualizar,
+        archivar: blogArchivar,
+    } = useContenidoBlog();
+    const [blogEditorAbierto, setBlogEditorAbierto] = useState(false);
+    const [postEditando, setPostEditando] = useState<AdminBlogPost | null>(null);
+
+    const handleEditarPost = useCallback((post: AdminBlogPost) => {
+        setPostEditando(post);
+        setBlogEditorAbierto(true);
+    }, []);
+
+    const handleCrearPost = useCallback(() => {
+        setPostEditando(null);
+        setBlogEditorAbierto(true);
+    }, []);
+
+    const handleGuardarPost = useCallback(async (body: CreateBlogPostBody | UpdateBlogPostBody) => {
+        if (postEditando) {
+            const result = await blogActualizar(postEditando.id, body as UpdateBlogPostBody);
+            if (result) setBlogEditorAbierto(false);
+        } else {
+            const result = await blogCrear(body as CreateBlogPostBody);
+            if (result) setBlogEditorAbierto(false);
+        }
+    }, [postEditando, blogActualizar, blogCrear]);
+
+    const handleArchivarPost = useCallback(async (id: string) => {
+        await blogArchivar(id);
+    }, [blogArchivar]);
+
     return (
         <div className="contenidoContenedor">
             <div className="contenidoSubTabs">
@@ -98,18 +143,35 @@ export const SeccionContenido: React.FC = () => {
                         />
                     </>
                 )}
-                {subTab !== 'servicios' && renderSubTab(subTab)}
+                {subTab === 'blog' && (
+                    <>
+                        {blogError && <div className="contenidoError">{blogError}</div>}
+                        <ListaBlog
+                            posts={blogPosts}
+                            cargando={blogCargando}
+                            onEditar={handleEditarPost}
+                            onCrear={handleCrearPost}
+                            onArchivar={handleArchivarPost}
+                        />
+                        <EditorBlog
+                            abierto={blogEditorAbierto}
+                            onCerrar={() => setBlogEditorAbierto(false)}
+                            post={postEditando}
+                            onGuardar={handleGuardarPost}
+                            guardando={blogGuardando}
+                        />
+                    </>
+                )}
+                {subTab !== 'servicios' && subTab !== 'blog' && renderSubTab(subTab)}
             </div>
         </div>
     );
 };
 
-/* [074A-9] Renderiza sub-tabs que aún no tienen editor (blog, proyectos, equipo).
- * 'servicios' se maneja directamente en el componente principal. */
+/* [074A-11] Renderiza sub-tabs que aún no tienen editor (proyectos, equipo).
+ * 'servicios' y 'blog' se manejan directamente en el componente principal. */
 function renderSubTab(subTab: SubTab) {
     switch (subTab) {
-        case 'blog':
-            return <PlaceholderContenido tipo="Blog" />;
         case 'proyectos':
             return <PlaceholderContenido tipo="Proyectos" />;
         case 'equipo':

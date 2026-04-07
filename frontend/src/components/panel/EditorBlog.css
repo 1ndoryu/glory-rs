@@ -1,0 +1,184 @@
+/* [074A-11] Estilos del editor modal de blog CMS.
+ * Patrón: misma estructura que EditorServicio.css.
+ * Tabs con underline matching contenidoSubTabs (084A-12). */
+
+/* Colores de Google para SEO preview — deliberadamente hardcodeados para simular SERP */
+.editorBlogModal {
+    --seo-titulo: #1a0dab;
+    --seo-url: #006621;
+    width: 90vw;
+    max-width: 800px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Tabs del modal alineados visualmente con contenidoSubTabs */
+.editorBlogTabs {
+    display: flex;
+    gap: var(--spacing-xs);
+    padding: 0 var(--spacing-lg);
+    padding-top: var(--spacing-md);
+    border-bottom: 1px solid var(--bg-item-active);
+    flex-shrink: 0;
+}
+
+.editorBlogTab {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: none;
+    background: none;
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    font-family: var(--font-primary);
+    font-weight: 500;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    transition: color var(--transicion-rapida), border-color var(--transicion-rapida);
+}
+
+.editorBlogTab:hover {
+    color: var(--brand-black);
+}
+
+.editorBlogTab--activo {
+    color: var(--brand-black);
+    border-bottom-color: var(--brand-black);
+}
+
+.editorBlogCuerpo {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--spacing-lg);
+}
+
+.editorBlogSeccion {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.editorBlogLabel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--text-tertiary);
+}
+
+.editorBlogTextarea {
+    font-family: var(--font-primary);
+    font-size: var(--text-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-sm);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    outline: none;
+    resize: vertical;
+    transition: border-color 0.2s;
+}
+
+.editorBlogTextarea:focus {
+    border-color: var(--brand-primary);
+}
+
+/* SEO Preview — simula resultado de Google */
+.editorBlogSeoPreview {
+    margin-top: var(--spacing-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.editorBlogSeoPreviewLabel {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.editorBlogSeoCard {
+    padding: var(--spacing-md);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-sm);
+    background: var(--bg-primary);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.editorBlogSeoTitulo {
+    font-size: var(--text-base);
+    color: var(--seo-titulo);
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.editorBlogSeoUrl {
+    font-size: var(--text-xs);
+    color: var(--seo-url);
+}
+
+.editorBlogSeoDesc {
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Footer con acciones */
+.editorBlogAcciones {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-top: 1px solid var(--border-default);
+    flex-shrink: 0;
+}
+
+.editorBlogEstado {
+    display: flex;
+    gap: var(--spacing-xs);
+}
+
+.editorBlogStatusBtn {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border: 1px solid var(--border-default);
+    background: none;
+    color: var(--text-tertiary);
+    font-size: var(--text-xs);
+    font-family: var(--font-primary);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s;
+}
+
+.editorBlogStatusBtn:hover {
+    border-color: var(--text-tertiary);
+}
+
+.editorBlogStatusBtn--activo {
+    border-color: var(--brand-primary);
+    color: var(--brand-primary);
+    background: var(--bg-item-active);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .editorBlogModal {
+        width: 100vw;
+        max-width: 100vw;
+        max-height: 100vh;
+        border-radius: 0;
+    }
+}

@@ -1,9 +1,8 @@
 /**
  * Island: BlogSingleIsland
  * Página individual de un post del blog.
- * Consume datos de window.GLORY_CONTEXT para el post actual.
- * TO-DO: Conectar con WP REST API para contenido real de posts.
- */
+ * [074A-11] Conectado a API pública /api/blog/:slug con fallback a datos estáticos.
+ * Lógica de datos extraída a useBlogSingle. */
 import {useTranslation} from 'react-i18next';
 import {spaClick} from '../navegacionSPA';
 import {LayoutPagina} from '../components/layout/LayoutPagina';
@@ -12,6 +11,7 @@ import {blogPostSchema} from '../components/seo/schemas';
 import {SeccionContacto} from '../components/home/SeccionContacto';
 import {POSTS_BLOG} from '../data/blog';
 import {obtenerImagenBlog} from '../hooks/useImagenes';
+import {useBlogSingle} from '../hooks/useBlogSingle';
 import './BlogSingleIsland.css';
 
 interface BlogSingleIslandProps {
@@ -32,32 +32,16 @@ export const BlogSingleIsland = ({
     imagen: imagenProp
 }: BlogSingleIslandProps): JSX.Element => {
     const {t} = useTranslation();
-    /*
-     * Si venimos de un single-post.php con datos inyectados,
-     * usamos las props. Si no, buscamos en los datos locales por slug.
-     */
-    let titulo = tituloProp || t('blog_single.default_title');
-    let contenido = contenidoProp || '';
-    let fecha = fechaProp || '';
-    let categoria = categoriaProp || '';
-    let imagen = imagenProp || '';
 
-    if (!contenidoProp && slug) {
-        const postLocal = POSTS_BLOG.find(p => {
-            const postSlug = p.link?.split('/').filter(Boolean).pop() || '';
-            return postSlug === slug;
-        });
-
-        if (postLocal) {
-            titulo = postLocal.titulo;
-            contenido = postLocal.contenido || postLocal.resumen || '';
-            fecha = postLocal.fecha;
-            categoria = postLocal.categoria;
-            imagen = postLocal.imagen || obtenerImagenBlog(postLocal.id);
-        }
-    }
-
-    if (!imagen) imagen = obtenerImagenBlog(1);
+    /* [074A-11] Datos del post: API > props > fallback estático */
+    const {titulo, contenido, fecha, categoria, imagen} = useBlogSingle({
+        slug,
+        titulo: tituloProp,
+        contenido: contenidoProp,
+        fecha: fechaProp,
+        categoria: categoriaProp,
+        imagen: imagenProp,
+    });
 
     return (
         <LayoutPagina className="blogSingleMain" id="paginaBlogSingle">

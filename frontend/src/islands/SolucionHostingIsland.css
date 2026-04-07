@@ -55,6 +55,8 @@
 .hostingFeatures {
     padding: var(--spacing-2xl) var(--spacing-lg);
     text-align: center;
+    max-width: var(--container-width);
+    margin: 0 auto;
 }
 
 .hostingFeaturesTitle {
@@ -74,7 +76,7 @@
 .hostingFeaturesGrid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-sm);
+    gap: var(--spacing-md);
     max-width: 100%;
 }
 
@@ -92,9 +94,10 @@
     justify-content: center;
     width: 40px;
     height: 40px;
+    
     border: 1px solid var(--border-default);
     border-radius: var(--radius-md);
-    margin-bottom: var(--spacing-xs);
+    margin-bottom: 40px;
 }
 
 .hostingFeatureIcono svg {
@@ -110,7 +113,6 @@
 }
 
 .hostingFeatureCard p {
-    font-size: 0.875rem;
     color: var(--brand-black);
     opacity: 0.6;
     line-height: 1.5;

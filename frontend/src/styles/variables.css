@@ -43,12 +43,12 @@
     --font-sans-alt: 'Anthropic Sans', sans-serif;
 
     /* Spacing & Sizing */
-    --container-width: 86rem;
+    --container-width: 78rem;
     --spacing-xs: 0.5rem;
     --spacing-sm: 0.5rem;
     --spacing-md: 1rem;
     --spacing-lg: 2rem;
-    --spacing-xl: 4rem;
+    --spacing-xl: 3rem;
     --spacing-2xl: 6rem;
     --spacing-3xl: 8rem;
     --spacing-4xl: 10rem;

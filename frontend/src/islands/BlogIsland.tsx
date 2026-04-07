@@ -1,9 +1,9 @@
 /**
  * Componente: BlogIsland
  * Página de listado de artículos del blog.
- * TO-DO: Conectar con WP REST API para paginación real.
- */
-import React, {useState, useMemo} from 'react';
+ * [074A-11] Conectado a API pública /api/blog con paginación real.
+ * Fallback a datos estáticos si la API falla. */
+import React, {useState, useMemo, useEffect} from 'react';
 import {useTranslation} from 'react-i18next';
 import '../styles/variables.css';
 import './BlogIsland.css';
@@ -14,6 +14,8 @@ import {PostBlog} from '../types/contenido';
 import {obtenerImagenBlog} from '../hooks/useImagenes';
 import {navegar} from '../navegacionSPA';
 import {Button} from '../components/ui/Button';
+import {apiListPublicBlog} from '../api/admin-blog';
+import type {AdminBlogPost} from '../api/admin-blog';
 
 interface BlogIslandProps {
     titulo?: string;
@@ -38,20 +40,52 @@ const TarjetaArticulo: React.FC<{post: PostBlog; destacado?: boolean}> = ({post,
     );
 };
 
+/* [074A-11] Convierte AdminBlogPost de la API a PostBlog para las tarjetas */
+function apiPostToPostBlog(post: AdminBlogPost): PostBlog {
+    return {
+        id: typeof post.id === 'string' ? parseInt(post.id.replace(/-/g, '').slice(0, 8), 16) : 0,
+        titulo: post.title,
+        resumen: post.excerpt ?? '',
+        contenido: post.content,
+        fecha: new Date(post.published_at ?? post.created_at).toLocaleDateString('es', {day: 'numeric', month: 'short', year: 'numeric'}),
+        categoria: post.tags[0] ?? 'General',
+        link: `/blog/${post.slug}`,
+        imagen: post.featured_image ?? undefined,
+    };
+}
+
 export const BlogIsland = ({titulo}: BlogIslandProps): JSX.Element => {
     const {t} = useTranslation();
     const [categoriaActiva, setCategoriaActiva] = useState('todos');
+    const [postsApi, setPostsApi] = useState<PostBlog[] | null>(null);
+
+    /* [074A-11] Fetch posts publicados de la API, fallback a datos estáticos */
+    useEffect(() => {
+        const controller = new AbortController();
+        apiListPublicBlog(1, 50)
+            .then(data => {
+                if (!controller.signal.aborted) {
+                    setPostsApi(data.posts.map(apiPostToPostBlog));
+                }
+            })
+            .catch(() => {
+                /* Fallback silencioso a datos estáticos */
+            });
+        return () => controller.abort();
+    }, []);
+
+    const postsReales = postsApi ?? POSTS_BLOG;
 
     /* Categorías únicas extraídas de los posts */
     const categorias = useMemo(() => {
-        const cats = new Set(POSTS_BLOG.map(p => p.categoria));
+        const cats = new Set(postsReales.map(p => p.categoria));
         return ['todos', ...Array.from(cats)];
-    }, []);
+    }, [postsReales]);
 
     const postsFiltrados = useMemo(() => {
-        if (categoriaActiva === 'todos') return POSTS_BLOG;
-        return POSTS_BLOG.filter(p => p.categoria === categoriaActiva);
-    }, [categoriaActiva]);
+        if (categoriaActiva === 'todos') return postsReales;
+        return postsReales.filter(p => p.categoria === categoriaActiva);
+    }, [categoriaActiva, postsReales]);
 
     return (
         <LayoutPagina className="blogMain" id="paginaBlog">

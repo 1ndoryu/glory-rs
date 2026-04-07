@@ -33,12 +33,48 @@ async fn main() {
     println!("Usuarios creados: cliente={client_id}, empleado={employee_id}");
 
     /* [064A-33] Limpiar órdenes previas del cliente de prueba para idempotencia.
-     * Borra fases primero (FK), luego órdenes. Solo afecta al usuario de test. */
-    sqlx::query("DELETE FROM order_phases WHERE order_id IN (SELECT id FROM orders WHERE client_id = $1)")
-        .bind(client_id)
-        .execute(&pool)
-        .await
-        .expect("Error al limpiar fases previas");
+     * Borra dependencias en orden inverso de FK antes de limpiar orders.
+     * Solo afecta al usuario de test. */
+    let order_ids_subquery = "SELECT id FROM orders WHERE client_id = $1";
+
+    /* chat_sessions tiene FK a orders sin CASCADE. chat_messages tiene CASCADE desde sessions.
+     * orders.chat_session_id también referencia chat_sessions, así que lo anulamos primero. */
+    sqlx::query(&format!(
+        "UPDATE orders SET chat_session_id = NULL WHERE client_id = $1"
+    ))
+    .bind(client_id)
+    .execute(&pool)
+    .await
+    .expect("Error al anular chat_session_id en orders");
+
+    sqlx::query(&format!(
+        "DELETE FROM chat_sessions WHERE order_id IN ({order_ids_subquery})"
+    ))
+    .bind(client_id)
+    .execute(&pool)
+    .await
+    .expect("Error al limpiar chat_sessions");
+
+    /* Tablas con FK a orders sin CASCADE */
+    for table in &["order_reviews", "order_payments", "order_refunds", "order_delegations"] {
+        let sql = format!(
+            "DELETE FROM {table} WHERE order_id IN ({order_ids_subquery})"
+        );
+        sqlx::query(&sql)
+            .bind(client_id)
+            .execute(&pool)
+            .await
+            .unwrap_or_else(|e| panic!("Error al limpiar {table}: {e}"));
+    }
+
+    /* order_phases tiene ON DELETE CASCADE pero limpiamos explícitamente por claridad */
+    sqlx::query(&format!(
+        "DELETE FROM order_phases WHERE order_id IN ({order_ids_subquery})"
+    ))
+    .bind(client_id)
+    .execute(&pool)
+    .await
+    .expect("Error al limpiar order_phases");
     sqlx::query("DELETE FROM orders WHERE client_id = $1")
         .bind(client_id)
         .execute(&pool)
@@ -154,6 +190,59 @@ async fn main() {
     println!("  Cliente:  cliente@test.com / cliente");
     println!("  Empleado: empleado@test.com / empleado");
     println!("  Admin:    admin@admin.com / admin");
+
+    /* [074A-11] Seed: 4 blog posts de prueba para CMS blog.
+     * Usa el admin existente como autor. Limpia posts previos para idempotencia. */
+    let admin_id = sqlx::query_scalar::<_, Uuid>(
+        "SELECT id FROM users WHERE email = 'admin@admin.com'"
+    )
+    .fetch_optional(&pool)
+    .await
+    .expect("Error al buscar admin");
+
+    if let Some(author_id) = admin_id {
+        sqlx::query("DELETE FROM blog_posts WHERE author_id = $1")
+            .bind(author_id)
+            .execute(&pool)
+            .await
+            .expect("Error al limpiar blog posts previos");
+
+        seed_blog_post(&pool, author_id, "ia-agentes-autonomos",
+            "Agentes Autónomos de IA: El Futuro del Desarrollo",
+            "Los agentes de IA están transformando cómo construimos software. Ya no se trata solo de autocompletar código.",
+            "<p>Los agentes autónomos de IA representan un cambio paradigmático en el desarrollo de software. A diferencia de los asistentes de código tradicionales que sugieren completaciones línea por línea, los agentes pueden <strong>planificar, ejecutar y validar</strong> tareas completas de forma autónoma.</p><h2>¿Qué los hace diferentes?</h2><p>Un agente de IA moderno puede: leer un codebase completo, identificar patrones arquitectónicos, implementar features siguiendo las convenciones del proyecto, ejecutar tests y corregir errores — todo sin intervención humana.</p><h2>El impacto real</h2><p>En nuestra experiencia con proyectos reales, los agentes reducen el tiempo de implementación en un 60-70% para tareas bien definidas. La clave está en dar contexto suficiente: un buen roadmap, convenciones claras y tests que validen el comportamiento esperado.</p>",
+            "published",
+            &["IA", "Desarrollo", "Automatización"],
+        ).await;
+
+        seed_blog_post(&pool, author_id, "rust-web-2026",
+            "Rust para Web en 2026: ¿Vale la Pena?",
+            "Evaluamos Axum, SQLx y el ecosistema Rust para aplicaciones web de producción.",
+            "<p>Rust ha madurado enormemente como opción para desarrollo web. Con frameworks como <strong>Axum</strong> y ORMs como <strong>SQLx</strong>, es posible construir APIs robustas y type-safe que compilan a binarios eficientes.</p><h2>Ventajas reales</h2><ul><li><strong>Performance</strong>: Un servidor Axum consume 10-50MB de RAM sirviendo miles de requests concurrentes.</li><li><strong>Type safety</strong>: SQLx valida queries contra la base de datos en compile time.</li><li><strong>Confiabilidad</strong>: Si compila, probablemente funciona. El borrow checker elimina categorías enteras de bugs.</li></ul><h2>Los trade-offs</h2><p>La curva de aprendizaje es real. Compile times largos en proyectos grandes. El ecosistema web es más joven que Node o Go. Pero para proyectos que valoran correctitud y rendimiento, Rust es una inversión que paga dividendos.</p>",
+            "published",
+            &["Rust", "Backend", "Web"],
+        ).await;
+
+        seed_blog_post(&pool, author_id, "diseno-ui-minimalista",
+            "Diseño UI Minimalista: Menos Decisiones, Mejor UX",
+            "Cómo reducir la carga cognitiva en interfaces web con patrones de diseño probados.",
+            "<p>El minimalismo en UI no se trata de quitar cosas — se trata de <strong>eliminar decisiones innecesarias</strong> para el usuario. Cada botón, cada opción, cada color compite por atención.</p><h2>Principios que aplicamos</h2><ul><li><strong>Jerarquía visual clara</strong>: Un solo color de acción primario. Todo lo demás es neutro.</li><li><strong>Espaciado generoso</strong>: El whitespace no es desperdicio, es respiración.</li><li><strong>Tipografía como estructura</strong>: Tamaño y peso comunican jerarquía sin necesidad de bordes o backgrounds.</li></ul><h2>El resultado</h2><p>Nuestros proyectos con diseño minimalista consistentemente muestran tiempos de onboarding 40% menores y tasas de conversión superiores. La simplicidad no es ausencia — es intención.</p>",
+            "published",
+            &["Diseño", "UX", "Frontend"],
+        ).await;
+
+        seed_blog_post(&pool, author_id, "branding-startups-tech",
+            "Branding para Startups Tech: Identidad que Escala",
+            "Las startups necesitan una identidad visual que funcione hoy y escale mañana.",
+            "<p>El branding para startups tech tiene un desafío único: debe ser <strong>memorable desde el día uno</strong> pero flexible para evolucionar con el producto. No es lo mismo hacer un logo bonito que construir un sistema visual.</p><h2>Qué incluye un buen sistema</h2><ul><li><strong>Logo adaptable</strong>: Funciona en favicon (16px), avatar (48px) y hero (full-width).</li><li><strong>Paleta con propósito</strong>: Primario para acciones, secundario para contenido, neutros para estructura.</li><li><strong>Tipografía consistente</strong>: Una familia tipográfica con suficientes pesos para todas las necesidades.</li></ul><p>Un sistema de branding bien construido ahorra meses de iteración en diseño y desarrollo.</p>",
+            "draft",
+            &["Branding", "Startups", "Diseño"],
+        ).await;
+
+        println!("Blog posts de prueba creados (3 publicados, 1 borrador).");
+    } else {
+        eprintln!("WARN: No se encontró usuario admin. Ejecuta seed_admin primero.");
+    }
 }
 
 #[derive(sqlx::FromRow)]
@@ -344,4 +433,42 @@ fn determine_phase_status(payment_mode: &str, order_status: &str, phase_idx: usi
 
         _ => "locked",
     }
+}
+
+/* [074A-11] Inserta un blog post de prueba con tags como JSONB */
+async fn seed_blog_post(
+    pool: &PgPool,
+    author_id: Uuid,
+    slug: &str,
+    title: &str,
+    excerpt: &str,
+    content: &str,
+    status: &str,
+    tags: &[&str],
+) {
+    let tags_json = serde_json::to_value(tags).unwrap_or_default();
+    let published_at = if status == "published" {
+        Some(chrono::Utc::now())
+    } else {
+        None
+    };
+
+    sqlx::query(
+        "INSERT INTO blog_posts (author_id, title, slug, excerpt, content, status, tags, published_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+         ON CONFLICT (slug) DO UPDATE SET title = $2, excerpt = $4, content = $5, status = $6, tags = $7, updated_at = NOW()"
+    )
+    .bind(author_id)
+    .bind(title)
+    .bind(slug)
+    .bind(excerpt)
+    .bind(content)
+    .bind(status)
+    .bind(&tags_json)
+    .bind(published_at)
+    .execute(pool)
+    .await
+    .unwrap_or_else(|e| panic!("Error al crear blog post '{slug}': {e}"));
+
+    println!("  Blog post: {title} [{status}]");
 }

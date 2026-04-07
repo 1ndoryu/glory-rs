@@ -1,0 +1,184 @@
+/* [074A-11] Estilos de la lista de blog posts CMS.
+ * Patrón: misma estructura que ListaServicios.css. */
+
+.listaBlog {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.listaBlogCargando {
+    padding: var(--spacing-xl);
+    text-align: center;
+    color: var(--text-tertiary);
+    font-size: var(--text-sm);
+}
+
+.listaBlogHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.listaBlogTitulo {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.listaBlogGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--spacing-md);
+}
+
+.listaBlogCard {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    background: var(--bg-primary);
+    cursor: pointer;
+    transition: border-color 0.2s;
+    overflow: hidden;
+}
+
+.listaBlogCard:hover {
+    border-color: var(--brand-primary);
+}
+
+.listaBlogCard--inactivo {
+    opacity: 0.6;
+}
+
+.listaBlogImagen {
+    width: 100%;
+    height: 120px;
+    overflow: hidden;
+}
+
+.listaBlogImagen img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.listaBlogInfo {
+    padding: var(--spacing-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.listaBlogCardHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-sm);
+}
+
+.listaBlogNombre {
+    font-weight: 600;
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.listaBlogSlug {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+    font-family: monospace;
+}
+
+.listaBlogDesc {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.listaBlogCardFooter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: var(--spacing-xs);
+}
+
+.listaBlogFecha {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+}
+
+.listaBlogTags {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 50%;
+    text-align: right;
+}
+
+/* Badge de status */
+.listaBlogBadge {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    filter: grayscale(100%);
+}
+
+.listaBlogBadge--published {
+    background: var(--bg-item-active);
+    color: var(--text-primary);
+}
+
+.listaBlogBadge--draft {
+    background: var(--bg-item-hover);
+    color: var(--text-tertiary);
+}
+
+.listaBlogBadge--archived {
+    background: var(--bg-item-hover);
+    color: var(--text-tertiary);
+    opacity: 0.7;
+}
+
+/* Botón archivar */
+.listaBlogArchivar {
+    position: absolute;
+    top: var(--spacing-sm);
+    right: var(--spacing-sm);
+    padding: var(--spacing-xs);
+    border: none;
+    background: var(--bg-primary);
+    color: var(--text-tertiary);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s, color 0.2s;
+}
+
+.listaBlogCard:hover .listaBlogArchivar {
+    opacity: 1;
+}
+
+.listaBlogArchivar:hover {
+    color: var(--text-primary);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .listaBlogGrid {
+        grid-template-columns: 1fr;
+    }
+}
