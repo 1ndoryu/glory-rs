@@ -7,13 +7,13 @@
  * sentinel-disable-file componente-sin-hook: la lógica son constantes de ordenamiento y filtros
  * que no son reutilizables; data ya está en useOrdenes. */
 import React, {useCallback, useMemo, useState} from 'react';
-import {FolderOpen, Search} from 'lucide-react';
+import {FolderOpen, Search, ChevronDown} from 'lucide-react';
 import {useAuthStore} from '../../stores/authStore';
 import {useOrdenes} from '../../hooks/useOrdenes';
 import {OrdenDetalle} from './OrdenDetalle';
 import {Button} from '../ui/Button';
 import {Input} from '../ui/Input';
-import {Select} from '../ui/Select';
+import {MenuContextual} from '../ui/ContextMenu';
 import {
     ORDER_STATUS_LABELS,
     PAYMENT_MODE_LABELS,
@@ -62,6 +62,7 @@ export const SeccionProyectos: React.FC = () => {
     /* [084A-1] Búsqueda y filtro por empleado — solo admin */
     const [busqueda, setBusqueda] = useState('');
     const [filtroEmpleado, setFiltroEmpleado] = useState<string>('');
+    const [empleadoMenuAbierto, setEmpleadoMenuAbierto] = useState(false);
     const {
         ordenes, cargando, detalle, cargandoDetalle,
         ordenSeleccionada, error, seleccionarOrden, recargar,
@@ -173,16 +174,24 @@ export const SeccionProyectos: React.FC = () => {
                         />
                     </div>
                     {empleadosUnicos.length > 0 && (
-                        <Select
-                            className="proyectosFiltroEmpleado"
-                            value={filtroEmpleado}
-                            onChange={e => setFiltroEmpleado(e.target.value)}
-                        >
-                            <option value="">Todos los empleados</option>
-                            {empleadosUnicos.map(emp => (
-                                <option key={emp.id} value={emp.id}>{emp.nombre}</option>
-                            ))}
-                        </Select>
+                        <MenuContextual
+                            abierto={empleadoMenuAbierto}
+                            onToggle={() => setEmpleadoMenuAbierto(prev => !prev)}
+                            onCerrar={() => setEmpleadoMenuAbierto(false)}
+                            ariaLabel="Filtrar por empleado"
+                            triggerClassName="proyectosFiltroEmpleado"
+                            triggerVariante="outline"
+                            triggerTamano="pequeno"
+                            triggerContent={<>{filtroEmpleado ? empleadosUnicos.find(e => e.id === filtroEmpleado)?.nombre ?? 'Empleado' : 'Todos los empleados'} <ChevronDown size={14} /></>}
+                            items={[
+                                {id: 'all', label: 'Todos los empleados', onSelect: () => setFiltroEmpleado('')},
+                                ...empleadosUnicos.map(emp => ({
+                                    id: emp.id,
+                                    label: emp.nombre,
+                                    onSelect: () => setFiltroEmpleado(emp.id),
+                                })),
+                            ]}
+                        />
                     )}
                 </div>
             )}

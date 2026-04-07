@@ -41,10 +41,13 @@
     margin: 0;
 }
 
-/* [064A-54] Padding reducido para igualar panelSidebar (--spacing-lg). */
+/* [064A-54] Padding reducido para igualar panelSidebar (--spacing-lg).
+ * [114A-3] overflow hidden para evitar que secciones internas se salgan del panel. */
 .panelContenido {
     flex: 1;
     padding: var(--spacing-lg);
+    overflow: hidden;
+    min-width: 0;
 }
 
 /* Responsive: stack vertical en movil */

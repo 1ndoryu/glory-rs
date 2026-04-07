@@ -12,7 +12,14 @@ use argon2::{Argon2, PasswordHasher, password_hash::SaltString};
 use sqlx::PgPool;
 use uuid::Uuid;
 
-const TEST_EMAILS: [&str; 2] = ["cliente@test.com", "empleado@test.com"];
+/* [114A-1] Incluye usuarios legacy de test anteriores para limpiarlos */
+const TEST_EMAILS: [&str; 5] = [
+    "cliente@test.com",
+    "empleado@test.com",
+    "test@test.com",
+    "testfase2@test.com",
+    "employee1@test.com",
+];
 
 /* plan, status, client_name, domain, price_cents, storage_mb */
 type HostingSeedEntry<'a> = (&'a str, &'a str, &'a str, Option<&'a str>, i32, i32);
