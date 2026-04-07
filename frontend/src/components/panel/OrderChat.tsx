@@ -17,7 +17,7 @@ interface OrderChatProps {
 
 export const OrderChat: React.FC<OrderChatProps> = ({orderId}) => {
     const [input, setInput] = useState('');
-    const messagesEndRef = useRef<HTMLDivElement>(null);
+    const messagesContainerRef = useRef<HTMLDivElement>(null);
     const userId = useAuthStore(s => s.user?.userId);
     const {sessionId, mensajes, enviando, creando, iniciarSesion, enviarMensaje} =
         useOrderChat(orderId);
@@ -27,9 +27,11 @@ export const OrderChat: React.FC<OrderChatProps> = ({orderId}) => {
         iniciarSesion();
     }, [iniciarSesion]);
 
-    /* Auto-scroll al último mensaje */
+    /* [074A-52] Auto-scroll interno: usar scrollTop del contenedor, no scrollIntoView
+     * que mueve el scroll de la página entera */
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({behavior: 'smooth'});
+        const el = messagesContainerRef.current;
+        if (el) el.scrollTop = el.scrollHeight;
     }, [mensajes]);
 
     const handleSend = async () => {
@@ -56,7 +58,7 @@ export const OrderChat: React.FC<OrderChatProps> = ({orderId}) => {
 
     return (
         <div className="orderChatPanel">
-            <div className="orderChatMensajes">
+            <div className="orderChatMensajes" ref={messagesContainerRef}>
                 {mensajes.length === 0 && (
                     <p className="orderChatVacio">
                         Envía un mensaje para iniciar la conversación.
@@ -89,7 +91,6 @@ export const OrderChat: React.FC<OrderChatProps> = ({orderId}) => {
                         </div>
                     );
                 })}
-                <div ref={messagesEndRef} />
             </div>
             <div className="orderChatInputArea">
                 <Input
