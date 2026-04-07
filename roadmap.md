@@ -60,16 +60,3 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 ### SEO y mejoras (plan: plan-seo-completo-2026-04-04.md)
 
 - 074A-14: SEO Fase 2 — Performance (lazy loading, image optimization, Core Web Vitals)
-
-##
-
-### Bugs y UX del usuario (nuevos)
-
-- 074A-38: En OrderChat, no mostrar avatar propio en mensajes enviados (solo el del otro usuario).
-- 074A-39: Chat panel (SeccionChat) — fotos de perfil no se ven aunque el usuario tiene foto subida.
-- 074A-40: chatInfoNotaInput debería ser un textarea sin botón de enviar.
-- 074A-41: Info del visitante debe mostrar IP, ubicación, dispositivo (toda la info posible).
-- 074A-42: Chat IA siempre responde el mismo saludo — revisar prompts y flujo de respuesta.
-- 074A-43: Chat panel necesita ancho máximo, carga diferida de mensajes, scroll al final.
-- 074A-44: Stripe 500 persiste — POST .../pay devuelve "Ocurrió un error interno".
-- EL BOTON DE SALIR SIGUE DESLOGEANDO EL USUARIO!!!!!!!!!!!!!!!! DIJE QUE EL BOTON DE SALIR EN EL PANEL TIENE QUE SER UN BOTON PARA IR AL INICIO SIN DESLOGEARSE CUANDO SE DE CLICK EN LA FOTO DE PERIFL headerPanelAvatar TIENE QUE ABRIR UN SUBMENU DONDE SI SALE LE BOTON DE DESLOGEARSE!!!
