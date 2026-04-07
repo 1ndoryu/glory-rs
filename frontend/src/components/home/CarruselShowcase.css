@@ -30,6 +30,8 @@
     align-items: center;
     /* Alineacion inicial con el contenedor principal usando la variable + el espaciado extra solicitado */
     padding-left: calc(max(1rem, (100% - var(--container-width)) / 2) + var(--spacing-lg));
+    /* [074A-26] Espacio inferior para que los badges no se recorten por overflow:hidden */
+    padding-bottom: var(--spacing-xl);
 }
 
 .carruselPista {
