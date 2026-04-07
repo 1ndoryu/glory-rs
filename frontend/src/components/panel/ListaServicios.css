@@ -1,0 +1,179 @@
+/* [074A-9] Estilos de la lista de servicios CMS. */
+
+.listaServicios {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.listaServiciosCargando {
+    padding: var(--spacing-xl);
+    text-align: center;
+    color: var(--text-tertiary);
+    font-size: var(--text-sm);
+}
+
+.listaServiciosHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.listaServiciosTitulo {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.listaServiciosGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--spacing-md);
+}
+
+.listaServiciosCard {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    background: var(--bg-primary);
+    cursor: pointer;
+    transition: border-color 0.2s;
+    overflow: hidden;
+}
+
+.listaServiciosCard:hover {
+    border-color: var(--brand-primary);
+}
+
+.listaServiciosCard--inactivo {
+    opacity: 0.6;
+}
+
+.listaServiciosImagen {
+    width: 100%;
+    height: 120px;
+    overflow: hidden;
+}
+
+.listaServiciosImagen img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.listaServiciosInfo {
+    padding: var(--spacing-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.listaServiciosCardHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-sm);
+}
+
+.listaServiciosNombre {
+    font-weight: 600;
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.listaServiciosSlug {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+    font-family: monospace;
+}
+
+.listaServiciosDesc {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.listaServiciosCardFooter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: var(--spacing-xs);
+}
+
+.listaServiciosPrecio {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.listaServiciosPlanes {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+}
+
+/* Badge de status */
+.listaServiciosBadge {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    filter: grayscale(100%);
+}
+
+.listaServiciosBadge--published {
+    background: var(--bg-item-active);
+    color: var(--text-primary);
+}
+
+.listaServiciosBadge--draft {
+    background: var(--bg-item-hover);
+    color: var(--text-tertiary);
+}
+
+.listaServiciosBadge--archived {
+    background: var(--bg-item-hover);
+    color: var(--text-tertiary);
+    opacity: 0.7;
+}
+
+/* Botón archivar */
+.listaServiciosArchivar {
+    position: absolute;
+    top: var(--spacing-sm);
+    right: var(--spacing-sm);
+    padding: var(--spacing-xs);
+    border: none;
+    background: var(--bg-primary);
+    color: var(--text-tertiary);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s, color 0.2s;
+}
+
+.listaServiciosCard:hover .listaServiciosArchivar {
+    opacity: 1;
+}
+
+.listaServiciosArchivar:hover {
+    color: var(--text-primary);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .listaServiciosGrid {
+        grid-template-columns: 1fr;
+    }
+}

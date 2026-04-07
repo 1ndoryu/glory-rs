@@ -52,3 +52,13 @@
     font-size: var(--text-sm);
     color: var(--text-muted);
 }
+
+/* [074A-9] Error feedback */
+.contenidoError {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--text-sm);
+    color: var(--brand-black);
+    background: var(--bg-item-hover);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-sm);
+}
