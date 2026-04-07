@@ -41,16 +41,14 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 > Plan de hosting: `Agente/planes/plan-hosting-coolify-2026-04-04.md` (5 fases) — Fases 3-4 ✅, Fases 1-2-5 bloqueadas por infraestructura externa (VPS2, DNS, Google Drive OAuth)
 > Status hosting: `Agente/documentacion/hosting/status-hosting-administrado-2026-04-07.md`
 
-### Funcionalidad grande
+### Bugs y UX del usuario
 
-(sin tareas pendientes)
-
-### Funcionalidad media
-
-(sin tareas pendientes)
-
-
-### Tooling
-
-(sin tareas pendientes)
-
+- 074A-2: Datos de prueba completos para vista cliente y empleado (falta seed data visible).
+- 074A-3: Verificar/corregir datos de prueba de hosting (064A-51 los creó, puede que no se vean).
+- 074A-15: hostingFormCrear tiene un padding innecesario.
+- 074A-16: Padding innecesario en usuariosContenedor y proyectosContenedor.
+- 074A-17: Reembolso sigue diciendo "Request failed with status code 404".
+- 074A-18: Quitar .chatWidgetBubble del panel (mala idea haberlo puesto ahí).
+- 074A-19: chatInputArea se ve feo — usar como referencia el input+botón de chatWidgetBubble.
+- 074A-20: Estilos de títulos inconsistentes en chat del panel ("Conversaciones", "Chat general", "Info de visitante") — todos deben ser: font-size: var(--text-sm), font-weight: 600, color: var(--brand-black), flex: 1.
+- 074A-21: En "Info del visitante" la forma en la que se ordena la información se ve fatal.
