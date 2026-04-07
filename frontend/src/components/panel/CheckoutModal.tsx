@@ -45,10 +45,13 @@ export default function CheckoutModal(props: CheckoutModalProps) {
                 phase_number: phaseNumber,
             });
             setClientSecret(resp.client_secret);
-        } catch (err) {
-            setError(
-                err instanceof Error ? err.message : 'Error iniciando pago'
-            );
+        } catch (err: unknown) {
+            /* [074A-24] Extraer mensaje real del response body de Axios.
+             * El backend devuelve { error: "...", message: "..." } en errores. */
+            const axiosData = (err as { response?: { data?: { message?: string } } })?.response?.data;
+            const msg = axiosData?.message
+                ?? (err instanceof Error ? err.message : 'Error iniciando pago');
+            setError(msg);
         } finally {
             setLoading(false);
         }

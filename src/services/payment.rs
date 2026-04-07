@@ -328,9 +328,11 @@ impl PaymentService {
 
         if !resp.status().is_success() {
             let body = resp.text().await.unwrap_or_default();
-            /* [064A-73] Log explícito de errores Stripe para debugging */
+            /* [064A-73] Log explícito de errores Stripe para debugging.
+             * [074A-24] Clasificar el error Stripe para dar feedback útil al usuario
+             * sin exponer detalles internos (ej: claves API). */
             tracing::error!("Stripe create_payment_intent falló: {body}");
-            return Err(AppError::Internal(format!("Stripe error: {body}")));
+            return Err(Self::classify_stripe_error(&body));
         }
 
         resp.json::<StripePaymentIntentMin>()
@@ -514,6 +516,33 @@ impl PaymentService {
             _ => Err(AppError::BadRequest(
                 "El pago no está en un estado reembolsable".into(),
             )),
+        }
+    }
+
+    /* [074A-24] Clasifica errores de Stripe API para dar feedback útil al usuario
+     * sin exponer detalles internos (claves API, IDs internos de Stripe).
+     * Stripe devuelve: { "error": { "type": "...", "message": "...", "code": "..." } } */
+    fn classify_stripe_error(body: &str) -> AppError {
+        let parsed: Result<serde_json::Value, _> = serde_json::from_str(body);
+        let (error_type, message) = match &parsed {
+            Ok(json) => (
+                json["error"]["type"].as_str().unwrap_or("unknown"),
+                json["error"]["message"].as_str().unwrap_or("Error desconocido de Stripe"),
+            ),
+            Err(_) => return AppError::Internal("Error inesperado del servicio de pagos".into()),
+        };
+
+        match error_type {
+            "authentication_error" => {
+                AppError::Internal("Error de configuración de pagos — contacta soporte".into())
+            }
+            "invalid_request_error" | "card_error" => {
+                AppError::BadRequest(format!("Error de pago: {message}"))
+            }
+            "rate_limit_error" => {
+                AppError::BadRequest("Demasiadas solicitudes de pago, intenta de nuevo en unos segundos".into())
+            }
+            _ => AppError::Internal("Servicio de pagos no disponible temporalmente".into()),
         }
     }
 }

@@ -51,12 +51,16 @@ pub async fn initiate_payment(
     };
 
     /* [064A-59] Obtener email del usuario para pre-llenar en Stripe (receipt_email).
-     * Así no se le pide email de nuevo en el checkout. */
-    let user_email = UserRepository::find_by_id(&state.pool, auth.user_id)
-        .await
-        .ok()
-        .flatten()
-        .map(|u| u.email);
+     * Así no se le pide email de nuevo en el checkout.
+     * [074A-24] Log si falla la consulta en vez de silenciar con .ok(). */
+    let user_email = match UserRepository::find_by_id(&state.pool, auth.user_id).await {
+        Ok(Some(u)) => Some(u.email),
+        Ok(None) => None,
+        Err(e) => {
+            tracing::warn!("No se pudo obtener email del usuario para receipt_email: {e}");
+            None
+        }
+    };
 
     let result = PaymentService::initiate_payment(
         &state.pool,
