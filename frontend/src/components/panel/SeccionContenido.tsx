@@ -76,6 +76,11 @@ export const SeccionContenido: React.FC = () => {
         await archivar(id);
     }, [archivar]);
 
+    /* [114A-7] Desarchivar = actualizar status a draft */
+    const handleDesarchivarServicio = useCallback(async (id: string) => {
+        await actualizar(id, {status: 'draft'} as UpdateServiceBody);
+    }, [actualizar]);
+
     /* [074A-11] Estado del CMS blog */
     const {
         posts: blogPosts,
@@ -112,6 +117,10 @@ export const SeccionContenido: React.FC = () => {
     const handleArchivarPost = useCallback(async (id: string) => {
         await blogArchivar(id);
     }, [blogArchivar]);
+
+    const handleDesarchivarPost = useCallback(async (id: string) => {
+        await blogActualizar(id, {status: 'draft'} as UpdateBlogPostBody);
+    }, [blogActualizar]);
 
     /* [074A-12] Estado del CMS proyectos */
     const {
@@ -150,6 +159,10 @@ export const SeccionContenido: React.FC = () => {
         await proyectosArchivar(id);
     }, [proyectosArchivar]);
 
+    const handleDesarchivarProyecto = useCallback(async (id: string) => {
+        await proyectosActualizar(id, {status: 'draft'} as UpdateProjectBody);
+    }, [proyectosActualizar]);
+
     /* [074A-13] Estado del CMS equipo */
     const {
         miembros: equipoList,
@@ -186,6 +199,10 @@ export const SeccionContenido: React.FC = () => {
         await equipoArchivar(id);
     }, [equipoArchivar]);
 
+    const handleDesarchivarMiembro = useCallback(async (id: string) => {
+        await equipoActualizar(id, {status: 'draft'} as UpdateTeamMemberBody);
+    }, [equipoActualizar]);
+
     return (
         <div className="contenidoContenedor">
             <div className="contenidoSubTabs">
@@ -216,6 +233,7 @@ export const SeccionContenido: React.FC = () => {
                             onEditar={handleEditarServicio}
                             onCrear={handleCrearServicio}
                             onArchivar={handleArchivarServicio}
+                            onDesarchivar={handleDesarchivarServicio}
                         />
                         <EditorServicio
                             abierto={editorAbierto}
@@ -235,6 +253,7 @@ export const SeccionContenido: React.FC = () => {
                             onEditar={handleEditarPost}
                             onCrear={handleCrearPost}
                             onArchivar={handleArchivarPost}
+                            onDesarchivar={handleDesarchivarPost}
                         />
                         <EditorBlog
                             abierto={blogEditorAbierto}
@@ -254,6 +273,7 @@ export const SeccionContenido: React.FC = () => {
                             onEditar={handleEditarProyecto}
                             onCrear={handleCrearProyecto}
                             onArchivar={handleArchivarProyecto}
+                            onDesarchivar={handleDesarchivarProyecto}
                         />
                         <EditorProyecto
                             abierto={proyectoEditorAbierto}
@@ -273,6 +293,7 @@ export const SeccionContenido: React.FC = () => {
                             onEditar={handleEditarMiembro}
                             onCrear={handleCrearMiembro}
                             onArchivar={handleArchivarMiembro}
+                            onDesarchivar={handleDesarchivarMiembro}
                         />
                         <EditorMiembro
                             abierto={miembroEditorAbierto}

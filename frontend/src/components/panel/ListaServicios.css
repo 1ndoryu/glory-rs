@@ -148,27 +148,17 @@
     opacity: 0.7;
 }
 
-/* Botón archivar */
-.listaServiciosArchivar {
+/* [114A-7] Menú contextual 3 puntos */
+.listaServiciosMenu {
     position: absolute;
     top: var(--spacing-sm);
     right: var(--spacing-sm);
-    padding: var(--spacing-xs);
-    border: none;
-    background: var(--bg-primary);
-    color: var(--text-tertiary);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
     opacity: 0;
-    transition: opacity 0.2s, color 0.2s;
+    transition: opacity 0.2s;
 }
 
-.listaServiciosCard:hover .listaServiciosArchivar {
+.listaServiciosCard:hover .listaServiciosMenu {
     opacity: 1;
-}
-
-.listaServiciosArchivar:hover {
-    color: var(--text-primary);
 }
 
 /* Responsive */

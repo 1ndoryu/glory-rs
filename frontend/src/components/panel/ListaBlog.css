@@ -153,27 +153,17 @@
     opacity: 0.7;
 }
 
-/* Botón archivar */
-.listaBlogArchivar {
+/* [114A-7] Menú contextual 3 puntos */
+.listaBlogMenu {
     position: absolute;
     top: var(--spacing-sm);
     right: var(--spacing-sm);
-    padding: var(--spacing-xs);
-    border: none;
-    background: var(--bg-primary);
-    color: var(--text-tertiary);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
     opacity: 0;
-    transition: opacity 0.2s, color 0.2s;
+    transition: opacity 0.2s;
 }
 
-.listaBlogCard:hover .listaBlogArchivar {
+.listaBlogCard:hover .listaBlogMenu {
     opacity: 1;
-}
-
-.listaBlogArchivar:hover {
-    color: var(--text-primary);
 }
 
 /* Responsive */

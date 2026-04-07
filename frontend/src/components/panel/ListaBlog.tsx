@@ -1,11 +1,9 @@
 /* [074A-11] Lista de blog posts en el CMS admin.
- * Grid de cards con status, título, fecha, tags. Click para editar.
- * Patrón: misma estructura que ListaServicios.tsx.
- * sentinel-disable-file button-nativo: Botón archivar es icon-only overlay sobre card,
- * botonBase interfiere con posicionamiento absoluto y estilos (mismo patrón ListaServicios). */
-import React from 'react';
-import {Plus, Archive} from 'lucide-react';
+ * [114A-7] Menú 3 puntos con archivar/desarchivar/eliminar. */
+import React, {useState} from 'react';
+import {Plus, Archive, ArchiveRestore, Trash2} from 'lucide-react';
 import {Button} from '../ui/Button';
+import {MenuContextual, type MenuContextualItem} from '../ui/ContextMenu';
 import type {AdminBlogPost} from '../../api/admin-blog';
 import './ListaBlog.css';
 
@@ -15,6 +13,8 @@ interface ListaBlogProps {
     onEditar: (post: AdminBlogPost) => void;
     onCrear: () => void;
     onArchivar: (id: string) => void;
+    onDesarchivar?: (id: string) => void;
+    onEliminar?: (id: string) => void;
 }
 
 /* Badge de status con color semántico */
@@ -43,7 +43,11 @@ export const ListaBlog: React.FC<ListaBlogProps> = ({
     onEditar,
     onCrear,
     onArchivar,
+    onDesarchivar,
+    onEliminar,
 }) => {
+    const [menuActivo, setMenuActivo] = useState<string | null>(null);
+
     if (cargando) {
         return <div className="listaBlogCargando">Cargando posts...</div>;
     }
@@ -59,52 +63,64 @@ export const ListaBlog: React.FC<ListaBlogProps> = ({
             </div>
 
             <div className="listaBlogGrid">
-                {posts.map(post => (
-                    <div
-                        key={post.id}
-                        className={`listaBlogCard ${post.status === 'archived' ? 'listaBlogCard--inactivo' : ''}`}
-                        onClick={() => onEditar(post)}
-                        role="button"
-                        tabIndex={0}
-                        onKeyDown={e => { if (e.key === 'Enter') onEditar(post); }}
-                    >
-                        {post.featured_image && (
-                            <div className="listaBlogImagen">
-                                <img src={post.featured_image} alt={post.title} />
-                            </div>
-                        )}
-                        <div className="listaBlogInfo">
-                            <div className="listaBlogCardHeader">
-                                <span className="listaBlogNombre">{post.title}</span>
-                                <BadgeStatus status={post.status} />
-                            </div>
-                            <span className="listaBlogSlug">/{post.slug}</span>
-                            {post.excerpt && (
-                                <span className="listaBlogDesc">{post.excerpt}</span>
+                {posts.map(post => {
+                    const items: MenuContextualItem[] = [];
+                    if (post.status !== 'archived') {
+                        items.push({id: 'archivar', label: 'Archivar', icon: <Archive size={14} />, onSelect: () => onArchivar(post.id)});
+                    }
+                    if (post.status === 'archived' && onDesarchivar) {
+                        items.push({id: 'desarchivar', label: 'Desarchivar', icon: <ArchiveRestore size={14} />, onSelect: () => onDesarchivar(post.id)});
+                    }
+                    if (onEliminar) {
+                        items.push({id: 'eliminar', label: 'Eliminar', icon: <Trash2 size={14} />, danger: true, onSelect: () => onEliminar(post.id)});
+                    }
+
+                    return (
+                        <div
+                            key={post.id}
+                            className={`listaBlogCard ${post.status === 'archived' ? 'listaBlogCard--inactivo' : ''}`}
+                            onClick={() => onEditar(post)}
+                            role="button"
+                            tabIndex={0}
+                            onKeyDown={e => { if (e.key === 'Enter') onEditar(post); }}
+                        >
+                            {post.featured_image && (
+                                <div className="listaBlogImagen">
+                                    <img src={post.featured_image} alt={post.title} />
+                                </div>
                             )}
-                            <div className="listaBlogCardFooter">
-                                <span className="listaBlogFecha">
-                                    {formatearFecha(post.created_at)}
-                                </span>
-                                {post.tags.length > 0 && (
-                                    <span className="listaBlogTags">
-                                        {post.tags.slice(0, 3).join(', ')}
-                                    </span>
+                            <div className="listaBlogInfo">
+                                <div className="listaBlogCardHeader">
+                                    <span className="listaBlogNombre">{post.title}</span>
+                                    <BadgeStatus status={post.status} />
+                                </div>
+                                <span className="listaBlogSlug">/{post.slug}</span>
+                                {post.excerpt && (
+                                    <span className="listaBlogDesc">{post.excerpt}</span>
                                 )}
+                                <div className="listaBlogCardFooter">
+                                    <span className="listaBlogFecha">
+                                        {formatearFecha(post.created_at)}
+                                    </span>
+                                    {post.tags.length > 0 && (
+                                        <span className="listaBlogTags">
+                                            {post.tags.slice(0, 3).join(', ')}
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="listaBlogMenu" onClick={e => e.stopPropagation()}>
+                                <MenuContextual
+                                    abierto={menuActivo === post.id}
+                                    onToggle={() => setMenuActivo(prev => prev === post.id ? null : post.id)}
+                                    onCerrar={() => setMenuActivo(null)}
+                                    ariaLabel="Acciones del post"
+                                    items={items}
+                                />
                             </div>
                         </div>
-                        {post.status !== 'archived' && (
-                            <button
-                                type="button"
-                                className="listaBlogArchivar"
-                                title="Archivar post"
-                                onClick={e => { e.stopPropagation(); onArchivar(post.id); }}
-                            >
-                                <Archive size={14} />
-                            </button>
-                        )}
-                    </div>
-                ))}
+                    );
+                })}
             </div>
         </div>
     );

@@ -1,10 +1,12 @@
 /* [074A-13] Lista de miembros del equipo para el panel admin CMS.
- * Patrón similar a ListaProyectos. */
-/* sentinel-disable-file button-nativo: botones de acción del panel admin */
+ * [114A-7] Menú 3 puntos con archivar/desarchivar/eliminar. */
 
-import React from 'react';
+import React, {useState} from 'react';
+import {Archive, ArchiveRestore, Trash2} from 'lucide-react';
 import {AdminTeamMember} from '../../api/admin-team';
 import {Badge} from '../ui/Badge';
+import {Button} from '../ui/Button';
+import {MenuContextual, type MenuContextualItem} from '../ui/ContextMenu';
 import './ListaEquipo.css';
 
 interface ListaEquipoProps {
@@ -13,41 +15,59 @@ interface ListaEquipoProps {
     onEditar: (m: AdminTeamMember) => void;
     onCrear: () => void;
     onArchivar: (id: string) => void;
+    onDesarchivar?: (id: string) => void;
+    onEliminar?: (id: string) => void;
 }
 
-export const ListaEquipo: React.FC<ListaEquipoProps> = ({miembros, cargando, onEditar, onCrear, onArchivar}) => {
+export const ListaEquipo: React.FC<ListaEquipoProps> = ({miembros, cargando, onEditar, onCrear, onArchivar, onDesarchivar, onEliminar}) => {
+    const [menuActivo, setMenuActivo] = useState<string | null>(null);
+
     if (cargando) return <p className="equipoListaCargando">Cargando miembros...</p>;
 
     return (
         <div className="equipoListaContenedor">
             <div className="equipoListaAcciones">
-                <button className="equipoListaCrear" onClick={onCrear}>+ Nuevo miembro</button>
+                <Button variante="primario" tamano="pequeno" onClick={onCrear}>+ Nuevo miembro</Button>
             </div>
             {miembros.length === 0 && <p className="equipoListaVacia">No hay miembros del equipo.</p>}
             <div className="equipoListaGrid">
-            {miembros.map(m => (
-                <article key={m.id} className="equipoListaCard" onClick={() => onEditar(m)}>
-                    <div className="equipoListaAvatar">
-                        {m.avatar && <img src={m.avatar} alt={m.name} loading="lazy" />}
-                    </div>
-                    <div className="equipoListaInfo">
-                        <h4 className="equipoListaNombre">{m.name}</h4>
-                        <span className="equipoListaCargo">{m.role}</span>
-                        <div className="equipoListaMeta">
-                            <Badge label={m.status} />
-                            <span className="equipoListaOrden">#{m.sort_order}</span>
+            {miembros.map(m => {
+                const items: MenuContextualItem[] = [];
+                if (m.status !== 'archived') {
+                    items.push({id: 'archivar', label: 'Archivar', icon: <Archive size={14} />, onSelect: () => onArchivar(m.id)});
+                }
+                if (m.status === 'archived' && onDesarchivar) {
+                    items.push({id: 'desarchivar', label: 'Desarchivar', icon: <ArchiveRestore size={14} />, onSelect: () => onDesarchivar(m.id)});
+                }
+                if (onEliminar) {
+                    items.push({id: 'eliminar', label: 'Eliminar', icon: <Trash2 size={14} />, danger: true, onSelect: () => onEliminar(m.id)});
+                }
+
+                return (
+                    <article key={m.id} className="equipoListaCard" onClick={() => onEditar(m)}>
+                        <div className="equipoListaAvatar">
+                            {m.avatar && <img src={m.avatar} alt={m.name} loading="lazy" />}
                         </div>
-                    </div>
-                    {m.status !== 'archived' && (
-                        <button
-                            className="equipoListaArchivar"
-                            onClick={e => { e.stopPropagation(); onArchivar(m.id); }}
-                        >
-                            Archivar
-                        </button>
-                    )}
-                </article>
-            ))}
+                        <div className="equipoListaInfo">
+                            <h4 className="equipoListaNombre">{m.name}</h4>
+                            <span className="equipoListaCargo">{m.role}</span>
+                            <div className="equipoListaMeta">
+                                <Badge label={m.status} />
+                                <span className="equipoListaOrden">#{m.sort_order}</span>
+                            </div>
+                        </div>
+                        <div className="equipoListaMenu" onClick={e => e.stopPropagation()}>
+                            <MenuContextual
+                                abierto={menuActivo === m.id}
+                                onToggle={() => setMenuActivo(prev => prev === m.id ? null : m.id)}
+                                onCerrar={() => setMenuActivo(null)}
+                                ariaLabel="Acciones del miembro"
+                                items={items}
+                            />
+                        </div>
+                    </article>
+                );
+            })}
             </div>
         </div>
     );

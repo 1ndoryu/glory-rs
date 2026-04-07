@@ -11,20 +11,6 @@
     justify-content: flex-end;
 }
 
-.equipoListaCrear {
-    background: var(--accent-primary);
-    color: var(--text-primary);
-    border: none;
-    padding: var(--spacing-xs) var(--spacing-md);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    font-size: var(--font-size-sm);
-}
-
-.equipoListaCrear:hover {
-    opacity: 0.85;
-}
-
 .equipoListaGrid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -43,8 +29,8 @@
     align-items: center;
     gap: var(--spacing-md);
     padding: var(--spacing-md);
-    background: var(--bg-secondary);
-    border: 1px solid var(--white-10);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-default);
     border-radius: var(--radius-md);
     cursor: pointer;
     transition: border-color 0.2s;
@@ -52,7 +38,7 @@
 }
 
 .equipoListaCard:hover {
-    border-color: var(--white-20);
+    border-color: var(--brand-primary);
 }
 
 .equipoListaAvatar {
@@ -61,7 +47,7 @@
     border-radius: 50%;
     overflow: hidden;
     flex-shrink: 0;
-    background: var(--bg-tertiary);
+    background: var(--bg-dark);
 }
 
 .equipoListaAvatar img {
@@ -99,26 +85,17 @@
     color: var(--text-tertiary);
 }
 
-.equipoListaArchivar {
+/* [114A-7] Menú contextual 3 puntos */
+.equipoListaMenu {
     position: absolute;
     top: var(--spacing-sm);
     right: var(--spacing-sm);
-    background: transparent;
-    border: 1px solid var(--white-10);
-    color: var(--text-tertiary);
-    padding: var(--spacing-xs) var(--spacing-sm);
-    border-radius: var(--radius-sm);
-    font-size: var(--text-xs);
-    cursor: pointer;
     opacity: 0;
     transition: opacity 0.2s;
 }
 
-.equipoListaCard:hover .equipoListaArchivar {
+.equipoListaCard:hover .equipoListaMenu {
     opacity: 1;
 }
 
-.equipoListaArchivar:hover {
-    border-color: var(--error);
-    color: var(--error);
-}
+

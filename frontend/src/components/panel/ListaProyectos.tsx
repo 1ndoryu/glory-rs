@@ -1,11 +1,9 @@
 /* [074A-12] Lista de proyectos en el CMS admin.
- * Grid de cards con status, título, cliente, categorías. Click para editar.
- * Patrón: misma estructura que ListaBlog.tsx.
- * sentinel-disable-file button-nativo: Botón archivar es icon-only overlay sobre card,
- * botonBase interfiere con posicionamiento absoluto y estilos (mismo patrón ListaBlog). */
-import React from 'react';
-import { Plus, Archive } from 'lucide-react';
+ * [114A-7] Menú 3 puntos con archivar/desarchivar/eliminar. */
+import React, {useState} from 'react';
+import { Plus, Archive, ArchiveRestore, Trash2 } from 'lucide-react';
 import { Button } from '../ui/Button';
+import { MenuContextual, type MenuContextualItem } from '../ui/ContextMenu';
 import type { AdminProject } from '../../api/admin-projects';
 import './ListaProyectos.css';
 
@@ -15,6 +13,8 @@ interface ListaProyectosProps {
     onEditar: (proyecto: AdminProject) => void;
     onCrear: () => void;
     onArchivar: (id: string) => void;
+    onDesarchivar?: (id: string) => void;
+    onEliminar?: (id: string) => void;
 }
 
 function BadgeStatus({ status }: { status: string }) {
@@ -33,7 +33,11 @@ export const ListaProyectos: React.FC<ListaProyectosProps> = ({
     onEditar,
     onCrear,
     onArchivar,
+    onDesarchivar,
+    onEliminar,
 }) => {
+    const [menuActivo, setMenuActivo] = useState<string | null>(null);
+
     if (cargando) {
         return <div className="listaProyectosCargando">Cargando proyectos...</div>;
     }
@@ -49,54 +53,66 @@ export const ListaProyectos: React.FC<ListaProyectosProps> = ({
             </div>
 
             <div className="listaProyectosGrid">
-                {proyectos.map(proyecto => (
-                    <div
-                        key={proyecto.id}
-                        className={`listaProyectosCard ${proyecto.status === 'archived' ? 'listaProyectosCard--inactivo' : ''}`}
-                        onClick={() => onEditar(proyecto)}
-                        role="button"
-                        tabIndex={0}
-                        onKeyDown={e => { if (e.key === 'Enter') onEditar(proyecto); }}
-                    >
-                        {proyecto.featured_image && (
-                            <div className="listaProyectosImagen">
-                                <img src={proyecto.featured_image} alt={proyecto.title} />
-                            </div>
-                        )}
-                        <div className="listaProyectosInfo">
-                            <div className="listaProyectosCardHeader">
-                                <span className="listaProyectosNombre">{proyecto.title}</span>
-                                <BadgeStatus status={proyecto.status} />
-                            </div>
-                            {proyecto.client && (
-                                <span className="listaProyectosCliente">{proyecto.client}</span>
+                {proyectos.map(proyecto => {
+                    const items: MenuContextualItem[] = [];
+                    if (proyecto.status !== 'archived') {
+                        items.push({id: 'archivar', label: 'Archivar', icon: <Archive size={14} />, onSelect: () => onArchivar(proyecto.id)});
+                    }
+                    if (proyecto.status === 'archived' && onDesarchivar) {
+                        items.push({id: 'desarchivar', label: 'Desarchivar', icon: <ArchiveRestore size={14} />, onSelect: () => onDesarchivar(proyecto.id)});
+                    }
+                    if (onEliminar) {
+                        items.push({id: 'eliminar', label: 'Eliminar', icon: <Trash2 size={14} />, danger: true, onSelect: () => onEliminar(proyecto.id)});
+                    }
+
+                    return (
+                        <div
+                            key={proyecto.id}
+                            className={`listaProyectosCard ${proyecto.status === 'archived' ? 'listaProyectosCard--inactivo' : ''}`}
+                            onClick={() => onEditar(proyecto)}
+                            role="button"
+                            tabIndex={0}
+                            onKeyDown={e => { if (e.key === 'Enter') onEditar(proyecto); }}
+                        >
+                            {proyecto.featured_image && (
+                                <div className="listaProyectosImagen">
+                                    <img src={proyecto.featured_image} alt={proyecto.title} />
+                                </div>
                             )}
-                            <span className="listaProyectosSlug">/{proyecto.slug}</span>
-                            <div className="listaProyectosCardFooter">
-                                {proyecto.categories.length > 0 && (
-                                    <span className="listaProyectosCategorias">
-                                        {proyecto.categories.slice(0, 3).join(', ')}
-                                    </span>
+                            <div className="listaProyectosInfo">
+                                <div className="listaProyectosCardHeader">
+                                    <span className="listaProyectosNombre">{proyecto.title}</span>
+                                    <BadgeStatus status={proyecto.status} />
+                                </div>
+                                {proyecto.client && (
+                                    <span className="listaProyectosCliente">{proyecto.client}</span>
                                 )}
-                                {proyecto.technologies.length > 0 && (
-                                    <span className="listaProyectosTech">
-                                        {proyecto.technologies.slice(0, 3).join(', ')}
-                                    </span>
-                                )}
+                                <span className="listaProyectosSlug">/{proyecto.slug}</span>
+                                <div className="listaProyectosCardFooter">
+                                    {proyecto.categories.length > 0 && (
+                                        <span className="listaProyectosCategorias">
+                                            {proyecto.categories.slice(0, 3).join(', ')}
+                                        </span>
+                                    )}
+                                    {proyecto.technologies.length > 0 && (
+                                        <span className="listaProyectosTech">
+                                            {proyecto.technologies.slice(0, 3).join(', ')}
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="listaProyectosMenu" onClick={e => e.stopPropagation()}>
+                                <MenuContextual
+                                    abierto={menuActivo === proyecto.id}
+                                    onToggle={() => setMenuActivo(prev => prev === proyecto.id ? null : proyecto.id)}
+                                    onCerrar={() => setMenuActivo(null)}
+                                    ariaLabel="Acciones del proyecto"
+                                    items={items}
+                                />
                             </div>
                         </div>
-                        {proyecto.status !== 'archived' && (
-                            <button
-                                type="button"
-                                className="listaProyectosArchivar"
-                                title="Archivar proyecto"
-                                onClick={e => { e.stopPropagation(); onArchivar(proyecto.id); }}
-                            >
-                                <Archive size={14} />
-                            </button>
-                        )}
-                    </div>
-                ))}
+                    );
+                })}
             </div>
         </div>
     );
