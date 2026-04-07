@@ -49,12 +49,8 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 ### Bugs / UX reportados por usuario
 
-- EL SELECT DE proyectosFiltros SIGUE SIENDO EL INCORRECTO!! ESTO NO LO DETECTA GLORY SENTINEL??????? Ese select no es valido, no se debe usar ese select!! Tiene que ser el que esta en usuariosFiltros. Borra ese tipo de select en proyectosFiltros para que no se vuelva a usar.
-
-- ANTERIORMENTE DIJE "Al cambiar al usuario cliente no veo un proyecto que este en proceso (no en proceso de pago), tiene que haber uno que este entre el admin y cliente, y otro entre el cliente y empleado." SIGO SIGO SIN VER PEDIDOS ACTIVOS AL CAMBIAR AL USUARIO EMPLEADO!!!!!!!!!!! ESO NECESITO DATOS DE PRUEBAS REALES; UN PEDIDO AL MENOS ACITVO QUE ESTE PARA EL USUARIO EMPLEADO AL QUE ACCESO DESDE EL AMDIN; NECESITO 2 O 3 PEDIDOS ACTIVOS UNO ENTRE EL ADMIN Y EL CLIENTE; UNO ENTRE EL EMPLEADO Y EL CLIENTE. ELIMINA TODOS LOS DATOS DE PRUEBA LOS QUE HAY NO ME SIRVEN.
 
 - La pagina de disponibles para el usuario empleado se ve mal, hay que reahacerla desde cero, no la entiendo. Igual la pagina delegaciones, porque carajo las letras son blancas, esto es incoherente. 
-- chatMensajes SIGUE SIN UN ANCHO mAXIMO QUE EVITE QUE chatContenedor se salga de l pantalla.
 
 - En proyecto dice Request failed with status code 404
 
@@ -62,4 +58,16 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 - No veo un boton para eliminar, los contenidos del cms deben tener un boton de 3 puntos, alli la opcion de eliminar, archivar, desarchivar, etc. 
 
+- EL Menu al dar click a la foto de perfil del lado del panel no es igual al que se ve cuando se sale del panel (este ess el correcto) ¿porque esta inconsistencia?
+
+- Inconsistencia: borra reembolsosTitulo, se supone que debería ser como hostingHeader, o sea, obviamente esto es una inconsistencia, el titulo de hosting header y reembolsos son diferentes (el de hosting se ve mejor), no digo que todas los contenedores deben tener titulos pero esto es una inconsistencia y quita el padding innecesario de reembolsosContenedor.
+
 - No veo donde se modifican los planes de los servicios.
+
+- Sigo sin ven hosting de prueba, esta mrd la he dicho ya la 4ta vez. 
+
+- En el dato de prueba el boton de entregar no sirve, lo que supone que debería hacer es que abre un modal para escribr algo y adjuntar algo, lo que sea, no es obligatorio adjuntar.
+
+- Al cambiar al usuario de cliente no veo pedidos, ni historial ni hosting de prueba!! De verdad esta mrd de los datos de prueba, necesitamos crear una solución de raiz, un codigo o algo robuzto en glory en que se encargue de los datos de prueba, que se encargue suministrar la logica de contenido, cms, y estas cosas para facilitar la gestión de contenido, tambien hay que actualizar las reglas en .github\instructions\test.instructions.md para que explique mejor /glory-rs es el nucleo de nuestro framework para agregar cosas utiles que sirven para todos los proyectos, agrega la regla de que /glory-rs debe ser agnostico, y que cuando es complete una tarea en la estructura de bajo de - **Sentinel:**  haya - **GLORY-RS:** Evualuando si la logica o lo que se hizo se puede mover a glory-rs para que pueda ser reutlizada en otro proyecto si es necesario, se tiene que pensar en GLORY-RS siempre como algo que sirve como nuestra caja de herramienta permantente. HEMOS ESTADO TOOD EL TIEMPO LUCHANDO CON LOS DATOS DE PRUEBA; NECESITO ALGO INFALIBLE BIEN PLANIFICADO PARA EVITARNOS ESTE PROBLEMA EN EL FUTURO. 
+
+hoy es 7, y veo Agente\completados\tareas-2026-04-08.md y Agente\completados\tareas-2026-04-11.md, es un error. 
