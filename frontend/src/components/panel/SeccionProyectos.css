@@ -219,12 +219,11 @@
     font-style: italic;
 }
 
-/* [084A-1] Filtros admin: búsqueda + filtro empleado */
+/* [084A-1] Filtros admin: búsqueda + filtro empleado — siempre en fila */
 .proyectosFiltros {
     display: flex;
     gap: var(--spacing-sm);
     align-items: center;
-    flex-wrap: wrap;
 }
 
 .proyectosBusqueda {
