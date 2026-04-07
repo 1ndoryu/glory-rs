@@ -9,6 +9,7 @@ import {useSeccionChat} from '../../hooks/useSeccionChat';
 import {ChatInfoPanel} from './ChatInfoPanel';
 import {Button} from '../ui/Button';
 import {Textarea} from '../ui/Textarea';
+import {DEFAULT_PROFILE_AVATAR} from '../../hooks/useCurrentProfile';
 import './SeccionChat.css';
 
 export const SeccionChat: React.FC = () => {
@@ -223,18 +224,12 @@ function MessageBubble({message}: {message: ChatMessage}) {
     return (
         <div className={`chatBurbuja ${isOwn ? 'chatBurbujaPropia' : ''} ${isAi ? 'chatBurbujaIA' : ''}`}>
             <div className="chatBurbujaHeader">
-                {/* [064A-70] Avatar del sender — solo si tiene avatar_url */}
-                {message.sender_avatar_url ? (
-                    <img
-                        className="chatBurbujaAvatar"
-                        src={message.sender_avatar_url}
-                        alt={displayName}
-                    />
-                ) : (
-                    <span className="chatBurbujaAvatarFallback">
-                        <User size={14} />
-                    </span>
-                )}
+                {/* [074A-32] Avatar del sender — usa DEFAULT_PROFILE_AVATAR como fallback */}
+                <img
+                    className="chatBurbujaAvatar"
+                    src={message.sender_avatar_url || DEFAULT_PROFILE_AVATAR}
+                    alt={displayName}
+                />
                 <span className={resolveSenderToneClass(message.sender_type)}>{displayName}</span>
                 <span className="chatBurbujaHora">
                     {new Date(message.created_at).toLocaleTimeString('es', {

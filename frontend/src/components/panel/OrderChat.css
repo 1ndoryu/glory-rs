@@ -47,8 +47,22 @@
 
 .orderChatBurbuja {
     display: flex;
-    flex-direction: column;
+    gap: var(--spacing-xs);
     max-width: 85%;
+}
+
+/* [074A-32] Avatar en burbujas de chat de orden */
+.orderChatBurbujaAvatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.orderChatBurbujaContenido {
+    display: flex;
+    flex-direction: column;
 }
 
 .orderChatBurbuja--propia {

@@ -8,6 +8,7 @@ import {useOrderChat} from '../../hooks/useOrderChat';
 import {useAuthStore} from '../../stores/authStore';
 import {Input} from '../ui/Input';
 import {Button} from '../ui/Button';
+import {DEFAULT_PROFILE_AVATAR} from '../../hooks/useCurrentProfile';
 import './OrderChat.css';
 
 interface OrderChatProps {
@@ -72,13 +73,21 @@ export const OrderChat: React.FC<OrderChatProps> = ({orderId, employeeName}) => 
                             key={msg.id}
                             className={`orderChatBurbuja ${esPropio ? 'orderChatBurbuja--propia' : 'orderChatBurbuja--otra'}`}
                         >
-                            <div className="orderChatBurbujaTexto">{msg.content}</div>
-                            <span className="orderChatBurbujaHora">
+                            {/* [074A-32] Avatar del sender */}
+                            <img
+                                className="orderChatBurbujaAvatar"
+                                src={msg.sender_avatar_url || DEFAULT_PROFILE_AVATAR}
+                                alt=""
+                            />
+                            <div className="orderChatBurbujaContenido">
+                                <div className="orderChatBurbujaTexto">{msg.content}</div>
+                                <span className="orderChatBurbujaHora">
                                 {new Date(msg.created_at).toLocaleTimeString('es-ES', {
                                     hour: '2-digit',
                                     minute: '2-digit',
                                 })}
-                            </span>
+                                </span>
+                            </div>
                         </div>
                     );
                 })}

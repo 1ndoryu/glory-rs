@@ -62,6 +62,7 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 - 074A-14: SEO Fase 2 — Performance (lazy loading, image optimization, Core Web Vitals)
 
 ## 
-- En el chat del panel no aparece la foto de perifl de quien claramente si tiene foto de perfil. 
-- Quita la sombra de .orderChatPanel y la altura no esta tomando la altura maxima, la minima debe ser 440px, orderChatEncabezado es innecesario y el chat debe aparecer al final. 
-- el boton de suscribir en el footer le falta borde
+
+- 074A-32: En el chat del panel no aparece la foto de perfil de quien claramente sí tiene foto de perfil.
+- 074A-33: Quitar sombra de .orderChatPanel, altura mínima 440px, orderChatEncabezado innecesario, chat scrollear al final.
+- 074A-34: Botón de suscribir en el footer le falta borde.
