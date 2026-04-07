@@ -10,7 +10,8 @@ import type {UserRole} from '../api/auth';
 export type SeccionPanel =
     | 'proyectos' | 'pagos' | 'perfil' | 'metodos-pago' | 'mensajes'
     | 'asignados' | 'disponibles' | 'delegaciones'
-    | 'todos-ordenes' | 'reembolsos' | 'usuarios' | 'hosting' | 'configuracion';
+    | 'todos-ordenes' | 'reembolsos' | 'usuarios' | 'hosting' | 'configuracion'
+    | 'contenido';
 
 export interface TabConfig {
     id: SeccionPanel;
@@ -121,6 +122,12 @@ const TABS_ADMIN: TabConfig[] = [
         id: 'configuracion',
         label: 'Configuración',
         descripcion: 'Herramientas de desarrollo: recrear o borrar datos de prueba, configuraciones del sistema.'
+    },
+    /* [074A-7] Tab de contenido editorial — CMS admin */
+    {
+        id: 'contenido',
+        label: 'Contenido',
+        descripcion: 'Gestiona servicios, blog, proyectos y equipo. Editor de contenido con texto enriquecido.'
     }
 ];
 

@@ -18,6 +18,7 @@ import {SeccionReembolsos} from '../components/panel/SeccionReembolsos';
 import {SeccionUsuarios} from '../components/panel/SeccionUsuarios';
 import {SeccionHosting} from '../components/panel/SeccionHosting';
 import {SeccionConfiguracion} from '../components/panel/SeccionConfiguracion';
+import {SeccionContenido} from '../components/panel/SeccionContenido';
 /* [064A-34] EmployeesSection y ServicesCatalogSection eliminados del panel. */
 import {SidebarPanel} from '../components/panel/SidebarPanel';
 import {PlaceholderSeccion} from '../components/panel/PlaceholderSeccion';
@@ -96,6 +97,9 @@ export const PanelIsland: React.FC = () => {
             /* [064A-62] Configuración: seed, herramientas dev (admin) */
             case 'configuracion':
                 return <SeccionConfiguracion />;
+            /* [074A-7] CMS: editor de contenido editorial (admin) */
+            case 'contenido':
+                return <SeccionContenido />;
             default:
                 return <PlaceholderSeccion tab={tabActual} />;
         }

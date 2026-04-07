@@ -1,0 +1,127 @@
+/* [074A-7] Estilos del RichTextEditor (tiptap). */
+
+.richTextEditor {
+    border: 1px solid var(--bg-item-active);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--bg-primary);
+}
+
+.richTextToolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-bottom: 1px solid var(--bg-item-active);
+    background: var(--bg-accent);
+}
+
+.richTextBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    transition: background var(--transicion-rapida), color var(--transicion-rapida);
+}
+
+.richTextBtn:hover {
+    background: var(--bg-item-hover);
+    color: var(--text-primary);
+}
+
+.richTextBtn--activo {
+    background: var(--bg-item-active);
+    color: var(--brand-black);
+}
+
+.richTextBtn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.richTextSeparador {
+    width: 1px;
+    height: 20px;
+    background: var(--bg-item-active);
+    margin: 4px 4px;
+    align-self: center;
+}
+
+/* Área de edición — tiptap genera un div[contenteditable] */
+.richTextContenido .tiptap {
+    padding: var(--spacing-md);
+    min-height: 200px;
+    font-family: var(--font-primary);
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+    line-height: 1.6;
+    outline: none;
+}
+
+.richTextContenido .tiptap p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    color: var(--text-muted);
+    pointer-events: none;
+    float: left;
+    height: 0;
+}
+
+.richTextContenido .tiptap h1 {
+    font-size: var(--text-xl);
+    font-weight: 600;
+    margin: var(--spacing-md) 0 var(--spacing-sm);
+}
+
+.richTextContenido .tiptap h2 {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    margin: var(--spacing-md) 0 var(--spacing-sm);
+}
+
+.richTextContenido .tiptap h3 {
+    font-size: var(--text-base);
+    font-weight: 600;
+    margin: var(--spacing-sm) 0 var(--spacing-xs);
+}
+
+.richTextContenido .tiptap ul,
+.richTextContenido .tiptap ol {
+    padding-left: var(--spacing-lg);
+    margin: var(--spacing-sm) 0;
+}
+
+.richTextContenido .tiptap blockquote {
+    border-left: 3px solid var(--bg-item-active);
+    padding-left: var(--spacing-md);
+    margin: var(--spacing-sm) 0;
+    color: var(--text-tertiary);
+    font-style: italic;
+}
+
+.richTextContenido .tiptap pre {
+    background: var(--bg-dark);
+    color: var(--bg-primary);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    overflow-x: auto;
+    margin: var(--spacing-sm) 0;
+}
+
+.richTextContenido .tiptap img {
+    max-width: 100%;
+    border-radius: var(--radius-sm);
+    margin: var(--spacing-sm) 0;
+}
+
+.richTextContenido .tiptap a {
+    color: var(--accent-primary);
+    text-decoration: underline;
+}
