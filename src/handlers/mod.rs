@@ -5,6 +5,7 @@ mod admin_services;
 mod admin_users;
 mod assignment;
 mod auth;
+mod blog;
 mod chat;
 mod dashboard;
 mod deliverables;
@@ -113,6 +114,12 @@ impl utoipa::Modify for SecurityAddon {
         admin_services::create,
         admin_services::update,
         admin_services::archive,
+        blog::list_published,
+        blog::get_by_slug,
+        blog::list_all,
+        blog::create,
+        blog::update,
+        blog::archive,
         uploads::upload_image,
     ),
     components(schemas(
@@ -177,6 +184,10 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::AdminServiceResponse,
         crate::models::CreateServiceRequest,
         crate::models::UpdateServiceRequest,
+        crate::models::BlogPostResponse,
+        crate::models::PaginatedBlogPosts,
+        crate::models::CreateBlogPostRequest,
+        crate::models::UpdateBlogPostRequest,
         profile::AvatarResponse,
         uploads::UploadResponse,
         crate::errors::ErrorResponse,
@@ -321,6 +332,8 @@ fn api_routes() -> Router<AppState> {
         .merge(profile::routes())
         .merge(admin_users::routes())
         .merge(admin_services::routes())
+        .merge(blog::public_routes())
+        .merge(blog::admin_routes())
         .merge(admin_seed::seed_routes())
         .merge(hosting::hosting_routes())
         .merge(uploads::routes())

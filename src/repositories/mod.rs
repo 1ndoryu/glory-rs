@@ -1,3 +1,4 @@
+mod blog;
 mod chat;
 mod dashboard;
 mod delegation;
@@ -11,6 +12,7 @@ mod refund;
 mod review;
 mod user;
 
+pub use blog::{BlogRepository, CreateBlogPostParams, UpdateBlogPostParams};
 pub use chat::ChatRepository;
 pub use dashboard::DashboardRepository;
 pub use delegation::{DelegationRepository, EmployeeListItemRow};

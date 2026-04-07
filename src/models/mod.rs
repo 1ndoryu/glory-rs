@@ -1,3 +1,4 @@
+mod blog;
 mod chat;
 mod dashboard;
 mod delegation;
@@ -11,6 +12,10 @@ mod refund;
 mod review;
 mod user;
 
+pub use blog::{
+    BlogPost, BlogPostResponse, CreateBlogPostRequest, PaginatedBlogPosts,
+    UpdateBlogPostRequest,
+};
 pub use chat::{
     ChatMessage, ChatMessageResponse, ChatSession, ChatSessionNote, ChatSessionResponse,
     CreateChatSessionRequest, CreateSessionNoteRequest, SendMessageRequest,
