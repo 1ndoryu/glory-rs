@@ -43,7 +43,6 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 ### CMS Admin (plan: plan-cms-admin-2026-04-07.md)
 
-- 074A-12: CMS Proyectos — Full stack (migrate showcase.ts → BD)
 - 074A-13: CMS Equipo — Full stack (migrate miembros.ts → BD)
 
 ### SEO y mejoras (plan: plan-seo-completo-2026-04-04.md)
