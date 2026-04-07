@@ -45,6 +45,9 @@ impl OrderService {
                 slug: svc.slug,
                 title: svc.title,
                 description: svc.description,
+                image_url: svc.image_url,
+                base_price_cents: svc.base_price_cents,
+                skills: svc.skills,
                 plans: plan_responses,
             });
         }
@@ -84,6 +87,9 @@ impl OrderService {
             slug: svc.slug,
             title: svc.title,
             description: svc.description,
+            image_url: svc.image_url,
+            base_price_cents: svc.base_price_cents,
+            skills: svc.skills,
             plans: plan_responses,
         })
     }

@@ -6,7 +6,7 @@
  * [044A-38 Fase 1] CTA "Contratar" apunta a /panel si logueado (Fase 2 conecta con API de órdenes).
  * [084A-4] Restaurado ModalCompra — click en plan abre modal de pago (revertido 074A-36).
  */
-import {useState, useCallback} from 'react';
+import {useState, useCallback, useEffect} from 'react';
 import {useTranslation} from 'react-i18next';
 import {useAuthStore} from '../stores/authStore';
 import {useChatStore} from '../stores/chatStore';
@@ -27,6 +27,7 @@ import {SKILLS_POR_DEFECTO} from '../data/skills';
 import {obtenerPlanesServicio} from '../data/planes/index';
 import type {PlanServicio} from '../data/planes/tipos';
 import {SERVICIOS_DATA} from '../data/servicios';
+import {apiGetServiceBySlug, type PublicService} from '../api/admin-services';
 
 /* [064A-47] Imagen del servicio añadida al hero. */
 interface ServicioIndividualIslandProps {
@@ -53,10 +54,24 @@ export const ServicioIndividualIsland = ({titulo, descripcion, precio_desde, slu
     /* ID del servicio actual para excluirlo de relacionados */
     const servicioId = slug || titulo?.toLowerCase().replace(/\s+/g, '-') || '';
 
+    /* [074A-21] Fetch servicio de la API con fallback a datos estáticos */
+    const [apiData, setApiData] = useState<PublicService | null>(null);
+    useEffect(() => {
+        const controller = new AbortController();
+        if (slug) {
+            apiGetServiceBySlug(slug)
+                .then(data => { if (!controller.signal.aborted) setApiData(data); })
+                .catch(() => { /* mantiene fallback estático */ });
+        }
+        return () => controller.abort();
+    }, [slug]);
+
     /* [064A-64] Buscar servicio por slug para traducir titulo y descripcion */
     const servicioData = SERVICIOS_DATA.find(s => slug && s.link.includes(slug));
-    const tituloTraducido = servicioData ? t(`content.services.${servicioData.id}.titulo`, {defaultValue: titulo ?? ''}) : titulo;
-    const descripcionTraducida = servicioData ? t(`content.services.${servicioData.id}.descripcion`, {defaultValue: descripcion ?? ''}) : descripcion;
+    const tituloFinal = apiData?.title || (servicioData ? t(`content.services.${servicioData.id}.titulo`, {defaultValue: titulo ?? ''}) : titulo);
+    const descripcionFinal = apiData?.description || (servicioData ? t(`content.services.${servicioData.id}.descripcion`, {defaultValue: descripcion ?? ''}) : descripcion);
+    const imagenFinal = apiData?.image_url || imagen;
+    const skillsApi = apiData?.skills ? (apiData.skills as Array<{titulo: string; descripcion: string}>).map((sk, i) => ({id: i, titulo: sk.titulo, descripcion: sk.descripcion})) : null;
 
     /* [044A-40] Obtener precio mínimo real de los planes del servicio. */
     const datosPlanes = obtenerPlanesServicio(servicioId);
@@ -81,11 +96,11 @@ export const ServicioIndividualIsland = ({titulo, descripcion, precio_desde, slu
                 path={`/servicios/${slug || ''}`}
                 jsonLd={titulo && descripcion && slug ? serviceSchema(titulo, descripcion, slug) : undefined}
             />
-            <SeccionHeroServicio titulo={tituloTraducido} descripcion={descripcionTraducida} imagen={imagen} />
+            <SeccionHeroServicio titulo={tituloFinal} descripcion={descripcionFinal} imagen={imagenFinal} />
             <SeccionGaleriaServicio />
             <SeccionPlanesServicio slug={servicioId} onSeleccionarPlan={handleSeleccionarPlan} />
             <SeccionCta descripcion={[t('service_detail.cta_1'), t('service_detail.cta_2')]} textoBotonPrimario={precioMinimo ? `${t('service_detail.cta_hire')} ${precioMinimo}` : t('service_detail.cta_hire')} linkBotonPrimario={ctaLink} onBotonPrimarioClick={logueado ? undefined : abrirChat} textoBotonSecundario={t('service_detail.cta_contact')} onBotonSecundarioClick={abrirChat} />
-            <SeccionSkillsServicio skills={SKILLS_POR_DEFECTO} />
+            <SeccionSkillsServicio skills={skillsApi || SKILLS_POR_DEFECTO} />
             <SeccionServiciosRelacionados servicioActualId={servicioId} />
             <SeccionContacto />
             {planSeleccionado && (

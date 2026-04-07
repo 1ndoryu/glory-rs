@@ -95,3 +95,37 @@ export async function apiUpdateService(id: string, body: UpdateServiceBody): Pro
 export async function apiArchiveService(id: string): Promise<void> {
     await instance.delete(`/api/admin/services/${id}`);
 }
+
+/* [074A-21] Endpoints públicos de servicios (sin auth) */
+export interface PublicServicePlan {
+    id: string;
+    slug: string;
+    name: string;
+    price_cents: number;
+    description: string | null;
+    features: unknown;
+    is_highlighted: boolean;
+    is_custom: boolean;
+    phases: AdminPlanPhase[];
+}
+
+export interface PublicService {
+    id: string;
+    slug: string;
+    title: string;
+    description: string | null;
+    image_url: string | null;
+    base_price_cents: number;
+    skills: unknown[];
+    plans: PublicServicePlan[];
+}
+
+export async function apiListPublicServices(): Promise<PublicService[]> {
+    const {data} = await instance.get<PublicService[]>('/api/services');
+    return data;
+}
+
+export async function apiGetServiceBySlug(slug: string): Promise<PublicService> {
+    const {data} = await instance.get<PublicService>(`/api/services/${slug}`);
+    return data;
+}
