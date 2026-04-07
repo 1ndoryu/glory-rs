@@ -20,20 +20,25 @@ const CHANNEL_CAPACITY: usize = 64;
 
 pub type SessionSender = broadcast::Sender<WsServerMessage>;
 
-/// Hub central de chat: estado en memoria de sesiones activas + broadcasters
+/// Hub central de chat: estado en memoria de sesiones activas + broadcasters.
+/// [064A-68] Canal global de staff para notificar nuevas sesiones en tiempo real.
 #[derive(Clone)]
 pub struct ChatHub {
     pool: PgPool,
     /* session_id → broadcast::Sender para ese chat */
     channels: Arc<DashMap<Uuid, SessionSender>>,
+    /* Canal global: todos los staff conectados reciben session_new aquí */
+    staff_channel: SessionSender,
 }
 
 impl ChatHub {
     #[must_use]
     pub fn new(pool: PgPool) -> Self {
+        let (staff_tx, _) = broadcast::channel(CHANNEL_CAPACITY);
         Self {
             pool,
             channels: Arc::new(DashMap::new()),
+            staff_channel: staff_tx,
         }
     }
 
@@ -55,6 +60,12 @@ impl ChatHub {
     /// Eliminar canal cuando la sesión se cierra
     pub fn remove_channel(&self, session_id: Uuid) {
         self.channels.remove(&session_id);
+    }
+
+    /// [064A-68] Suscribirse al canal global de staff (nuevas sesiones, etc.)
+    #[must_use]
+    pub fn subscribe_staff(&self) -> broadcast::Receiver<WsServerMessage> {
+        self.staff_channel.subscribe()
     }
 
     /// Broadcast de un mensaje a todos los suscriptores de una sesión
@@ -88,6 +99,12 @@ impl ChatHub {
             None,
         )
         .await?;
+
+        /* [064A-68] Notificar a todos los staff conectados sobre la nueva sesión */
+        let _ = self.staff_channel.send(WsServerMessage::SessionNew {
+            session: session.clone(),
+        });
+
         Ok(session)
     }
 
@@ -127,9 +144,18 @@ impl ChatHub {
             if let Ok(Some(updated)) =
                 ChatRepository::find_session_by_id(&self.pool, session.id).await
             {
+                /* [064A-68] Notificar a staff conectados sobre nueva sesión de orden */
+                let _ = self.staff_channel.send(WsServerMessage::SessionNew {
+                    session: updated.clone(),
+                });
                 return Ok(updated);
             }
         }
+
+        /* [064A-68] Notificar incluso si no se asignó empleado */
+        let _ = self.staff_channel.send(WsServerMessage::SessionNew {
+            session: session.clone(),
+        });
 
         Ok(session)
     }

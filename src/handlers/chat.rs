@@ -209,6 +209,18 @@ async fn handle_staff_ws(socket: WebSocket, state: AppState, staff_id: Uuid) {
         }
     }
 
+    /* [064A-68] Suscripción global al canal de staff para nuevas sesiones.
+     * Cualquier sesión creada (visitante u orden) se reenvía a este WS. */
+    let mut staff_rx = hub.subscribe_staff();
+    let tx_staff = tx.clone();
+    let staff_sub = tokio::spawn(async move {
+        while let Ok(server_msg) = staff_rx.recv().await {
+            if tx_staff.send(server_msg).await.is_err() {
+                break;
+            }
+        }
+    });
+
     /* Task: leer del mpsc y enviar al WS */
     let send_task = tokio::spawn(async move {
         while let Some(server_msg) = rx.recv().await {
@@ -270,6 +282,7 @@ async fn handle_staff_ws(socket: WebSocket, state: AppState, staff_id: Uuid) {
     for handle in subscriptions {
         handle.abort();
     }
+    staff_sub.abort();
     send_task.abort();
 
     let _ = pool;

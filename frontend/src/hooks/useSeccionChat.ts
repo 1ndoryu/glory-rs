@@ -1,13 +1,16 @@
 /* [054A-10] Hook de la sección de chat del panel.
- * Centraliza estado local, envío, cierre y conexión WS por sesión activa. */
+ * Centraliza estado local, envío, cierre y conexión WS por sesión activa.
+ * [064A-68] WS events ahora invalidan React Query cache para updates en tiempo real. */
 
 import {useCallback, useEffect, useRef, useState, type KeyboardEvent} from 'react';
+import {useQueryClient} from '@tanstack/react-query';
 
 import {apiCloseSession} from '../api/chat';
 import {useChat, useChatWs} from './useChat';
 import {toast} from '../stores/toastStore';
 
 export function useSeccionChat() {
+    const queryClient = useQueryClient();
     const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
     const [input, setInput] = useState('');
     const [closing, setClosing] = useState(false);
@@ -16,6 +19,20 @@ export function useSeccionChat() {
     const {sessions, messages, cargandoSesiones, cargandoMensajes, enviarMensaje, enviando} =
         useChat(activeSessionId ?? undefined);
     const ws = useChatWs();
+
+    /* [064A-68] Cuando WS recibe nuevos mensajes, invalidar cache REST para refrescar
+     * la UI instantáneamente en vez de esperar el polling de 5s/15s. */
+    useEffect(() => {
+        if (ws.messages.length > 0) {
+            queryClient.invalidateQueries({queryKey: ['chat-messages']});
+        }
+    }, [ws.messages.length, queryClient]);
+
+    useEffect(() => {
+        if (ws.sessions.length > 0) {
+            queryClient.invalidateQueries({queryKey: ['chat-sessions']});
+        }
+    }, [ws.sessions.length, queryClient]);
 
     useEffect(() => {
         ws.connect();
