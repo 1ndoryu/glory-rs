@@ -9,8 +9,23 @@ import {Modal} from '../ui/Modal';
 import {Button} from '../ui/Button';
 import {Input} from '../ui/Input';
 import {useModalCompra} from '../../hooks/useModalCompra';
+import {PAYMENT_MODE_LABELS, type PaymentMode} from '../../api/orders';
 import type {PlanServicio} from '../../data/planes/tipos';
 import './ModalCompra.css';
+
+/* [064A-60] Info de descuento por modo de pago. Alineado con backend discount_for_mode */
+const PAYMENT_MODE_DISCOUNT: Record<PaymentMode, number> = {
+    full: 20,
+    half_half: 10,
+    phased: 0,
+};
+
+/* [064A-60] Descripciones breves de cada modo */
+const PAYMENT_MODE_DESC: Record<PaymentMode, string> = {
+    full: 'Un solo pago al confirmar',
+    half_half: '50% al inicio, 50% al entregar',
+    phased: 'Paga cada fase por separado',
+};
 
 interface ModalCompraProps {
     plan: PlanServicio;
@@ -23,7 +38,8 @@ export const ModalCompra: React.FC<ModalCompraProps> = ({plan, servicioSlug, abi
     const {t} = useTranslation();
     const {
         paso, email, setEmail, password, setPassword,
-        emailExiste, errorMsg, handleContinuar, handleAuth, reintentar
+        emailExiste, errorMsg, paymentMode, setPaymentMode,
+        handleContinuar, handleAuth, reintentar
     } = useModalCompra({plan, servicioSlug, onClose: onCerrar});
 
     return (
@@ -36,9 +52,31 @@ export const ModalCompra: React.FC<ModalCompraProps> = ({plan, servicioSlug, abi
                 </div>
             )}
 
-            {/* Paso resumen: botón continuar con precio */}
+            {/* Paso resumen: selector de modo de pago + botón continuar */}
             {paso === 'resumen' && (
                 <div className="modalCompraAcciones">
+                    {/* [064A-60] Selector de modo de pago */}
+                    <div className="modalCompraModos" role="radiogroup" aria-label="Modo de pago">
+                        {(['full', 'half_half', 'phased'] as PaymentMode[]).map(mode => (
+                            <div
+                                key={mode}
+                                role="radio"
+                                aria-checked={paymentMode === mode}
+                                tabIndex={0}
+                                className={`modalCompraModo ${paymentMode === mode ? 'modalCompraModoActivo' : ''}`}
+                                onClick={() => setPaymentMode(mode)}
+                                onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') setPaymentMode(mode); }}
+                            >
+                                <span className="modalCompraModoNombre">{PAYMENT_MODE_LABELS[mode]}</span>
+                                <span className="modalCompraModoDesc">{PAYMENT_MODE_DESC[mode]}</span>
+                                {PAYMENT_MODE_DISCOUNT[mode] > 0 && (
+                                    <span className="modalCompraModoDescuento">
+                                        {PAYMENT_MODE_DISCOUNT[mode]}% descuento
+                                    </span>
+                                )}
+                            </div>
+                        ))}
+                    </div>
                     <Button variante="primario" tamano="mediano" onClick={handleContinuar}>
                         {t('purchase.continue', 'Continuar')} ({plan.precio})
                     </Button>

@@ -67,7 +67,8 @@ export const OrdenDetalle: React.FC<OrdenDetalleProps> = ({
 
     const canCancel = CANCELABLE_STATUSES.includes(order.status);
     const needsPayment = order.status === 'pending_payment';
-    const isPhased = order.payment_mode === 'phased';
+    /* [064A-60] Tanto phased como half_half usan pagos por fase individuales */
+    const isPerPhasePayment = order.payment_mode === 'phased' || order.payment_mode === 'half_half';
     const isEmployee = effectiveRole === 'employee';
     const isClient = effectiveRole === 'client' || effectiveRole === 'admin';
 
@@ -126,7 +127,7 @@ export const OrdenDetalle: React.FC<OrdenDetalleProps> = ({
                                 <MessageCircle size={16} /> Chat
                             </Button>
                         )}
-                        {needsPayment && !isPhased && (
+                        {needsPayment && !isPerPhasePayment && (
                             <Button
                                 onClick={() => abrirCheckout(order.final_price_cents)}
                                 type="button"
@@ -271,7 +272,7 @@ export const OrdenDetalle: React.FC<OrdenDetalleProps> = ({
                                 isLast={idx === phases.length - 1}
                                 isClient={isClient}
                                 isEmployee={isEmployee}
-                                isPhased={isPhased}
+                                isPhased={isPerPhasePayment}
                                 onAprobar={onAprobar}
                                 onRevision={onRevision}
                                 onPagarFase={(pn, amount) => abrirCheckout(amount, pn)}

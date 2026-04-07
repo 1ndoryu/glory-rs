@@ -5,7 +5,7 @@
 import {useState} from 'react';
 import {useAuthStore} from '../stores/authStore';
 import {apiQuickRegister, apiLogin} from '../api/auth';
-import {apiCreateOrder} from '../api/orders';
+import {apiCreateOrder, type PaymentMode} from '../api/orders';
 import {apiInitiatePayment} from '../api/payments';
 import {navegar} from '../navegacionSPA';
 import type {PlanServicio} from '../data/planes/tipos';
@@ -28,6 +28,8 @@ export function useModalCompra({plan, servicioSlug, onClose}: UseModalCompraPara
     /* [064A-3] Si el email ya existe, mostramos campo password */
     const [emailExiste, setEmailExiste] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
+    /* [064A-60] Modo de pago seleccionable: full (20% desc), half_half (10%), phased (0%) */
+    const [paymentMode, setPaymentMode] = useState<PaymentMode>('full');
 
     /* Crear orden y redirigir a pasarela de pago */
     const crearOrdenYPagar = async () => {
@@ -36,7 +38,7 @@ export function useModalCompra({plan, servicioSlug, onClose}: UseModalCompraPara
             const orden = await apiCreateOrder({
                 service_slug: servicioSlug,
                 plan_slug: plan.id,
-                payment_mode: 'full',
+                payment_mode: paymentMode,
                 client_notes: undefined
             });
 
@@ -123,6 +125,8 @@ export function useModalCompra({plan, servicioSlug, onClose}: UseModalCompraPara
         setPassword,
         emailExiste,
         errorMsg,
+        paymentMode,
+        setPaymentMode,
         handleContinuar,
         handleAuth,
         reintentar

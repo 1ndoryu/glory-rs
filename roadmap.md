@@ -58,7 +58,6 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 ###
 
-- 064A-60: Selección de modo de pago (completo, por fases, 50/50) — ¿dónde se elige?
 - 064A-61: Menú hamburguesa mobile: quitar accionCabecera, modal centrado estilo chatWidgetPanel, soporte submenús, botón para volver al menú.
 - 064A-62: Tab de configuración en panel: opciones para recrear/borrar datos de prueba.
 - 064A-63: Plan detallado para edición de contenidos admin: servicios, blog, proyectos editables desde el front con modal + tabs laterales.
