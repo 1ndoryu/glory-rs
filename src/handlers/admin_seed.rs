@@ -53,5 +53,5 @@ pub async fn delete_seed(
 
 pub fn seed_routes() -> Router<AppState> {
     Router::new()
-        .route("/api/admin/seed", post(recreate_seed).delete(delete_seed))
+        .route("/admin/seed", post(recreate_seed).delete(delete_seed))
 }
