@@ -1,5 +1,6 @@
 /* [044A-38 Fase 7] API client para reembolsos.
- * Conecta con POST /orders/:id/refund, PATCH /refunds/:id, GET /refunds.
+ * Conecta con POST /api/orders/:id/refund, PATCH /api/refunds/:id, GET /api/refunds.
+ * [074A-17] Corregido: faltaba prefijo /api en todas las URLs.
  * Tipos alineados con RefundResponse del backend Rust. */
 import instance from './axios-instance';
 
@@ -37,7 +38,7 @@ export async function apiRequestRefund(
     body: RequestRefundBody
 ): Promise<RefundResponse> {
     const { data } = await instance.post<RefundResponse>(
-        `/orders/${orderId}/refund`,
+        `/api/orders/${orderId}/refund`,
         body
     );
     return data;
@@ -48,20 +49,20 @@ export async function apiReviewRefund(
     body: ReviewRefundBody
 ): Promise<RefundResponse> {
     const { data } = await instance.patch<RefundResponse>(
-        `/refunds/${refundId}`,
+        `/api/refunds/${refundId}`,
         body
     );
     return data;
 }
 
 export async function apiListRefunds(): Promise<RefundResponse[]> {
-    const { data } = await instance.get<RefundResponse[]>('/refunds');
+    const { data } = await instance.get<RefundResponse[]>('/api/refunds');
     return data;
 }
 
 export async function apiGetOrderRefund(orderId: string): Promise<RefundResponse> {
     const { data } = await instance.get<RefundResponse>(
-        `/orders/${orderId}/refund`
+        `/api/orders/${orderId}/refund`
     );
     return data;
 }
