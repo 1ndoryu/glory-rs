@@ -30,3 +30,8 @@
         max-width: 100%;
     }
 }
+
+/* [084A-7] Modales CMS: sin padding interno, el contenido maneja su propio spacing */
+.modalBaseContenedor.modalSinPadding {
+    padding: 0;
+}
