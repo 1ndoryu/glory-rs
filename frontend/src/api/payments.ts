@@ -29,12 +29,13 @@ export interface InitiatePaymentRequest {
     phase_number?: number;
 }
 
+/* [064A-57] Corregido: faltaba /api prefix en ambos endpoints. */
 export async function apiInitiatePayment(
     orderId: string,
     req: InitiatePaymentRequest
 ): Promise<PaymentIntentResponse> {
     const { data } = await instance.post<PaymentIntentResponse>(
-        `/orders/${orderId}/pay`,
+        `/api/orders/${orderId}/pay`,
         req
     );
     return data;
@@ -42,7 +43,7 @@ export async function apiInitiatePayment(
 
 export async function apiListPayments(orderId: string): Promise<PaymentResponse[]> {
     const { data } = await instance.get<PaymentResponse[]>(
-        `/orders/${orderId}/payments`
+        `/api/orders/${orderId}/payments`
     );
     return data;
 }

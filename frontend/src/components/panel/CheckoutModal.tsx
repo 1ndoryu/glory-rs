@@ -81,7 +81,7 @@ export default function CheckoutModal(props: CheckoutModalProps) {
                     className="checkoutBoton"
                     type="button"
                     variante="primario"
-                    tamano="grande"
+                    tamano="mediano"
                     onClick={iniciar}
                     disabled={loading}
                 >

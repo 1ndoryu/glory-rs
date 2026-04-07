@@ -63,8 +63,15 @@ pub async fn list_orders(
     State(state): State<AppState>,
     auth: AuthUser,
 ) -> Result<Json<Vec<OrderResponse>>, AppError> {
+    /* [064A-58] Admin siempre ve todas las órdenes, incluso si switcheó effective_role
+     * a client/employee. El effective_role solo afecta la UI (tabs), no el filtrado. */
+    let query_role = if auth.role == UserRole::Admin {
+        UserRole::Admin
+    } else {
+        auth.effective_role
+    };
     let orders =
-        OrderService::list_orders_for_user(&state.pool, auth.user_id, auth.effective_role).await?;
+        OrderService::list_orders_for_user(&state.pool, auth.user_id, query_role).await?;
     Ok(Json(orders))
 }
 
