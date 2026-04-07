@@ -57,12 +57,14 @@ impl ChatRepository {
         pool: &PgPool,
         user_id: Uuid,
     ) -> Result<Vec<ChatSession>, sqlx::Error> {
+        /* [074A-30] Filtrar sesiones sin mensajes */
         sqlx::query_as::<_, ChatSession>(
             "SELECT id, visitor_id, visitor_name, user_id, order_id, status, \
                assigned_staff_id, ai_enabled, created_at, updated_at \
              FROM chat_sessions \
              WHERE (user_id = $1 OR assigned_staff_id = $1) \
              AND status != 'closed' \
+             AND EXISTS (SELECT 1 FROM chat_messages WHERE session_id = chat_sessions.id) \
              ORDER BY updated_at DESC",
         )
         .bind(user_id)
@@ -109,12 +111,14 @@ impl ChatRepository {
     pub async fn list_active_sessions(
         pool: &PgPool,
     ) -> Result<Vec<ChatSession>, sqlx::Error> {
+        /* [074A-30] Filtrar sesiones sin mensajes — no tiene sentido mostrarlas */
         sqlx::query_as::<_, ChatSession>(
             "SELECT id, visitor_id, visitor_name, user_id, order_id, status, \
                assigned_staff_id, ai_enabled, created_at, updated_at, \
                visitor_ip, visitor_user_agent \
              FROM chat_sessions \
              WHERE status != 'closed' \
+             AND EXISTS (SELECT 1 FROM chat_messages WHERE session_id = chat_sessions.id) \
              ORDER BY updated_at DESC",
         )
         .fetch_all(pool)
