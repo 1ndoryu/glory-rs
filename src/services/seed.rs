@@ -126,6 +126,14 @@ impl SeedService {
             .execute(pool)
             .await?;
 
+        /* [074A-12] Limpiar proyectos de seed (slug conocidos) */
+        sqlx::query(
+            "DELETE FROM projects WHERE slug = ANY($1)",
+        )
+        .bind(["kamples", "mabuhay", "guillermochatbot", "task", "material-de-padel"])
+        .execute(pool)
+        .await?;
+
         Ok(result.rows_affected())
     }
 
@@ -172,8 +180,11 @@ impl SeedService {
         let chat_count = Self::create_seed_chat(pool, client_id, employee_id).await?;
         let activity_count = Self::create_seed_activity(pool, client_id, employee_id).await?;
 
+        /* [074A-12] Proyectos de showcase */
+        let projects_count = Self::create_seed_projects(pool).await?;
+
         Ok(format!(
-            "Seed completado: 2 usuarios + {created} órdenes + {hosting_count} suscripciones hosting + {notif_count} notificaciones + {review_count} reviews + {chat_count} mensajes chat + {activity_count} activity log. Credenciales: cliente@test.com/cliente, empleado@test.com/empleado"
+            "Seed completado: 2 usuarios + {created} órdenes + {hosting_count} suscripciones hosting + {notif_count} notificaciones + {review_count} reviews + {chat_count} mensajes chat + {activity_count} activity log + {projects_count} proyectos. Credenciales: cliente@test.com/cliente, empleado@test.com/empleado"
         ))
     }
 
@@ -482,6 +493,97 @@ impl SeedService {
                 .await?;
                 count += 1;
             }
+        }
+
+        Ok(count)
+    }
+
+    /* [074A-12] Proyectos de showcase para el CMS y la página pública */
+    async fn create_seed_projects(pool: &PgPool) -> Result<u32, sqlx::Error> {
+        #[allow(clippy::needless_pass_by_value)]
+        fn je(e: serde_json::Error) -> sqlx::Error { sqlx::Error::Protocol(e.to_string()) }
+        type ProjectSeed<'a> = (&'a str, &'a str, &'a str, &'a str, &'a str, &'a str, &'a [&'a str], &'a [&'a str], &'a str);
+        let projects: &[ProjectSeed<'_>] = &[
+            (
+                "KAMPLES", "kamples", "Open Source Platform",
+                "Plataforma de samples musicales con algoritmo de recomendación, DAW integrado y funcionalidades de red social.",
+                "/assets/Proyectos portadas/Kamples portada.jpg",
+                "published",
+                &["web", "software"],
+                &["React", "Node.js", "PostgreSQL", "Web Audio API", "Redis"],
+                "Full-Stack Development|Arquitectura completa: API, frontend SPA y procesamiento de audio.;Algoritmo de Recomendación|Motor de descubrimiento basado en samples, géneros y uso.;DAW Integrado|Workstation de audio embebida para previsualizar y mezclar samples."
+            ),
+            (
+                "MABUHAY", "mabuhay", "Agencia de Viajes",
+                "Web y branding para agencia de viajes en España especializada en destinos asiáticos.",
+                "/assets/Proyectos portadas/Mabuhay.jpg",
+                "published",
+                &["web", "branding"],
+                &["WordPress", "PHP", "Figma", "Illustrator"],
+                "Web Design|Sitio web responsive con catálogo de destinos y reservas.;Branding|Identidad visual inspirada en la hospitalidad filipina."
+            ),
+            (
+                "Guillermo Chatbot", "guillermochatbot", "Proyecto Interno",
+                "Chatbot IA conversacional con personalidad, contexto persistente y streaming de respuestas.",
+                "/assets/Proyectos portadas/GuillermoPortada.jpg",
+                "published",
+                &["software", "ia"],
+                &["Rust", "Axum", "OpenAI", "WebSocket", "React"],
+                "IA Conversacional|Motor de chat con memoria contextual y personalidad configurable.;Streaming|Respuestas en tiempo real con Server-Sent Events."
+            ),
+            (
+                "Task Manager", "task", "Herramienta Interna",
+                "Gestor de tareas con tablero Kanban, delegación y seguimiento de tiempo.",
+                "/assets/Proyectos portadas/TaskPortada.jpg",
+                "published",
+                &["software", "web"],
+                &["React", "TypeScript", "Node.js", "PostgreSQL"],
+                "Kanban Board|Tablero drag-and-drop con estados personalizables.;Time Tracking|Seguimiento de horas por tarea con reportes automáticos."
+            ),
+            (
+                "Material de Pádel", "material-de-padel", "E-commerce",
+                "Tienda online especializada en equipamiento de pádel con comparador de productos.",
+                "/assets/Proyectos portadas/PadelPortada.jpg",
+                "draft",
+                &["web", "ecommerce"],
+                &["WordPress", "WooCommerce", "PHP", "JavaScript"],
+                "E-commerce|Catálogo de productos con filtros avanzados y comparador.;SEO|Optimización para búsquedas de equipamiento deportivo."
+            ),
+        ];
+
+        let mut count = 0u32;
+        for (idx, (title, slug, client, desc, image, status, cats, techs, skills_str)) in projects.iter().enumerate() {
+            let categories = serde_json::to_value(cats).map_err(je)?;
+            let technologies = serde_json::to_value(techs).map_err(je)?;
+            let gallery = serde_json::to_value::<Vec<String>>(vec![]).map_err(je)?;
+            let links = serde_json::to_value::<Vec<String>>(vec![]).map_err(je)?;
+
+            /* Parsear skills desde string "titulo|desc;titulo|desc" */
+            let skills_parsed: Vec<serde_json::Value> = skills_str.split(';')
+                .filter(|s| !s.is_empty())
+                .map(|s| {
+                    let parts: Vec<&str> = s.splitn(2, '|').collect();
+                    serde_json::json!({
+                        "titulo": parts.first().unwrap_or(&""),
+                        "descripcion": parts.get(1).unwrap_or(&"")
+                    })
+                })
+                .collect();
+            let skills = serde_json::to_value(&skills_parsed).map_err(je)?;
+
+            sqlx::query(
+                "INSERT INTO projects (title, slug, client, description, featured_image, gallery, categories, technologies, links, skills, status, sort_order)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+                 ON CONFLICT (slug) DO UPDATE SET title = $1, client = $3, description = $4, featured_image = $5,
+                 gallery = $6, categories = $7, technologies = $8, links = $9, skills = $10, status = $11, sort_order = $12"
+            )
+            .bind(title).bind(slug).bind(client).bind(desc).bind(image)
+            .bind(&gallery).bind(&categories).bind(&technologies).bind(&links).bind(&skills)
+            .bind(status).bind(i32::try_from(idx).unwrap_or(0))
+            .execute(pool)
+            .await?;
+
+            count += 1;
         }
 
         Ok(count)

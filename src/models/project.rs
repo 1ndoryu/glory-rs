@@ -1,0 +1,136 @@
+/* [074A-12] Modelos para CMS de proyectos/portfolio.
+ * Project: registro BD completo. ProjectResponse: respuesta API.
+ * Sin author_id porque los proyectos no tienen autor individual. */
+
+use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
+use utoipa::ToSchema;
+use uuid::Uuid;
+use validator::Validate;
+
+#[derive(Debug, FromRow)]
+pub struct Project {
+    pub id: Uuid,
+    pub title: String,
+    pub slug: String,
+    pub client: Option<String>,
+    pub description: String,
+    pub featured_image: Option<String>,
+    pub gallery: serde_json::Value,
+    pub categories: serde_json::Value,
+    pub technologies: serde_json::Value,
+    pub links: serde_json::Value,
+    pub skills: serde_json::Value,
+    pub status: String,
+    pub sort_order: i32,
+    pub meta_title: Option<String>,
+    pub meta_description: Option<String>,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Serialize, ToSchema)]
+pub struct ProjectResponse {
+    pub id: Uuid,
+    pub title: String,
+    pub slug: String,
+    pub client: Option<String>,
+    pub description: String,
+    pub featured_image: Option<String>,
+    pub gallery: Vec<String>,
+    pub categories: Vec<String>,
+    pub technologies: Vec<String>,
+    pub links: Vec<ProjectLink>,
+    pub skills: Vec<ProjectSkill>,
+    pub status: String,
+    pub sort_order: i32,
+    pub meta_title: Option<String>,
+    pub meta_description: Option<String>,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema, Clone)]
+pub struct ProjectLink {
+    pub tipo: String,
+    pub url: String,
+    pub etiqueta: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema, Clone)]
+pub struct ProjectSkill {
+    pub titulo: String,
+    pub descripcion: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Validate, ToSchema)]
+pub struct CreateProjectRequest {
+    #[validate(length(min = 1, max = 255))]
+    pub title: String,
+    #[validate(length(min = 1, max = 255))]
+    pub slug: String,
+    pub client: Option<String>,
+    pub description: Option<String>,
+    pub featured_image: Option<String>,
+    pub gallery: Option<Vec<String>>,
+    pub categories: Option<Vec<String>>,
+    pub technologies: Option<Vec<String>>,
+    pub links: Option<Vec<ProjectLink>>,
+    pub skills: Option<Vec<ProjectSkill>>,
+    pub status: Option<String>,
+    pub sort_order: Option<i32>,
+    pub meta_title: Option<String>,
+    pub meta_description: Option<String>,
+}
+
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct UpdateProjectRequest {
+    pub title: Option<String>,
+    pub slug: Option<String>,
+    pub client: Option<String>,
+    pub description: Option<String>,
+    pub featured_image: Option<String>,
+    pub gallery: Option<Vec<String>>,
+    pub categories: Option<Vec<String>>,
+    pub technologies: Option<Vec<String>>,
+    pub links: Option<Vec<ProjectLink>>,
+    pub skills: Option<Vec<ProjectSkill>>,
+    pub status: Option<String>,
+    pub sort_order: Option<i32>,
+    pub meta_title: Option<String>,
+    pub meta_description: Option<String>,
+}
+
+impl Project {
+    /// Convierte a respuesta API deserializando JSONB a tipos tipados
+    #[must_use]
+    pub fn into_response(self) -> ProjectResponse {
+        let gallery: Vec<String> = serde_json::from_value(self.gallery).unwrap_or_default();
+        let categories: Vec<String> = serde_json::from_value(self.categories).unwrap_or_default();
+        let technologies: Vec<String> =
+            serde_json::from_value(self.technologies).unwrap_or_default();
+        let links: Vec<ProjectLink> = serde_json::from_value(self.links).unwrap_or_default();
+        let skills: Vec<ProjectSkill> = serde_json::from_value(self.skills).unwrap_or_default();
+
+        ProjectResponse {
+            id: self.id,
+            title: self.title,
+            slug: self.slug,
+            client: self.client,
+            description: self.description,
+            featured_image: self.featured_image,
+            gallery,
+            categories,
+            technologies,
+            links,
+            skills,
+            status: self.status,
+            sort_order: self.sort_order,
+            meta_title: self.meta_title,
+            meta_description: self.meta_description,
+            created_at: self.created_at,
+            updated_at: self.updated_at,
+        }
+    }
+}

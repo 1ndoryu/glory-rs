@@ -51,6 +51,10 @@
     max-width: 500px;
 }
 
+.heroDescripcion p {
+    font-family: var(--font-serif);
+}
+
 .heroBoton {
     margin-top: var(--spacing-lg);
 }

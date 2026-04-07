@@ -16,6 +16,7 @@ mod notes;
 mod notifications;
 mod orders;
 mod payments;
+mod projects;
 mod refunds;
 mod reviews;
 mod seo;
@@ -121,6 +122,12 @@ impl utoipa::Modify for SecurityAddon {
         blog::update,
         blog::archive,
         uploads::upload_image,
+        projects::list_published,
+        projects::get_by_slug,
+        projects::list_all,
+        projects::create,
+        projects::update,
+        projects::archive,
     ),
     components(schemas(
         health::HealthResponse,
@@ -188,6 +195,11 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::PaginatedBlogPosts,
         crate::models::CreateBlogPostRequest,
         crate::models::UpdateBlogPostRequest,
+        crate::models::ProjectResponse,
+        crate::models::ProjectLink,
+        crate::models::ProjectSkill,
+        crate::models::CreateProjectRequest,
+        crate::models::UpdateProjectRequest,
         profile::AvatarResponse,
         uploads::UploadResponse,
         crate::errors::ErrorResponse,
@@ -334,6 +346,8 @@ fn api_routes() -> Router<AppState> {
         .merge(admin_services::routes())
         .merge(blog::public_routes())
         .merge(blog::admin_routes())
+        .merge(projects::public_routes())
+        .merge(projects::admin_routes())
         .merge(admin_seed::seed_routes())
         .merge(hosting::hosting_routes())
         .merge(uploads::routes())

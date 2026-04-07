@@ -1,0 +1,181 @@
+/* [074A-12] Estilos de la lista de proyectos CMS.
+ * Patrón: misma estructura que ListaBlog.css. */
+
+.listaProyectos {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.listaProyectosCargando {
+    padding: var(--spacing-xl);
+    text-align: center;
+    color: var(--text-tertiary);
+    font-size: var(--text-sm);
+}
+
+.listaProyectosHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.listaProyectosTitulo {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.listaProyectosGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--spacing-md);
+}
+
+.listaProyectosCard {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    background: var(--bg-primary);
+    cursor: pointer;
+    transition: border-color 0.2s;
+    overflow: hidden;
+}
+
+.listaProyectosCard:hover {
+    border-color: var(--brand-primary);
+}
+
+.listaProyectosCard--inactivo {
+    opacity: 0.6;
+}
+
+.listaProyectosImagen {
+    width: 100%;
+    height: 120px;
+    overflow: hidden;
+}
+
+.listaProyectosImagen img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.listaProyectosInfo {
+    padding: var(--spacing-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.listaProyectosCardHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-sm);
+}
+
+.listaProyectosNombre {
+    font-weight: 600;
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.listaProyectosCliente {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+    font-style: italic;
+}
+
+.listaProyectosSlug {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+    font-family: monospace;
+}
+
+.listaProyectosCardFooter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: var(--spacing-xs);
+}
+
+.listaProyectosCategorias {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+}
+
+.listaProyectosTech {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 50%;
+    text-align: right;
+}
+
+/* Badge de status */
+.listaProyectosBadge {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    filter: grayscale(100%);
+}
+
+.listaProyectosBadge--published {
+    background: var(--bg-item-active);
+    color: var(--text-primary);
+}
+
+.listaProyectosBadge--draft {
+    background: var(--bg-item-hover);
+    color: var(--text-tertiary);
+}
+
+.listaProyectosBadge--archived {
+    background: var(--bg-item-hover);
+    color: var(--text-tertiary);
+    opacity: 0.7;
+}
+
+/* Botón archivar */
+.listaProyectosArchivar {
+    position: absolute;
+    top: var(--spacing-sm);
+    right: var(--spacing-sm);
+    padding: var(--spacing-xs);
+    border: none;
+    background: var(--bg-primary);
+    color: var(--text-tertiary);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s, color 0.2s;
+}
+
+.listaProyectosCard:hover .listaProyectosArchivar {
+    opacity: 1;
+}
+
+.listaProyectosArchivar:hover {
+    color: var(--text-primary);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .listaProyectosGrid {
+        grid-template-columns: 1fr;
+    }
+}

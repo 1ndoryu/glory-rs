@@ -1,0 +1,300 @@
+/* [074A-12] Editor de proyecto CMS — Modal con tabs: General | Media | Tech | SEO.
+ * Más campos que EditorBlog: cliente, categorías, tecnologías, enlaces, skills.
+ * Lógica de formulario extraída a useEditorProyecto.
+ * sentinel-disable-file button-nativo: Tabs del editor y status toggles usan <button> nativo
+ * porque botonBase interfiere con estilos del tab (mismo patrón EditorBlog). */
+import React, { useState, useCallback } from 'react';
+import { Modal } from '../ui/Modal';
+import { Input } from '../ui/Input';
+import { Textarea } from '../ui/Textarea';
+import { Button } from '../ui/Button';
+import { SlugInput } from '../ui/SlugInput';
+import { UploadImage } from '../ui/UploadImage';
+import { useEditorProyecto } from '../../hooks/useEditorProyecto';
+import type { AdminProject, CreateProjectBody, UpdateProjectBody } from '../../api/admin-projects';
+import './EditorProyecto.css';
+
+type TabEditor = 'general' | 'media' | 'tech' | 'seo';
+
+interface EditorProyectoProps {
+    abierto: boolean;
+    onCerrar: () => void;
+    proyecto: AdminProject | null;
+    onGuardar: (body: CreateProjectBody | UpdateProjectBody) => Promise<void>;
+    guardando: boolean;
+}
+
+const TABS: { id: TabEditor; label: string }[] = [
+    { id: 'general', label: 'General' },
+    { id: 'media', label: 'Media' },
+    { id: 'tech', label: 'Tech' },
+    { id: 'seo', label: 'SEO' },
+];
+
+export const EditorProyecto: React.FC<EditorProyectoProps> = ({
+    abierto,
+    onCerrar,
+    proyecto,
+    onGuardar,
+    guardando,
+}) => {
+    const [tab, setTab] = useState<TabEditor>('general');
+    const form = useEditorProyecto(proyecto, abierto);
+
+    const handleGuardar = useCallback(async () => {
+        await onGuardar(form.buildBody());
+    }, [form, onGuardar]);
+
+    /* Manejo de campos array como texto separado por comas */
+    const handleCategoriasChange = useCallback((valor: string) => {
+        form.setCategorias(valor.split(',').map(t => t.trim()).filter(Boolean));
+    }, [form]);
+
+    const handleTecnologiasChange = useCallback((valor: string) => {
+        form.setTecnologias(valor.split(',').map(t => t.trim()).filter(Boolean));
+    }, [form]);
+
+    return (
+        <Modal abierto={abierto} onCerrar={onCerrar} className="editorProyectoModal modalSinPadding">
+            <div className="editorProyectoTabs">
+                {TABS.map(t => (
+                    <button
+                        key={t.id}
+                        type="button"
+                        className={`editorProyectoTab ${tab === t.id ? 'editorProyectoTab--activo' : ''}`}
+                        onClick={() => setTab(t.id)}
+                    >
+                        {t.label}
+                    </button>
+                ))}
+            </div>
+
+            <div className="editorProyectoCuerpo">
+                {tab === 'general' && (
+                    <div className="editorProyectoSeccion">
+                        <label className="editorProyectoLabel">
+                            Título
+                            <Input
+                                value={form.titulo}
+                                onChange={e => form.setTitulo(e.target.value)}
+                                placeholder="Nombre del proyecto"
+                            />
+                        </label>
+
+                        <SlugInput titulo={form.titulo} valor={form.slug} onChange={form.setSlug} />
+
+                        <label className="editorProyectoLabel">
+                            Cliente
+                            <Input
+                                value={form.cliente}
+                                onChange={e => form.setCliente(e.target.value)}
+                                placeholder="Nombre del cliente"
+                            />
+                        </label>
+
+                        <label className="editorProyectoLabel">
+                            Descripción
+                            <Textarea
+                                className="editorProyectoTextarea"
+                                value={form.descripcion}
+                                onChange={e => form.setDescripcion(e.target.value)}
+                                placeholder="Descripción breve del proyecto"
+                                rows={4}
+                            />
+                        </label>
+
+                        <label className="editorProyectoLabel">
+                            Categorías (separadas por comas)
+                            <Input
+                                value={form.categorias.join(', ')}
+                                onChange={e => handleCategoriasChange(e.target.value)}
+                                placeholder="Desarrollo web, Branding, E-commerce"
+                            />
+                        </label>
+
+                        <label className="editorProyectoLabel">
+                            Orden
+                            <Input
+                                type="number"
+                                value={String(form.sortOrder)}
+                                onChange={e => form.setSortOrder(Number(e.target.value) || 0)}
+                                placeholder="0"
+                            />
+                        </label>
+                    </div>
+                )}
+
+                {tab === 'media' && (
+                    <div className="editorProyectoSeccion">
+                        <UploadImage
+                            valor={form.imagenUrl}
+                            onChange={form.setImagenUrl}
+                            etiqueta="Imagen destacada"
+                        />
+                    </div>
+                )}
+
+                {tab === 'tech' && (
+                    <div className="editorProyectoSeccion">
+                        <label className="editorProyectoLabel">
+                            Tecnologías (separadas por comas)
+                            <Input
+                                value={form.tecnologias.join(', ')}
+                                onChange={e => handleTecnologiasChange(e.target.value)}
+                                placeholder="React, TypeScript, Rust, PostgreSQL"
+                            />
+                        </label>
+
+                        <div className="editorProyectoEnlaces">
+                            <span className="editorProyectoLabel">Enlaces</span>
+                            {form.enlaces.map((enlace, idx) => (
+                                <div key={`enlace-${enlace.tipo}-${enlace.url}`} className="editorProyectoEnlaceRow">
+                                    <Input
+                                        value={enlace.tipo}
+                                        onChange={e => {
+                                            const nuevos = [...form.enlaces];
+                                            nuevos[idx] = { ...nuevos[idx], tipo: e.target.value };
+                                            form.setEnlaces(nuevos);
+                                        }}
+                                        placeholder="web, github, npm"
+                                    />
+                                    <Input
+                                        value={enlace.url}
+                                        onChange={e => {
+                                            const nuevos = [...form.enlaces];
+                                            nuevos[idx] = { ...nuevos[idx], url: e.target.value };
+                                            form.setEnlaces(nuevos);
+                                        }}
+                                        placeholder="https://..."
+                                    />
+                                    <button
+                                        type="button"
+                                        className="editorProyectoEnlaceEliminar"
+                                        onClick={() => form.setEnlaces(form.enlaces.filter((_, i) => i !== idx))}
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+                            ))}
+                            <Button
+                                variante="texto"
+                                tamano="pequeno"
+                                onClick={() => form.setEnlaces([...form.enlaces, { tipo: 'web', url: '' }])}
+                            >
+                                + Añadir enlace
+                            </Button>
+                        </div>
+
+                        <div className="editorProyectoSkills">
+                            <span className="editorProyectoLabel">Skills</span>
+                            {form.skills.map((skill, idx) => (
+                                <div key={`skill-${skill.titulo}-${idx}`} className="editorProyectoSkillRow">
+                                    <Input
+                                        value={skill.titulo}
+                                        onChange={e => {
+                                            const nuevos = [...form.skills];
+                                            nuevos[idx] = { ...nuevos[idx], titulo: e.target.value };
+                                            form.setSkills(nuevos);
+                                        }}
+                                        placeholder="Título del skill"
+                                    />
+                                    <Input
+                                        value={skill.descripcion ?? ''}
+                                        onChange={e => {
+                                            const nuevos = [...form.skills];
+                                            nuevos[idx] = { ...nuevos[idx], descripcion: e.target.value || undefined };
+                                            form.setSkills(nuevos);
+                                        }}
+                                        placeholder="Descripción (opcional)"
+                                    />
+                                    <button
+                                        type="button"
+                                        className="editorProyectoSkillEliminar"
+                                        onClick={() => form.setSkills(form.skills.filter((_, i) => i !== idx))}
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+                            ))}
+                            <Button
+                                variante="texto"
+                                tamano="pequeno"
+                                onClick={() => form.setSkills([...form.skills, { titulo: '' }])}
+                            >
+                                + Añadir skill
+                            </Button>
+                        </div>
+                    </div>
+                )}
+
+                {tab === 'seo' && (
+                    <div className="editorProyectoSeccion">
+                        <label className="editorProyectoLabel">
+                            Meta título
+                            <Input
+                                value={form.metaTitle}
+                                onChange={e => form.setMetaTitle(e.target.value)}
+                                placeholder="Título para buscadores"
+                                maxLength={70}
+                            />
+                        </label>
+
+                        <label className="editorProyectoLabel">
+                            Meta descripción
+                            <Textarea
+                                className="editorProyectoTextarea"
+                                value={form.metaDescription}
+                                onChange={e => form.setMetaDescription(e.target.value)}
+                                placeholder="Descripción para buscadores (max 160 caracteres)"
+                                rows={3}
+                                maxLength={160}
+                            />
+                        </label>
+
+                        <div className="editorProyectoSeoPreview">
+                            <span className="editorProyectoSeoPreviewLabel">Vista previa en Google</span>
+                            <div className="editorProyectoSeoCard">
+                                <span className="editorProyectoSeoTitulo">
+                                    {form.metaTitle || form.titulo || 'Título del proyecto'}
+                                </span>
+                                <span className="editorProyectoSeoUrl">
+                                    nakomi.studio/proyectos/{form.slug || 'slug'}
+                                </span>
+                                <span className="editorProyectoSeoDesc">
+                                    {form.metaDescription || form.descripcion || 'Descripción del proyecto...'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            <div className="editorProyectoAcciones">
+                <div className="editorProyectoEstado">
+                    <button
+                        type="button"
+                        className={`editorProyectoStatusBtn ${form.status === 'draft' ? 'editorProyectoStatusBtn--activo' : ''}`}
+                        onClick={() => form.setStatus('draft')}
+                    >
+                        Borrador
+                    </button>
+                    <button
+                        type="button"
+                        className={`editorProyectoStatusBtn ${form.status === 'published' ? 'editorProyectoStatusBtn--activo' : ''}`}
+                        onClick={() => form.setStatus('published')}
+                    >
+                        Publicado
+                    </button>
+                </div>
+                <Button
+                    variante="primario"
+                    tamano="pequeno"
+                    onClick={handleGuardar}
+                    disabled={guardando || !form.titulo.trim() || !form.slug.trim()}
+                >
+                    {guardando ? 'Guardando...' : 'Guardar'}
+                </Button>
+            </div>
+        </Modal>
+    );
+};

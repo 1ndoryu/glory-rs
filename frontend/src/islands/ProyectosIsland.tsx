@@ -2,7 +2,7 @@
  * Componente: ProyectosIsland
  * Página de portfolio/proyectos con grid filtrable.
  */
-import React, {useState, useMemo} from 'react';
+import React, {useState, useMemo, useEffect} from 'react';
 import {useTranslation} from 'react-i18next';
 import {spaClick} from '../navegacionSPA';
 import '../styles/variables.css';
@@ -15,6 +15,7 @@ import {BarraFiltros} from '../components/servicios/BarraFiltros';
 import {Badge} from '../components/ui/Badge';
 import {obtenerImagenShowcase} from '../hooks/useImagenes';
 import {Proyecto} from '../types/contenido';
+import {apiListPublicProjects, AdminProject} from '../api/admin-projects';
 
 interface ProyectosIslandProps {
     titulo?: string;
@@ -46,13 +47,44 @@ const TarjetaProyecto: React.FC<{proyecto: Proyecto; indice: number}> = ({proyec
     );
 };
 
+/* [074A-12] Convierte AdminProject (API) → Proyecto (frontend) */
+function convertirProyecto(p: AdminProject): Proyecto {
+    return {
+        id: p.slug,
+        titulo: p.title,
+        cliente: p.client || '',
+        categorias: p.categories,
+        imagen: p.featured_image || '',
+        descripcion: p.description,
+        link: `/proyectos/${p.slug}`,
+        skills: p.skills.map((s, i) => ({id: i, titulo: s.titulo, descripcion: s.descripcion})),
+        galeria: p.gallery,
+        tecnologias: p.technologies,
+        enlaces: p.links.map(l => ({tipo: l.tipo as 'github' | 'web' | 'npm' | 'demo', url: l.url, etiqueta: l.etiqueta}))
+    };
+}
+
 export const ProyectosIsland = ({titulo}: ProyectosIslandProps): JSX.Element => {
     const {t} = useTranslation();
     const [categoriaActiva, setCategoriaActiva] = useState('todos');
     const [busqueda, setBusqueda] = useState('');
+    const [proyectos, setProyectos] = useState<Proyecto[]>(PROYECTOS_DATA);
+
+    /* [074A-12] Fetch proyectos desde API, fallback a datos estáticos */
+    useEffect(() => {
+        const controller = new AbortController();
+        apiListPublicProjects()
+            .then(data => {
+                if (!controller.signal.aborted && data.length > 0) {
+                    setProyectos(data.map(convertirProyecto));
+                }
+            })
+            .catch(() => { /* mantiene PROYECTOS_DATA como fallback */ });
+        return () => controller.abort();
+    }, []);
 
     const proyectosFiltrados = useMemo(() => {
-        return PROYECTOS_DATA.filter(p => {
+        return proyectos.filter(p => {
             const coincideCategoria = categoriaActiva === 'todos' ||
                 (Array.isArray(p.categorias) ? p.categorias.includes(categoriaActiva) : p.categorias === categoriaActiva);
             const coincideBusqueda = !busqueda ||

@@ -3,7 +3,7 @@
  * Página de detalle de un proyecto individual.
  * Estructura: Hero -> Galería -> Skills -> CTA -> Relacionados -> Footer
  */
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import {useTranslation} from 'react-i18next';
 import {GitBranch, Globe, ExternalLink, Package} from 'lucide-react';
 import {spaClick} from '../navegacionSPA';
@@ -19,6 +19,7 @@ import {SeccionContacto} from '../components/home/SeccionContacto';
 import {PROYECTOS_DATA} from '../data/showcase';
 import {Proyecto} from '../types/contenido';
 import {SeccionHeader} from '../components/ui/SeccionHeader';
+import {apiGetProjectBySlug, apiListPublicProjects, AdminProject} from '../api/admin-projects';
 
 interface ProyectoIndividualIslandProps {
     titulo?: string;
@@ -48,12 +49,53 @@ const TarjetaRelacionado: React.FC<{proyecto: Proyecto}> = ({proyecto}) => (
     </a>
 );
 
+/* [074A-12] Convierte AdminProject (API) → Proyecto (frontend) */
+function convertirProyecto(p: AdminProject): Proyecto {
+    return {
+        id: p.slug,
+        titulo: p.title,
+        cliente: p.client || '',
+        categorias: p.categories,
+        imagen: p.featured_image || '',
+        descripcion: p.description,
+        link: `/proyectos/${p.slug}`,
+        skills: p.skills.map((s, i) => ({id: i, titulo: s.titulo, descripcion: s.descripcion})),
+        galeria: p.gallery,
+        tecnologias: p.technologies,
+        enlaces: p.links.map(l => ({tipo: l.tipo as 'github' | 'web' | 'npm' | 'demo', url: l.url, etiqueta: l.etiqueta}))
+    };
+}
+
 export const ProyectoIndividualIsland = ({titulo = 'Proyecto', descripcion = '', cliente = '', categorias = '', slug = ''}: ProyectoIndividualIslandProps): JSX.Element => {
     const {t} = useTranslation();
     const abrirChat = useChatStore(s => s.abrir);
 
-    /* Buscar datos enriquecidos desde el contexto */
-    const proyectoContexto = PROYECTOS_DATA.find(p => p.titulo.toLowerCase() === titulo.toLowerCase() || String(p.id) === slug);
+    /* [074A-12] Proyecto desde API con fallback a datos estáticos */
+    const fallback = PROYECTOS_DATA.find(p => p.titulo.toLowerCase() === titulo.toLowerCase() || String(p.id) === slug);
+    const [proyectoContexto, setProyectoContexto] = useState<Proyecto | undefined>(fallback);
+    const [todosProyectos, setTodosProyectos] = useState<Proyecto[]>(PROYECTOS_DATA);
+
+    useEffect(() => {
+        const controller = new AbortController();
+        if (slug) {
+            apiGetProjectBySlug(slug)
+                .then(data => {
+                    if (!controller.signal.aborted) {
+                        setProyectoContexto(convertirProyecto(data));
+                    }
+                })
+                .catch(() => { /* mantiene fallback estático */ });
+        }
+        /* Cargar todos para los relacionados */
+        apiListPublicProjects()
+            .then(data => {
+                if (!controller.signal.aborted && data.length > 0) {
+                    setTodosProyectos(data.map(convertirProyecto));
+                }
+            })
+            .catch(() => { /* mantiene PROYECTOS_DATA */ });
+        return () => controller.abort();
+    }, [slug]);
 
     const skills = proyectoContexto?.skills || [];
     const desc = descripcion || proyectoContexto?.descripcion || '';
@@ -64,7 +106,7 @@ export const ProyectoIndividualIsland = ({titulo = 'Proyecto', descripcion = '',
 
     /* Proyectos relacionados: misma categoría, excluyendo el actual */
     const categoriasArray = cats.split(',').map(c => c.trim().toLowerCase());
-    const relacionados = PROYECTOS_DATA.filter(p => {
+    const relacionados = todosProyectos.filter(p => {
         if (String(p.id) === slug || p.titulo === titulo) return false;
         const pCats = Array.isArray(p.categorias) ? p.categorias : [p.categorias];
         return pCats.some(c => categoriasArray.includes(c.toLowerCase()));

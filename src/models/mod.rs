@@ -8,6 +8,7 @@ mod note;
 mod notification;
 mod order;
 mod payment;
+mod project;
 mod refund;
 mod review;
 mod user;
@@ -38,6 +39,10 @@ pub use order::{
 };
 pub use payment::{
     InitiatePaymentRequest, OrderPayment, PaymentIntentResponse, PaymentResponse, PaymentStatus,
+};
+pub use project::{
+    CreateProjectRequest, Project, ProjectLink, ProjectResponse, ProjectSkill,
+    UpdateProjectRequest,
 };
 pub use refund::{
     OrderRefund, RefundResponse, RefundStatus, RequestRefundBody, ReviewAction, ReviewRefundBody,

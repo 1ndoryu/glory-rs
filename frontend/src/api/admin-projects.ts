@@ -1,0 +1,98 @@
+/* [074A-12] API client para CMS de proyectos.
+ * Mismo patrón que admin-blog.ts. Tipos alineados con ProjectResponse del backend. */
+
+import instance from './axios-instance';
+
+export interface ProjectLink {
+    tipo: string;
+    url: string;
+    etiqueta?: string;
+}
+
+export interface ProjectSkill {
+    titulo: string;
+    descripcion?: string;
+}
+
+export interface AdminProject {
+    id: string;
+    title: string;
+    slug: string;
+    client: string | null;
+    description: string;
+    featured_image: string | null;
+    gallery: string[];
+    categories: string[];
+    technologies: string[];
+    links: ProjectLink[];
+    skills: ProjectSkill[];
+    status: string;
+    sort_order: number;
+    meta_title: string | null;
+    meta_description: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface CreateProjectBody {
+    title: string;
+    slug: string;
+    client?: string;
+    description?: string;
+    featured_image?: string;
+    gallery?: string[];
+    categories?: string[];
+    technologies?: string[];
+    links?: ProjectLink[];
+    skills?: ProjectSkill[];
+    status?: string;
+    sort_order?: number;
+    meta_title?: string;
+    meta_description?: string;
+}
+
+export interface UpdateProjectBody {
+    title?: string;
+    slug?: string;
+    client?: string;
+    description?: string;
+    featured_image?: string;
+    gallery?: string[];
+    categories?: string[];
+    technologies?: string[];
+    links?: ProjectLink[];
+    skills?: ProjectSkill[];
+    status?: string;
+    sort_order?: number;
+    meta_title?: string;
+    meta_description?: string;
+}
+
+export async function apiListAdminProjects(): Promise<AdminProject[]> {
+    const { data } = await instance.get<AdminProject[]>('/admin/projects');
+    return data;
+}
+
+export async function apiCreateProject(body: CreateProjectBody): Promise<AdminProject> {
+    const { data } = await instance.post<AdminProject>('/admin/projects', body);
+    return data;
+}
+
+export async function apiUpdateProject(id: string, body: UpdateProjectBody): Promise<AdminProject> {
+    const { data } = await instance.put<AdminProject>(`/admin/projects/${id}`, body);
+    return data;
+}
+
+export async function apiArchiveProject(id: string): Promise<void> {
+    await instance.delete(`/admin/projects/${id}`);
+}
+
+export async function apiListPublicProjects(): Promise<AdminProject[]> {
+    const { data } = await instance.get<AdminProject[]>('/projects');
+    return data;
+}
+
+export async function apiGetProjectBySlug(slug: string): Promise<AdminProject> {
+    const { data } = await instance.get<AdminProject>(`/projects/${slug}`);
+    return data;
+}

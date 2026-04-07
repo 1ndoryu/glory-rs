@@ -3,6 +3,7 @@
  * Cada sub-tab renderiza su propio editor/lista.
  * [074A-9] Sub-tab Servicios conectada a ListaServicios + EditorServicio.
  * [074A-11] Sub-tab Blog conectada a ListaBlog + EditorBlog.
+ * [074A-12] Sub-tab Proyectos conectada a ListaProyectos + EditorProyecto.
  * sentinel-disable-file componente-sin-hook: Orquestador de sub-tabs CMS.
  * Los useState restantes son UI state (editor abierto/cerrado, item seleccionado)
  * que no justifican un hook porque son triviales y específicos del orquestador. */
@@ -13,10 +14,14 @@ import {ListaServicios} from './ListaServicios';
 import {EditorServicio} from './EditorServicio';
 import {ListaBlog} from './ListaBlog';
 import {EditorBlog} from './EditorBlog';
+import {ListaProyectos} from './ListaProyectos';
+import {EditorProyecto} from './EditorProyecto';
 import {useContenidoServicios} from '../../hooks/useContenidoServicios';
 import {useContenidoBlog} from '../../hooks/useContenidoBlog';
+import {useContenidoProyectos} from '../../hooks/useContenidoProyectos';
 import type {AdminService, CreateServiceBody, UpdateServiceBody} from '../../api/admin-services';
 import type {AdminBlogPost, CreateBlogPostBody, UpdateBlogPostBody} from '../../api/admin-blog';
+import type {AdminProject, CreateProjectBody, UpdateProjectBody} from '../../api/admin-projects';
 import './SeccionContenido.css';
 
 type SubTab = 'servicios' | 'blog' | 'proyectos' | 'equipo';
@@ -103,6 +108,43 @@ export const SeccionContenido: React.FC = () => {
         await blogArchivar(id);
     }, [blogArchivar]);
 
+    /* [074A-12] Estado del CMS proyectos */
+    const {
+        proyectos: proyectosList,
+        cargando: proyectosCargando,
+        error: proyectosError,
+        guardando: proyectosGuardando,
+        crear: proyectosCrear,
+        actualizar: proyectosActualizar,
+        archivar: proyectosArchivar,
+    } = useContenidoProyectos();
+    const [proyectoEditorAbierto, setProyectoEditorAbierto] = useState(false);
+    const [proyectoEditando, setProyectoEditando] = useState<AdminProject | null>(null);
+
+    const handleEditarProyecto = useCallback((proy: AdminProject) => {
+        setProyectoEditando(proy);
+        setProyectoEditorAbierto(true);
+    }, []);
+
+    const handleCrearProyecto = useCallback(() => {
+        setProyectoEditando(null);
+        setProyectoEditorAbierto(true);
+    }, []);
+
+    const handleGuardarProyecto = useCallback(async (body: CreateProjectBody | UpdateProjectBody) => {
+        if (proyectoEditando) {
+            const result = await proyectosActualizar(proyectoEditando.id, body as UpdateProjectBody);
+            if (result) setProyectoEditorAbierto(false);
+        } else {
+            const result = await proyectosCrear(body as CreateProjectBody);
+            if (result) setProyectoEditorAbierto(false);
+        }
+    }, [proyectoEditando, proyectosActualizar, proyectosCrear]);
+
+    const handleArchivarProyecto = useCallback(async (id: string) => {
+        await proyectosArchivar(id);
+    }, [proyectosArchivar]);
+
     return (
         <div className="contenidoContenedor">
             <div className="contenidoSubTabs">
@@ -162,18 +204,35 @@ export const SeccionContenido: React.FC = () => {
                         />
                     </>
                 )}
-                {subTab !== 'servicios' && subTab !== 'blog' && renderSubTab(subTab)}
+                {subTab === 'proyectos' && (
+                    <>
+                        {proyectosError && <div className="contenidoError">{proyectosError}</div>}
+                        <ListaProyectos
+                            proyectos={proyectosList}
+                            cargando={proyectosCargando}
+                            onEditar={handleEditarProyecto}
+                            onCrear={handleCrearProyecto}
+                            onArchivar={handleArchivarProyecto}
+                        />
+                        <EditorProyecto
+                            abierto={proyectoEditorAbierto}
+                            onCerrar={() => setProyectoEditorAbierto(false)}
+                            proyecto={proyectoEditando}
+                            onGuardar={handleGuardarProyecto}
+                            guardando={proyectosGuardando}
+                        />
+                    </>
+                )}
+                {subTab !== 'servicios' && subTab !== 'blog' && subTab !== 'proyectos' && renderSubTab(subTab)}
             </div>
         </div>
     );
 };
 
-/* [074A-11] Renderiza sub-tabs que aún no tienen editor (proyectos, equipo).
- * 'servicios' y 'blog' se manejan directamente en el componente principal. */
+/* [074A-12] Renderiza sub-tabs que aún no tienen editor (equipo).
+ * 'servicios', 'blog' y 'proyectos' se manejan directamente en el componente principal. */
 function renderSubTab(subTab: SubTab) {
     switch (subTab) {
-        case 'proyectos':
-            return <PlaceholderContenido tipo="Proyectos" />;
         case 'equipo':
             return <PlaceholderContenido tipo="Equipo" />;
         default:
