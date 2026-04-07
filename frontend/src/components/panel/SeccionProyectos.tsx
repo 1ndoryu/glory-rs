@@ -1,7 +1,9 @@
 /* [044A-38 Fase 2] Sección "Mis Proyectos" del panel.
  * Muestra lista de órdenes con progreso visual + detalle con fases.
- * Vista lista ↔ detalle. Detalle extraído a OrdenDetalle.tsx (SRP). */
-import React, {useCallback} from 'react';
+ * Vista lista ↔ detalle. Detalle extraído a OrdenDetalle.tsx (SRP).
+ * [064A-50] Tabs Activas/Historial. Activas ordenadas por prioridad de status.
+ * Canceladas y completadas van a Historial. */
+import React, {useCallback, useState} from 'react';
 import {FolderOpen} from 'lucide-react';
 import {useAuthStore} from '../../stores/authStore';
 import {useOrdenes} from '../../hooks/useOrdenes';
@@ -12,8 +14,29 @@ import {
     PAYMENT_MODE_LABELS,
     formatPrice,
     type OrderResponse,
+    type OrderStatus,
 } from '../../api/orders';
 import './SeccionProyectos.css';
+
+/* [064A-50] Prioridad de status para ordenar (menor = más arriba).
+ * in_progress es lo más urgente, completed/cancelled al fondo. */
+const STATUS_PRIORITY: Record<string, number> = {
+    in_progress: 0,
+    under_review: 1,
+    awaiting_assignment: 2,
+    payment_held: 3,
+    pending_payment: 4,
+    disputed: 5,
+    completed: 6,
+    cancelled: 7,
+};
+
+/* Status que van al tab "Historial" */
+const HISTORY_STATUSES: Set<OrderStatus> = new Set(['completed', 'cancelled']);
+
+function sortByStatusPriority(a: OrderResponse, b: OrderResponse): number {
+    return (STATUS_PRIORITY[a.status] ?? 99) - (STATUS_PRIORITY[b.status] ?? 99);
+}
 
 /* Mapa status → clase CSS (evita inline style) */
 const STATUS_CLASS: Record<string, string> = {
@@ -29,6 +52,7 @@ const STATUS_CLASS: Record<string, string> = {
 
 export const SeccionProyectos: React.FC = () => {
     const effectiveRole = useAuthStore(s => s.user?.effectiveRole) || 'client';
+    const [tabActiva, setTabActiva] = useState<'activas' | 'historial'>('activas');
     const {
         ordenes, cargando, detalle, cargandoDetalle,
         ordenSeleccionada, error, seleccionarOrden, recargar,
@@ -72,7 +96,15 @@ export const SeccionProyectos: React.FC = () => {
         return <div className="proyectosLoading"><div className="proyectosSpinner" /><p>Cargando detalle...</p></div>;
     }
 
-    /* Lista vacía */
+    /* [064A-50] Filtrar y ordenar por tab */
+    const activas = ordenes
+        .filter(o => !HISTORY_STATUSES.has(o.status))
+        .sort(sortByStatusPriority);
+    const historial = ordenes
+        .filter(o => HISTORY_STATUSES.has(o.status));
+    const listaActual = tabActiva === 'activas' ? activas : historial;
+
+    /* Lista vacía (todas las órdenes, no solo la tab) */
     if (ordenes.length === 0) {
         return (
             <div className="proyectosVacio">
@@ -85,12 +117,43 @@ export const SeccionProyectos: React.FC = () => {
         );
     }
 
-    /* Lista de órdenes */
+    /* Lista de órdenes con tabs */
     return (
-        <div className="proyectosLista">
-            {ordenes.map(orden => (
-                <OrdenCard key={orden.id} orden={orden} onClick={() => seleccionarOrden(orden.id)} />
-            ))}
+        <div className="proyectosContenedor">
+            <div className="proyectosTabs">
+                <Button
+                    type="button"
+                    variante="texto"
+                    className={`proyectosTab ${tabActiva === 'activas' ? 'proyectosTab--activa' : ''}`}
+                    onClick={() => setTabActiva('activas')}
+                >
+                    Activas ({activas.length})
+                </Button>
+                <Button
+                    type="button"
+                    variante="texto"
+                    className={`proyectosTab ${tabActiva === 'historial' ? 'proyectosTab--activa' : ''}`}
+                    onClick={() => setTabActiva('historial')}
+                >
+                    Historial ({historial.length})
+                </Button>
+            </div>
+
+            {listaActual.length === 0 ? (
+                <div className="proyectosVacio">
+                    <p className="proyectosVacioTexto">
+                        {tabActiva === 'activas'
+                            ? 'No tienes proyectos activos en este momento.'
+                            : 'No tienes órdenes en el historial.'}
+                    </p>
+                </div>
+            ) : (
+                <div className="proyectosLista">
+                    {listaActual.map(orden => (
+                        <OrdenCard key={orden.id} orden={orden} onClick={() => seleccionarOrden(orden.id)} />
+                    ))}
+                </div>
+            )}
         </div>
     );
 };
