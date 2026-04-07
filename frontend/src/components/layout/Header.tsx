@@ -6,11 +6,13 @@
  * [044A-13] Sesión conectada con authStore (Zustand + JWT).
  * Accesibilidad: aria-labels, aria-expanded, navegación por teclado.
  * [054A-19] Lógica extraída a useHeader (SRP). Links internos usan GloryLink.
- */
+ * [064A-61] Menú móvil rediseñado: overlay modal centrado, soporte submenús,
+ * botón volver, acciones inline. accionCabecera oculto en mobile via CSS. */
 import React from 'react';
 import {useTranslation} from 'react-i18next';
-import {ChevronDown, ChevronRight, Menu, X} from 'lucide-react';
+import {ChevronDown, ChevronRight, ArrowLeft, Menu, X} from 'lucide-react';
 import {Button} from '../ui/Button';
+import {Modal} from '../ui/Modal';
 import {ENLACES_HEADER} from '../../data/navegacion';
 import {ModalAutenticacion} from './ModalAutenticacion';
 import {useChatStore} from '../../stores/chatStore';
@@ -37,6 +39,8 @@ export const Header: React.FC = () => {
         dropdownAbierto, setDropdownAbierto,
         modalAbierto, setModalAbierto,
         menuMovilAbierto, setMenuMovilAbierto,
+        subMenuMovil, setSubMenuMovil,
+        cerrarMenuMovil,
         logueado, logout, enPanel,
         dropdownRef,
         handleKeyDownDropdown,
@@ -51,6 +55,11 @@ export const Header: React.FC = () => {
     const textoCta = logueado ? t('nav.chat') : t('nav.contact');
     const abrirChat = useChatStore(s => s.abrir);
 
+    /* [064A-61] Enlace con submenú actualmente abierto en el menú móvil */
+    const enlaceSubMenuActivo = subMenuMovil
+        ? ENLACES_HEADER.find(l => l.label === subMenuMovil)
+        : null;
+
     return (
         <>
             <header className="cabeceraPrincipal" role="banner">
@@ -61,11 +70,12 @@ export const Header: React.FC = () => {
                 </div>
 
                 {/* Botón hamburguesa para móvil */}
-                <Button variante="texto" className="botonMenuMovil" onClick={() => setMenuMovilAbierto(!menuMovilAbierto)} aria-expanded={menuMovilAbierto} aria-controls="navegacion-principal" aria-label={menuMovilAbierto ? t('accessibility.close_menu') : t('accessibility.open_menu')}>
+                <Button variante="texto" className="botonMenuMovil" onClick={() => menuMovilAbierto ? cerrarMenuMovil() : setMenuMovilAbierto(true)} aria-expanded={menuMovilAbierto} aria-controls="menu-movil" aria-label={menuMovilAbierto ? t('accessibility.close_menu') : t('accessibility.open_menu')}>
                     {menuMovilAbierto ? <X size={24} /> : <Menu size={24} />}
                 </Button>
 
-                <nav className={`navegacionPrincipal ${menuMovilAbierto ? 'navegacionAbierta' : ''}`} id="navegacion-principal" aria-label={t('accessibility.main_nav')}>
+                {/* [064A-61] Navegación desktop: solo visible en desktop */}
+                <nav className="navegacionPrincipal" aria-label={t('accessibility.main_nav')}>
                     {ENLACES_HEADER.map(link => (
                         <div key={link.label} className="enlaceNavegacionWrapper" ref={link.hasDropdown ? dropdownRef : undefined} onMouseEnter={() => (link.hasDropdown ? setDropdownAbierto(link.label) : null)} onMouseLeave={() => setDropdownAbierto(null)}>
                             <GloryLink to={link.href} className="enlaceNavegacion" aria-expanded={link.hasDropdown ? dropdownAbierto === link.label : undefined} aria-haspopup={link.hasDropdown ? 'true' : undefined} onKeyDown={link.hasDropdown ? e => handleKeyDownDropdown(e, link.label) : undefined}>
@@ -85,8 +95,8 @@ export const Header: React.FC = () => {
                     ))}
                 </nav>
 
+                {/* [064A-61] accionCabecera: oculto en mobile via CSS */}
                 <div className="accionCabecera" role="group" aria-label={t('accessibility.user_actions')}>
-                    {/* [044A-37] LanguageSelector removido del header por petición del usuario. Se mantiene en footer. */}
                     {logueado ? (
                         <>
                             <GloryLink to={hrefAccion!} className="enlaceAcceder">
@@ -107,6 +117,91 @@ export const Header: React.FC = () => {
                     </Button>
                 </div>
             </header>
+
+            {/* [064A-61] Menú móvil: overlay modal centrado con glassmorphism */}
+            <Modal abierto={menuMovilAbierto} onCerrar={cerrarMenuMovil} className="menuMovilPanel">
+                <nav role="navigation" aria-label={t('accessibility.main_nav')}>
+                    {/* Vista principal o submenú */}
+                    {!subMenuMovil ? (
+                        <div className="menuMovilLista">
+                            {ENLACES_HEADER.map(link => (
+                                link.hasDropdown && link.subEnlaces ? (
+                                    <div
+                                        key={link.label}
+                                        role="button"
+                                        tabIndex={0}
+                                        className="menuMovilEnlace menuMovilEnlaceConSub"
+                                        onClick={() => setSubMenuMovil(link.label)}
+                                        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') setSubMenuMovil(link.label); }}
+                                    >
+                                        {t(NAV_KEYS[link.label] || link.label)}
+                                        <ChevronRight size={16} aria-hidden="true" />
+                                    </div>
+                                ) : (
+                                    <GloryLink key={link.label} to={link.href} className="menuMovilEnlace" onClick={cerrarMenuMovil}>
+                                        {t(NAV_KEYS[link.label] || link.label)}
+                                    </GloryLink>
+                                )
+                            ))}
+
+                            {/* Acciones de usuario dentro del menú móvil */}
+                            <div className="menuMovilSeparador" />
+                            {logueado ? (
+                                <>
+                                    <GloryLink to={hrefAccion!} className="menuMovilEnlace" onClick={cerrarMenuMovil}>
+                                        {textoAccion}
+                                    </GloryLink>
+                                    <div
+                                        role="button"
+                                        tabIndex={0}
+                                        className="menuMovilEnlace"
+                                        onClick={() => { logout(); cerrarMenuMovil(); }}
+                                        onKeyDown={e => { if (e.key === 'Enter') { logout(); cerrarMenuMovil(); } }}
+                                    >
+                                        {t('nav.logout')}
+                                    </div>
+                                </>
+                            ) : (
+                                <div
+                                    role="button"
+                                    tabIndex={0}
+                                    className="menuMovilEnlace"
+                                    onClick={() => { setModalAbierto(true); cerrarMenuMovil(); }}
+                                    onKeyDown={e => { if (e.key === 'Enter') { setModalAbierto(true); cerrarMenuMovil(); } }}
+                                >
+                                    {t('nav.login')}
+                                </div>
+                            )}
+                            <div
+                                role="button"
+                                tabIndex={0}
+                                className="menuMovilEnlace menuMovilEnlaceCta"
+                                onClick={() => { abrirChat(); cerrarMenuMovil(); }}
+                                onKeyDown={e => { if (e.key === 'Enter') { abrirChat(); cerrarMenuMovil(); } }}
+                            >
+                                {textoCta}
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="menuMovilLista">
+                            <div
+                                role="button"
+                                tabIndex={0}
+                                className="menuMovilVolver"
+                                onClick={() => setSubMenuMovil(null)}
+                                onKeyDown={e => { if (e.key === 'Enter') setSubMenuMovil(null); }}
+                            >
+                                <ArrowLeft size={16} /> {t('common.back', 'Volver')}
+                            </div>
+                            {enlaceSubMenuActivo?.subEnlaces?.map(sub => (
+                                <GloryLink key={sub.label} to={sub.href} className="menuMovilEnlace" onClick={cerrarMenuMovil}>
+                                    {t(NAV_KEYS[sub.label] || sub.label)}
+                                </GloryLink>
+                            ))}
+                        </div>
+                    )}
+                </nav>
+            </Modal>
 
             {!logueado && <ModalAutenticacion abierto={modalAbierto} onCerrar={() => setModalAbierto(false)} />}
         </>

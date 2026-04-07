@@ -189,25 +189,82 @@
         justify-content: center;
     }
 
+    /* [064A-61] Desktop nav y acciones ocultas en mobile — todo va en el modal */
     .navegacionPrincipal {
         display: none;
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        flex-direction: column;
-        background: var(--bg-primary);
-        border-top: 1px solid var(--border-primary);
-        padding: var(--spacing-md) var(--spacing-lg);
-        gap: var(--spacing-sm);
-        box-shadow: 0 4px 12px var(--bg-item-active);
-    }
-
-    .navegacionPrincipal.navegacionAbierta {
-        display: flex;
     }
 
     .accionCabecera {
-        margin-left: 0;
+        display: none;
     }
+}
+
+/* [064A-61] Menú móvil: panel dentro del <Modal> del sistema.
+ * Estilo inspirado en chatWidgetPanel: glassmorphism, border sutil, radius. */
+.menuMovilPanel {
+    background: rgba(245, 242, 239, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--bg-item-active);
+    max-width: 340px;
+    width: 100%;
+    padding: var(--spacing-lg);
+}
+
+.menuMovilLista {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.menuMovilEnlace {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-sm) var(--spacing-sm);
+    font-size: var(--text-base);
+    font-weight: 500;
+    color: var(--text-dark);
+    text-decoration: none;
+    border-radius: var(--radius-md, 8px);
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+.menuMovilEnlace:hover {
+    background-color: var(--bg-item-active);
+}
+
+.menuMovilEnlaceConSub {
+    color: var(--text-primary);
+}
+
+.menuMovilEnlaceCta {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.menuMovilSeparador {
+    height: 1px;
+    background: var(--border-default, var(--bg-item-active));
+    margin: var(--spacing-xs) 0;
+}
+
+.menuMovilVolver {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    border-radius: var(--radius-md, 8px);
+    transition: background-color 0.15s;
+    margin-bottom: var(--spacing-xs);
+}
+
+.menuMovilVolver:hover {
+    background-color: var(--bg-item-active);
+    color: var(--text-dark);
 }

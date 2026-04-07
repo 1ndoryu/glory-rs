@@ -58,7 +58,6 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 ###
 
-- 064A-61: Menú hamburguesa mobile: quitar accionCabecera, modal centrado estilo chatWidgetPanel, soporte submenús, botón para volver al menú.
 - 064A-62: Tab de configuración en panel: opciones para recrear/borrar datos de prueba.
 - 064A-63: Plan detallado para edición de contenidos admin: servicios, blog, proyectos editables desde el front con modal + tabs laterales.
 - 064A-64: Traducción de categorías, servicios, planes, descripciones de equipo, soluciones a los 3 idiomas (enfoque automatizado).

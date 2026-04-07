@@ -1,6 +1,7 @@
 /* [054A-19] Hook: useHeader
  * Encapsula lógica de estado del Header: dropdown, modal, menú móvil.
- * Extraído del componente Header para cumplir SRP (<3 useState). */
+ * Extraído del componente Header para cumplir SRP (<3 useState).
+ * [064A-61] Submenú móvil para navegación anidada en overlay modal. */
 import {useState, useRef, useCallback, useEffect} from 'react';
 import {useAuthStore} from '../stores/authStore';
 
@@ -14,6 +15,8 @@ export const useHeader = () => {
     const [dropdownAbierto, setDropdownAbierto] = useState<string | null>(null);
     const [modalAbierto, setModalAbierto] = useState(false);
     const [menuMovilAbierto, setMenuMovilAbierto] = useState(false);
+    /* [064A-61] Submenú activo en el menú móvil (null = menú principal) */
+    const [subMenuMovil, setSubMenuMovil] = useState<string | null>(null);
     const logueado = useAuthStore(s => s.logueado);
     const logout = useAuthStore(s => s.logout);
     const enPanel = esRutaActual('/panel');
@@ -51,20 +54,34 @@ export const useHeader = () => {
         }
     }, []);
 
-    /* Cerrar menú móvil con Escape */
+    /* Cerrar menú móvil con Escape. Si hay submenú abierto, cierra el submenú primero */
     useEffect(() => {
         if (!menuMovilAbierto) return;
         const handleEsc = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') setMenuMovilAbierto(false);
+            if (e.key === 'Escape') {
+                if (subMenuMovil) {
+                    setSubMenuMovil(null);
+                } else {
+                    setMenuMovilAbierto(false);
+                }
+            }
         };
         document.addEventListener('keydown', handleEsc);
         return () => document.removeEventListener('keydown', handleEsc);
-    }, [menuMovilAbierto]);
+    }, [menuMovilAbierto, subMenuMovil]);
+
+    /* [064A-61] Al cerrar el menú móvil, resetear submenú */
+    const cerrarMenuMovil = useCallback(() => {
+        setMenuMovilAbierto(false);
+        setSubMenuMovil(null);
+    }, []);
 
     return {
         dropdownAbierto, setDropdownAbierto,
         modalAbierto, setModalAbierto,
         menuMovilAbierto, setMenuMovilAbierto,
+        subMenuMovil, setSubMenuMovil,
+        cerrarMenuMovil,
         logueado, logout, enPanel,
         dropdownRef,
         handleKeyDownDropdown,
