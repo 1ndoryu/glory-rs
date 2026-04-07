@@ -19,9 +19,12 @@ mod seo;
 mod services;
 
 use axum::Router;
-use tower_http::cors::{Any, CorsLayer};
+use tower_http::cors::{AllowOrigin, Any, CorsLayer};
+use tower_http::set_header::SetResponseHeaderLayer;
 use tower_http::services::{ServeDir, ServeFile};
 use tower_http::trace::TraceLayer;
+use axum::http::{HeaderName, HeaderValue, Method};
+use tower_governor::{GovernorLayer, governor::GovernorConfigBuilder};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
@@ -193,11 +196,48 @@ pub fn create_router(pool: sqlx::PgPool, config: crate::config::AppConfig) -> Ro
         notification_hub,
     };
 
-    /* CORS: en desarrollo se permite todo. En producción, restringir orígenes */
-    let cors = CorsLayer::new()
-        .allow_origin(Any)
-        .allow_methods(Any)
-        .allow_headers(Any);
+    /* [064A-73] CORS: restringir orígenes en producción. Si GLORY_ALLOWED_ORIGINS vacío, allow all (dev). */
+    let cors = if config.allowed_origins.is_empty() {
+        CorsLayer::new()
+            .allow_origin(Any)
+            .allow_methods(Any)
+            .allow_headers(Any)
+    } else {
+        let origins: Vec<HeaderValue> = config
+            .allowed_origins
+            .iter()
+            .filter_map(|o| o.parse().ok())
+            .collect();
+        CorsLayer::new()
+            .allow_origin(AllowOrigin::list(origins))
+            .allow_methods([
+                Method::GET,
+                Method::POST,
+                Method::PUT,
+                Method::PATCH,
+                Method::DELETE,
+                Method::OPTIONS,
+            ])
+            .allow_headers([
+                HeaderName::from_static("content-type"),
+                HeaderName::from_static("authorization"),
+            ])
+            .allow_credentials(true)
+    };
+
+    /* [064A-73] Security headers OWASP */
+    let hsts = SetResponseHeaderLayer::if_not_present(
+        HeaderName::from_static("strict-transport-security"),
+        HeaderValue::from_static("max-age=31536000; includeSubDomains"),
+    );
+    let nosniff = SetResponseHeaderLayer::if_not_present(
+        HeaderName::from_static("x-content-type-options"),
+        HeaderValue::from_static("nosniff"),
+    );
+    let frame_deny = SetResponseHeaderLayer::if_not_present(
+        HeaderName::from_static("x-frame-options"),
+        HeaderValue::from_static("DENY"),
+    );
 
     Router::new()
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
@@ -211,6 +251,9 @@ pub fn create_router(pool: sqlx::PgPool, config: crate::config::AppConfig) -> Ro
         .nest("/api", api_routes())
         .layer(TraceLayer::new_for_http())
         .layer(cors)
+        .layer(hsts)
+        .layer(nosniff)
+        .layer(frame_deny)
         .with_state(state)
 }
 
@@ -230,9 +273,26 @@ pub fn create_app(pool: sqlx::PgPool, config: crate::config::AppConfig) -> Route
 }
 
 fn api_routes() -> Router<AppState> {
+    /* [064A-73] Rate limiting: auth estricto (5 req/min por IP), API general (120 req/min) */
+    let auth_governor = GovernorConfigBuilder::default()
+        .per_second(12)
+        .burst_size(5)
+        .finish()
+        .expect("rate limit config válida");
+
+    let api_governor = GovernorConfigBuilder::default()
+        .per_second(1)
+        .burst_size(120)
+        .finish()
+        .expect("rate limit config válida");
+
+    let auth_routes = auth::routes().layer(GovernorLayer {
+        config: std::sync::Arc::new(auth_governor),
+    });
+
     Router::new()
         .merge(health::routes())
-        .merge(auth::routes())
+        .merge(auth_routes)
         .merge(notes::routes())
         .merge(services::routes())
         /* assignment routes ANTES de orders: /orders/unassigned (literal) debe
@@ -249,4 +309,7 @@ fn api_routes() -> Router<AppState> {
         .merge(profile::routes())
         .merge(admin_users::routes())
         .merge(hosting::hosting_routes())
+        .layer(GovernorLayer {
+            config: std::sync::Arc::new(api_governor),
+        })
 }

@@ -17,6 +17,7 @@ use crate::models::{
     AdminUserItem, ChangeRoleRequest, ChangeStatusRequest, PaginatedUsers, UserResponse, UserRole,
 };
 use crate::repositories::UserRepository;
+use crate::services::AuditService;
 use crate::AppState;
 
 /// Query params para listar usuarios con paginación y filtros
@@ -132,6 +133,16 @@ pub async fn change_role(
             sqlx::Error::RowNotFound => AppError::NotFound("Usuario no encontrado".into()),
             other => AppError::Database(other),
         })?;
+
+    /* [064A-73] Audit: cambio de rol ejecutado por admin */
+    AuditService::log(
+        &state.pool,
+        "role_change",
+        Some(auth.user_id),
+        None,
+        serde_json::json!({"target_user": user_id, "new_role": format!("{:?}", body.role)}),
+    )
+    .await;
 
     Ok(Json(UserResponse::from(user)))
 }

@@ -12,7 +12,7 @@ use crate::errors::AppError;
 use crate::middleware::AuthUser;
 use crate::models::{InitiatePaymentRequest, PaymentIntentResponse, PaymentResponse, UserRole};
 use crate::repositories::OrderRepository;
-use crate::services::PaymentService;
+use crate::services::{AuditService, PaymentService};
 use crate::AppState;
 
 /// Iniciar pago de una orden (crea `PaymentIntent` en Stripe)
@@ -97,7 +97,47 @@ pub async fn stripe_webhook(
         .as_str()
         .ok_or_else(|| AppError::BadRequest("Missing event type".into()))?;
 
+    /* [064A-73] Deduplicación: si el event_id ya fue procesado, retornar 200 sin
+     * reprocesar. Stripe reenvía webhooks si no obtiene 200, sin esto un pago
+     * podría acreditarse doble. */
+    let event_id = event["id"]
+        .as_str()
+        .ok_or_else(|| AppError::BadRequest("Missing event id".into()))?;
+
+    let already_processed: bool = sqlx::query_scalar(
+        "SELECT EXISTS(SELECT 1 FROM stripe_processed_events WHERE event_id = $1)"
+    )
+    .bind(event_id)
+    .fetch_one(&state.pool)
+    .await
+    .unwrap_or(false);
+
+    if already_processed {
+        tracing::info!("Webhook duplicado ignorado: {event_id}");
+        return Ok(StatusCode::OK);
+    }
+
     PaymentService::handle_webhook(&state.pool, event_type, &event["data"]).await?;
+
+    /* [064A-73] Audit: webhook procesado exitosamente */
+    AuditService::log(
+        &state.pool,
+        "stripe_webhook",
+        None,
+        None,
+        serde_json::json!({"event_id": event_id, "event_type": event_type}),
+    )
+    .await;
+
+    /* Registrar evento como procesado */
+    sqlx::query(
+        "INSERT INTO stripe_processed_events (event_id, event_type) VALUES ($1, $2) ON CONFLICT DO NOTHING"
+    )
+    .bind(event_id)
+    .bind(event_type)
+    .execute(&state.pool)
+    .await
+    .map_err(AppError::Database)?;
 
     Ok(StatusCode::OK)
 }

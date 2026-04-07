@@ -205,10 +205,11 @@ impl PaymentService {
         mac.verify_slice(&decoded_sig)
             .map_err(|_| AppError::Forbidden("Invalid webhook signature".into()))?;
 
-        /* Verificar freshness: máximo 5 minutos de tolerancia */
+        /* [064A-73] Verificar freshness: máximo 2 minutos de tolerancia (antes 5 min).
+         * Reducido para estrechar la ventana de replay attacks. */
         if let Ok(ts_num) = ts.parse::<i64>() {
             let now = chrono::Utc::now().timestamp();
-            if (now - ts_num).unsigned_abs() > 300 {
+            if (now - ts_num).unsigned_abs() > 120 {
                 return Err(AppError::BadRequest("Webhook timestamp too old".into()));
             }
         }
@@ -319,6 +320,8 @@ impl PaymentService {
 
         if !resp.status().is_success() {
             let body = resp.text().await.unwrap_or_default();
+            /* [064A-73] Log explícito de errores Stripe para debugging */
+            tracing::error!("Stripe create_payment_intent falló: {body}");
             return Err(AppError::Internal(format!("Stripe error: {body}")));
         }
 
@@ -345,6 +348,8 @@ impl PaymentService {
 
         if !resp.status().is_success() {
             let body = resp.text().await.unwrap_or_default();
+            /* [064A-73] Log explícito de errores Stripe para debugging */
+            tracing::error!("Stripe capture falló: {body}");
             return Err(AppError::Internal(format!(
                 "Stripe capture error: {body}"
             )));
@@ -465,6 +470,7 @@ impl PaymentService {
 
                 if !resp.status().is_success() {
                     let body = resp.text().await.unwrap_or_default();
+                    tracing::error!("Stripe cancel falló: {body}");
                     return Err(AppError::Internal(format!(
                         "Stripe cancel error: {body}"
                     )));
@@ -486,6 +492,7 @@ impl PaymentService {
 
                 if !resp.status().is_success() {
                     let body = resp.text().await.unwrap_or_default();
+                    tracing::error!("Stripe refund falló: {body}");
                     return Err(AppError::Internal(format!(
                         "Stripe refund error: {body}"
                     )));

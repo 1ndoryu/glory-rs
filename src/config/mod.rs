@@ -18,6 +18,9 @@ pub struct AppConfig {
     pub static_dir: Option<String>,
     pub stripe_secret_key: Option<String>,
     pub stripe_webhook_secret: Option<String>,
+    /* [064A-73] Orígenes permitidos para CORS (separados por coma en env).
+     * Si vacío, permite todo (dev). En producción, definir GLORY_ALLOWED_ORIGINS. */
+    pub allowed_origins: Vec<String>,
 }
 
 impl AppConfig {
@@ -43,6 +46,13 @@ impl AppConfig {
             stripe_webhook_secret: std::env::var("GLORY_STRIPE_WEBHOOK_SECRET")
                 .or_else(|_| std::env::var("STRIPE_WEBHOOK_SECRET"))
                 .ok(),
+            /* [064A-73] CORS: leer orígenes de GLORY_ALLOWED_ORIGINS (separados por coma) */
+            allowed_origins: std::env::var("GLORY_ALLOWED_ORIGINS")
+                .unwrap_or_default()
+                .split(',')
+                .map(|s| s.trim().to_string())
+                .filter(|s| !s.is_empty())
+                .collect(),
         })
     }
 }

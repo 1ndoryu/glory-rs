@@ -6,7 +6,7 @@ use validator::Validate;
 
 use crate::errors::AppError;
 use crate::models::{AuthResponse, LoginRequest, QuickRegisterRequest, RegisterRequest};
-use crate::services::AuthService;
+use crate::services::{AuditService, AuthService};
 use crate::AppState;
 
 /// Registrar nuevo usuario
@@ -48,8 +48,33 @@ pub async fn login(
     req.validate()
         .map_err(|e| AppError::Validation(e.to_string()))?;
 
-    let response = AuthService::login(&state.pool, req, &state.jwt_secret).await?;
-    Ok(Json(response))
+    let email = req.email.clone();
+    match AuthService::login(&state.pool, req, &state.jwt_secret).await {
+        Ok(response) => {
+            /* [064A-73] Audit: login exitoso */
+            AuditService::log(
+                &state.pool,
+                "login_success",
+                Some(response.user_id),
+                None,
+                serde_json::json!({"email": email}),
+            )
+            .await;
+            Ok(Json(response))
+        }
+        Err(e) => {
+            /* [064A-73] Audit: login fallido */
+            AuditService::log(
+                &state.pool,
+                "login_failed",
+                None,
+                None,
+                serde_json::json!({"email": email}),
+            )
+            .await;
+            Err(e)
+        }
+    }
 }
 
 pub fn routes() -> Router<AppState> {

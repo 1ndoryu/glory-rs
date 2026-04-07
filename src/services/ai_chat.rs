@@ -51,6 +51,22 @@ impl AiChatConfig {
         let model = std::env::var("AI_MODEL")
             .unwrap_or_else(|_| "llama-3.3-70b-versatile".to_string());
 
+        /* [064A-73] Whitelist de modelos permitidos. Si el env var tiene un modelo
+         * no reconocido, fallback al default. Previene inyección de modelo arbitrario. */
+        let allowed_models = [
+            "llama-3.3-70b-versatile",
+            "llama-3.1-8b-instant",
+            "llama-3.2-90b-vision-preview",
+            "mixtral-8x7b-32768",
+            "gemma2-9b-it",
+        ];
+        let model = if allowed_models.contains(&model.as_str()) {
+            model
+        } else {
+            tracing::warn!("Modelo AI no permitido: {model}, usando default");
+            "llama-3.3-70b-versatile".to_string()
+        };
+
         let api_url = std::env::var("AI_API_URL").unwrap_or_else(|_| {
             "https://api.groq.com/openai/v1/chat/completions".to_string()
         });

@@ -213,8 +213,18 @@ pub async fn download_deliverable(
 
     verify_order_access(&order, &auth)?;
 
-    /* Leer archivo de disco */
+    /* [064A-73] Validar path traversal: el archivo debe estar dentro de uploads/ */
     let file_path = format!(".{}", deliverable.file_url);
+    let canonical = std::path::Path::new(&file_path)
+        .canonicalize()
+        .map_err(|_| AppError::NotFound("Archivo no encontrado en disco".into()))?;
+    let base_dir = std::path::Path::new("uploads")
+        .canonicalize()
+        .map_err(|_| AppError::Internal("Directorio uploads no existe".into()))?;
+    if !canonical.starts_with(&base_dir) {
+        return Err(AppError::BadRequest("Ruta de archivo inválida".into()));
+    }
+
     let data = fs::read(&file_path)
         .await
         .map_err(|_| AppError::NotFound("Archivo no encontrado en disco".into()))?;
@@ -344,6 +354,14 @@ async fn process_multipart_files(
                 .await
                 .map_err(|e| AppError::BadRequest(format!("Error leyendo archivo: {e}")))?;
 
+            /* [064A-73] Validar magic bytes: el contenido real debe coincidir con el
+             * MIME declarado por el cliente. Previene upload de ejecutables disfrazados. */
+            if !validate_magic_bytes(&data, &content_type) {
+                return Err(AppError::BadRequest(format!(
+                    "El contenido del archivo no coincide con el tipo declarado: {content_type}"
+                )));
+            }
+
             #[allow(clippy::cast_possible_truncation)]
             let file_size = data.len() as u64;
             if file_size > MAX_FILE_SIZE {
@@ -360,6 +378,15 @@ async fn process_multipart_files(
             fs::write(&file_path, &data)
                 .await
                 .map_err(|e| AppError::Internal(format!("Error guardando archivo: {e}")))?;
+
+            /* [064A-73] Log de upload para auditoría */
+            tracing::info!(
+                user_id = %uploaded_by,
+                file = %original_name,
+                mime = %content_type,
+                size = file_size,
+                "Archivo subido"
+            );
 
             let file_url = format!(
                 "/uploads/deliverables/{order_id}/{phase_number}/{unique_name}"
@@ -419,4 +446,43 @@ fn has_suspicious_extension(name: &str) -> bool {
         }
     }
     false
+}
+
+/* [064A-73] Valida que los primeros bytes del archivo coincidan con el MIME declarado.
+ * Evita que un atacante suba un .exe renombrado a .pdf.
+ * Para application/octet-stream no se puede validar — se acepta siempre.
+ * Para SVG se busca la etiqueta <svg en los primeros 512 bytes (es XML). */
+fn validate_magic_bytes(data: &[u8], claimed_mime: &str) -> bool {
+    match claimed_mime {
+        "application/pdf" => data.starts_with(b"%PDF"),
+        "application/msword" => data.starts_with(&[0xD0, 0xCF, 0x11, 0xE0]),
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document" => {
+            data.starts_with(&[0x50, 0x4B, 0x03, 0x04])
+        }
+        "image/png" => data.starts_with(&[0x89, 0x50, 0x4E, 0x47]),
+        "image/jpeg" => data.starts_with(&[0xFF, 0xD8, 0xFF]),
+        "image/gif" => data.starts_with(b"GIF87a") || data.starts_with(b"GIF89a"),
+        "image/svg+xml" => {
+            let check_len = data.len().min(512);
+            let prefix = String::from_utf8_lossy(&data[..check_len]);
+            prefix.contains("<svg")
+        }
+        "image/webp" => {
+            data.len() >= 12
+                && data.starts_with(b"RIFF")
+                && &data[8..12] == b"WEBP"
+        }
+        "video/mp4" => {
+            data.len() >= 8 && &data[4..8] == b"ftyp"
+        }
+        "application/zip" => data.starts_with(&[0x50, 0x4B]),
+        "application/x-rar-compressed" => data.starts_with(b"Rar!"),
+        "application/x-7z-compressed" => {
+            data.starts_with(&[0x37, 0x7A, 0xBC, 0xAF, 0x27, 0x1C])
+        }
+        /* octet-stream es genérico, no se puede validar por contenido */
+        "application/octet-stream" => true,
+        /* MIME desconocido que pasó la whitelist: rechazar por precaución */
+        _ => false,
+    }
 }
