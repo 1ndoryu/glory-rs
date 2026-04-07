@@ -195,7 +195,6 @@ export const OrdenDetalle: React.FC<OrdenDetalleProps> = ({
             {chatAbierto && canChat && (
                 <OrderChat
                     orderId={order.id}
-                    employeeName={order.assigned_employee_name ?? null}
                 />
             )}
 

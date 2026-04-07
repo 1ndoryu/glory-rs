@@ -1,5 +1,6 @@
 /* [064A-31] Estilos del chat dentro de pedidos.
- * [064A-67] Rediseñado para coincidir con chatWidgetPanel (glassmorphism, pill input). */
+ * [064A-67] Rediseñado para coincidir con chatWidgetPanel (glassmorphism, pill input).
+ * [074A-33] Sin sombra, min-height 440px, sin encabezado. */
 
 .orderChatPanel {
     border: 1px solid var(--bg-item-active);
@@ -7,18 +8,10 @@
     background: rgba(245, 242, 239, 0.8);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    box-shadow: rgba(78, 50, 23, 0.04) 0px 6px 16px 0px, rgba(0, 0, 0, 0.1) 0px 0px 0px 1px;
     display: flex;
     flex-direction: column;
-    max-height: 440px;
+    min-height: 440px;
     overflow: hidden;
-}
-
-.orderChatEncabezado {
-    padding: var(--spacing-sm) var(--spacing-md);
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--text-primary);
 }
 
 .orderChatMensajes {

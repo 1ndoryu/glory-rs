@@ -13,10 +13,9 @@ import './OrderChat.css';
 
 interface OrderChatProps {
     orderId: string;
-    employeeName: string | null;
 }
 
-export const OrderChat: React.FC<OrderChatProps> = ({orderId, employeeName}) => {
+export const OrderChat: React.FC<OrderChatProps> = ({orderId}) => {
     const [input, setInput] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const userId = useAuthStore(s => s.user?.userId);
@@ -57,9 +56,6 @@ export const OrderChat: React.FC<OrderChatProps> = ({orderId, employeeName}) => 
 
     return (
         <div className="orderChatPanel">
-            <div className="orderChatEncabezado">
-                Chat con {employeeName ?? 'freelancer'}
-            </div>
             <div className="orderChatMensajes">
                 {mensajes.length === 0 && (
                     <p className="orderChatVacio">
