@@ -52,9 +52,7 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 - La pagina de disponibles para el usuario empleado se ve mal, hay que reahacerla desde cero, no la entiendo. Igual la pagina delegaciones. (Nota: colores CSS corregidos en 074A-15, falta rediseño estructural)
 
-- En proyecto dice Request failed with status code 404
-
-- El contenido de los servicios en incrugente o sea lo que sale en cms no es lo mismo que sale en el front (los del front es el contenido que hay que preservar), supongo que lo mismo pasa con el resto de cosas. Con el blog parece funcionar.
+- El contenido de los servicios del CMS no matchea el front. (Nota: 074A-21 conectó servicios públicos a API. Si persiste en blog/proyectos especificar cuál)
 
 - No veo donde se modifican los planes de los servicios.
 
@@ -66,3 +64,4 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 Nueva inforamción: La solución que me ocurre es que glory-rs sirva como cms cuando se necesite, y que pueda inyectar contenido dinamicamente, tiene que ser del tipo de contenido que escribas en un archivo y que se pueda modificar de alli, asi se puede agregar cualquier tipo de datos de prueba donde se necesita y de cualquier tipo, tiene que ser inteligente, si se borra un contenido en el codigo, se borra en la base de dato tambien, esto servira para datos iniciales en los proyectos que se necesiten que tambien sean reales e inyecten al correr e iniciar un proyecto en cualquier parte. 
 
+- Ejecuta el plan # Plan: Glory-RS Content Fixture System
