@@ -184,10 +184,30 @@
 .chatBurbujaHeader {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: var(--spacing-sm);
     margin-bottom: 4px;
     font-size: var(--text-xs);
+}
+
+/* [064A-70] Avatar circular en la burbuja de mensaje */
+.chatBurbujaAvatar {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.chatBurbujaAvatarFallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--bg-item-active);
+    flex-shrink: 0;
+    color: var(--text-muted);
 }
 
 /* [064A-37] Header de burbuja propia: texto oscuro (ya no fondo negro). */

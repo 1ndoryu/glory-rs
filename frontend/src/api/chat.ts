@@ -26,6 +26,9 @@ export interface ChatMessage {
     sender_id: string | null;
     content: string;
     created_at: string;
+    /* [064A-70] Datos del sender enriquecidos por el backend */
+    sender_avatar_url: string | null;
+    sender_display_name: string | null;
 }
 
 export interface WsServerMessage {

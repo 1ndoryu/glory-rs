@@ -195,12 +195,26 @@ function SessionItem({
 function MessageBubble({message}: {message: ChatMessage}) {
     const isAi = message.sender_type === 'ai';
     const isOwn = message.sender_type === 'client';
-    const label = SENDER_LABELS[message.sender_type] || message.sender_type;
+    const displayName = message.sender_display_name
+        || SENDER_LABELS[message.sender_type]
+        || message.sender_type;
 
     return (
         <div className={`chatBurbuja ${isOwn ? 'chatBurbujaPropia' : ''} ${isAi ? 'chatBurbujaIA' : ''}`}>
             <div className="chatBurbujaHeader">
-                <span className={resolveSenderToneClass(message.sender_type)}>{label}</span>
+                {/* [064A-70] Avatar del sender — solo si tiene avatar_url */}
+                {message.sender_avatar_url ? (
+                    <img
+                        className="chatBurbujaAvatar"
+                        src={message.sender_avatar_url}
+                        alt={displayName}
+                    />
+                ) : (
+                    <span className="chatBurbujaAvatarFallback">
+                        <User size={14} />
+                    </span>
+                )}
+                <span className={resolveSenderToneClass(message.sender_type)}>{displayName}</span>
                 <span className="chatBurbujaHora">
                     {new Date(message.created_at).toLocaleTimeString('es', {
                         hour: '2-digit',

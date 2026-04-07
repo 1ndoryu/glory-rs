@@ -12,7 +12,7 @@ mod review;
 mod user;
 
 pub use chat::{
-    ChatMessage, ChatSession, ChatSessionResponse, CreateChatSessionRequest,
+    ChatMessage, ChatMessageResponse, ChatSession, ChatSessionResponse, CreateChatSessionRequest,
     SendMessageRequest, WsClientMessage, WsServerMessage,
 };
 pub use delegation::{

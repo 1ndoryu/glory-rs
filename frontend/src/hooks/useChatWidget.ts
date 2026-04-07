@@ -94,6 +94,8 @@ export function useChatWidget() {
                                         sender_id: msg.sender_id ?? null,
                                         content: msg.content!,
                                         created_at: msg.created_at || new Date().toISOString(),
+                                        sender_avatar_url: null,
+                                        sender_display_name: null,
                                     },
                                 ];
                             });

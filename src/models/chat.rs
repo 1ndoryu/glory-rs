@@ -36,6 +36,19 @@ pub struct ChatMessage {
     pub created_at: DateTime<Utc>,
 }
 
+/* [064A-70] Respuesta enriquecida con datos del sender (avatar + nombre) */
+#[derive(Debug, Clone, Serialize, ToSchema)]
+pub struct ChatMessageResponse {
+    pub id: Uuid,
+    pub session_id: Uuid,
+    pub sender_type: String,
+    pub sender_id: Option<String>,
+    pub content: String,
+    pub created_at: DateTime<Utc>,
+    pub sender_avatar_url: Option<String>,
+    pub sender_display_name: Option<String>,
+}
+
 /* ============================================================
    REQUESTS / RESPONSES
    ============================================================ */
