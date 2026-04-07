@@ -1,5 +1,5 @@
 /* [064A-32] Planes de hosting administrado.
- * Precios alineados con backend (src/handlers/hosting.rs).
+ * [084A-10] 3 planes: Básico $5, Pro $10, E-commerce $15.
  * CTA abre chat (provisioning manual por ahora — automático cuando infra esté lista). */
 
 import {incluida, noIncluida} from './tipos';
@@ -9,7 +9,7 @@ export const PLANES_HOSTING: PlanServicio[] = [
     {
         id: 'hosting-basico',
         nombre: 'Básico',
-        precio: '$15',
+        precio: '$5',
         periodo: '/mes',
         descripcion: 'Ideal para sitios personales y landing pages con tráfico moderado.',
         destacado: false,
@@ -30,7 +30,7 @@ export const PLANES_HOSTING: PlanServicio[] = [
     {
         id: 'hosting-pro',
         nombre: 'Pro',
-        precio: '$35',
+        precio: '$10',
         periodo: '/mes',
         descripcion: 'Para negocios en crecimiento que necesitan rendimiento y fiabilidad.',
         destacado: true,
@@ -51,7 +51,7 @@ export const PLANES_HOSTING: PlanServicio[] = [
     {
         id: 'hosting-ecommerce',
         nombre: 'E-commerce',
-        precio: '$60',
+        precio: '$15',
         periodo: '/mes',
         descripcion: 'Optimizado para tiendas online con alto tráfico y transacciones.',
         destacado: false,
@@ -67,25 +67,6 @@ export const PLANES_HOSTING: PlanServicio[] = [
             incluida('CDN global'),
             incluida('Staging environment'),
             incluida('Optimización de caché avanzada'),
-        ],
-    },
-    {
-        id: 'hosting-custom',
-        nombre: 'A Medida',
-        precio: 'Cotizar',
-        descripcion: 'Infraestructura personalizada para proyectos con necesidades específicas.',
-        esPersonalizado: true,
-        ctaTexto: 'Consultar',
-        ctaLink: '#',
-        caracteristicas: [
-            incluida('100+ GB almacenamiento'),
-            incluida('SSL gratuito'),
-            incluida('Backups bajo demanda'),
-            incluida('Dominios ilimitados'),
-            incluida('Soporte dedicado'),
-            incluida('CDN global'),
-            incluida('Multi-region'),
-            incluida('SLA personalizado'),
         ],
     },
 ];

@@ -18,13 +18,12 @@ use crate::models::{
 use crate::repositories::{CreateHostingParams, HostingRepository};
 use crate::AppState;
 
-/* Precios por plan en centavos */
+/* [084A-10] Precios por plan en centavos: Básico $5, Pro $10, E-commerce $15 */
 fn plan_price_cents(plan: &str) -> Option<i32> {
     match plan {
-        "basico" => Some(1500),
-        "pro" => Some(3500),
-        "ecommerce" => Some(6000),
-        "custom" => Some(0),
+        "basico" => Some(500),
+        "pro" => Some(1000),
+        "ecommerce" => Some(1500),
         _ => None,
     }
 }
