@@ -110,7 +110,9 @@ Sin este anuncio, no se inicia ninguna tarea. Esta regla existe para que el agen
   - Despues de cada commit, despues de cada resumen, SIEMPRE releer el roadmap como ultima accion antes de cerrar o pasar a la siguiente tarea. Esta regla existe porque se omite sistematicamente. No es opcional.
 
 **17. Glory Framework (submodulo agnostico).**
-  - Si la funcionalidad implementada es reutilizable entre proyectos (componentes UI atomicos, logica de pagos, WebSocket, chat, utilidades de estilos), debe vivir en el submodulo Glory del proyecto (`glory-rs` para Rust, `glory` para PHP).
+  - `/glory-rs` es el nucleo del framework reutilizable. Contiene logica, componentes UI atomicos, utilidades, sistemas de datos (fixtures/CMS), pagos, WebSocket, chat, y cualquier funcionalidad agnostica que sirva para todos los proyectos. Es nuestra caja de herramientas permanente.
+  - `/glory-rs` DEBE ser agnostico: nunca debe contener logica especifica de un proyecto. Si algo es especifico de nakomi (u otro proyecto), NO va en glory-rs.
+  - Si la funcionalidad implementada es reutilizable entre proyectos, debe vivir en el submodulo Glory del proyecto (`glory-rs` para Rust, `glory` para PHP).
   - Al completar una tarea, preguntarse: "Esto es especifico de este proyecto o es agnostico?" Si es agnostico, moverlo al submodulo.
   - La evaluacion de si algo debe ir en Glory es parte del paso de cierre de cada tarea.
 
@@ -210,6 +212,7 @@ Completada (movida a Agente/completados/tareas-YYYY-MM-DD.md):
 - **Archivos:** lista de archivos modificados
 - **Gotchas:** problemas encontrados (si los hubo)
 - **Sentinel:** si requiere nueva regla, si hubo falso positivo, o si no aplica
+- **GLORY-RS:** Evaluacion de si la logica implementada es agnostica y debe moverse a glory-rs. Si no aplica, indicar "No aplica". Si aplica, describir que se movio o que queda pendiente de mover.
 ```
 
 ### Comentarios en codigo
