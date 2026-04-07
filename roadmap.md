@@ -63,8 +63,9 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 ## 
 
-- 074A-25: El botón de salir sigue deslogeando en vez de ir al home y no se ve el submenú al dar click a la foto de perfil (verificar 074A-22).
 - 074A-26: Al cambiar el tamaño de la pantalla algo hace que los bordes de los badge de abajo se recorten un poco en carruselItem.
 - 074A-27: Stripe 500 sigue diciendo "Ocurrió un error interno" sin explicar — follow-up de 074A-24 (verificar si los cambios aplican).
 - 074A-30: Hay chats que aparecen sin mensajes en el panel, no tiene sentido — filtrar.
 - En el chat del panel no aparece la foto de perifl de quien claramente si tiene foto de perfil. 
+- Quita la sombra de .orderChatPanel y la altura no esta tomando la altura maxima, la minima debe ser 440px, orderChatEncabezado es innecesario y el chat debe aparecer al final. 
+- el boton de suscribir en el footer le falta borde
