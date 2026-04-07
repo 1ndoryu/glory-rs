@@ -58,8 +58,13 @@
     flex-direction: column;
 }
 
+/* [074A-37] flex-direction: row-reverse pone el avatar a la derecha en mensajes propios */
 .orderChatBurbuja--propia {
     align-self: flex-end;
+    flex-direction: row-reverse;
+}
+
+.orderChatBurbuja--propia .orderChatBurbujaContenido {
     align-items: flex-end;
 }
 
