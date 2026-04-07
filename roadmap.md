@@ -59,4 +59,3 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 ###
 
 - 064A-63: Plan detallado para edición de contenidos admin: servicios, blog, proyectos editables desde el front con modal + tabs laterales.
-- 064A-64: Traducción de categorías, servicios, planes, descripciones de equipo, soluciones a los 3 idiomas (enfoque automatizado).

@@ -204,5 +204,14 @@
         "es": "Español",
         "en": "English",
         "ja": "日本語"
+    },
+    "hosting_page": {
+        "hero_title": "Infraestructura que escala contigo",
+        "hero_desc": "Olvídate de la administración de servidores. Nos encargamos de todo: rendimiento, seguridad, backups y actualizaciones.",
+        "view_plans": "Ver Planes",
+        "features_title": "Todo Incluido",
+        "features_subtitle": "Cada plan incluye las herramientas esenciales para mantener tu sitio rápido y seguro.",
+        "plans_title": "Planes de Hosting",
+        "plans_subtitle": "Elige el plan que mejor se adapte a tu proyecto"
     }
 }

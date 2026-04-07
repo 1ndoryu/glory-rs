@@ -204,5 +204,14 @@
         "es": "Español",
         "en": "English",
         "ja": "日本語"
+    },
+    "hosting_page": {
+        "hero_title": "Infrastructure that scales with you",
+        "hero_desc": "Forget about server management. We take care of everything: performance, security, backups, and updates.",
+        "view_plans": "View Plans",
+        "features_title": "All Included",
+        "features_subtitle": "Every plan includes the essential tools to keep your site fast and secure.",
+        "plans_title": "Hosting Plans",
+        "plans_subtitle": "Choose the plan that best fits your project"
     }
 }

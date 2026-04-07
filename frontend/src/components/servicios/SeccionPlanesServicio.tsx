@@ -37,13 +37,14 @@ const TarjetaPlan: React.FC<TarjetaPlanProps> = ({plan, onSeleccionar}) => {
         <div className={`tarjetaPlan ${claseDestacado}`}>
             {plan.destacado && <div className="tarjetaPlanBadge">{t('plans.recommended')}</div>}
 
+            {/* [064A-64] Nombre, descripcion y CTA traducidos via content translations */}
             <div className="tarjetaPlanCabecera">
-                <h3 className="tarjetaPlanNombre">{plan.nombre}</h3>
+                <h3 className="tarjetaPlanNombre">{t(`content.plans.${plan.id}.nombre`, plan.nombre)}</h3>
                 <div className="tarjetaPlanPrecio">
                     <span className="tarjetaPlanPrecioCifra">{plan.precio}</span>
                     {plan.periodo && <span className="tarjetaPlanPrecioPeriodo">{plan.periodo}</span>}
                 </div>
-                <p className="tarjetaPlanDescripcion">{plan.descripcion}</p>
+                <p className="tarjetaPlanDescripcion">{t(`content.plans.${plan.id}.descripcion`, plan.descripcion)}</p>
             </div>
 
             <ul className="tarjetaPlanCaracteristicas">
@@ -61,7 +62,7 @@ const TarjetaPlan: React.FC<TarjetaPlanProps> = ({plan, onSeleccionar}) => {
                                 </svg>
                             )}
                         </span>
-                        <span className="tarjetaPlanItemTexto">{car.texto}</span>
+                        <span className="tarjetaPlanItemTexto">{t(`content.plans.${plan.id}.features.${idx}`, car.texto)}</span>
                     </li>
                 ))}
             </ul>
@@ -72,7 +73,7 @@ const TarjetaPlan: React.FC<TarjetaPlanProps> = ({plan, onSeleccionar}) => {
                     tamano="mediano"
                     onClick={handleClickCTA}
                 >
-                    {plan.ctaTexto}
+                    {t(`content.plans.${plan.id}.cta`, plan.ctaTexto)}
                 </Button>
                 <Button variante="texto" className="tarjetaPlanConversar" onClick={handleConversar}>
                     {t('plans.chat_with_us', 'Conversar')}

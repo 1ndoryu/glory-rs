@@ -20,8 +20,9 @@ interface ProyectosIslandProps {
     titulo?: string;
 }
 
-/* Componente tarjeta de proyecto individual */
+/* [064A-64] TarjetaProyecto traduce descripcion y cliente via content translations */
 const TarjetaProyecto: React.FC<{proyecto: Proyecto; indice: number}> = ({proyecto, indice}) => {
+    const {t} = useTranslation();
     const categorias = Array.isArray(proyecto.categorias) ? proyecto.categorias : [proyecto.categorias];
 
     /* Fallback a imagen showcase si el backend no resolvió la URL */
@@ -34,7 +35,7 @@ const TarjetaProyecto: React.FC<{proyecto: Proyecto; indice: number}> = ({proyec
             </div>
             <div className="tarjetaProyectoInfo">
                 <h3 className="tarjetaProyectoTitulo">{proyecto.titulo}</h3>
-                <span className="tarjetaProyectoCliente">{proyecto.cliente}</span>
+                <span className="tarjetaProyectoCliente">{t(`content.projects.${proyecto.id}.cliente`, proyecto.cliente)}</span>
                 <div className="tarjetaProyectoTags">
                     {categorias.map(cat => (
                         <Badge key={cat} label={cat} />

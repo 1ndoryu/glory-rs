@@ -13,7 +13,7 @@ import {Button} from '../components/ui/Button';
 import '../components/servicios/SeccionPlanesServicio.css';
 import './SolucionHostingIsland.css';
 
-const FEATURES = [
+const FEATURES_FALLBACK = [
     {icono: Zap, titulo: 'Alto Rendimiento', desc: 'Servidores SSD con última generación de hardware para tiempos de carga mínimos.'},
     {icono: Shield, titulo: 'Seguridad Incluida', desc: 'SSL gratuito, firewall, backups automáticos y monitoreo 24/7.'},
     {icono: Clock, titulo: '99.9% Uptime', desc: 'Infraestructura redundante con failover automático para máxima disponibilidad.'},
@@ -22,9 +22,20 @@ const FEATURES = [
     {icono: Headphones, titulo: 'Soporte Experto', desc: 'Equipo técnico disponible para resolver cualquier incidencia rápidamente.'},
 ];
 
+/* [064A-64] Features del hosting traducidos via content.solutions.hosting.
+ * Se declara como funcion dentro del componente para acceder a t(). */
+const FEATURE_ICONS = [Zap, Shield, Clock, Globe, Server, Headphones];
+const FEATURE_KEYS = ['performance', 'security', 'uptime', 'cdn', 'managed', 'support'];
+
 export const SolucionHostingIsland = (): JSX.Element => {
     const {t} = useTranslation();
     const abrirChat = useChatStore(s => s.abrir);
+
+    const features = FEATURE_KEYS.map((key, i) => ({
+        icono: FEATURE_ICONS[i],
+        titulo: t(`content.solutions.hosting.features.${key}.titulo`, FEATURES_FALLBACK[i].titulo),
+        desc: t(`content.solutions.hosting.features.${key}.desc`, FEATURES_FALLBACK[i].desc),
+    }));
 
     return (
         <LayoutPagina className="hostingPaginaMain">
@@ -37,19 +48,18 @@ export const SolucionHostingIsland = (): JSX.Element => {
             {/* Hero */}
             <section className="hostingHero">
                 <div className="hostingHeroContenido">
-                    <span className="hostingHeroEtiqueta">Hosting Administrado</span>
+                    <span className="hostingHeroEtiqueta">{t('content.solutions.hosting.titulo', 'Hosting Administrado')}</span>
                     <h1 className="hostingHeroTitulo">
-                        Infraestructura que escala contigo
+                        {t('hosting_page.hero_title', 'Infraestructura que escala contigo')}
                     </h1>
                     <p className="hostingHeroDesc">
-                        Olvídate de la administración de servidores. Nos encargamos de todo:
-                        rendimiento, seguridad, backups y actualizaciones.
+                        {t('hosting_page.hero_desc', 'Olvídate de la administración de servidores. Nos encargamos de todo: rendimiento, seguridad, backups y actualizaciones.')}
                     </p>
                     <div className="hostingHeroBotones">
                         <Button variante="primario" onClick={() => {
                             document.getElementById('planesHosting')?.scrollIntoView({behavior: 'smooth'});
                         }}>
-                            Ver Planes
+                            {t('hosting_page.view_plans', 'Ver Planes')}
                         </Button>
                         <Button variante="outline" onClick={abrirChat}>
                             {t('plans.chat_with_us', 'Conversar')}
@@ -60,12 +70,12 @@ export const SolucionHostingIsland = (): JSX.Element => {
 
             {/* Features */}
             <section className="hostingFeatures">
-                <h2 className="hostingFeaturesTitle">Todo Incluido</h2>
+                <h2 className="hostingFeaturesTitle">{t('hosting_page.features_title', 'Todo Incluido')}</h2>
                 <p className="hostingFeaturesSubtitle">
-                    Cada plan incluye las herramientas esenciales para mantener tu sitio rápido y seguro.
+                    {t('hosting_page.features_subtitle', 'Cada plan incluye las herramientas esenciales para mantener tu sitio rápido y seguro.')}
                 </p>
                 <div className="hostingFeaturesGrid">
-                    {FEATURES.map((f) => (
+                    {features.map((f) => (
                         <div key={f.titulo} className="hostingFeatureCard">
                             <f.icono size={24} strokeWidth={1.5} />
                             <h3>{f.titulo}</h3>
@@ -79,20 +89,20 @@ export const SolucionHostingIsland = (): JSX.Element => {
             <section id="planesHosting" className="planesSeccion">
                 <div className="planesContenedor">
                     <div className="planesCabecera">
-                        <h2 className="planesTitulo">Planes de Hosting</h2>
-                        <p className="planesSubtitulo">Elige el plan que mejor se adapte a tu proyecto</p>
+                        <h2 className="planesTitulo">{t('hosting_page.plans_title', 'Planes de Hosting')}</h2>
+                        <p className="planesSubtitulo">{t('hosting_page.plans_subtitle', 'Elige el plan que mejor se adapte a tu proyecto')}</p>
                     </div>
                     <div className="planesGrid">
                         {PLANES_HOSTING.map(plan => (
                             <div key={plan.id} className={`tarjetaPlan ${plan.destacado ? 'tarjetaPlanDestacado' : ''}`}>
                                 {plan.destacado && <div className="tarjetaPlanBadge">{t('plans.recommended')}</div>}
                                 <div className="tarjetaPlanCabecera">
-                                    <h3 className="tarjetaPlanNombre">{plan.nombre}</h3>
+                                    <h3 className="tarjetaPlanNombre">{t(`content.plans.${plan.id}.nombre`, plan.nombre)}</h3>
                                     <div className="tarjetaPlanPrecio">
                                         <span className="tarjetaPlanPrecioCifra">{plan.precio}</span>
                                         {plan.periodo && <span className="tarjetaPlanPrecioPeriodo">{plan.periodo}</span>}
                                     </div>
-                                    <p className="tarjetaPlanDescripcion">{plan.descripcion}</p>
+                                    <p className="tarjetaPlanDescripcion">{t(`content.plans.${plan.id}.descripcion`, plan.descripcion)}</p>
                                 </div>
                                 <ul className="tarjetaPlanCaracteristicas">
                                     {plan.caracteristicas.map((car, idx) => (
@@ -109,7 +119,7 @@ export const SolucionHostingIsland = (): JSX.Element => {
                                                     </svg>
                                                 )}
                                             </span>
-                                            <span className="tarjetaPlanItemTexto">{car.texto}</span>
+                                            <span className="tarjetaPlanItemTexto">{t(`content.plans.${plan.id}.features.${idx}`, car.texto)}</span>
                                         </li>
                                     ))}
                                 </ul>
@@ -119,7 +129,7 @@ export const SolucionHostingIsland = (): JSX.Element => {
                                         tamano="mediano"
                                         onClick={abrirChat}
                                     >
-                                        {plan.ctaTexto}
+                                        {t(`content.plans.${plan.id}.cta`, plan.ctaTexto)}
                                     </Button>
                                     <Button variante="texto" className="tarjetaPlanConversar" onClick={abrirChat}>
                                         {t('plans.chat_with_us', 'Conversar')}

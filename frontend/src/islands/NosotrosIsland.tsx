@@ -17,16 +17,18 @@ interface NosotrosIslandProps {
     titulo?: string;
 }
 
-/* Tarjeta de miembro del equipo */
-const TarjetaMiembro: React.FC<{miembro: Miembro}> = ({miembro}) => (
+/* [064A-64] TarjetaMiembro traduce bio y cargo via i18n content translations */
+const TarjetaMiembro: React.FC<{miembro: Miembro}> = ({miembro}) => {
+    const {t} = useTranslation();
+    return (
     <article className="tarjetaMiembro">
         <div className="miembroAvatar">
             <img src={miembro.avatar} alt={miembro.nombre} loading="lazy" />
         </div>
         <div className="miembroInfo">
             <h3 className="miembroNombre">{miembro.nombre}</h3>
-            <span className="miembroCargo">{miembro.cargo}</span>
-            <p className="miembroBio">{miembro.bio}</p>
+            <span className="miembroCargo">{t(`content.team.${miembro.id}.cargo`, miembro.cargo)}</span>
+            <p className="miembroBio">{t(`content.team.${miembro.id}.bio`, miembro.bio)}</p>
             <div className="miembroRedes">
                 {miembro.linkedin && (
                     <a href={miembro.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
@@ -41,7 +43,8 @@ const TarjetaMiembro: React.FC<{miembro: Miembro}> = ({miembro}) => (
             </div>
         </div>
     </article>
-);
+    );
+};
 
 export const NosotrosIsland = ({titulo}: NosotrosIslandProps): JSX.Element => {
     const {t} = useTranslation();

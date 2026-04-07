@@ -22,6 +22,7 @@ import {SeccionPlanesServicio} from '../components/servicios/SeccionPlanesServic
 import {SeccionContacto} from '../components/home/SeccionContacto';
 import {SKILLS_POR_DEFECTO} from '../data/skills';
 import {obtenerPlanesServicio} from '../data/planes/index';
+import {SERVICIOS_DATA} from '../data/servicios';
 
 /* [064A-47] Imagen del servicio añadida al hero. */
 interface ServicioIndividualIslandProps {
@@ -42,6 +43,11 @@ export const ServicioIndividualIsland = ({titulo, descripcion, precio_desde, slu
 
     /* ID del servicio actual para excluirlo de relacionados */
     const servicioId = slug || titulo?.toLowerCase().replace(/\s+/g, '-') || '';
+
+    /* [064A-64] Buscar servicio por slug para traducir titulo y descripcion */
+    const servicioData = SERVICIOS_DATA.find(s => slug && s.link.includes(slug));
+    const tituloTraducido = servicioData ? t(`content.services.${servicioData.id}.titulo`, {defaultValue: titulo ?? ''}) : titulo;
+    const descripcionTraducida = servicioData ? t(`content.services.${servicioData.id}.descripcion`, {defaultValue: descripcion ?? ''}) : descripcion;
 
     /* [044A-40] Obtener precio mínimo real de los planes del servicio. */
     const datosPlanes = obtenerPlanesServicio(servicioId);
@@ -66,7 +72,7 @@ export const ServicioIndividualIsland = ({titulo, descripcion, precio_desde, slu
                 path={`/servicios/${slug || ''}`}
                 jsonLd={titulo && descripcion && slug ? serviceSchema(titulo, descripcion, slug) : undefined}
             />
-            <SeccionHeroServicio titulo={titulo} descripcion={descripcion} imagen={imagen} />
+            <SeccionHeroServicio titulo={tituloTraducido} descripcion={descripcionTraducida} imagen={imagen} />
             <SeccionGaleriaServicio />
             <SeccionPlanesServicio slug={servicioId} />
             <SeccionCta descripcion={[t('service_detail.cta_1'), t('service_detail.cta_2')]} textoBotonPrimario={precioMinimo ? `${t('service_detail.cta_hire')} ${precioMinimo}` : t('service_detail.cta_hire')} linkBotonPrimario={ctaLink} onBotonPrimarioClick={logueado ? undefined : abrirChat} textoBotonSecundario={t('service_detail.cta_contact')} onBotonSecundarioClick={abrirChat} />
