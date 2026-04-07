@@ -43,7 +43,6 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 ### CMS Admin (plan: plan-cms-admin-2026-04-07.md)
 
-- 074A-11: CMS Blog — Frontend (editor admin + páginas públicas)
 - 074A-12: CMS Proyectos — Full stack (migrate showcase.ts → BD)
 - 074A-13: CMS Equipo — Full stack (migrate miembros.ts → BD)
 
@@ -53,4 +52,9 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 ### Bugs / UX reportados por usuario
 
-(sin tareas pendientes)
+- EL SELECT DE proyectosFiltros SIGUE SIENDO EL INCORRECTO!! ESTO NO LO DETECTA GLORY SENTINEL??????? Ese select no es valido, no se debe usar ese select!! Tiene que ser el que esta en usuariosFiltros. Borra ese tipo de select en proyectosFiltros para que no se vuelva a usar.
+
+- ANTERIORMENTE DIJE "Al cambiar al usuario cliente no veo un proyecto que este en proceso (no en proceso de pago), tiene que haber uno que este entre el admin y cliente, y otro entre el cliente y empleado." SIGO SIGO SIN VER PEDIDOS ACTIVOS AL CAMBIAR AL USUARIO EMPLEADO!!!!!!!!!!! ESO NECESITO DATOS DE PRUEBAS REALES; UN PEDIDO AL MENOS ACITVO QUE ESTE PARA EL USUARIO EMPLEADO AL QUE ACCESO DESDE EL AMDIN; NECESITO 2 O 3 PEDIDOS ACTIVOS UNO ENTRE EL ADMIN Y EL CLIENTE; UNO ENTRE EL EMPLEADO Y EL CLIENTE. ELIMINA TODOS LOS DATOS DE PRUEBA LOS QUE HAY NO ME SIRVEN.
+
+- La pagina de disponibles para el usuario empleado se ve mal, hay que reahacerla desde cero, no la entiendo. Igual la pagina delegaciones, porque carajo las letras son blancas, esto es incoherente. 
+- chatMensajes SIGUE SIN UN ANCHO mAXIMO QUE EVITE QUE chatContenedor se salga de l pantalla.
