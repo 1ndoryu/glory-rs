@@ -220,31 +220,38 @@
     align-items: center;
 }
 
+/* [084A-13] Búsqueda y filtros alineados visualmente con SeccionUsuarios */
 .proyectosBusqueda {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
+    position: relative;
     flex: 1;
-    min-width: 160px;
-    border: 1px solid var(--bg-item-active);
-    border-radius: var(--radius-sm);
-    padding: var(--spacing-xs) var(--spacing-sm);
-    background: var(--bg-primary);
+    min-width: 200px;
 }
 
 .proyectosBusquedaIcono {
-    color: var(--text-muted);
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--brand-black);
+    opacity: 0.4;
     flex-shrink: 0;
 }
 
 .proyectosBusquedaInput {
-    border: none;
-    outline: none;
-    background: transparent;
-    font-family: var(--font-primary);
-    font-size: var(--text-sm);
-    color: var(--text-primary);
     width: 100%;
+    padding: 10px 12px 10px 36px;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    font-family: var(--font-primary);
+    background: var(--bg-primary);
+    color: var(--brand-black);
+    transition: border-color 0.2s;
+}
+
+.proyectosBusquedaInput:focus {
+    outline: none;
+    border-color: var(--border-default);
 }
 
 .proyectosBusquedaInput::placeholder {
@@ -252,12 +259,12 @@
 }
 
 .proyectosFiltroEmpleado {
-    border: 1px solid var(--bg-item-active);
-    border-radius: var(--radius-sm);
-    padding: var(--spacing-xs) var(--spacing-sm);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
     font-family: var(--font-primary);
     font-size: var(--text-sm);
-    color: var(--text-primary);
+    color: var(--brand-black);
     background: var(--bg-primary);
     min-width: 160px;
 }
