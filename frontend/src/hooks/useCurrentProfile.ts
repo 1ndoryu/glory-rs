@@ -5,7 +5,9 @@ import {useQuery} from '@tanstack/react-query';
 import {obtenerPerfil, type PerfilResponse} from '../api/profile';
 import {useAuthStore} from '../stores/authStore';
 
-export const DEFAULT_PROFILE_AVATAR = 'https://i.pravatar.cc/100?u=default';
+/* [064A-53] Avatar default: SVG inline con fondo taupe (#c4b5a5) y silueta clara (#f5f3f1).
+ * Mas contraste y aspecto moderno que la version anterior. Sin dependencia externa. */
+export const DEFAULT_PROFILE_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%23c4b5a5'/%3E%3Ccircle cx='50' cy='38' r='14' fill='%23f5f3f1'/%3E%3Cpath d='M24 85c0-15 12-26 26-26s26 11 26 26' fill='%23f5f3f1'/%3E%3C/svg%3E";
 
 export const currentProfileKey = (userId?: string) =>
     ['current-profile', userId ?? 'anonymous'] as const;

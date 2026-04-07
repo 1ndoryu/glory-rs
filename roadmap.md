@@ -62,13 +62,16 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 ###
 
-- La imagen por defecto de cuando se crea un usuario no me gusta, elige otra.
 - No debería preguntar el correo en el modal para continuar con el pedido, el correo tiene que el que se use en la compra de stripe, si la contraseña se puede pedir en el formulario de stripe, mejor, sino, debe aparecer para elegirse en el panel al regresar. Tambien hay que revisar que falta para que funcione con stripe porque hice una prueba y da 404, haz un plan sobre esto.
-- parece que panelUsuario tiene un padding botton innecesario.
-- Que fatal que hayas borrado alguans tareas, habia dicho que los select en usuariosFiltros se ven fatal, no usan el color de borde correcto, no tienen padding a los lados, el texto n ose ve centrado. Ningun menu tiene que usar sombras.
 - Noto que cuando se elige un servicio, no se esta eligiendo si pagar completo, por fases o 50/50. ¿Donde se elige esto?
-- sidebarUsuario es redundante que aparezca sabiendo que ya aparezce la foto perfil en el nav del panel, la foto de perfil debería ser un poquito mas pequeña, 2 px mas pequeña.
 - En movil hay que quitar accionCabecera y dejar solo el boton de hamburgueza, tambien ajustar lo que se ve al abrir el boton de hamburgueza, tiene que ser un modal con el estilo de .chatWidgetPanel pero centrado, con los botones de menu en el centrol tiene que soportar los botones con menu y mostrar las opciones internas en vez de navegar directamente, agregar un boton para ver el menu porque tambien se puede navegar directamente una pagina con submenu.
 - Agrega una tab en el panel de configuracion. Alli habra opciones para recrear los datos de prueba, borrarlos. 
 - Para el admin, todos los contenidos deben ser editables en el front, esto es una tarea gigantezca, requiere un plan detallado. Nos podemos enfocar en los servicios, habrá un boton en la esquina para editar, abrira un modal con tab lateral para modificar cada cosa, titulo, descripción, planes, precios, fases, etc, todo lo que sea modificable, enlaces. Tambien para los blog, y proyectos. 
-- En el chat el boton de enviar dejalo sin fondo. 
+
+- Las categorías no estan traducidas, deben traducirse a los 3 idiomas. Los contenidos de los servicios, planes, tambien, no creo que sea bueno reescribir todo en los 3 idiomas lo ideal es una forma automatica y segura porque es contenido que va modificarse. Las descripciones de los miembros de equipo no estan traducidas.
+- Para el cliente no aparezca nada de "escribiendo" aparece "escribiendo" cuando el mismo criente esta escribiendo. 
+- Los servicios en soluciones tampoco estan traducidos.
+- El padding de panelContenido es muy grande, debería ser el mismo de panelSidebar.
+- Quita los padding de arriba y abajo en panelContenedor.
+- Veo modales "checkoutModal" que no tienen 30px de padding, habia dicho que todos los modales deben tener 30px (con variable) y que ninguno debe usar boton de X. 
+- El 

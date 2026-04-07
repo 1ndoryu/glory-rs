@@ -7,7 +7,7 @@
     min-height: 80vh;
     max-width: var(--container-width);
     margin: 0 auto;
-    padding: var(--spacing-md) 0 var(--spacing-3xl);
+    padding: var(--spacing-md) 0;
 }
 
 /* Layout horizontal: sidebar + contenido */

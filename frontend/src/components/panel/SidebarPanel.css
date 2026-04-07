@@ -16,13 +16,9 @@
     align-self: flex-start;
 }
 
-/* Info usuario en sidebar */
+/* [064A-53] Ocultado: redundante con el avatar del nav del panel */
 .sidebarUsuario {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    padding-bottom: var(--spacing-lg);
-    border-bottom: 1px solid var(--bg-item-active);
+    display: none;
 }
 
 .sidebarAvatar {

@@ -32,8 +32,13 @@
 
 @media (max-width: 1024px) {
     .showcaseFila {
-        grid-template-columns: 1fr; /* Apilar en móviles/tablets verticales */
+        grid-template-columns: 1fr;
         gap: var(--spacing-lg);
+    }
+
+    /* [064A-53] En mobile/tablet no hace falta sticky, se ve mal */
+    .showcaseCategoria {
+        position: static;
     }
 }
 

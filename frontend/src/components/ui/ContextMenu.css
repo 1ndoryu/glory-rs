@@ -16,8 +16,7 @@
     background: var(--overlay-hover);
 }
 
-/* [064A-18] z-index alto para que el menu no quede clippeado
- * por contenedores con overflow (tablas, scrollables). */
+/* [064A-18+064A-53] z-index alto, sin sombra per diseño. */
 .menuContextualPanel {
     position: absolute;
     top: calc(100% + 8px);
@@ -29,7 +28,6 @@
     border-radius: var(--radius-lg);
     border: 1px solid var(--bg-item-active);
     background: var(--bg-primary);
-    box-shadow: 0 18px 40px var(--border-light);
     z-index: 100;
 }
 
