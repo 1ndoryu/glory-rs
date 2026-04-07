@@ -13,6 +13,7 @@ import {
 } from '../../api/chat';
 import {Button} from '../ui/Button';
 import {Input} from '../ui/Input';
+import {Textarea} from '../ui/Textarea';
 import './ChatInfoPanel.css';
 
 interface ChatInfoPanelProps {
@@ -174,28 +175,20 @@ export const ChatInfoPanel: React.FC<ChatInfoPanelProps> = ({session, onClose}) 
                         ))}
                     </div>
                     <div className="chatInfoNotaInput">
-                        <Input
+                        {/* [074A-40] Textarea sin botón — Enter envía la nota */}
+                        <Textarea
                             className="chatInfoInput"
                             value={noteInput}
                             onChange={e => setNoteInput(e.target.value)}
                             onKeyDown={e => {
-                                if (e.key === 'Enter' && noteInput.trim()) {
+                                if (e.key === 'Enter' && !e.shiftKey && noteInput.trim()) {
+                                    e.preventDefault();
                                     createNote.mutate(noteInput.trim());
                                 }
                             }}
-                            placeholder="Agregar nota..."
+                            placeholder="Agregar nota... (Enter para enviar)"
+                            rows={2}
                         />
-                        <Button
-                            type="button"
-                            variante="texto"
-                            tamano="pequeno"
-                            onClick={() => {
-                                if (noteInput.trim()) createNote.mutate(noteInput.trim());
-                            }}
-                            disabled={createNote.isPending || !noteInput.trim()}
-                        >
-                            <Send size={14} />
-                        </Button>
                     </div>
                 </div>
             </div>

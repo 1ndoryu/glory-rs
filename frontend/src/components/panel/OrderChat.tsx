@@ -69,12 +69,14 @@ export const OrderChat: React.FC<OrderChatProps> = ({orderId}) => {
                             key={msg.id}
                             className={`orderChatBurbuja ${esPropio ? 'orderChatBurbuja--propia' : 'orderChatBurbuja--otra'}`}
                         >
-                            {/* [074A-32] Avatar del sender */}
-                            <img
-                                className="orderChatBurbujaAvatar"
-                                src={msg.sender_avatar_url || DEFAULT_PROFILE_AVATAR}
-                                alt=""
-                            />
+                            {/* [074A-38] Solo mostrar avatar del otro usuario, no el propio */}
+                            {!esPropio && (
+                                <img
+                                    className="orderChatBurbujaAvatar"
+                                    src={msg.sender_avatar_url || DEFAULT_PROFILE_AVATAR}
+                                    alt=""
+                                />
+                            )}
                             <div className="orderChatBurbujaContenido">
                                 <div className="orderChatBurbujaTexto">{msg.content}</div>
                                 <span className="orderChatBurbujaHora">
