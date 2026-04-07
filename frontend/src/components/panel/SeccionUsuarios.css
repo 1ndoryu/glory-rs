@@ -194,13 +194,12 @@
 
 /* ========== Badges ========== */
 
-/* [064A-42] Badges de rol en escala de grises. Sin colores. */
+/* [074A-5] Sin font-weight en badges, diseño sutil. */
 
 .usuariosRolBadge {
     padding: 3px 8px;
     border-radius: var(--radius-sm);
     font-size: var(--text-xs);
-    font-weight: 600;
     text-transform: capitalize;
     background: var(--bg-accent);
     color: var(--text-muted);
@@ -225,7 +224,6 @@
     padding: 3px 8px;
     border-radius: var(--radius-sm);
     font-size: var(--text-xs);
-    font-weight: 500;
 }
 
 .statusActivo {
