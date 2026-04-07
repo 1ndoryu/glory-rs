@@ -140,6 +140,13 @@
     font-weight: 500;
 }
 
+.perfilGuardadoError {
+    font-family: var(--font-serif);
+    font-size: var(--text-sm);
+    color: var(--error-color);
+    font-weight: 500;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .perfilFormGrid {

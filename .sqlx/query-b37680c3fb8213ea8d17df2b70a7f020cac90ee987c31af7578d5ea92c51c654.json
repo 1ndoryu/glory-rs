@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO user_profiles (user_id, bio, linkedin, twitter, website)\n             VALUES ($1, $2, $3, $4, $5)\n             ON CONFLICT (user_id) DO UPDATE SET\n               bio = COALESCE($2, user_profiles.bio),\n               linkedin = COALESCE($3, user_profiles.linkedin),\n               twitter = COALESCE($4, user_profiles.twitter),\n               website = COALESCE($5, user_profiles.website),\n               updated_at = NOW()",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Varchar",
+        "Varchar",
+        "Varchar"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b37680c3fb8213ea8d17df2b70a7f020cac90ee987c31af7578d5ea92c51c654"
+}

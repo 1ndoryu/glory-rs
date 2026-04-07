@@ -45,9 +45,7 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 - 074A-2: Datos de prueba completos para vista cliente y empleado (falta seed data visible).
 - 074A-3: Verificar/corregir datos de prueba de hosting (064A-51 los creó, puede que no se vean).
-- 074A-22: Hay 2 botones de "salir" en el panel y ambos desloguean. El logout debe ir en un submenú al dar click en la imagen de perfil, NO en el sidebar. El botón "salir" del header debe navegar al home sin desloguear.
 - 074A-23: No se puede cambiar el nombre de usuario después de registrarse — verificar si existe y si no, agregar.
-- 074A-24: Al continuar con el pago en un pedido de prueba dice "Request failed with status code 500".
 
 ### CMS Admin (plan: plan-cms-admin-2026-04-07.md)
 
@@ -63,3 +61,13 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 ### SEO y mejoras (plan: plan-seo-completo-2026-04-04.md)
 
 - 074A-14: SEO Fase 2 — Performance (lazy loading, image optimization, Core Web Vitals)
+
+## 
+
+- EL boton de salir sigue deslogeando en vez de ir al home y no veo ningún submenu a dar click a la foto de perfil.
+- Al cambiar el tamaño de la pantalla algo hace que los bordes de los badge de abajo se recorten un poco en carruselItem.
+- Sigue diciendo payments.ts:37  POST http://localhost:3000/api/orders/2e504954-1e1d-49b6-93a9-b2e85ae1092b/pay 500 (Internal Server Error), dice "Ocurrió un error interno" sin explicar por qué. 
+- El boton de enviar en chatInputArea dejalo sin background. 
+- Busca todos los border-color: que esten usando borde negro y cambialo a     border-color: var(--border-default);
+- Hay chat que aparecen sin mensajes en el panel, no tiene sentido. 
+- a .sidebarItem agrega margin-left: -1rem;

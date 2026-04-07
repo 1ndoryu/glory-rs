@@ -1,14 +1,16 @@
 /* [044A-43] Endpoints de perfil de usuario: obtener perfil y subir avatar.
-   Upload multipart con validación MIME (image), max 2MB, guardado en uploads/avatars/. */
+   Upload multipart con validación MIME (image), max 2MB, guardado en uploads/avatars/.
+   [074A-23] PATCH /api/profile para actualizar display_name y campos extendidos. */
 use axum::extract::{Multipart, State};
 use axum::Json;
 use axum::Router;
 use chrono::Utc;
+use validator::Validate;
 
 use crate::errors::AppError;
 use crate::AppState;
 use crate::middleware::AuthUser;
-use crate::models::UserResponse;
+use crate::models::{UpdateProfileRequest, UserResponse};
 use crate::repositories::UserRepository;
 
 const MAX_AVATAR_SIZE: usize = 2 * 1024 * 1024;
@@ -152,6 +154,46 @@ pub struct AvatarResponse {
 pub fn routes() -> Router<AppState> {
     use axum::routing::{get, post};
     Router::new()
-        .route("/profile", get(get_profile))
+        .route("/profile", get(get_profile).patch(update_profile))
         .route("/profile/avatar", post(upload_avatar))
+}
+
+/* [074A-23] PATCH /api/profile — actualiza display_name y campos extendidos */
+#[utoipa::path(
+    patch,
+    path = "/api/profile",
+    request_body = UpdateProfileRequest,
+    responses(
+        (status = 200, description = "Perfil actualizado", body = UserResponse),
+        (status = 400, description = "Datos inválidos"),
+        (status = 401, description = "No autenticado"),
+    ),
+    security(("bearer_auth" = [])),
+    tag = "profile"
+)]
+pub async fn update_profile(
+    auth: AuthUser,
+    State(state): State<AppState>,
+    Json(req): Json<UpdateProfileRequest>,
+) -> Result<Json<UserResponse>, AppError> {
+    req.validate()
+        .map_err(|e| AppError::Validation(e.to_string()))?;
+
+    UserRepository::update_profile(
+        &state.pool,
+        auth.user_id,
+        req.display_name.as_deref(),
+        req.bio.as_deref(),
+        req.linkedin.as_deref(),
+        req.twitter.as_deref(),
+        req.website.as_deref(),
+    )
+    .await
+    .map_err(|e| AppError::Internal(format!("Error actualizando perfil: {e}")))?;
+
+    let user = UserRepository::find_by_id(&state.pool, auth.user_id)
+        .await?
+        .ok_or_else(|| AppError::NotFound("Usuario no encontrado".into()))?;
+
+    Ok(Json(user.into()))
 }

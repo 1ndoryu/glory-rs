@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE users SET display_name = COALESCE($2, display_name) WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Varchar"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "8bed7ca0d6a9d890e0d3e05199be5ffb8fbde94d40c8afcc0b09628afbed76fe"
+}

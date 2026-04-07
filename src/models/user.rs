@@ -163,3 +163,18 @@ fn validate_user_status(status: &str) -> Result<(), validator::ValidationError> 
         }
     }
 }
+
+/* [074A-23] Request para actualizar perfil (display_name + campos extendidos) */
+#[derive(Debug, Deserialize, Validate, ToSchema)]
+pub struct UpdateProfileRequest {
+    #[validate(length(max = 100, message = "El nombre no puede exceder 100 caracteres"))]
+    pub display_name: Option<String>,
+    #[validate(length(max = 500, message = "La descripción no puede exceder 500 caracteres"))]
+    pub bio: Option<String>,
+    #[validate(length(max = 255, message = "URL de LinkedIn demasiado larga"))]
+    pub linkedin: Option<String>,
+    #[validate(length(max = 255, message = "URL de Twitter demasiado larga"))]
+    pub twitter: Option<String>,
+    #[validate(length(max = 500, message = "URL de website demasiado larga"))]
+    pub website: Option<String>,
+}

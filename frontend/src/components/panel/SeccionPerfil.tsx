@@ -12,7 +12,7 @@ import './SeccionPerfil.css';
 export const SeccionPerfil: React.FC = () => {
     const {t} = useTranslation();
     const {
-        estado, guardado, cargando, perfil, avatarUrl,
+        estado, guardado, guardando, errorGuardar, cargando, perfil, avatarUrl,
         subiendoAvatar, actualizarCampo, handleGuardar, handleSubirAvatar
     } = usePerfil();
     const inputArchivoRef = useRef<HTMLInputElement>(null);
@@ -144,8 +144,11 @@ export const SeccionPerfil: React.FC = () => {
                 </div>
 
                 <div className="perfilFormAcciones">
-                    <Button variante="primario" tamano="mediano">{t('panel.save')}</Button>
+                    <Button variante="primario" tamano="mediano" disabled={guardando}>
+                        {guardando ? t('common.saving', 'Guardando...') : t('panel.save')}
+                    </Button>
                     {guardado && <span className="perfilGuardadoExito">{t('panel.saved_success')}</span>}
+                    {errorGuardar && <span className="perfilGuardadoError">{errorGuardar}</span>}
                 </div>
             </form>
         </div>

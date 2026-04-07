@@ -103,6 +103,46 @@ impl UserRepository {
         Ok(())
     }
 
+    /* [074A-23] Actualiza display_name en users + campos extendidos en user_profiles.
+     * Upsert en user_profiles porque puede no existir row para el usuario. */
+    pub async fn update_profile(
+        pool: &PgPool,
+        user_id: Uuid,
+        display_name: Option<&str>,
+        bio: Option<&str>,
+        linkedin: Option<&str>,
+        twitter: Option<&str>,
+        website: Option<&str>,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query!(
+            "UPDATE users SET display_name = COALESCE($2, display_name) WHERE id = $1",
+            user_id,
+            display_name,
+        )
+        .execute(pool)
+        .await?;
+
+        sqlx::query!(
+            r#"INSERT INTO user_profiles (user_id, bio, linkedin, twitter, website)
+             VALUES ($1, $2, $3, $4, $5)
+             ON CONFLICT (user_id) DO UPDATE SET
+               bio = COALESCE($2, user_profiles.bio),
+               linkedin = COALESCE($3, user_profiles.linkedin),
+               twitter = COALESCE($4, user_profiles.twitter),
+               website = COALESCE($5, user_profiles.website),
+               updated_at = NOW()"#,
+            user_id,
+            bio,
+            linkedin,
+            twitter,
+            website,
+        )
+        .execute(pool)
+        .await?;
+
+        Ok(())
+    }
+
     /* [054A-1] Lista paginada de usuarios con búsqueda y filtros para panel admin.
      * Usa COUNT(*) OVER() para obtener el total sin query extra.
      * Filtros: role, status, búsqueda por email/display_name (ILIKE). */

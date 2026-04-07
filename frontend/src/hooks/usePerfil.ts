@@ -1,8 +1,8 @@
 /* [044A-43] Hook de perfil: carga perfil desde backend, sube avatar.
- * Reemplaza la versión stub que usaba obtenerUsuarioActual (siempre null). */
+ * [074A-23] handleGuardar conectado a PATCH /api/profile (antes era stub). */
 import {useState, useEffect} from 'react';
 import {useQueryClient} from '@tanstack/react-query';
-import {subirAvatar} from '../api/profile';
+import {subirAvatar, actualizarPerfil} from '../api/profile';
 import type {PerfilResponse} from '../api/profile';
 import {currentProfileKey, useCurrentProfile} from './useCurrentProfile';
 import {useAuthStore} from '../stores/authStore';
@@ -18,6 +18,8 @@ interface EstadoPerfil {
 interface RetornoUsePerfil {
     estado: EstadoPerfil;
     guardado: boolean;
+    guardando: boolean;
+    errorGuardar: string | null;
     cargando: boolean;
     perfil: PerfilResponse | null;
     avatarUrl: string;
@@ -42,6 +44,8 @@ export const usePerfil = (): RetornoUsePerfil => {
     });
 
     const [guardado, setGuardado] = useState(false);
+    const [guardando, setGuardando] = useState(false);
+    const [errorGuardar, setErrorGuardar] = useState<string | null>(null);
 
     /* Sincroniza los datos editables cuando el backend devuelve el perfil actual */
     useEffect(() => {
@@ -56,11 +60,31 @@ export const usePerfil = (): RetornoUsePerfil => {
         setEstado(prev => ({...prev, [campo]: valor}));
     };
 
-    const handleGuardar = (e: React.FormEvent) => {
+    /* [074A-23] Guardar perfil llamando PATCH /api/profile */
+    const handleGuardar = async (e: React.FormEvent) => {
         e.preventDefault();
-        /* TO-DO: Endpoint de actualización de perfil completo (display_name, bio, redes) */
-        setGuardado(true);
-        setTimeout(() => setGuardado(false), 3000);
+        setGuardando(true);
+        setErrorGuardar(null);
+        try {
+            const resp = await actualizarPerfil({
+                display_name: estado.nombre || undefined,
+                bio: estado.descripcion || undefined,
+                linkedin: estado.linkedin || undefined,
+                twitter: estado.twitter || undefined,
+                website: estado.website || undefined,
+            });
+            queryClient.setQueryData<PerfilResponse | undefined>(
+                currentProfileKey(userId),
+                (prev) => prev ? {...prev, display_name: resp.display_name} : prev,
+            );
+            setGuardado(true);
+            setTimeout(() => setGuardado(false), 3000);
+        } catch (err: unknown) {
+            const axiosData = (err as { response?: { data?: { message?: string } } })?.response?.data;
+            setErrorGuardar(axiosData?.message ?? (err instanceof Error ? err.message : 'Error guardando perfil'));
+        } finally {
+            setGuardando(false);
+        }
     };
 
     const handleSubirAvatar = async (archivo: File) => {
@@ -77,7 +101,7 @@ export const usePerfil = (): RetornoUsePerfil => {
     };
 
     return {
-        estado, guardado, cargando: cargandoPerfil, perfil, avatarUrl,
+        estado, guardado, guardando, errorGuardar, cargando: cargandoPerfil, perfil, avatarUrl,
         subiendoAvatar, actualizarCampo, handleGuardar, handleSubirAvatar
     };
 };

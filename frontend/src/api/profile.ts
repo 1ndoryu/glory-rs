@@ -1,6 +1,7 @@
 /* [044A-43] API de perfil de usuario.
  * GET /api/profile — obtiene perfil del usuario autenticado.
- * POST /api/profile/avatar — sube imagen de avatar (multipart). */
+ * POST /api/profile/avatar — sube imagen de avatar (multipart).
+ * [074A-23] PATCH /api/profile — actualiza display_name y campos extendidos. */
 import instance from './axios-instance';
 
 export interface PerfilResponse {
@@ -17,8 +18,21 @@ export interface AvatarResponse {
     avatar_url: string;
 }
 
+export interface UpdateProfilePayload {
+    display_name?: string;
+    bio?: string;
+    linkedin?: string;
+    twitter?: string;
+    website?: string;
+}
+
 export async function obtenerPerfil(): Promise<PerfilResponse> {
     const {data} = await instance.get<PerfilResponse>('/api/profile');
+    return data;
+}
+
+export async function actualizarPerfil(payload: UpdateProfilePayload): Promise<PerfilResponse> {
+    const {data} = await instance.patch<PerfilResponse>('/api/profile', payload);
     return data;
 }
 
