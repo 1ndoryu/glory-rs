@@ -11,7 +11,7 @@ use uuid::Uuid;
 use crate::errors::AppError;
 use crate::middleware::AuthUser;
 use crate::models::{InitiatePaymentRequest, PaymentIntentResponse, PaymentResponse, UserRole};
-use crate::repositories::OrderRepository;
+use crate::repositories::{OrderRepository, UserRepository};
 use crate::services::{AuditService, PaymentService};
 use crate::AppState;
 
@@ -50,6 +50,14 @@ pub async fn initiate_payment(
         Some(auth.user_id)
     };
 
+    /* [064A-59] Obtener email del usuario para pre-llenar en Stripe (receipt_email).
+     * Así no se le pide email de nuevo en el checkout. */
+    let user_email = UserRepository::find_by_id(&state.pool, auth.user_id)
+        .await
+        .ok()
+        .flatten()
+        .map(|u| u.email);
+
     let result = PaymentService::initiate_payment(
         &state.pool,
         &state.http_client,
@@ -57,6 +65,7 @@ pub async fn initiate_payment(
         order_id,
         caller_id,
         req.phase_number,
+        user_email.as_deref(),
     )
     .await?;
 

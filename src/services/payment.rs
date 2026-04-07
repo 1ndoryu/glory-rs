@@ -19,6 +19,7 @@ pub struct PaymentService;
 impl PaymentService {
     /// Inicia un pago: crea `PaymentIntent` en Stripe con capture manual, guarda en BD.
     /// [064A-65] `client_id` es None si el caller es admin (no aplica ownership check).
+    /// [064A-59] `receipt_email` pre-llena el email en Stripe para no pedirlo en checkout.
     pub async fn initiate_payment(
         pool: &PgPool,
         http_client: &Client,
@@ -26,6 +27,7 @@ impl PaymentService {
         order_id: Uuid,
         client_id: Option<Uuid>,
         phase_number: Option<i32>,
+        receipt_email: Option<&str>,
     ) -> Result<PaymentIntentResponse, AppError> {
         let order = OrderRepository::find_order_by_id(pool, order_id)
             .await?
@@ -49,6 +51,7 @@ impl PaymentService {
             &order.currency,
             order_id,
             phase_number,
+            receipt_email,
         )
         .await?;
 
@@ -289,6 +292,7 @@ impl PaymentService {
     }
 
     /// Crea `PaymentIntent` en Stripe con `capture_method` manual (escrow)
+    /// [064A-59] `receipt_email` pre-llena el email — Stripe no lo pide de nuevo en checkout
     async fn create_stripe_intent(
         client: &Client,
         api_key: &str,
@@ -296,6 +300,7 @@ impl PaymentService {
         currency: &str,
         order_id: Uuid,
         phase_number: Option<i32>,
+        receipt_email: Option<&str>,
     ) -> Result<StripePaymentIntentMin, AppError> {
         let mut form = vec![
             ("amount".to_string(), amount.to_string()),
@@ -308,6 +313,9 @@ impl PaymentService {
         ];
         if let Some(pn) = phase_number {
             form.push(("metadata[phase_number]".to_string(), pn.to_string()));
+        }
+        if let Some(email) = receipt_email {
+            form.push(("receipt_email".to_string(), email.to_string()));
         }
 
         let resp = client
