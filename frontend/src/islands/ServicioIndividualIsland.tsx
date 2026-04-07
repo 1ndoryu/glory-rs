@@ -4,7 +4,9 @@
  * Estructura: Hero -> Galeria -> CTA -> Skills -> Relacionados -> Contacto -> Footer
  * Skills y datos centralizados en data/ (DRY).
  * [044A-38 Fase 1] CTA "Contratar" apunta a /panel si logueado (Fase 2 conecta con API de órdenes).
+ * [084A-4] Restaurado ModalCompra — click en plan abre modal de pago (revertido 074A-36).
  */
+import {useState, useCallback} from 'react';
 import {useTranslation} from 'react-i18next';
 import {useAuthStore} from '../stores/authStore';
 import {useChatStore} from '../stores/chatStore';
@@ -19,9 +21,11 @@ import {SeccionSkillsServicio} from '../components/servicios/SeccionSkillsServic
 import {SeccionServiciosRelacionados} from '../components/servicios/SeccionServiciosRelacionados';
 import {SeccionCta} from '../components/ui/SeccionCta';
 import {SeccionPlanesServicio} from '../components/servicios/SeccionPlanesServicio';
+import {ModalCompra} from '../components/servicios/ModalCompra';
 import {SeccionContacto} from '../components/home/SeccionContacto';
 import {SKILLS_POR_DEFECTO} from '../data/skills';
 import {obtenerPlanesServicio} from '../data/planes/index';
+import type {PlanServicio} from '../data/planes/tipos';
 import {SERVICIOS_DATA} from '../data/servicios';
 
 /* [064A-47] Imagen del servicio añadida al hero. */
@@ -37,6 +41,11 @@ export const ServicioIndividualIsland = ({titulo, descripcion, precio_desde, slu
     const {t} = useTranslation();
     const logueado = useAuthStore(s => s.logueado);
     const abrirChat = useChatStore(s => s.abrir);
+
+    /* [084A-4] Estado del modal de compra */
+    const [planSeleccionado, setPlanSeleccionado] = useState<PlanServicio | null>(null);
+    const handleSeleccionarPlan = useCallback((plan: PlanServicio) => setPlanSeleccionado(plan), []);
+    const handleCerrarModal = useCallback(() => setPlanSeleccionado(null), []);
 
     /* [064A-5] Si logueado, CTA lleva al panel. Si no, abre el chat. */
     const ctaLink = logueado ? '/panel' : undefined;
@@ -74,11 +83,19 @@ export const ServicioIndividualIsland = ({titulo, descripcion, precio_desde, slu
             />
             <SeccionHeroServicio titulo={tituloTraducido} descripcion={descripcionTraducida} imagen={imagen} />
             <SeccionGaleriaServicio />
-            <SeccionPlanesServicio slug={servicioId} />
+            <SeccionPlanesServicio slug={servicioId} onSeleccionarPlan={handleSeleccionarPlan} />
             <SeccionCta descripcion={[t('service_detail.cta_1'), t('service_detail.cta_2')]} textoBotonPrimario={precioMinimo ? `${t('service_detail.cta_hire')} ${precioMinimo}` : t('service_detail.cta_hire')} linkBotonPrimario={ctaLink} onBotonPrimarioClick={logueado ? undefined : abrirChat} textoBotonSecundario={t('service_detail.cta_contact')} onBotonSecundarioClick={abrirChat} />
             <SeccionSkillsServicio skills={SKILLS_POR_DEFECTO} />
             <SeccionServiciosRelacionados servicioActualId={servicioId} />
             <SeccionContacto />
+            {planSeleccionado && (
+                <ModalCompra
+                    plan={planSeleccionado}
+                    servicioSlug={servicioId}
+                    abierto={true}
+                    onCerrar={handleCerrarModal}
+                />
+            )}
         </LayoutPagina>
     );
 };

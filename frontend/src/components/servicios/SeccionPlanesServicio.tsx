@@ -1,27 +1,25 @@
 /* [044A-40] Componente: SeccionPlanesServicio
  * Muestra las tarjetas de precios de un servicio.
- * [074A-36] CTA abre el chat widget directamente.*/
+ * [084A-4] CTA abre ModalCompra con el plan seleccionado (revertido 074A-36 que abría chat). */
 import React from 'react';
 import {useTranslation} from 'react-i18next';
 import {obtenerPlanesServicio, type PlanServicio} from '../../data/planes/index';
 import {Button} from '../ui/Button';
-import {useChatStore} from '../../stores/chatStore';
 import './SeccionPlanesServicio.css';
 
 interface SeccionPlanesServicioProps {
     slug: string;
+    onSeleccionarPlan?: (plan: PlanServicio) => void;
 }
 
 interface TarjetaPlanProps {
     plan: PlanServicio;
+    onSeleccionar?: (plan: PlanServicio) => void;
 }
 
-const TarjetaPlan: React.FC<TarjetaPlanProps> = ({plan}) => {
+const TarjetaPlan: React.FC<TarjetaPlanProps> = ({plan, onSeleccionar}) => {
     const {t} = useTranslation();
     const claseDestacado = plan.destacado ? 'tarjetaPlanDestacado' : '';
-
-    /* [074A-36] CTA abre el chat widget directamente */
-    const abrirChat = useChatStore(s => s.abrir);
 
     return (
         <div className={`tarjetaPlan ${claseDestacado}`}>
@@ -61,7 +59,7 @@ const TarjetaPlan: React.FC<TarjetaPlanProps> = ({plan}) => {
                 <Button
                     variante={plan.destacado ? 'primario' : 'outline'}
                     tamano="mediano"
-                    onClick={abrirChat}
+                    onClick={() => onSeleccionar?.(plan)}
                 >
                     {t(`content.plans.${plan.id}.cta`, plan.ctaTexto)}
                 </Button>
@@ -70,7 +68,7 @@ const TarjetaPlan: React.FC<TarjetaPlanProps> = ({plan}) => {
     );
 };
 
-export const SeccionPlanesServicio: React.FC<SeccionPlanesServicioProps> = ({slug}) => {
+export const SeccionPlanesServicio: React.FC<SeccionPlanesServicioProps> = ({slug, onSeleccionarPlan}) => {
     const {t} = useTranslation();
     const datos = obtenerPlanesServicio(slug);
 
@@ -85,7 +83,7 @@ export const SeccionPlanesServicio: React.FC<SeccionPlanesServicioProps> = ({slu
                 </div>
                 <div className="planesGrid">
                     {datos.planes.map(plan => (
-                        <TarjetaPlan key={plan.id} plan={plan} />
+                        <TarjetaPlan key={plan.id} plan={plan} onSeleccionar={onSeleccionarPlan} />
                     ))}
                 </div>
             </div>
