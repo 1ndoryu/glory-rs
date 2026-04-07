@@ -62,8 +62,6 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 - 074A-14: SEO Fase 2 — Performance (lazy loading, image optimization, Core Web Vitals)
 
 ## 
-
-- 074A-27: Stripe 500 sigue diciendo "Ocurrió un error interno" sin explicar — follow-up de 074A-24 (verificar si los cambios aplican).
 - En el chat del panel no aparece la foto de perifl de quien claramente si tiene foto de perfil. 
 - Quita la sombra de .orderChatPanel y la altura no esta tomando la altura maxima, la minima debe ser 440px, orderChatEncabezado es innecesario y el chat debe aparecer al final. 
 - el boton de suscribir en el footer le falta borde
