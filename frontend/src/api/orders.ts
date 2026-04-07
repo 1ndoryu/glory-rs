@@ -3,9 +3,7 @@
  * Tipos alineados con OrderResponse y OrderPhaseResponse del backend. */
 import instance from './axios-instance';
 
-/* ============================================================
-   TIPOS — alineados con backend Rust (serde snake_case)
-   ============================================================ */
+/*    TIPOS — alineados con backend Rust (serde snake_case) */
 
 export type OrderStatus =
     | 'pending_payment'
@@ -74,9 +72,7 @@ export interface CreateOrderRequest {
     client_notes?: string;
 }
 
-/* ============================================================
-   API CALLS
-   ============================================================ */
+/*    API CALLS */
 
 export async function apiListOrders(): Promise<OrderResponse[]> {
     const {data} = await instance.get<OrderResponse[]>('/api/orders');
@@ -121,9 +117,7 @@ export async function apiRequestRevision(
 /* [044A-38 Fase 6] apiDeliverPhase eliminada: la entrega ahora es multipart
  * y vive en api/deliverables.ts (apiDeliverPhase con FormData). */
 
-/* ============================================================
-   HELPERS — labels y colores para UI
-   ============================================================ */
+/*    HELPERS — labels y colores para UI */
 
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
     pending_payment: 'Pendiente de pago',

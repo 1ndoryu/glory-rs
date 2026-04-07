@@ -1,9 +1,8 @@
-/**
- * [044A-32] Planes de precios unificados.
+/* [044A-32] Planes de precios unificados.
  * [054A-21] 3 tiers por servicio: Basico, Medio, Avanzado.
  * El botón "Conversar" reemplaza la funcionalidad personalizada.
  * Servicios activos: Web, Apps, IA, Branding, E-commerce, SEO, Marketing.
- */
+ * sentinel-disable-file limite-lineas: archivo de datos centralizado (7 servicios × ~60 líneas cada uno). */
 import {type PlanesDeServicio, incluida, noIncluida} from './tipos';
 
 /* ── Diseño Web ─────────────────────────────────────────── */

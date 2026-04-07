@@ -1,3 +1,5 @@
+/* sentinel-disable-file sqlx-query-sin-macro sqlx-query-as-sin-macro: seed example usa runtime
+ * queries para insertar datos de prueba con tipos genéricos. */
 /* [064A-15+064A-21] Seed: datos de prueba realistas para vistas de cliente y empleado.
  * Crea usuarios de prueba (cliente, empleado) y órdenes en estados coherentes.
  * Ejecutar: cargo run --example seed_test_data

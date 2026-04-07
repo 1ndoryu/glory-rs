@@ -1,3 +1,5 @@
+/* sentinel-disable-file sqlx-query-sin-macro sqlx-query-as-sin-macro: chat usa runtime query_as
+ * para soportar campos con #[sqlx(default)] (visitor_ip, visitor_user_agent). */
 /* [044A-38 Fase 5] Repositorio de chat: CRUD sesiones y mensajes.
  * [064A-72] ChatSession queries migradas a runtime query_as para soportar
  * campos con #[sqlx(default)] (visitor_ip, visitor_user_agent).

@@ -11,6 +11,7 @@ import {LayoutPagina} from '../components/layout/LayoutPagina';
 import {SEOHead} from '../components/seo/SEOHead';
 import {Button} from '../components/ui/Button';
 import {Input} from '../components/ui/Input';
+import {Select} from '../components/ui/Select';
 import {Textarea} from '../components/ui/Textarea';
 import {INFO_CONTACTO} from '../data/contacto';
 
@@ -143,7 +144,7 @@ export const ContactoIsland = ({titulo}: ContactoIslandProps): JSX.Element => {
                                 {/* Presupuesto */}
                                 <div className="campoCampo">
                                     <label htmlFor="presupuesto" className="campoEtiqueta">{t('contact.budget_label')}</label>
-                                    <select
+                                    <Select
                                         id="presupuesto"
                                         name="presupuesto"
                                         value={formulario.presupuesto}
@@ -153,7 +154,7 @@ export const ContactoIsland = ({titulo}: ContactoIslandProps): JSX.Element => {
                                         {PRESUPUESTOS_KEYS.map(p => (
                                             <option key={p.value} value={p.value}>{t(p.key)}</option>
                                         ))}
-                                    </select>
+                                    </Select>
                                 </div>
                             </div>
 

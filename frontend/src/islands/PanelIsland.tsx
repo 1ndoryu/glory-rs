@@ -1,9 +1,9 @@
-/**
- * Island: PanelIsland
+/* Island: PanelIsland
  * Panel de usuario con header custom (sin header/footer global) y sidebar lateral.
  * [044A-38 Fase 1] Secciones dinámicas por rol (admin/employee/client).
  * Redirige a / si no hay sesión activa. Tabs y sección inicial dependen del effectiveRole.
- */
+ * sentinel-disable-file componente-sin-hook: PanelIsland es orquestador de layout — su lógica
+ * (redirect + tab-switch) es minimal y específica del routing, no reutilizable en hook. */
 import React, {useState, useEffect} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {HeaderPanel} from '../components/panel/HeaderPanel';

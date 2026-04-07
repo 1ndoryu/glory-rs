@@ -2,7 +2,9 @@
  * Click o drag-and-drop para seleccionar imagen.
  * Sube al endpoint /api/admin/uploads y retorna URL via onChange. */
 import React, { useCallback, useRef, useState } from 'react';
+import { Camera, X } from 'lucide-react';
 import { apiUploadImage } from '../../api/uploads';
+import { Button } from './Button';
 import './UploadImage.css';
 
 interface UploadImageProps {
@@ -88,14 +90,15 @@ export const UploadImage: React.FC<UploadImageProps> = ({
                 {valor ? (
                     <div className="uploadImagenPreview">
                         <img src={valor} alt="Preview" />
-                        <button
-                            type="button"
+                        <Button
+                            variante="texto"
+                            tamano="pequeno"
                             className="uploadImagenEliminar"
                             onClick={handleRemove}
                             aria-label="Eliminar imagen"
                         >
-                            ×
-                        </button>
+                            <X size={14} />
+                        </Button>
                     </div>
                 ) : (
                     <div className="uploadImagenPlaceholder">
@@ -103,7 +106,7 @@ export const UploadImage: React.FC<UploadImageProps> = ({
                             <span className="uploadImagenCargando">Subiendo...</span>
                         ) : (
                             <>
-                                <span className="uploadImagenIcono">📷</span>
+                                <Camera size={24} className="uploadImagenIcono" />
                                 <span>Click o arrastra una imagen</span>
                             </>
                         )}

@@ -3,9 +3,7 @@
 
 import axiosInstance from './axios-instance';
 
-/* ============================================================
-   TIPOS
-   ============================================================ */
+/*    TIPOS */
 
 export interface PhaseDeliverable {
     id: string;
@@ -33,9 +31,7 @@ export interface PhaseDeliverablesResponse {
     max_revisions: number;
 }
 
-/* ============================================================
-   REST
-   ============================================================ */
+/*    REST */
 
 /* [074A-51] Entregar fase — files opcional, el botón puede marcar entrega sin archivos */
 export async function apiDeliverPhase(
@@ -78,9 +74,7 @@ export async function apiDownloadDeliverable(deliverableId: string): Promise<str
     return URL.createObjectURL(data as Blob);
 }
 
-/* ============================================================
-   CONSTANTES UI
-   ============================================================ */
+/*    CONSTANTES UI */
 
 export const PHASE_STATUS_LABELS: Record<string, string> = {
     Locked: 'Bloqueada',

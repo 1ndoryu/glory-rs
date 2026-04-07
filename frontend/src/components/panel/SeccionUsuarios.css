@@ -31,7 +31,7 @@
     border-radius: var(--radius-md);
 }
 
-/* ========== Filtros ========== */
+/* Filtros */
 
 .usuariosFiltros {
     display: flex;
@@ -92,7 +92,7 @@
     white-space: nowrap;
 }
 
-/* ========== Tabla ========== */
+/* Tabla */
 
 /* [064A-18] overflow:visible para que MenuContextual no quede clippeado.
  * La tabla tiene pocas columnas y no necesita scroll horizontal. */
@@ -134,7 +134,7 @@
     vertical-align: middle;
 }
 
-/* ========== Celda de usuario ========== */
+/* Celda de usuario */
 
 .usuariosCeldaUsuario {
     display: flex;
@@ -192,7 +192,7 @@
     text-overflow: ellipsis;
 }
 
-/* ========== Badges ========== */
+/* Badges */
 
 /* [074A-5] Sin font-weight en badges, diseño sutil. */
 
@@ -241,7 +241,7 @@
     color: var(--color-warning-text);
 }
 
-/* ========== Fecha ========== */
+/* Fecha */
 
 .usuariosFecha {
     font-size: var(--text-xs);
@@ -250,7 +250,7 @@
     white-space: nowrap;
 }
 
-/* ========== Menú de acciones ========== */
+/* Menú de acciones */
 
 .usuariosAcciones {
     position: relative;
@@ -333,7 +333,7 @@
     margin: 4px 0;
 }
 
-/* ========== Paginación ========== */
+/* Paginación */
 
 .usuariosPaginacion {
     display: flex;
@@ -370,7 +370,7 @@
     opacity: 0.6;
 }
 
-/* ========== Modal de confirmación (usa <Modal> base, estilos adicionales) ========== */
+/* Modal de confirmación (usa <Modal> base, estilos adicionales) */
 
 .usuariosModal {
     max-width: 400px;
@@ -428,7 +428,7 @@
     cursor: not-allowed;
 }
 
-/* ========== Responsive ========== */
+/* Responsive */
 
 @media (max-width: 768px) {
     .usuariosContenedor {

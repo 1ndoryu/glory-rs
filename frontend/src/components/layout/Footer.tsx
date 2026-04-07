@@ -51,11 +51,15 @@ export const Footer: React.FC = () => {
              * Endpoint esperado: /wp-json/glory/v1/newsletter
              * Método: POST, Body: { email }
              */
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 10000);
             const response = await fetch('/wp-json/glory/v1/newsletter', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({email})
+                body: JSON.stringify({email}),
+                signal: controller.signal,
             });
+            clearTimeout(timeout);
 
             if (response.ok) {
                 setEstado('exito');

@@ -2,6 +2,9 @@
  * Convierte a minúsculas, elimina acentos, reemplaza espacios por guiones.
  * Permite edición manual del slug si el usuario lo desea. */
 import React, { useCallback, useEffect, useState } from 'react';
+import { RotateCcw } from 'lucide-react';
+import { Input } from './Input';
+import { Button } from './Button';
 import './SlugInput.css';
 
 interface SlugInputProps {
@@ -53,7 +56,7 @@ export const SlugInput: React.FC<SlugInputProps> = ({
             <span className="slugInputEtiqueta">Slug</span>
             <div className="slugInputContenedor">
                 <span className="slugInputPrefijo">/</span>
-                <input
+                <Input
                     type="text"
                     className="slugInputCampo"
                     value={valor}
@@ -61,14 +64,15 @@ export const SlugInput: React.FC<SlugInputProps> = ({
                     placeholder="slug-automatico"
                 />
                 {manual && (
-                    <button
-                        type="button"
+                    <Button
+                        variante="texto"
+                        tamano="pequeno"
                         className="slugInputReset"
                         onClick={handleReset}
                         title="Regenerar desde título"
                     >
-                        ↻
-                    </button>
+                        <RotateCcw size={14} />
+                    </Button>
                 )}
             </div>
         </div>

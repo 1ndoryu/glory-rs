@@ -18,8 +18,8 @@ export const SeccionShowcase = (): JSX.Element => {
             <div className="showcaseContenedor">
                 <SeccionHeader titulo={t('sections.selected_work')} />
 
-                {CATEGORIAS_SHOWCASE.map((categoria, index) => (
-                    <div className="showcaseFila" key={index}>
+                {CATEGORIAS_SHOWCASE.map((categoria) => (
+                    <div className="showcaseFila" key={categoria.titulo}>
                         <div className="showcaseCategoria">
                             <h2 className="showcaseTituloCategoria">{categoria.titulo}</h2>
                         </div>

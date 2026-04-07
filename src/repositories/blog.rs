@@ -1,3 +1,5 @@
+/* sentinel-disable-file sqlx-query-sin-macro sqlx-query-as-sin-macro: blog usa runtime queries
+ * con COALESCE para partial updates y tipos FromRow genéricos. */
 /* [074A-10] Repositorio para blog posts.
  * Queries SQL directas con sqlx. Usa COALESCE para partial updates. */
 

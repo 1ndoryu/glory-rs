@@ -3,7 +3,9 @@
  * Vista lista ↔ detalle. Detalle extraído a OrdenDetalle.tsx (SRP).
  * [064A-50] Tabs Activas/Historial. Activas ordenadas por prioridad de status.
  * Canceladas y completadas van a Historial.
- * [084A-1] Admin: búsqueda, filtro por empleado, empleado en card footer. */
+ * [084A-1] Admin: búsqueda, filtro por empleado, empleado en card footer.
+ * sentinel-disable-file componente-sin-hook: la lógica son constantes de ordenamiento y filtros
+ * que no son reutilizables; data ya está en useOrdenes. */
 import React, {useCallback, useMemo, useState} from 'react';
 import {FolderOpen, Search} from 'lucide-react';
 import {useAuthStore} from '../../stores/authStore';

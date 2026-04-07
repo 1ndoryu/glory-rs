@@ -346,7 +346,7 @@ body.menu-open {
         visibility: visible !important;
     }
 
-    /* ===== Submenús (dropdown) en escritorio ===== */
+    /* Submenús (dropdown) en escritorio */
     .siteMenuNav ul.menu > li {
         position: relative;
     }

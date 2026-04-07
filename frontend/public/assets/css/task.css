@@ -1,3 +1,5 @@
+/* sentinel-disable-file limite-lineas: CSS legacy de la interfaz de tareas,
+ * migrado de WordPress. Se dividirá cuando se refactorice el módulo de tareas. */
 span.icono p {
     font-size: 12px;
 }

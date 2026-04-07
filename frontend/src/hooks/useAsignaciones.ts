@@ -21,9 +21,7 @@ const UNASSIGNED_KEY = ['orders-unassigned'] as const;
 const DELEGATIONS_KEY = ['delegations'] as const;
 const EMPLOYEES_KEY = ['employees'] as const;
 
-/* ============================================================
-   ÓRDENES SIN ASIGNAR (employee + admin)
-   ============================================================ */
+/*    ÓRDENES SIN ASIGNAR (employee + admin) */
 
 export function useDisponibles() {
     const queryClient = useQueryClient();
@@ -52,9 +50,7 @@ export function useDisponibles() {
     };
 }
 
-/* ============================================================
-   DELEGACIONES (employee + admin)
-   ============================================================ */
+/*    DELEGACIONES (employee + admin) */
 
 export function useDelegaciones() {
     const queryClient = useQueryClient();
@@ -104,9 +100,7 @@ export function useDelegaciones() {
     };
 }
 
-/* ============================================================
-   EMPLEADOS (admin)
-   ============================================================ */
+/*    EMPLEADOS (admin) */
 
 export function useEmpleados() {
     const {

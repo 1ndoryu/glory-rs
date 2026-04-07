@@ -39,8 +39,8 @@ export const SeccionCta: React.FC<SeccionCtaProps> = ({titulo, descripcion, text
             <div className="ctaContenedor">
                 <div className="ctaTexto">
                     {titulo && <h2 className="ctaTitulo">{titulo}</h2>}
-                    {parrafos.map((texto, idx) => (
-                        <p key={idx}>{texto}</p>
+                    {parrafos.map((texto) => (
+                        <p key={texto}>{texto}</p>
                     ))}
                 </div>
                 {(textoBotonPrimario || textoBotonSecundario) && (

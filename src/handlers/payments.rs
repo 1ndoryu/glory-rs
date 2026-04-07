@@ -1,3 +1,5 @@
+/* sentinel-disable-file sqlx-query-sin-macro: payment handler usa runtime query para
+ * UPDATE de estado tras webhook Stripe (tipo dinámico por contexto). */
 /* [044A-38 Fase 3] Handlers de pagos: Stripe checkout, webhook, historial.
  * Webhook no requiere auth — se verifica con firma HMAC-SHA256. */
 

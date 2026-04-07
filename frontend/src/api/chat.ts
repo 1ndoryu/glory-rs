@@ -3,9 +3,7 @@
 
 import axiosInstance, {getApiHost} from './axios-instance';
 
-/* ============================================================
-   TIPOS
-   ============================================================ */
+/*    TIPOS */
 
 export interface ChatSession {
     id: string;
@@ -54,9 +52,7 @@ export interface WsServerMessage {
     message?: string;
 }
 
-/* ============================================================
-   REST API
-   ============================================================ */
+/*    REST API */
 
 export async function apiListChatSessions(): Promise<ChatSession[]> {
     const {data} = await axiosInstance.get<ChatSession[]>('/api/chat/sessions');
@@ -100,9 +96,7 @@ export async function apiCloseSession(sessionId: string): Promise<void> {
     await axiosInstance.post(`/api/chat/sessions/${sessionId}/close`);
 }
 
-/* ============================================================
-   [064A-72] NOTAS DE SESIÓN Y RENOMBRAR VISITANTE
-   ============================================================ */
+/*    [064A-72] NOTAS DE SESIÓN Y RENOMBRAR VISITANTE */
 
 export interface ChatSessionNote {
     id: string;
@@ -137,9 +131,7 @@ export async function apiUpdateVisitorName(
     await axiosInstance.patch(`/api/chat/sessions/${sessionId}/visitor-name`, {name});
 }
 
-/* ============================================================
-   WEBSOCKET HELPERS
-   ============================================================ */
+/*    WEBSOCKET HELPERS */
 
 /** Construye URL de WebSocket para visitante */
 export function buildVisitorWsUrl(visitorId: string, visitorName?: string): string {
@@ -159,9 +151,7 @@ export function buildStaffWsUrl(token: string): string {
     return `${protocol}//${host}/ws/chat/staff?token=${encodeURIComponent(token)}`;
 }
 
-/* ============================================================
-   CONSTANTES UI
-   ============================================================ */
+/*    CONSTANTES UI */
 
 export const SENDER_LABELS: Record<string, string> = {
     client: 'Cliente',

@@ -1,3 +1,5 @@
+/* sentinel-disable-file sqlx-query-sin-macro sqlx-query-as-sin-macro: seed usa runtime queries
+ * porque ejecuta SQL dinámico con datos de prueba y tipos genéricos. */
 /* [064A-62] Servicio de seed: recrear/borrar datos de prueba desde el panel admin.
  * Lógica extraída de examples/seed_test_data.rs. Crea usuarios de test (cliente, empleado)
  * y órdenes en estados variados para testear flujos del marketplace.

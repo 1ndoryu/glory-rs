@@ -3,6 +3,7 @@
 import React from 'react';
 import { X, CheckCircle, AlertCircle, Info, AlertTriangle } from 'lucide-react';
 import { useToastStore, type ToastType } from '../../stores/toastStore';
+import { Button } from './Button';
 import './ToastContainer.css';
 
 const ICONS: Record<ToastType, React.ElementType> = {
@@ -26,14 +27,15 @@ export const ToastContainer: React.FC = () => {
                     <div key={t.id} className={`toastItem toastItem${t.type}`}>
                         <Icon size={18} className="toastIcono" />
                         <span className="toastMensaje">{t.message}</span>
-                        <button
+                        <Button
+                            variante="texto"
+                            tamano="pequeno"
                             className="toastCerrar"
                             onClick={() => removeToast(t.id)}
-                            type="button"
                             aria-label="Cerrar"
                         >
                             <X size={14} />
-                        </button>
+                        </Button>
                     </div>
                 );
             })}

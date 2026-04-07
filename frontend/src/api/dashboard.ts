@@ -3,7 +3,7 @@
 
 import axiosInstance from './axios-instance';
 
-/* ========== Types ========== */
+/* Types */
 
 export interface RevenueStats {
   total_revenue: number;
@@ -42,7 +42,7 @@ export interface DashboardResponse {
   alerts: DashboardAlerts;
 }
 
-/* ========== REST Function ========== */
+/* REST Function */
 
 export async function apiGetDashboard(): Promise<DashboardResponse> {
   const { data } = await axiosInstance.get<DashboardResponse>('/api/admin/dashboard');

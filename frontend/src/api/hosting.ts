@@ -3,9 +3,7 @@
 
 import axiosInstance from './axios-instance';
 
-/* ============================================================
-   TIPOS
-   ============================================================ */
+/*    TIPOS */
 
 export interface HostingSubscription {
     id: string;
@@ -37,9 +35,7 @@ export interface CreateHostingRequest {
     domain?: string;
 }
 
-/* ============================================================
-   REST API
-   ============================================================ */
+/*    REST API */
 
 export async function apiListHostingSubscriptions(): Promise<HostingSubscription[]> {
     const {data} = await axiosInstance.get<HostingSubscription[]>('/hosting/subscriptions');
@@ -71,9 +67,7 @@ export async function apiListHostingEvents(id: string): Promise<HostingEvent[]> 
     return data;
 }
 
-/* ============================================================
-   CONSTANTES
-   ============================================================ */
+/*    CONSTANTES */
 
 export const HOSTING_PLAN_LABELS: Record<string, string> = {
     basico: 'Básico',

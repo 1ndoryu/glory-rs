@@ -1,3 +1,5 @@
+/* sentinel-disable-file sqlx-query-as-sin-macro: chat handler usa runtime query_as
+ * para query ad-hoc de sesiones con tipos FromRow genéricos. */
 /* [044A-38 Fase 5] Handlers de chat: WebSocket + REST.
  * WS: /ws/chat/visitor (anónimo), /ws/chat/staff (autenticado).
  * REST: CRUD sesiones y mensajes bajo /api/chat/. */

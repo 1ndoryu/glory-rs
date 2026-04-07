@@ -1,9 +1,9 @@
-/**
- * Componente: SeccionTestimonios
+/* Componente: SeccionTestimonios
  * Muestra un carrusel interactivo de testimonios.
  * Datos centralizados en data/testimonios.ts (DRY).
  * Incluye botón para escribir un testimonio (abre modal).
- */
+ * sentinel-disable-file inline-style: CSS custom properties dinámicas (--testimonio-idx,
+ * --testimonio-drag, --testimonio-transition) se asignan via style={{}}, no hay alternativa CSS pura. */
 import React, {useState} from 'react';
 import './SeccionTestimonios.css';
 import {useCarruselInfinito} from '../../hooks/useCarruselInfinito';

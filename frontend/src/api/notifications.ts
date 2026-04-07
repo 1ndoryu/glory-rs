@@ -3,7 +3,7 @@
 
 import axiosInstance, {getApiHost} from './axios-instance';
 
-/* ========== Types ========== */
+/* Types */
 
 export interface NotificationResponse {
   id: string;
@@ -26,7 +26,7 @@ export interface MarkReadBody {
   ids: string[];
 }
 
-/* ========== Tipos de notificación (mirrors backend) ========== */
+/* Tipos de notificación (mirrors backend) */
 
 export const NOTIF_TYPES = {
   new_order: { label: 'Nueva orden', icon: 'ShoppingCart' },
@@ -49,7 +49,7 @@ export const NOTIF_TYPES = {
 
 export type NotificationType = keyof typeof NOTIF_TYPES;
 
-/* ========== REST Functions ========== */
+/* REST Functions */
 
 export async function apiListNotifications(
   limit = 20,
@@ -84,7 +84,7 @@ export async function apiMarkAllRead(): Promise<{ marked: number }> {
   return data;
 }
 
-/* ========== WebSocket URL builder ========== */
+/* WebSocket URL builder */
 
 export function buildNotificationsWsUrl(token: string): string {
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';

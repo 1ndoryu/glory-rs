@@ -16,9 +16,7 @@ import {
 } from '../api/chat';
 import {useAuthStore} from '../stores/authStore';
 
-/* ============================================================
-   HOOK: Sesiones y mensajes REST
-   ============================================================ */
+/*    HOOK: Sesiones y mensajes REST */
 
 export function useChat(sessionId?: string, limit = 100) {
     const queryClient = useQueryClient();
@@ -63,9 +61,7 @@ export function useChat(sessionId?: string, limit = 100) {
     };
 }
 
-/* ============================================================
-   HOOK: WebSocket en tiempo real (staff panel)
-   ============================================================ */
+/*    HOOK: WebSocket en tiempo real (staff panel) */
 
 /* [054A-4] Typing indicator: mapa session_id → info del que escribe */
 export interface TypingInfo {

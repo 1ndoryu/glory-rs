@@ -3,7 +3,7 @@
 
 import axiosInstance from './axios-instance';
 
-/* ========== Types ========== */
+/* Types */
 
 export interface AdminUserItem {
   id: string;
@@ -31,7 +31,7 @@ export interface ListUsersParams {
   status?: string;
 }
 
-/* ========== API functions ========== */
+/* API functions */
 
 export async function apiListUsers(params: ListUsersParams = {}): Promise<PaginatedUsers> {
   const { data } = await axiosInstance.get('/api/admin/users', { params });
@@ -46,7 +46,7 @@ export async function apiChangeStatus(userId: string, status: string): Promise<v
   await axiosInstance.patch(`/api/admin/users/${userId}/status`, { status });
 }
 
-/* ========== Constantes de UI ========== */
+/* Constantes de UI */
 
 export const ROLE_LABELS: Record<string, string> = {
   admin: 'Admin',

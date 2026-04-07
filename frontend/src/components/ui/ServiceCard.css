@@ -4,9 +4,7 @@
  * Variantes: .detailed (Grid principal) y .simple (Listado Home)
  */
 
-/* ==========================================================================
-   Variante: Detailed (Tarjeta completa 1:1)
-   ========================================================================== */
+/*    Variante: Detailed (Tarjeta completa 1:1) */
 .serviceCard.detailed {
     display: flex;
     flex-direction: column;
@@ -92,9 +90,7 @@
     margin-top: var(--spacing-xs);
 }
 
-/* ==========================================================================
-   Variante: Simple (Lista horizontal)
-   ========================================================================== */
+/*    Variante: Simple (Lista horizontal) */
 .serviceCard.simple {
     display: flex;
     align-items: center;

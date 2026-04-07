@@ -139,9 +139,7 @@ export const SeccionHosting: React.FC = () => {
     );
 };
 
-/* ============================================================
-   SUB-COMPONENTES
-   ============================================================ */
+/*    SUB-COMPONENTES */
 
 function HostingRow({
     sub,

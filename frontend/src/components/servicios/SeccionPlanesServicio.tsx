@@ -37,7 +37,7 @@ const TarjetaPlan: React.FC<TarjetaPlanProps> = ({plan, onSeleccionar}) => {
 
             <ul className="tarjetaPlanCaracteristicas">
                 {plan.caracteristicas.map((car, idx) => (
-                    <li key={idx} className={`tarjetaPlanItem ${car.incluido ? 'tarjetaPlanItemIncluido' : 'tarjetaPlanItemNoIncluido'}`}>
+                    <li key={car.texto} className={`tarjetaPlanItem ${car.incluido ? 'tarjetaPlanItemIncluido' : 'tarjetaPlanItemNoIncluido'}`}>
                         <span className="tarjetaPlanItemIcono">
                             {car.incluido ? (
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

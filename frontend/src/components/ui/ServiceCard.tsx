@@ -29,8 +29,8 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({servicio, variant = 'si
                     <p className="cardDescription">{descripcion}</p>
                     {servicio.categorias && (
                         <div className="cardTags">
-                            {servicio.categorias.map((cat, idx) => (
-                                <Badge key={idx} label={cat} />
+                            {servicio.categorias.map((cat) => (
+                                <Badge key={cat} label={cat} />
                             ))}
                         </div>
                     )}

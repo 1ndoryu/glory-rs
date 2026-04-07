@@ -5,13 +5,14 @@
  * [044A-38 Fase 1] Logout real conectado a authStore.
  * [074A-45] "Salir" → "Inicio" navega sin desloguear. Avatar abre submenú con logout.
  */
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {useNavigate} from 'react-router-dom';
 import {GloryLink} from '../../core/router';
 import {useAuthStore} from '../../stores/authStore';
 import {useCurrentProfile} from '../../hooks/useCurrentProfile';
 import {Button} from '../ui/Button';
+import {MenuContextual} from '../ui/ContextMenu';
 import {Logo} from '../ui/Logo';
 import NotificationBell from './NotificationBell';
 import './HeaderPanel.css';
@@ -22,25 +23,12 @@ export const HeaderPanel: React.FC = () => {
     const logout = useAuthStore(s => s.logout);
     const navigate = useNavigate();
     const [menuAbierto, setMenuAbierto] = useState(false);
-    const menuRef = useRef<HTMLDivElement>(null);
 
     const handleLogout = useCallback(() => {
         setMenuAbierto(false);
         logout();
         navigate('/');
     }, [logout, navigate]);
-
-    /* [074A-45] Cerrar submenú al hacer click fuera */
-    useEffect(() => {
-        if (!menuAbierto) return;
-        const cerrar = (e: MouseEvent) => {
-            if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-                setMenuAbierto(false);
-            }
-        };
-        document.addEventListener('mousedown', cerrar);
-        return () => document.removeEventListener('mousedown', cerrar);
-    }, [menuAbierto]);
 
     return (
         <header className="headerPanel" role="banner">
@@ -61,30 +49,23 @@ export const HeaderPanel: React.FC = () => {
                     <GloryLink to="/" className="headerPanelEnlace">
                         {t('nav.home', 'Inicio')}
                     </GloryLink>
-                    {/* [074A-45] Avatar abre submenú con opción de cerrar sesión */}
-                    <div className="headerPanelAvatarContenedor" ref={menuRef}>
-                        <button
-                            type="button"
-                            className="headerPanelAvatar"
-                            onClick={() => setMenuAbierto(prev => !prev)}
-                            aria-expanded={menuAbierto}
-                            aria-haspopup="true"
-                        >
-                            <img src={avatarUrl} alt={t('accessibility.profile_photo')} className="headerPanelAvatarImg" />
-                        </button>
-                        {menuAbierto && (
-                            <div className="headerPanelSubmenu" role="menu">
-                                <button
-                                    type="button"
-                                    className="headerPanelSubmenuItem"
-                                    onClick={handleLogout}
-                                    role="menuitem"
-                                >
-                                    {t('nav.logout')}
-                                </button>
-                            </div>
-                        )}
-                    </div>
+                    {/* [084A-11] Avatar → MenuContextual en vez de dropdown artesanal */}
+                    <MenuContextual
+                        abierto={menuAbierto}
+                        onToggle={() => setMenuAbierto(prev => !prev)}
+                        onCerrar={() => setMenuAbierto(false)}
+                        ariaLabel={t('accessibility.profile_photo')}
+                        triggerContent={<img src={avatarUrl} alt={t('accessibility.profile_photo')} className="headerPanelAvatarImg" />}
+                        triggerClassName="headerPanelAvatar"
+                        triggerVariante="texto"
+                        triggerTamano="pequeno"
+                        panelClassName="headerPanelSubmenu"
+                        items={[{
+                            id: 'logout',
+                            label: t('nav.logout'),
+                            onSelect: handleLogout,
+                        }]}
+                    />
                 </div>
             </div>
         </header>

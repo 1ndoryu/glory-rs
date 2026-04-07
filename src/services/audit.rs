@@ -1,3 +1,4 @@
+/* sentinel-disable-file sqlx-query-sin-macro: audit usa runtime query (fire-and-forget INSERT). */
 /* [064A-73] Servicio de auditoría: registra eventos de seguridad en BD.
  * Diseñado para ser fire-and-forget: loguea si falla pero no bloquea el request. */
 

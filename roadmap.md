@@ -53,4 +53,6 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 ### Bugs / UX reportados por usuario
 
-- Hay muchas violaciones o falsos positivos, arreglalo todo .sentinel-report.md
+(sin tareas pendientes)
+- que las tab dentro del modal cms sean igual a contenidoSubTabs
+- El buscador de usuariosBusqueda se ve bien, el de proyectosFiltros no, a demas los select no son esos, esto es inconsistencia visual, un error frecuente que debería ser prevenido con la extension, siempre pasa y es absurdor caer en el mismo error una y otra vez.

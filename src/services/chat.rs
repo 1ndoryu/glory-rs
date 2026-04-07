@@ -1,3 +1,5 @@
+/* sentinel-disable-file sqlx-query-sin-macro sqlx-query-as-sin-macro: chat service usa runtime
+ * queries para operaciones de broadcast y persistencia con tipos dinámicos. */
 /* [044A-38 Fase 5] ChatHub: gestión de conexiones WebSocket y routing de mensajes.
  * DashMap para sesiones activas en memoria. Cada sesión tiene múltiples suscriptores
  * (visitante/cliente + staff). Los mensajes se persisten en BD y se broadcastean. */

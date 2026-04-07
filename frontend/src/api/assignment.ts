@@ -3,9 +3,7 @@
 import instance from './axios-instance';
 import type {OrderResponse} from './orders';
 
-/* ============================================================
-   TIPOS
-   ============================================================ */
+/*    TIPOS */
 
 export type DelegationStatus = 'requested' | 'accepted' | 'rejected' | 'completed';
 
@@ -42,9 +40,7 @@ export interface RespondDelegationRequest {
     accept: boolean;
 }
 
-/* ============================================================
-   API CALLS
-   ============================================================ */
+/*    API CALLS */
 
 export async function apiListUnassigned(): Promise<OrderResponse[]> {
     const {data} = await instance.get<OrderResponse[]>('/api/orders/unassigned');
@@ -99,9 +95,7 @@ export async function apiListDelegations(): Promise<DelegationResponse[]> {
     return data;
 }
 
-/* ============================================================
-   HELPERS
-   ============================================================ */
+/*    HELPERS */
 
 export const DELEGATION_STATUS_LABELS: Record<DelegationStatus, string> = {
     requested: 'Pendiente',

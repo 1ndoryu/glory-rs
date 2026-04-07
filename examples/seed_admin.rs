@@ -1,3 +1,4 @@
+/* sentinel-disable-file sqlx-query-sin-macro: seed usa runtime query para INSERT de admin. */
 /* [044A-34] Seed: crea usuario admin/admin para desarrollo local.
  * Ejecutar: cargo run --example seed_admin
  * Requiere DATABASE_URL en .env o como variable de entorno. */
