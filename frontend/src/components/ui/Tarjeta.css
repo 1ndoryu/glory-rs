@@ -1,0 +1,16 @@
+/* [084A-6] Estilos base para componente Tarjeta. */
+
+.tarjetaBase {
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    background: var(--bg-primary);
+}
+
+/* Reset para cuando es botón */
+button.tarjetaBase {
+    cursor: pointer;
+    text-align: inherit;
+    font: inherit;
+    color: inherit;
+}

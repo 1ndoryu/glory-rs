@@ -51,11 +51,9 @@
     margin-top: var(--spacing-sm);
 }
 
-/* Features */
+/* [084A-6] Features — ancho completo, gap reducido, fondo #f5f3f1, contenido izquierda */
 .hostingFeatures {
     padding: var(--spacing-2xl) var(--spacing-lg);
-    max-width: 1080px;
-    margin: 0 auto;
     text-align: center;
 }
 
@@ -76,21 +74,30 @@
 .hostingFeaturesGrid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-lg);
+    gap: var(--spacing-sm);
+    max-width: 100%;
 }
 
 .hostingFeatureCard {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     gap: var(--spacing-xs);
-    padding: var(--spacing-lg);
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-lg);
-    text-align: center;
+    text-align: left;
 }
 
-.hostingFeatureCard svg {
+.hostingFeatureIcono {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-xs);
+}
+
+.hostingFeatureIcono svg {
     color: var(--brand-black);
     opacity: 0.7;
 }

@@ -10,6 +10,7 @@ import {SeccionContacto} from '../components/home/SeccionContacto';
 import {useChatStore} from '../stores/chatStore';
 import {PLANES_HOSTING} from '../data/planes/planes-hosting';
 import {Button} from '../components/ui/Button';
+import {Tarjeta} from '../components/ui/Tarjeta';
 import '../components/servicios/SeccionPlanesServicio.css';
 import './SolucionHostingIsland.css';
 
@@ -76,11 +77,13 @@ export const SolucionHostingIsland = (): JSX.Element => {
                 </p>
                 <div className="hostingFeaturesGrid">
                     {features.map((f) => (
-                        <div key={f.titulo} className="hostingFeatureCard">
-                            <f.icono size={24} strokeWidth={1.5} />
+                        <Tarjeta key={f.titulo} className="hostingFeatureCard" fondo="#f5f3f1">
+                            <div className="hostingFeatureIcono">
+                                <f.icono size={20} strokeWidth={1.5} />
+                            </div>
                             <h3>{f.titulo}</h3>
                             <p>{f.desc}</p>
-                        </div>
+                        </Tarjeta>
                     ))}
                 </div>
             </section>
