@@ -69,9 +69,5 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 - Para el admin, todos los contenidos deben ser editables en el front, esto es una tarea gigantezca, requiere un plan detallado. Nos podemos enfocar en los servicios, habrá un boton en la esquina para editar, abrira un modal con tab lateral para modificar cada cosa, titulo, descripción, planes, precios, fases, etc, todo lo que sea modificable, enlaces. Tambien para los blog, y proyectos. 
 
 - Las categorías no estan traducidas, deben traducirse a los 3 idiomas. Los contenidos de los servicios, planes, tambien, no creo que sea bueno reescribir todo en los 3 idiomas lo ideal es una forma automatica y segura porque es contenido que va modificarse. Las descripciones de los miembros de equipo no estan traducidas.
-- Para el cliente no aparezca nada de "escribiendo" aparece "escribiendo" cuando el mismo criente esta escribiendo. 
 - Los servicios en soluciones tampoco estan traducidos.
-- El padding de panelContenido es muy grande, debería ser el mismo de panelSidebar.
-- Quita los padding de arriba y abajo en panelContenedor.
-- Veo modales "checkoutModal" que no tienen 30px de padding, habia dicho que todos los modales deben tener 30px (con variable) y que ninguno debe usar boton de X. 
-- El 
+- NO IGNORES "Los errores de @stripe/stripe-js y @stripe/react-stripe-js son preexistentes (paquetes no instalados localmente). Las advertencias de Code Sentinel sobre "modal artesanal" son sugerencias para usar un componente <Modal> compartido — pendiente para refactor futuro, no parte de este fix"arreglalo.

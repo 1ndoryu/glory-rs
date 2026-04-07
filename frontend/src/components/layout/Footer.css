@@ -141,8 +141,9 @@
 
 /* Botón outline invertido para fondo oscuro */
 /* [064A-48] Botón suscribir: sin borde visible (transparent). */
+/* [064A-54] Borde visible en boton suscribir footer. */
 .botonFooter {
-    border-color: transparent;
+    border-color: var(--bg-item-active);
     color: var(--bg-primary);
 }
 

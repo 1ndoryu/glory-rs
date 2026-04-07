@@ -3,11 +3,12 @@
  * Layout principal del panel con sidebar lateral.
  * Sidebar a la izquierda, contenido principal a la derecha.
  */
+/* [064A-54] Removido padding top/bottom por instruccion del usuario. */
 .panelContenedor {
     min-height: 80vh;
     max-width: var(--container-width);
     margin: 0 auto;
-    padding: var(--spacing-md) 0;
+    padding: 0;
 }
 
 /* Layout horizontal: sidebar + contenido */
@@ -40,9 +41,10 @@
     margin: 0;
 }
 
+/* [064A-54] Padding reducido para igualar panelSidebar (--spacing-lg). */
 .panelContenido {
     flex: 1;
-    padding: var(--spacing-xl);
+    padding: var(--spacing-lg);
 }
 
 /* Responsive: stack vertical en movil */

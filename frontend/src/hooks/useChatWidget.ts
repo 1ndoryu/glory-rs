@@ -107,7 +107,8 @@ export function useChatWidget() {
                         break;
 
                     case 'typing':
-                        if (msg.sender) {
+                        /* [064A-54] No mostrar typing del propio visitante/cliente */
+                        if (msg.sender && msg.sender !== 'visitor' && msg.sender !== 'client') {
                             setTyping({sender: msg.sender, content: msg.content || ''});
                             if (typingTimerRef.current) {
                                 clearTimeout(typingTimerRef.current);

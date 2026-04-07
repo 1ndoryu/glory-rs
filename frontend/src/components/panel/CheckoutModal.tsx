@@ -10,7 +10,6 @@ import {
     useStripe,
     useElements,
 } from '@stripe/react-stripe-js';
-import { X } from 'lucide-react';
 import { apiInitiatePayment } from '../../api/payments';
 import { formatPrice } from '../../api/orders';
 import { Button } from '../ui/Button';
@@ -55,11 +54,8 @@ export default function CheckoutModal(props: CheckoutModalProps) {
 
     if (!stripePromise) {
         return (
-            <div className="checkoutOverlay">
-                <div className="checkoutModal">
-                    <Button variante="texto" className="checkoutCerrar" type="button" onClick={onClose}>
-                        <X size={20} />
-                    </Button>
+            <div className="checkoutOverlay" onClick={onClose}>
+                <div className="checkoutModal" onClick={e => e.stopPropagation()}>
                     <p className="checkoutError">
                         Stripe no está configurado. Agrega
                         VITE_STRIPE_PUBLISHABLE_KEY al .env
@@ -70,11 +66,8 @@ export default function CheckoutModal(props: CheckoutModalProps) {
     }
 
     return (
-        <div className="checkoutOverlay">
-            <div className="checkoutModal">
-                <Button variante="texto" className="checkoutCerrar" type="button" onClick={onClose}>
-                    <X size={20} />
-                </Button>
+        <div className="checkoutOverlay" onClick={onClose}>
+            <div className="checkoutModal" onClick={e => e.stopPropagation()}>
 
                 <h3 className="checkoutTitulo">
                     Pagar Orden #{props.orderNumber}

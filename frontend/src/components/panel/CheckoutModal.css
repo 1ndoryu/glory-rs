@@ -10,24 +10,14 @@
     z-index: 1000;
 }
 
+/* [064A-54] Padding ~30px (--spacing-lg = 2rem ≈ 32px). Removido boton cerrar X. */
 .checkoutModal {
     background: var(--bg-primary);
     border-radius: var(--radius-lg);
-    padding: var(--spacing-xl);
+    padding: var(--spacing-lg);
     width: 90%;
     max-width: 480px;
     position: relative;
-}
-
-.checkoutCerrar {
-    position: absolute;
-    top: var(--spacing-sm);
-    right: var(--spacing-sm);
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--brand-black);
-    padding: var(--spacing-xs);
 }
 
 .checkoutTitulo {
