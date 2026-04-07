@@ -54,6 +54,4 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 ### Bugs / UX reportados por usuario
 
-- En los servicios en los planes cuando le doy click debería abrir el modal para comezar el pago del servicio pero en este caso abre el chat, antes funcionaba pero se mal interpreto una tarea anterior!
--  SeccionProyectos.tsx:115 Warning: React has detected a change in the order of Hooks called by SeccionProyectos. This will lead to bugs and errors if not fixed. For more information, read the Rules of Hooks: https://reactjs.org/link/rules-of-hooks
-   Previous render            Next render
+(sin tareas pendientes)
