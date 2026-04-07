@@ -19,7 +19,7 @@ export function useDeliverables(orderId: string, phaseNumber: number | null) {
     });
 
     const {mutateAsync: entregarFase, isPending: entregando} = useMutation({
-        mutationFn: ({files, notes}: {files: File[]; notes?: string}) =>
+        mutationFn: ({files, notes}: {files?: File[]; notes?: string}) =>
             apiDeliverPhase(orderId, phaseNumber!, files, notes),
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ['deliverables', orderId, phaseNumber]});

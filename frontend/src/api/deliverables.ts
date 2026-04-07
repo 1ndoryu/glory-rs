@@ -37,17 +37,19 @@ export interface PhaseDeliverablesResponse {
    REST
    ============================================================ */
 
-/** Entregar fase con archivos (multipart/form-data) */
+/* [074A-51] Entregar fase — files opcional, el botón puede marcar entrega sin archivos */
 export async function apiDeliverPhase(
     orderId: string,
     phaseNumber: number,
-    files: File[],
+    files?: File[],
     notes?: string,
 ): Promise<DeliverPhaseResponse> {
     const form = new FormData();
     if (notes) form.append('notes', notes);
-    for (const file of files) {
-        form.append('files', file);
+    if (files) {
+        for (const file of files) {
+            form.append('files', file);
+        }
     }
     const {data} = await axiosInstance.post<DeliverPhaseResponse>(
         `/api/orders/${orderId}/phases/${phaseNumber}/deliver`,

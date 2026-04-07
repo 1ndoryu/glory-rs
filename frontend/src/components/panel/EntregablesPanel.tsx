@@ -1,10 +1,9 @@
 /* [044A-38 Fase 6] Panel de entregables dentro de cada fase.
- * Maneja upload de archivos (empleado) y listado/descarga (todos los roles).
- * Lógica extraída a useEntregablesPanel (SRP). */
-import {Upload, Download, FileText, Package, X} from 'lucide-react';
+ * [074A-51] Simplificado: sin upload de archivos. Entrega solo marca la fase.
+ * Los archivos se comparten por chat. Botón primario. */
+import {Download, FileText, Package} from 'lucide-react';
 import {formatFileSize} from '../../api/deliverables';
 import {useEntregablesPanel} from '../../hooks/useEntregablesPanel';
-import {Textarea} from '../ui/Textarea';
 import {Button} from '../ui/Button';
 import './EntregablesPanel.css';
 
@@ -16,60 +15,22 @@ interface EntregablesPanelProps {
 
 export function EntregablesPanel({orderId, phaseNumber, canDeliver}: EntregablesPanelProps) {
     const {
-        files, notes, setNotes, error, cargando, entregando,
-        fileInputRef, handleFileSelect, removeFile, handleDeliver,
-        handleDownload, sortedRevisions, revisionGroups,
+        error, cargando, entregando,
+        handleDeliver, handleDownload, sortedRevisions, revisionGroups,
     } = useEntregablesPanel(orderId, phaseNumber);
 
     return (
         <div className="entregablesPanel">
-            {/* Zona de upload para empleados */}
+            {/* [074A-51] Botón de entrega sin archivos — solo marca la fase como entregada */}
             {canDeliver && (
-                <div className="entregablesUpload">
-                    <div className="entregablesUploadHeader">
-                        <Upload size={14} />
-                        <span>Entregar archivos</span>
-                    </div>
-                    <input
-                        ref={fileInputRef}
-                        type="file"
-                        multiple
-                        onChange={handleFileSelect}
-                        className="entregablesFileInput"
-                    />
-                    {files.length > 0 && (
-                        <ul className="entregablesFileList">
-                            {files.map((f, i) => (
-                                <li key={`${f.name}-${i}`} className="entregablesFileItem">
-                                    <FileText size={12} />
-                                    <span className="entregablesFileName">{f.name}</span>
-                                    <span className="entregablesFileSize">{formatFileSize(f.size)}</span>
-                                    <Button
-                                        variante="texto"
-                                        className="entregablesFileRemove"
-                                        onClick={() => removeFile(i)}
-                                        type="button"
-                                    >
-                                        <X size={12} />
-                                    </Button>
-                                </li>
-                            ))}
-                        </ul>
-                    )}
-                    <Textarea
-                        className="entregablesNotes"
-                        placeholder="Notas opcionales sobre la entrega..."
-                        value={notes}
-                        onChange={e => setNotes(e.target.value)}
-                        rows={2}
-                    />
+                <div className="entregablesEntregarZona">
                     {error && <p className="entregablesError">{error}</p>}
                     <Button
-                        variante="exito"
+                        variante="primario"
                         tamano="pequeno"
                         className="faseBtn"
                         onClick={handleDeliver}
-                        disabled={entregando || files.length === 0}
+                        disabled={entregando}
                         type="button"
                     >
                         <Package size={14} /> {entregando ? 'Entregando...' : 'Entregar'}
