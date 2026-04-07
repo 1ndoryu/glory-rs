@@ -43,7 +43,6 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 ### CMS Admin (plan: plan-cms-admin-2026-04-07.md)
 
-- 074A-8: CMS Servicios — Backend (migración + CRUD endpoints admin)
 - 074A-9: CMS Servicios — Frontend (SeccionContenido + EditorServicio)
 - 074A-10: CMS Blog — Backend (tabla blog_posts + CRUD)
 - 074A-11: CMS Blog — Frontend (editor admin + páginas públicas)
@@ -57,4 +56,5 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 ### Bugs / UX reportados por usuario
 
 - En los servicios en los planes cuando le doy click debería abrir el modal para comezar el pago del servicio pero en este caso abre el chat, antes funcionaba pero se mal interpreto una tarea anterior!
-- 
+-  SeccionProyectos.tsx:115 Warning: React has detected a change in the order of Hooks called by SeccionProyectos. This will lead to bugs and errors if not fixed. For more information, read the Rules of Hooks: https://reactjs.org/link/rules-of-hooks
+   Previous render            Next render
