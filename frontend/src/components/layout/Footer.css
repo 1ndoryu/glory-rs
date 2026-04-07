@@ -140,9 +140,9 @@
 }
 
 /* Botón outline invertido para fondo oscuro */
-/* [074A-34] Borde visible en boton suscribir footer — bg-item-active era invisible (6% opacidad). */
+/* [074A-35] Borde visible en fondo oscuro — --white-20 es el estándar para bordes en bg oscuro. */
 .botonFooter {
-    border-color: var(--bg-primary);
+    border-color: var(--white-20);
     color: var(--bg-primary);
 }
 
