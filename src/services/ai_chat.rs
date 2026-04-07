@@ -81,20 +81,21 @@ pub struct AiChatService;
 
 impl AiChatService {
     /// Genera respuesta de IA para un mensaje en una sesión.
-    /// Usa Groq API (OpenAI-compatible) con rotacion de keys.
+    /// Usa Groq API (OpenAI-compatible) con rotación de keys y retry automático.
     pub async fn generate_response(
         pool: &PgPool,
         config: &AiChatConfig,
         session_id: Uuid,
         user_message: &str,
     ) -> Result<String, String> {
-        let Some(api_key) = config.next_key() else {
+        if !config.is_configured() {
+            tracing::warn!("AI: sin API keys configuradas, usando fallback");
             return Ok(
                 "Un miembro del equipo se conectará pronto para ayudarte. \
                  Mientras tanto, ¿en qué puedo orientarte?"
                     .to_string(),
             );
-        };
+        }
 
         let system_prompt = build_system_prompt(pool, session_id).await;
 
@@ -102,7 +103,6 @@ impl AiChatService {
             .await
             .unwrap_or_default();
 
-        /* [064A-29] Formato OpenAI-compatible para Groq API */
         let mut messages = vec![serde_json::json!({
             "role": "system",
             "content": system_prompt
@@ -133,38 +133,71 @@ impl AiChatService {
             "top_p": 0.9
         });
 
+        /* [064A-69] Retry con todas las keys disponibles antes de caer al fallback.
+         * Si key N falla con error HTTP, intenta key N+1, N+2, etc. */
         let client = reqwest::Client::new();
-        let response = client
-            .post(&config.api_url)
-            .header("Authorization", format!("Bearer {api_key}"))
-            .header("Content-Type", "application/json")
-            .json(&body)
-            .send()
-            .await
-            .map_err(|e| format!("Error llamando a IA: {e}"))?;
+        let num_keys = config.api_keys.len();
+        let mut last_error = String::new();
 
-        if !response.status().is_success() {
-            let status = response.status();
-            let text = response.text().await.unwrap_or_default();
-            tracing::error!("AI API error {status}: {text}");
-            return Ok(
-                "Disculpa, en este momento no puedo procesar tu consulta. \
-                 Un miembro del equipo te atenderá pronto."
-                    .to_string(),
-            );
+        for attempt in 0..num_keys {
+            let Some(api_key) = config.next_key() else {
+                break;
+            };
+
+            let key_hint = &api_key[..api_key.len().min(8)];
+
+            let resp = client
+                .post(&config.api_url)
+                .header("Authorization", format!("Bearer {api_key}"))
+                .header("Content-Type", "application/json")
+                .json(&body)
+                .send()
+                .await;
+
+            match resp {
+                Err(e) => {
+                    tracing::error!("AI key {key_hint}... intento {}/{num_keys}: error red: {e}", attempt + 1);
+                    last_error = format!("Error de red: {e}");
+                }
+                Ok(response) => {
+                    if !response.status().is_success() {
+                        let status = response.status();
+                        let text = response.text().await.unwrap_or_default();
+                        tracing::error!("AI key {key_hint}... intento {}/{num_keys}: HTTP {status}: {text}", attempt + 1);
+                        last_error = format!("HTTP {status}");
+                        continue;
+                    }
+
+                    let json: serde_json::Value = match response.json().await {
+                        Ok(j) => j,
+                        Err(e) => {
+                            tracing::error!("AI: error parseando JSON: {e}");
+                            last_error = format!("Parse error: {e}");
+                            continue;
+                        }
+                    };
+
+                    let text = json["choices"][0]["message"]["content"]
+                        .as_str()
+                        .unwrap_or("");
+
+                    if text.is_empty() {
+                        tracing::warn!("AI: respuesta vacía de la API, reintentando");
+                        last_error = "Respuesta vacía".to_string();
+                        continue;
+                    }
+
+                    return Ok(text.to_string());
+                }
+            }
         }
 
-        let json: serde_json::Value = response
-            .json()
-            .await
-            .map_err(|e| format!("Error parseando respuesta IA: {e}"))?;
-
-        /* [064A-29] Formato OpenAI: choices[0].message.content */
-        let text = json["choices"][0]["message"]["content"]
-            .as_str()
-            .unwrap_or("No pude generar una respuesta. Un miembro del equipo te ayudará.");
-
-        Ok(text.to_string())
+        tracing::error!("AI: todas las keys fallaron ({num_keys} intentos). Último error: {last_error}");
+        Ok(
+            "Disculpa, nuestro asistente virtual está temporalmente fuera de servicio. \
+             Un miembro del equipo te atenderá pronto."
+                .to_string(),
+        )
     }
 }
 
