@@ -1,0 +1,133 @@
+/* [064A-32] Estilos para SolucionHostingIsland. */
+
+.hostingPaginaMain {
+    overflow-x: hidden;
+}
+
+/* Hero */
+.hostingHero {
+    padding: var(--spacing-3xl) var(--spacing-lg) var(--spacing-2xl);
+    text-align: center;
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+.hostingHeroContenido {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.hostingHeroEtiqueta {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--brand-black);
+    opacity: 0.5;
+}
+
+.hostingHeroTitulo {
+    font-size: var(--text-4xl);
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--brand-black);
+    margin: 0;
+}
+
+.hostingHeroDesc {
+    font-size: 1.125rem;
+    line-height: 1.6;
+    color: var(--brand-black);
+    opacity: 0.7;
+    max-width: 560px;
+    margin: 0;
+}
+
+.hostingHeroBotones {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-sm);
+}
+
+/* Features */
+.hostingFeatures {
+    padding: var(--spacing-2xl) var(--spacing-lg);
+    max-width: 1080px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.hostingFeaturesTitle {
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    color: var(--brand-black);
+    margin: 0 0 var(--spacing-xs);
+}
+
+.hostingFeaturesSubtitle {
+    font-size: 1rem;
+    color: var(--brand-black);
+    opacity: 0.6;
+    margin: 0 0 var(--spacing-xl);
+}
+
+.hostingFeaturesGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-lg);
+}
+
+.hostingFeatureCard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-lg);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    text-align: center;
+}
+
+.hostingFeatureCard svg {
+    color: var(--brand-black);
+    opacity: 0.7;
+}
+
+.hostingFeatureCard h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--brand-black);
+    margin: 0;
+}
+
+.hostingFeatureCard p {
+    font-size: 0.875rem;
+    color: var(--brand-black);
+    opacity: 0.6;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .hostingHeroTitulo {
+        font-size: var(--text-2xl);
+    }
+
+    .hostingFeaturesGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .hostingHeroBotones {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .hostingFeaturesGrid {
+        grid-template-columns: 1fr;
+    }
+}

@@ -43,7 +43,7 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 ### Funcionalidad grande
 
-- 064A-32: Hosting + dominio panel cliente: página funcional, plan para compra de dominios.
+(sin tareas pendientes)
 
 ### Funcionalidad media
 

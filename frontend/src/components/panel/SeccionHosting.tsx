@@ -1,6 +1,6 @@
-/* [054A-2] Sección Hosting del panel admin.
+/* [054A-2] Sección Hosting del panel.
  * Dashboard de suscripciones de hosting: lista, status, acciones.
- * Solo visible para admin.
+ * [064A-32] Ahora role-aware: admin ve todo + crear/cambiar status, cliente solo ve sus suscripciones.
  * [054A-17] Corregidos: <button>→<Button>, inline styles→CSS classes, overlay→MenuContextual. */
 
 import React, {useState, useCallback} from 'react';
@@ -19,6 +19,7 @@ import {
     type CreateHostingRequest,
 } from '../../api/hosting';
 import {toast} from '../../stores/toastStore';
+import {useAuthStore} from '../../stores/authStore';
 import {Modal} from '../ui/Modal';
 import {Input} from '../ui/Input';
 import {Select} from '../ui/Select';
@@ -31,6 +32,9 @@ export const SeccionHosting: React.FC = () => {
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [selectedSub, setSelectedSub] = useState<HostingSubscription | null>(null);
     const [showEvents, setShowEvents] = useState(false);
+
+    /* [064A-32] Detectar rol para ocultar features admin */
+    const isAdmin = useAuthStore(s => s.user?.effectiveRole) === 'admin';
 
     const {data: subscriptions = [], isLoading} = useQuery({
         queryKey: ['hosting-subscriptions'],
@@ -70,15 +74,17 @@ export const SeccionHosting: React.FC = () => {
         <div className="hostingContenedor">
             <div className="hostingHeader">
                 <h2>Hosting</h2>
-                <Button
-                    variante="primario"
-                    tamano="pequeno"
-                    className="hostingBtnCrear"
-                    onClick={() => setShowCreateModal(true)}
-                    type="button"
-                >
-                    <Plus size={16} /> Nueva suscripción
-                </Button>
+                {isAdmin && (
+                    <Button
+                        variante="primario"
+                        tamano="pequeno"
+                        className="hostingBtnCrear"
+                        onClick={() => setShowCreateModal(true)}
+                        type="button"
+                    >
+                        <Plus size={16} /> Nueva suscripción
+                    </Button>
+                )}
             </div>
 
             {subscriptions.length === 0 ? (
@@ -89,7 +95,7 @@ export const SeccionHosting: React.FC = () => {
             ) : (
                 <div className="hostingTabla">
                     <div className="hostingTablaHeader">
-                        <span>Cliente</span>
+                        {isAdmin && <span>Cliente</span>}
                         <span>Plan</span>
                         <span>Dominio</span>
                         <span>Status</span>
@@ -100,6 +106,7 @@ export const SeccionHosting: React.FC = () => {
                         <HostingRow
                             key={sub.id}
                             sub={sub}
+                            isAdmin={isAdmin}
                             onStatusChange={(status) =>
                                 statusMutation.mutate({id: sub.id, status})
                             }
@@ -138,10 +145,12 @@ export const SeccionHosting: React.FC = () => {
 
 function HostingRow({
     sub,
+    isAdmin,
     onStatusChange,
     onViewEvents,
 }: {
     sub: HostingSubscription;
+    isAdmin: boolean;
     onStatusChange: (status: string) => void;
     onViewEvents: () => void;
 }) {
@@ -158,10 +167,12 @@ function HostingRow({
 
     return (
         <div className="hostingFila">
-            <div className="hostingFilaCelda">
-                <span className="hostingClientName">{sub.client_name}</span>
-                <span className="hostingClientEmail">{sub.client_email}</span>
-            </div>
+            {isAdmin && (
+                <div className="hostingFilaCelda">
+                    <span className="hostingClientName">{sub.client_name}</span>
+                    <span className="hostingClientEmail">{sub.client_email}</span>
+                </div>
+            )}
             <span>{HOSTING_PLAN_LABELS[sub.plan] || sub.plan}</span>
             <span className="hostingDominio">{sub.domain || '—'}</span>
             <span className={`hostingStatus ${HOSTING_STATUS_CLASS[sub.status] || ''}`}>
@@ -179,14 +190,16 @@ function HostingRow({
                 >
                     <History size={16} />
                 </Button>
-                <MenuContextual
-                    abierto={menuOpen}
-                    onToggle={() => setMenuOpen(prev => !prev)}
-                    onCerrar={() => setMenuOpen(false)}
-                    items={statusItems}
-                    ariaLabel="Cambiar status de suscripción"
-                    triggerClassName="hostingBtnAccion"
-                />
+                {isAdmin && (
+                    <MenuContextual
+                        abierto={menuOpen}
+                        onToggle={() => setMenuOpen(prev => !prev)}
+                        onCerrar={() => setMenuOpen(false)}
+                        items={statusItems}
+                        ariaLabel="Cambiar status de suscripción"
+                        triggerClassName="hostingBtnAccion"
+                    />
+                )}
             </div>
         </div>
     );

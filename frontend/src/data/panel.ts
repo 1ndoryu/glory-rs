@@ -45,6 +45,12 @@ const TABS_CLIENT: TabConfig[] = [
         id: 'mensajes',
         label: 'Mensajes',
         descripcion: 'Conversaciones con soporte, asistente IA y seguimiento de tus ordenes por chat.'
+    },
+    /* [064A-32] Hosting visible para clientes con suscripciones */
+    {
+        id: 'hosting',
+        label: 'Mi Hosting',
+        descripcion: 'Estado de tus suscripciones de hosting, plan activo y eventos recientes.'
     }
 ];
 

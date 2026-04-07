@@ -22,6 +22,7 @@ import {BlogIsland} from './islands/BlogIsland';
 import {BlogSingleIsland} from './islands/BlogSingleIsland';
 import {SolucionesIsland} from './islands/SolucionesIsland';
 import {SolucionPlaceholderIsland} from './islands/SolucionPlaceholderIsland';
+import {SolucionHostingIsland} from './islands/SolucionHostingIsland';
 import {PanelIsland} from './islands/PanelIsland';
 import {NotFoundIsland} from './islands/NotFoundIsland';
 
@@ -120,6 +121,8 @@ function App() {
                     <Route path="/blog" element={<BlogIsland />} />
                     <Route path="/blog/:slug" element={<BlogDetallePage />} />
                     <Route path="/soluciones" element={<SolucionesIsland />} />
+                    {/* [064A-32] Hosting tiene página propia, el resto usa placeholder */}
+                    <Route path="/soluciones/hosting" element={<SolucionHostingIsland />} />
                     <Route path="/soluciones/:slug" element={<SolucionPlaceholderIsland />} />
                     {/* [064A-5] Ruta /contacto eliminada — todos los CTAs abren el chat */}
                     <Route path="/panel" element={<PanelIsland />} />
