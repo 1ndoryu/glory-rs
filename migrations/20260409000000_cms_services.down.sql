@@ -1,0 +1,9 @@
+/* [074A-8] Revertir campos CMS de services. */
+ALTER TABLE services DROP COLUMN IF EXISTS image_url;
+ALTER TABLE services DROP COLUMN IF EXISTS gallery;
+ALTER TABLE services DROP COLUMN IF EXISTS skills;
+ALTER TABLE services DROP COLUMN IF EXISTS content;
+ALTER TABLE services DROP COLUMN IF EXISTS meta_title;
+ALTER TABLE services DROP COLUMN IF EXISTS meta_description;
+ALTER TABLE services DROP COLUMN IF EXISTS status;
+ALTER TABLE services DROP COLUMN IF EXISTS updated_at;

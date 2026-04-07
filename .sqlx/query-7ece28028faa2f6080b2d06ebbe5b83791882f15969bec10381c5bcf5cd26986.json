@@ -1,0 +1,132 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE services SET\n             title = COALESCE($2, title),\n             slug = COALESCE($3, slug),\n             description = COALESCE($4, description),\n             base_price_cents = COALESCE($5, base_price_cents),\n             currency = COALESCE($6, currency),\n             is_active = COALESCE($7, is_active),\n             image_url = COALESCE($8, image_url),\n             gallery = COALESCE($9, gallery),\n             skills = COALESCE($10, skills),\n             content = COALESCE($11, content),\n             meta_title = COALESCE($12, meta_title),\n             meta_description = COALESCE($13, meta_description),\n             status = COALESCE($14, status),\n             sort_order = COALESCE($15, sort_order),\n             updated_at = NOW()\n             WHERE id = $1\n             RETURNING id, slug, title, description, base_price_cents, currency, is_active, sort_order, created_at,\n             image_url, gallery, skills, content, meta_title, meta_description, status, updated_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "slug",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "title",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "base_price_cents",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 5,
+        "name": "currency",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "is_active",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 7,
+        "name": "sort_order",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 8,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 9,
+        "name": "image_url",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 10,
+        "name": "gallery",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 11,
+        "name": "skills",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 12,
+        "name": "content",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 13,
+        "name": "meta_title",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 14,
+        "name": "meta_description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 15,
+        "name": "status",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 16,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Varchar",
+        "Varchar",
+        "Text",
+        "Int4",
+        "Varchar",
+        "Bool",
+        "Varchar",
+        "Jsonb",
+        "Jsonb",
+        "Text",
+        "Varchar",
+        "Text",
+        "Varchar",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      true,
+      true,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "7ece28028faa2f6080b2d06ebbe5b83791882f15969bec10381c5bcf5cd26986"
+}

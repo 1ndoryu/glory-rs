@@ -66,6 +66,15 @@ pub struct ServiceRecord {
     pub is_active: bool,
     pub sort_order: i32,
     pub created_at: DateTime<Utc>,
+    /* [074A-8] Campos CMS */
+    pub image_url: Option<String>,
+    pub gallery: serde_json::Value,
+    pub skills: serde_json::Value,
+    pub content: Option<String>,
+    pub meta_title: Option<String>,
+    pub meta_description: Option<String>,
+    pub status: String,
+    pub updated_at: DateTime<Utc>,
 }
 
 #[derive(Debug, Clone, FromRow)]
@@ -224,6 +233,68 @@ pub struct ServiceDetailResponse {
     pub title: String,
     pub description: Option<String>,
     pub plans: Vec<ServicePlanResponse>,
+}
+
+/* [074A-8] Response admin con todos los campos CMS */
+#[derive(Debug, Serialize, ToSchema)]
+pub struct AdminServiceResponse {
+    pub id: Uuid,
+    pub slug: String,
+    pub title: String,
+    pub description: Option<String>,
+    pub base_price_cents: i32,
+    pub currency: String,
+    pub is_active: bool,
+    pub sort_order: i32,
+    pub image_url: Option<String>,
+    pub gallery: serde_json::Value,
+    pub skills: serde_json::Value,
+    pub content: Option<String>,
+    pub meta_title: Option<String>,
+    pub meta_description: Option<String>,
+    pub status: String,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+    pub plans: Vec<ServicePlanResponse>,
+}
+
+/* [074A-8] Request para crear servicio */
+#[derive(Debug, Deserialize, Validate, ToSchema)]
+pub struct CreateServiceRequest {
+    #[validate(length(min = 1, max = 200))]
+    pub title: String,
+    #[validate(length(min = 1, max = 100))]
+    pub slug: String,
+    pub description: Option<String>,
+    pub base_price_cents: Option<i32>,
+    pub currency: Option<String>,
+    pub image_url: Option<String>,
+    pub gallery: Option<serde_json::Value>,
+    pub skills: Option<serde_json::Value>,
+    pub content: Option<String>,
+    pub meta_title: Option<String>,
+    pub meta_description: Option<String>,
+    pub status: Option<String>,
+    pub sort_order: Option<i32>,
+}
+
+/* [074A-8] Request para actualizar servicio (todos opcionales) */
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct UpdateServiceRequest {
+    pub title: Option<String>,
+    pub slug: Option<String>,
+    pub description: Option<String>,
+    pub base_price_cents: Option<i32>,
+    pub currency: Option<String>,
+    pub is_active: Option<bool>,
+    pub image_url: Option<String>,
+    pub gallery: Option<serde_json::Value>,
+    pub skills: Option<serde_json::Value>,
+    pub content: Option<String>,
+    pub meta_title: Option<String>,
+    pub meta_description: Option<String>,
+    pub status: Option<String>,
+    pub sort_order: Option<i32>,
 }
 
 #[derive(Debug, Serialize, ToSchema)]

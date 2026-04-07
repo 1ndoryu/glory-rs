@@ -1,6 +1,7 @@
 #![allow(clippy::needless_for_each)] // Generado por utoipa OpenApi derive
 
 mod admin_seed;
+mod admin_services;
 mod admin_users;
 mod assignment;
 mod auth;
@@ -108,6 +109,10 @@ impl utoipa::Modify for SecurityAddon {
         admin_users::list_users,
         admin_users::change_role,
         admin_users::change_status,
+        admin_services::list_all,
+        admin_services::create,
+        admin_services::update,
+        admin_services::archive,
         uploads::upload_image,
     ),
     components(schemas(
@@ -169,6 +174,9 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::PaginatedUsers,
         crate::models::ChangeRoleRequest,
         crate::models::ChangeStatusRequest,
+        crate::models::AdminServiceResponse,
+        crate::models::CreateServiceRequest,
+        crate::models::UpdateServiceRequest,
         profile::AvatarResponse,
         uploads::UploadResponse,
         crate::errors::ErrorResponse,
@@ -312,6 +320,7 @@ fn api_routes() -> Router<AppState> {
         .merge(dashboard::routes())
         .merge(profile::routes())
         .merge(admin_users::routes())
+        .merge(admin_services::routes())
         .merge(admin_seed::seed_routes())
         .merge(hosting::hosting_routes())
         .merge(uploads::routes())

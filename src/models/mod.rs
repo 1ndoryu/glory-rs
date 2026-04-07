@@ -26,6 +26,7 @@ pub use deliverable::{
 };
 pub use note::{CreateNoteRequest, Note, PaginatedNotes, PaginationParams, UpdateNoteRequest};
 pub use order::{
+    AdminServiceResponse, CreateServiceRequest, UpdateServiceRequest,
     Order, OrderPhase, OrderStatus, PaymentMode, PhaseStatus, ServicePlan, ServiceRecord,
     ServicePlanPhase, CreateOrderRequest, OrderResponse, OrderPhaseResponse, SwitchRoleRequest,
     ServiceDetailResponse, ServicePlanResponse, ServicePlanPhaseResponse,

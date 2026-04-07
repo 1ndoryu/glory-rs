@@ -43,7 +43,8 @@ impl OrderRepository {
     pub async fn list_services(pool: &PgPool) -> Result<Vec<ServiceRecord>, sqlx::Error> {
         sqlx::query_as!(
             ServiceRecord,
-            r#"SELECT id, slug, title, description, base_price_cents, currency, is_active, sort_order, created_at
+            r#"SELECT id, slug, title, description, base_price_cents, currency, is_active, sort_order, created_at,
+             image_url, gallery, skills, content, meta_title, meta_description, status, updated_at
              FROM services WHERE is_active = true ORDER BY sort_order"#,
         )
         .fetch_all(pool)
@@ -56,7 +57,8 @@ impl OrderRepository {
     ) -> Result<Option<ServiceRecord>, sqlx::Error> {
         sqlx::query_as!(
             ServiceRecord,
-            r#"SELECT id, slug, title, description, base_price_cents, currency, is_active, sort_order, created_at
+            r#"SELECT id, slug, title, description, base_price_cents, currency, is_active, sort_order, created_at,
+             image_url, gallery, skills, content, meta_title, meta_description, status, updated_at
              FROM services WHERE slug = $1 AND is_active = true"#,
             slug,
         )
@@ -110,6 +112,126 @@ impl OrderRepository {
         )
         .fetch_all(pool)
         .await
+    }
+
+    /* ============================================================
+       SERVICIOS — Admin CRUD (074A-8)
+       ============================================================ */
+
+    /// Lista TODOS los servicios (incluyendo inactivos/draft) para el panel admin
+    pub async fn list_all_services(pool: &PgPool) -> Result<Vec<ServiceRecord>, sqlx::Error> {
+        sqlx::query_as!(
+            ServiceRecord,
+            r#"SELECT id, slug, title, description, base_price_cents, currency, is_active, sort_order, created_at,
+             image_url, gallery, skills, content, meta_title, meta_description, status, updated_at
+             FROM services ORDER BY sort_order, created_at DESC"#,
+        )
+        .fetch_all(pool)
+        .await
+    }
+
+    /// Busca un servicio por ID (sin filtrar por `is_active`)
+    pub async fn find_service_by_id(
+        pool: &PgPool,
+        id: Uuid,
+    ) -> Result<Option<ServiceRecord>, sqlx::Error> {
+        sqlx::query_as!(
+            ServiceRecord,
+            r#"SELECT id, slug, title, description, base_price_cents, currency, is_active, sort_order, created_at,
+             image_url, gallery, skills, content, meta_title, meta_description, status, updated_at
+             FROM services WHERE id = $1"#,
+            id,
+        )
+        .fetch_optional(pool)
+        .await
+    }
+
+    /// Crea un servicio nuevo
+    pub async fn create_service(
+        pool: &PgPool,
+        params: &crate::models::CreateServiceRequest,
+    ) -> Result<ServiceRecord, sqlx::Error> {
+        sqlx::query_as!(
+            ServiceRecord,
+            r#"INSERT INTO services (title, slug, description, base_price_cents, currency,
+             image_url, gallery, skills, content, meta_title, meta_description, status, sort_order)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+             RETURNING id, slug, title, description, base_price_cents, currency, is_active, sort_order, created_at,
+             image_url, gallery, skills, content, meta_title, meta_description, status, updated_at"#,
+            params.title,
+            params.slug,
+            params.description,
+            params.base_price_cents.unwrap_or(0),
+            params.currency.as_deref().unwrap_or("USD"),
+            params.image_url,
+            params.gallery.clone().unwrap_or_else(|| serde_json::json!([])),
+            params.skills.clone().unwrap_or_else(|| serde_json::json!([])),
+            params.content,
+            params.meta_title,
+            params.meta_description,
+            params.status.as_deref().unwrap_or("draft"),
+            params.sort_order.unwrap_or(0),
+        )
+        .fetch_one(pool)
+        .await
+    }
+
+    /// Actualiza un servicio existente (solo campos proporcionados)
+    pub async fn update_service(
+        pool: &PgPool,
+        id: Uuid,
+        params: &crate::models::UpdateServiceRequest,
+    ) -> Result<ServiceRecord, sqlx::Error> {
+        sqlx::query_as!(
+            ServiceRecord,
+            r#"UPDATE services SET
+             title = COALESCE($2, title),
+             slug = COALESCE($3, slug),
+             description = COALESCE($4, description),
+             base_price_cents = COALESCE($5, base_price_cents),
+             currency = COALESCE($6, currency),
+             is_active = COALESCE($7, is_active),
+             image_url = COALESCE($8, image_url),
+             gallery = COALESCE($9, gallery),
+             skills = COALESCE($10, skills),
+             content = COALESCE($11, content),
+             meta_title = COALESCE($12, meta_title),
+             meta_description = COALESCE($13, meta_description),
+             status = COALESCE($14, status),
+             sort_order = COALESCE($15, sort_order),
+             updated_at = NOW()
+             WHERE id = $1
+             RETURNING id, slug, title, description, base_price_cents, currency, is_active, sort_order, created_at,
+             image_url, gallery, skills, content, meta_title, meta_description, status, updated_at"#,
+            id,
+            params.title,
+            params.slug,
+            params.description,
+            params.base_price_cents,
+            params.currency,
+            params.is_active,
+            params.image_url,
+            params.gallery.clone(),
+            params.skills.clone(),
+            params.content,
+            params.meta_title,
+            params.meta_description,
+            params.status,
+            params.sort_order,
+        )
+        .fetch_one(pool)
+        .await
+    }
+
+    /// Archiva un servicio (soft delete: `is_active`=false, status=archived)
+    pub async fn archive_service(pool: &PgPool, id: Uuid) -> Result<(), sqlx::Error> {
+        sqlx::query!(
+            r#"UPDATE services SET is_active = false, status = 'archived', updated_at = NOW() WHERE id = $1"#,
+            id,
+        )
+        .execute(pool)
+        .await?;
+        Ok(())
     }
 
     /* ============================================================
@@ -587,18 +709,4 @@ impl OrderRepository {
         .await
     }
 
-    /// Busca servicio por UUID (para resolver slug en auto-asignación)
-    pub async fn find_service_by_id(
-        pool: &PgPool,
-        service_id: Uuid,
-    ) -> Result<Option<ServiceRecord>, sqlx::Error> {
-        sqlx::query_as!(
-            ServiceRecord,
-            r#"SELECT id, slug, title, description, base_price_cents, currency, is_active, sort_order, created_at
-             FROM services WHERE id = $1"#,
-            service_id,
-        )
-        .fetch_optional(pool)
-        .await
-    }
 }
