@@ -1,13 +1,11 @@
 /* [044A-40] Componente: SeccionPlanesServicio
  * Muestra las tarjetas de precios de un servicio.
- * Al hacer click en CTA abre ModalCompra en vez de redirigir a /contacto/.
- * Incluye botón "Conversar" debajo de cada CTA. */
-import React, {useState} from 'react';
+ * [074A-36] CTA abre el chat widget directamente.*/
+import React from 'react';
 import {useTranslation} from 'react-i18next';
 import {obtenerPlanesServicio, type PlanServicio} from '../../data/planes/index';
 import {Button} from '../ui/Button';
 import {useChatStore} from '../../stores/chatStore';
-import {ModalCompra} from './ModalCompra';
 import './SeccionPlanesServicio.css';
 
 interface SeccionPlanesServicioProps {
@@ -16,22 +14,14 @@ interface SeccionPlanesServicioProps {
 
 interface TarjetaPlanProps {
     plan: PlanServicio;
-    onSeleccionar: (plan: PlanServicio) => void;
 }
 
-const TarjetaPlan: React.FC<TarjetaPlanProps> = ({plan, onSeleccionar}) => {
+const TarjetaPlan: React.FC<TarjetaPlanProps> = ({plan}) => {
     const {t} = useTranslation();
     const claseDestacado = plan.destacado ? 'tarjetaPlanDestacado' : '';
 
-    const handleClickCTA = () => {
-        onSeleccionar(plan);
-    };
-
-    /* [064A-5] Botón conversar: abre el chat widget */
+    /* [074A-36] CTA abre el chat widget directamente */
     const abrirChat = useChatStore(s => s.abrir);
-    const handleConversar = () => {
-        abrirChat();
-    };
 
     return (
         <div className={`tarjetaPlan ${claseDestacado}`}>
@@ -71,12 +61,9 @@ const TarjetaPlan: React.FC<TarjetaPlanProps> = ({plan, onSeleccionar}) => {
                 <Button
                     variante={plan.destacado ? 'primario' : 'outline'}
                     tamano="mediano"
-                    onClick={handleClickCTA}
+                    onClick={abrirChat}
                 >
                     {t(`content.plans.${plan.id}.cta`, plan.ctaTexto)}
-                </Button>
-                <Button variante="texto" className="tarjetaPlanConversar" onClick={handleConversar}>
-                    {t('plans.chat_with_us', 'Conversar')}
                 </Button>
             </div>
         </div>
@@ -86,7 +73,6 @@ const TarjetaPlan: React.FC<TarjetaPlanProps> = ({plan, onSeleccionar}) => {
 export const SeccionPlanesServicio: React.FC<SeccionPlanesServicioProps> = ({slug}) => {
     const {t} = useTranslation();
     const datos = obtenerPlanesServicio(slug);
-    const [planSeleccionado, setPlanSeleccionado] = useState<PlanServicio | null>(null);
 
     if (!datos) return null;
 
@@ -99,19 +85,10 @@ export const SeccionPlanesServicio: React.FC<SeccionPlanesServicioProps> = ({slu
                 </div>
                 <div className="planesGrid">
                     {datos.planes.map(plan => (
-                        <TarjetaPlan key={plan.id} plan={plan} onSeleccionar={setPlanSeleccionado} />
+                        <TarjetaPlan key={plan.id} plan={plan} />
                     ))}
                 </div>
             </div>
-
-            {planSeleccionado && (
-                <ModalCompra
-                    plan={planSeleccionado}
-                    servicioSlug={datos.servicioSlug}
-                    abierto
-                    onCerrar={() => setPlanSeleccionado(null)}
-                />
-            )}
         </section>
     );
 };
