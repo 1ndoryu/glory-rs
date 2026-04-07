@@ -1,3 +1,5 @@
+use std::net::SocketAddr;
+
 use glory_backend::config::AppConfig;
 use glory_backend::handlers;
 use glory_backend::services::AssignmentService;
@@ -36,7 +38,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let app = handlers::create_app(pool, config);
     let listener = tokio::net::TcpListener::bind(&addr).await?;
-    axum::serve(listener, app).await?;
+    /* [074A-41] into_make_service_with_connect_info para que GovernorLayer
+     * (PeerIpKeyExtractor) y ConnectInfo<SocketAddr> en ws_visitor funcionen.
+     * Sin esto, tower_governor devuelve "Unable To Extract Key!" en todas las rutas /api/ routes. */
+    axum::serve(listener, app.into_make_service_with_connect_info::<SocketAddr>()).await?;
 
     Ok(())
 }
