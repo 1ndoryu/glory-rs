@@ -1,4 +1,5 @@
-/* [044A-38 Fase 4] Estilos para SeccionDisponibles — órdenes sin asignar */
+/* [044A-38 Fase 4] Estilos para SeccionDisponibles — órdenes sin asignar.
+ * [114A-4] Rehecho: tema oscuro→claro para consistencia con panel (hostingContenedor). */
 
 .disponiblesLoading {
     display: flex;
@@ -6,15 +7,14 @@
     align-items: center;
     gap: var(--spacing-md);
     padding: var(--spacing-3xl) 0;
-    color: var(--brand-white);
-    opacity: 0.6;
+    color: var(--overlay-medium);
 }
 
 .disponiblesSpinner {
     width: 32px;
     height: 32px;
-    border: 3px solid var(--white-10);
-    border-top-color: var(--bg-accent);
+    border: 3px solid var(--bg-accent);
+    border-top-color: var(--brand-black);
     border-radius: 50%;
     animation: spinDisp 0.6s linear infinite;
 }
@@ -29,8 +29,7 @@
     align-items: center;
     gap: var(--spacing-sm);
     padding: var(--spacing-3xl) 0;
-    color: var(--brand-white);
-    opacity: 0.5;
+    color: var(--overlay-medium);
     text-align: center;
 }
 
@@ -66,13 +65,18 @@
 }
 
 .disponibleCard {
-    background: var(--white-5);
-    border: 1px solid var(--white-10);
+    background: var(--bg-dark);
+    border: 1px solid var(--bg-accent);
     border-radius: var(--radius-lg);
     padding: var(--spacing-lg);
     display: flex;
     flex-direction: column;
     gap: var(--spacing-md);
+    transition: background 0.1s;
+}
+
+.disponibleCard:hover {
+    background: var(--bg-card-subtle);
 }
 
 .disponibleCardHeader {
@@ -97,13 +101,13 @@
 .disponibleCardTitulo {
     font-size: var(--text-base);
     font-weight: 600;
-    color: var(--brand-white);
+    color: var(--brand-black);
     margin: 0;
 }
 
 .disponibleCardPlan {
     font-size: var(--text-sm);
-    color: var(--white-40);
+    color: var(--overlay-medium);
 }
 
 .disponibleCardBadge {
@@ -121,16 +125,16 @@
     gap: var(--spacing-md);
     flex-wrap: wrap;
     font-size: var(--text-sm);
-    color: var(--white-85);
+    color: var(--overlay-dark);
 }
 
 .disponibleCardNotas {
     font-size: var(--text-sm);
-    color: var(--white-40);
+    color: var(--overlay-medium);
     font-style: italic;
     margin: 0;
     padding: var(--spacing-sm);
-    background: var(--white-5);
+    background: var(--bg-card-subtle);
     border-radius: var(--radius-sm);
 }
 

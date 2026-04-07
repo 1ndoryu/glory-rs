@@ -1,5 +1,6 @@
 /* [044A-38 Fase 4] Estilos para SeccionDelegaciones.
- * Tarjetas de delegación con badges de estado, botones aceptar/rechazar, responsive. */
+ * Tarjetas de delegación con badges de estado, botones aceptar/rechazar, responsive.
+ * [114A-4] Rehecho: tema oscuro→claro para consistencia con panel. */
 
 .delegContenedor {
     display: flex;
@@ -14,18 +15,18 @@
 }
 
 .delegCard {
-    background: var(--bg-primary);
-    border: 1px solid var(--white-10);
+    background: var(--bg-dark);
+    border: 1px solid var(--bg-accent);
     border-radius: var(--radius-lg);
     padding: var(--spacing-md);
     display: flex;
     flex-direction: column;
     gap: var(--spacing-sm);
-    transition: border-color 0.2s ease;
+    transition: background 0.1s;
 }
 
 .delegCard:hover {
-    border-color: var(--white-15);
+    background: var(--bg-card-subtle);
 }
 
 .delegCardHeader {
@@ -48,7 +49,7 @@
     align-items: center;
     gap: 4px;
     font-size: var(--text-xs);
-    color: var(--white-40);
+    color: var(--overlay-medium);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -56,7 +57,7 @@
 .delegCardTitulo {
     font-size: var(--text-sm);
     font-weight: 600;
-    color: var(--brand-white);
+    color: var(--brand-black);
     margin: 0;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -94,7 +95,7 @@
 
 .delegCardRazon {
     font-size: var(--text-sm);
-    color: var(--white-85);
+    color: var(--overlay-dark);
     margin: 0;
     line-height: 1.4;
 }
@@ -104,7 +105,7 @@
     flex-wrap: wrap;
     gap: var(--spacing-sm);
     font-size: var(--text-xs);
-    color: var(--white-40);
+    color: var(--overlay-medium);
 }
 
 .delegCardAcciones {
@@ -166,15 +167,15 @@
     align-items: center;
     justify-content: center;
     padding: var(--spacing-3xl) 0;
-    color: var(--white-40);
+    color: var(--overlay-medium);
     gap: var(--spacing-sm);
 }
 
 .delegSpinner {
     width: 32px;
     height: 32px;
-    border: 3px solid var(--white-10);
-    border-top-color: var(--bg-accent);
+    border: 3px solid var(--bg-accent);
+    border-top-color: var(--brand-black);
     border-radius: 50%;
     animation: delegSpin 0.8s linear infinite;
 }
@@ -189,7 +190,7 @@
     align-items: center;
     justify-content: center;
     padding: var(--spacing-3xl) 0;
-    color: var(--white-40);
+    color: var(--overlay-medium);
     text-align: center;
     gap: var(--spacing-sm);
 }
@@ -197,7 +198,7 @@
 .delegVacio h3 {
     margin: 0;
     font-size: var(--text-md);
-    color: var(--white-40);
+    color: var(--overlay-medium);
 }
 
 .delegVacio p {
