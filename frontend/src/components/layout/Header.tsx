@@ -41,7 +41,7 @@ export const Header: React.FC = () => {
         menuMovilAbierto, setMenuMovilAbierto,
         subMenuMovil, setSubMenuMovil,
         cerrarMenuMovil,
-        logueado, logout, enPanel,
+        logueado, enPanel,
         dropdownRef,
         handleKeyDownDropdown,
         handleKeyDownSubmenu,
@@ -99,12 +99,11 @@ export const Header: React.FC = () => {
                 <div className="accionCabecera" role="group" aria-label={t('accessibility.user_actions')}>
                     {logueado ? (
                         <>
+                            {/* [074A-1] Solo botón de navegación (Panel/Volver).
+                             * Logout movido al SidebarPanel para no desloguear accidentalmente. */}
                             <GloryLink to={hrefAccion!} className="enlaceAcceder">
                                 {textoAccion}
                             </GloryLink>
-                            <Button variante="texto" className="enlaceAcceder" onClick={logout}>
-                                {t('nav.logout')}
-                            </Button>
                         </>
                     ) : (
                         <Button variante="texto" className="enlaceAcceder" onClick={() => setModalAbierto(true)}>
@@ -148,18 +147,10 @@ export const Header: React.FC = () => {
                             <div className="menuMovilSeparador" />
                             {logueado ? (
                                 <>
+                                    {/* [074A-1] Solo navegación. Logout en el panel. */}
                                     <GloryLink to={hrefAccion!} className="menuMovilEnlace" onClick={cerrarMenuMovil}>
                                         {textoAccion}
                                     </GloryLink>
-                                    <div
-                                        role="button"
-                                        tabIndex={0}
-                                        className="menuMovilEnlace"
-                                        onClick={() => { logout(); cerrarMenuMovil(); }}
-                                        onKeyDown={e => { if (e.key === 'Enter') { logout(); cerrarMenuMovil(); } }}
-                                    >
-                                        {t('nav.logout')}
-                                    </div>
                                 </>
                             ) : (
                                 <div

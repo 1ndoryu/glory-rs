@@ -5,10 +5,9 @@
  * [044A-38 Fase 1] Redirige / → /panel si el usuario está logueado. */
 
 import {useEffect} from 'react';
-import {BrowserRouter, Routes, Route, Navigate, useNavigate, useParams} from 'react-router-dom';
+import {BrowserRouter, Routes, Route, useNavigate, useParams} from 'react-router-dom';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import {registrarNavigate} from './navegacionSPA';
-import {useAuthStore} from './stores/authStore';
 import {ScrollToTop} from './components/ui/ScrollToTop';
 
 /* Pages (ex-islands) */
@@ -97,13 +96,9 @@ function BlogDetallePage() {
     return <BlogSingleIsland slug={slug} />;
 }
 
-/* [044A-38 Fase 1] Redirige al panel si está logueado, sino muestra home */
-function HomeOrPanel() {
-    const logueado = useAuthStore(s => s.logueado);
-    if (logueado) return <Navigate to="/panel" replace />;
-    return <BienvenidaIsland />;
-}
-
+/* [074A-1] Home siempre muestra BienvenidaIsland, logueado o no.
+ * Los usuarios logueados pueden navegar libremente por el sitio.
+ * El panel se accede desde el header (botón "Panel"). */
 function App() {
     return (
         <QueryClientProvider client={queryClient}>
@@ -112,7 +107,7 @@ function App() {
                 <ScrollToTop />
                 <NavigateRegistrar />
                 <Routes>
-                    <Route path="/" element={<HomeOrPanel />} />
+                    <Route path="/" element={<BienvenidaIsland />} />
                     <Route path="/servicios" element={<ServiciosIsland />} />
                     <Route path="/servicios/:slug" element={<ServicioDetallePage />} />
                     <Route path="/proyectos" element={<ProyectosIsland />} />

@@ -18,7 +18,6 @@ export const useHeader = () => {
     /* [064A-61] Submenú activo en el menú móvil (null = menú principal) */
     const [subMenuMovil, setSubMenuMovil] = useState<string | null>(null);
     const logueado = useAuthStore(s => s.logueado);
-    const logout = useAuthStore(s => s.logout);
     const enPanel = esRutaActual('/panel');
     const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -82,7 +81,7 @@ export const useHeader = () => {
         menuMovilAbierto, setMenuMovilAbierto,
         subMenuMovil, setSubMenuMovil,
         cerrarMenuMovil,
-        logueado, logout, enPanel,
+        logueado, enPanel,
         dropdownRef,
         handleKeyDownDropdown,
         handleKeyDownSubmenu,
