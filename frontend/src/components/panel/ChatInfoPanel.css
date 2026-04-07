@@ -19,12 +19,12 @@
     border-bottom: 1px solid var(--bg-accent);
 }
 
+/* [074A-20] Consistente con chatAreaTitulo y chatListaHeader h3 */
 .chatInfoTitulo {
     font-size: var(--text-sm);
     font-weight: 600;
     color: var(--brand-black);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    flex: 1;
 }
 
 .chatInfoBtnCerrar {
@@ -45,20 +45,21 @@
     gap: var(--spacing-md);
 }
 
+/* [074A-21] Layout compacto: label y valor en la misma fila */
 .chatInfoSeccion {
     display: flex;
-    flex-direction: column;
-    gap: 4px;
+    align-items: baseline;
+    gap: var(--spacing-sm);
 }
 
 .chatInfoLabel {
     font-size: var(--text-xs);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
     color: var(--text-muted);
     display: flex;
     align-items: center;
     gap: 4px;
+    white-space: nowrap;
+    min-width: 80px;
 }
 
 .chatInfoValor {
@@ -106,10 +107,14 @@
     border-color: var(--brand-black);
 }
 
-/* Notas */
+/* [074A-21] Notas: sección separada visualmente */
 .chatInfoSeccionNotas {
     flex: 1;
     min-height: 0;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    border-top: 1px solid var(--bg-accent);
+    padding-top: var(--spacing-md);
 }
 
 .chatInfoNotas {
