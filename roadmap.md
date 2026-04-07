@@ -43,7 +43,6 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 ### CMS Admin (plan: plan-cms-admin-2026-04-07.md)
 
-- 074A-6: CMS Infra — Upload endpoint backend + componentes base (UploadImage, SlugInput)
 - 074A-7: CMS Infra — RichTextEditor (tiptap) + ContentSection/ContentEditor base
 - 074A-8: CMS Servicios — Backend (migración + CRUD endpoints admin)
 - 074A-9: CMS Servicios — Frontend (SeccionContenido + EditorServicio)
@@ -55,3 +54,8 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 ### SEO y mejoras (plan: plan-seo-completo-2026-04-04.md)
 
 - 074A-14: SEO Fase 2 — Performance (lazy loading, image optimization, Core Web Vitals)
+
+### Bugs / UX reportados por usuario
+
+- 084A-1: Switch de vista debe cambiar de usuario real (pedidos por vista incoherentes, chat mensajes siempre izquierda, datos de prueba no realistas). Admin: filtrar por empleado, ver responsable en ordenCardFooter, separar "mis pedidos" de "pedidos de empleados". Buscador y filtro solo para admin.
+- 084A-2: Chat dentro de pedidos debe estar abierto por defecto, debajo de historial de proyecto.
