@@ -70,4 +70,3 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 - Las categorías no estan traducidas, deben traducirse a los 3 idiomas. Los contenidos de los servicios, planes, tambien, no creo que sea bueno reescribir todo en los 3 idiomas lo ideal es una forma automatica y segura porque es contenido que va modificarse. Las descripciones de los miembros de equipo no estan traducidas.
 - Los servicios en soluciones tampoco estan traducidos.
-- NO IGNORES "Los errores de @stripe/stripe-js y @stripe/react-stripe-js son preexistentes (paquetes no instalados localmente). Las advertencias de Code Sentinel sobre "modal artesanal" son sugerencias para usar un componente <Modal> compartido — pendiente para refactor futuro, no parte de este fix"arreglalo.

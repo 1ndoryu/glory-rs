@@ -1,23 +1,10 @@
-/* [044A-38 Fase 3] Estilos del modal de checkout Stripe */
+/* [044A-38 Fase 3] Estilos del modal de checkout Stripe.
+ * [064A-55] Migrado a <Modal> base — overlay removido, .checkoutModal es className del Modal. */
 
-.checkoutOverlay {
-    position: fixed;
-    inset: 0;
-    background: var(--overlay-dark);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-}
-
-/* [064A-54] Padding ~30px (--spacing-lg = 2rem ≈ 32px). Removido boton cerrar X. */
+/* [064A-54] Padding ~30px (--spacing-lg = 2rem ≈ 32px). Sin boton cerrar X. */
 .checkoutModal {
-    background: var(--bg-primary);
-    border-radius: var(--radius-lg);
-    padding: var(--spacing-lg);
     width: 90%;
     max-width: 480px;
-    position: relative;
 }
 
 .checkoutTitulo {

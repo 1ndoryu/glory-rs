@@ -1,6 +1,7 @@
 /* [044A-38 Fase 3] Modal de checkout con Stripe Elements.
  * Inicia PaymentIntent en el backend, muestra formulario de tarjeta,
- * y confirma el pago. El webhook procesa el resultado asíncronamente. */
+ * y confirma el pago. El webhook procesa el resultado asíncronamente.
+ * [064A-55] Migrado a <Modal> del sistema (focus trap, Escape, scroll lock). */
 
 import { useCallback, useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
@@ -13,6 +14,7 @@ import {
 import { apiInitiatePayment } from '../../api/payments';
 import { formatPrice } from '../../api/orders';
 import { Button } from '../ui/Button';
+import { Modal } from '../ui/Modal';
 import './CheckoutModal.css';
 
 const stripePromise = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
@@ -54,56 +56,51 @@ export default function CheckoutModal(props: CheckoutModalProps) {
 
     if (!stripePromise) {
         return (
-            <div className="checkoutOverlay" onClick={onClose}>
-                <div className="checkoutModal" onClick={e => e.stopPropagation()}>
-                    <p className="checkoutError">
-                        Stripe no está configurado. Agrega
-                        VITE_STRIPE_PUBLISHABLE_KEY al .env
-                    </p>
-                </div>
-            </div>
+            <Modal abierto onCerrar={onClose} className="checkoutModal">
+                <p className="checkoutError">
+                    Stripe no está configurado. Agrega
+                    VITE_STRIPE_PUBLISHABLE_KEY al .env
+                </p>
+            </Modal>
         );
     }
 
     return (
-        <div className="checkoutOverlay" onClick={onClose}>
-            <div className="checkoutModal" onClick={e => e.stopPropagation()}>
+        <Modal abierto onCerrar={onClose} className="checkoutModal">
+            <h3 className="checkoutTitulo">
+                Pagar Orden #{props.orderNumber}
+            </h3>
+            <p className="checkoutMonto">
+                {formatPrice(props.amountCents, props.currency)}
+            </p>
 
-                <h3 className="checkoutTitulo">
-                    Pagar Orden #{props.orderNumber}
-                </h3>
-                <p className="checkoutMonto">
-                    {formatPrice(props.amountCents, props.currency)}
-                </p>
+            {error && <p className="checkoutError">{error}</p>}
 
-                {error && <p className="checkoutError">{error}</p>}
+            {!clientSecret && (
+                <Button
+                    className="checkoutBoton"
+                    type="button"
+                    variante="primario"
+                    tamano="grande"
+                    onClick={iniciar}
+                    disabled={loading}
+                >
+                    {loading ? 'Preparando...' : 'Continuar al pago'}
+                </Button>
+            )}
 
-                {!clientSecret && (
-                    <Button
-                        className="checkoutBoton"
-                        type="button"
-                        variante="primario"
-                        tamano="grande"
-                        onClick={iniciar}
-                        disabled={loading}
-                    >
-                        {loading ? 'Preparando...' : 'Continuar al pago'}
-                    </Button>
-                )}
-
-                {clientSecret && (
-                    <Elements
-                        stripe={stripePromise}
-                        options={{ clientSecret, appearance: { theme: 'stripe' } }}
-                    >
-                        <FormularioPago
-                            onSuccess={onSuccess}
-                            onError={setError}
-                        />
-                    </Elements>
-                )}
-            </div>
-        </div>
+            {clientSecret && (
+                <Elements
+                    stripe={stripePromise}
+                    options={{ clientSecret, appearance: { theme: 'stripe' } }}
+                >
+                    <FormularioPago
+                        onSuccess={onSuccess}
+                        onError={setError}
+                    />
+                </Elements>
+            )}
+        </Modal>
     );
 }
 
