@@ -1,10 +1,10 @@
 /* [054A-1] Estilos para SeccionUsuarios (admin). */
 
+/* [074A-16] Eliminado padding — panelContenido ya da padding. */
 .usuariosContenedor {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-lg);
-    padding: var(--spacing-lg);
 }
 
 .usuariosVacio {
