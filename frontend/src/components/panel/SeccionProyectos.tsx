@@ -76,6 +76,44 @@ export const SeccionProyectos: React.FC = () => {
     const handleRevision = useCallback(async (orderId: string, phase: number) => {
         await solicitarRevision({orderId, phase});
     }, [solicitarRevision]);
+
+    /* [064A-50] Filtrar y ordenar por tab — debe estar antes de early returns para cumplir Rules of Hooks */
+    const activas = useMemo(() =>
+        ordenes.filter(o => !HISTORY_STATUSES.has(o.status)).sort(sortByStatusPriority),
+        [ordenes]
+    );
+    const historial = useMemo(() =>
+        ordenes.filter(o => HISTORY_STATUSES.has(o.status)),
+        [ordenes]
+    );
+    const listaBase = tabActiva === 'activas' ? activas : historial;
+
+    /* [084A-1] Filtrado admin: búsqueda por título + filtro por empleado.
+     * [084A-4] Movido antes de early returns para cumplir Rules of Hooks. */
+    const empleadosUnicos = useMemo(() => {
+        if (!isAdmin) return [];
+        const mapa = new Map<string, string>();
+        for (const o of ordenes) {
+            if (o.assigned_employee_id && o.assigned_employee_name) {
+                mapa.set(o.assigned_employee_id, o.assigned_employee_name);
+            }
+        }
+        return Array.from(mapa, ([id, nombre]) => ({id, nombre}));
+    }, [isAdmin, ordenes]);
+
+    const listaActual = useMemo(() => {
+        if (!isAdmin) return listaBase;
+        let resultado = listaBase;
+        if (busqueda.trim()) {
+            const q = busqueda.toLowerCase();
+            resultado = resultado.filter(o => o.service_title.toLowerCase().includes(q));
+        }
+        if (filtroEmpleado) {
+            resultado = resultado.filter(o => o.assigned_employee_id === filtroEmpleado);
+        }
+        return resultado;
+    }, [isAdmin, listaBase, busqueda, filtroEmpleado]);
+
     if (cargando) {
         return <div className="proyectosLoading"><div className="proyectosSpinner" /><p>Cargando proyectos...</p></div>;
     }
@@ -102,39 +140,6 @@ export const SeccionProyectos: React.FC = () => {
     if (ordenSeleccionada && cargandoDetalle) {
         return <div className="proyectosLoading"><div className="proyectosSpinner" /><p>Cargando detalle...</p></div>;
     }
-
-    /* [064A-50] Filtrar y ordenar por tab */
-    const activas = ordenes
-        .filter(o => !HISTORY_STATUSES.has(o.status))
-        .sort(sortByStatusPriority);
-    const historial = ordenes
-        .filter(o => HISTORY_STATUSES.has(o.status));
-    const listaBase = tabActiva === 'activas' ? activas : historial;
-
-    /* [084A-1] Filtrado admin: búsqueda por título + filtro por empleado */
-    const empleadosUnicos = useMemo(() => {
-        if (!isAdmin) return [];
-        const mapa = new Map<string, string>();
-        for (const o of ordenes) {
-            if (o.assigned_employee_id && o.assigned_employee_name) {
-                mapa.set(o.assigned_employee_id, o.assigned_employee_name);
-            }
-        }
-        return Array.from(mapa, ([id, nombre]) => ({id, nombre}));
-    }, [isAdmin, ordenes]);
-
-    const listaActual = useMemo(() => {
-        if (!isAdmin) return listaBase;
-        let resultado = listaBase;
-        if (busqueda.trim()) {
-            const q = busqueda.toLowerCase();
-            resultado = resultado.filter(o => o.service_title.toLowerCase().includes(q));
-        }
-        if (filtroEmpleado) {
-            resultado = resultado.filter(o => o.assigned_employee_id === filtroEmpleado);
-        }
-        return resultado;
-    }, [isAdmin, listaBase, busqueda, filtroEmpleado]);
 
     /* Lista vacía (todas las órdenes, no solo la tab) */
     if (ordenes.length === 0) {
