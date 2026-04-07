@@ -45,7 +45,6 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 - 074A-2: Datos de prueba completos para vista cliente y empleado (falta seed data visible).
 - 074A-3: Verificar/corregir datos de prueba de hosting (064A-51 los creó, puede que no se vean).
-- 074A-23: No se puede cambiar el nombre de usuario después de registrarse — verificar si existe y si no, agregar.
 
 ### CMS Admin (plan: plan-cms-admin-2026-04-07.md)
 
