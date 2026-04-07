@@ -72,7 +72,7 @@ export const OrderChat: React.FC<OrderChatProps> = ({orderId, employeeName}) => 
                             key={msg.id}
                             className={`orderChatBurbuja ${esPropio ? 'orderChatBurbuja--propia' : 'orderChatBurbuja--otra'}`}
                         >
-                            <span className="orderChatBurbujaTexto">{msg.content}</span>
+                            <div className="orderChatBurbujaTexto">{msg.content}</div>
                             <span className="orderChatBurbujaHora">
                                 {new Date(msg.created_at).toLocaleTimeString('es-ES', {
                                     hour: '2-digit',
