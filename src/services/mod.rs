@@ -7,6 +7,7 @@ mod note;
 mod notification;
 mod order;
 mod payment;
+mod seed;
 
 pub use ai_chat::{AiChatConfig, AiChatService};
 pub use assignment::AssignmentService;
@@ -17,3 +18,4 @@ pub use note::NoteService;
 pub use notification::NotificationHub;
 pub use order::OrderService;
 pub use payment::PaymentService;
+pub use seed::SeedService;

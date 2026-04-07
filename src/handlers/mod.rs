@@ -1,5 +1,6 @@
 #![allow(clippy::needless_for_each)] // Generado por utoipa OpenApi derive
 
+mod admin_seed;
 mod admin_users;
 mod assignment;
 mod auth;
@@ -308,6 +309,7 @@ fn api_routes() -> Router<AppState> {
         .merge(dashboard::routes())
         .merge(profile::routes())
         .merge(admin_users::routes())
+        .merge(admin_seed::seed_routes())
         .merge(hosting::hosting_routes())
         .layer(GovernorLayer {
             config: std::sync::Arc::new(api_governor),

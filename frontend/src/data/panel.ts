@@ -5,11 +5,12 @@
  */
 import type {UserRole} from '../api/auth';
 
-/* [064A-34] Eliminados: servicios, empleados, config-servicios (páginas innecesarias). */
+/* [064A-34] Eliminados: servicios, empleados, config-servicios (páginas innecesarias).
+ * [064A-62] Añadido 'configuracion' para tab admin de herramientas dev. */
 export type SeccionPanel =
     | 'proyectos' | 'pagos' | 'perfil' | 'metodos-pago' | 'mensajes'
     | 'asignados' | 'disponibles' | 'delegaciones'
-    | 'todos-ordenes' | 'reembolsos' | 'usuarios' | 'hosting';
+    | 'todos-ordenes' | 'reembolsos' | 'usuarios' | 'hosting' | 'configuracion';
 
 export interface TabConfig {
     id: SeccionPanel;
@@ -108,6 +109,12 @@ const TABS_ADMIN: TabConfig[] = [
         id: 'perfil',
         label: 'Configurar Perfil',
         descripcion: 'Personaliza tu perfil publico: nombre, imagen, descripcion y redes sociales.'
+    },
+    /* [064A-62] Tab de configuración/herramientas dev */
+    {
+        id: 'configuracion',
+        label: 'Configuración',
+        descripcion: 'Herramientas de desarrollo: recrear o borrar datos de prueba, configuraciones del sistema.'
     }
 ];
 
