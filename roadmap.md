@@ -67,5 +67,4 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 ### 
 
-- 064A-72: No se puede ver la informacion del usuario para distinguirlo al menso, debera haber un panel lateral en el chat disponible para ver informacion del usuario como su ip, ubicación, dispositivo y toda la información posible, y para agregar notas, cambiar el nombre, el nombre deberia actualizarse automaticamente cuando la IA se lo pida. 
 - 064A-73: Auditoría de seguridad detallada — primero plan con todo lo que se va a revisar, luego ir por etapa.

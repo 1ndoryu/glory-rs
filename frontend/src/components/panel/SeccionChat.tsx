@@ -1,11 +1,12 @@
 /* [044A-38 Fase 5] Sección "Mensajes" del panel.
- * Lista de conversaciones + chat activo. Soporta chat por orden y pre-venta.
+ * Lista de conversaciones + chat activo + panel info visitante (064A-72).
  * Staff: ve todas las sesiones. Cliente: solo sus chats de órdenes. */
 
-import React from 'react';
-import {MessageCircle, Send, Bot, User, ChevronLeft, XCircle} from 'lucide-react';
+import React, {useState} from 'react';
+import {MessageCircle, Send, Bot, User, ChevronLeft, XCircle, Info} from 'lucide-react';
 import {SENDER_LABELS, SESSION_STATUS_LABELS, type ChatSession, type ChatMessage} from '../../api/chat';
 import {useSeccionChat} from '../../hooks/useSeccionChat';
+import {ChatInfoPanel} from './ChatInfoPanel';
 import {Button} from '../ui/Button';
 import {Textarea} from '../ui/Textarea';
 import './SeccionChat.css';
@@ -28,6 +29,9 @@ export const SeccionChat: React.FC = () => {
         handleKeyDown,
         handleSend,
     } = useSeccionChat();
+
+    const [showInfo, setShowInfo] = useState(false);
+    const activeSession = sessions.find(s => s.id === activeSessionId) ?? null;
 
     if (cargandoSesiones) {
         return (
@@ -77,12 +81,21 @@ export const SeccionChat: React.FC = () => {
                                 <ChevronLeft size={18} />
                             </Button>
                             <span className="chatAreaTitulo">
-                                {(() => {
-                                    const s = sessions.find(ses => ses.id === activeSessionId);
-                                    if (s?.order_id) return `Chat de orden #${s.order_number ?? '...'}`;
-                                    return 'Chat general';
-                                })()}
+                                {activeSession?.order_id
+                                    ? `Chat de orden #${activeSession.order_number ?? '...'}`
+                                    : activeSession?.visitor_name || 'Chat general'}
                             </span>
+                            {/* [064A-72] Botón para abrir/cerrar panel de info */}
+                            <Button
+                                className="chatBtnInfo"
+                                onClick={() => setShowInfo(prev => !prev)}
+                                type="button"
+                                variante="texto"
+                                tamano="pequeno"
+                                title="Info del visitante"
+                            >
+                                <Info size={18} />
+                            </Button>
                             {/* [064A-71] Botón para deseleccionar la conversación activa,
                              * sin cerrarla permanentemente. El cierre definitivo (close_session)
                              * requiere acción explícita desde un menú contextual futuro. */}
@@ -149,6 +162,14 @@ export const SeccionChat: React.FC = () => {
                     </div>
                 )}
             </div>
+
+            {/* [064A-72] Panel lateral de info del visitante */}
+            {showInfo && activeSession && (
+                <ChatInfoPanel
+                    session={activeSession}
+                    onClose={() => setShowInfo(false)}
+                />
+            )}
         </div>
     );
 };

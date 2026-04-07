@@ -24,6 +24,12 @@ pub struct ChatSession {
     pub ai_enabled: bool,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
+    /* [064A-72] Metadata del visitante capturada en la conexión WS.
+     * default: los queries que no seleccionan estas columnas las reciben como None. */
+    #[sqlx(default)]
+    pub visitor_ip: Option<String>,
+    #[sqlx(default)]
+    pub visitor_user_agent: Option<String>,
 }
 
 #[derive(Debug, Clone, FromRow, Serialize, ToSchema)]
@@ -77,6 +83,30 @@ pub struct ChatSessionResponse {
     pub last_message: Option<String>,
     pub last_message_at: Option<DateTime<Utc>>,
     pub created_at: DateTime<Utc>,
+    /* [064A-72] Info del visitante para panel lateral */
+    pub visitor_name: Option<String>,
+    pub visitor_ip: Option<String>,
+    pub visitor_user_agent: Option<String>,
+}
+
+/* [064A-72] Modelo de notas de sesión de chat */
+#[derive(Debug, Clone, FromRow, Serialize, ToSchema)]
+pub struct ChatSessionNote {
+    pub id: Uuid,
+    pub session_id: Uuid,
+    pub author_id: Uuid,
+    pub content: String,
+    pub created_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct CreateSessionNoteRequest {
+    pub content: String,
+}
+
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct UpdateVisitorNameRequest {
+    pub name: String,
 }
 
 /* ============================================================

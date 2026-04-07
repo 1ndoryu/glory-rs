@@ -152,6 +152,18 @@
     opacity: 0.3;
 }
 
+/* [064A-72] Botón info: toggle panel lateral */
+.chatBtnInfo {
+    opacity: 0.5;
+    padding: 4px;
+    min-width: auto;
+    min-height: auto;
+}
+
+.chatBtnInfo:hover {
+    opacity: 1;
+}
+
 .chatMensajes {
     flex: 1;
     overflow-y: auto;

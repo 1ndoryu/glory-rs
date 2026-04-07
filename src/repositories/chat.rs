@@ -1,11 +1,12 @@
 /* [044A-38 Fase 5] Repositorio de chat: CRUD sesiones y mensajes.
- * [044A-44] Migrado a query_as!/query! con verificación en compilación.
+ * [064A-72] ChatSession queries migradas a runtime query_as para soportar
+ * campos con #[sqlx(default)] (visitor_ip, visitor_user_agent).
  * Queries con prepared statements. Soporta sesiones anónimas y autenticadas. */
 
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::models::{ChatMessage, ChatSession};
+use crate::models::{ChatMessage, ChatSession, ChatSessionNote};
 
 pub struct ChatRepository;
 
@@ -22,17 +23,16 @@ impl ChatRepository {
         user_id: Option<Uuid>,
         order_id: Option<Uuid>,
     ) -> Result<ChatSession, sqlx::Error> {
-        sqlx::query_as!(
-            ChatSession,
-            r#"INSERT INTO chat_sessions (visitor_id, visitor_name, user_id, order_id)
-             VALUES ($1, $2, $3, $4)
-             RETURNING id, visitor_id, visitor_name, user_id, order_id, status,
-               assigned_staff_id, ai_enabled, created_at, updated_at"#,
-            visitor_id,
-            visitor_name,
-            user_id,
-            order_id,
+        sqlx::query_as::<_, ChatSession>(
+            "INSERT INTO chat_sessions (visitor_id, visitor_name, user_id, order_id) \
+             VALUES ($1, $2, $3, $4) \
+             RETURNING id, visitor_id, visitor_name, user_id, order_id, status, \
+               assigned_staff_id, ai_enabled, created_at, updated_at",
         )
+        .bind(visitor_id)
+        .bind(visitor_name)
+        .bind(user_id)
+        .bind(order_id)
         .fetch_one(pool)
         .await
     }
@@ -41,13 +41,13 @@ impl ChatRepository {
         pool: &PgPool,
         id: Uuid,
     ) -> Result<Option<ChatSession>, sqlx::Error> {
-        sqlx::query_as!(
-            ChatSession,
-            r#"SELECT id, visitor_id, visitor_name, user_id, order_id, status,
-               assigned_staff_id, ai_enabled, created_at, updated_at
-             FROM chat_sessions WHERE id = $1"#,
-            id,
+        sqlx::query_as::<_, ChatSession>(
+            "SELECT id, visitor_id, visitor_name, user_id, order_id, status, \
+               assigned_staff_id, ai_enabled, created_at, updated_at, \
+               visitor_ip, visitor_user_agent \
+             FROM chat_sessions WHERE id = $1",
         )
+        .bind(id)
         .fetch_optional(pool)
         .await
     }
@@ -57,16 +57,15 @@ impl ChatRepository {
         pool: &PgPool,
         user_id: Uuid,
     ) -> Result<Vec<ChatSession>, sqlx::Error> {
-        sqlx::query_as!(
-            ChatSession,
-            r#"SELECT id, visitor_id, visitor_name, user_id, order_id, status,
-               assigned_staff_id, ai_enabled, created_at, updated_at
-             FROM chat_sessions
-             WHERE (user_id = $1 OR assigned_staff_id = $1)
-             AND status != 'closed'
-             ORDER BY updated_at DESC"#,
-            user_id,
+        sqlx::query_as::<_, ChatSession>(
+            "SELECT id, visitor_id, visitor_name, user_id, order_id, status, \
+               assigned_staff_id, ai_enabled, created_at, updated_at \
+             FROM chat_sessions \
+             WHERE (user_id = $1 OR assigned_staff_id = $1) \
+             AND status != 'closed' \
+             ORDER BY updated_at DESC",
         )
+        .bind(user_id)
         .fetch_all(pool)
         .await
     }
@@ -76,15 +75,14 @@ impl ChatRepository {
         pool: &PgPool,
         order_id: Uuid,
     ) -> Result<Option<ChatSession>, sqlx::Error> {
-        sqlx::query_as!(
-            ChatSession,
-            r#"SELECT id, visitor_id, visitor_name, user_id, order_id, status,
-               assigned_staff_id, ai_enabled, created_at, updated_at
-             FROM chat_sessions
-             WHERE order_id = $1 AND status != 'closed'
-             ORDER BY created_at DESC LIMIT 1"#,
-            order_id,
+        sqlx::query_as::<_, ChatSession>(
+            "SELECT id, visitor_id, visitor_name, user_id, order_id, status, \
+               assigned_staff_id, ai_enabled, created_at, updated_at \
+             FROM chat_sessions \
+             WHERE order_id = $1 AND status != 'closed' \
+             ORDER BY created_at DESC LIMIT 1",
         )
+        .bind(order_id)
         .fetch_optional(pool)
         .await
     }
@@ -94,15 +92,15 @@ impl ChatRepository {
         pool: &PgPool,
         visitor_id: &str,
     ) -> Result<Option<ChatSession>, sqlx::Error> {
-        sqlx::query_as!(
-            ChatSession,
-            r#"SELECT id, visitor_id, visitor_name, user_id, order_id, status,
-               assigned_staff_id, ai_enabled, created_at, updated_at
-             FROM chat_sessions
-             WHERE visitor_id = $1 AND status != 'closed'
-             ORDER BY created_at DESC LIMIT 1"#,
-            visitor_id,
+        sqlx::query_as::<_, ChatSession>(
+            "SELECT id, visitor_id, visitor_name, user_id, order_id, status, \
+               assigned_staff_id, ai_enabled, created_at, updated_at, \
+               visitor_ip, visitor_user_agent \
+             FROM chat_sessions \
+             WHERE visitor_id = $1 AND status != 'closed' \
+             ORDER BY created_at DESC LIMIT 1",
         )
+        .bind(visitor_id)
         .fetch_optional(pool)
         .await
     }
@@ -111,13 +109,13 @@ impl ChatRepository {
     pub async fn list_active_sessions(
         pool: &PgPool,
     ) -> Result<Vec<ChatSession>, sqlx::Error> {
-        sqlx::query_as!(
-            ChatSession,
-            r#"SELECT id, visitor_id, visitor_name, user_id, order_id, status,
-               assigned_staff_id, ai_enabled, created_at, updated_at
-             FROM chat_sessions
-             WHERE status != 'closed'
-             ORDER BY updated_at DESC"#,
+        sqlx::query_as::<_, ChatSession>(
+            "SELECT id, visitor_id, visitor_name, user_id, order_id, status, \
+               assigned_staff_id, ai_enabled, created_at, updated_at, \
+               visitor_ip, visitor_user_agent \
+             FROM chat_sessions \
+             WHERE status != 'closed' \
+             ORDER BY updated_at DESC",
         )
         .fetch_all(pool)
         .await
@@ -129,16 +127,15 @@ impl ChatRepository {
         session_id: Uuid,
         staff_id: Uuid,
     ) -> Result<ChatSession, sqlx::Error> {
-        sqlx::query_as!(
-            ChatSession,
-            r#"UPDATE chat_sessions SET assigned_staff_id = $2,
-             status = 'staff_handling', ai_enabled = false,
-             updated_at = NOW() WHERE id = $1
-             RETURNING id, visitor_id, visitor_name, user_id, order_id, status,
-               assigned_staff_id, ai_enabled, created_at, updated_at"#,
-            session_id,
-            staff_id,
+        sqlx::query_as::<_, ChatSession>(
+            "UPDATE chat_sessions SET assigned_staff_id = $2, \
+             status = 'staff_handling', ai_enabled = false, \
+             updated_at = NOW() WHERE id = $1 \
+             RETURNING id, visitor_id, visitor_name, user_id, order_id, status, \
+               assigned_staff_id, ai_enabled, created_at, updated_at",
         )
+        .bind(session_id)
+        .bind(staff_id)
         .fetch_one(pool)
         .await
     }
@@ -150,16 +147,15 @@ impl ChatRepository {
         enabled: bool,
     ) -> Result<ChatSession, sqlx::Error> {
         let new_status = if enabled { "ai_handling" } else { "staff_handling" };
-        sqlx::query_as!(
-            ChatSession,
-            r#"UPDATE chat_sessions SET ai_enabled = $2, status = $3,
-             updated_at = NOW() WHERE id = $1
-             RETURNING id, visitor_id, visitor_name, user_id, order_id, status,
-               assigned_staff_id, ai_enabled, created_at, updated_at"#,
-            session_id,
-            enabled,
-            new_status,
+        sqlx::query_as::<_, ChatSession>(
+            "UPDATE chat_sessions SET ai_enabled = $2, status = $3, \
+             updated_at = NOW() WHERE id = $1 \
+             RETURNING id, visitor_id, visitor_name, user_id, order_id, status, \
+               assigned_staff_id, ai_enabled, created_at, updated_at",
         )
+        .bind(session_id)
+        .bind(enabled)
+        .bind(new_status)
         .fetch_one(pool)
         .await
     }
@@ -169,14 +165,13 @@ impl ChatRepository {
         pool: &PgPool,
         session_id: Uuid,
     ) -> Result<ChatSession, sqlx::Error> {
-        sqlx::query_as!(
-            ChatSession,
-            r#"UPDATE chat_sessions SET status = 'closed',
-             updated_at = NOW() WHERE id = $1
-             RETURNING id, visitor_id, visitor_name, user_id, order_id, status,
-               assigned_staff_id, ai_enabled, created_at, updated_at"#,
-            session_id,
+        sqlx::query_as::<_, ChatSession>(
+            "UPDATE chat_sessions SET status = 'closed', \
+             updated_at = NOW() WHERE id = $1 \
+             RETURNING id, visitor_id, visitor_name, user_id, order_id, status, \
+               assigned_staff_id, ai_enabled, created_at, updated_at",
         )
+        .bind(session_id)
         .fetch_one(pool)
         .await
     }
@@ -270,6 +265,60 @@ impl ChatRepository {
             session_id,
             content,
         )
+        .execute(pool)
+        .await?;
+        Ok(())
+    }
+
+    /* ============================================================
+       NOTAS DE SESIÓN (064A-72)
+       ============================================================ */
+
+    /// Listar notas de una sesión
+    pub async fn list_session_notes(
+        pool: &PgPool,
+        session_id: Uuid,
+    ) -> Result<Vec<ChatSessionNote>, sqlx::Error> {
+        sqlx::query_as::<_, ChatSessionNote>(
+            "SELECT id, session_id, author_id, content, created_at \
+             FROM chat_session_notes WHERE session_id = $1 \
+             ORDER BY created_at ASC",
+        )
+        .bind(session_id)
+        .fetch_all(pool)
+        .await
+    }
+
+    /// Crear nota en una sesión
+    pub async fn create_session_note(
+        pool: &PgPool,
+        session_id: Uuid,
+        author_id: Uuid,
+        content: &str,
+    ) -> Result<ChatSessionNote, sqlx::Error> {
+        sqlx::query_as::<_, ChatSessionNote>(
+            "INSERT INTO chat_session_notes (session_id, author_id, content) \
+             VALUES ($1, $2, $3) \
+             RETURNING id, session_id, author_id, content, created_at",
+        )
+        .bind(session_id)
+        .bind(author_id)
+        .bind(content)
+        .fetch_one(pool)
+        .await
+    }
+
+    /// Renombrar visitante de una sesión
+    pub async fn update_visitor_name(
+        pool: &PgPool,
+        session_id: Uuid,
+        name: &str,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query(
+            "UPDATE chat_sessions SET visitor_name = $2, updated_at = NOW() WHERE id = $1",
+        )
+        .bind(session_id)
+        .bind(name)
         .execute(pool)
         .await?;
         Ok(())

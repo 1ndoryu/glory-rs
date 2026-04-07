@@ -17,6 +17,10 @@ export interface ChatSession {
     last_message: string | null;
     last_message_at: string | null;
     created_at: string;
+    /* [064A-72] Metadata del visitante (panel de info) */
+    visitor_name: string | null;
+    visitor_ip: string | null;
+    visitor_user_agent: string | null;
 }
 
 export interface ChatMessage {
@@ -94,6 +98,43 @@ export async function apiSendMessage(
 /* [054A-9] Cerrar sesión de chat (staff/admin) */
 export async function apiCloseSession(sessionId: string): Promise<void> {
     await axiosInstance.post(`/api/chat/sessions/${sessionId}/close`);
+}
+
+/* ============================================================
+   [064A-72] NOTAS DE SESIÓN Y RENOMBRAR VISITANTE
+   ============================================================ */
+
+export interface ChatSessionNote {
+    id: string;
+    session_id: string;
+    author_id: string;
+    content: string;
+    created_at: string;
+}
+
+export async function apiListSessionNotes(sessionId: string): Promise<ChatSessionNote[]> {
+    const {data} = await axiosInstance.get<ChatSessionNote[]>(
+        `/api/chat/sessions/${sessionId}/notes`,
+    );
+    return data;
+}
+
+export async function apiCreateSessionNote(
+    sessionId: string,
+    content: string,
+): Promise<ChatSessionNote> {
+    const {data} = await axiosInstance.post<ChatSessionNote>(
+        `/api/chat/sessions/${sessionId}/notes`,
+        {content},
+    );
+    return data;
+}
+
+export async function apiUpdateVisitorName(
+    sessionId: string,
+    name: string,
+): Promise<void> {
+    await axiosInstance.patch(`/api/chat/sessions/${sessionId}/visitor-name`, {name});
 }
 
 /* ============================================================

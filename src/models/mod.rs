@@ -12,8 +12,9 @@ mod review;
 mod user;
 
 pub use chat::{
-    ChatMessage, ChatMessageResponse, ChatSession, ChatSessionResponse, CreateChatSessionRequest,
-    SendMessageRequest, WsClientMessage, WsServerMessage,
+    ChatMessage, ChatMessageResponse, ChatSession, ChatSessionNote, ChatSessionResponse,
+    CreateChatSessionRequest, CreateSessionNoteRequest, SendMessageRequest,
+    UpdateVisitorNameRequest, WsClientMessage, WsServerMessage,
 };
 pub use delegation::{
     CreateDelegationRequest, Delegation, DelegationResponse, DelegationStatus, EmployeeListItem,

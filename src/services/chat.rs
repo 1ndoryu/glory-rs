@@ -81,14 +81,29 @@ impl ChatHub {
        ============================================================ */
 
     /// Crear o recuperar sesión para un visitante anónimo
+    #[allow(clippy::similar_names)] /* visitor_ip vs visitor_id — nombres semánticos claros */
     pub async fn get_or_create_visitor_session(
         &self,
         visitor_id: &str,
         visitor_name: Option<&str>,
+        visitor_ip: Option<&str>,
+        visitor_user_agent: Option<&str>,
     ) -> Result<ChatSession, AppError> {
         if let Some(existing) =
             ChatRepository::find_session_by_visitor(&self.pool, visitor_id).await?
         {
+            /* [064A-72] Actualizar IP/UA si cambió (reconexiones) */
+            if visitor_ip.is_some() || visitor_user_agent.is_some() {
+                let _ = sqlx::query(
+                    "UPDATE chat_sessions SET visitor_ip = COALESCE($2, visitor_ip), \
+                     visitor_user_agent = COALESCE($3, visitor_user_agent) WHERE id = $1",
+                )
+                .bind(existing.id)
+                .bind(visitor_ip)
+                .bind(visitor_user_agent)
+                .execute(&self.pool)
+                .await;
+            }
             return Ok(existing);
         }
         let session = ChatRepository::create_session(
@@ -99,6 +114,18 @@ impl ChatHub {
             None,
         )
         .await?;
+
+        /* [064A-72] Guardar IP y user-agent en la nueva sesión */
+        if visitor_ip.is_some() || visitor_user_agent.is_some() {
+            let _ = sqlx::query(
+                "UPDATE chat_sessions SET visitor_ip = $2, visitor_user_agent = $3 WHERE id = $1",
+            )
+            .bind(session.id)
+            .bind(visitor_ip)
+            .bind(visitor_user_agent)
+            .execute(&self.pool)
+            .await;
+        }
 
         /* [064A-68] Notificar a todos los staff conectados sobre la nueva sesión */
         let _ = self.staff_channel.send(WsServerMessage::SessionNew {
@@ -301,6 +328,9 @@ impl ChatHub {
                     last_message: last.map(|m| m.content.clone()),
                     last_message_at: last.map(|m| m.created_at),
                     created_at: s.created_at,
+                    visitor_name: s.visitor_name,
+                    visitor_ip: s.visitor_ip,
+                    visitor_user_agent: s.visitor_user_agent,
                 }
             })
             .collect())

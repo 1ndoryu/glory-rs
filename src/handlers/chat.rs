@@ -15,8 +15,9 @@ use uuid::Uuid;
 use crate::errors::AppError;
 use crate::middleware::AuthUser;
 use crate::models::{
-    ChatMessage, ChatMessageResponse, ChatSessionResponse, CreateChatSessionRequest,
-    SendMessageRequest, WsClientMessage, WsServerMessage,
+    ChatMessage, ChatMessageResponse, ChatSessionNote, ChatSessionResponse,
+    CreateChatSessionRequest, CreateSessionNoteRequest, SendMessageRequest,
+    UpdateVisitorNameRequest, WsClientMessage, WsServerMessage,
 };
 use crate::services::AiChatService;
 use crate::AppState;
@@ -44,15 +45,45 @@ pub struct MessagesQuery {
 async fn ws_visitor(
     ws: WebSocketUpgrade,
     State(state): State<AppState>,
+    headers: axum::http::HeaderMap,
     Query(params): Query<VisitorWsParams>,
 ) -> impl IntoResponse {
-    ws.on_upgrade(move |socket| handle_visitor_ws(socket, state, params))
+    /* [064A-72] Capturar IP y User-Agent del visitante */
+    let visitor_ip = headers
+        .get("x-forwarded-for")
+        .and_then(|v| v.to_str().ok())
+        .map(|s| s.split(',').next().unwrap_or(s).trim().to_string())
+        .or_else(|| {
+            headers
+                .get("x-real-ip")
+                .and_then(|v| v.to_str().ok())
+                .map(String::from)
+        });
+    let visitor_ua = headers
+        .get("user-agent")
+        .and_then(|v| v.to_str().ok())
+        .map(String::from);
+
+    ws.on_upgrade(move |socket| {
+        handle_visitor_ws(socket, state, params, visitor_ip, visitor_ua)
+    })
 }
 
-async fn handle_visitor_ws(socket: WebSocket, state: AppState, params: VisitorWsParams) {
+async fn handle_visitor_ws(
+    socket: WebSocket,
+    state: AppState,
+    params: VisitorWsParams,
+    visitor_ip: Option<String>,
+    visitor_ua: Option<String>,
+) {
     let session = match state
         .chat_hub
-        .get_or_create_visitor_session(&params.visitor_id, params.visitor_name.as_deref())
+        .get_or_create_visitor_session(
+            &params.visitor_id,
+            params.visitor_name.as_deref(),
+            visitor_ip.as_deref(),
+            visitor_ua.as_deref(),
+        )
         .await
     {
         Ok(s) => s,
@@ -73,12 +104,9 @@ async fn handle_visitor_ws(socket: WebSocket, state: AppState, params: VisitorWs
     {
         for msg in history {
             let ws_msg = WsServerMessage::Message {
-                id: msg.id,
-                session_id: msg.session_id,
-                sender: msg.sender_type,
-                sender_id: msg.sender_id,
-                content: msg.content,
-                created_at: msg.created_at,
+                id: msg.id, session_id: msg.session_id,
+                sender: msg.sender_type, sender_id: msg.sender_id,
+                content: msg.content, created_at: msg.created_at,
             };
             if let Ok(json) = serde_json::to_string(&ws_msg) {
                 if sender.send(Message::Text(json)).await.is_err() {
@@ -442,7 +470,7 @@ pub async fn create_session(
             .unwrap_or_else(|| auth.user_id.to_string());
         state
             .chat_hub
-            .get_or_create_visitor_session(&vid, req.visitor_name.as_deref())
+            .get_or_create_visitor_session(&vid, req.visitor_name.as_deref(), None, None)
             .await?
     };
 
@@ -467,6 +495,9 @@ pub async fn create_session(
         last_message: None,
         last_message_at: None,
         created_at: session.created_at,
+        visitor_name: session.visitor_name,
+        visitor_ip: session.visitor_ip,
+        visitor_user_agent: session.visitor_user_agent,
     };
     Ok((StatusCode::CREATED, Json(response)))
 }
@@ -551,6 +582,52 @@ pub async fn close_session(
 }
 
 /* ============================================================
+   [064A-72] NOTAS Y RENOMBRAR VISITANTE
+   ============================================================ */
+
+/// Listar notas de una sesión
+pub async fn list_session_notes(
+    State(state): State<AppState>,
+    _auth: AuthUser,
+    Path(session_id): Path<Uuid>,
+) -> Result<Json<Vec<ChatSessionNote>>, AppError> {
+    let notes =
+        crate::repositories::ChatRepository::list_session_notes(&state.pool, session_id).await?;
+    Ok(Json(notes))
+}
+
+/// Crear nota en una sesión (solo staff/admin)
+pub async fn create_session_note(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    Path(session_id): Path<Uuid>,
+    Json(req): Json<CreateSessionNoteRequest>,
+) -> Result<(StatusCode, Json<ChatSessionNote>), AppError> {
+    auth.require_role(&[crate::models::UserRole::Admin, crate::models::UserRole::Employee])?;
+    let note = crate::repositories::ChatRepository::create_session_note(
+        &state.pool,
+        session_id,
+        auth.user_id,
+        &req.content,
+    )
+    .await?;
+    Ok((StatusCode::CREATED, Json(note)))
+}
+
+/// Renombrar visitante de una sesión (solo staff/admin)
+pub async fn update_visitor_name(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    Path(session_id): Path<Uuid>,
+    Json(req): Json<UpdateVisitorNameRequest>,
+) -> Result<StatusCode, AppError> {
+    auth.require_role(&[crate::models::UserRole::Admin, crate::models::UserRole::Employee])?;
+    crate::repositories::ChatRepository::update_visitor_name(&state.pool, session_id, &req.name)
+        .await?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
+/* ============================================================
    ROUTES
    ============================================================ */
 
@@ -567,4 +644,12 @@ pub fn rest_routes() -> Router<AppState> {
         .route("/chat/sessions", get(list_sessions).post(create_session))
         .route("/chat/sessions/:session_id/messages", get(get_messages).post(send_message))
         .route("/chat/sessions/:session_id/close", axum::routing::post(close_session))
+        .route(
+            "/chat/sessions/:session_id/notes",
+            get(list_session_notes).post(create_session_note),
+        )
+        .route(
+            "/chat/sessions/:session_id/visitor-name",
+            axum::routing::patch(update_visitor_name),
+        )
 }

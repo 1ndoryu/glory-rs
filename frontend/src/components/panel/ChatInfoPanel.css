@@ -1,0 +1,153 @@
+/* [064A-72] Estilos del panel lateral de info del visitante.
+ * Tercera columna en el layout del chat (SeccionChat). */
+
+.chatInfoPanel {
+    width: 280px;
+    min-width: 280px;
+    border-left: 1px solid var(--bg-accent);
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-primary);
+    overflow-y: auto;
+}
+
+.chatInfoHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-bottom: 1px solid var(--bg-accent);
+}
+
+.chatInfoTitulo {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--brand-black);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.chatInfoBtnCerrar {
+    opacity: 0.5;
+    padding: 4px;
+    min-width: auto;
+    min-height: auto;
+}
+
+.chatInfoBtnCerrar:hover {
+    opacity: 1;
+}
+
+.chatInfoBody {
+    padding: var(--spacing-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.chatInfoSeccion {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.chatInfoLabel {
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.chatInfoValor {
+    font-size: var(--text-sm);
+    color: var(--brand-black);
+    word-break: break-word;
+}
+
+.chatInfoValorRow {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.chatInfoBtnEditar {
+    opacity: 0.4;
+    padding: 2px;
+    min-width: auto;
+    min-height: auto;
+}
+
+.chatInfoBtnEditar:hover {
+    opacity: 1;
+}
+
+.chatInfoEditRow {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.chatInfoInput {
+    flex: 1;
+    padding: 4px var(--spacing-sm);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
+    font-family: var(--font-primary);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    outline: none;
+}
+
+.chatInfoInput:focus {
+    border-color: var(--brand-black);
+}
+
+/* Notas */
+.chatInfoSeccionNotas {
+    flex: 1;
+    min-height: 0;
+}
+
+.chatInfoNotas {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.chatInfoNota {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background: var(--bg-accent);
+    border-radius: var(--radius-sm);
+}
+
+.chatInfoNotaContenido {
+    font-size: var(--text-sm);
+    color: var(--brand-black);
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.chatInfoNotaFecha {
+    font-size: var(--text-2xs);
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.chatInfoNotaInput {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    margin-top: var(--spacing-xs);
+}
+
+@media (max-width: 1024px) {
+    .chatInfoPanel {
+        display: none;
+    }
+}
