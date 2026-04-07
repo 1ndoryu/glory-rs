@@ -52,8 +52,6 @@ export function SeccionReembolsos() {
 
     return (
         <div className="reembolsosContenedor">
-            <h2 className="reembolsosTitulo">Solicitudes de Reembolso</h2>
-
             {reembolsos.length === 0 && (
                 <div className="reembolsosVacio">
                     <CheckCircle size={32} />

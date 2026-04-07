@@ -1,17 +1,11 @@
-/* [044A-38 Fase 7] Estilos para SeccionReembolsos (admin). */
+/* [044A-38 Fase 7] Estilos para SeccionReembolsos (admin).
+ * [114A-5] Eliminado reembolsosTitulo, padding alineado con hostingContenedor. */
 
 .reembolsosContenedor {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-lg);
-    padding: var(--spacing-lg);
-}
-
-.reembolsosTitulo {
-    font-family: var(--font-serif);
-    font-size: var(--text-xl);
-    color: var(--brand-black);
-    margin: 0;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
 }
 
 .reembolsosVacio {
