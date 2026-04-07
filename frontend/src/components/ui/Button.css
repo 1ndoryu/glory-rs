@@ -25,24 +25,26 @@
     cursor: not-allowed;
 }
 
-/* Variantes */
+/* [074A-4] Primario = sutil (beige cálido), Secundario = bold (negro).
+ * Invertido respecto al patrón estándar: el primario es el botón "tranquilo"
+ * y el secundario es el de alto contraste. Diseño Nakomi. */
 .botonPrimario {
-    background-color: var(--brand-black);
-    color: var(--bg-primary);
+    background-color: var(--bg-warm);
+    color: var(--text-primary);
 }
 
 .botonPrimario:hover {
-    opacity: 0.9;
+    background-color: var(--bg-warm-hover);
     transform: translateY(-1px);
 }
 
 .botonSecundario {
-    background-color: var(--bg-dark);
-    color: var(--text-primary);
+    background-color: var(--brand-black);
+    color: var(--bg-primary);
 }
 
 .botonSecundario:hover {
-    background-color: var(--bg-accent);
+    opacity: 0.9;
 }
 
 .botonOutline {
