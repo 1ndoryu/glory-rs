@@ -30,13 +30,14 @@
     border-bottom: 1px solid var(--bg-accent);
 }
 
+/* [074A-20] Títulos chat panel: todos con font-size sm, weight 600, brand-black, flex 1 */
 .chatListaHeader h3 {
     margin: 0;
     font-family: var(--font-primary);
     font-size: var(--text-sm);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    font-weight: 600;
     color: var(--brand-black);
+    flex: 1;
 }
 
 /* [064A-1] Botón de sesión: usa Button variante="texto". Solo layout contextual. */
@@ -308,24 +309,22 @@
     }
 }
 
+/* [074A-19] Input rediseñado estilo ChatWidget: pill shape, send button overlaid */
 .chatInputArea {
-    display: flex;
-    align-items: flex-end;
-    gap: var(--spacing-xs);
+    position: relative;
     padding: var(--spacing-sm) var(--spacing-md);
     border-top: 1px solid var(--bg-accent);
 }
 
-/* [064A-37] Input claro: --bg-primary en vez de --bg-dark. */
 .chatInput {
-    flex: 1;
-    padding: var(--spacing-sm);
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-md);
+    width: 100%;
+    padding: var(--spacing-sm) 48px var(--spacing-sm) var(--spacing-md);
+    border: 1px solid var(--bg-item-active);
+    border-radius: 104px;
     font-size: var(--text-sm);
     font-family: var(--font-primary);
     resize: none;
-    background: var(--bg-primary);
+    background: unset;
     color: var(--text-primary);
     outline: none;
     transition: border-color 0.2s;
@@ -335,8 +334,12 @@
     border-color: var(--brand-black);
 }
 
-/* [064A-1] Botón enviar: usa Button variante="primario". Solo flex-shrink contextual. */
+/* [074A-19] Send button superpuesto dentro del input, alineado a la derecha */
 .chatBtnEnviar {
+    position: absolute;
+    right: calc(var(--spacing-md) + 6px);
+    top: 50%;
+    transform: translateY(-50%);
     flex-shrink: 0;
 }
 
