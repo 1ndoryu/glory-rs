@@ -1,6 +1,7 @@
 /* [064A-62] Servicio de seed: recrear/borrar datos de prueba desde el panel admin.
  * Lógica extraída de examples/seed_test_data.rs. Crea usuarios de test (cliente, empleado)
  * y órdenes en estados variados para testear flujos del marketplace.
+ * [064A-51] Extendido con suscripciones de hosting en diferentes estados.
  * Solo accesible por admin. */
 
 use argon2::password_hash::rand_core::OsRng;
@@ -9,6 +10,9 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 const TEST_EMAILS: [&str; 2] = ["cliente@test.com", "empleado@test.com"];
+
+/* plan, status, client_name, domain, price_cents, storage_mb */
+type HostingSeedEntry<'a> = (&'a str, &'a str, &'a str, Option<&'a str>, i32, i32);
 
 pub struct SeedService;
 
@@ -26,7 +30,7 @@ impl SeedService {
             return Ok(0);
         }
 
-        /* Borrar en orden por FKs: fases → órdenes → chat → usuarios */
+        /* Borrar en orden por FKs: fases → órdenes → chat → hosting → usuarios */
         sqlx::query(
             "DELETE FROM order_phases WHERE order_id IN (SELECT id FROM orders WHERE client_id = ANY($1))",
         )
@@ -45,6 +49,19 @@ impl SeedService {
             .await?;
 
         sqlx::query("DELETE FROM chat_sessions WHERE user_id = ANY($1)")
+            .bind(&ids)
+            .execute(pool)
+            .await?;
+
+        /* Hosting: borrar eventos primero, luego suscripciones */
+        sqlx::query(
+            "DELETE FROM hosting_events WHERE subscription_id IN (SELECT id FROM hosting_subscriptions WHERE user_id = ANY($1))",
+        )
+        .bind(&ids)
+        .execute(pool)
+        .await?;
+
+        sqlx::query("DELETE FROM hosting_subscriptions WHERE user_id = ANY($1)")
             .bind(&ids)
             .execute(pool)
             .await?;
@@ -91,9 +108,85 @@ impl SeedService {
             created += 1;
         }
 
+        /* Suscripciones de hosting de prueba */
+        let hosting_count = Self::create_seed_hosting(pool, client_id).await?;
+
         Ok(format!(
-            "Seed completado: 2 usuarios + {created} órdenes. Credenciales: cliente@test.com/cliente, empleado@test.com/empleado"
+            "Seed completado: 2 usuarios + {created} órdenes + {hosting_count} suscripciones hosting. Credenciales: cliente@test.com/cliente, empleado@test.com/empleado"
         ))
+    }
+
+    /* [064A-51] Crea suscripciones de hosting variadas para el usuario test.
+     * 3 suscripciones en diferentes estados y planes para poblar el panel hosting. */
+    async fn create_seed_hosting(pool: &PgPool, client_id: Uuid) -> Result<u32, sqlx::Error> {
+        let subs: &[HostingSeedEntry<'_>] = &[
+            ("basico", "active", "Cliente Test", Some("mitienda-test.com"), 1500, 5120),
+            ("pro", "provisioning", "Cliente Test", Some("app-demo.nakomi.dev"), 3500, 20480),
+            ("ecommerce", "suspended", "Cliente Test", None, 6000, 51200),
+        ];
+
+        let mut count = 0u32;
+        for (plan, status, name, domain, price, storage) in subs {
+            let sub_id: Uuid = sqlx::query_scalar(
+                "INSERT INTO hosting_subscriptions
+                 (user_id, client_name, client_email, plan, domain, status, monthly_price_cents, storage_limit_mb)
+                 VALUES ($1, $2, 'cliente@test.com', $3, $4, $5, $6, $7)
+                 RETURNING id",
+            )
+            .bind(client_id).bind(name).bind(plan).bind(domain).bind(status)
+            .bind(price).bind(storage)
+            .fetch_one(pool)
+            .await?;
+
+            /* Evento de creación */
+            sqlx::query(
+                "INSERT INTO hosting_events (subscription_id, event_type, details)
+                 VALUES ($1, 'created', $2::jsonb)",
+            )
+            .bind(sub_id)
+            .bind(serde_json::json!({"source": "seed", "plan": plan}))
+            .execute(pool)
+            .await?;
+
+            /* Evento adicional según status */
+            match *status {
+                "active" => {
+                    sqlx::query(
+                        "INSERT INTO hosting_events (subscription_id, event_type, details)
+                         VALUES ($1, 'status_changed', $2::jsonb)",
+                    )
+                    .bind(sub_id)
+                    .bind(serde_json::json!({"from": "pending", "to": "active", "source": "seed"}))
+                    .execute(pool)
+                    .await?;
+                }
+                "provisioning" => {
+                    sqlx::query(
+                        "INSERT INTO hosting_events (subscription_id, event_type, details)
+                         VALUES ($1, 'status_changed', $2::jsonb)",
+                    )
+                    .bind(sub_id)
+                    .bind(serde_json::json!({"from": "pending", "to": "provisioning", "source": "seed"}))
+                    .execute(pool)
+                    .await?;
+                }
+                "suspended" => {
+                    sqlx::query(
+                        "INSERT INTO hosting_events (subscription_id, event_type, details)
+                         VALUES ($1, 'status_changed', $2::jsonb)",
+                    )
+                    .bind(sub_id)
+                    .bind(serde_json::json!({"from": "active", "to": "suspended", "reason": "Impago simulado (seed)", "source": "seed"}))
+                    .execute(pool)
+                    .await?;
+                }
+                _ => {}
+            }
+
+            count += 1;
+        }
+
+        Ok(count)
     }
 
     async fn upsert_user(pool: &PgPool, email: &str, password: &str, role: &str) -> Result<Uuid, sqlx::Error> {

@@ -49,7 +49,6 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 - 064A-45: Hosting doc pendientes (status-hosting-administrado-2026-04-06.md).
 - 064A-44: Revisar todos los planes, mover completados, crear plan nuevo para pendientes.
-- 064A-51: Datos de prueba para hosting panel.
 
 
 ### Tooling
