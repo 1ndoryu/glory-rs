@@ -42,12 +42,20 @@ pub async fn initiate_payment(
         .as_ref()
         .ok_or_else(|| AppError::Internal("Stripe no está configurado".into()))?;
 
+    /* [064A-65] Admin puede pagar cualquier orden (testing/soporte).
+     * Para clientes, el servicio verifica ownership por client_id. */
+    let caller_id = if auth.role == UserRole::Admin {
+        None
+    } else {
+        Some(auth.user_id)
+    };
+
     let result = PaymentService::initiate_payment(
         &state.pool,
         &state.http_client,
         stripe_key,
         order_id,
-        auth.user_id,
+        caller_id,
         req.phase_number,
     )
     .await?;

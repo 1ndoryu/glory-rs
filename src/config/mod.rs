@@ -36,8 +36,13 @@ impl AppConfig {
                 .unwrap_or_else(|_| "3000".to_string())
                 .parse()?,
             static_dir: std::env::var("STATIC_DIR").ok(),
-            stripe_secret_key: std::env::var("STRIPE_SECRET_KEY").ok(),
-            stripe_webhook_secret: std::env::var("STRIPE_WEBHOOK_SECRET").ok(),
+            /* [064A-65] Admite ambas variantes: GLORY_STRIPE_* (convención del proyecto) y STRIPE_* */
+            stripe_secret_key: std::env::var("GLORY_STRIPE_SECRET_KEY")
+                .or_else(|_| std::env::var("STRIPE_SECRET_KEY"))
+                .ok(),
+            stripe_webhook_secret: std::env::var("GLORY_STRIPE_WEBHOOK_SECRET")
+                .or_else(|_| std::env::var("STRIPE_WEBHOOK_SECRET"))
+                .ok(),
         })
     }
 }

@@ -17,23 +17,26 @@ use crate::repositories::{CreatePaymentParams, OrderRepository, PaymentRepositor
 pub struct PaymentService;
 
 impl PaymentService {
-    /// Inicia un pago: crea `PaymentIntent` en Stripe con capture manual, guarda en BD
+    /// Inicia un pago: crea `PaymentIntent` en Stripe con capture manual, guarda en BD.
+    /// [064A-65] `client_id` es None si el caller es admin (no aplica ownership check).
     pub async fn initiate_payment(
         pool: &PgPool,
         http_client: &Client,
         stripe_key: &str,
         order_id: Uuid,
-        client_id: Uuid,
+        client_id: Option<Uuid>,
         phase_number: Option<i32>,
     ) -> Result<PaymentIntentResponse, AppError> {
         let order = OrderRepository::find_order_by_id(pool, order_id)
             .await?
             .ok_or_else(|| AppError::NotFound("Orden no encontrada".into()))?;
 
-        if order.client_id != client_id {
-            return Err(AppError::Forbidden(
-                "No tienes acceso a esta orden".into(),
-            ));
+        if let Some(cid) = client_id {
+            if order.client_id != cid {
+                return Err(AppError::Forbidden(
+                    "No tienes acceso a esta orden".into(),
+                ));
+            }
         }
 
         let (amount_cents, phase_id, description) =

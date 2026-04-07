@@ -64,5 +64,10 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 - 064A-62: Tab de configuración en panel: opciones para recrear/borrar datos de prueba.
 - 064A-63: Plan detallado para edición de contenidos admin: servicios, blog, proyectos editables desde el front con modal + tabs laterales.
 - 064A-64: Traducción de categorías, servicios, planes, descripciones de equipo, soluciones a los 3 idiomas (enfoque automatizado).
-- Sigue saliendo Sin proyectos aún
-Cuando contrates un servicio, aparecerá aquí con seguimiento en tiempo real. al cambiar la vista a cliente y empleado.
+
+### Bugs reportados
+
+- 064A-67: El chat con el freelancer debería usar el estilo de chatWidgetPanel (chatWidgetPanelAbierto). El chat widget también debería aparecer en el panel.
+- 064A-68: Chat no funciona en tiempo real — desde incognito los mensajes del visitante no aparecen en el panel staff.
+- 064A-69: IA del chat siempre responde lo mismo ("Un miembro del equipo se conectará pronto..."), la lógica no está terminada.
+- 064A-70: Al responder en el chat, no muestra imagen de perfil del usuario.
