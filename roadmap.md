@@ -45,10 +45,21 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 - 074A-2: Datos de prueba completos para vista cliente y empleado (falta seed data visible).
 - 074A-3: Verificar/corregir datos de prueba de hosting (064A-51 los creó, puede que no se vean).
-- 074A-15: hostingFormCrear tiene un padding innecesario.
-- 074A-16: Padding innecesario en usuariosContenedor y proyectosContenedor.
-- 074A-17: Reembolso sigue diciendo "Request failed with status code 404".
-- 074A-18: Quitar .chatWidgetBubble del panel (mala idea haberlo puesto ahí).
-- 074A-19: chatInputArea se ve feo — usar como referencia el input+botón de chatWidgetBubble.
-- 074A-20: Estilos de títulos inconsistentes en chat del panel ("Conversaciones", "Chat general", "Info de visitante") — todos deben ser: font-size: var(--text-sm), font-weight: 600, color: var(--brand-black), flex: 1.
-- 074A-21: En "Info del visitante" la forma en la que se ordena la información se ve fatal.
+- 074A-22: Hay 2 botones de "salir" en el panel y ambos desloguean. El logout debe ir en un submenú al dar click en la imagen de perfil, NO en el sidebar. El botón "salir" del header debe navegar al home sin desloguear.
+- 074A-23: No se puede cambiar el nombre de usuario después de registrarse — verificar si existe y si no, agregar.
+- 074A-24: Al continuar con el pago en un pedido de prueba dice "Request failed with status code 500".
+
+### CMS Admin (plan: plan-cms-admin-2026-04-07.md)
+
+- 074A-6: CMS Infra — Upload endpoint backend + componentes base (UploadImage, SlugInput)
+- 074A-7: CMS Infra — RichTextEditor (tiptap) + ContentSection/ContentEditor base
+- 074A-8: CMS Servicios — Backend (migración + CRUD endpoints admin)
+- 074A-9: CMS Servicios — Frontend (SeccionContenido + EditorServicio)
+- 074A-10: CMS Blog — Backend (tabla blog_posts + CRUD)
+- 074A-11: CMS Blog — Frontend (editor admin + páginas públicas)
+- 074A-12: CMS Proyectos — Full stack (migrate showcase.ts → BD)
+- 074A-13: CMS Equipo — Full stack (migrate miembros.ts → BD)
+
+### SEO y mejoras (plan: plan-seo-completo-2026-04-04.md)
+
+- 074A-14: SEO Fase 2 — Performance (lazy loading, image optimization, Core Web Vitals)
