@@ -50,17 +50,11 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 ### Bugs / UX reportados por usuario
 
 
-- La pagina de disponibles para el usuario empleado se ve mal, hay que reahacerla desde cero, no la entiendo. Igual la pagina delegaciones, porque carajo las letras son blancas, esto es incoherente. 
+- La pagina de disponibles para el usuario empleado se ve mal, hay que reahacerla desde cero, no la entiendo. Igual la pagina delegaciones. (Nota: colores CSS corregidos en 074A-15, falta rediseño estructural)
 
 - En proyecto dice Request failed with status code 404
 
 - El contenido de los servicios en incrugente o sea lo que sale en cms no es lo mismo que sale en el front (los del front es el contenido que hay que preservar), supongo que lo mismo pasa con el resto de cosas. Con el blog parece funcionar.
-
-- No veo un boton para eliminar, los contenidos del cms deben tener un boton de 3 puntos, alli la opcion de eliminar, archivar, desarchivar, etc. 
-
-- EL Menu al dar click a la foto de perfil del lado del panel no es igual al que se ve cuando se sale del panel (este ess el correcto) ¿porque esta inconsistencia?
-
-- Inconsistencia: borra reembolsosTitulo, se supone que debería ser como hostingHeader, o sea, obviamente esto es una inconsistencia, el titulo de hosting header y reembolsos son diferentes (el de hosting se ve mejor), no digo que todas los contenedores deben tener titulos pero esto es una inconsistencia y quita el padding innecesario de reembolsosContenedor.
 
 - No veo donde se modifican los planes de los servicios.
 
@@ -70,4 +64,5 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 - Al cambiar al usuario de cliente no veo pedidos, ni historial ni hosting de prueba!! De verdad esta mrd de los datos de prueba, necesitamos crear una solución de raiz, un codigo o algo robuzto en glory en que se encargue de los datos de prueba, que se encargue suministrar la logica de contenido, cms, y estas cosas para facilitar la gestión de contenido, tambien hay que actualizar las reglas en .github\instructions\test.instructions.md para que explique mejor /glory-rs es el nucleo de nuestro framework para agregar cosas utiles que sirven para todos los proyectos, agrega la regla de que /glory-rs debe ser agnostico, y que cuando es complete una tarea en la estructura de bajo de - **Sentinel:**  haya - **GLORY-RS:** Evualuando si la logica o lo que se hizo se puede mover a glory-rs para que pueda ser reutlizada en otro proyecto si es necesario, se tiene que pensar en GLORY-RS siempre como algo que sirve como nuestra caja de herramienta permantente. HEMOS ESTADO TOOD EL TIEMPO LUCHANDO CON LOS DATOS DE PRUEBA; NECESITO ALGO INFALIBLE BIEN PLANIFICADO PARA EVITARNOS ESTE PROBLEMA EN EL FUTURO. 
 
-hoy es 7, y veo Agente\completados\tareas-2026-04-08.md y Agente\completados\tareas-2026-04-11.md, es un error. 
+Nueva inforamción: La solución que me ocurre es que glory-rs sirva como cms cuando se necesite, y que pueda inyectar contenido dinamicamente, tiene que ser del tipo de contenido que escribas en un archivo y que se pueda modificar de alli, asi se puede agregar cualquier tipo de datos de prueba donde se necesita y de cualquier tipo, tiene que ser inteligente, si se borra un contenido en el codigo, se borra en la base de dato tambien, esto servira para datos iniciales en los proyectos que se necesiten que tambien sean reales e inyecten al correr e iniciar un proyecto en cualquier parte. 
+
