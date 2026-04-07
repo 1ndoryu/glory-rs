@@ -10,35 +10,40 @@
     overflow: hidden;
 }
 
+/* [084A-12] Tabs del modal alineados visualmente con contenidoSubTabs */
 .editorServicioTabs {
     display: flex;
     gap: var(--spacing-xs);
-    padding: var(--spacing-md) var(--spacing-lg);
-    border-bottom: 1px solid var(--border-default);
+    padding: 0 var(--spacing-lg);
+    padding-top: var(--spacing-md);
+    border-bottom: 1px solid var(--bg-item-active);
     flex-shrink: 0;
 }
 
 .editorServicioTab {
-    padding: var(--spacing-xs) var(--spacing-md);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm) var(--spacing-md);
     border: none;
     background: none;
-    color: var(--text-tertiary);
+    color: var(--text-muted);
     font-size: var(--text-sm);
     font-family: var(--font-primary);
+    font-weight: 500;
     cursor: pointer;
-    border-radius: var(--radius-sm);
-    transition: color 0.2s, background-color 0.2s;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    transition: color var(--transicion-rapida), border-color var(--transicion-rapida);
 }
 
 .editorServicioTab:hover {
-    color: var(--text-primary);
-    background: var(--bg-item-hover);
+    color: var(--brand-black);
 }
 
 .editorServicioTab--activo {
-    color: var(--brand-primary);
-    background: var(--bg-item-active);
-    font-weight: 600;
+    color: var(--brand-black);
+    border-bottom-color: var(--brand-black);
 }
 
 .editorServicioCuerpo {
