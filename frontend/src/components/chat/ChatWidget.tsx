@@ -5,6 +5,7 @@
  * Avatar de AI al lado de los mensajes en vez de icono Bot. */
 
 import React, {useState, useRef, useEffect} from 'react';
+import {useLocation} from 'react-router-dom';
 import {Send, User, Minus} from 'lucide-react';
 import {useChatWidget} from '../../hooks/useChatWidget';
 import {SENDER_LABELS} from '../../api/chat';
@@ -32,7 +33,9 @@ export const ChatWidget: React.FC = () => {
         sendTyping,
     } = useChatWidget();
 
-    /* [064A-67] Widget de chat visible en todo el sitio, incluyendo panel */
+    /* [064A-67→074A-18] Widget de chat oculto en /panel — el panel tiene su propia SeccionChat */
+    const location = useLocation();
+    if (location.pathname.startsWith('/panel')) return null;
 
     /* [064A-52] Al abrir, conectar directamente sin pedir nombre.
      * El agente IA pedirá el nombre al usuario si lo necesita. */
