@@ -18,7 +18,6 @@ export const SeccionChat: React.FC = () => {
         cargandoSesiones,
         cargandoMensajes,
         enviando,
-        closing,
         input,
         messagesEndRef,
         typingMap,
@@ -28,7 +27,6 @@ export const SeccionChat: React.FC = () => {
         clearActiveSession,
         handleKeyDown,
         handleSend,
-        handleCloseSession,
     } = useSeccionChat();
 
     if (cargandoSesiones) {
@@ -85,13 +83,14 @@ export const SeccionChat: React.FC = () => {
                                     return 'Chat general';
                                 })()}
                             </span>
-                            {/* [054A-9] Botón cerrar conversación */}
+                            {/* [064A-71] Botón para deseleccionar la conversación activa,
+                             * sin cerrarla permanentemente. El cierre definitivo (close_session)
+                             * requiere acción explícita desde un menú contextual futuro. */}
                             <Button
                                 className="chatBtnCerrar"
-                                onClick={handleCloseSession}
-                                disabled={closing}
+                                onClick={clearActiveSession}
                                 type="button"
-                                title="Cerrar conversación"
+                                title="Volver a la lista"
                                 variante="texto"
                                 tamano="pequeno"
                             >
