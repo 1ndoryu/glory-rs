@@ -140,24 +140,24 @@ impl SeedService {
         }
 
         let mut created = 0u32;
-        /* Orden 1: full + in_progress */
+        /* Orden 1: full + in_progress — proyecto activo entre cliente y empleado */
         if let Some(p) = plans.iter().find(|p| p.slug == "basico" && p.service_title.contains("Sitios Web")) {
             Self::create_seed_order(pool, client_id, p, "full", 20, "in_progress", Some(employee_id)).await?;
             created += 1;
         }
-        /* Orden 2: phased + pending_payment */
+        /* Orden 2: phased + pending_payment — esperando pago del cliente */
         if let Some(p) = plans.iter().find(|p| p.slug == "avanzado" && p.service_title.contains("Aplicaciones")) {
             Self::create_seed_order(pool, client_id, p, "phased", 0, "pending_payment", None).await?;
             created += 1;
         }
-        /* Orden 3: full + completed */
+        /* Orden 3: full + completed — proyecto ya entregado */
         if let Some(p) = plans.iter().find(|p| p.slug == "basico" && p.service_title.contains("IA")) {
             Self::create_seed_order(pool, client_id, p, "full", 20, "completed", Some(employee_id)).await?;
             created += 1;
         }
-        /* Orden 4: half_half + awaiting_assignment */
+        /* [084A-9] Orden 4: full + under_review — admin revisa trabajo del empleado */
         if let Some(p) = plans.iter().find(|p| p.slug == "avanzado" && p.service_title.contains("Marca")) {
-            Self::create_seed_order(pool, client_id, p, "half_half", 10, "awaiting_assignment", None).await?;
+            Self::create_seed_order(pool, client_id, p, "full", 10, "under_review", Some(employee_id)).await?;
             created += 1;
         }
 
@@ -176,12 +176,12 @@ impl SeedService {
     }
 
     /* [064A-51] Crea suscripciones de hosting variadas para el usuario test.
-     * 3 suscripciones en diferentes estados y planes para poblar el panel hosting. */
+     * [084A-10] Precios actualizados: Básico $5, Pro $10, E-commerce $15. */
     async fn create_seed_hosting(pool: &PgPool, client_id: Uuid) -> Result<u32, sqlx::Error> {
         let subs: &[HostingSeedEntry<'_>] = &[
-            ("basico", "active", "Cliente Test", Some("mitienda-test.com"), 1500, 5120),
-            ("pro", "provisioning", "Cliente Test", Some("app-demo.nakomi.dev"), 3500, 20480),
-            ("ecommerce", "suspended", "Cliente Test", None, 6000, 51200),
+            ("basico", "active", "Cliente Test", Some("mitienda-test.com"), 500, 5120),
+            ("pro", "provisioning", "Cliente Test", Some("app-demo.nakomi.dev"), 1000, 20480),
+            ("ecommerce", "suspended", "Cliente Test", None, 1500, 51200),
         ];
 
         let mut count = 0u32;
