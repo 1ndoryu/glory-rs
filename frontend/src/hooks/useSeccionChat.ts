@@ -14,10 +14,11 @@ export function useSeccionChat() {
     const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
     const [input, setInput] = useState('');
     const [closing, setClosing] = useState(false);
+    const [messageLimit, setMessageLimit] = useState(100);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const {sessions, messages, cargandoSesiones, cargandoMensajes, enviarMensaje, enviando} =
-        useChat(activeSessionId ?? undefined);
+        useChat(activeSessionId ?? undefined, messageLimit);
     const ws = useChatWs();
 
     /* [064A-68] Cuando WS recibe nuevos mensajes, invalidar cache REST para refrescar
@@ -89,11 +90,21 @@ export function useSeccionChat() {
 
     const selectSession = useCallback((sessionId: string) => {
         setActiveSessionId(sessionId);
+        setMessageLimit(100);
     }, []);
 
     const clearActiveSession = useCallback(() => {
         setActiveSessionId(null);
+        setMessageLimit(100);
     }, []);
+
+    /* [074A-43] Cargar más mensajes antiguos */
+    const loadOlderMessages = useCallback(() => {
+        setMessageLimit(prev => prev + 100);
+    }, []);
+
+    /* Indica si podría haber mensajes más antiguos (si la cantidad actual coincide con el límite) */
+    const hasOlderMessages = messages.length >= messageLimit;
 
     return {
         activeSessionId,
@@ -107,9 +118,11 @@ export function useSeccionChat() {
         messagesEndRef,
         typingMap: ws.typingMap,
         showingChat: activeSessionId !== null,
+        hasOlderMessages,
         setInput,
         selectSession,
         clearActiveSession,
+        loadOlderMessages,
         handleKeyDown,
         handleSend,
         handleCloseSession,

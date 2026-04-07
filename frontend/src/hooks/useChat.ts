@@ -20,7 +20,7 @@ import {useAuthStore} from '../stores/authStore';
    HOOK: Sesiones y mensajes REST
    ============================================================ */
 
-export function useChat(sessionId?: string) {
+export function useChat(sessionId?: string, limit = 100) {
     const queryClient = useQueryClient();
 
     const {data: sessions = [], isLoading: cargandoSesiones} = useQuery({
@@ -29,9 +29,10 @@ export function useChat(sessionId?: string) {
         refetchInterval: 15_000,
     });
 
+    /* [074A-43] limit parametrizable para carga diferida */
     const {data: messages = [], isLoading: cargandoMensajes} = useQuery({
-        queryKey: ['chat-messages', sessionId],
-        queryFn: () => apiGetMessages(sessionId!, 100, 0),
+        queryKey: ['chat-messages', sessionId, limit],
+        queryFn: () => apiGetMessages(sessionId!, limit, 0),
         enabled: !!sessionId,
         refetchInterval: 5_000,
     });

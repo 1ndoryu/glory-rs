@@ -165,6 +165,7 @@
     opacity: 1;
 }
 
+/* [074A-43] max-width para legibilidad + scroll adaptativo */
 .chatMensajes {
     flex: 1;
     overflow-y: auto;
@@ -172,6 +173,21 @@
     display: flex;
     flex-direction: column;
     gap: var(--spacing-sm);
+    max-width: 800px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+/* [074A-43] Botón para cargar mensajes anteriores */
+.chatBtnCargarAnteriores {
+    align-self: center;
+    font-size: var(--text-xs);
+    opacity: 0.6;
+    margin-bottom: var(--spacing-xs);
+}
+
+.chatBtnCargarAnteriores:hover {
+    opacity: 1;
 }
 
 /* [064A-37] Burbujas claras: --bg-accent para otros, tono cálido para propias.

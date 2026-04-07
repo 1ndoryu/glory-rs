@@ -24,9 +24,11 @@ export const SeccionChat: React.FC = () => {
         messagesEndRef,
         typingMap,
         showingChat,
+        hasOlderMessages,
         setInput,
         selectSession,
         clearActiveSession,
+        loadOlderMessages,
         handleKeyDown,
         handleSend,
     } = useSeccionChat();
@@ -115,6 +117,18 @@ export const SeccionChat: React.FC = () => {
                         <div className="chatMensajes">
                             {cargandoMensajes && (
                                 <div className="chatLoading"><div className="chatSpinner" /></div>
+                            )}
+                            {/* [074A-43] Botón para cargar mensajes antiguos */}
+                            {hasOlderMessages && !cargandoMensajes && (
+                                <Button
+                                    className="chatBtnCargarAnteriores"
+                                    onClick={loadOlderMessages}
+                                    type="button"
+                                    variante="texto"
+                                    tamano="pequeno"
+                                >
+                                    Cargar anteriores
+                                </Button>
                             )}
                             {messages.map(m => (
                                 <MessageBubble key={m.id} message={m} />
