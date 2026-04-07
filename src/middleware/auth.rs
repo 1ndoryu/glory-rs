@@ -10,11 +10,14 @@ use crate::AppState;
 
 /* [044A-38] AuthUser extendido con role y effective_role del JWT.
  * effective_role determina qué panel/permisos tiene el usuario en la sesión actual.
- * Para admins, puede ser diferente de role si usan "cambiar rol". */
+ * Para admins, puede ser diferente de role si usan "cambiar rol".
+ * [084A-1] impersonator: si Some, es UUID del admin que inició impersonación.
+ * En ese caso user_id es el usuario impersonado y role es su rol real. */
 pub struct AuthUser {
     pub user_id: Uuid,
     pub role: UserRole,
     pub effective_role: UserRole,
+    pub impersonator: Option<Uuid>,
 }
 
 impl AuthUser {
@@ -52,6 +55,7 @@ impl FromRequestParts<AppState> for AuthUser {
             user_id: claims.sub,
             role: claims.role,
             effective_role: claims.effective_role,
+            impersonator: claims.impersonator,
         })
     }
 }

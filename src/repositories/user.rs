@@ -221,4 +221,25 @@ impl UserRepository {
         .fetch_one(pool)
         .await
     }
+
+    /* [084A-1] Busca el primer usuario activo con un rol dado.
+     * Usado por switch_role para encontrar un usuario real a impersonar. */
+    pub async fn find_first_by_role(
+        pool: &PgPool,
+        role: UserRole,
+    ) -> Result<Option<User>, sqlx::Error> {
+        sqlx::query_as!(
+            User,
+            r#"SELECT id, email, password_hash,
+                      role as "role: UserRole", active_role as "active_role: UserRole",
+                      email_verified, status, avatar_url, display_name, created_at
+             FROM users
+             WHERE role = $1 AND status = 'active'
+             ORDER BY created_at ASC
+             LIMIT 1"#,
+            role as UserRole,
+        )
+        .fetch_optional(pool)
+        .await
+    }
 }

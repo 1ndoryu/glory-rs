@@ -188,3 +188,13 @@
     opacity: 0.5;
     cursor: not-allowed;
 }
+
+/* [084A-1] Badge que indica impersonación activa */
+.sidebarImpersonando {
+    display: block;
+    text-align: center;
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    font-style: italic;
+    padding-top: var(--spacing-xs);
+}

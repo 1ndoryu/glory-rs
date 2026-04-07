@@ -63,15 +63,11 @@ pub async fn list_orders(
     State(state): State<AppState>,
     auth: AuthUser,
 ) -> Result<Json<Vec<OrderResponse>>, AppError> {
-    /* [064A-58] Admin siempre ve todas las órdenes, incluso si switcheó effective_role
-     * a client/employee. El effective_role solo afecta la UI (tabs), no el filtrado. */
-    let query_role = if auth.role == UserRole::Admin {
-        UserRole::Admin
-    } else {
-        auth.effective_role
-    };
+    /* [084A-1] Con impersonación, effective_role refleja el rol real del usuario
+     * impersonado. Admin sin impersonar tiene effective_role=admin → ve todo.
+     * Impersonando como client → filtra por client_id. Como employee → por assigned. */
     let orders =
-        OrderService::list_orders_for_user(&state.pool, auth.user_id, query_role).await?;
+        OrderService::list_orders_for_user(&state.pool, auth.user_id, auth.effective_role).await?;
     Ok(Json(orders))
 }
 
@@ -150,7 +146,9 @@ pub async fn assign_order(
    CAMBIO DE ROL (admin)
    ============================================================ */
 
-/// Cambiar el `active_role` del admin (permite operar como otro tipo de usuario)
+/// Cambiar de vista impersonando un usuario real con el rol objetivo.
+/// [084A-1] Si target es client/employee, busca un usuario real con ese rol y genera
+/// token impersonado. Si target es admin, restaura el token del admin original.
 #[utoipa::path(
     post,
     path = "/api/auth/switch-role",
@@ -159,6 +157,7 @@ pub async fn assign_order(
         (status = 200, description = "Rol cambiado, nuevo token"),
         (status = 401, description = "No autorizado", body = crate::errors::ErrorResponse),
         (status = 403, description = "Solo admins pueden cambiar rol", body = crate::errors::ErrorResponse),
+        (status = 404, description = "No hay usuario con ese rol", body = crate::errors::ErrorResponse),
     ),
     security(("bearer_auth" = [])),
     tag = "auth"
@@ -168,24 +167,52 @@ pub async fn switch_role(
     auth: AuthUser,
     Json(req): Json<SwitchRoleRequest>,
 ) -> Result<Json<crate::models::AuthResponse>, AppError> {
-    /* Solo admin real puede cambiar de rol */
-    if auth.role != UserRole::Admin {
+    /* Determinar el admin original: puede ser el caller directo o el impersonator */
+    let admin_id = if auth.role == UserRole::Admin && auth.impersonator.is_none() {
+        auth.user_id
+    } else if let Some(imp) = auth.impersonator {
+        imp
+    } else {
         return Err(AppError::Forbidden(
             "Solo administradores pueden cambiar de rol".into(),
         ));
+    };
+
+    match req.role {
+        UserRole::Admin => {
+            /* Restaurar sesión del admin original */
+            let admin = UserRepository::find_by_id(&state.pool, admin_id)
+                .await?
+                .ok_or_else(|| AppError::Internal("Admin original no encontrado".into()))?;
+            let effective = admin.effective_role();
+            let token = AuthService::generate_token(admin.id, admin.role, effective, None, &state.jwt_secret)?;
+            Ok(Json(crate::models::AuthResponse {
+                token,
+                user_id: admin.id,
+                role: admin.role,
+                effective_role: effective,
+                impersonating: false,
+            }))
+        }
+        target_role => {
+            /* Impersonar un usuario real con el rol objetivo */
+            let target = UserRepository::find_first_by_role(&state.pool, target_role)
+                .await?
+                .ok_or_else(|| AppError::NotFound(
+                    format!("No hay usuario activo con rol {target_role}")
+                ))?;
+            let token = AuthService::generate_token(
+                target.id, target.role, target.role, Some(admin_id), &state.jwt_secret,
+            )?;
+            Ok(Json(crate::models::AuthResponse {
+                token,
+                user_id: target.id,
+                role: target.role,
+                effective_role: target.role,
+                impersonating: true,
+            }))
+        }
     }
-
-    /* Actualizar en BD y generar nuevo token con el rol efectivo cambiado */
-    let user = UserRepository::update_active_role(&state.pool, auth.user_id, Some(req.role)).await?;
-    let effective = user.effective_role();
-    let token = AuthService::generate_token(user.id, user.role, effective, &state.jwt_secret)?;
-
-    Ok(Json(crate::models::AuthResponse {
-        token,
-        user_id: user.id,
-        role: user.role,
-        effective_role: effective,
-    }))
 }
 
 /* ============================================================

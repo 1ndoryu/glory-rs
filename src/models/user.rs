@@ -107,13 +107,15 @@ pub struct LoginRequest {
     pub password: String,
 }
 
-/// Response con token JWT después de autenticarse
+/// Response con token JWT después de autenticarse.
+/// [084A-1] `impersonating` indica si la sesión es impersonada por un admin.
 #[derive(Debug, Serialize, ToSchema)]
 pub struct AuthResponse {
     pub token: String,
     pub user_id: Uuid,
     pub role: UserRole,
     pub effective_role: UserRole,
+    pub impersonating: bool,
 }
 
 /* [054A-1] Modelos para gestión de usuarios desde panel admin */

@@ -1,6 +1,7 @@
 /* [044A-13] Servicio API de autenticación.
  * Conecta con POST /api/auth/login y POST /api/auth/register del backend Rust.
- * [044A-38 Fase 1] Añadido role/effective_role en AuthResponse y switch-role endpoint. */
+ * [044A-38 Fase 1] Añadido role/effective_role en AuthResponse y switch-role endpoint.
+ * [084A-1] Añadido impersonating: al switchear rol, el admin impersona un usuario real. */
 import instance from './axios-instance';
 
 export type UserRole = 'admin' | 'employee' | 'client';
@@ -10,6 +11,7 @@ export interface AuthResponse {
     user_id: string;
     role: UserRole;
     effective_role: UserRole;
+    impersonating: boolean;
 }
 
 interface ApiError {

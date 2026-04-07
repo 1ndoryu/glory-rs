@@ -13,13 +13,17 @@ use crate::repositories::UserRepository;
 
 /* [044A-38] Claims extendidos con role y effective_role.
  * El effective_role es el rol con el que el usuario opera: para admins
- * puede ser diferente de role si tienen active_role configurado. */
+ * puede ser diferente de role si tienen active_role configurado.
+ * [084A-1] impersonator: UUID del admin que inició impersonación.
+ * Si Some, sub es el usuario impersonado y role/effective_role son los de ese usuario. */
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
     pub sub: Uuid,
     pub role: UserRole,
     pub effective_role: UserRole,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub impersonator: Option<Uuid>,
     pub exp: usize,
 }
 
@@ -47,13 +51,14 @@ impl AuthService {
 
         let user = UserRepository::create(pool, &req.email, &password_hash).await?;
         let effective = user.effective_role();
-        let token = Self::generate_token(user.id, user.role, effective, jwt_secret)?;
+        let token = Self::generate_token(user.id, user.role, effective, None, jwt_secret)?;
 
         Ok(AuthResponse {
             token,
             user_id: user.id,
             role: user.role,
             effective_role: effective,
+            impersonating: false,
         })
     }
 
@@ -87,13 +92,14 @@ impl AuthService {
 
         let user = UserRepository::create(pool, &req.email, &password_hash).await?;
         let effective = user.effective_role();
-        let token = Self::generate_token(user.id, user.role, effective, jwt_secret)?;
+        let token = Self::generate_token(user.id, user.role, effective, None, jwt_secret)?;
 
         Ok(AuthResponse {
             token,
             user_id: user.id,
             role: user.role,
             effective_role: effective,
+            impersonating: false,
         })
     }
 
@@ -115,21 +121,24 @@ impl AuthService {
             .map_err(|_| AppError::Unauthorized)?;
 
         let effective = user.effective_role();
-        let token = Self::generate_token(user.id, user.role, effective, jwt_secret)?;
+        let token = Self::generate_token(user.id, user.role, effective, None, jwt_secret)?;
 
         Ok(AuthResponse {
             token,
             user_id: user.id,
             role: user.role,
             effective_role: effective,
+            impersonating: false,
         })
     }
 
-    /// Genera un JWT con expiración de 24 horas, incluye role y `effective_role`
+    /// Genera un JWT con expiración de 24 horas, incluye role y `effective_role`.
+    /// Si `impersonator` es Some, el token representa una sesión impersonada por un admin.
     pub fn generate_token(
         user_id: Uuid,
         role: UserRole,
         effective_role: UserRole,
+        impersonator: Option<Uuid>,
         secret: &str,
     ) -> Result<String, AppError> {
         let timestamp = chrono::Utc::now()
@@ -143,6 +152,7 @@ impl AuthService {
             sub: user_id,
             role,
             effective_role,
+            impersonator,
             exp,
         };
 

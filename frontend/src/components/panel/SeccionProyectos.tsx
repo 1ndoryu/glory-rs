@@ -2,13 +2,16 @@
  * Muestra lista de órdenes con progreso visual + detalle con fases.
  * Vista lista ↔ detalle. Detalle extraído a OrdenDetalle.tsx (SRP).
  * [064A-50] Tabs Activas/Historial. Activas ordenadas por prioridad de status.
- * Canceladas y completadas van a Historial. */
-import React, {useCallback, useState} from 'react';
-import {FolderOpen} from 'lucide-react';
+ * Canceladas y completadas van a Historial.
+ * [084A-1] Admin: búsqueda, filtro por empleado, empleado en card footer. */
+import React, {useCallback, useMemo, useState} from 'react';
+import {FolderOpen, Search} from 'lucide-react';
 import {useAuthStore} from '../../stores/authStore';
 import {useOrdenes} from '../../hooks/useOrdenes';
 import {OrdenDetalle} from './OrdenDetalle';
 import {Button} from '../ui/Button';
+import {Input} from '../ui/Input';
+import {Select} from '../ui/Select';
 import {
     ORDER_STATUS_LABELS,
     PAYMENT_MODE_LABELS,
@@ -52,7 +55,11 @@ const STATUS_CLASS: Record<string, string> = {
 
 export const SeccionProyectos: React.FC = () => {
     const effectiveRole = useAuthStore(s => s.user?.effectiveRole) || 'client';
+    const isAdmin = effectiveRole === 'admin';
     const [tabActiva, setTabActiva] = useState<'activas' | 'historial'>('activas');
+    /* [084A-1] Búsqueda y filtro por empleado — solo admin */
+    const [busqueda, setBusqueda] = useState('');
+    const [filtroEmpleado, setFiltroEmpleado] = useState<string>('');
     const {
         ordenes, cargando, detalle, cargandoDetalle,
         ordenSeleccionada, error, seleccionarOrden, recargar,
@@ -102,7 +109,32 @@ export const SeccionProyectos: React.FC = () => {
         .sort(sortByStatusPriority);
     const historial = ordenes
         .filter(o => HISTORY_STATUSES.has(o.status));
-    const listaActual = tabActiva === 'activas' ? activas : historial;
+    const listaBase = tabActiva === 'activas' ? activas : historial;
+
+    /* [084A-1] Filtrado admin: búsqueda por título + filtro por empleado */
+    const empleadosUnicos = useMemo(() => {
+        if (!isAdmin) return [];
+        const mapa = new Map<string, string>();
+        for (const o of ordenes) {
+            if (o.assigned_employee_id && o.assigned_employee_name) {
+                mapa.set(o.assigned_employee_id, o.assigned_employee_name);
+            }
+        }
+        return Array.from(mapa, ([id, nombre]) => ({id, nombre}));
+    }, [isAdmin, ordenes]);
+
+    const listaActual = useMemo(() => {
+        if (!isAdmin) return listaBase;
+        let resultado = listaBase;
+        if (busqueda.trim()) {
+            const q = busqueda.toLowerCase();
+            resultado = resultado.filter(o => o.service_title.toLowerCase().includes(q));
+        }
+        if (filtroEmpleado) {
+            resultado = resultado.filter(o => o.assigned_employee_id === filtroEmpleado);
+        }
+        return resultado;
+    }, [isAdmin, listaBase, busqueda, filtroEmpleado]);
 
     /* Lista vacía (todas las órdenes, no solo la tab) */
     if (ordenes.length === 0) {
@@ -120,6 +152,34 @@ export const SeccionProyectos: React.FC = () => {
     /* Lista de órdenes con tabs */
     return (
         <div className="proyectosContenedor">
+            {/* [084A-1] Barra de búsqueda y filtro — solo admin */}
+            {isAdmin && (
+                <div className="proyectosFiltros">
+                    <div className="proyectosBusqueda">
+                        <Search size={16} className="proyectosBusquedaIcono" />
+                        <Input
+                            type="text"
+                            className="proyectosBusquedaInput"
+                            placeholder="Buscar por servicio..."
+                            value={busqueda}
+                            onChange={e => setBusqueda(e.target.value)}
+                        />
+                    </div>
+                    {empleadosUnicos.length > 0 && (
+                        <Select
+                            className="proyectosFiltroEmpleado"
+                            value={filtroEmpleado}
+                            onChange={e => setFiltroEmpleado(e.target.value)}
+                        >
+                            <option value="">Todos los empleados</option>
+                            {empleadosUnicos.map(emp => (
+                                <option key={emp.id} value={emp.id}>{emp.nombre}</option>
+                            ))}
+                        </Select>
+                    )}
+                </div>
+            )}
+
             <div className="proyectosTabs">
                 <Button
                     type="button"
@@ -150,7 +210,12 @@ export const SeccionProyectos: React.FC = () => {
             ) : (
                 <div className="proyectosLista">
                     {listaActual.map(orden => (
-                        <OrdenCard key={orden.id} orden={orden} onClick={() => seleccionarOrden(orden.id)} />
+                        <OrdenCard
+                            key={orden.id}
+                            orden={orden}
+                            onClick={() => seleccionarOrden(orden.id)}
+                            mostrarEmpleado={isAdmin}
+                        />
                     ))}
                 </div>
             )}
@@ -170,8 +235,9 @@ const SERVICE_IMAGE: Record<string, string> = {
 
 /* Sub-componente: card de orden en la lista */
 /* [054A-6] Rediseño: quita numeración, plan_name, barra de progreso.
- * Agrega imagen del servicio resuelta por slug. */
-function OrdenCard({orden, onClick}: {orden: OrderResponse; onClick: () => void}) {
+ * Agrega imagen del servicio resuelta por slug.
+ * [084A-1] Vista admin muestra empleado responsable en footer. */
+function OrdenCard({orden, onClick, mostrarEmpleado}: {orden: OrderResponse; onClick: () => void; mostrarEmpleado?: boolean}) {
     const imgSrc = SERVICE_IMAGE[orden.service_slug] || '/assets/Servicios/diseno web.jpg';
 
     return (
@@ -192,6 +258,11 @@ function OrdenCard({orden, onClick}: {orden: OrderResponse; onClick: () => void}
                 <div className="ordenCardFooter">
                     <span className="ordenCardPrecio">{formatPrice(orden.final_price_cents, orden.currency)}</span>
                     <span className="ordenCardModo">{PAYMENT_MODE_LABELS[orden.payment_mode]}</span>
+                    {mostrarEmpleado && (
+                        <span className="ordenCardEmpleado">
+                            {orden.assigned_employee_name ?? 'Sin asignar'}
+                        </span>
+                    )}
                     <span className="ordenCardFecha">{new Date(orden.created_at).toLocaleDateString('es')}</span>
                 </div>
             </div>

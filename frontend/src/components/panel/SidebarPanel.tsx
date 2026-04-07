@@ -53,11 +53,13 @@ export const SidebarPanel: React.FC<SidebarPanelProps> = ({seccionActiva, onCamb
 
     const effectiveRole: UserRole = authUser?.effectiveRole || 'client';
     const isAdmin = authUser?.role === 'admin';
+    const isImpersonating = authUser?.impersonating ?? false;
     const tabs = obtenerTabsPorRol(effectiveRole);
 
-    /* [044A-38 Fase 1] Cicla entre los 3 roles: admin → employee → client → admin */
+    /* [084A-1] Cicla entre los 3 roles impersonando usuarios reales.
+     * Admin → employee → client → admin. El backend busca un usuario real con ese rol. */
     const handleSwitchRole = useCallback(async () => {
-        if (switchingRole || !isAdmin) return;
+        if (switchingRole || (!isAdmin && !isImpersonating)) return;
         const cycle: UserRole[] = ['admin', 'employee', 'client'];
         const currentIdx = cycle.indexOf(effectiveRole);
         const nextRole = cycle[(currentIdx + 1) % cycle.length];
@@ -65,19 +67,18 @@ export const SidebarPanel: React.FC<SidebarPanelProps> = ({seccionActiva, onCamb
         setSwitchingRole(true);
         try {
             const resp = await apiSwitchRole(nextRole);
-            actualizarRol(resp.token, resp.role, resp.effective_role);
+            actualizarRol(resp.token, resp.user_id, resp.role, resp.effective_role, resp.impersonating);
             /* Resetear a la primera tab del nuevo rol */
             const newTabs = obtenerTabsPorRol(nextRole);
             if (newTabs.length > 0) {
                 onCambiarSeccion(newTabs[0].id);
             }
         } catch {
-            /* Error silencioso no permitido — mostrar en consola */
             console.error('[SidebarPanel] Error al cambiar rol');
         } finally {
             setSwitchingRole(false);
         }
-    }, [switchingRole, isAdmin, effectiveRole, actualizarRol, onCambiarSeccion]);
+    }, [switchingRole, isAdmin, isImpersonating, effectiveRole, actualizarRol, onCambiarSeccion]);
 
     return (
         <aside className="panelSidebar" aria-label={t('accessibility.panel_nav')}>
@@ -114,8 +115,8 @@ export const SidebarPanel: React.FC<SidebarPanelProps> = ({seccionActiva, onCamb
                 })}
             </nav>
 
-            {/* [044A-38 Fase 1] Botón switch-role — solo visible para admin */}
-            {isAdmin && (
+            {/* [084A-1] Botón switch-role — visible para admin real o cuando impersonando */}
+            {(isAdmin || isImpersonating) && (
                 <div className="sidebarSwitchRole">
                     <Button
                         className="sidebarSwitchBtn"
@@ -127,6 +128,9 @@ export const SidebarPanel: React.FC<SidebarPanelProps> = ({seccionActiva, onCamb
                         <ArrowRightLeft size={16} aria-hidden="true" />
                         <span>{switchingRole ? 'Cambiando...' : `Vista: ${ROLE_LABELS[effectiveRole]}`}</span>
                     </Button>
+                    {isImpersonating && (
+                        <span className="sidebarImpersonando">Impersonando</span>
+                    )}
                 </div>
             )}
         </aside>

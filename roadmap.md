@@ -57,5 +57,5 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 ### Bugs / UX reportados por usuario
 
-- 084A-1: Switch de vista debe cambiar de usuario real (pedidos por vista incoherentes, chat mensajes siempre izquierda, datos de prueba no realistas). Admin: filtrar por empleado, ver responsable en ordenCardFooter, separar "mis pedidos" de "pedidos de empleados". Buscador y filtro solo para admin.
 - 084A-2: Chat dentro de pedidos debe estar abierto por defecto, debajo de historial de proyecto.
+- 084A-3: Todos los scroll deben ser minimalistas, sin fondo, un poco más pequeños.

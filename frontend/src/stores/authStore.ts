@@ -1,7 +1,8 @@
 /* [044A-13] Store de autenticación con Zustand.
  * Maneja token JWT, estado de sesión y persistencia en localStorage.
  * El token se guarda en localStorage para que axios-instance lo inyecte automáticamente.
- * [044A-38 Fase 1] Añadido role/effectiveRole para panel dinámico por rol. */
+ * [044A-38 Fase 1] Añadido role/effectiveRole para panel dinámico por rol.
+ * [084A-1] Añadido impersonating + userId dinámico para impersonación real. */
 import {create} from 'zustand';
 import type {UserRole} from '../api/auth';
 
@@ -10,6 +11,7 @@ interface AuthUser {
     email: string;
     role: UserRole;
     effectiveRole: UserRole;
+    impersonating: boolean;
 }
 
 interface AuthState {
@@ -19,8 +21,8 @@ interface AuthState {
     login: (token: string, userId: string, email: string, role: UserRole, effectiveRole: UserRole) => void;
     logout: () => void;
     inicializar: () => void;
-    /* [044A-38 Fase 1] Actualiza token y rol tras switch-role */
-    actualizarRol: (token: string, role: UserRole, effectiveRole: UserRole) => void;
+    /* [084A-1] Actualiza token, roles, userId y estado de impersonación tras switch-role */
+    actualizarRol: (token: string, userId: string, role: UserRole, effectiveRole: UserRole, impersonating: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -30,8 +32,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     login: (token, userId, email, role, effectiveRole) => {
         localStorage.setItem('token', token);
-        localStorage.setItem('auth_user', JSON.stringify({userId, email, role, effectiveRole}));
-        set({token, user: {userId, email, role, effectiveRole}, logueado: true});
+        localStorage.setItem('auth_user', JSON.stringify({userId, email, role, effectiveRole, impersonating: false}));
+        set({token, user: {userId, email, role, effectiveRole, impersonating: false}, logueado: true});
     },
 
     logout: () => {
@@ -52,6 +54,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                     user.role = 'client';
                     user.effectiveRole = 'client';
                 }
+                if (user.impersonating === undefined) {
+                    user.impersonating = false;
+                }
                 set({token, user, logueado: true});
             } catch {
                 localStorage.removeItem('token');
@@ -60,11 +65,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         }
     },
 
-    /* [044A-38 Fase 1] Switch role: actualiza token y roles sin perder sesión */
-    actualizarRol: (token, role, effectiveRole) => {
+    /* [084A-1] Switch role: actualiza token, userId, roles e impersonación */
+    actualizarRol: (token, userId, role, effectiveRole, impersonating) => {
         const currentUser = get().user;
         if (!currentUser) return;
-        const updatedUser = {...currentUser, role, effectiveRole};
+        const updatedUser = {...currentUser, userId, role, effectiveRole, impersonating};
         localStorage.setItem('token', token);
         localStorage.setItem('auth_user', JSON.stringify(updatedUser));
         set({token, user: updatedUser});
