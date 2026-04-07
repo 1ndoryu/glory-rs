@@ -8,6 +8,7 @@
 import React, {useCallback, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {useNavigate} from 'react-router-dom';
+import {LogOut} from 'lucide-react';
 import {GloryLink} from '../../core/router';
 import {useAuthStore} from '../../stores/authStore';
 import {useCurrentProfile} from '../../hooks/useCurrentProfile';
@@ -16,6 +17,7 @@ import {MenuContextual} from '../ui/ContextMenu';
 import {Logo} from '../ui/Logo';
 import NotificationBell from './NotificationBell';
 import './HeaderPanel.css';
+import '../../styles/header.css';
 
 export const HeaderPanel: React.FC = () => {
     const {t} = useTranslation();
@@ -49,20 +51,20 @@ export const HeaderPanel: React.FC = () => {
                     <GloryLink to="/" className="headerPanelEnlace">
                         {t('nav.home', 'Inicio')}
                     </GloryLink>
-                    {/* [084A-11] Avatar → MenuContextual en vez de dropdown artesanal */}
+                    {/* [084A-11] Avatar → MenuContextual en vez de dropdown artesanal.
+                     * [114A-6] Alineado con Header.tsx: mismas clases + ícono LogOut. */}
                     <MenuContextual
                         abierto={menuAbierto}
                         onToggle={() => setMenuAbierto(prev => !prev)}
                         onCerrar={() => setMenuAbierto(false)}
-                        ariaLabel={t('accessibility.profile_photo')}
-                        triggerContent={<img src={avatarUrl} alt={t('accessibility.profile_photo')} className="headerPanelAvatarImg" />}
-                        triggerClassName="headerPanelAvatar"
-                        triggerVariante="texto"
-                        triggerTamano="pequeno"
-                        panelClassName="headerPanelSubmenu"
+                        ariaLabel={t('accessibility.user_actions')}
+                        className="perfilDropdownWrapper"
+                        triggerClassName="perfilAvatarBtn"
+                        triggerContent={<img src={avatarUrl} alt={t('accessibility.profile_photo')} className="perfilAvatarImg" />}
                         items={[{
                             id: 'logout',
                             label: t('nav.logout'),
+                            icon: <LogOut size={14} />,
                             onSelect: handleLogout,
                         }]}
                     />
