@@ -153,14 +153,16 @@
 
 .ordenCard:hover {
     border-color: var(--border-hover);
-    box-shadow: 0 2px 8px var(--bg-item-hover);
 }
 
+/* [064A-74] Imagen cuadrada 1:1 en tarjeta de pedido */
 .ordenCardImagen {
     width: 120px;
-    min-height: 100%;
+    height: 120px;
+    aspect-ratio: 1 / 1;
     object-fit: cover;
     flex-shrink: 0;
+    border-radius: var(--radius-md);
 }
 
 .ordenCardBody {
