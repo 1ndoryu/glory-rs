@@ -18,6 +18,7 @@ mod refunds;
 mod reviews;
 mod seo;
 mod services;
+mod uploads;
 
 use axum::Router;
 use tower_http::cors::{AllowOrigin, Any, CorsLayer};
@@ -107,6 +108,7 @@ impl utoipa::Modify for SecurityAddon {
         admin_users::list_users,
         admin_users::change_role,
         admin_users::change_status,
+        uploads::upload_image,
     ),
     components(schemas(
         health::HealthResponse,
@@ -168,6 +170,7 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::ChangeRoleRequest,
         crate::models::ChangeStatusRequest,
         profile::AvatarResponse,
+        uploads::UploadResponse,
         crate::errors::ErrorResponse,
     )),
     modifiers(&SecurityAddon),
@@ -311,6 +314,7 @@ fn api_routes() -> Router<AppState> {
         .merge(admin_users::routes())
         .merge(admin_seed::seed_routes())
         .merge(hosting::hosting_routes())
+        .merge(uploads::routes())
         .layer(GovernorLayer {
             config: std::sync::Arc::new(api_governor),
         })
