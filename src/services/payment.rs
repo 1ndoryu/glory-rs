@@ -521,7 +521,9 @@ impl PaymentService {
 
     /* [074A-24] Clasifica errores de Stripe API para dar feedback útil al usuario
      * sin exponer detalles internos (claves API, IDs internos de Stripe).
-     * Stripe devuelve: { "error": { "type": "...", "message": "...", "code": "..." } } */
+     * Stripe devuelve: { "error": { "type": "...", "message": "...", "code": "..." } }
+     * [074A-27] Todos retornan BadRequest para que el mensaje llegue al cliente.
+     * AppError::Internal oculta el mensaje — seguro pero inútil para el usuario. */
     fn classify_stripe_error(body: &str) -> AppError {
         let parsed: Result<serde_json::Value, _> = serde_json::from_str(body);
         let (error_type, message) = match &parsed {
@@ -529,12 +531,12 @@ impl PaymentService {
                 json["error"]["type"].as_str().unwrap_or("unknown"),
                 json["error"]["message"].as_str().unwrap_or("Error desconocido de Stripe"),
             ),
-            Err(_) => return AppError::Internal("Error inesperado del servicio de pagos".into()),
+            Err(_) => return AppError::BadRequest("Error inesperado del servicio de pagos".into()),
         };
 
         match error_type {
             "authentication_error" => {
-                AppError::Internal("Error de configuración de pagos — contacta soporte".into())
+                AppError::BadRequest("Error de configuración de pagos — contacta soporte".into())
             }
             "invalid_request_error" | "card_error" => {
                 AppError::BadRequest(format!("Error de pago: {message}"))
@@ -542,7 +544,7 @@ impl PaymentService {
             "rate_limit_error" => {
                 AppError::BadRequest("Demasiadas solicitudes de pago, intenta de nuevo en unos segundos".into())
             }
-            _ => AppError::Internal("Servicio de pagos no disponible temporalmente".into()),
+            _ => AppError::BadRequest("Servicio de pagos no disponible temporalmente".into()),
         }
     }
 }
