@@ -69,30 +69,30 @@ export interface UpdateProjectBody {
 }
 
 export async function apiListAdminProjects(): Promise<AdminProject[]> {
-    const { data } = await instance.get<AdminProject[]>('/admin/projects');
+    const { data } = await instance.get<AdminProject[]>('/api/admin/projects');
     return data;
 }
 
 export async function apiCreateProject(body: CreateProjectBody): Promise<AdminProject> {
-    const { data } = await instance.post<AdminProject>('/admin/projects', body);
+    const { data } = await instance.post<AdminProject>('/api/admin/projects', body);
     return data;
 }
 
 export async function apiUpdateProject(id: string, body: UpdateProjectBody): Promise<AdminProject> {
-    const { data } = await instance.put<AdminProject>(`/admin/projects/${id}`, body);
+    const { data } = await instance.put<AdminProject>(`/api/admin/projects/${id}`, body);
     return data;
 }
 
 export async function apiArchiveProject(id: string): Promise<void> {
-    await instance.delete(`/admin/projects/${id}`);
+    await instance.delete(`/api/admin/projects/${id}`);
 }
 
 export async function apiListPublicProjects(): Promise<AdminProject[]> {
-    const { data } = await instance.get<AdminProject[]>('/projects');
+    const { data } = await instance.get<AdminProject[]>('/api/projects');
     return data;
 }
 
 export async function apiGetProjectBySlug(slug: string): Promise<AdminProject> {
-    const { data } = await instance.get<AdminProject>(`/projects/${slug}`);
+    const { data } = await instance.get<AdminProject>(`/api/projects/${slug}`);
     return data;
 }

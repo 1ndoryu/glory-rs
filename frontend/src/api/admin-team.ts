@@ -46,25 +46,25 @@ export interface UpdateTeamMemberBody {
 }
 
 export async function apiListAdminTeamMembers(): Promise<AdminTeamMember[]> {
-    const { data } = await instance.get<AdminTeamMember[]>('/admin/team');
+    const { data } = await instance.get<AdminTeamMember[]>('/api/admin/team');
     return data;
 }
 
 export async function apiCreateTeamMember(body: CreateTeamMemberBody): Promise<AdminTeamMember> {
-    const { data } = await instance.post<AdminTeamMember>('/admin/team', body);
+    const { data } = await instance.post<AdminTeamMember>('/api/admin/team', body);
     return data;
 }
 
 export async function apiUpdateTeamMember(id: string, body: UpdateTeamMemberBody): Promise<AdminTeamMember> {
-    const { data } = await instance.put<AdminTeamMember>(`/admin/team/${id}`, body);
+    const { data } = await instance.put<AdminTeamMember>(`/api/admin/team/${id}`, body);
     return data;
 }
 
 export async function apiArchiveTeamMember(id: string): Promise<void> {
-    await instance.delete(`/admin/team/${id}`);
+    await instance.delete(`/api/admin/team/${id}`);
 }
 
 export async function apiListPublicTeamMembers(): Promise<AdminTeamMember[]> {
-    const { data } = await instance.get<AdminTeamMember[]>('/team');
+    const { data } = await instance.get<AdminTeamMember[]>('/api/team');
     return data;
 }
