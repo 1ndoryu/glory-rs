@@ -1,0 +1,39 @@
+# Suscripciones de hosting de prueba para el usuario cliente.
+# Usa @users:cliente@test.com para resolver el UUID del cliente.
+
+[meta]
+table = "hosting_subscriptions"
+id_field = "domain"
+depends_on = ["users"]
+
+[meta.casts]
+
+[[records]]
+user_id = "@users:cliente@test.com"
+client_name = "Cliente Test"
+client_email = "cliente@test.com"
+plan = "basico"
+domain = "mitienda-test.com"
+status = "active"
+monthly_price_cents = 500
+storage_limit_mb = 5120
+
+[[records]]
+user_id = "@users:cliente@test.com"
+client_name = "Cliente Test"
+client_email = "cliente@test.com"
+plan = "pro"
+domain = "app-demo.nakomi.dev"
+status = "provisioning"
+monthly_price_cents = 1000
+storage_limit_mb = 20480
+
+[[records]]
+user_id = "@users:cliente@test.com"
+client_name = "Cliente Test"
+client_email = "cliente@test.com"
+plan = "ecommerce"
+domain = "ecommerce-demo.nakomi.dev"
+status = "suspended"
+monthly_price_cents = 1500
+storage_limit_mb = 51200
