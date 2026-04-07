@@ -43,8 +43,6 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 ### CMS Admin (plan: plan-cms-admin-2026-04-07.md)
 
-- 074A-13: CMS Equipo — Full stack (migrate miembros.ts → BD)
-
 ### SEO y mejoras (plan: plan-seo-completo-2026-04-04.md)
 
 - 074A-14: SEO Fase 2 — Performance (lazy loading, image optimization, Core Web Vitals)
@@ -57,3 +55,11 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 - La pagina de disponibles para el usuario empleado se ve mal, hay que reahacerla desde cero, no la entiendo. Igual la pagina delegaciones, porque carajo las letras son blancas, esto es incoherente. 
 - chatMensajes SIGUE SIN UN ANCHO mAXIMO QUE EVITE QUE chatContenedor se salga de l pantalla.
+
+- En proyecto dice Request failed with status code 404
+
+- El contenido de los servicios en incrugente o sea lo que sale en cms no es lo mismo que sale en el front (los del front es el contenido que hay que preservar), supongo que lo mismo pasa con el resto de cosas. Con el blog parece funcionar.
+
+- No veo un boton para eliminar, los contenidos del cms deben tener un boton de 3 puntos, alli la opcion de eliminar, archivar, desarchivar, etc. 
+
+- No veo donde se modifican los planes de los servicios.
