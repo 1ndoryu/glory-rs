@@ -54,5 +54,5 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 ### Tooling
 
-- 064A-43: VarSense shadow detection rule.
+(sin tareas pendientes)
 
