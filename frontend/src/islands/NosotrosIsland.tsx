@@ -1,8 +1,9 @@
 /**
  * Componente: NosotrosIsland
  * Página "Sobre Nosotros" con misión, equipo, marcas y testimonios.
+ * [074A-13] Equipo cargado desde API pública con fallback a datos estáticos.
  */
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import {useTranslation} from 'react-i18next';
 import '../styles/variables.css';
 import './NosotrosIsland.css';
@@ -12,6 +13,8 @@ import {SeccionHeader} from '../components/ui/SeccionHeader';
 import {SeccionContacto} from '../components/home/SeccionContacto';
 import {MIEMBROS_DATA} from '../data/miembros';
 import {Miembro} from '../types/contenido';
+import {apiListPublicTeamMembers} from '../api/admin-team';
+import type {AdminTeamMember} from '../api/admin-team';
 
 interface NosotrosIslandProps {
     titulo?: string;
@@ -46,8 +49,38 @@ const TarjetaMiembro: React.FC<{miembro: Miembro}> = ({miembro}) => {
     );
 };
 
+/* [074A-13] Convierte AdminTeamMember (API) → Miembro (frontend) */
+function convertirMiembro(m: AdminTeamMember): Miembro {
+    return {
+        id: m.slug,
+        nombre: m.name,
+        cargo: m.role,
+        bio: m.bio,
+        avatar: m.avatar || '/images/avatar-placeholder.webp',
+        linkedin: m.linkedin || undefined,
+        twitter: m.twitter || undefined,
+        github: m.github || undefined,
+    };
+}
+
 export const NosotrosIsland = ({titulo}: NosotrosIslandProps): JSX.Element => {
     const {t} = useTranslation();
+    const [miembros, setMiembros] = useState<Miembro[]>(MIEMBROS_DATA);
+
+    /* [074A-13] Cargar equipo desde API pública, fallback a datos estáticos */
+    useEffect(() => {
+        const ctrl = new AbortController();
+        apiListPublicTeamMembers()
+            .then(data => {
+                if (!ctrl.signal.aborted && data.length > 0) {
+                    setMiembros(data.map(convertirMiembro));
+                }
+            })
+            .catch(() => {
+                /* Fallback silencioso: se mantiene MIEMBROS_DATA */
+            });
+        return () => ctrl.abort();
+    }, []);
 
     return (
         <LayoutPagina className="nosotrosMain" id="paginaNosotros">
@@ -93,7 +126,7 @@ export const NosotrosIsland = ({titulo}: NosotrosIslandProps): JSX.Element => {
                 <div className="nosotrosEquipoContenedor">
                     <SeccionHeader titulo={t('about.team_title')} />
                     <div className="equipoGrid">
-                        {MIEMBROS_DATA.map(miembro => (
+                        {miembros.map(miembro => (
                             <TarjetaMiembro key={miembro.id} miembro={miembro} />
                         ))}
                     </div>

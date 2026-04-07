@@ -76,6 +76,12 @@ impl SeedService {
         .execute(pool)
         .await?;
 
+        /* Limpiar chat_session_id de orders antes de borrar chat_sessions (FK) */
+        sqlx::query("UPDATE orders SET chat_session_id = NULL WHERE client_id = ANY($1)")
+            .bind(&ids)
+            .execute(pool)
+            .await?;
+
         /* Chat depende de orders (order_id FK) y users (user_id FK) — borrar antes de orders */
         sqlx::query("DELETE FROM chat_messages WHERE session_id IN (SELECT id FROM chat_sessions WHERE user_id = ANY($1) OR order_id IN (SELECT id FROM orders WHERE client_id = ANY($1)))")
             .bind(&ids)
@@ -83,12 +89,6 @@ impl SeedService {
             .await?;
 
         sqlx::query("DELETE FROM chat_sessions WHERE user_id = ANY($1) OR order_id IN (SELECT id FROM orders WHERE client_id = ANY($1))")
-            .bind(&ids)
-            .execute(pool)
-            .await?;
-
-        /* Limpiar chat_session_id de orders antes de borrarlas */
-        sqlx::query("UPDATE orders SET chat_session_id = NULL WHERE client_id = ANY($1)")
             .bind(&ids)
             .execute(pool)
             .await?;
@@ -131,6 +131,14 @@ impl SeedService {
             "DELETE FROM projects WHERE slug = ANY($1)",
         )
         .bind(["kamples", "mabuhay", "guillermochatbot", "task", "material-de-padel"])
+        .execute(pool)
+        .await?;
+
+        /* [074A-13] Limpiar miembros del equipo de seed */
+        sqlx::query(
+            "DELETE FROM team_members WHERE slug = ANY($1)",
+        )
+        .bind(["wan", "anthony", "misael"])
         .execute(pool)
         .await?;
 
@@ -183,8 +191,11 @@ impl SeedService {
         /* [074A-12] Proyectos de showcase */
         let projects_count = Self::create_seed_projects(pool).await?;
 
+        /* [074A-13] Miembros del equipo */
+        let team_count = Self::create_seed_team_members(pool).await?;
+
         Ok(format!(
-            "Seed completado: 2 usuarios + {created} órdenes + {hosting_count} suscripciones hosting + {notif_count} notificaciones + {review_count} reviews + {chat_count} mensajes chat + {activity_count} activity log + {projects_count} proyectos. Credenciales: cliente@test.com/cliente, empleado@test.com/empleado"
+            "Seed completado: 2 usuarios + {created} órdenes + {hosting_count} suscripciones hosting + {notif_count} notificaciones + {review_count} reviews + {chat_count} mensajes chat + {activity_count} activity log + {projects_count} proyectos + {team_count} miembros equipo. Credenciales: cliente@test.com/cliente, empleado@test.com/empleado"
         ))
     }
 
@@ -579,6 +590,47 @@ impl SeedService {
             )
             .bind(title).bind(slug).bind(client).bind(desc).bind(image)
             .bind(&gallery).bind(&categories).bind(&technologies).bind(&links).bind(&skills)
+            .bind(status).bind(i32::try_from(idx).unwrap_or(0))
+            .execute(pool)
+            .await?;
+
+            count += 1;
+        }
+
+        Ok(count)
+    }
+
+    /* [074A-13] Miembros del equipo para el CMS y la página pública */
+    async fn create_seed_team_members(pool: &PgPool) -> Result<u32, sqlx::Error> {
+        let members: &[(&str, &str, &str, &str, &str, &str)] = &[
+            (
+                "Wan", "wan", "CEO & Founder",
+                "Fundadora y directora creativa con visión estratégica para soluciones digitales de alto impacto.",
+                "/assets/equipo/wan.jpg",
+                "published"
+            ),
+            (
+                "Anthony", "anthony", "Lead Developer",
+                "Ingeniero de software principal, especializado en arquitecturas escalables y rendimiento.",
+                "/assets/equipo/anthony.jpg",
+                "published"
+            ),
+            (
+                "Misael", "misael", "DevOps Engineer",
+                "Ingeniero DevOps enfocado en la automatización, despliegue continuo y estabilidad de infraestructura.",
+                "/assets/equipo/misael.jpg",
+                "published"
+            ),
+        ];
+
+        let mut count = 0u32;
+        for (idx, (name, slug, role, bio, avatar, status)) in members.iter().enumerate() {
+            sqlx::query(
+                "INSERT INTO team_members (name, slug, role, bio, avatar, status, sort_order)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7)
+                 ON CONFLICT (slug) DO UPDATE SET name = $1, role = $3, bio = $4, avatar = $5, status = $6, sort_order = $7"
+            )
+            .bind(name).bind(slug).bind(role).bind(bio).bind(avatar)
             .bind(status).bind(i32::try_from(idx).unwrap_or(0))
             .execute(pool)
             .await?;

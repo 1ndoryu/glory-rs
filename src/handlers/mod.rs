@@ -21,6 +21,7 @@ mod refunds;
 mod reviews;
 mod seo;
 mod services;
+mod team_members;
 mod uploads;
 
 use axum::Router;
@@ -128,6 +129,11 @@ impl utoipa::Modify for SecurityAddon {
         projects::create,
         projects::update,
         projects::archive,
+        team_members::list_published,
+        team_members::list_all,
+        team_members::create,
+        team_members::update,
+        team_members::archive,
     ),
     components(schemas(
         health::HealthResponse,
@@ -200,6 +206,9 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::ProjectSkill,
         crate::models::CreateProjectRequest,
         crate::models::UpdateProjectRequest,
+        crate::models::TeamMemberResponse,
+        crate::models::CreateTeamMemberRequest,
+        crate::models::UpdateTeamMemberRequest,
         profile::AvatarResponse,
         uploads::UploadResponse,
         crate::errors::ErrorResponse,
@@ -348,6 +357,8 @@ fn api_routes() -> Router<AppState> {
         .merge(blog::admin_routes())
         .merge(projects::public_routes())
         .merge(projects::admin_routes())
+        .merge(team_members::public_routes())
+        .merge(team_members::admin_routes())
         .merge(admin_seed::seed_routes())
         .merge(hosting::hosting_routes())
         .merge(uploads::routes())

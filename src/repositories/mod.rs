@@ -11,6 +11,7 @@ mod payment;
 mod project;
 mod refund;
 mod review;
+mod team_member;
 mod user;
 
 pub use blog::{BlogRepository, CreateBlogPostParams, UpdateBlogPostParams};
@@ -26,4 +27,5 @@ pub use payment::{PaymentRepository, CreatePaymentParams};
 pub use project::{CreateProjectParams, ProjectRepository, UpdateProjectParams};
 pub use refund::RefundRepository;
 pub use review::ReviewRepository;
+pub use team_member::{CreateTeamMemberParams, TeamMemberRepository, UpdateTeamMemberParams};
 pub use user::{UserRepository, UserWithTotal};

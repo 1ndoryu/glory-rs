@@ -4,6 +4,7 @@
  * [074A-9] Sub-tab Servicios conectada a ListaServicios + EditorServicio.
  * [074A-11] Sub-tab Blog conectada a ListaBlog + EditorBlog.
  * [074A-12] Sub-tab Proyectos conectada a ListaProyectos + EditorProyecto.
+ * [074A-13] Sub-tab Equipo conectada a ListaEquipo + EditorMiembro.
  * sentinel-disable-file componente-sin-hook: Orquestador de sub-tabs CMS.
  * Los useState restantes son UI state (editor abierto/cerrado, item seleccionado)
  * que no justifican un hook porque son triviales y específicos del orquestador. */
@@ -16,12 +17,16 @@ import {ListaBlog} from './ListaBlog';
 import {EditorBlog} from './EditorBlog';
 import {ListaProyectos} from './ListaProyectos';
 import {EditorProyecto} from './EditorProyecto';
+import {ListaEquipo} from './ListaEquipo';
+import {EditorMiembro} from './EditorMiembro';
 import {useContenidoServicios} from '../../hooks/useContenidoServicios';
 import {useContenidoBlog} from '../../hooks/useContenidoBlog';
 import {useContenidoProyectos} from '../../hooks/useContenidoProyectos';
+import {useContenidoEquipo} from '../../hooks/useContenidoEquipo';
 import type {AdminService, CreateServiceBody, UpdateServiceBody} from '../../api/admin-services';
 import type {AdminBlogPost, CreateBlogPostBody, UpdateBlogPostBody} from '../../api/admin-blog';
 import type {AdminProject, CreateProjectBody, UpdateProjectBody} from '../../api/admin-projects';
+import type {AdminTeamMember, CreateTeamMemberBody, UpdateTeamMemberBody} from '../../api/admin-team';
 import './SeccionContenido.css';
 
 type SubTab = 'servicios' | 'blog' | 'proyectos' | 'equipo';
@@ -145,6 +150,42 @@ export const SeccionContenido: React.FC = () => {
         await proyectosArchivar(id);
     }, [proyectosArchivar]);
 
+    /* [074A-13] Estado del CMS equipo */
+    const {
+        miembros: equipoList,
+        cargando: equipoCargando,
+        error: equipoError,
+        guardando: equipoGuardando,
+        crear: equipoCrear,
+        actualizar: equipoActualizar,
+        archivar: equipoArchivar,
+    } = useContenidoEquipo();
+    const [miembroEditorAbierto, setMiembroEditorAbierto] = useState(false);
+    const [miembroEditando, setMiembroEditando] = useState<AdminTeamMember | null>(null);
+
+    const handleEditarMiembro = useCallback((m: AdminTeamMember) => {
+        setMiembroEditando(m);
+        setMiembroEditorAbierto(true);
+    }, []);
+
+    const handleCrearMiembro = useCallback(() => {
+        setMiembroEditando(null);
+        setMiembroEditorAbierto(true);
+    }, []);
+
+    const handleGuardarMiembro = useCallback(async (id: string | null, body: CreateTeamMemberBody | UpdateTeamMemberBody) => {
+        if (id) {
+            await equipoActualizar(id, body as UpdateTeamMemberBody);
+        } else {
+            await equipoCrear(body as CreateTeamMemberBody);
+        }
+        setMiembroEditorAbierto(false);
+    }, [equipoActualizar, equipoCrear]);
+
+    const handleArchivarMiembro = useCallback(async (id: string) => {
+        await equipoArchivar(id);
+    }, [equipoArchivar]);
+
     return (
         <div className="contenidoContenedor">
             <div className="contenidoSubTabs">
@@ -223,30 +264,26 @@ export const SeccionContenido: React.FC = () => {
                         />
                     </>
                 )}
-                {subTab !== 'servicios' && subTab !== 'blog' && subTab !== 'proyectos' && renderSubTab(subTab)}
+                {subTab === 'equipo' && (
+                    <>
+                        {equipoError && <div className="contenidoError">{equipoError}</div>}
+                        <ListaEquipo
+                            miembros={equipoList}
+                            cargando={equipoCargando}
+                            onEditar={handleEditarMiembro}
+                            onCrear={handleCrearMiembro}
+                            onArchivar={handleArchivarMiembro}
+                        />
+                        <EditorMiembro
+                            abierto={miembroEditorAbierto}
+                            onCerrar={() => setMiembroEditorAbierto(false)}
+                            miembro={miembroEditando}
+                            onGuardar={handleGuardarMiembro}
+                            guardando={equipoGuardando}
+                        />
+                    </>
+                )}
             </div>
         </div>
     );
 };
-
-/* [074A-12] Renderiza sub-tabs que aún no tienen editor (equipo).
- * 'servicios', 'blog' y 'proyectos' se manejan directamente en el componente principal. */
-function renderSubTab(subTab: SubTab) {
-    switch (subTab) {
-        case 'equipo':
-            return <PlaceholderContenido tipo="Equipo" />;
-        default:
-            return null;
-    }
-}
-
-/* Placeholder genérico hasta que cada sección tenga su editor real. */
-function PlaceholderContenido({tipo}: {tipo: string}) {
-    return (
-        <div className="contenidoPlaceholder">
-            <p className="contenidoPlaceholderTexto">
-                Editor de {tipo} — próximamente.
-            </p>
-        </div>
-    );
-}

@@ -1,0 +1,126 @@
+/* [074A-13] Estilos del editor de miembros del equipo. */
+
+.editorMiembroOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: var(--spacing-md);
+}
+
+.editorMiembroModal {
+    background: var(--bg-secondary);
+    border: 1px solid var(--white-10);
+    border-radius: var(--radius-lg);
+    width: 100%;
+    max-width: 560px;
+    max-height: 90vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.editorMiembroContenido {
+    padding: var(--spacing-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.editorMiembroCampo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    flex: 1;
+}
+
+.editorMiembroCampo label {
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+    font-weight: 500;
+}
+
+.editorMiembroCampo input,
+.editorMiembroCampo textarea {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--white-10);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--text-sm);
+    font-family: inherit;
+    resize: vertical;
+}
+
+.editorMiembroCampo input:focus,
+.editorMiembroCampo textarea:focus {
+    outline: none;
+    border-color: var(--white-20);
+}
+
+.editorMiembroFila {
+    display: flex;
+    gap: var(--spacing-md);
+}
+
+.editorMiembroEstados {
+    display: flex;
+    gap: var(--spacing-xs);
+}
+
+.editorMiembroEstadoBtn {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--white-10);
+    color: var(--text-tertiary);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-xs);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.editorMiembroEstadoBtn.activo {
+    border-color: var(--text-primary);
+    color: var(--text-primary);
+}
+
+.editorMiembroAcciones {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-top: 1px solid var(--white-10);
+}
+
+.editorMiembroBtnCancelar {
+    background: transparent;
+    border: 1px solid var(--white-10);
+    color: var(--text-tertiary);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+}
+
+.editorMiembroBtnGuardar {
+    background: var(--text-primary);
+    border: none;
+    color: var(--bg-primary);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.editorMiembroBtnGuardar:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+    .editorMiembroFila {
+        flex-direction: column;
+    }
+}

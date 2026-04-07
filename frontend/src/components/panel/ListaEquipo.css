@@ -1,0 +1,124 @@
+/* [074A-13] Estilos de la lista de miembros del equipo admin. */
+
+.equipoListaContenedor {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.equipoListaAcciones {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.equipoListaCrear {
+    background: var(--accent-primary);
+    color: var(--text-primary);
+    border: none;
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+}
+
+.equipoListaCrear:hover {
+    opacity: 0.85;
+}
+
+.equipoListaGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--spacing-md);
+}
+
+.equipoListaCargando,
+.equipoListaVacia {
+    color: var(--text-tertiary);
+    text-align: center;
+    padding: var(--spacing-xl) 0;
+}
+
+.equipoListaCard {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    background: var(--bg-secondary);
+    border: 1px solid var(--white-10);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: border-color 0.2s;
+    position: relative;
+}
+
+.equipoListaCard:hover {
+    border-color: var(--white-20);
+}
+
+.equipoListaAvatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: var(--bg-tertiary);
+}
+
+.equipoListaAvatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.equipoListaInfo {
+    flex: 1;
+    min-width: 0;
+}
+
+.equipoListaNombre {
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.equipoListaCargo {
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+}
+
+.equipoListaMeta {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    margin-top: var(--spacing-xs);
+}
+
+.equipoListaOrden {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+}
+
+.equipoListaArchivar {
+    position: absolute;
+    top: var(--spacing-sm);
+    right: var(--spacing-sm);
+    background: transparent;
+    border: 1px solid var(--white-10);
+    color: var(--text-tertiary);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-xs);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.equipoListaCard:hover .equipoListaArchivar {
+    opacity: 1;
+}
+
+.equipoListaArchivar:hover {
+    border-color: var(--error);
+    color: var(--error);
+}

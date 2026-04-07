@@ -11,6 +11,7 @@ mod payment;
 mod project;
 mod refund;
 mod review;
+mod team_member;
 mod user;
 
 pub use blog::{
@@ -43,6 +44,9 @@ pub use payment::{
 pub use project::{
     CreateProjectRequest, Project, ProjectLink, ProjectResponse, ProjectSkill,
     UpdateProjectRequest,
+};
+pub use team_member::{
+    CreateTeamMemberRequest, TeamMember, TeamMemberResponse, UpdateTeamMemberRequest,
 };
 pub use refund::{
     OrderRefund, RefundResponse, RefundStatus, RequestRefundBody, ReviewAction, ReviewRefundBody,
