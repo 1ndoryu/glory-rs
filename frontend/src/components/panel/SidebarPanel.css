@@ -67,7 +67,8 @@
 }
 
 /* [064A-1] Sidebar item: usa Button variante="texto" como base.
- * Solo layout contextual y colores de navegación. */
+ * Solo layout contextual y colores de navegación.
+ * [074A-31] margin-left negativo para alinear con el borde del sidebar. */
 .sidebarItem {
     display: flex;
     align-items: center;
@@ -77,9 +78,10 @@
     font-weight: 500;
     color: var(--text-muted);
     padding: var(--spacing-sm) var(--spacing-md);
+    margin-left: -1rem;
     border-radius: var(--radius-md);
     text-align: left;
-    width: 100%;
+    width: calc(100% + 1rem);
 }
 
 .sidebarItem:hover {

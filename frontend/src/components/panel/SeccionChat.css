@@ -331,7 +331,7 @@
 }
 
 .chatInput:focus {
-    border-color: var(--brand-black);
+    border-color: var(--border-default);
 }
 
 /* [074A-19] Send button superpuesto dentro del input, alineado a la derecha */

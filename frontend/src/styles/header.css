@@ -190,7 +190,7 @@
 }
 
 .perfilAvatarBtn:hover {
-    border-color: var(--brand-black);
+    border-color: var(--border-default);
 }
 
 .perfilAvatarImg {

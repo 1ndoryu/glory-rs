@@ -65,7 +65,7 @@
 }
 
 .testimonioFotoPlaceholder:hover {
-    border-color: var(--brand-black);
+    border-color: var(--border-default);
 }
 
 .testimonioFotoPreview {
@@ -115,7 +115,7 @@
 
 .testimonioCampo input:focus,
 .testimonioCampo textarea:focus {
-    border-color: var(--brand-black);
+    border-color: var(--border-default);
 }
 
 .testimonioCampo textarea {

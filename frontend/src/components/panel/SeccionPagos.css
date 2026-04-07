@@ -33,11 +33,11 @@
 }
 
 .pagosOrdenBtn:hover {
-    border-color: var(--brand-black);
+    border-color: var(--border-default);
 }
 
 .pagosOrdenBtn--activo {
-    border-color: var(--brand-black);
+    border-color: var(--border-default);
     background: var(--bg-accent);
 }
 

@@ -83,7 +83,7 @@
     text-decoration: none;
     padding: var(--spacing-sm) var(--spacing-md);
     background-color: var(--brand-black);
-    border: 1px solid var(--brand-black);
+    border: 1px solid var(--border-default);
     border-radius: var(--radius-sm);
     transition: opacity var(--transicion-rapida);
 }

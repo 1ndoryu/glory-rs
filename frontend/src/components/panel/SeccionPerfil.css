@@ -100,7 +100,7 @@
 
 .perfilCampoInput:focus,
 .perfilCampoTextarea:focus {
-    border-color: var(--brand-black);
+    border-color: var(--border-default);
 }
 
 .perfilCampoInput:disabled {

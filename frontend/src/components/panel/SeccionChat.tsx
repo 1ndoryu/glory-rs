@@ -148,7 +148,7 @@ export const SeccionChat: React.FC = () => {
                                 onClick={() => void handleSend()}
                                 disabled={!input.trim() || enviando}
                                 type="button"
-                                variante="primario"
+                                variante="texto"
                                 tamano="pequeno"
                             >
                                 <Send size={16} />

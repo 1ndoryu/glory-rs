@@ -104,7 +104,7 @@
 }
 
 .chatInfoInput:focus {
-    border-color: var(--brand-black);
+    border-color: var(--border-default);
 }
 
 /* [074A-21] Notas: sección separada visualmente */

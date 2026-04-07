@@ -49,7 +49,7 @@
 
 .botonOutline {
     background-color: transparent;
-    border: 1px solid var(--brand-black);
+    border: 1px solid var(--border-default);
     color: var(--brand-black);
 }
 

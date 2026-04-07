@@ -63,10 +63,10 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 ## 
 
-- EL boton de salir sigue deslogeando en vez de ir al home y no veo ningún submenu a dar click a la foto de perfil.
-- Al cambiar el tamaño de la pantalla algo hace que los bordes de los badge de abajo se recorten un poco en carruselItem.
-- Sigue diciendo payments.ts:37  POST http://localhost:3000/api/orders/2e504954-1e1d-49b6-93a9-b2e85ae1092b/pay 500 (Internal Server Error), dice "Ocurrió un error interno" sin explicar por qué. 
-- El boton de enviar en chatInputArea dejalo sin background. 
-- Busca todos los border-color: que esten usando borde negro y cambialo a     border-color: var(--border-default);
-- Hay chat que aparecen sin mensajes en el panel, no tiene sentido. 
-- a .sidebarItem agrega margin-left: -1rem;
+- 074A-25: El botón de salir sigue deslogeando en vez de ir al home y no se ve el submenú al dar click a la foto de perfil (verificar 074A-22).
+- 074A-26: Al cambiar el tamaño de la pantalla algo hace que los bordes de los badge de abajo se recorten un poco en carruselItem.
+- 074A-27: Stripe 500 sigue diciendo "Ocurrió un error interno" sin explicar — follow-up de 074A-24 (verificar si los cambios aplican).
+- 074A-28: El botón de enviar en chatInputArea dejarlo sin background.
+- 074A-29: Buscar todos los border-color: que usen borde negro y cambiarlos a var(--border-default).
+- 074A-30: Hay chats que aparecen sin mensajes en el panel, no tiene sentido — filtrar.
+- 074A-31: A .sidebarItem agregar margin-left: -1rem.

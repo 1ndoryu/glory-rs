@@ -72,7 +72,7 @@
 
 /* Tarjeta destacada (plan recomendado) */
 .tarjetaPlanDestacado {
-    border-color: var(--brand-black);
+    border-color: var(--border-default);
     border-width: 2px;
     transform: scale(1.02);
 }

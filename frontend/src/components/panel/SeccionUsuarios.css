@@ -69,7 +69,7 @@
 
 .usuariosBusquedaInput:focus {
     outline: none;
-    border-color: var(--brand-black);
+    border-color: var(--border-default);
 }
 
 /* [064A-17+064A-53] Boton de filtro: border --bg-item-active, padding lateral, texto centrado */
@@ -356,7 +356,7 @@
 
 .usuariosPaginacionBtn:hover:not(:disabled) {
     background: var(--bg-card-subtle);
-    border-color: var(--brand-black);
+    border-color: var(--border-default);
 }
 
 .usuariosPaginacionBtn:disabled {

@@ -138,7 +138,7 @@
 }
 
 .campoTextarea:focus {
-    border-color: var(--brand-black);
+    border-color: var(--border-default);
 }
 
 /* Acciones del formulario */
