@@ -43,7 +43,6 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 ### CMS Admin (plan: plan-cms-admin-2026-04-07.md)
 
-- 074A-10: CMS Blog — Backend (tabla blog_posts + CRUD)
 - 074A-11: CMS Blog — Frontend (editor admin + páginas públicas)
 - 074A-12: CMS Proyectos — Full stack (migrate showcase.ts → BD)
 - 074A-13: CMS Equipo — Full stack (migrate miembros.ts → BD)
@@ -54,4 +53,8 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 ### Bugs / UX reportados por usuario
 
-(sin tareas pendientes)
+- proyectosFiltros no tiene que estar en columna
+- Al cambiar al usuario cliente no veo un proyecto que este en proceso (no en proceso de pago), tiene que haber uno que este entre el admin y cliente, y otro entre el cliente y empleado. 
+- De los planes de hosting quita el personalizado, deja solo 3. El plan basico bajalo a 5$, el pro a 10$, el e-commerce bajalo a 15$
+- hostingFeaturesGrid tiene que tomar el ancho completo de la pagina, tener meno gap, el color de fondo de .hostingFeatureCard debe ser #f5f3f1, y el de todas las tarjetas, haz un componente tarjeta y centraliza todas las tarjetas usando ese componente. El contenido no tiene que estar centrado, sino a la izquierda, el icono arriba y el texto abajo todo al a derecha, el icono con borde default.
+- Se nota que todos los modales del cms no necesitan el padding que agrega el modal, unicamente esos modales de cms no necesita el padding que agrega el modal, el boton de guardar alli debe ser pequeño. 
