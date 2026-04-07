@@ -39,7 +39,7 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 > Plan maestro: `Agente/planes/plan-marketplace-2026-04-04.md` (11 fases) — ✅ completado
 > Plan de chat: `Agente/planes/plan-live-chat-2026-04-04.md` (5 fases) — ✅ completado (streaming IA = mejora futura)
 > Plan de hosting: `Agente/planes/plan-hosting-coolify-2026-04-04.md` (5 fases) — Fases 3-4 ✅, Fases 1-2-5 bloqueadas por infraestructura externa (VPS2, DNS, Google Drive OAuth)
-> Status hosting: `Agente/documentacion/hosting/status-hosting-administrado-2026-04-06.md`
+> Status hosting: `Agente/documentacion/hosting/status-hosting-administrado-2026-04-07.md`
 
 ### Funcionalidad grande
 
@@ -47,7 +47,7 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 ### Funcionalidad media
 
-- 064A-45: Hosting doc pendientes (status-hosting-administrado-2026-04-06.md).
+(sin tareas pendientes)
 
 
 ### Tooling
