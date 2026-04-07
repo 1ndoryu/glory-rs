@@ -10,6 +10,7 @@ import axiosInstance, {getApiHost} from './axios-instance';
 export interface ChatSession {
     id: string;
     order_id: string | null;
+    order_number: number | null;
     status: string;
     ai_enabled: boolean;
     assigned_staff_id: string | null;

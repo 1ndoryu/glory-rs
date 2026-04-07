@@ -79,9 +79,11 @@ export const SeccionChat: React.FC = () => {
                                 <ChevronLeft size={18} />
                             </Button>
                             <span className="chatAreaTitulo">
-                                {sessions.find(s => s.id === activeSessionId)?.order_id
-                                    ? `Chat de orden`
-                                    : 'Chat general'}
+                                {(() => {
+                                    const s = sessions.find(ses => ses.id === activeSessionId);
+                                    if (s?.order_id) return `Chat de orden #${s.order_number ?? '...'}`;
+                                    return 'Chat general';
+                                })()}
                             </span>
                             {/* [054A-9] Botón cerrar conversación */}
                             <Button
@@ -174,7 +176,9 @@ function SessionItem({
             </div>
             <div className="chatSesionInfo">
                 <div className="chatSesionTitulo">
-                    {session.order_id ? `Orden` : 'Chat general'}
+                    {session.order_id
+                        ? `Orden #${session.order_number ?? '...'}`
+                        : 'Chat general'}
                 </div>
                 <div className="chatSesionPreview">
                     {session.last_message || 'Sin mensajes'}

@@ -1,0 +1,108 @@
+/* [064A-31] Chat dentro de pedidos: comunicación cliente ↔ empleado asignado.
+ * Se abre inline en OrdenDetalle. Usa REST polling (5s) via useOrderChat.
+ * El empleado ve estos mensajes en SeccionChat del panel staff. */
+
+import React, {useState, useRef, useEffect} from 'react';
+import {Send} from 'lucide-react';
+import {useOrderChat} from '../../hooks/useOrderChat';
+import {useAuthStore} from '../../stores/authStore';
+import {Input} from '../ui/Input';
+import {Button} from '../ui/Button';
+import './OrderChat.css';
+
+interface OrderChatProps {
+    orderId: string;
+    employeeName: string | null;
+}
+
+export const OrderChat: React.FC<OrderChatProps> = ({orderId, employeeName}) => {
+    const [input, setInput] = useState('');
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+    const userId = useAuthStore(s => s.user?.userId);
+    const {sessionId, mensajes, enviando, creando, iniciarSesion, enviarMensaje} =
+        useOrderChat(orderId);
+
+    /* Iniciar sesión al montar */
+    useEffect(() => {
+        iniciarSesion();
+    }, [iniciarSesion]);
+
+    /* Auto-scroll al último mensaje */
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({behavior: 'smooth'});
+    }, [mensajes]);
+
+    const handleSend = async () => {
+        const content = input.trim();
+        if (!content || enviando) return;
+        setInput('');
+        await enviarMensaje(content);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSend();
+        }
+    };
+
+    if (creando && !sessionId) {
+        return (
+            <div className="orderChatPanel">
+                <p className="orderChatCargando">Conectando chat...</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="orderChatPanel">
+            <div className="orderChatEncabezado">
+                Chat con {employeeName ?? 'freelancer'}
+            </div>
+            <div className="orderChatMensajes">
+                {mensajes.length === 0 && (
+                    <p className="orderChatVacio">
+                        Envía un mensaje para iniciar la conversación.
+                    </p>
+                )}
+                {mensajes.map(msg => {
+                    const esPropio = msg.sender_id === userId;
+                    return (
+                        <div
+                            key={msg.id}
+                            className={`orderChatBurbuja ${esPropio ? 'orderChatBurbuja--propia' : 'orderChatBurbuja--otra'}`}
+                        >
+                            <span className="orderChatBurbujaTexto">{msg.content}</span>
+                            <span className="orderChatBurbujaHora">
+                                {new Date(msg.created_at).toLocaleTimeString('es-ES', {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                })}
+                            </span>
+                        </div>
+                    );
+                })}
+                <div ref={messagesEndRef} />
+            </div>
+            <div className="orderChatInputArea">
+                <Input
+                    value={input}
+                    onChange={e => setInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Escribe un mensaje..."
+                    disabled={!sessionId || enviando}
+                />
+                <Button
+                    variante="texto"
+                    tamano="pequeno"
+                    type="button"
+                    onClick={handleSend}
+                    disabled={!input.trim() || enviando || !sessionId}
+                    className="orderChatEnviar"
+                >
+                    <Send size={16} />
+                </Button>
+            </div>
+        </div>
+    );
+};

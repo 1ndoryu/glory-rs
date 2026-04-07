@@ -91,7 +91,8 @@ impl ChatHub {
         Ok(session)
     }
 
-    /// Crear o recuperar sesión vinculada a una orden
+    /// Crear o recuperar sesión vinculada a una orden.
+    /// [064A-31] Auto-asigna al empleado de la orden como staff y desactiva IA.
     pub async fn get_or_create_order_session(
         &self,
         order_id: Uuid,
@@ -110,6 +111,26 @@ impl ChatHub {
             Some(order_id),
         )
         .await?;
+
+        /* Auto-asignar empleado de la orden como staff del chat */
+        let employee_id: Option<Uuid> = sqlx::query_scalar(
+            "SELECT assigned_employee_id FROM orders WHERE id = $1",
+        )
+        .bind(order_id)
+        .fetch_optional(&self.pool)
+        .await
+        .unwrap_or(None);
+
+        if let Some(eid) = employee_id {
+            let _ = ChatRepository::assign_staff(&self.pool, session.id, eid).await;
+            /* Recargar sesión con staff asignado y ai_enabled=false */
+            if let Ok(Some(updated)) =
+                ChatRepository::find_session_by_id(&self.pool, session.id).await
+            {
+                return Ok(updated);
+            }
+        }
+
         Ok(session)
     }
 
@@ -215,7 +236,7 @@ impl ChatHub {
         self.enrich_sessions(sessions).await
     }
 
-    /// Enriquecer sesiones con `last_message` preview
+    /// Enriquecer sesiones con `last_message` preview y `order_number`
     async fn enrich_sessions(
         &self,
         sessions: Vec<ChatSession>,
@@ -223,13 +244,31 @@ impl ChatHub {
         let ids: Vec<Uuid> = sessions.iter().map(|s| s.id).collect();
         let last_msgs = ChatRepository::last_messages_for_sessions(&self.pool, &ids).await?;
 
+        /* [064A-31] Obtener order_number para sesiones vinculadas a órdenes */
+        let order_ids: Vec<Uuid> = sessions.iter().filter_map(|s| s.order_id).collect();
+        let order_numbers: Vec<(Uuid, i32)> = if order_ids.is_empty() {
+            vec![]
+        } else {
+            sqlx::query_as::<_, (Uuid, i32)>(
+                "SELECT id, order_number FROM orders WHERE id = ANY($1)",
+            )
+            .bind(&order_ids)
+            .fetch_all(&self.pool)
+            .await
+            .unwrap_or_default()
+        };
+
         Ok(sessions
             .into_iter()
             .map(|s| {
                 let last = last_msgs.iter().find(|m| m.session_id == s.id);
+                let order_num = s.order_id.and_then(|oid| {
+                    order_numbers.iter().find(|(id, _)| *id == oid).map(|(_, n)| *n)
+                });
                 ChatSessionResponse {
                     id: s.id,
                     order_id: s.order_id,
+                    order_number: order_num,
                     status: s.status,
                     ai_enabled: s.ai_enabled,
                     assigned_staff_id: s.assigned_staff_id,

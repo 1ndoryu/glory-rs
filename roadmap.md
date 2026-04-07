@@ -43,7 +43,6 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 ### Funcionalidad grande
 
-- 064A-31: Chat dentro de pedidos: botón que abre chat con el proveedor del servicio para comunicación cliente↔empleado.
 - 064A-32: Hosting + dominio panel cliente: página funcional, plan para compra de dominios.
 
 ### Funcionalidad media
@@ -59,11 +58,11 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 ###
 
-- No debería preguntar el correo en el modal para continuar con el pedido, el correo tiene que el que se use en la compra de stripe, si la contraseña se puede pedir en el formulario de stripe, mejor, sino, debe aparecer para elegirse en el panel al regresar. Tambien hay que revisar que falta para que funcione con stripe porque hice una prueba y da 404, haz un plan sobre esto.
-- Noto que cuando se elige un servicio, no se esta eligiendo si pagar completo, por fases o 50/50. ¿Donde se elige esto?
-- En movil hay que quitar accionCabecera y dejar solo el boton de hamburgueza, tambien ajustar lo que se ve al abrir el boton de hamburgueza, tiene que ser un modal con el estilo de .chatWidgetPanel pero centrado, con los botones de menu en el centrol tiene que soportar los botones con menu y mostrar las opciones internas en vez de navegar directamente, agregar un boton para ver el menu porque tambien se puede navegar directamente una pagina con submenu.
-- Agrega una tab en el panel de configuracion. Alli habra opciones para recrear los datos de prueba, borrarlos. 
-- Para el admin, todos los contenidos deben ser editables en el front, esto es una tarea gigantezca, requiere un plan detallado. Nos podemos enfocar en los servicios, habrá un boton en la esquina para editar, abrira un modal con tab lateral para modificar cada cosa, titulo, descripción, planes, precios, fases, etc, todo lo que sea modificable, enlaces. Tambien para los blog, y proyectos. 
-
-- Las categorías no estan traducidas, deben traducirse a los 3 idiomas. Los contenidos de los servicios, planes, tambien, no creo que sea bueno reescribir todo en los 3 idiomas lo ideal es una forma automatica y segura porque es contenido que va modificarse. Las descripciones de los miembros de equipo no estan traducidas.
-- Los servicios en soluciones tampoco estan traducidos.
+- 064A-59: Stripe: no preguntar correo en modal de checkout (usar el del usuario logueado), revisar flujo completo de pago, crear plan detallado de lo que falta para que Stripe funcione end-to-end.
+- 064A-60: Selección de modo de pago (completo, por fases, 50/50) — ¿dónde se elige?
+- 064A-61: Menú hamburguesa mobile: quitar accionCabecera, modal centrado estilo chatWidgetPanel, soporte submenús, botón para volver al menú.
+- 064A-62: Tab de configuración en panel: opciones para recrear/borrar datos de prueba.
+- 064A-63: Plan detallado para edición de contenidos admin: servicios, blog, proyectos editables desde el front con modal + tabs laterales.
+- 064A-64: Traducción de categorías, servicios, planes, descripciones de equipo, soluciones a los 3 idiomas (enfoque automatizado).
+- Sigue saliendo Sin proyectos aún
+Cuando contrates un servicio, aparecerá aquí con seguimiento en tiempo real. al cambiar la vista a cliente y empleado.

@@ -56,6 +56,8 @@ pub struct SendMessageRequest {
 pub struct ChatSessionResponse {
     pub id: Uuid,
     pub order_id: Option<Uuid>,
+    /// [064A-31] Número de orden legible (si la sesión está vinculada a una orden)
+    pub order_number: Option<i32>,
     pub status: String,
     pub ai_enabled: bool,
     pub assigned_staff_id: Option<Uuid>,

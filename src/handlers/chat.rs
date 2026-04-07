@@ -366,9 +366,21 @@ pub async fn create_session(
             .await?
     };
 
+    /* [064A-31] Obtener order_number si la sesión está vinculada a una orden */
+    let order_number: Option<i32> = if let Some(oid) = session.order_id {
+        sqlx::query_scalar("SELECT order_number FROM orders WHERE id = $1")
+            .bind(oid)
+            .fetch_optional(&state.pool)
+            .await
+            .unwrap_or(None)
+    } else {
+        None
+    };
+
     let response = ChatSessionResponse {
         id: session.id,
         order_id: session.order_id,
+        order_number,
         status: session.status,
         ai_enabled: session.ai_enabled,
         assigned_staff_id: session.assigned_staff_id,

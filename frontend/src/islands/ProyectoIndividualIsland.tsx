@@ -30,7 +30,7 @@ interface ProyectoIndividualIslandProps {
 }
 
 /* [064A-8] Icono según tipo de enlace */
-const ICONOS_ENLACE: Record<string, React.FC<{size?: number}>> = {
+const ICONOS_ENLACE: Record<string, typeof GitBranch> = {
     github: GitBranch,
     web: Globe,
     npm: Package,

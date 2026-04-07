@@ -2,8 +2,8 @@
  * número, fecha inicio, precio, 3 puntos) + historial de fases con entregas y
  * revisiones. Clientes solicitan revisiones al recibir entrega.
  * Opciones: reportar, extensión de tiempo (empleado), cancelar. */
-import React from 'react';
-import {CreditCard, XCircle, ArrowLeft, AlertTriangle, User} from 'lucide-react';
+import React, {useState} from 'react';
+import {CreditCard, XCircle, ArrowLeft, AlertTriangle, User, MessageCircle} from 'lucide-react';
 import {
     ORDER_STATUS_LABELS,
     PAYMENT_MODE_LABELS,
@@ -18,6 +18,7 @@ import {Button} from '../ui/Button';
 import {MenuContextual, type MenuContextualItem} from '../ui/ContextMenu';
 import {Modal} from '../ui/Modal';
 import CheckoutModal from './CheckoutModal';
+import {OrderChat} from './OrderChat';
 import {useOrdenDetalle} from '../../hooks/useOrdenDetalle';
 import './SeccionProyectos.css';
 
@@ -62,11 +63,18 @@ export const OrdenDetalle: React.FC<OrdenDetalleProps> = ({
         confirmarCancelacion, abrirCheckout, cerrarCheckout,
     } = useOrdenDetalle(order, onCancelar);
 
+    const [chatAbierto, setChatAbierto] = useState(false);
+
     const canCancel = CANCELABLE_STATUSES.includes(order.status);
     const needsPayment = order.status === 'pending_payment';
     const isPhased = order.payment_mode === 'phased';
     const isEmployee = effectiveRole === 'employee';
     const isClient = effectiveRole === 'client' || effectiveRole === 'admin';
+
+    /* [064A-31] Chat disponible cuando hay empleado asignado y la orden está activa */
+    const canChat = !!order.assigned_employee_id
+        && order.status !== 'cancelled'
+        && order.status !== 'completed';
 
     /* [064A-30] Menú contextual con más opciones según rol */
     const menuItems: MenuContextualItem[] = [];
@@ -107,6 +115,17 @@ export const OrdenDetalle: React.FC<OrdenDetalleProps> = ({
                         {ORDER_STATUS_LABELS[order.status]}
                     </span>
                     <div className="ordenInfoCardAcciones">
+                        {/* [064A-31] Botón de chat con freelancer */}
+                        {canChat && (
+                            <Button
+                                onClick={() => setChatAbierto(prev => !prev)}
+                                type="button"
+                                variante={chatAbierto ? 'marca' : 'outline'}
+                                tamano="pequeno"
+                            >
+                                <MessageCircle size={16} /> Chat
+                            </Button>
+                        )}
                         {needsPayment && !isPhased && (
                             <Button
                                 onClick={() => abrirCheckout(order.final_price_cents)}
@@ -170,6 +189,14 @@ export const OrdenDetalle: React.FC<OrdenDetalleProps> = ({
                     </div>
                 </div>
             </div>
+
+            {/* [064A-31] Chat inline con el freelancer asignado */}
+            {chatAbierto && canChat && (
+                <OrderChat
+                    orderId={order.id}
+                    employeeName={order.assigned_employee_name ?? null}
+                />
+            )}
 
             {/* [064A-30] Modales */}
             <Modal
