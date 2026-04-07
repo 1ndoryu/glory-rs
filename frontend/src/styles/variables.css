@@ -75,6 +75,10 @@
     --border-hover-strong: rgba(0, 0, 0, 0.3);
     --success-color: #16a34a;
 
+    /* [084A-3] Scrollbar */
+    --scrollbar-thumb: rgba(0, 0, 0, 0.15);
+    --scrollbar-thumb-hover: rgba(0, 0, 0, 0.25);
+
     /* Typography Sizes */
     --text-xs: 0.75rem;
     --text-sm: 0.875rem;

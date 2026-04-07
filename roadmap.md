@@ -57,4 +57,4 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 ### Bugs / UX reportados por usuario
 
-- 084A-3: Todos los scroll deben ser minimalistas, sin fondo, un poco más pequeños.
+(sin tareas pendientes)
