@@ -63,7 +63,9 @@ export const OrdenDetalle: React.FC<OrdenDetalleProps> = ({
         confirmarCancelacion, abrirCheckout, cerrarCheckout,
     } = useOrdenDetalle(order, onCancelar);
 
-    const [chatAbierto, setChatAbierto] = useState(false);
+    /* [064A-31] Chat disponible cuando hay empleado asignado y la orden está activa
+     * [084A-2] Chat abierto por defecto. Se muestra debajo del historial. */
+    const [chatAbierto, setChatAbierto] = useState(true);
 
     const canCancel = CANCELABLE_STATUSES.includes(order.status);
     const needsPayment = order.status === 'pending_payment';
@@ -191,12 +193,7 @@ export const OrdenDetalle: React.FC<OrdenDetalleProps> = ({
                 </div>
             </div>
 
-            {/* [064A-31] Chat inline con el freelancer asignado */}
-            {chatAbierto && canChat && (
-                <OrderChat
-                    orderId={order.id}
-                />
-            )}
+            {/* [064A-31] Chat movido debajo del historial — ver 084A-2 */}
 
             {/* [064A-30] Modales */}
             <Modal
@@ -279,6 +276,11 @@ export const OrdenDetalle: React.FC<OrdenDetalleProps> = ({
                         ))}
                     </div>
                 </div>
+            )}
+
+            {/* [084A-2] Chat abierto por defecto, debajo del historial */}
+            {chatAbierto && canChat && (
+                <OrderChat orderId={order.id} />
             )}
 
             {order.status === 'completed' && (

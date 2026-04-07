@@ -57,5 +57,4 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 
 ### Bugs / UX reportados por usuario
 
-- 084A-2: Chat dentro de pedidos debe estar abierto por defecto, debajo de historial de proyecto.
 - 084A-3: Todos los scroll deben ser minimalistas, sin fondo, un poco más pequeños.
