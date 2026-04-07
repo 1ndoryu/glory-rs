@@ -111,6 +111,7 @@
     display: flex;
     flex-direction: column;
     min-width: 0;
+    overflow-x: hidden;
 }
 
 .chatAreaHeader {
@@ -192,12 +193,15 @@
 
 /* [064A-37] Burbujas claras: --bg-accent para otros, tono cálido para propias.
  * Elimina fondos oscuros (--bg-dark, --brand-black). */
+/* [074A-48] overflow-wrap para que URLs/palabras largas no rompan el layout */
 .chatBurbuja {
     max-width: 75%;
     padding: var(--spacing-sm) var(--spacing-md);
     border-radius: var(--radius-lg);
     background: var(--bg-accent);
     align-self: flex-start;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 
 .chatBurbujaPropia {

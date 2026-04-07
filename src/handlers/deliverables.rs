@@ -273,7 +273,11 @@ pub fn routes() -> Router<AppState> {
    ============================================================ */
 
 /// Verifica que el usuario tiene acceso a una orden
+/// [074A-50] Admin real siempre tiene acceso, `effective_role` solo afecta UI.
 fn verify_order_access(order: &crate::models::Order, auth: &AuthUser) -> Result<(), AppError> {
+    if auth.role == UserRole::Admin {
+        return Ok(());
+    }
     match auth.effective_role {
         UserRole::Admin => {}
         UserRole::Client => {

@@ -203,8 +203,9 @@ pub async fn list_reviews(
 }
 
 pub fn routes() -> Router<AppState> {
+    /* [074A-49] Sin /api/ — ya se nestan bajo .nest("/api", api_routes()) */
     Router::new()
-        .route("/api/orders/:order_id/review", post(create_review).get(get_order_review))
-        .route("/api/reviews/:review_id/respond", post(respond_review))
-        .route("/api/reviews", get(list_reviews))
+        .route("/orders/:order_id/review", post(create_review).get(get_order_review))
+        .route("/reviews/:review_id/respond", post(respond_review))
+        .route("/reviews", get(list_reviews))
 }

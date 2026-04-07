@@ -95,17 +95,20 @@ pub async fn get_order(
 ) -> Result<Json<serde_json::Value>, AppError> {
     let (client_id, order, phases) = OrderService::get_order(&state.pool, order_id).await?;
 
-    /* Verificar que el usuario puede ver esta orden */
-    match auth.effective_role {
-        UserRole::Admin => { /* admin ve todo */ }
-        UserRole::Client => {
-            if client_id != auth.user_id {
-                return Err(AppError::Forbidden("No tienes acceso a esta orden".into()));
+    /* [074A-50] Admin real siempre puede ver cualquier orden, incluso con effective_role
+     * switcheado a client/employee. El effective_role solo afecta la UI, no el acceso. */
+    if auth.role != UserRole::Admin {
+        match auth.effective_role {
+            UserRole::Admin => { /* imposible si role != admin, pero por completitud */ }
+            UserRole::Client => {
+                if client_id != auth.user_id {
+                    return Err(AppError::Forbidden("No tienes acceso a esta orden".into()));
+                }
             }
-        }
-        UserRole::Employee => {
-            if order.assigned_employee_id != Some(auth.user_id) {
-                return Err(AppError::Forbidden("No tienes acceso a esta orden".into()));
+            UserRole::Employee => {
+                if order.assigned_employee_id != Some(auth.user_id) {
+                    return Err(AppError::Forbidden("No tienes acceso a esta orden".into()));
+                }
             }
         }
     }

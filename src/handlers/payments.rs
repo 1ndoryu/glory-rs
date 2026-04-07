@@ -178,16 +178,19 @@ pub async fn list_payments(
         .await?
         .ok_or_else(|| AppError::NotFound("Orden no encontrada".into()))?;
 
-    match auth.effective_role {
-        UserRole::Admin => {}
-        UserRole::Client => {
-            if order.client_id != auth.user_id {
-                return Err(AppError::Forbidden("No tienes acceso a esta orden".into()));
+    /* [074A-50] Admin real siempre tiene acceso, effective_role solo afecta UI */
+    if auth.role != UserRole::Admin {
+        match auth.effective_role {
+            UserRole::Admin => {}
+            UserRole::Client => {
+                if order.client_id != auth.user_id {
+                    return Err(AppError::Forbidden("No tienes acceso a esta orden".into()));
+                }
             }
-        }
-        UserRole::Employee => {
-            if order.assigned_employee_id != Some(auth.user_id) {
-                return Err(AppError::Forbidden("No tienes acceso a esta orden".into()));
+            UserRole::Employee => {
+                if order.assigned_employee_id != Some(auth.user_id) {
+                    return Err(AppError::Forbidden("No tienes acceso a esta orden".into()));
+                }
             }
         }
     }

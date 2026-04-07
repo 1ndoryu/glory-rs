@@ -74,15 +74,14 @@ export const HeaderPanel: React.FC = () => {
                         </button>
                         {menuAbierto && (
                             <div className="headerPanelSubmenu" role="menu">
-                                <Button
-                                    variante="texto"
-                                    className="headerPanelSubmenuItem"
+                                <button
                                     type="button"
+                                    className="headerPanelSubmenuItem"
                                     onClick={handleLogout}
                                     role="menuitem"
                                 >
                                     {t('nav.logout')}
-                                </Button>
+                                </button>
                             </div>
                         )}
                     </div>

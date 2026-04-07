@@ -268,8 +268,9 @@ pub async fn get_order_refund(
    ============================================================ */
 
 pub fn routes() -> Router<AppState> {
+    /* [074A-49] Rutas sin /api/ porque ya se nestan bajo .nest("/api", api_routes()) */
     Router::new()
-        .route("/api/orders/:order_id/refund", post(request_refund).get(get_order_refund))
-        .route("/api/refunds", get(list_refunds))
-        .route("/api/refunds/:refund_id", patch(review_refund))
+        .route("/orders/:order_id/refund", post(request_refund).get(get_order_refund))
+        .route("/refunds", get(list_refunds))
+        .route("/refunds/:refund_id", patch(review_refund))
 }
