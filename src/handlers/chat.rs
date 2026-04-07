@@ -3,13 +3,14 @@
  * REST: CRUD sesiones y mensajes bajo /api/chat/. */
 
 use axum::extract::ws::{Message, WebSocket};
-use axum::extract::{Path, Query, State, WebSocketUpgrade};
+use axum::extract::{ConnectInfo, Path, Query, State, WebSocketUpgrade};
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::routing::get;
 use axum::{Json, Router};
 use futures::{SinkExt, StreamExt};
 use serde::Deserialize;
+use std::net::SocketAddr;
 use uuid::Uuid;
 
 use crate::errors::AppError;
@@ -45,10 +46,11 @@ pub struct MessagesQuery {
 async fn ws_visitor(
     ws: WebSocketUpgrade,
     State(state): State<AppState>,
+    ConnectInfo(addr): ConnectInfo<SocketAddr>,
     headers: axum::http::HeaderMap,
     Query(params): Query<VisitorWsParams>,
 ) -> impl IntoResponse {
-    /* [064A-72] Capturar IP y User-Agent del visitante */
+    /* [064A-72] [074A-41] Capturar IP (proxy headers → fallback a socket) y User-Agent */
     let visitor_ip = headers
         .get("x-forwarded-for")
         .and_then(|v| v.to_str().ok())
@@ -58,7 +60,8 @@ async fn ws_visitor(
                 .get("x-real-ip")
                 .and_then(|v| v.to_str().ok())
                 .map(String::from)
-        });
+        })
+        .or_else(|| Some(addr.ip().to_string()));
     let visitor_ua = headers
         .get("user-agent")
         .and_then(|v| v.to_str().ok())
