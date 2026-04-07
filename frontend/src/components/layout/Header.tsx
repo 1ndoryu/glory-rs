@@ -170,19 +170,10 @@ export const Header: React.FC = () => {
                             <div className="menuMovilSeparador" />
                             {logueado ? (
                                 <>
-                                    {/* [074A-22] Navegación + logout separados en mobile */}
+                                    {/* [074A-25] Solo navegación en mobile, logout via avatar dropdown */}
                                     <GloryLink to={hrefAccion!} className="menuMovilEnlace" onClick={cerrarMenuMovil}>
                                         {textoAccion}
                                     </GloryLink>
-                                    <div
-                                        role="button"
-                                        tabIndex={0}
-                                        className="menuMovilEnlace"
-                                        onClick={() => { logout(); cerrarMenuMovil(); }}
-                                        onKeyDown={e => { if (e.key === 'Enter') { logout(); cerrarMenuMovil(); } }}
-                                    >
-                                        <LogOut size={16} /> {t('nav.logout')}
-                                    </div>
                                 </>
                             ) : (
                                 <div

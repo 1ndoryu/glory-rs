@@ -216,6 +216,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        order: 10;
     }
 
     /* [064A-61] Desktop nav y acciones ocultas en mobile — todo va en el modal */
@@ -223,7 +224,9 @@
         display: none;
     }
 
-    .accionCabecera {
+    /* [074A-25] En mobile, ocultar enlaces/CTAs pero mantener avatar visible */
+    .accionCabecera .enlaceAcceder,
+    .accionCabecera .botonHeader {
         display: none;
     }
 }
