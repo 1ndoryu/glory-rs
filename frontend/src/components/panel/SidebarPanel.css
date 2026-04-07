@@ -148,12 +148,6 @@
         width: 100%;
         padding-top: var(--spacing-xs);
     }
-
-    .sidebarLogout {
-        width: 100%;
-        margin-top: 0;
-        padding-top: var(--spacing-xs);
-    }
 }
 
 /* [044A-38 Fase 1] Botón switch-role para admin */
@@ -191,16 +185,4 @@
 .sidebarSwitchBtn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-}
-
-/* [074A-1] Logout en el sidebar — empuja al fondo si no hay switch-role */
-.sidebarLogout {
-    margin-top: auto;
-    padding-top: var(--spacing-sm);
-    border-top: 1px solid var(--bg-item-active);
-}
-
-.sidebarSwitchRole + .sidebarLogout {
-    margin-top: 0;
-    border-top: none;
 }

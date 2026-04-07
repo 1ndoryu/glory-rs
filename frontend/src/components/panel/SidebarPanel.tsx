@@ -6,7 +6,7 @@
  */
 import React, {useState, useCallback} from 'react';
 import {useTranslation} from 'react-i18next';
-import {FolderOpen, Receipt, User, CreditCard, ClipboardList, PackageOpen, ArrowRightLeft, MessageSquare, RotateCcw, UserCog, Server, Settings, LogOut} from 'lucide-react';
+import {FolderOpen, Receipt, User, CreditCard, ClipboardList, PackageOpen, ArrowRightLeft, MessageSquare, RotateCcw, UserCog, Server, Settings} from 'lucide-react';
 import {obtenerTabsPorRol, type SeccionPanel} from '../../data/panel';
 import {useCurrentProfile} from '../../hooks/useCurrentProfile';
 import {useAuthStore} from '../../stores/authStore';
@@ -54,8 +54,6 @@ export const SidebarPanel: React.FC<SidebarPanelProps> = ({seccionActiva, onCamb
     const effectiveRole: UserRole = authUser?.effectiveRole || 'client';
     const isAdmin = authUser?.role === 'admin';
     const tabs = obtenerTabsPorRol(effectiveRole);
-    /* [074A-1] Logout movido del Header al sidebar del panel */
-    const logout = useAuthStore(s => s.logout);
 
     /* [044A-38 Fase 1] Cicla entre los 3 roles: admin → employee → client → admin */
     const handleSwitchRole = useCallback(async () => {
@@ -131,14 +129,6 @@ export const SidebarPanel: React.FC<SidebarPanelProps> = ({seccionActiva, onCamb
                     </Button>
                 </div>
             )}
-
-            {/* [074A-1] Logout movido del Header al sidebar del panel */}
-            <div className="sidebarLogout">
-                <Button variante="texto" className="sidebarItem" onClick={logout}>
-                    <LogOut size={18} className="sidebarItemIcono" aria-hidden="true" />
-                    <span className="sidebarItemTexto">{t('nav.logout')}</span>
-                </Button>
-            </div>
         </aside>
     );
 };

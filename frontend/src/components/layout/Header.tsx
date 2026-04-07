@@ -8,14 +8,17 @@
  * [054A-19] Lógica extraída a useHeader (SRP). Links internos usan GloryLink.
  * [064A-61] Menú móvil rediseñado: overlay modal centrado, soporte submenús,
  * botón volver, acciones inline. accionCabecera oculto en mobile via CSS. */
-import React from 'react';
+import React, {useState} from 'react';
 import {useTranslation} from 'react-i18next';
-import {ChevronDown, ChevronRight, ArrowLeft, Menu, X} from 'lucide-react';
+import {ChevronDown, ChevronRight, ArrowLeft, Menu, X, LogOut} from 'lucide-react';
 import {Button} from '../ui/Button';
 import {Modal} from '../ui/Modal';
+import {MenuContextual} from '../ui/ContextMenu';
 import {ENLACES_HEADER} from '../../data/navegacion';
 import {ModalAutenticacion} from './ModalAutenticacion';
 import {useChatStore} from '../../stores/chatStore';
+import {useAuthStore} from '../../stores/authStore';
+import {useCurrentProfile} from '../../hooks/useCurrentProfile';
 import {GloryLink} from '../../core/router';
 import {Logo} from '../ui/Logo';
 import {useHeader} from '../../hooks/useHeader';
@@ -54,6 +57,11 @@ export const Header: React.FC = () => {
     /* [064A-5] Botón secundario: abre el chat en vez de navegar a /contacto */
     const textoCta = logueado ? t('nav.chat') : t('nav.contact');
     const abrirChat = useChatStore(s => s.abrir);
+
+    /* [074A-22] Avatar con dropdown para cerrar sesión */
+    const logout = useAuthStore(s => s.logout);
+    const {avatarUrl} = useCurrentProfile();
+    const [perfilAbierto, setPerfilAbierto] = useState(false);
 
     /* [064A-61] Enlace con submenú actualmente abierto en el menú móvil */
     const enlaceSubMenuActivo = subMenuMovil
@@ -99,11 +107,26 @@ export const Header: React.FC = () => {
                 <div className="accionCabecera" role="group" aria-label={t('accessibility.user_actions')}>
                     {logueado ? (
                         <>
-                            {/* [074A-1] Solo botón de navegación (Panel/Volver).
-                             * Logout movido al SidebarPanel para no desloguear accidentalmente. */}
+                            {/* [074A-22] Navegación Panel/Volver (solo navegación, sin logout) */}
                             <GloryLink to={hrefAccion!} className="enlaceAcceder">
                                 {textoAccion}
                             </GloryLink>
+                            {/* [074A-22] Avatar con MenuContextual para cerrar sesión */}
+                            <MenuContextual
+                                abierto={perfilAbierto}
+                                onToggle={() => setPerfilAbierto(prev => !prev)}
+                                onCerrar={() => setPerfilAbierto(false)}
+                                ariaLabel={t('accessibility.user_actions')}
+                                className="perfilDropdownWrapper"
+                                triggerClassName="perfilAvatarBtn"
+                                triggerContent={<img src={avatarUrl} alt="Perfil" className="perfilAvatarImg" />}
+                                items={[{
+                                    id: 'logout',
+                                    label: t('nav.logout'),
+                                    icon: <LogOut size={14} />,
+                                    onSelect: logout,
+                                }]}
+                            />
                         </>
                     ) : (
                         <Button variante="texto" className="enlaceAcceder" onClick={() => setModalAbierto(true)}>
@@ -147,10 +170,19 @@ export const Header: React.FC = () => {
                             <div className="menuMovilSeparador" />
                             {logueado ? (
                                 <>
-                                    {/* [074A-1] Solo navegación. Logout en el panel. */}
+                                    {/* [074A-22] Navegación + logout separados en mobile */}
                                     <GloryLink to={hrefAccion!} className="menuMovilEnlace" onClick={cerrarMenuMovil}>
                                         {textoAccion}
                                     </GloryLink>
+                                    <div
+                                        role="button"
+                                        tabIndex={0}
+                                        className="menuMovilEnlace"
+                                        onClick={() => { logout(); cerrarMenuMovil(); }}
+                                        onKeyDown={e => { if (e.key === 'Enter') { logout(); cerrarMenuMovil(); } }}
+                                    >
+                                        <LogOut size={16} /> {t('nav.logout')}
+                                    </div>
                                 </>
                             ) : (
                                 <div
