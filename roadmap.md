@@ -41,11 +41,6 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 > Plan de hosting: `Agente/planes/plan-hosting-coolify-2026-04-04.md` (5 fases) — Fases 3-4 ✅, Fases 1-2-5 bloqueadas por infraestructura externa (VPS2, DNS, Google Drive OAuth)
 > Status hosting: `Agente/documentacion/hosting/status-hosting-administrado-2026-04-07.md`
 
-### Bugs y UX del usuario
-
-- 074A-2: Datos de prueba completos para vista cliente y empleado (falta seed data visible).
-- 074A-3: Verificar/corregir datos de prueba de hosting (064A-51 los creó, puede que no se vean).
-
 ### CMS Admin (plan: plan-cms-admin-2026-04-07.md)
 
 - 074A-6: CMS Infra — Upload endpoint backend + componentes base (UploadImage, SlugInput)
@@ -60,3 +55,16 @@ Proyecto migrado de WordPress a Rust (Axum) + React SPA. El frontend React de Ap
 ### SEO y mejoras (plan: plan-seo-completo-2026-04-04.md)
 
 - 074A-14: SEO Fase 2 — Performance (lazy loading, image optimization, Core Web Vitals)
+
+## 
+
+(ASEGURATE DE BORRAR TAREAS QUE DE VERDAD HAYA HECHO)
+- El headerPanelSubmenu se ve diferente a como es en realidad el componente 
+- chatMensajes necesita un ancho maximo que haga que no se salga de la pantalla para que funcione el scroll interno. 
+- En la pagina de reembolso Request failed with status code 404
+- ya se ven datos de prueba en la vista de empleado pero ajam
+orders.ts:85  GET http://localhost:3000/api/orders/2e504954-1e1d-49b6-93a9-b2e85ae1092b 403 (Forbidden)
+orders.ts:85  GET http://localhost:3000/api/orders/2e504954-1e1d-49b6-93a9-b2e85ae1092b 403 (Forbidden)
+igualmente con la vista de cliente http://localhost:3000/api/orders/2e504954-1e1d-49b6-93a9-b2e85ae1092b 403 (Forbidden)
+- Borra .entregablesUpload, los entregables tienen que marcarse de otra forma, todo debe ser por el chat, el boton de entrega se hace sin enviar nada, el boton debe ser boton primario, no de exito.
+- Cuando abro el chat el scroll se va hacia abajo (dentro del os detalles de un pedido), en vez del scroll interno
