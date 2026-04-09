@@ -43,6 +43,8 @@ pub struct ConfiguracionRestaurante {
     pub haddock_api_token: String,
     /* [064A-5] Toggle para activar/desactivar la sincronización de ventas con Haddock */
     pub haddock_sync_enabled: bool,
+    /* [094A-4] URL de Google Business para redirigir reseñas positivas */
+    pub google_review_url: String,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -78,6 +80,9 @@ pub struct ActualizarConfiguracionRequest {
     pub haddock_api_token: Option<String>,
     /* [064A-5] Activar sincronización de ventas con Haddock */
     pub haddock_sync_enabled: Option<bool>,
+    /* [094A-4] URL de Google Business para reseñas positivas */
+    #[validate(length(max = 500))]
+    pub google_review_url: Option<String>,
 }
 
 fn validar_iva(valor: &rust_decimal::Decimal) -> Result<(), validator::ValidationError> {
