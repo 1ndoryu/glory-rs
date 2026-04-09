@@ -143,7 +143,8 @@ impl VentaRepository {
                   OR v.turno ILIKE $6 \
                   OR v.canal ILIKE $6 \
                   OR c.nombre ILIKE $6 \
-                  OR c.apellidos ILIKE $6) \
+                  OR c.apellidos ILIKE $6 \
+                  OR CONCAT(c.nombre, ' ', c.apellidos) ILIKE $6) \
              AND ($7::TEXT IS NULL OR v.turno = ANY(string_to_array($7, ','))) \
              AND ($8::TEXT IS NULL OR v.canal = ANY(string_to_array($8, ','))) \
              AND ($9::TEXT IS NULL OR v.metodo_pago = ANY(string_to_array($9, ','))) \
@@ -187,7 +188,8 @@ impl VentaRepository {
                       OR v.turno ILIKE $4 \
                       OR v.canal ILIKE $4 \
                       OR c.nombre ILIKE $4 \
-                      OR c.apellidos ILIKE $4) \
+                      OR c.apellidos ILIKE $4 \
+                      OR CONCAT(c.nombre, ' ', c.apellidos) ILIKE $4) \
                  AND ($5::TEXT IS NULL OR v.turno = ANY(string_to_array($5, ','))) \
                  AND ($6::TEXT IS NULL OR v.canal = ANY(string_to_array($6, ','))) \
                  AND ($7::TEXT IS NULL OR v.metodo_pago = ANY(string_to_array($7, ','))) \
@@ -235,6 +237,38 @@ impl VentaRepository {
         .execute(pool)
         .await?;
         Ok(result.rows_affected() > 0)
+    }
+
+    /* [094A-1] Buscar venta asociada a una reserva — para evitar duplicados.
+     * Retorna true si ya existe al menos una venta con este reserva_id. */
+    pub async fn exists_by_reserva_id(
+        pool: &PgPool,
+        reserva_id: Uuid,
+    ) -> Result<bool, sqlx::Error> {
+        let rec = sqlx::query_scalar::<_, bool>(
+            "SELECT EXISTS(SELECT 1 FROM ventas WHERE reserva_id = $1)"
+        )
+        .bind(reserva_id)
+        .fetch_one(pool)
+        .await?;
+        Ok(rec)
+    }
+
+    /* [094A-1] Eliminar ventas asociadas a una reserva al descompletar.
+     * Solo elimina ventas auto-generadas (importe_base = 0) para no perder datos manuales. */
+    pub async fn delete_by_reserva_id(
+        pool: &PgPool,
+        reserva_id: Uuid,
+        user_id: Uuid,
+    ) -> Result<u64, sqlx::Error> {
+        let result = sqlx::query(
+            "DELETE FROM ventas WHERE reserva_id = $1 AND user_id = $2 AND importe_base = 0"
+        )
+        .bind(reserva_id)
+        .bind(user_id)
+        .execute(pool)
+        .await?;
+        Ok(result.rows_affected())
     }
 
     /* [283A-22] Actualizar parcialmente una venta — COALESCE mantiene valores existentes
