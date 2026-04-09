@@ -4,7 +4,7 @@
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::models::{ActualizarMesaRequest, CombinacionMesas, CrearMesaRequest, Mesa, ZonaSala};
+use crate::models::{ActualizarMesaRequest, CombinacionMesas, CrearMesaRequest, Mesa, ParedSala, ZonaSala};
 
 /* [263A-16] Struct auxiliar para las reservas asociadas a mesas (query raw) */
 #[derive(Debug, sqlx::FromRow)]
@@ -414,5 +414,107 @@ impl PlanoSalaRepository {
         )
         .fetch_all(pool)
         .await
+    }
+
+    /* ========== Paredes — 094A-7 ========== */
+
+    pub async fn listar_paredes_zona(
+        pool: &PgPool,
+        zona_id: Uuid,
+    ) -> Result<Vec<ParedSala>, sqlx::Error> {
+        sqlx::query_as::<_, ParedSala>(
+            "SELECT * FROM paredes_sala WHERE zona_id = $1 ORDER BY created_at"
+        )
+        .bind(zona_id)
+        .fetch_all(pool)
+        .await
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub async fn crear_pared(
+        pool: &PgPool,
+        zona_id: Uuid,
+        pos_x: i32,
+        pos_y: i32,
+        ancho: i32,
+        alto: i32,
+        rotacion: i32,
+        color: &str,
+    ) -> Result<ParedSala, sqlx::Error> {
+        let id = Uuid::new_v4();
+        sqlx::query_as::<_, ParedSala>(
+            "INSERT INTO paredes_sala (id, zona_id, pos_x, pos_y, ancho, alto, rotacion, color) \
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *"
+        )
+        .bind(id)
+        .bind(zona_id)
+        .bind(pos_x)
+        .bind(pos_y)
+        .bind(ancho)
+        .bind(alto)
+        .bind(rotacion)
+        .bind(color)
+        .fetch_one(pool)
+        .await
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub async fn actualizar_pared(
+        pool: &PgPool,
+        id: Uuid,
+        pos_x: Option<i32>,
+        pos_y: Option<i32>,
+        ancho: Option<i32>,
+        alto: Option<i32>,
+        rotacion: Option<i32>,
+        color: Option<&str>,
+    ) -> Result<ParedSala, sqlx::Error> {
+        sqlx::query_as::<_, ParedSala>(
+            "UPDATE paredes_sala SET \
+             pos_x = COALESCE($2, pos_x), \
+             pos_y = COALESCE($3, pos_y), \
+             ancho = COALESCE($4, ancho), \
+             alto = COALESCE($5, alto), \
+             rotacion = COALESCE($6, rotacion), \
+             color = COALESCE($7, color), \
+             updated_at = NOW() \
+             WHERE id = $1 RETURNING *"
+        )
+        .bind(id)
+        .bind(pos_x)
+        .bind(pos_y)
+        .bind(ancho)
+        .bind(alto)
+        .bind(rotacion)
+        .bind(color)
+        .fetch_one(pool)
+        .await
+    }
+
+    pub async fn eliminar_pared(pool: &PgPool, id: Uuid) -> Result<bool, sqlx::Error> {
+        let result = sqlx::query("DELETE FROM paredes_sala WHERE id = $1")
+            .bind(id)
+            .execute(pool)
+            .await?;
+        Ok(result.rows_affected() > 0)
+    }
+
+    pub async fn actualizar_posiciones_paredes(
+        pool: &PgPool,
+        posiciones: &[(Uuid, i32, i32)],
+    ) -> Result<u64, sqlx::Error> {
+        let mut total = 0u64;
+        for (id, x, y) in posiciones {
+            let result = sqlx::query(
+                "UPDATE paredes_sala SET pos_x = $2, pos_y = $3, updated_at = NOW() WHERE id = $1"
+            )
+            .bind(id)
+            .bind(x)
+            .bind(y)
+            .execute(pool)
+            .await?;
+            total += result.rows_affected();
+        }
+        Ok(total)
     }
 }

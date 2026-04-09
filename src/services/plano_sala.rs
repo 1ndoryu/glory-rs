@@ -26,7 +26,9 @@ impl PlanoSalaService {
 
         for zona in zonas {
             let mesas = Repo::listar_mesas_zona(pool, zona.id).await?;
-            zonas_con_mesas.push(ZonaConMesas { zona, mesas });
+            /* [094A-7] Cargar paredes de cada zona */
+            let paredes = Repo::listar_paredes_zona(pool, zona.id).await?;
+            zonas_con_mesas.push(ZonaConMesas { zona, mesas, paredes });
         }
 
         let combos = Repo::listar_combinaciones(pool, user_id).await?;

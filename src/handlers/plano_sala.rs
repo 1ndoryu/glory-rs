@@ -11,9 +11,11 @@ use validator::Validate;
 use crate::errors::AppError;
 use crate::middleware::AuthUser;
 use crate::models::{
-    ActualizarMesaRequest, ActualizarPosicionesRequest, ActualizarZonaRequest,
-    CombinacionMesas, CrearCombinacionRequest, CrearMesaRequest, CrearZonaRequest,
-    Mesa, PlanoExport, PlanoOcupacion, PlanoOcupacionQuery, PlanoSala, ZonaSala,
+    ActualizarMesaRequest, ActualizarParedRequest, ActualizarPosicionesRequest,
+    ActualizarPosicionesParedesRequest, ActualizarZonaRequest,
+    CombinacionMesas, CrearCombinacionRequest, CrearMesaRequest, CrearParedRequest,
+    CrearZonaRequest, Mesa, ParedSala, PlanoExport, PlanoOcupacion, PlanoOcupacionQuery,
+    PlanoSala, ZonaSala,
 };
 use crate::services::PlanoSalaService;
 use crate::AppState;
@@ -366,6 +368,129 @@ pub async fn obtener_ocupacion(
     Ok(Json(plano))
 }
 
+/* ========== Paredes — 094A-7 ========== */
+
+#[utoipa::path(
+    post,
+    path = "/api/plano-sala/paredes",
+    tag = "PlanoSala",
+    request_body = CrearParedRequest,
+    responses(
+        (status = 201, description = "Pared creada", body = ParedSala),
+        (status = 401, description = "No autorizado"),
+        (status = 422, description = "Error de validación")
+    ),
+    security(("bearer_auth" = []))
+)]
+pub async fn crear_pared(
+    State(state): State<AppState>,
+    _auth: AuthUser,
+    Json(req): Json<CrearParedRequest>,
+) -> Result<(StatusCode, Json<ParedSala>), AppError> {
+    req.validate()
+        .map_err(|e| AppError::Validation(e.to_string()))?;
+
+    let pared = crate::repositories::PlanoSalaRepository::crear_pared(
+        &state.pool,
+        req.zona_id,
+        req.pos_x.unwrap_or(0),
+        req.pos_y.unwrap_or(0),
+        req.ancho.unwrap_or(100),
+        req.alto.unwrap_or(20),
+        req.rotacion.unwrap_or(0),
+        req.color.as_deref().unwrap_or("#6b7280"),
+    )
+    .await?;
+
+    Ok((StatusCode::CREATED, Json(pared)))
+}
+
+#[utoipa::path(
+    patch,
+    path = "/api/plano-sala/paredes/{id}",
+    tag = "PlanoSala",
+    request_body = ActualizarParedRequest,
+    params(("id" = Uuid, Path, description = "ID de la pared")),
+    responses(
+        (status = 200, description = "Pared actualizada", body = ParedSala),
+        (status = 401, description = "No autorizado")
+    ),
+    security(("bearer_auth" = []))
+)]
+pub async fn actualizar_pared(
+    State(state): State<AppState>,
+    _auth: AuthUser,
+    Path(id): Path<Uuid>,
+    Json(req): Json<ActualizarParedRequest>,
+) -> Result<Json<ParedSala>, AppError> {
+    req.validate()
+        .map_err(|e| AppError::Validation(e.to_string()))?;
+
+    let pared = crate::repositories::PlanoSalaRepository::actualizar_pared(
+        &state.pool,
+        id,
+        req.pos_x,
+        req.pos_y,
+        req.ancho,
+        req.alto,
+        req.rotacion,
+        req.color.as_deref(),
+    )
+    .await?;
+
+    Ok(Json(pared))
+}
+
+#[utoipa::path(
+    delete,
+    path = "/api/plano-sala/paredes/{id}",
+    tag = "PlanoSala",
+    params(("id" = Uuid, Path, description = "ID de la pared")),
+    responses(
+        (status = 204, description = "Pared eliminada"),
+        (status = 404, description = "Pared no encontrada")
+    ),
+    security(("bearer_auth" = []))
+)]
+pub async fn eliminar_pared(
+    State(state): State<AppState>,
+    _auth: AuthUser,
+    Path(id): Path<Uuid>,
+) -> Result<StatusCode, AppError> {
+    let deleted = crate::repositories::PlanoSalaRepository::eliminar_pared(&state.pool, id).await?;
+    if deleted {
+        Ok(StatusCode::NO_CONTENT)
+    } else {
+        Err(AppError::NotFound("Pared no encontrada".into()))
+    }
+}
+
+#[utoipa::path(
+    patch,
+    path = "/api/plano-sala/paredes/posiciones",
+    tag = "PlanoSala",
+    request_body = ActualizarPosicionesParedesRequest,
+    responses(
+        (status = 200, description = "Posiciones actualizadas"),
+        (status = 401, description = "No autorizado")
+    ),
+    security(("bearer_auth" = []))
+)]
+pub async fn actualizar_posiciones_paredes(
+    State(state): State<AppState>,
+    _auth: AuthUser,
+    Json(req): Json<ActualizarPosicionesParedesRequest>,
+) -> Result<StatusCode, AppError> {
+    let datos: Vec<(Uuid, i32, i32)> = req
+        .posiciones
+        .iter()
+        .map(|p| (p.id, p.pos_x, p.pos_y))
+        .collect();
+    crate::repositories::PlanoSalaRepository::actualizar_posiciones_paredes(&state.pool, &datos)
+        .await?;
+    Ok(StatusCode::OK)
+}
+
 /* ========== Router ========== */
 
 pub fn routes() -> Router<AppState> {
@@ -390,4 +515,11 @@ pub fn routes() -> Router<AppState> {
         )
         .route("/plano-sala/export", get(exportar_plano))
         .route("/plano-sala/import", post(importar_plano))
+        /* [094A-7] Rutas de paredes */
+        .route("/plano-sala/paredes", post(crear_pared))
+        .route("/plano-sala/paredes/posiciones", patch(actualizar_posiciones_paredes))
+        .route(
+            "/plano-sala/paredes/:id",
+            patch(actualizar_pared).delete(eliminar_pared),
+        )
 }

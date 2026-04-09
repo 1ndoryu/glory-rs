@@ -151,6 +151,8 @@ pub struct ZonaConMesas {
     #[serde(flatten)]
     pub zona: ZonaSala,
     pub mesas: Vec<Mesa>,
+    /* [094A-7] Paredes de la zona */
+    pub paredes: Vec<ParedSala>,
 }
 
 #[derive(Debug, Serialize, ToSchema)]
@@ -198,6 +200,66 @@ pub struct CombinacionExport {
     pub max_personas: i32,
     /* Números de mesa referenciados (zona_nombre:numero) para remap al importar */
     pub mesas_ref: Vec<String>,
+}
+
+/* ========== Ocupación de mesas (vista día) — 263A-16 ========== */
+
+/* ========== Pared de sala — 094A-7 ========== */
+
+#[derive(Debug, Clone, FromRow, Serialize, ToSchema)]
+pub struct ParedSala {
+    pub id: Uuid,
+    pub zona_id: Uuid,
+    pub pos_x: i32,
+    pub pos_y: i32,
+    pub ancho: i32,
+    pub alto: i32,
+    pub rotacion: i32,
+    pub color: String,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Deserialize, Validate, ToSchema)]
+pub struct CrearParedRequest {
+    pub zona_id: Uuid,
+    pub pos_x: Option<i32>,
+    pub pos_y: Option<i32>,
+    #[validate(range(min = 10, max = 3000, message = "Ancho entre 10 y 3000 px"))]
+    pub ancho: Option<i32>,
+    #[validate(range(min = 5, max = 3000, message = "Alto entre 5 y 3000 px"))]
+    pub alto: Option<i32>,
+    #[validate(range(min = 0, max = 359))]
+    pub rotacion: Option<i32>,
+    #[validate(length(min = 4, max = 20))]
+    pub color: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Validate, ToSchema)]
+pub struct ActualizarParedRequest {
+    pub pos_x: Option<i32>,
+    pub pos_y: Option<i32>,
+    #[validate(range(min = 10, max = 3000))]
+    pub ancho: Option<i32>,
+    #[validate(range(min = 5, max = 3000))]
+    pub alto: Option<i32>,
+    #[validate(range(min = 0, max = 359))]
+    pub rotacion: Option<i32>,
+    #[validate(length(min = 4, max = 20))]
+    pub color: Option<String>,
+}
+
+/* Batch update de posiciones de paredes — para drag-and-drop */
+#[derive(Debug, Deserialize, Validate, ToSchema)]
+pub struct ActualizarPosicionesParedesRequest {
+    pub posiciones: Vec<PosicionPared>,
+}
+
+#[derive(Debug, Deserialize, Validate, ToSchema)]
+pub struct PosicionPared {
+    pub id: Uuid,
+    pub pos_x: i32,
+    pub pos_y: i32,
 }
 
 /* ========== Ocupación de mesas (vista día) — 263A-16 ========== */
