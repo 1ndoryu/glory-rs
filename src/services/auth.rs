@@ -14,10 +14,13 @@ use crate::services::email::EmailService;
 use crate::config::AppConfig;
 
 /// Claims del JWT — `sub` es el `user_id`, `exp` la expiración Unix
+/// [094A-3] `tid` opcional = `trabajador_id` (si el token es de un trabajador)
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
     pub sub: Uuid,
     pub exp: usize,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub tid: Option<Uuid>,
 }
 
 pub struct AuthService;
@@ -77,7 +80,16 @@ impl AuthService {
     }
 
     /// Genera un JWT con expiración de 24 horas
+    /// [094A-3] Acepta `trabajador_id` para tokens de staff
     pub fn generate_token(user_id: Uuid, secret: &str) -> Result<String, AppError> {
+        Self::generate_token_with_tid(user_id, None, secret)
+    }
+
+    pub fn generate_token_with_tid(
+        user_id: Uuid,
+        trabajador_id: Option<Uuid>,
+        secret: &str,
+    ) -> Result<String, AppError> {
         let timestamp = chrono::Utc::now()
             .checked_add_signed(chrono::Duration::hours(24))
             .ok_or_else(|| AppError::Internal("Error calculando expiración del token".into()))?
@@ -85,7 +97,11 @@ impl AuthService {
         let exp = usize::try_from(timestamp)
             .map_err(|_| AppError::Internal("Timestamp fuera de rango".into()))?;
 
-        let claims = Claims { sub: user_id, exp };
+        let claims = Claims {
+            sub: user_id,
+            exp,
+            tid: trabajador_id,
+        };
 
         encode(
             &Header::default(),

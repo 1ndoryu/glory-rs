@@ -8,9 +8,12 @@ use crate::services::AuthService;
 use crate::AppState;
 
 /// Extractor que valida el JWT del header Authorization y extrae el `user_id`.
+/// [094A-3] También extrae `trabajador_id` si el token es de un trabajador.
 /// Usar como parámetro en handlers que requieren autenticación.
 pub struct AuthUser {
     pub user_id: Uuid,
+    /* [094A-3] None = propietario, Some = trabajador con permisos restringidos */
+    pub trabajador_id: Option<Uuid>,
 }
 
 #[async_trait]
@@ -35,6 +38,7 @@ impl FromRequestParts<AppState> for AuthUser {
 
         Ok(Self {
             user_id: claims.sub,
+            trabajador_id: claims.tid,
         })
     }
 }
