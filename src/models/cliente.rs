@@ -28,6 +28,8 @@ pub struct Cliente {
     pub alergias: String,
     pub preferencias_bebida: String,
     pub preferencias_ubicacion: String,
+    /* [094A-5] Fecha de última visita — se actualiza automáticamente al completar reserva */
+    pub ultima_visita: Option<DateTime<Utc>>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }

@@ -1,5 +1,6 @@
 /* 263A-1: Repositorio de clientes — CRM con búsqueda y paginación.
-   Rendimiento crítico: debe manejar ~43k clientes con índices adecuados. */
+   Rendimiento crítico: debe manejar ~43k clientes con índices adecuados.
+   [094A-5] Convertido a queries dinámicas para soportar nueva columna ultima_visita. */
 
 use sqlx::PgPool;
 use uuid::Uuid;
@@ -50,31 +51,30 @@ pub struct ClienteRepository;
 impl ClienteRepository {
     pub async fn create(pool: &PgPool, data: &NuevoCliente<'_>) -> Result<Cliente, sqlx::Error> {
         let id = Uuid::new_v4();
-        sqlx::query_as!(
-            Cliente,
+        sqlx::query_as::<_, Cliente>(
             "INSERT INTO clientes (id, user_id, nombre, apellidos, telefono, prefijo_telefono, \
              email, empresa, notas, foto_url, consentimiento_comercial_email, \
              consentimiento_comercial_sms, enviar_encuestas, alergias, preferencias_bebida, \
              preferencias_ubicacion) \
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) \
              RETURNING *",
-            id,
-            data.user_id,
-            data.nombre,
-            data.apellidos,
-            data.telefono,
-            data.prefijo_telefono,
-            data.email,
-            data.empresa,
-            data.notas,
-            data.foto_url,
-            data.consentimiento_comercial_email,
-            data.consentimiento_comercial_sms,
-            data.enviar_encuestas,
-            data.alergias,
-            data.preferencias_bebida,
-            data.preferencias_ubicacion
         )
+        .bind(id)
+        .bind(data.user_id)
+        .bind(data.nombre)
+        .bind(data.apellidos)
+        .bind(data.telefono)
+        .bind(data.prefijo_telefono)
+        .bind(data.email)
+        .bind(data.empresa)
+        .bind(data.notas)
+        .bind(data.foto_url)
+        .bind(data.consentimiento_comercial_email)
+        .bind(data.consentimiento_comercial_sms)
+        .bind(data.enviar_encuestas)
+        .bind(data.alergias)
+        .bind(data.preferencias_bebida)
+        .bind(data.preferencias_ubicacion)
         .fetch_one(pool)
         .await
     }
@@ -84,34 +84,32 @@ impl ClienteRepository {
         id: Uuid,
         user_id: Uuid,
     ) -> Result<Option<Cliente>, sqlx::Error> {
-        sqlx::query_as!(
-            Cliente,
+        sqlx::query_as::<_, Cliente>(
             "SELECT * FROM clientes WHERE id = $1 AND user_id = $2",
-            id,
-            user_id
         )
+        .bind(id)
+        .bind(user_id)
         .fetch_optional(pool)
         .await
     }
 
     /* [014A-2] Buscar cliente existente por teléfono o email para evitar duplicados.
      * Prioriza teléfono (más fiable), luego email. Solo busca campos no vacíos.
-     * [014A-11] Convertido a query_as! para verificación SQL en compilación. */
+     * [094A-5] Convertido a query dinámico. */
     pub async fn find_by_telefono_o_email(
         pool: &PgPool,
         user_id: Uuid,
         telefono: &str,
         email: &str,
     ) -> Result<Option<Cliente>, sqlx::Error> {
-        sqlx::query_as!(
-            Cliente,
+        sqlx::query_as::<_, Cliente>(
             "SELECT * FROM clientes WHERE user_id = $1 \
              AND (($2 != '' AND telefono = $2) OR ($3 != '' AND email = $3)) \
              LIMIT 1",
-            user_id,
-            telefono,
-            email
         )
+        .bind(user_id)
+        .bind(telefono)
+        .bind(email)
         .fetch_optional(pool)
         .await
     }
@@ -163,8 +161,8 @@ impl ClienteRepository {
             .fetch_all(pool)
             .await?;
 
-        let rec = sqlx::query!(
-            "SELECT COUNT(*) as total FROM clientes WHERE user_id = $1 \
+        let rec: (i64,) = sqlx::query_as(
+            "SELECT COUNT(*)::BIGINT FROM clientes WHERE user_id = $1 \
              AND ($2::TEXT IS NULL \
                   OR nombre ILIKE $2 \
                   OR apellidos ILIKE $2 \
@@ -172,21 +170,20 @@ impl ClienteRepository {
                   OR email ILIKE $2 \
                   OR empresa ILIKE $2 \
                   OR notas ILIKE $2)",
-            user_id,
-            patron.as_deref()
         )
+        .bind(user_id)
+        .bind(patron.as_deref())
         .fetch_one(pool)
         .await?;
 
-        Ok((items, rec.total.unwrap_or(0)))
+        Ok((items, rec.0))
     }
 
     pub async fn update(
         pool: &PgPool,
         data: &ActualizarClienteData<'_>,
     ) -> Result<Option<Cliente>, sqlx::Error> {
-        sqlx::query_as!(
-            Cliente,
+        sqlx::query_as::<_, Cliente>(
             "UPDATE clientes SET \
              nombre = COALESCE($3, nombre), \
              apellidos = COALESCE($4, apellidos), \
@@ -205,33 +202,33 @@ impl ClienteRepository {
              updated_at = NOW() \
              WHERE id = $1 AND user_id = $2 \
              RETURNING *",
-            data.id,
-            data.user_id,
-            data.nombre,
-            data.apellidos,
-            data.telefono,
-            data.prefijo_telefono,
-            data.email,
-            data.empresa,
-            data.notas,
-            data.foto_url,
-            data.consentimiento_comercial_email,
-            data.consentimiento_comercial_sms,
-            data.enviar_encuestas,
-            data.alergias,
-            data.preferencias_bebida,
-            data.preferencias_ubicacion
         )
+        .bind(data.id)
+        .bind(data.user_id)
+        .bind(data.nombre)
+        .bind(data.apellidos)
+        .bind(data.telefono)
+        .bind(data.prefijo_telefono)
+        .bind(data.email)
+        .bind(data.empresa)
+        .bind(data.notas)
+        .bind(data.foto_url)
+        .bind(data.consentimiento_comercial_email)
+        .bind(data.consentimiento_comercial_sms)
+        .bind(data.enviar_encuestas)
+        .bind(data.alergias)
+        .bind(data.preferencias_bebida)
+        .bind(data.preferencias_ubicacion)
         .fetch_optional(pool)
         .await
     }
 
     pub async fn delete(pool: &PgPool, id: Uuid, user_id: Uuid) -> Result<bool, sqlx::Error> {
-        let result = sqlx::query!(
+        let result = sqlx::query(
             "DELETE FROM clientes WHERE id = $1 AND user_id = $2",
-            id,
-            user_id
         )
+        .bind(id)
+        .bind(user_id)
         .execute(pool)
         .await?;
         Ok(result.rows_affected() > 0)
@@ -251,57 +248,52 @@ impl ClienteRepository {
         let mut tx = pool.begin().await?;
 
         /* 1. Migrar reservas: origen → destino */
-        let reservas = sqlx::query!(
+        let reservas = sqlx::query(
             "UPDATE reservas SET cliente_id = $1 WHERE cliente_id = $2 AND user_id = $3",
-            destino_id,
-            origen_id,
-            user_id
         )
+        .bind(destino_id)
+        .bind(origen_id)
+        .bind(user_id)
         .execute(&mut *tx)
         .await?;
 
         /* 2. Migrar etiquetas: ON CONFLICT ignora duplicados (misma etiqueta ya asignada al destino) */
-        let etiquetas = sqlx::query!(
+        let etiquetas = sqlx::query(
             "UPDATE clientes_etiquetas SET cliente_id = $1 \
              WHERE cliente_id = $2 \
              AND etiqueta_id NOT IN (SELECT etiqueta_id FROM clientes_etiquetas WHERE cliente_id = $1)",
-            destino_id,
-            origen_id
         )
+        .bind(destino_id)
+        .bind(origen_id)
         .execute(&mut *tx)
         .await?;
 
         /* Limpiar etiquetas duplicadas que NO se migraron */
-        sqlx::query!(
-            "DELETE FROM clientes_etiquetas WHERE cliente_id = $1",
-            origen_id
-        )
-        .execute(&mut *tx)
-        .await?;
+        sqlx::query("DELETE FROM clientes_etiquetas WHERE cliente_id = $1")
+            .bind(origen_id)
+            .execute(&mut *tx)
+            .await?;
 
         /* 3. Migrar destinatarios de campañas: evitar duplicados (misma campaña+destino) */
-        let campanas = sqlx::query!(
+        let campanas = sqlx::query(
             "UPDATE campana_destinatarios SET cliente_id = $1 \
              WHERE cliente_id = $2 \
              AND campana_id NOT IN (SELECT campana_id FROM campana_destinatarios WHERE cliente_id = $1)",
-            destino_id,
-            origen_id
         )
+        .bind(destino_id)
+        .bind(origen_id)
         .execute(&mut *tx)
         .await?;
 
         /* Limpiar destinatarios duplicados que NO se migraron */
-        sqlx::query!(
-            "DELETE FROM campana_destinatarios WHERE cliente_id = $1",
-            origen_id
-        )
-        .execute(&mut *tx)
-        .await?;
+        sqlx::query("DELETE FROM campana_destinatarios WHERE cliente_id = $1")
+            .bind(origen_id)
+            .execute(&mut *tx)
+            .await?;
 
         /* 4. Combinar campos: si el destino tiene campo vacío, rellenar con el del origen.
          * Para booleanos, usar OR (si alguno tiene consentimiento, mantenerlo). */
-        let cliente = sqlx::query_as!(
-            Cliente,
+        let cliente = sqlx::query_as::<_, Cliente>(
             "WITH origen AS (SELECT * FROM clientes WHERE id = $2 AND user_id = $3) \
              UPDATE clientes SET \
                apellidos = CASE WHEN clientes.apellidos = '' THEN (SELECT apellidos FROM origen) ELSE clientes.apellidos END, \
@@ -325,21 +317,19 @@ impl ClienteRepository {
                updated_at = NOW() \
              WHERE clientes.id = $1 AND clientes.user_id = $3 \
              RETURNING clientes.*",
-            destino_id,
-            origen_id,
-            user_id
         )
+        .bind(destino_id)
+        .bind(origen_id)
+        .bind(user_id)
         .fetch_one(&mut *tx)
         .await?;
 
         /* 5. Eliminar cliente origen */
-        sqlx::query!(
-            "DELETE FROM clientes WHERE id = $1 AND user_id = $2",
-            origen_id,
-            user_id
-        )
-        .execute(&mut *tx)
-        .await?;
+        sqlx::query("DELETE FROM clientes WHERE id = $1 AND user_id = $2")
+            .bind(origen_id)
+            .bind(user_id)
+            .execute(&mut *tx)
+            .await?;
 
         tx.commit().await?;
 
@@ -349,5 +339,19 @@ impl ClienteRepository {
             etiquetas.rows_affected().cast_signed(),
             campanas.rows_affected().cast_signed(),
         ))
+    }
+
+    /* [094A-5] Actualizar ultima_visita de un cliente (al completar reserva) */
+    pub async fn actualizar_ultima_visita(
+        pool: &PgPool,
+        cliente_id: Uuid,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query(
+            "UPDATE clientes SET ultima_visita = NOW() WHERE id = $1",
+        )
+        .bind(cliente_id)
+        .execute(pool)
+        .await?;
+        Ok(())
     }
 }

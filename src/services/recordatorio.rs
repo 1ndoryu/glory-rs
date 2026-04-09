@@ -181,6 +181,10 @@ impl RecordatorioService {
             tracing::info!("Recordatorios procesados: {procesados}");
         }
 
+        /* [094A-5] Procesar mensajes de inactividad de clientes */
+        let inactivos = procesar_inactividad(pool).await;
+        procesados += inactivos;
+
         Ok(procesados)
     }
 }
@@ -280,4 +284,103 @@ async fn enviar_recordatorio(
         }
         otro => Err(format!("Canal desconocido: {otro}")),
     }
+}
+
+/* [094A-5] Procesa mensajes automáticos a clientes inactivos.
+ * Consulta todas las reglas activas, busca clientes que cumplen el criterio,
+ * envía el mensaje y registra el envío para no repetir. */
+async fn procesar_inactividad(pool: &PgPool) -> usize {
+    use crate::repositories::InactividadRepository;
+
+    let pendientes = match InactividadRepository::clientes_inactivos_pendientes(pool).await {
+        Ok(p) => p,
+        Err(e) => {
+            tracing::error!("Error buscando clientes inactivos: {e}");
+            return 0;
+        }
+    };
+
+    if pendientes.is_empty() {
+        return 0;
+    }
+
+    let mut cache_integ: std::collections::HashMap<Uuid, crate::models::IntegracionMarketing> =
+        std::collections::HashMap::new();
+    let mut procesados = 0;
+
+    for ci in &pendientes {
+        /* Renderizar mensaje con placeholders */
+        let mensaje = ci.mensaje_plantilla.replace("{nombre}", &ci.nombre);
+
+        /* Obtener integraciones del usuario */
+        let integ = if let Some(cached) = cache_integ.get(&ci.user_id) {
+            cached.clone()
+        } else {
+            match IntegracionMarketingRepository::obtener_o_crear(pool, ci.user_id).await {
+                Ok(i) => {
+                    cache_integ.insert(ci.user_id, i.clone());
+                    i
+                }
+                Err(e) => {
+                    tracing::error!("Error integraciones para inactividad: {e}");
+                    let _ = InactividadRepository::registrar_envio(
+                        pool, ci.regla_id, ci.cliente_id, "fallido",
+                    )
+                    .await;
+                    continue;
+                }
+            }
+        };
+
+        let resultado = match ci.canal.as_str() {
+            "email" => {
+                if ci.email.is_empty() {
+                    Err("Sin email".into())
+                } else {
+                    let asunto = "¡Te echamos de menos!".to_string();
+                    EmailService::enviar_campana(&integ, &ci.email, &asunto, &mensaje)
+                        .await
+                        .map(|_| ())
+                        .map_err(|e| format!("SMTP: {e}"))
+                }
+            }
+            "sms" => {
+                if ci.telefono.is_empty() {
+                    Err("Sin teléfono".into())
+                } else {
+                    TwilioService::enviar_sms(&integ, &ci.telefono, &mensaje)
+                        .await
+                        .map(|_| ())
+                        .map_err(|e| format!("Twilio: {e}"))
+                }
+            }
+            "whatsapp" => {
+                if ci.telefono.is_empty() {
+                    Err("Sin teléfono".into())
+                } else {
+                    MetaWhatsappService::enviar_mensaje(&integ, &ci.telefono, &mensaje)
+                        .await
+                        .map(|_| ())
+                        .map_err(|e| format!("Meta: {e}"))
+                }
+            }
+            otro => Err(format!("Canal desconocido: {otro}")),
+        };
+
+        let estado = if resultado.is_ok() { "enviado" } else { "fallido" };
+        if let Err(ref e) = resultado {
+            tracing::warn!("Inactividad envío fallido cliente={}: {e}", ci.cliente_id);
+        }
+
+        let _ = InactividadRepository::registrar_envio(
+            pool, ci.regla_id, ci.cliente_id, estado,
+        )
+        .await;
+        procesados += 1;
+    }
+
+    if procesados > 0 {
+        tracing::info!("Mensajes de inactividad procesados: {procesados}");
+    }
+    procesados
 }

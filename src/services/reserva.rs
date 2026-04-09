@@ -208,6 +208,10 @@ impl ReservaService {
          * disparar auto-venta igual que en update. */
         if estado == "completada" {
             Self::crear_venta_automatica(pool, user_id, &reserva).await;
+            /* [094A-5] Actualizar ultima_visita del cliente */
+            if let Some(cid) = reserva.cliente_id {
+                let _ = ClienteRepository::actualizar_ultima_visita(pool, cid).await;
+            }
         }
 
         Ok(reserva)
@@ -346,6 +350,24 @@ impl ReservaService {
         let cambio_a_completada = estado_str.as_deref() == Some("completada")
             && estado_anterior != "completada";
 
+        /* [094A-1] Si la reserva SALE de "completada" (a cualquier otro estado),
+         * eliminar las ventas auto-generadas (importe_base = 0) vinculadas. */
+        let salio_de_completada = estado_str.is_some()
+            && estado_str.as_deref() != Some("completada")
+            && estado_anterior == "completada";
+
+        if salio_de_completada {
+            match VentaRepository::delete_by_reserva_id(pool, reserva.id, user_id).await {
+                Ok(n) if n > 0 => {
+                    tracing::info!("[094A-1] Eliminadas {n} ventas auto-generadas al descompletar reserva {}", reserva.id);
+                }
+                Err(e) => {
+                    warn!("[094A-1] Error eliminando ventas al descompletar reserva {}: {e}", reserva.id);
+                }
+                _ => {}
+            }
+        }
+
         if cambio_a_completada {
             /* [034A-2] Si la reserva no tiene cliente vinculado, intentar crearlo ahora.
              * Cubre reservas creadas antes del fix donde upsert_cliente requería tel/email. */
@@ -371,6 +393,11 @@ impl ReservaService {
             }
 
             Self::crear_venta_automatica(pool, user_id, &reserva).await;
+
+            /* [094A-5] Actualizar ultima_visita del cliente al completar reserva */
+            if let Some(cid) = reserva.cliente_id {
+                let _ = ClienteRepository::actualizar_ultima_visita(pool, cid).await;
+            }
         }
 
         Ok(reserva)
@@ -490,8 +517,25 @@ impl ReservaService {
 
     /* [014A-1] Crear venta automáticamente cuando una reserva se marca como completada.
      * Solo si auto_venta_reserva está habilitado en la configuración.
+     * [094A-1] Verifica que no exista ya una venta con este reserva_id — evita duplicados.
      * No falla la operación si algo sale mal — solo loguea el error. */
     async fn crear_venta_automatica(pool: &PgPool, user_id: Uuid, reserva: &Reserva) {
+        /* [094A-1] Verificar si ya existe una venta para esta reserva — evitar duplicados */
+        match VentaRepository::exists_by_reserva_id(pool, reserva.id).await {
+            Ok(true) => {
+                tracing::info!(
+                    "[094A-1] Ya existe venta para reserva {} — saltando creación",
+                    reserva.id
+                );
+                return;
+            }
+            Err(e) => {
+                warn!("[094A-1] Error verificando venta existente: {e} — continuando por seguridad");
+            }
+            _ => {}
+        }
+
+        /* Verificar si auto_venta_reserva está habilitado */
         /* Verificar si auto_venta_reserva está habilitado */
         let config = match ConfiguracionRepository::obtener_o_crear(pool, user_id).await {
             Ok(c) => c,
