@@ -30,6 +30,4 @@
 
 ## Tareas pendientes
 
-### Data VIII — Solicitudes del cliente (094A)
-
-- 094A-8: Verificar OCR documentos end-to-end (digitalizacion.rs ya existe)
+(Sin tareas pendientes)
