@@ -36,3 +36,5 @@ cliente/
 glory-rust-template.code-workspace
 
 extracted/
+/uploads
+/scripts

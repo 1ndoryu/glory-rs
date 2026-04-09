@@ -30,4 +30,7 @@
 
 ## Tareas pendientes
 
-(sin tareas pendientes)
+### Data VIII — Solicitudes del cliente (094A)
+
+- 094A-6: Botones CTA "Reserva ya" y "Llámanos" en mensajes WhatsApp
+- 094A-8: Verificar OCR documentos end-to-end (digitalizacion.rs ya existe)

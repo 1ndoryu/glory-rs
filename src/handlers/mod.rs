@@ -13,11 +13,14 @@ mod errores;
 mod etiquetas;
 mod gastos;
 mod health;
+mod inactividad;
 mod notificaciones;
 mod plano_sala;
 mod plantillas_whatsapp;
 mod recordatorios;
 mod reservas;
+mod resenas;
+mod trabajadores;
 mod ventas;
 
 use axum::Router;
@@ -166,6 +169,20 @@ impl utoipa::Modify for SecurityAddon {
         admin::eliminar_datos,
         admin::ejecutar_seed,
         admin::eliminar_datos,
+        trabajadores::listar,
+        trabajadores::crear,
+        trabajadores::actualizar,
+        trabajadores::eliminar,
+        trabajadores::login_trabajador,
+        trabajadores::listar_secciones,
+        resenas::listar_resenas,
+        resenas::solicitar_resena,
+        resenas::obtener_resena_publica,
+        resenas::responder_resena,
+        inactividad::listar,
+        inactividad::crear,
+        inactividad::actualizar,
+        inactividad::eliminar,
     ),
     components(schemas(
         health::HealthResponse,
@@ -277,6 +294,21 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::DigitalizarDocumentoRequest,
         crate::models::DatosDocumentoExtraidos,
         crate::models::Notificacion,
+        crate::models::TrabajadorResponse,
+        crate::models::CrearTrabajadorRequest,
+        crate::models::ActualizarTrabajadorRequest,
+        crate::models::LoginTrabajadorRequest,
+        crate::models::TrabajadorAuthResponse,
+        crate::models::PermisoSeccion,
+        crate::models::ResenaPublicaResponse,
+        crate::models::ResponderResenaRequest,
+        crate::models::ResponderResenaResponse,
+        crate::models::ResenasPaginadas,
+        crate::models::ResenaAdmin,
+        resenas::SolicitarResponse,
+        crate::models::ReglaInactividad,
+        crate::models::CrearReglaInactividadRequest,
+        crate::models::ActualizarReglaInactividadRequest,
         notificaciones::ConteoNoLeidas,
         errores::ReportarErrorRequest,
         errores::ReportarErrorResponse,
@@ -361,4 +393,8 @@ fn api_routes() -> Router<AppState> {
         .merge(notificaciones::routes())
         .merge(errores::routes())
         .merge(admin::routes())
+        .merge(trabajadores::routes())
+        .merge(resenas::routes())
+        .merge(resenas::public_routes())
+        .merge(inactividad::routes())
 }

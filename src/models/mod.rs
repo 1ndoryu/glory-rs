@@ -13,6 +13,7 @@ mod notificacion;
 mod plano_sala;
 mod plantilla_whatsapp;
 mod reserva;
+mod trabajador;
 mod user;
 mod venta;
 
@@ -53,12 +54,18 @@ pub use venta::{
     ActualizarVentaRequest, CanalVenta, CrearVentaRequest, MetodoPago, Turno, Venta,
     VentaConCliente, VentasPaginadas, VentasQuery,
 };
+pub use trabajador::{
+    ActualizarTrabajadorRequest, CrearTrabajadorRequest, LoginTrabajadorRequest,
+    PermisoSeccion, Trabajador, TrabajadorAuthResponse, TrabajadorResponse,
+    SECCIONES_VALIDAS,
+};
 pub use plano_sala::{
-    ActualizarMesaRequest, ActualizarPosicionesRequest, ActualizarZonaRequest,
+    ActualizarMesaRequest, ActualizarParedRequest, ActualizarPosicionesRequest,
+    ActualizarPosicionesParedesRequest, ActualizarZonaRequest,
     CombinacionConMesas, CombinacionExport, CombinacionMesas, CrearCombinacionRequest,
-    CrearMesaRequest, CrearZonaRequest, Mesa, MesaExport, MesaOcupacion, PlanoExport,
-    PlanoOcupacion, PlanoOcupacionQuery, PlanoSala, PosicionMesa, ReservaMesa, ZonaConMesas,
-    ZonaExport, ZonaOcupacion, ZonaSala,
+    CrearMesaRequest, CrearParedRequest, CrearZonaRequest, Mesa, MesaExport, MesaOcupacion,
+    ParedSala, PlanoExport, PlanoOcupacion, PlanoOcupacionQuery, PlanoSala, PosicionMesa,
+    PosicionPared, ReservaMesa, ZonaConMesas, ZonaExport, ZonaOcupacion, ZonaSala,
 };
 pub use plantilla_whatsapp::{
     ActualizarPlantillaRequest, CrearPlantillaRequest, PlantillaWhatsapp,
@@ -81,4 +88,13 @@ pub use notificacion::{Notificacion, NotificacionEvent};
 mod integracion_marketing;
 pub use integracion_marketing::{
     ActualizarIntegracionesRequest, IntegracionMarketing, IntegracionMarketingPublica,
+};
+mod resena;
+pub use resena::{
+    Resena, ResenaAdmin, ResenaPublicaResponse, ResenasQuery, ResenasPaginadas,
+    ResponderResenaRequest, ResponderResenaResponse,
+};
+mod inactividad;
+pub use inactividad::{
+    ActualizarReglaInactividadRequest, CrearReglaInactividadRequest, ReglaInactividad,
 };
