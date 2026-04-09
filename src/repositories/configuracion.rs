@@ -64,6 +64,8 @@ impl ConfiguracionRepository {
                 haddock_api_token = COALESCE($17, haddock_api_token), \
                 haddock_sync_enabled = COALESCE($18, haddock_sync_enabled), \
                 google_review_url = COALESCE($19, google_review_url), \
+                telefono_restaurante = COALESCE($20, telefono_restaurante), \
+                url_reservas = COALESCE($21, url_reservas), \
                 updated_at = NOW() \
              WHERE user_id = $1 RETURNING *",
         )
@@ -86,6 +88,8 @@ impl ConfiguracionRepository {
         .bind(req.haddock_api_token.as_deref())
         .bind(req.haddock_sync_enabled)
         .bind(req.google_review_url.as_deref())
+        .bind(req.telefono_restaurante.as_deref())
+        .bind(req.url_reservas.as_deref())
         .fetch_one(pool)
         .await
     }

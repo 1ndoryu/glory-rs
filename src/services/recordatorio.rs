@@ -276,7 +276,13 @@ async fn enviar_recordatorio(
             }
             /* [303A-1] Componer número E.164 con prefijo del cliente */
             let numero = format!("{}{}", p.prefijo_telefono, p.telefono);
-            match MetaWhatsappService::enviar_mensaje(&integ, &numero, &mensaje).await {
+            /* [094A-6] Enviar con botones CTA si están configurados */
+            let config = crate::repositories::ConfiguracionRepository::obtener_o_crear(pool, p.user_id)
+                .await
+                .map_err(|e| format!("Error config CTA: {e}"))?;
+            let url_reservas = if config.url_reservas.is_empty() { None } else { Some(config.url_reservas.as_str()) };
+            let tel_rest = if config.telefono_restaurante.is_empty() { None } else { Some(config.telefono_restaurante.as_str()) };
+            match MetaWhatsappService::enviar_mensaje_con_cta(&integ, &numero, &mensaje, url_reservas, tel_rest).await {
                 Ok(true) => Ok(()),
                 Ok(false) => Err("Meta WhatsApp no configurado".to_string()),
                 Err(e) => Err(format!("Error Meta: {e}")),
@@ -358,7 +364,22 @@ async fn procesar_inactividad(pool: &PgPool) -> usize {
                 if ci.telefono.is_empty() {
                     Err("Sin teléfono".into())
                 } else {
-                    MetaWhatsappService::enviar_mensaje(&integ, &ci.telefono, &mensaje)
+                    /* [094A-6] Botones CTA en mensajes de inactividad */
+                    let (url_r, tel_r) = match crate::repositories::ConfiguracionRepository::obtener_o_crear(pool, ci.user_id).await {
+                        Ok(c) => {
+                            let u: Option<String> = if c.url_reservas.is_empty() { None } else { Some(c.url_reservas) };
+                            let t: Option<String> = if c.telefono_restaurante.is_empty() { None } else { Some(c.telefono_restaurante) };
+                            (u, t)
+                        }
+                        Err(e) => {
+                            tracing::warn!("Config CTA error: {e}");
+                            (None, None)
+                        }
+                    };
+                    MetaWhatsappService::enviar_mensaje_con_cta(
+                        &integ, &ci.telefono, &mensaje,
+                        url_r.as_deref(), tel_r.as_deref(),
+                    )
                         .await
                         .map(|_| ())
                         .map_err(|e| format!("Meta: {e}"))

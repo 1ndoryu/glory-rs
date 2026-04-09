@@ -45,6 +45,9 @@ pub struct ConfiguracionRestaurante {
     pub haddock_sync_enabled: bool,
     /* [094A-4] URL de Google Business para redirigir reseñas positivas */
     pub google_review_url: String,
+    /* [094A-6] Datos para botones CTA en mensajes WhatsApp */
+    pub telefono_restaurante: String,
+    pub url_reservas: String,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -83,6 +86,12 @@ pub struct ActualizarConfiguracionRequest {
     /* [094A-4] URL de Google Business para reseñas positivas */
     #[validate(length(max = 500))]
     pub google_review_url: Option<String>,
+    /* [094A-6] Teléfono del restaurante para botón "Llámanos" */
+    #[validate(length(max = 30))]
+    pub telefono_restaurante: Option<String>,
+    /* [094A-6] URL de reservas para botón "Reserva ya" */
+    #[validate(length(max = 500))]
+    pub url_reservas: Option<String>,
 }
 
 fn validar_iva(valor: &rust_decimal::Decimal) -> Result<(), validator::ValidationError> {
