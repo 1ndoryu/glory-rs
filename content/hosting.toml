@@ -1,5 +1,7 @@
 # Suscripciones de hosting de prueba para el usuario cliente.
 # Usa @users:cliente@test.com para resolver el UUID del cliente.
+# Simulan un hosting real comprado: activo con servidor asignado,
+# uno en provisioning y otro suspendido para probar todos los estados.
 
 [meta]
 table = "hosting_subscriptions"
@@ -8,32 +10,46 @@ depends_on = ["users"]
 
 [meta.casts]
 
-[[records]]
-user_id = "@users:cliente@test.com"
-client_name = "Cliente Test"
-client_email = "cliente@test.com"
-plan = "basico"
-domain = "mitienda-test.com"
-status = "active"
-monthly_price_cents = 500
-storage_limit_mb = 5120
-
+# Hosting activo — simula un hosting comprado, provisionado y funcionando.
+# server_ip y coolify_site_name permiten que las tabs de DNS, acceso SSH
+# y general muestren datos reales.
 [[records]]
 user_id = "@users:cliente@test.com"
 client_name = "Cliente Test"
 client_email = "cliente@test.com"
 plan = "pro"
-domain = "app-demo.nakomi.dev"
-status = "provisioning"
+domain = "mitienda-test.com"
+coolify_site_name = "mitienda-test"
+status = "active"
+stripe_subscription_id = "sub_demo_1aB2cD3eF4gH5i"
 monthly_price_cents = 1000
 storage_limit_mb = 20480
+server_uuid = "demo-vps1-uuid-0001"
+server_ip = "66.94.100.241"
 
+# Hosting recién comprado — en proceso de provisioning.
+# No tiene server_ip ni coolify_site_name todavía.
+[[records]]
+user_id = "@users:cliente@test.com"
+client_name = "Cliente Test"
+client_email = "cliente@test.com"
+plan = "basico"
+domain = "blog-demo.nakomi.dev"
+status = "provisioning"
+monthly_price_cents = 500
+storage_limit_mb = 5120
+
+# Hosting suspendido — falta de pago simulada.
 [[records]]
 user_id = "@users:cliente@test.com"
 client_name = "Cliente Test"
 client_email = "cliente@test.com"
 plan = "ecommerce"
 domain = "ecommerce-demo.nakomi.dev"
+coolify_site_name = "ecommerce-demo"
 status = "suspended"
+stripe_subscription_id = "sub_demo_9xY8wV7uT6sR5q"
 monthly_price_cents = 1500
 storage_limit_mb = 51200
+server_uuid = "demo-vps1-uuid-0003"
+server_ip = "66.94.100.241"
