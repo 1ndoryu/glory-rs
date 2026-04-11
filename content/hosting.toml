@@ -27,17 +27,21 @@ storage_limit_mb = 20480
 server_uuid = "demo-vps1-uuid-0001"
 server_ip = "66.94.100.241"
 
-# Hosting recién comprado — en proceso de provisioning.
-# No tiene server_ip ni coolify_site_name todavía.
+# Hosting real provisionado — WordPress + MariaDB en Coolify VPS2 (173.249.50.44).
+# Servicio UUID: vpag09kzdkfax34h4ttxukqq, URL: http://wordpress-vpag09kzdkfax34h4ttxukqq.173.249.50.44.sslip.io
+# Provisionado el 2026-04-11 via POST /api/v1/hosting/{id}/provision.
 [[records]]
 user_id = "@users:cliente@test.com"
 client_name = "Cliente Test"
 client_email = "cliente@test.com"
 plan = "basico"
 domain = "blog-demo.nakomi.dev"
-status = "provisioning"
+coolify_site_name = "hosting-0d1de66f"
+status = "active"
 monthly_price_cents = 500
 storage_limit_mb = 5120
+server_uuid = "vpag09kzdkfax34h4ttxukqq"
+server_ip = "173.249.50.44"
 
 # Hosting suspendido — falta de pago simulada.
 [[records]]
