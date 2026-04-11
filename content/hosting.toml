@@ -30,6 +30,7 @@ server_ip = "66.94.100.241"
 # Hosting real provisionado — WordPress + MariaDB en Coolify VPS2 (173.249.50.44).
 # Servicio UUID: vpag09kzdkfax34h4ttxukqq, URL: http://wordpress-vpag09kzdkfax34h4ttxukqq.173.249.50.44.sslip.io
 # Provisionado el 2026-04-11 via POST /api/v1/hosting/{id}/provision.
+# Credenciales SFTP demo generadas con el provisioning SFTP (atmoz/sftp).
 [[records]]
 user_id = "@users:cliente@test.com"
 client_name = "Cliente Test"
@@ -42,6 +43,9 @@ monthly_price_cents = 500
 storage_limit_mb = 5120
 server_uuid = "vpag09kzdkfax34h4ttxukqq"
 server_ip = "173.249.50.44"
+sftp_user = "wp_demo1234"
+sftp_password = "DemoPass2026Nakomi!"
+sftp_port = 12345
 
 # Hosting suspendido — falta de pago simulada.
 [[records]]
