@@ -13,6 +13,17 @@ type DragMode = 'none' | 'move' | 'rotate' | 'resize';
 const MIN_LARGO = 20;
 const GROSOR = 10;
 
+/* Cursor de resize adaptado al ángulo de la pared.
+ * La pared es una barra horizontal — su extremo derecho apunta en dirección (cosθ, sinθ).
+ * Mapeamos ese ángulo al cursor CSS más cercano (snap cada 45°). */
+function resizeCursorForAngle(deg: number): string {
+  const norm = ((deg % 180) + 180) % 180;
+  if (norm < 22.5 || norm >= 157.5) return 'ew-resize';
+  if (norm < 67.5) return 'nwse-resize';
+  if (norm < 112.5) return 'ns-resize';
+  return 'nesw-resize';
+}
+
 interface Props {
   pared: ParedSala;       /* display coords (× zoom) */
   canonical: ParedSala;   /* canonical coords (sin escala) — usado en callbacks */
@@ -109,13 +120,27 @@ export default function ParedDraggable({
     const dy = e.clientY - startMouse.current.y;
     const z = zoomRef.current;
     const zona = zonaRef.current;
-    const c = canonicalRef.current;
 
     if (mode.current === 'move') {
-      const maxX = (zona.ancho - c.ancho) * z;
-      const maxY = (zona.alto - c.alto) * z;
-      previewX.current = Math.min(Math.max(maxX, 0), Math.max(0, startRect.current.x + dx));
-      previewY.current = Math.min(Math.max(maxY, 0), Math.max(0, startRect.current.y + dy));
+      /* [134A-10] Bounding box del elemento rotado para calcular límites correctos.
+       * CSS rotate(θ) gira alrededor del centro — la bbox visual es:
+       *   bbW = W·|cosθ| + H·|sinθ|,  bbH = W·|sinθ| + H·|cosθ|
+       * Límites del CSS left/top (esquina sup-izq sin rotar):
+       *   minX = bbW/2 - W/2,  maxX = zonaAncho·z - W/2 - bbW/2
+       * Antes se usaba c.ancho como si fuera el largo visual — fallaba con rotación. */
+      const W = previewW.current;
+      const H = GROSOR * z;
+      const rad = (previewRot.current * Math.PI) / 180;
+      const abscos = Math.abs(Math.cos(rad));
+      const abssin = Math.abs(Math.sin(rad));
+      const bbW = W * abscos + H * abssin;
+      const bbH = W * abssin + H * abscos;
+      const minX = bbW / 2 - W / 2;
+      const maxX = zona.ancho * z - W / 2 - bbW / 2;
+      const minY = bbH / 2 - H / 2;
+      const maxY = zona.alto * z - H / 2 - bbH / 2;
+      previewX.current = Math.min(Math.max(minX, startRect.current.x + dx), maxX);
+      previewY.current = Math.min(Math.max(minY, startRect.current.y + dy), maxY);
     } else if (mode.current === 'rotate' && divRef.current) {
       const rect = divRef.current.getBoundingClientRect();
       const cx = rect.left + rect.width / 2;
@@ -180,7 +205,7 @@ export default function ParedDraggable({
         transform: previewRot.current ? `rotate(${previewRot.current}deg)` : undefined,
         transformOrigin: 'center center',
         boxShadow: seleccionada ? '0 0 0 2px hsl(var(--primary))' : undefined,
-        cursor: mode.current === 'move' ? 'grabbing' : 'grab',
+        cursor: mode.current === 'move' ? 'grabbing' : mode.current === 'resize' ? resizeCursorForAngle(previewRot.current) : 'grab',
         zIndex: 1,
         touchAction: 'none',
       }}
@@ -203,7 +228,7 @@ export default function ParedDraggable({
           {/* Handle resize largo (extremo derecho del bar) */}
           <div
             className="absolute top-1/2 -right-1 -translate-y-1/2 w-2 h-5 rounded-sm bg-primary/80 hover:bg-primary"
-            style={{ zIndex: 3, touchAction: 'none', cursor: 'ew-resize' }}
+            style={{ zIndex: 3, touchAction: 'none', cursor: resizeCursorForAngle(previewRot.current) }}
             onPointerDown={onPointerDownResizeE}
             title="Arrastrar para cambiar largo"
           />
