@@ -124,12 +124,21 @@ export default function ParedDraggable({
       angle = Math.round(angle / 15) * 15;
       previewRot.current = ((angle % 360) + 360) % 360;
     } else if (mode.current === 'resize') {
-      /* Proyectar el delta del mouse sobre el eje local del bar.
-       * El bar sin rotación apunta a la derecha (+X). Con rotación θ,
-       * el eje local es (cos θ, sin θ). Proyección escalar = dx·cos + dy·sin. */
+      /* [134A-9] Proyectar delta del mouse sobre el eje local del bar (cos θ, sin θ).
+       * CSS rotate(θ) gira alrededor del centro — si solo cambiamos width el centro
+       * se desplaza y la pared se mueve. Compensamos pos para anclar el extremo izquierdo:
+       *   deltaW = newW - startW
+       *   newLeft = startLeft - deltaW/2 × (1 - cos θ)
+       *   newTop  = startTop  + deltaW/2 × sin θ */
       const rad = (previewRot.current * Math.PI) / 180;
-      const proj = dx * Math.cos(rad) + dy * Math.sin(rad);
-      previewW.current = Math.max(MIN_LARGO * z, startRect.current.w + proj);
+      const cosR = Math.cos(rad);
+      const sinR = Math.sin(rad);
+      const proj = dx * cosR + dy * sinR;
+      const newW = Math.max(MIN_LARGO * z, startRect.current.w + proj);
+      const deltaW = newW - startRect.current.w;
+      previewW.current = newW;
+      previewX.current = startRect.current.x - (deltaW / 2) * (1 - cosR);
+      previewY.current = startRect.current.y + (deltaW / 2) * sinR;
     }
     forceUpdate(n => n + 1);
   };
