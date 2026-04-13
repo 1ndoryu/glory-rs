@@ -165,13 +165,15 @@ function PlanoOcupacion({ fecha, turno }: Props) {
               {(zonaData.paredes ?? []).map((pared: ParedSala) => (
                 <div
                   key={pared.id}
-                  className="absolute rounded-sm"
+                  className="absolute"
                   style={{
                     left: pared.pos_x * zoom,
                     top: pared.pos_y * zoom,
                     width: pared.ancho * zoom,
                     height: pared.alto * zoom,
-                    backgroundColor: pared.color || 'hsl(var(--border))',
+                    background: 'var(--background)',
+                    border: '2px solid var(--border)',
+                    borderRadius: 'var(--radius)',
                     transform: pared.rotacion ? `rotate(${pared.rotacion}deg)` : undefined,
                     transformOrigin: 'center center',
                     pointerEvents: 'none',

@@ -330,7 +330,7 @@ export function usePlanoSala(
   const handleCrearPared = async () => {
     if (!zonaActiva) return;
     try {
-      await crearPared({ zona_id: zonaActiva, ancho: 120, alto: 10, color: '#6b7280' } as CrearParedRequest);
+      await crearPared({ zona_id: zonaActiva, ancho: 120, alto: 10 } as CrearParedRequest);
       refetchPlano();
     } catch {
       toast.error('Error al crear pared');
@@ -367,14 +367,17 @@ export function usePlanoSala(
   const handleMoverPared = async (id: string, pos_x: number, pos_y: number) => {
     const pared = paredesZona.find(p => p.id === id);
     if (!pared) return;
-    /* [134A-13] Clamp igual que mesas en handleDragEnd — la pared regresa al canvas
-     * si se suelta fuera de los límites de la zona. */
-    const clampedX = zonaData ? Math.max(0, Math.min(zonaData.ancho, pos_x)) : pos_x;
-    const clampedY = zonaData ? Math.max(0, Math.min(zonaData.alto, pos_y)) : pos_y;
+    /* [134A-14] Clamp idéntico a handleDragEnd de mesas: usa canvasWidth/zoom
+     * en X y zonaData.alto en Y, restando la dimensión del elemento. */
+    const canvasWidth = canvasRef.current?.clientWidth ?? 800;
+    const maxX = canvasWidth / zoom - pared.ancho;
+    const maxY = (zonaData?.alto ?? 600) - pared.alto;
+    const clampedX = Math.max(0, Math.min(maxX, pos_x));
+    const clampedY = Math.max(0, Math.min(maxY, pos_y));
     try {
       await actualizarParedApi(id, {
         ancho: pared.ancho, alto: pared.alto,
-        color: pared.color, rotacion: pared.rotacion,
+        rotacion: pared.rotacion,
         pos_x: clampedX, pos_y: clampedY,
       });
       refetchPlano();
@@ -389,7 +392,7 @@ export function usePlanoSala(
     try {
       await actualizarParedApi(id, {
         ancho: pared.ancho, alto: pared.alto,
-        color: pared.color, rotacion,
+        rotacion,
         pos_x: pared.pos_x, pos_y: pared.pos_y,
       });
       refetchPlano();
@@ -414,7 +417,7 @@ export function usePlanoSala(
       await crearPared({
         zona_id: zonaActiva,
         ancho: pared.ancho, alto: pared.alto,
-        color: pared.color, rotacion: pared.rotacion,
+        rotacion: pared.rotacion,
         pos_x: pared.pos_x + 20, pos_y: pared.pos_y + 20,
       } as CrearParedRequest);
       refetchPlano();

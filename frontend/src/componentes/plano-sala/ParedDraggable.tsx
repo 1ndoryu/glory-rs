@@ -168,7 +168,6 @@ export default function ParedDraggable({
         pos_y: Math.round(previewY.current / z),
         ancho: Math.round(previewW.current / z),
         alto: GROSOR,
-        color: c.color,
         rotacion: previewRot.current,
       });
     }
@@ -178,13 +177,15 @@ export default function ParedDraggable({
   return (
     <div
       ref={divRef}
-      className="absolute rounded-sm border border-border/50 select-none"
+      className="absolute select-none"
       style={{
         left: previewX.current,
         top: previewY.current,
         width: previewW.current,
         height: GROSOR * zoom,
-        backgroundColor: canonical.color || '#6b7280',
+        background: 'var(--background)',
+        border: '2px solid var(--border)',
+        borderRadius: 'var(--radius)',
         transform: previewRot.current ? `rotate(${previewRot.current}deg)` : undefined,
         transformOrigin: 'center center',
         boxShadow: seleccionada ? '0 0 0 2px hsl(var(--primary))' : undefined,

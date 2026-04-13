@@ -255,7 +255,7 @@ function PlanoSala() {
                         zonaAncho={zonaData.ancho}
                         zonaAlto={zonaData.alto}
                         onResize={handleResizeMesa}
-                        onClick={() => setMesaSeleccionada(base)}
+                        onClick={() => { setMesaSeleccionada(base); setParedSeleccionada(null); }}
                       />
                     );
                   })}
