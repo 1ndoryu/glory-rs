@@ -462,31 +462,33 @@ export function usePlanoSala() {
      * CSS aplica rotate(θ) alrededor del centro → la esquina top-left NO
      * representa ningún borde visual real cuando θ ≠ 0.
      *
-     * REGRESIÓN HISTÓRICA (no repetir):
-     *  ❌ Math.max(0, pos_x) → "límite horizontal imaginario": una pared
+     * REGRESIONES HISTÓRICAS (no repetir):
+     *  ❌ Math.max(0, pos_x) directo → "límite horizontal imaginario": una pared
      *     vertical tiene pos_x = centro_x - largo/2 < 0 aunque esté dentro
      *     del plano. El clamp la mueve como si fuera horizontal.
-     *  ❌ Sin clamp → las paredes salen del plano si se arrastran al exterior.
-     *  ✅ Clampear el CENTRO del bounding box rotado, luego volver a top-left.
+     *  ❌ Sin clamp ninguno → las paredes salen por arriba/izquierda.
+     *  ❌ Math.min(zonaW - bbW/2, ...) → bloquea también derecha/abajo, a diferencia
+     *     de las mesas que son libres en esa dirección. Inconsistente con el resto.
+     *  ✅ Solo Math.max(bbW/2, centro_x) → evita salir por arriba/izquierda,
+     *     libre hacia abajo/derecha. Igual que mesas pero sobre el centro rotado.
      *
      * FÓRMULA CORRECTA:
      *  centro visual  = (pos_x + w/2, pos_y + h/2)
      *  bounding box   = { bbW = w|cosθ| + h|sinθ|, bbH = w|sinθ| + h|cosθ| }
-     *  clamp centro   = [bbW/2, zonaW - bbW/2] × [bbH/2, zonaH - bbH/2]
+     *  clamp centro   = [bbW/2, ∞) × [bbH/2, ∞)    ← sin límite superior
      *  top-left final = centro_clampado - (w/2, h/2)
-     *
-     * RESULTADO: la pared no puede salir de la zona, y los límites respetan
-     * su ángulo real independientemente de cuánto esté rotada.
      * ===================================================================== */
     const w = pared.ancho;
     const h = pared.alto;
     const rad = (pared.rotacion * Math.PI) / 180;
     const bbW = w * Math.abs(Math.cos(rad)) + h * Math.abs(Math.sin(rad));
     const bbH = w * Math.abs(Math.sin(rad)) + h * Math.abs(Math.cos(rad));
-    const zonaW = zonaData?.ancho ?? 600;
-    const zonaH = zonaData?.alto ?? 600;
-    const cx = Math.min(zonaW - bbW / 2, Math.max(bbW / 2, pos_x + w / 2));
-    const cy = Math.min(zonaH - bbH / 2, Math.max(bbH / 2, pos_y + h / 2));
+    /* Solo límite inferior (arriba/izquierda): el centro no puede salir del canvas
+     * por la parte negativa. Sin límite superior → libres hacia abajo/derecha,
+     * igual que las mesas con Math.max(0, ...). zonaW/zonaH declarados arriba
+     * pero no se usan como límite superior para mantener consistencia con mesas. */
+    const cx = Math.max(bbW / 2, pos_x + w / 2);
+    const cy = Math.max(bbH / 2, pos_y + h / 2);
     const clampedX = Math.round(cx - w / 2);
     const clampedY = Math.round(cy - h / 2);
     try {
