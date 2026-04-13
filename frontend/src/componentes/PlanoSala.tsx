@@ -38,6 +38,7 @@ function PlanoSala() {
     handleCrearMesa, handleGuardarMesa, handleResizeMesa, handleEliminarMesa,
     handleCrearPared, handleEliminarPared, handleGuardarPared,
     handleMoverPared, handleRotarPared, handleRedimensionarPared,
+    handleDuplicarPared, handleDuplicarMesa,
     handleDragStart, handleDragEnd,
     handleExportar, handleImportar,
     handleCrearCombinacion, handleEliminarCombinacion,
@@ -174,7 +175,7 @@ function PlanoSala() {
                 ref={viewportRef}
                 className={`planoCanvas ${panning ? 'planoPanning' : ''}`}
                 style={{ height: canvasHeight }}
-                onClick={() => setMesaSeleccionada(null)}
+                onClick={() => { setMesaSeleccionada(null); setParedSeleccionada(null); }}
                 onMouseDown={onPanMouseDown}
               >
                 <div
@@ -309,6 +310,7 @@ function PlanoSala() {
               mesa={mesaSeleccionada}
               onGuardar={handleGuardarMesa}
               onEliminar={handleEliminarMesa}
+              onDuplicar={handleDuplicarMesa}
               onCerrar={() => setMesaSeleccionada(null)}
             />
           </div>
@@ -320,6 +322,7 @@ function PlanoSala() {
               pared={paredSeleccionada}
               onGuardar={handleGuardarPared}
               onEliminar={handleEliminarPared}
+              onDuplicar={handleDuplicarPared}
               onCerrar={() => setParedSeleccionada(null)}
             />
           </div>

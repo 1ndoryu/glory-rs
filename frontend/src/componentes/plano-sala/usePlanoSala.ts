@@ -402,6 +402,43 @@ export function usePlanoSala(
     }
   };
 
+  /* [134A-7] Duplicar pared — crea copia con offset de 20px */
+  const handleDuplicarPared = async (pared: ParedSala) => {
+    if (!zonaActiva) return;
+    try {
+      await crearPared({
+        zona_id: zonaActiva,
+        ancho: pared.ancho, alto: pared.alto,
+        color: pared.color, rotacion: pared.rotacion,
+        pos_x: pared.pos_x + 20, pos_y: pared.pos_y + 20,
+      } as CrearParedRequest);
+      refetchPlano();
+      toast.success('Pared duplicada');
+    } catch {
+      toast.error('Error al duplicar pared');
+    }
+  };
+
+  /* [134A-7] Duplicar mesa — crea copia con siguiente número disponible + offset 20px */
+  const handleDuplicarMesa = async (mesa: Mesa) => {
+    if (!zonaActiva) return;
+    const maxNum = mesasZona.reduce((max, m) => Math.max(max, m.numero), 0);
+    try {
+      await crearMesa({
+        zona_id: zonaActiva,
+        numero: maxNum + 1,
+        forma: mesa.forma, ancho: mesa.ancho, alto: mesa.alto,
+        min_personas: mesa.min_personas, max_personas: mesa.max_personas,
+        pos_x: mesa.pos_x + 20, pos_y: mesa.pos_y + 20,
+      } as CrearMesaRequest);
+      refetchPlano();
+      toast.success(`Mesa ${maxNum + 1} duplicada`);
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { message?: string } } };
+      toast.error(axiosErr?.response?.data?.message || 'Error al duplicar mesa');
+    }
+  };
+
   return {
     plano, zonaActiva, zonaData, mesasZona, paredesZona, mesaSeleccionada, arrastrando,
     paredSeleccionada, setParedSeleccionada,
@@ -411,6 +448,7 @@ export function usePlanoSala(
     handleCrearMesa, handleGuardarMesa, handleResizeMesa, handleEliminarMesa,
     handleCrearPared, handleEliminarPared, handleGuardarPared,
     handleMoverPared, handleRotarPared, handleRedimensionarPared,
+    handleDuplicarPared, handleDuplicarMesa,
     handleDragStart, handleDragEnd,
     handleExportar, handleImportar,
     handleCrearCombinacion, handleEliminarCombinacion,

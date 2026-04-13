@@ -5,17 +5,18 @@ import { useState, type FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Trash2, X } from 'lucide-react';
+import { Trash2, X, Copy } from 'lucide-react';
 import type { ParedSala, ActualizarParedRequest } from '../../api/generated/gestionRestauranteAPI.schemas';
 
 interface Props {
   pared: ParedSala;
   onGuardar: (id: string, req: ActualizarParedRequest) => void;
   onEliminar: (id: string) => void;
+  onDuplicar: (pared: ParedSala) => void;
   onCerrar: () => void;
 }
 
-export default function PanelConfigPared({ pared, onGuardar, onEliminar, onCerrar }: Props) {
+export default function PanelConfigPared({ pared, onGuardar, onEliminar, onDuplicar, onCerrar }: Props) {
   const [ancho, setAncho] = useState(pared.ancho);
   const [alto, setAlto] = useState(pared.alto);
   const [color, setColor] = useState(pared.color || '#6b7280');
@@ -76,6 +77,9 @@ export default function PanelConfigPared({ pared, onGuardar, onEliminar, onCerra
         </div>
         <div className="flex gap-2">
           <Button type="submit" size="sm" className="flex-1">Guardar</Button>
+          <Button type="button" size="sm" variant="outline" onClick={() => onDuplicar(pared)} title="Duplicar pared">
+            <Copy className="size-4" />
+          </Button>
           <Button type="button" size="sm" variant="destructive" onClick={() => onEliminar(pared.id)}>
             <Trash2 className="size-4" />
           </Button>

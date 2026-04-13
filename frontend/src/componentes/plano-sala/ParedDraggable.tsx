@@ -1,8 +1,7 @@
 /* [134A-3] Pared arrastrable — pointer events nativos con setPointerCapture.
- * Modos: move (drag cuerpo), rotate (handle circular, snap 15°), resize-e/resize-s (handles de borde).
- * setPointerCapture en el div padre garantiza que todos los modos reciben pointermove/up
- * aunque el cursor salga del elemento. stopPropagation en pointerdown evita que dnd-kit
- * del canvas capture el pointer (era la causa del bug de movimiento solo vertical). */
+ * [134A-6] Fix ancho/alto con rotación: cuando la pared está rotada ~90°/270°,
+ * el handle E cambia alto y el S cambia ancho (swap de ejes). Handles más finos.
+ * Mínimo igual para ancho y alto (MIN_DIM). */
 
 import { useRef, useState, useEffect } from 'react';
 import { RotateCw } from 'lucide-react';
@@ -10,6 +9,13 @@ import type { ParedSala } from '../../api/generated/gestionRestauranteAPI.schema
 import type { ActualizarParedRequest } from '../../api/generated';
 
 type DragMode = 'none' | 'move' | 'rotate' | 'resize-e' | 'resize-s';
+const MIN_DIM = 10;
+
+/* Determina si la rotación está más cerca de 90°/270° (ejes visuamente invertidos) */
+function isSwapped(deg: number): boolean {
+  const norm = ((deg % 360) + 360) % 360;
+  return (norm > 45 && norm < 135) || (norm > 225 && norm < 315);
+}
 
 interface Props {
   pared: ParedSala;       /* display coords (× zoom) */
@@ -132,9 +138,21 @@ export default function ParedDraggable({
       angle = Math.round(angle / 15) * 15;
       previewRot.current = ((angle % 360) + 360) % 360;
     } else if (mode.current === 'resize-e') {
-      previewW.current = Math.max(10 * z, startRect.current.w + dx);
+      /* [134A-6] Si la pared está rotada ~90°/270°, el handle E (visual: derecha)
+       * controla el alto canónico en vez del ancho. */
+      const swapped = isSwapped(previewRot.current);
+      if (swapped) {
+        previewH.current = Math.max(MIN_DIM * z, startRect.current.h + dx);
+      } else {
+        previewW.current = Math.max(MIN_DIM * z, startRect.current.w + dx);
+      }
     } else if (mode.current === 'resize-s') {
-      previewH.current = Math.max(5 * z, startRect.current.h + dy);
+      const swapped = isSwapped(previewRot.current);
+      if (swapped) {
+        previewW.current = Math.max(MIN_DIM * z, startRect.current.w + dy);
+      } else {
+        previewH.current = Math.max(MIN_DIM * z, startRect.current.h + dy);
+      }
     }
     forceUpdate(n => n + 1);
   };
@@ -196,19 +214,19 @@ export default function ParedDraggable({
           >
             <RotateCw className="size-3 text-primary-foreground pointer-events-none" />
           </div>
-          {/* Handle resize ancho (borde derecho) */}
+          {/* Handle resize E (borde derecho) — más fino */}
           <div
-            className="absolute top-1/2 -right-1.5 -translate-y-1/2 w-3 h-6 rounded-sm bg-primary/80 hover:bg-primary"
+            className="absolute top-1/2 -right-1 -translate-y-1/2 w-2 h-5 rounded-sm bg-primary/80 hover:bg-primary"
             style={{ zIndex: 3, touchAction: 'none', cursor: 'ew-resize' }}
             onPointerDown={onPointerDownResizeE}
-            title="Arrastrar para cambiar ancho"
+            title="Arrastrar para cambiar dimensión"
           />
-          {/* Handle resize alto (borde inferior) */}
+          {/* Handle resize S (borde inferior) — más fino */}
           <div
-            className="absolute left-1/2 -bottom-1.5 -translate-x-1/2 w-6 h-3 rounded-sm bg-primary/80 hover:bg-primary"
+            className="absolute left-1/2 -bottom-1 -translate-x-1/2 w-5 h-2 rounded-sm bg-primary/80 hover:bg-primary"
             style={{ zIndex: 3, touchAction: 'none', cursor: 'ns-resize' }}
             onPointerDown={onPointerDownResizeS}
-            title="Arrastrar para cambiar alto"
+            title="Arrastrar para cambiar dimensión"
           />
         </>
       )}
