@@ -6,7 +6,6 @@
  * Lógica en usePlanoSala, mesa arrastrable en MesaDraggable, config en PanelConfigMesa. */
 
 import { useRef, useMemo } from 'react';
-import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { Button } from '@/components/ui/button';
 import { Pencil, Trash2, Download, Upload, ZoomIn, ZoomOut } from 'lucide-react';
 import MesaDraggable from './plano-sala/MesaDraggable';
@@ -30,7 +29,7 @@ function PlanoSala() {
   const setCanvasHeight = useZoomStore(s => s.setCanvasHeight);
 
   const {
-    plano, zonaActiva, zonaData, mesasZona, paredesZona, mesaSeleccionada, arrastrando,
+    plano, zonaActiva, zonaData, mesasZona, paredesZona, mesaSeleccionada,
     paredSeleccionada, setParedSeleccionada,
     posicionesLocales, dimensionesLocales, setMesaSeleccionada, cambiarZona, zoom, setZoom,
     canvasHeight,
@@ -43,13 +42,13 @@ function PlanoSala() {
     handleEliminarPared, handleGuardarPared,
     handleMoverPared, handleRotarPared, handleRedimensionarPared,
     handleDuplicarPared, handleDuplicarMesa,
-    handleDragStart, handleDragEnd,
+    handleMoverMesa,
     handleExportar, handleImportar,
     handleCrearCombinacion, handleEliminarCombinacion,
     dialogoEntrada, setDialogoEntrada,
     dialogoConfirmar, setDialogoConfirmar,
     dialogoCombinacion, setDialogoCombinacion,
-  } = usePlanoSala(canvasRef);
+  } = usePlanoSala();
 
   /* [313A-13] PlanoSala sufría la misma clase de bug que reservas: el viewport se mide
    * sobre un nodo que aparece condicionalmente cuando existe zonaData. Con deps=[] el
@@ -103,11 +102,8 @@ function PlanoSala() {
    * [303A-20] Transform-based: panOffset state en vez de scrollLeft/scrollTop */
   const { panning, panOffset, setPanOffset, onPanMouseDown } = useCanvasPan(maxPanOffset, activeTool === 'pan');
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
-  );
-
   /* [134A-15+16] Handlers del viewport delegados a useCanvasViewport */
+  /* [134A-21] sensors/DndContext eliminados — mesa usa pointer events nativos. */
   const { onViewportClick, onViewportMouseDown, onViewportMouseMove } = useCanvasViewport({
     activeTool, wallDrawStart, zonaActiva, panOffset, zoom,
     setMesaSeleccionada, setParedSeleccionada,
@@ -116,7 +112,6 @@ function PlanoSala() {
   });
 
   return (
-    <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
     <div className="flex flex-col gap-4">
       {/* [134A-15] Toolbar simplificado: zona + export/import + zoom. Herramientas en toolbar flotante */}
       <div className="flex items-center gap-2 flex-wrap">
@@ -255,11 +250,11 @@ function PlanoSala() {
                         key={mesa.id}
                         mesa={mesaZoom}
                         seleccionada={mesaSeleccionada?.id === mesa.id}
-                        arrastrando={arrastrando === mesa.id}
                         zoom={zoom}
                         zonaAncho={zonaData.ancho}
                         zonaAlto={zonaData.alto}
                         onResize={handleResizeMesa}
+                        onMoveEnd={handleMoverMesa}
                         onClick={() => {
                           if (activeTool === 'delete') {
                             handleEliminarMesaDirecta(mesa.id);
@@ -348,7 +343,6 @@ function PlanoSala() {
         mesasZona={mesasZona}
       />
     </div>
-    </DndContext>
   );
 }
 

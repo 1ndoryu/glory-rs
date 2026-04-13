@@ -4,8 +4,7 @@
  * para que PlanoOcupacion (reservas) refleje cambios en tiempo real.
  * Los diálogos se renderizan en PlanoSala.tsx usando shadcn Dialog. */
 
-import { useState, useCallback, useRef, type RefObject } from 'react';
-import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
+import { useState, useCallback, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import axios from '@/api/axios-instance';
@@ -57,11 +56,9 @@ export interface DialogoCombinacion {
   onConfirmar: (nombre: string, maxPersonas: number, mesaIds: string[]) => void;
 }
 
-/* [283A-25] Recibe canvasRef para que los clamps de drag usen el ancho real
- * del DOM. Zoom vive aquí para centralizar lógica de escalado. */
-export function usePlanoSala(
-  canvasRef: RefObject<HTMLDivElement | null>,
-) {
+/* [283A-25] Clamp de mesas gestionado por MesaDraggable nativamente (pointer events).
+ * [134A-21] Se eliminó canvasRef — ya no es necesario para arrastrar mesas. */
+export function usePlanoSala() {
   const queryClient = useQueryClient();
   const { data, refetch } = useObtenerPlano();
   const plano = data?.status === 200 ? data.data : null;
@@ -76,7 +73,6 @@ export function usePlanoSala(
   const [zonaActiva, setZonaActiva] = useState<string | null>(null);
   const [mesaSeleccionada, setMesaSeleccionada] = useState<Mesa | null>(null);
   const [paredSeleccionada, setParedSeleccionada] = useState<ParedSala | null>(null);
-  const [arrastrando, setArrastrando] = useState<string | null>(null);
   const [posicionesLocales, setPosicionesLocales] = useState<
     Record<string, { x: number; y: number }>
   >({});
@@ -324,32 +320,19 @@ export function usePlanoSala(
     });
   };
 
-  const handleDragStart = (event: DragStartEvent) => setArrastrando(String(event.active.id));
+  const handleDragStart = (_event: { active: { id: string | number } }) => {
+    /* [134A-21] Drag gestionado por MesaDraggable con pointer events — no se usa dnd-kit */
+  };
 
-  /* [283A-25] Clamp usa el ancho real del canvas (DOM) dividido por zoom en vez
-   * de zonaData.ancho para que las mesas ocupen todo el ancho visible.
-   * Deltas divididos por zoom para mantener coordenadas canónicas.
-   * [283A-43] try/catch + refetch: si falla el PATCH, revierte posición local
-   * y muestra toast error. Sin esto el drag parecía no guardar. */
-  const handleDragEnd = useCallback(async (event: DragEndEvent) => {
-    const mesaId = String(event.active.id);
+  /* [134A-21] Mover mesa vía pointer events nativos (sin dnd-kit transform).
+   * Recibe coordenadas canónicas ya calculadas y clampadas por MesaDraggable. */
+  const handleMoverMesa = useCallback(async (mesaId: string, canonicalX: number, canonicalY: number) => {
     const mesa = mesasZona.find((m) => m.id === mesaId);
-    if (!mesa) { setArrastrando(null); return; }
+    if (!mesa) return;
     const prev = posicionesLocales[mesaId];
-    const canvasWidth = canvasRef.current?.clientWidth ?? 800;
-    const maxX = canvasWidth / zoom - mesa.ancho;
-    const maxY = (zonaData?.alto ?? 600) - mesa.alto;
-    const dx = event.delta.x / zoom;
-    const dy = event.delta.y / zoom;
-    const nuevoX = Math.min(maxX, Math.max(0, (prev?.x ?? mesa.pos_x) + dx));
-    const nuevoY = Math.min(maxY, Math.max(0, (prev?.y ?? mesa.pos_y) + dy));
-    /* [134A-21] Actualizar posición local ANTES de limpiar arrastrando.
-     * Si se limpia primero, el CSS transform desaparece un frame antes de
-     * que React aplique la nueva posición → flicker visual. */
-    setPosicionesLocales((p) => ({ ...p, [mesaId]: { x: nuevoX, y: nuevoY } }));
-    setArrastrando(null);
+    setPosicionesLocales((p) => ({ ...p, [mesaId]: { x: canonicalX, y: canonicalY } }));
     const req: ActualizarPosicionesRequest = {
-      posiciones: [{ id: mesaId, pos_x: Math.round(nuevoX), pos_y: Math.round(nuevoY) }],
+      posiciones: [{ id: mesaId, pos_x: canonicalX, pos_y: canonicalY }],
     };
     try {
       await actualizarPosiciones(req);
@@ -358,7 +341,7 @@ export function usePlanoSala(
       setPosicionesLocales((p) => ({ ...p, [mesaId]: { x: prev?.x ?? mesa.pos_x, y: prev?.y ?? mesa.pos_y } }));
       toast.error('No se pudo guardar la posición');
     }
-  }, [mesasZona, posicionesLocales, zonaData, canvasRef, zoom, refetchPlano]);
+  }, [mesasZona, posicionesLocales, refetchPlano]);
 
   /* [303A-2] Migrado de raw fetch a axios para usar interceptors JWT/401 */
   const handleExportar = async () => {
@@ -566,7 +549,7 @@ export function usePlanoSala(
   };
 
   return {
-    plano, zonaActiva, zonaData, mesasZona, paredesZona, mesaSeleccionada, arrastrando,
+    plano, zonaActiva, zonaData, mesasZona, paredesZona, mesaSeleccionada,
     paredSeleccionada, setParedSeleccionada,
     posicionesLocales, dimensionesLocales, setMesaSeleccionada, cambiarZona, zoom, setZoom,
     canvasHeight,
@@ -576,11 +559,11 @@ export function usePlanoSala(
     handleCrearMesaRapida, handleEliminarMesaDirecta, handleEliminarParedDirecta,
     handleWallDrawStart, handleWallDrawMove, handleWallDrawEnd,
     handleCrearZona, handleEliminarZona, handleEditarZona,
-    handleCrearMesa, handleGuardarMesa, handleResizeMesa, handleEliminarMesa,
+    handleCrearMesa, handleMoverMesa, handleGuardarMesa, handleResizeMesa, handleEliminarMesa,
     handleCrearPared, handleEliminarPared, handleGuardarPared,
     handleMoverPared, handleRotarPared, handleRedimensionarPared,
     handleDuplicarPared, handleDuplicarMesa,
-    handleDragStart, handleDragEnd,
+    handleDragStart,
     handleExportar, handleImportar,
     handleCrearCombinacion, handleEliminarCombinacion,
     dialogoEntrada, setDialogoEntrada,
