@@ -455,15 +455,40 @@ export function usePlanoSala() {
   const handleMoverPared = async (id: string, pos_x: number, pos_y: number) => {
     const pared = paredesZona.find(p => p.id === id);
     if (!pared) return;
-    /* [134A-14] pos_x/pos_y es la esquina top-left del rect sin rotar.
-     * [134A-23] Sin clamp de ningún tipo — ni zonaData ni Math.max(0).
-     * Cualquier clamp sobre pos_x/pos_y directo (sin considerar rotación) produce
-     * el bug de "límite horizontal imaginario": las paredes rotadas se detienen
-     * como si fueran horizontales porque pos_x no representa su borde visual real.
-     * La correcta posición visual de una pared rotada es su centro, no su top-left.
-     * Se pasan las coordenadas tal cual llegan de ParedDraggable (equivalente a handleMoverMesa). */
-    const clampedX = Math.round(pos_x);
-    const clampedY = Math.round(pos_y);
+    /* =====================================================================
+     * CLAMP DE PAREDES — LECTURA OBLIGATORIA ANTES DE MODIFICAR
+     * =====================================================================
+     * pos_x / pos_y = esquina top-left del rect SIN ROTAR (coords canónicas).
+     * CSS aplica rotate(θ) alrededor del centro → la esquina top-left NO
+     * representa ningún borde visual real cuando θ ≠ 0.
+     *
+     * REGRESIÓN HISTÓRICA (no repetir):
+     *  ❌ Math.max(0, pos_x) → "límite horizontal imaginario": una pared
+     *     vertical tiene pos_x = centro_x - largo/2 < 0 aunque esté dentro
+     *     del plano. El clamp la mueve como si fuera horizontal.
+     *  ❌ Sin clamp → las paredes salen del plano si se arrastran al exterior.
+     *  ✅ Clampear el CENTRO del bounding box rotado, luego volver a top-left.
+     *
+     * FÓRMULA CORRECTA:
+     *  centro visual  = (pos_x + w/2, pos_y + h/2)
+     *  bounding box   = { bbW = w|cosθ| + h|sinθ|, bbH = w|sinθ| + h|cosθ| }
+     *  clamp centro   = [bbW/2, zonaW - bbW/2] × [bbH/2, zonaH - bbH/2]
+     *  top-left final = centro_clampado - (w/2, h/2)
+     *
+     * RESULTADO: la pared no puede salir de la zona, y los límites respetan
+     * su ángulo real independientemente de cuánto esté rotada.
+     * ===================================================================== */
+    const w = pared.ancho;
+    const h = pared.alto;
+    const rad = (pared.rotacion * Math.PI) / 180;
+    const bbW = w * Math.abs(Math.cos(rad)) + h * Math.abs(Math.sin(rad));
+    const bbH = w * Math.abs(Math.sin(rad)) + h * Math.abs(Math.cos(rad));
+    const zonaW = zonaData?.ancho ?? 600;
+    const zonaH = zonaData?.alto ?? 600;
+    const cx = Math.min(zonaW - bbW / 2, Math.max(bbW / 2, pos_x + w / 2));
+    const cy = Math.min(zonaH - bbH / 2, Math.max(bbH / 2, pos_y + h / 2));
+    const clampedX = Math.round(cx - w / 2);
+    const clampedY = Math.round(cy - h / 2);
     try {
       await actualizarParedApi(id, {
         ancho: pared.ancho, alto: pared.alto,
