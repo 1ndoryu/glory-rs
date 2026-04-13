@@ -14,6 +14,7 @@ import MesaDraggable from './plano-sala/MesaDraggable';
 import MesaTemplate from './plano-sala/MesaTemplate';
 import PanelConfigMesa from './plano-sala/PanelConfigMesa';
 import PanelConfigPared from './plano-sala/PanelConfigPared';
+import ParedDraggable from './plano-sala/ParedDraggable';
 import PlanoDialogs from './plano-sala/PlanoDialogs';
 import CanvasMinimap from './plano-sala/CanvasMinimap';
 import OffScreenIndicators from './plano-sala/OffScreenIndicators';
@@ -36,6 +37,7 @@ function PlanoSala() {
     handleCrearZona, handleEliminarZona, handleEditarZona,
     handleCrearMesa, handleGuardarMesa, handleResizeMesa, handleEliminarMesa,
     handleCrearPared, handleEliminarPared, handleGuardarPared,
+    handleMoverPared, handleRotarPared,
     handleDragStart, handleDragEnd,
     handleExportar, handleImportar,
     handleCrearCombinacion, handleEliminarCombinacion,
@@ -184,10 +186,9 @@ function PlanoSala() {
                     transform: `translate(${-panOffset.x}px, ${-panOffset.y}px)`,
                   }}
                 >
-                  {/* [134A-3] Paredes: rectángulos estáticos representando muros/columnas.
-                   * Se renderizan antes de las mesas para que queden de fondo. */}
+                  {/* [134A-3] Paredes arrastrables — mueve con drag, rota con handle circular. */}
                   {paredesZona.map(pared => {
-                    const paredZoom = {
+                    const paredDisplay = {
                       ...pared,
                       pos_x: pared.pos_x * zoom,
                       pos_y: pared.pos_y * zoom,
@@ -195,27 +196,20 @@ function PlanoSala() {
                       alto: pared.alto * zoom,
                     };
                     return (
-                      <div
+                      <ParedDraggable
                         key={pared.id}
-                        className="absolute rounded-sm border border-border/50 cursor-pointer transition-shadow"
-                        style={{
-                          left: paredZoom.pos_x,
-                          top: paredZoom.pos_y,
-                          width: paredZoom.ancho,
-                          height: paredZoom.alto,
-                          backgroundColor: pared.color || '#6b7280',
-                          transform: pared.rotacion ? `rotate(${pared.rotacion}deg)` : undefined,
-                          transformOrigin: 'center center',
-                          boxShadow: paredSeleccionada?.id === pared.id
-                            ? '0 0 0 2px hsl(var(--primary))'
-                            : undefined,
-                          zIndex: 1,
-                        }}
-                        onClick={(e) => {
-                          e.stopPropagation();
+                        pared={paredDisplay}
+                        canonical={pared}
+                        zoom={zoom}
+                        zonaAncho={zonaData.ancho}
+                        zonaAlto={zonaData.alto}
+                        seleccionada={paredSeleccionada?.id === pared.id}
+                        onClick={() => {
                           setParedSeleccionada(pared);
                           setMesaSeleccionada(null);
                         }}
+                        onMoveEnd={handleMoverPared}
+                        onRotateEnd={handleRotarPared}
                       />
                     );
                   })}

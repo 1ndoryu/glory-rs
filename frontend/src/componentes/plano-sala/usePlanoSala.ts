@@ -24,7 +24,6 @@ import {
   ParedSala,
   CrearParedRequest,
   ActualizarParedRequest,
-  ActualizarPosicionesParedesRequest,
   crearZona,
   eliminarZona,
   actualizarZona as actualizarZonaApi,
@@ -38,7 +37,6 @@ import {
   crearPared,
   eliminarPared as eliminarParedApi,
   actualizarPared as actualizarParedApi,
-  actualizarPosicionesParedes,
 } from '../../api/generated';
 
 /* Tipos de diálogo para reemplazar prompt/confirm nativos */
@@ -364,6 +362,37 @@ export function usePlanoSala(
     }
   };
 
+  /* [134A-3] Mover/rotar pared via drag directo — no limpia la selección para UX fluida. */
+  const handleMoverPared = async (id: string, pos_x: number, pos_y: number) => {
+    const pared = paredesZona.find(p => p.id === id);
+    if (!pared) return;
+    try {
+      await actualizarParedApi(id, {
+        ancho: pared.ancho, alto: pared.alto,
+        color: pared.color, rotacion: pared.rotacion,
+        pos_x, pos_y,
+      });
+      refetchPlano();
+    } catch {
+      toast.error('Error al mover pared');
+    }
+  };
+
+  const handleRotarPared = async (id: string, rotacion: number) => {
+    const pared = paredesZona.find(p => p.id === id);
+    if (!pared) return;
+    try {
+      await actualizarParedApi(id, {
+        ancho: pared.ancho, alto: pared.alto,
+        color: pared.color, rotacion,
+        pos_x: pared.pos_x, pos_y: pared.pos_y,
+      });
+      refetchPlano();
+    } catch {
+      toast.error('Error al rotar pared');
+    }
+  };
+
   return {
     plano, zonaActiva, zonaData, mesasZona, paredesZona, mesaSeleccionada, arrastrando,
     paredSeleccionada, setParedSeleccionada,
@@ -372,6 +401,7 @@ export function usePlanoSala(
     handleCrearZona, handleEliminarZona, handleEditarZona,
     handleCrearMesa, handleGuardarMesa, handleResizeMesa, handleEliminarMesa,
     handleCrearPared, handleEliminarPared, handleGuardarPared,
+    handleMoverPared, handleRotarPared,
     handleDragStart, handleDragEnd,
     handleExportar, handleImportar,
     handleCrearCombinacion, handleEliminarCombinacion,
