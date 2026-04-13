@@ -1,21 +1,17 @@
-/* [134A-3] Pared arrastrable — pointer events nativos con setPointerCapture.
- * [134A-6] Fix ancho/alto con rotación: cuando la pared está rotada ~90°/270°,
- * el handle E cambia alto y el S cambia ancho (swap de ejes). Handles más finos.
- * Mínimo igual para ancho y alto (MIN_DIM). */
+/* [134A-8] Pared arrastrable — simplificada: solo largo editable, grosor fijo.
+ * ancho = largo del bar (editable con handle), alto = grosor (fijo 10).
+ * La rotación CSS orienta la pared. El handle de resize proyecta el delta
+ * del mouse sobre el eje local del bar (cos/sin de rotación) para que
+ * funcione naturalmente en cualquier ángulo. */
 
 import { useRef, useState, useEffect } from 'react';
 import { RotateCw } from 'lucide-react';
 import type { ParedSala } from '../../api/generated/gestionRestauranteAPI.schemas';
 import type { ActualizarParedRequest } from '../../api/generated';
 
-type DragMode = 'none' | 'move' | 'rotate' | 'resize-e' | 'resize-s';
-const MIN_DIM = 10;
-
-/* Determina si la rotación está más cerca de 90°/270° (ejes visuamente invertidos) */
-function isSwapped(deg: number): boolean {
-  const norm = ((deg % 360) + 360) % 360;
-  return (norm > 45 && norm < 135) || (norm > 225 && norm < 315);
-}
+type DragMode = 'none' | 'move' | 'rotate' | 'resize';
+const MIN_LARGO = 20;
+const GROSOR = 10;
 
 interface Props {
   pared: ParedSala;       /* display coords (× zoom) */
@@ -45,7 +41,7 @@ export default function ParedDraggable({
   const previewX = useRef(pared.pos_x);
   const previewY = useRef(pared.pos_y);
   const previewW = useRef(pared.ancho);
-  const previewH = useRef(pared.alto);
+  /* alto = grosor fijo, no se usa como preview editable */
   const previewRot = useRef(canonical.rotacion);
 
   /* Refs para callbacks y valores que cambian sin reinstalar handlers */
@@ -69,11 +65,10 @@ export default function ParedDraggable({
       previewX.current = pared.pos_x;
       previewY.current = pared.pos_y;
       previewW.current = pared.ancho;
-      previewH.current = pared.alto;
       previewRot.current = canonical.rotacion;
       forceUpdate(n => n + 1);
     }
-  }, [pared.pos_x, pared.pos_y, pared.ancho, pared.alto, canonical.rotacion]);
+  }, [pared.pos_x, pared.pos_y, pared.ancho, canonical.rotacion]);
 
   /* Todos los modos capturan el pointer en el div padre para recibir pointermove/up
    * incluso si el cursor sale del elemento. */
@@ -88,7 +83,7 @@ export default function ParedDraggable({
     onClick();
     mode.current = 'move';
     startMouse.current = { x: e.clientX, y: e.clientY };
-    startRect.current = { x: previewX.current, y: previewY.current, w: previewW.current, h: previewH.current };
+    startRect.current = { x: previewX.current, y: previewY.current, w: previewW.current, h: 0 };
     captureOnParent(e);
   };
 
@@ -102,18 +97,9 @@ export default function ParedDraggable({
   const onPointerDownResizeE = (e: React.PointerEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    mode.current = 'resize-e';
+    mode.current = 'resize';
     startMouse.current = { x: e.clientX, y: e.clientY };
-    startRect.current = { x: previewX.current, y: previewY.current, w: previewW.current, h: previewH.current };
-    captureOnParent(e);
-  };
-
-  const onPointerDownResizeS = (e: React.PointerEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
-    mode.current = 'resize-s';
-    startMouse.current = { x: e.clientX, y: e.clientY };
-    startRect.current = { x: previewX.current, y: previewY.current, w: previewW.current, h: previewH.current };
+    startRect.current = { x: previewX.current, y: previewY.current, w: previewW.current, h: 0 };
     captureOnParent(e);
   };
 
@@ -137,22 +123,13 @@ export default function ParedDraggable({
       let angle = Math.atan2(e.clientY - cy, e.clientX - cx) * (180 / Math.PI) + 90;
       angle = Math.round(angle / 15) * 15;
       previewRot.current = ((angle % 360) + 360) % 360;
-    } else if (mode.current === 'resize-e') {
-      /* [134A-6] Si la pared está rotada ~90°/270°, el handle E (visual: derecha)
-       * controla el alto canónico en vez del ancho. */
-      const swapped = isSwapped(previewRot.current);
-      if (swapped) {
-        previewH.current = Math.max(MIN_DIM * z, startRect.current.h + dx);
-      } else {
-        previewW.current = Math.max(MIN_DIM * z, startRect.current.w + dx);
-      }
-    } else if (mode.current === 'resize-s') {
-      const swapped = isSwapped(previewRot.current);
-      if (swapped) {
-        previewW.current = Math.max(MIN_DIM * z, startRect.current.w + dy);
-      } else {
-        previewH.current = Math.max(MIN_DIM * z, startRect.current.h + dy);
-      }
+    } else if (mode.current === 'resize') {
+      /* Proyectar el delta del mouse sobre el eje local del bar.
+       * El bar sin rotación apunta a la derecha (+X). Con rotación θ,
+       * el eje local es (cos θ, sin θ). Proyección escalar = dx·cos + dy·sin. */
+      const rad = (previewRot.current * Math.PI) / 180;
+      const proj = dx * Math.cos(rad) + dy * Math.sin(rad);
+      previewW.current = Math.max(MIN_LARGO * z, startRect.current.w + proj);
     }
     forceUpdate(n => n + 1);
   };
@@ -168,12 +145,12 @@ export default function ParedDraggable({
       onMoveEndRef.current(c.id, Math.round(previewX.current / z), Math.round(previewY.current / z));
     } else if (m === 'rotate') {
       onRotateEndRef.current(c.id, previewRot.current);
-    } else if (m === 'resize-e' || m === 'resize-s') {
+    } else if (m === 'resize') {
       onResizeEndRef.current(c.id, {
         pos_x: Math.round(previewX.current / z),
         pos_y: Math.round(previewY.current / z),
         ancho: Math.round(previewW.current / z),
-        alto: Math.round(previewH.current / z),
+        alto: GROSOR,
         color: c.color,
         rotacion: previewRot.current,
       });
@@ -189,7 +166,7 @@ export default function ParedDraggable({
         left: previewX.current,
         top: previewY.current,
         width: previewW.current,
-        height: previewH.current,
+        height: GROSOR * zoom,
         backgroundColor: canonical.color || '#6b7280',
         transform: previewRot.current ? `rotate(${previewRot.current}deg)` : undefined,
         transformOrigin: 'center center',
@@ -214,19 +191,12 @@ export default function ParedDraggable({
           >
             <RotateCw className="size-3 text-primary-foreground pointer-events-none" />
           </div>
-          {/* Handle resize E (borde derecho) — más fino */}
+          {/* Handle resize largo (extremo derecho del bar) */}
           <div
             className="absolute top-1/2 -right-1 -translate-y-1/2 w-2 h-5 rounded-sm bg-primary/80 hover:bg-primary"
             style={{ zIndex: 3, touchAction: 'none', cursor: 'ew-resize' }}
             onPointerDown={onPointerDownResizeE}
-            title="Arrastrar para cambiar dimensión"
-          />
-          {/* Handle resize S (borde inferior) — más fino */}
-          <div
-            className="absolute left-1/2 -bottom-1 -translate-x-1/2 w-5 h-2 rounded-sm bg-primary/80 hover:bg-primary"
-            style={{ zIndex: 3, touchAction: 'none', cursor: 'ns-resize' }}
-            onPointerDown={onPointerDownResizeS}
-            title="Arrastrar para cambiar dimensión"
+            title="Arrastrar para cambiar largo"
           />
         </>
       )}

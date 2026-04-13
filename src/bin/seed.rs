@@ -884,10 +884,10 @@ async fn seed_inactividad(pool: &PgPool, user_id: Uuid, _canal_ids: &[Uuid]) {
 
 /* [134A-1] 2 paredes demo para decorar el plano de sala */
 async fn seed_paredes(pool: &PgPool, zona_id: Uuid) {
-    /* (pos_x, pos_y, ancho, alto, rotacion, color) */
+    /* [134A-8] Pared = bar horizontal: ancho = largo, alto = grosor (10). Rotación orienta. */
     let paredes: &[(i32, i32, i32, i32, f64, &str)] = &[
-        (100, 50, 10, 150, 0.0, "#8B4513"),
-        (50, 200, 200, 10, 0.0, "#8B4513"),
+        (100, 50, 150, 10, 90.0, "#8B4513"),   /* vertical (rotada 90°) */
+        (50, 200, 200, 10, 0.0, "#8B4513"),    /* horizontal */
     ];
 
     for &(x, y, ancho, alto, rotacion, color) in paredes {

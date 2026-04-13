@@ -1,5 +1,4 @@
-/* [134A-3] Panel de configuración de paredes en el plano de sala.
- * Permite editar dimensiones, color y rotación de una pared seleccionada. */
+/* [134A-8] Panel de configuración de paredes — simplificado.\n * Solo largo (ancho canónico) editable. Grosor fijo (10). */
 
 import { useState, type FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Trash2, X, Copy } from 'lucide-react';
 import type { ParedSala, ActualizarParedRequest } from '../../api/generated/gestionRestauranteAPI.schemas';
+
+const GROSOR = 10;
 
 interface Props {
   pared: ParedSala;
@@ -17,8 +18,7 @@ interface Props {
 }
 
 export default function PanelConfigPared({ pared, onGuardar, onEliminar, onDuplicar, onCerrar }: Props) {
-  const [ancho, setAncho] = useState(pared.ancho);
-  const [alto, setAlto] = useState(pared.alto);
+  const [largo, setLargo] = useState(pared.ancho);
   const [color, setColor] = useState(pared.color || '#6b7280');
   const [rotacion, setRotacion] = useState(pared.rotacion);
   const [posX, setPosX] = useState(pared.pos_x);
@@ -26,7 +26,7 @@ export default function PanelConfigPared({ pared, onGuardar, onEliminar, onDupli
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    onGuardar(pared.id, { ancho, alto, color, rotacion, pos_x: posX, pos_y: posY });
+    onGuardar(pared.id, { ancho: largo, alto: GROSOR, color, rotacion, pos_x: posX, pos_y: posY });
   };
 
   return (
@@ -38,15 +38,9 @@ export default function PanelConfigPared({ pared, onGuardar, onEliminar, onDupli
         </Button>
       </div>
       <form onSubmit={handleSubmit} className="space-y-3">
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <Label htmlFor="pared-ancho">Ancho</Label>
-            <Input id="pared-ancho" type="number" min={10} value={ancho} onChange={e => setAncho(+e.target.value)} />
-          </div>
-          <div>
-            <Label htmlFor="pared-alto">Alto</Label>
-            <Input id="pared-alto" type="number" min={5} value={alto} onChange={e => setAlto(+e.target.value)} />
-          </div>
+        <div>
+          <Label htmlFor="pared-largo">Largo (px)</Label>
+          <Input id="pared-largo" type="number" min={20} value={largo} onChange={e => setLargo(+e.target.value)} />
         </div>
         <div className="grid grid-cols-2 gap-2">
           <div>

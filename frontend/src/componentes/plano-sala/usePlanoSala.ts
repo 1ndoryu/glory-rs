@@ -326,10 +326,11 @@ export function usePlanoSala(
   /* [134A-3] Handlers de paredes — CRUD para muros decorativos en el plano.
    * Las paredes son rectángulos con color y rotación que representan muros,
    * columnas u otros elementos físicos de la sala. */
+  /* [134A-8] Crear pared: grosor fijo 10, largo por defecto 120 */
   const handleCrearPared = async () => {
     if (!zonaActiva) return;
     try {
-      await crearPared({ zona_id: zonaActiva, ancho: 120, alto: 20, color: '#6b7280' } as CrearParedRequest);
+      await crearPared({ zona_id: zonaActiva, ancho: 120, alto: 10, color: '#6b7280' } as CrearParedRequest);
       refetchPlano();
     } catch {
       toast.error('Error al crear pared');
