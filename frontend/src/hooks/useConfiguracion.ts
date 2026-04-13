@@ -34,6 +34,10 @@ interface EstadoConfiguracion {
   /* [064A-5] Token API y toggle de sincronización Haddock */
   haddock_api_token: string;
   haddock_sync_enabled: boolean;
+  /* [134A-4] Reseñas y CTA WhatsApp */
+  google_review_url: string;
+  telefono_restaurante: string;
+  url_reservas: string;
 }
 
 const DEFAULTS: EstadoConfiguracion = {
@@ -54,6 +58,9 @@ const DEFAULTS: EstadoConfiguracion = {
   url_haddock: '',
   haddock_api_token: '',
   haddock_sync_enabled: false,
+  google_review_url: '',
+  telefono_restaurante: '',
+  url_reservas: '',
 };
 
 export function useConfiguracion() {
@@ -92,6 +99,9 @@ export function useConfiguracion() {
          * mantener valor local si ya fue editado */
         haddock_api_token: config.haddock_api_token || '',
         haddock_sync_enabled: d.haddock_sync_enabled,
+        google_review_url: (d as unknown as Record<string, string>).google_review_url ?? '',
+        telefono_restaurante: (d as unknown as Record<string, string>).telefono_restaurante ?? '',
+        url_reservas: (d as unknown as Record<string, string>).url_reservas ?? '',
       });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -129,6 +139,10 @@ export function useConfiguracion() {
       /* [064A-5] Haddock POS API sync */
       ...(config.haddock_api_token ? { haddock_api_token: config.haddock_api_token } : {}),
       haddock_sync_enabled: config.haddock_sync_enabled,
+      /* [134A-4] Reseñas y CTA WhatsApp */
+      google_review_url: config.google_review_url || undefined,
+      telefono_restaurante: config.telefono_restaurante || undefined,
+      url_reservas: config.url_reservas || undefined,
     };
     try {
       await mutacion.mutateAsync({ data: body });

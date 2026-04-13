@@ -29,6 +29,9 @@ import FormularioCampana from './componentes/FormularioCampana';
 import ListaPlantillas from './componentes/ListaPlantillas';
 import FormularioPlantilla from './componentes/FormularioPlantilla';
 import Recordatorios from './componentes/Recordatorios';
+import ListaTrabajadores from './componentes/ListaTrabajadores';
+import ListaResenas from './componentes/ListaResenas';
+import Inactividad from './componentes/Inactividad';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -68,6 +71,9 @@ function App() {
               <Route path="/marketing/plantillas" element={<ListaPlantillas />} />
               <Route path="/marketing/plantillas/nueva" element={<FormularioPlantilla />} />
               <Route path="/marketing/recordatorios" element={<Recordatorios />} />
+              <Route path="/trabajadores" element={<ListaTrabajadores />} />
+              <Route path="/resenas" element={<ListaResenas />} />
+              <Route path="/inactividad" element={<Inactividad />} />
             </Route>
 
             <Route path="*" element={<Navigate to="/" replace />} />

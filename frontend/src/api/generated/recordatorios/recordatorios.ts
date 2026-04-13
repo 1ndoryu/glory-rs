@@ -290,7 +290,7 @@ export function useListarReglas<TData = Awaited<ReturnType<typeof listarReglas>>
 
 
 /**
- * @summary Crear una regla de recordatorio autom├ítico
+ * @summary Crear una regla de recordatorio automático
  */
 export type crearReglaResponse201 = {
   data: ReglaRecordatorio
@@ -371,7 +371,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type CrearReglaMutationError = void
 
     /**
- * @summary Crear una regla de recordatorio autom├ítico
+ * @summary Crear una regla de recordatorio automático
  */
 export const useCrearRegla = <TError = void,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof crearRegla>>, TError,{data: CrearReglaRequest}, TContext>, request?: SecondParameter<typeof customInstance>}

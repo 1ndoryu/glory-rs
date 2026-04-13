@@ -21,6 +21,10 @@ import {
   ActualizarZonaRequest,
   PlanoExport,
   Mesa,
+  ParedSala,
+  CrearParedRequest,
+  ActualizarParedRequest,
+  ActualizarPosicionesParedesRequest,
   crearZona,
   eliminarZona,
   actualizarZona as actualizarZonaApi,
@@ -31,6 +35,10 @@ import {
   crearCombinacion,
   eliminarCombinacion,
   importarPlano,
+  crearPared,
+  eliminarPared as eliminarParedApi,
+  actualizarPared as actualizarParedApi,
+  actualizarPosicionesParedes,
 } from '../../api/generated';
 
 /* Tipos de diálogo para reemplazar prompt/confirm nativos */
@@ -68,6 +76,7 @@ export function usePlanoSala(
 
   const [zonaActiva, setZonaActiva] = useState<string | null>(null);
   const [mesaSeleccionada, setMesaSeleccionada] = useState<Mesa | null>(null);
+  const [paredSeleccionada, setParedSeleccionada] = useState<ParedSala | null>(null);
   const [arrastrando, setArrastrando] = useState<string | null>(null);
   const [posicionesLocales, setPosicionesLocales] = useState<
     Record<string, { x: number; y: number }>
@@ -88,6 +97,7 @@ export function usePlanoSala(
 
   const zonaData = plano?.zonas.find((z) => z.id === zonaActiva);
   const mesasZona = zonaData?.mesas ?? [];
+  const paredesZona: ParedSala[] = zonaData?.paredes ?? [];
 
   if (plano && plano.zonas.length > 0 && !zonaActiva) {
     setZonaActiva(plano.zonas[0].id);
@@ -315,12 +325,53 @@ export function usePlanoSala(
     });
   };
 
+  /* [134A-3] Handlers de paredes — CRUD para muros decorativos en el plano.
+   * Las paredes son rectángulos con color y rotación que representan muros,
+   * columnas u otros elementos físicos de la sala. */
+  const handleCrearPared = async () => {
+    if (!zonaActiva) return;
+    try {
+      await crearPared({ zona_id: zonaActiva, ancho: 120, alto: 20, color: '#6b7280' } as CrearParedRequest);
+      refetchPlano();
+    } catch {
+      toast.error('Error al crear pared');
+    }
+  };
+
+  const handleEliminarPared = (id: string) => {
+    setDialogoConfirmar({
+      titulo: 'Eliminar pared',
+      mensaje: '¿Eliminar esta pared?',
+      onConfirmar: async () => {
+        try {
+          await eliminarParedApi(id);
+          setParedSeleccionada(null);
+          refetchPlano();
+        } catch {
+          toast.error('Error al eliminar pared');
+        }
+      },
+    });
+  };
+
+  const handleGuardarPared = async (id: string, req: ActualizarParedRequest) => {
+    try {
+      await actualizarParedApi(id, req);
+      setParedSeleccionada(null);
+      refetchPlano();
+    } catch {
+      toast.error('Error al actualizar pared');
+    }
+  };
+
   return {
-    plano, zonaActiva, zonaData, mesasZona, mesaSeleccionada, arrastrando,
+    plano, zonaActiva, zonaData, mesasZona, paredesZona, mesaSeleccionada, arrastrando,
+    paredSeleccionada, setParedSeleccionada,
     posicionesLocales, dimensionesLocales, setMesaSeleccionada, cambiarZona, zoom, setZoom,
     canvasHeight,
     handleCrearZona, handleEliminarZona, handleEditarZona,
     handleCrearMesa, handleGuardarMesa, handleResizeMesa, handleEliminarMesa,
+    handleCrearPared, handleEliminarPared, handleGuardarPared,
     handleDragStart, handleDragEnd,
     handleExportar, handleImportar,
     handleCrearCombinacion, handleEliminarCombinacion,

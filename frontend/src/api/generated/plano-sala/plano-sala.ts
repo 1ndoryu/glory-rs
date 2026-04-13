@@ -26,15 +26,19 @@ import type {
 
 import type {
   ActualizarMesaRequest,
+  ActualizarParedRequest,
+  ActualizarPosicionesParedesRequest,
   ActualizarPosicionesRequest,
   ActualizarZonaRequest,
   CombinacionMesas,
   CrearCombinacionRequest,
   CrearMesaRequest,
+  CrearParedRequest,
   CrearZonaRequest,
   ErrorResponse,
   Mesa,
   ObtenerOcupacionParams,
+  ParedSala,
   PlanoExport,
   PlanoOcupacion,
   PlanoSala,
@@ -998,7 +1002,344 @@ export function useObtenerOcupacion<TData = Awaited<ReturnType<typeof obtenerOcu
 
 
 
-export type crearZonaResponse201 = {
+export type crearParedResponse201 = {
+  data: ParedSala
+  status: 201
+}
+
+export type crearParedResponse401 = {
+  data: void
+  status: 401
+}
+
+export type crearParedResponse422 = {
+  data: void
+  status: 422
+}
+
+export type crearParedResponseSuccess = (crearParedResponse201) & {
+  headers: Headers;
+};
+export type crearParedResponseError = (crearParedResponse401 | crearParedResponse422) & {
+  headers: Headers;
+};
+
+export type crearParedResponse = (crearParedResponseSuccess | crearParedResponseError)
+
+export const getCrearParedUrl = () => {
+
+
+
+
+  return `/api/plano-sala/paredes`
+}
+
+export const crearPared = async (crearParedRequest: CrearParedRequest, options?: RequestInit): Promise<crearParedResponse> => {
+
+  return customInstance<crearParedResponse>(getCrearParedUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      crearParedRequest,)
+  }
+);}
+
+
+
+
+export const getCrearParedMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof crearPared>>, TError,{data: CrearParedRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof crearPared>>, TError,{data: CrearParedRequest}, TContext> => {
+
+const mutationKey = ['crearPared'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof crearPared>>, {data: CrearParedRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  crearPared(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CrearParedMutationResult = NonNullable<Awaited<ReturnType<typeof crearPared>>>
+    export type CrearParedMutationBody = CrearParedRequest
+    export type CrearParedMutationError = void
+
+    export const useCrearPared = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof crearPared>>, TError,{data: CrearParedRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof crearPared>>,
+        TError,
+        {data: CrearParedRequest},
+        TContext
+      > => {
+      return useMutation(getCrearParedMutationOptions(options), queryClient);
+    }
+    export type actualizarPosicionesParedesResponse200 = {
+  data: void
+  status: 200
+}
+
+export type actualizarPosicionesParedesResponse401 = {
+  data: void
+  status: 401
+}
+
+export type actualizarPosicionesParedesResponseSuccess = (actualizarPosicionesParedesResponse200) & {
+  headers: Headers;
+};
+export type actualizarPosicionesParedesResponseError = (actualizarPosicionesParedesResponse401) & {
+  headers: Headers;
+};
+
+export type actualizarPosicionesParedesResponse = (actualizarPosicionesParedesResponseSuccess | actualizarPosicionesParedesResponseError)
+
+export const getActualizarPosicionesParedesUrl = () => {
+
+
+
+
+  return `/api/plano-sala/paredes/posiciones`
+}
+
+export const actualizarPosicionesParedes = async (actualizarPosicionesParedesRequest: ActualizarPosicionesParedesRequest, options?: RequestInit): Promise<actualizarPosicionesParedesResponse> => {
+
+  return customInstance<actualizarPosicionesParedesResponse>(getActualizarPosicionesParedesUrl(),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      actualizarPosicionesParedesRequest,)
+  }
+);}
+
+
+
+
+export const getActualizarPosicionesParedesMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof actualizarPosicionesParedes>>, TError,{data: ActualizarPosicionesParedesRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof actualizarPosicionesParedes>>, TError,{data: ActualizarPosicionesParedesRequest}, TContext> => {
+
+const mutationKey = ['actualizarPosicionesParedes'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof actualizarPosicionesParedes>>, {data: ActualizarPosicionesParedesRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  actualizarPosicionesParedes(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ActualizarPosicionesParedesMutationResult = NonNullable<Awaited<ReturnType<typeof actualizarPosicionesParedes>>>
+    export type ActualizarPosicionesParedesMutationBody = ActualizarPosicionesParedesRequest
+    export type ActualizarPosicionesParedesMutationError = void
+
+    export const useActualizarPosicionesParedes = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof actualizarPosicionesParedes>>, TError,{data: ActualizarPosicionesParedesRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof actualizarPosicionesParedes>>,
+        TError,
+        {data: ActualizarPosicionesParedesRequest},
+        TContext
+      > => {
+      return useMutation(getActualizarPosicionesParedesMutationOptions(options), queryClient);
+    }
+    export type eliminarParedResponse204 = {
+  data: void
+  status: 204
+}
+
+export type eliminarParedResponse404 = {
+  data: void
+  status: 404
+}
+
+export type eliminarParedResponseSuccess = (eliminarParedResponse204) & {
+  headers: Headers;
+};
+export type eliminarParedResponseError = (eliminarParedResponse404) & {
+  headers: Headers;
+};
+
+export type eliminarParedResponse = (eliminarParedResponseSuccess | eliminarParedResponseError)
+
+export const getEliminarParedUrl = (id: string,) => {
+
+
+
+
+  return `/api/plano-sala/paredes/${id}`
+}
+
+export const eliminarPared = async (id: string, options?: RequestInit): Promise<eliminarParedResponse> => {
+
+  return customInstance<eliminarParedResponse>(getEliminarParedUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getEliminarParedMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof eliminarPared>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof eliminarPared>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['eliminarPared'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof eliminarPared>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  eliminarPared(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type EliminarParedMutationResult = NonNullable<Awaited<ReturnType<typeof eliminarPared>>>
+
+    export type EliminarParedMutationError = void
+
+    export const useEliminarPared = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof eliminarPared>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof eliminarPared>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+      return useMutation(getEliminarParedMutationOptions(options), queryClient);
+    }
+    export type actualizarParedResponse200 = {
+  data: ParedSala
+  status: 200
+}
+
+export type actualizarParedResponse401 = {
+  data: void
+  status: 401
+}
+
+export type actualizarParedResponseSuccess = (actualizarParedResponse200) & {
+  headers: Headers;
+};
+export type actualizarParedResponseError = (actualizarParedResponse401) & {
+  headers: Headers;
+};
+
+export type actualizarParedResponse = (actualizarParedResponseSuccess | actualizarParedResponseError)
+
+export const getActualizarParedUrl = (id: string,) => {
+
+
+
+
+  return `/api/plano-sala/paredes/${id}`
+}
+
+export const actualizarPared = async (id: string,
+    actualizarParedRequest: ActualizarParedRequest, options?: RequestInit): Promise<actualizarParedResponse> => {
+
+  return customInstance<actualizarParedResponse>(getActualizarParedUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      actualizarParedRequest,)
+  }
+);}
+
+
+
+
+export const getActualizarParedMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof actualizarPared>>, TError,{id: string;data: ActualizarParedRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof actualizarPared>>, TError,{id: string;data: ActualizarParedRequest}, TContext> => {
+
+const mutationKey = ['actualizarPared'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof actualizarPared>>, {id: string;data: ActualizarParedRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  actualizarPared(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ActualizarParedMutationResult = NonNullable<Awaited<ReturnType<typeof actualizarPared>>>
+    export type ActualizarParedMutationBody = ActualizarParedRequest
+    export type ActualizarParedMutationError = void
+
+    export const useActualizarPared = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof actualizarPared>>, TError,{id: string;data: ActualizarParedRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof actualizarPared>>,
+        TError,
+        {id: string;data: ActualizarParedRequest},
+        TContext
+      > => {
+      return useMutation(getActualizarParedMutationOptions(options), queryClient);
+    }
+    export type crearZonaResponse201 = {
   data: ZonaSala
   status: 201
 }

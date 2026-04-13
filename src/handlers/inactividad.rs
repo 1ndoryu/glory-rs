@@ -21,6 +21,7 @@ use crate::AppState;
     get,
     path = "/api/inactividad",
     tag = "Inactividad",
+    operation_id = "listar_inactividad",
     responses((status = 200, body = Vec<ReglaInactividad>)),
     security(("bearer_auth" = []))
 )]
@@ -36,6 +37,7 @@ pub async fn listar(
     post,
     path = "/api/inactividad",
     tag = "Inactividad",
+    operation_id = "crear_inactividad",
     request_body = CrearReglaInactividadRequest,
     responses((status = 201, body = ReglaInactividad)),
     security(("bearer_auth" = []))
@@ -63,6 +65,7 @@ pub async fn crear(
     patch,
     path = "/api/inactividad/{id}",
     tag = "Inactividad",
+    operation_id = "actualizar_inactividad",
     request_body = ActualizarReglaInactividadRequest,
     params(("id" = Uuid, Path, description = "ID de la regla")),
     responses((status = 200, body = ReglaInactividad)),
@@ -95,6 +98,7 @@ pub async fn actualizar(
     delete,
     path = "/api/inactividad/{id}",
     tag = "Inactividad",
+    operation_id = "eliminar_inactividad",
     params(("id" = Uuid, Path, description = "ID de la regla")),
     responses((status = 204)),
     security(("bearer_auth" = []))

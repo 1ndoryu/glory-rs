@@ -1,4 +1,4 @@
-# Plataforma de Gestión de Restaurantes — Roadmap
+﻿# Plataforma de Gestión de Restaurantes — Roadmap
 
 > **URL producción:** http://restaurante.wandori.us (Swagger UI: /swagger-ui/)
 > **URL legacy (no funcional):** ~~http://app-b8s0cks444o0sogo8kg8wcgw.66.94.100.241.sslip.io~~
@@ -30,4 +30,4 @@
 
 ## Tareas pendientes
 
-(Sin tareas pendientes)
+(sin tareas pendientes)

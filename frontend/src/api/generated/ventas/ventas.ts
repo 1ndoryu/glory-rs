@@ -41,7 +41,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 /**
- * @summary Listar ventas con paginaci├│n y filtros de fecha
+ * @summary Listar ventas con paginación y filtros de fecha
  */
 export type listarVentasResponse200 = {
   data: VentasPaginadas
@@ -146,7 +146,7 @@ export function useListarVentas<TData = Awaited<ReturnType<typeof listarVentas>>
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary Listar ventas con paginaci├│n y filtros de fecha
+ * @summary Listar ventas con paginación y filtros de fecha
  */
 
 export function useListarVentas<TData = Awaited<ReturnType<typeof listarVentas>>, TError = ErrorResponse>(
@@ -574,7 +574,7 @@ export const useEliminarVenta = <TError = ErrorResponse,
       return useMutation(getEliminarVentaMutationOptions(options), queryClient);
     }
     /**
- * @summary Reintentar sincronizaci├│n con Haddock
+ * @summary Reintentar sincronización con Haddock
  */
 export type reintentarSyncHaddockResponse200 = {
   data: Venta
@@ -659,7 +659,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type ReintentarSyncHaddockMutationError = ErrorResponse
 
     /**
- * @summary Reintentar sincronizaci├│n con Haddock
+ * @summary Reintentar sincronización con Haddock
  */
 export const useReintentarSyncHaddock = <TError = ErrorResponse,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reintentarSyncHaddock>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}

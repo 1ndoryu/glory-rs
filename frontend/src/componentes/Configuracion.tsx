@@ -253,6 +253,55 @@ function Configuracion() {
         </CardContent>
       </Card>
 
+      {/* [134A-4] Reseñas y CTA WhatsApp — configuración para review gating y botones CTA */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Reseñas y WhatsApp</CardTitle>
+          <CardDescription>Configura el review gating para Google y los botones CTA en mensajes de WhatsApp</CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="google-review-url">URL de Google Reviews</Label>
+            <Input
+              id="google-review-url"
+              type="url"
+              value={config.google_review_url}
+              onChange={(e) => cambiarCampo('google_review_url', e.target.value)}
+              placeholder="https://g.page/r/tu-restaurante/review"
+            />
+            <p className="text-xs text-muted-foreground">
+              Los clientes que puntúen 4-5 estrellas serán redirigidos a esta URL para dejar reseña en Google.
+            </p>
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="telefono-restaurante">Teléfono del restaurante</Label>
+            <Input
+              id="telefono-restaurante"
+              type="tel"
+              value={config.telefono_restaurante}
+              onChange={(e) => cambiarCampo('telefono_restaurante', e.target.value)}
+              placeholder="+34 612 345 678"
+            />
+            <p className="text-xs text-muted-foreground">
+              Se mostrará en los mensajes de WhatsApp como enlace clickeable para llamar.
+            </p>
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="url-reservas">URL de reservas</Label>
+            <Input
+              id="url-reservas"
+              type="url"
+              value={config.url_reservas}
+              onChange={(e) => cambiarCampo('url_reservas', e.target.value)}
+              placeholder="https://tu-restaurante.com/reservar"
+            />
+            <p className="text-xs text-muted-foreground">
+              Se usará como botón "Reserva ya" en los mensajes de WhatsApp.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* [014A-4] Turnos configurables */}
       <Card>
         <CardHeader>

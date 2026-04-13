@@ -23,3 +23,6 @@ export * from './generated/api-keys/api-keys';
 export * from './generated/notificaciones/notificaciones';
 export * from './generated/errores/errores';
 export * from './generated/admin/admin';
+export * from './generated/trabajadores/trabajadores';
+export * from './generated/reseñas/reseñas';
+export * from './generated/inactividad/inactividad';

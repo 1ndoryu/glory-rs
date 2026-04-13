@@ -32,7 +32,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 /**
- * @summary Endpoint de health check ÔÇö siempre p├║blico
+ * @summary Endpoint de health check — siempre público
  */
 export type healthCheckResponse200 = {
   data: HealthResponse
@@ -123,7 +123,7 @@ export function useHealthCheck<TData = Awaited<ReturnType<typeof healthCheck>>, 
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary Endpoint de health check ÔÇö siempre p├║blico
+ * @summary Endpoint de health check — siempre público
  */
 
 export function useHealthCheck<TData = Awaited<ReturnType<typeof healthCheck>>, TError = unknown>(

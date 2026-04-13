@@ -44,6 +44,9 @@ import {
   Bell,
   Bug,
   ExternalLink,
+  Shield,
+  Star,
+  Clock,
 } from "lucide-react"
 import { useObtenerConfiguracion } from "@/api/generated/configuracion/configuracion"
 
@@ -60,6 +63,9 @@ const navPrincipal = [
   { title: "Campañas", url: "/marketing/campanas", icon: <Megaphone /> },
   { title: "Plantillas WA", url: "/marketing/plantillas", icon: <MessageSquare /> },
   { title: "Recordatorios", url: "/marketing/recordatorios", icon: <Bell /> },
+  { title: "Trabajadores", url: "/trabajadores", icon: <Shield /> },
+  { title: "Reseñas", url: "/resenas", icon: <Star /> },
+  { title: "Inactividad", url: "/inactividad", icon: <Clock /> },
 ]
 
 const navSecundario = [

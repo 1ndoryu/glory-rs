@@ -59,11 +59,13 @@ export interface ActualizarClienteRequest {
 }
 
 /**
- * Request para actualizar la configuraci├│n
+ * Request para actualizar la configuración
  */
 export interface ActualizarConfiguracionRequest {
   /** @nullable */
   auto_venta_reserva?: boolean | null;
+  /** @nullable */
+  google_review_url?: string | null;
   /** @nullable */
   groq_api_key?: string | null;
   /** @nullable */
@@ -95,11 +97,15 @@ export interface ActualizarConfiguracionRequest {
   /** @nullable */
   reserva_telefono_obligatorio?: boolean | null;
   /** @nullable */
+  telefono_restaurante?: string | null;
+  /** @nullable */
   url_haddock?: string | null;
+  /** @nullable */
+  url_reservas?: string | null;
 }
 
 /**
- * M├®todos de pago soportados ÔÇö compartido entre ventas y gastos
+ * Métodos de pago soportados — compartido entre ventas y gastos
  */
 export type MetodoPago = typeof MetodoPago[keyof typeof MetodoPago];
 
@@ -195,6 +201,21 @@ export interface ActualizarMesaRequest {
   pos_y?: number | null;
 }
 
+export interface ActualizarParedRequest {
+  /** @nullable */
+  alto?: number | null;
+  /** @nullable */
+  ancho?: number | null;
+  /** @nullable */
+  color?: string | null;
+  /** @nullable */
+  pos_x?: number | null;
+  /** @nullable */
+  pos_y?: number | null;
+  /** @nullable */
+  rotacion?: number | null;
+}
+
 export interface ActualizarPlantillaRequest {
   /** @nullable */
   cabecera_media_tipo?: string | null;
@@ -214,6 +235,16 @@ export interface ActualizarPlantillaRequest {
   pie_texto?: string | null;
 }
 
+export interface PosicionPared {
+  id: string;
+  pos_x: number;
+  pos_y: number;
+}
+
+export interface ActualizarPosicionesParedesRequest {
+  posiciones: PosicionPared[];
+}
+
 export interface PosicionMesa {
   id: string;
   pos_x: number;
@@ -222,6 +253,19 @@ export interface PosicionMesa {
 
 export interface ActualizarPosicionesRequest {
   posiciones: PosicionMesa[];
+}
+
+export interface ActualizarReglaInactividadRequest {
+  /** @nullable */
+  activa?: boolean | null;
+  /** @nullable */
+  canal?: string | null;
+  /** @nullable */
+  dias_inactividad?: number | null;
+  /** @nullable */
+  mensaje_plantilla?: string | null;
+  /** @nullable */
+  nombre?: string | null;
 }
 
 export interface ActualizarReglaRequest {
@@ -281,6 +325,21 @@ export interface ActualizarReservaRequest {
   num_personas?: number | null;
   /** @nullable */
   telefono?: string | null;
+}
+
+export interface ActualizarTrabajadorRequest {
+  /** @nullable */
+  activo?: boolean | null;
+  /** @nullable */
+  cargo?: string | null;
+  /** @nullable */
+  email?: string | null;
+  /** @nullable */
+  nombre?: string | null;
+  /** @nullable */
+  password?: string | null;
+  /** @nullable */
+  permisos?: string[] | null;
 }
 
 /**
@@ -388,7 +447,7 @@ export interface AgrupacionTurno {
 }
 
 /**
- * Panel 3 ÔÇö Analisis: efectividad, comensales, ticket medio
+ * Panel 3 — Analisis: efectividad, comensales, ticket medio
  */
 export interface AnalisisReservas {
   comensales_por_reserva: number;
@@ -401,7 +460,7 @@ export interface AnalisisReservas {
 }
 
 /**
- * Respuesta al crear una key ÔÇö incluye la key completa (solo se muestra una vez)
+ * Respuesta al crear una key — incluye la key completa (solo se muestra una vez)
  */
 export interface ApiKeyCreatedResponse {
   created_at: string;
@@ -413,7 +472,7 @@ export interface ApiKeyCreatedResponse {
 }
 
 /**
- * Respuesta p├║blica de API key (sin hash)
+ * Respuesta pública de API key (sin hash)
  */
 export interface ApiKeyResponse {
   activa: boolean;
@@ -427,7 +486,7 @@ export interface ApiKeyResponse {
 }
 
 /**
- * Response con token JWT despu├®s de autenticarse
+ * Response con token JWT después de autenticarse
  */
 export interface AuthResponse {
   token: string;
@@ -490,7 +549,7 @@ export interface CanalReserva {
 }
 
 /**
- * Categor├¡a de etiqueta (agrupa etiquetas por tipo)
+ * Categoría de etiqueta (agrupa etiquetas por tipo)
  */
 export interface CategoriaEtiqueta {
   aplica_a: string;
@@ -503,7 +562,7 @@ export interface CategoriaEtiqueta {
 }
 
 /**
- * Categor├¡a de gasto ÔÇö precargada en BD
+ * Categoría de gasto — precargada en BD
  */
 export interface CategoriaGasto {
   color: string;
@@ -579,6 +638,8 @@ export interface Cliente {
   preferencias_ubicacion: string;
   prefijo_telefono: string;
   telefono: string;
+  /** @nullable */
+  ultima_visita?: string | null;
   updated_at: string;
   user_id: string;
 }
@@ -630,11 +691,12 @@ export interface CombinacionExport {
 }
 
 /**
- * Configuraci├│n almacenada del restaurante
+ * Configuración almacenada del restaurante
  */
 export interface ConfiguracionRestaurante {
   auto_venta_reserva: boolean;
   created_at: string;
+  google_review_url: string;
   haddock_sync_enabled: boolean;
   hora_cena_fin: string;
   hora_cena_inicio: string;
@@ -649,13 +711,15 @@ export interface ConfiguracionRestaurante {
   reserva_email_obligatorio: boolean;
   reserva_nombre_obligatorio: boolean;
   reserva_telefono_obligatorio: boolean;
+  telefono_restaurante: string;
   updated_at: string;
   url_haddock: string;
+  url_reservas: string;
   user_id: string;
 }
 
 /**
- * Respuesta del conteo de no le├¡das
+ * Respuesta del conteo de no leídas
  */
 export interface ConteoNoLeidas {
   count: number;
@@ -690,7 +754,7 @@ export interface CrearCanalReservaRequest {
 }
 
 /**
- * Request para crear una categor├¡a de etiquetas
+ * Request para crear una categoría de etiquetas
  */
 export interface CrearCategoriaEtiquetaRequest {
   /** "cliente" o "reserva" */
@@ -787,6 +851,22 @@ export interface CrearMesaRequest {
   zona_id: string;
 }
 
+export interface CrearParedRequest {
+  /** @nullable */
+  alto?: number | null;
+  /** @nullable */
+  ancho?: number | null;
+  /** @nullable */
+  color?: string | null;
+  /** @nullable */
+  pos_x?: number | null;
+  /** @nullable */
+  pos_y?: number | null;
+  /** @nullable */
+  rotacion?: number | null;
+  zona_id: string;
+}
+
 export interface CrearPlantillaRequest {
   /** @nullable */
   cabecera_media_tipo?: string | null;
@@ -803,6 +883,13 @@ export interface CrearPlantillaRequest {
   nombre: string;
   /** @nullable */
   pie_texto?: string | null;
+}
+
+export interface CrearReglaInactividadRequest {
+  canal: string;
+  dias_inactividad: number;
+  mensaje_plantilla: string;
+  nombre: string;
 }
 
 export interface CrearReglaRequest {
@@ -841,6 +928,16 @@ export interface CrearReservaRequest {
   telefono?: string | null;
 }
 
+export interface CrearTrabajadorRequest {
+  /** @nullable */
+  cargo?: string | null;
+  email: string;
+  nombre: string;
+  password: string;
+  /** @nullable */
+  permisos?: string[] | null;
+}
+
 /**
  * Request para crear una venta
  */
@@ -869,7 +966,7 @@ export interface CrearZonaRequest {
 }
 
 /**
- * Panel 2 ÔÇö Ocupacion: medias, distribucion horaria, turnos, procedencia
+ * Panel 2 — Ocupacion: medias, distribucion horaria, turnos, procedencia
  */
 export interface OcupacionReservas {
   antelacion_media_dias: number;
@@ -882,7 +979,7 @@ export interface OcupacionReservas {
 }
 
 /**
- * Panel 1 ÔÇö Resumen: totales, comparativa, distribuciones
+ * Panel 1 — Resumen: totales, comparativa, distribuciones
  */
 export interface ResumenReservas {
   clientes_nuevos: number;
@@ -904,10 +1001,10 @@ export interface DashboardReservas {
 }
 
 /**
- * Datos extra├¡dos del documento por la IA
+ * Datos extraídos del documento por la IA
  */
 export interface DatosDocumentoExtraidos {
-  /** Confianza general de la extracci├│n (0.0 - 1.0) */
+  /** Confianza general de la extracción (0.0 - 1.0) */
   confianza: number;
   /** @nullable */
   fecha?: string | null;
@@ -918,7 +1015,7 @@ export interface DatosDocumentoExtraidos {
   /** @nullable */
   importe_total?: string | null;
   /**
-     * Notas o advertencias sobre la extracci├│n
+     * Notas o advertencias sobre la extracción
      * @nullable
      */
   notas?: string | null;
@@ -934,7 +1031,7 @@ export interface DatosDocumentoExtraidos {
 }
 
 /**
- * Request para digitalizar un documento (factura, albar├ín, ticket)
+ * Request para digitalizar un documento (factura, albarán, ticket)
  */
 export interface DigitalizarDocumentoRequest {
   /** Imagen codificada en base64 (JPEG, PNG, WebP) */
@@ -985,7 +1082,7 @@ export interface Etiqueta {
 }
 
 /**
- * Etiqueta con nombre de categor├¡a incluido (para listados)
+ * Etiqueta con nombre de categoría incluido (para listados)
  */
 export interface EtiquetaConCategoria {
   categoria_id: string;
@@ -1000,7 +1097,7 @@ export interface EtiquetaConCategoria {
 }
 
 /**
- * Request para solicitar un enlace de recuperaci├│n
+ * Request para solicitar un enlace de recuperación
  */
 export interface ForgotPasswordRequest {
   email: string;
@@ -1064,7 +1161,7 @@ export interface HistorialRecordatorios {
 }
 
 /**
- * Vista p├║blica: muestra solo si cada integraci├│n est├í configurada, sin exponer credentials
+ * Vista pública: muestra solo si cada integración está configurada, sin exponer credentials
  */
 export interface IntegracionMarketingPublica {
   id: string;
@@ -1084,9 +1181,14 @@ export interface IntegracionMarketingPublica {
 }
 
 /**
- * Request body para iniciar sesi├│n
+ * Request body para iniciar sesión
  */
 export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface LoginTrabajadorRequest {
   email: string;
   password: string;
 }
@@ -1094,12 +1196,12 @@ export interface LoginRequest {
 export interface MergeClientesRequest {
   /** ID del cliente que sobrevive */
   destino_id: string;
-  /** ID del cliente que se absorbe (se eliminar├í) */
+  /** ID del cliente que se absorbe (se eliminará) */
   origen_id: string;
 }
 
 /**
- * Resultado de la operaci├│n de merge
+ * Resultado de la operación de merge
  */
 export interface MergeClientesResponse {
   campanas_migradas: number;
@@ -1121,7 +1223,7 @@ export interface MesaExport {
 }
 
 /**
- * Reserva asociada a una mesa para la vista de ocupaci├│n
+ * Reserva asociada a una mesa para la vista de ocupación
  */
 export interface ReservaMesa {
   apellidos_cliente: string;
@@ -1134,14 +1236,14 @@ export interface ReservaMesa {
 }
 
 /**
- * Mesa con sus reservas del d├¡a para la vista de ocupaci├│n
+ * Mesa con sus reservas del día para la vista de ocupación
  */
 export type MesaOcupacion = Mesa & {
   reservas: ReservaMesa[];
 };
 
 /**
- * Response gen├®rico para operaciones que solo confirman ├®xito
+ * Response genérico para operaciones que solo confirman éxito
  */
 export interface MessageResponse {
   message: string;
@@ -1159,7 +1261,7 @@ export interface NoShowPorCanal {
 }
 
 /**
- * Estad├¡sticas de no-shows ÔÇö 263A-8
+ * Estadísticas de no-shows — 263A-8
  */
 export interface NoShowStats {
   por_canal: NoShowPorCanal[];
@@ -1176,6 +1278,24 @@ export interface Notificacion {
   tipo: string;
   titulo: string;
   user_id: string;
+}
+
+export interface ParedSala {
+  alto: number;
+  ancho: number;
+  color: string;
+  created_at: string;
+  id: string;
+  pos_x: number;
+  pos_y: number;
+  rotacion: number;
+  updated_at: string;
+  zona_id: string;
+}
+
+export interface PermisoSeccion {
+  permitido: boolean;
+  seccion: string;
 }
 
 export interface ZonaExport {
@@ -1204,14 +1324,14 @@ export interface ZonaSala {
 }
 
 /**
- * Zona con mesas y su estado de ocupaci├│n
+ * Zona con mesas y su estado de ocupación
  */
 export type ZonaOcupacion = ZonaSala & {
   mesas: MesaOcupacion[];
 };
 
 /**
- * Plano de sala con ocupaci├│n ÔÇö respuesta del endpoint
+ * Plano de sala con ocupación — respuesta del endpoint
  */
 export interface PlanoOcupacion {
   fecha: string;
@@ -1220,6 +1340,7 @@ export interface PlanoOcupacion {
 
 export type ZonaConMesas = ZonaSala & {
   mesas: Mesa[];
+  paredes: ParedSala[];
 };
 
 export interface PlanoSala {
@@ -1270,6 +1391,18 @@ export interface RegisterRequest {
   password: string;
 }
 
+export interface ReglaInactividad {
+  activa: boolean;
+  canal: string;
+  created_at: string;
+  dias_inactividad: number;
+  id: string;
+  mensaje_plantilla: string;
+  nombre: string;
+  updated_at: string;
+  user_id: string;
+}
+
 export interface ReglaRecordatorio {
   activa: boolean;
   canal: string;
@@ -1294,7 +1427,7 @@ export interface ReglasPaginadas {
 }
 
 export interface ReportarErrorRequest {
-  /** Mensaje de error o descripci├│n del problema */
+  /** Mensaje de error o descripción del problema */
   mensaje: string;
   /** User-Agent del navegador */
   navegador: string;
@@ -1303,13 +1436,40 @@ export interface ReportarErrorRequest {
      * @nullable
      */
   stack?: string | null;
-  /** URL donde ocurri├│ el error */
+  /** URL donde ocurrió el error */
   url: string;
 }
 
 export interface ReportarErrorResponse {
-  /** Siempre true ÔÇö si SMTP no est├í configurado se loguea pero no falla */
+  /** Siempre true — si SMTP no está configurado se loguea pero no falla */
   ok: boolean;
+}
+
+export interface ResenaAdmin {
+  /** @nullable */
+  cliente_nombre?: string | null;
+  comentario: string;
+  created_at: string;
+  id: string;
+  /** @nullable */
+  puntuacion?: number | null;
+  redirigido_google: boolean;
+  /** @nullable */
+  reserva_id?: string | null;
+  /** @nullable */
+  respondida_at?: string | null;
+}
+
+export interface ResenaPublicaResponse {
+  /** @nullable */
+  nombre_restaurante?: string | null;
+  respondida: boolean;
+  token: string;
+}
+
+export interface ResenasPaginadas {
+  data: ResenaAdmin[];
+  total: number;
 }
 
 /**
@@ -1340,7 +1500,7 @@ export interface Reserva {
 }
 
 /**
- * Conteo de reservas para el Home ÔÇö mes y d├¡a actual
+ * Conteo de reservas para el Home — mes y día actual
  */
 export interface ReservasConteo {
   total_hoy: number;
@@ -1358,11 +1518,23 @@ export interface ReservasPaginadas {
 }
 
 /**
- * Request para establecer nueva contrase├▒a con token
+ * Request para establecer nueva contraseña con token
  */
 export interface ResetPasswordRequest {
   new_password: string;
   token: string;
+}
+
+export interface ResponderResenaRequest {
+  /** @nullable */
+  comentario?: string | null;
+  puntuacion: number;
+}
+
+export interface ResponderResenaResponse {
+  gracias: string;
+  /** @nullable */
+  redirect_url?: string | null;
 }
 
 export interface ZonaResumen {
@@ -1373,7 +1545,7 @@ export interface ZonaResumen {
 }
 
 /**
- * Info p├║blica del restaurante para el chatbot
+ * Info pública del restaurante para el chatbot
  */
 export interface RestauranteInfoResponse {
   campos_obligatorios: CamposObligatorios;
@@ -1383,7 +1555,7 @@ export interface RestauranteInfoResponse {
 }
 
 /**
- * Resumen diario de reservas ÔÇö para la vista mes
+ * Resumen diario de reservas — para la vista mes
  */
 export interface ResumenDiario {
   fecha: string;
@@ -1392,10 +1564,10 @@ export interface ResumenDiario {
 }
 
 /**
- * Resumen econ├│mico: Gastos totales, Ventas totales, Margen
+ * Resumen económico: Gastos totales, Ventas totales, Margen
  */
 export interface ResumenEconomico {
-  /** Margen = ventas - gastos. Negativo si hay p├®rdidas */
+  /** Margen = ventas - gastos. Negativo si hay pérdidas */
   margen: string;
   mes: string;
   total_gastos: string;
@@ -1411,11 +1583,35 @@ export interface SegmentoPreview {
   total_clientes: number;
 }
 
+export interface SolicitarResponse {
+  id: string;
+  token: string;
+  url: string;
+}
+
 /**
  * Body para asignar/desasignar etiqueta
  */
 export interface TagAssignBody {
   etiqueta_id: string;
+}
+
+export interface TrabajadorAuthResponse {
+  nombre: string;
+  permisos: string[];
+  token: string;
+  trabajador_id: string;
+  user_id: string;
+}
+
+export interface TrabajadorResponse {
+  activo: boolean;
+  cargo: string;
+  created_at: string;
+  email: string;
+  id: string;
+  nombre: string;
+  permisos: PermisoSeccion[];
 }
 
 /**
@@ -1504,7 +1700,7 @@ fecha: string;
 
 export type BuscarReservasParams = {
 /**
- * Filtrar por tel├®fono
+ * Filtrar por teléfono
  * @nullable
  */
 telefono?: string | null;
@@ -1524,7 +1720,7 @@ export type ListarClientesParams = {
 page?: number;
 per_page?: number;
 /**
- * B├║squeda por nombre, apellidos, tel├®fono o email
+ * Búsqueda por nombre, apellidos, teléfono o email
  * @nullable
  */
 busqueda?: string | null;
@@ -1534,7 +1730,7 @@ busqueda?: string | null;
  */
 sort_by?: string | null;
 /**
- * [044A-8] Direcci├│n del orden: `asc` o `desc`
+ * [044A-8] Dirección del orden: `asc` o `desc`
  * @nullable
  */
 sort_order?: string | null;
@@ -1542,7 +1738,7 @@ sort_order?: string | null;
 
 export type DashboardReservasParams = {
 /**
- * A├▒o (ej: 2026)
+ * Año (ej: 2026)
  */
 year: number;
 /**
@@ -1554,7 +1750,7 @@ month: number;
 
 export type ResumenParams = {
 /**
- * A├▒o (ej: 2026)
+ * Año (ej: 2026)
  */
 year: number;
 /**
@@ -1566,7 +1762,7 @@ month: number;
 
 export type ListarEtiquetasParams = {
 /**
- * Filtrar por categor├¡a
+ * Filtrar por categoría
  * @nullable
  */
 categoria_id?: string | null;
@@ -1588,7 +1784,7 @@ hasta?: string | null;
  */
 categoria_id?: string | null;
 /**
- * B├║squeda por texto: proveedor, tipo documento, n├║mero documento
+ * Búsqueda por texto: proveedor, tipo documento, número documento
  * @nullable
  */
 busqueda?: string | null;
@@ -1598,7 +1794,7 @@ busqueda?: string | null;
  */
 tipo_documento?: string | null;
 /**
- * Filtro por m├®todo de pago (valores separados por coma: `efectivo,tarjeta,transferencia`)
+ * Filtro por método de pago (valores separados por coma: `efectivo,tarjeta,transferencia`)
  * @nullable
  */
 metodo_pago?: string | null;
@@ -1608,7 +1804,7 @@ metodo_pago?: string | null;
  */
 sort_by?: string | null;
 /**
- * Direcci├│n de orden: asc o desc. Por defecto desc
+ * Dirección de orden: asc o desc. Por defecto desc
  * @nullable
  */
 sort_order?: string | null;
@@ -1624,7 +1820,7 @@ busqueda?: string | null;
 
 export type ListarNotificacionesParams = {
 /**
- * M├íximo de notificaciones a devolver (default: 50)
+ * Máximo de notificaciones a devolver (default: 50)
  * @nullable
  */
 limite?: number | null;
@@ -1682,11 +1878,52 @@ page?: number | null;
 per_page?: number | null;
 };
 
+export type ListarResenasParams = {
+/**
+ * Página
+ * @nullable
+ */
+page?: number | null;
+/**
+ * Ítems por página
+ * @nullable
+ */
+per_page?: number | null;
+/**
+ * Filtro mínimo
+ * @nullable
+ */
+min_puntuacion?: number | null;
+/**
+ * Filtro máximo
+ * @nullable
+ */
+max_puntuacion?: number | null;
+/**
+ * Solo reseñas respondidas
+ * @nullable
+ */
+solo_respondidas?: boolean | null;
+};
+
+export type SolicitarResenaParams = {
+/**
+ * ID de la reserva asociada
+ * @nullable
+ */
+reserva_id?: string | null;
+/**
+ * ID del cliente
+ * @nullable
+ */
+cliente_id?: string | null;
+};
+
 export type ListarReservasParams = {
 page?: number;
 per_page?: number;
 /**
- * Fecha exacta (mantiene compatibilidad). Si se env├¡a junto con `fecha_desde`/`fecha_hasta`, se ignora.
+ * Fecha exacta (mantiene compatibilidad). Si se envía junto con `fecha_desde`/`fecha_hasta`, se ignora.
  * @nullable
  */
 fecha?: string | null;
@@ -1709,7 +1946,7 @@ estado?: string | null;
  */
 turno?: string | null;
 /**
- * B├║squeda por nombre o apellidos del cliente
+ * Búsqueda por nombre o apellidos del cliente
  * @nullable
  */
 busqueda?: string | null;
@@ -1719,7 +1956,7 @@ busqueda?: string | null;
  */
 sort_by?: string | null;
 /**
- * [044A-8] Direcci├│n del orden: `asc` o `desc`
+ * [044A-8] Dirección del orden: `asc` o `desc`
  * @nullable
  */
 sort_order?: string | null;
@@ -1755,7 +1992,7 @@ desde?: string | null;
  */
 hasta?: string | null;
 /**
- * B├║squeda por texto (descripci├│n, cliente, canal)
+ * Búsqueda por texto (descripción, cliente, canal)
  * @nullable
  */
 busqueda?: string | null;
@@ -1770,7 +2007,7 @@ turno?: string | null;
  */
 canal?: string | null;
 /**
- * Filtro por m├®todo de pago (valores separados por coma: `efectivo,tarjeta,transferencia`)
+ * Filtro por método de pago (valores separados por coma: `efectivo,tarjeta,transferencia`)
  * @nullable
  */
 metodo_pago?: string | null;
@@ -1785,7 +2022,7 @@ estado_haddock?: string | null;
  */
 sort_by?: string | null;
 /**
- * Direcci├│n de orden: asc o desc. Por defecto desc
+ * Dirección de orden: asc o desc. Por defecto desc
  * @nullable
  */
 sort_order?: string | null;

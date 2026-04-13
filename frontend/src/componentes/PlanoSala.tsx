@@ -9,10 +9,11 @@ import { useRef, useMemo } from 'react';
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import { Button } from '@/components/ui/button';
-import { Pencil, Trash2, Download, Upload, Combine, ZoomIn, ZoomOut } from 'lucide-react';
+import { Pencil, Trash2, Download, Upload, Combine, ZoomIn, ZoomOut, BrickWall } from 'lucide-react';
 import MesaDraggable from './plano-sala/MesaDraggable';
 import MesaTemplate from './plano-sala/MesaTemplate';
 import PanelConfigMesa from './plano-sala/PanelConfigMesa';
+import PanelConfigPared from './plano-sala/PanelConfigPared';
 import PlanoDialogs from './plano-sala/PlanoDialogs';
 import CanvasMinimap from './plano-sala/CanvasMinimap';
 import OffScreenIndicators from './plano-sala/OffScreenIndicators';
@@ -28,11 +29,13 @@ function PlanoSala() {
   const setCanvasHeight = useZoomStore(s => s.setCanvasHeight);
 
   const {
-    plano, zonaActiva, zonaData, mesasZona, mesaSeleccionada, arrastrando,
+    plano, zonaActiva, zonaData, mesasZona, paredesZona, mesaSeleccionada, arrastrando,
+    paredSeleccionada, setParedSeleccionada,
     posicionesLocales, dimensionesLocales, setMesaSeleccionada, cambiarZona, zoom, setZoom,
     canvasHeight,
     handleCrearZona, handleEliminarZona, handleEditarZona,
     handleCrearMesa, handleGuardarMesa, handleResizeMesa, handleEliminarMesa,
+    handleCrearPared, handleEliminarPared, handleGuardarPared,
     handleDragStart, handleDragEnd,
     handleExportar, handleImportar,
     handleCrearCombinacion, handleEliminarCombinacion,
@@ -122,6 +125,9 @@ function PlanoSala() {
         <Button size="sm" variant="ghost" onClick={handleCrearCombinacion} disabled={!zonaActiva || mesasZona.length < 2}>
           <Combine className="size-4 mr-1" />Combinación
         </Button>
+        <Button size="sm" variant="ghost" onClick={handleCrearPared} disabled={!zonaActiva}>
+          <BrickWall className="size-4 mr-1" />Pared
+        </Button>
         <div className="ml-auto flex gap-2">
           <Button size="sm" variant="ghost" onClick={handleExportar}><Download className="size-4 mr-1" />Exportar</Button>
           <Button size="sm" variant="ghost" onClick={handleImportar}><Upload className="size-4 mr-1" />Importar</Button>
@@ -178,6 +184,41 @@ function PlanoSala() {
                     transform: `translate(${-panOffset.x}px, ${-panOffset.y}px)`,
                   }}
                 >
+                  {/* [134A-3] Paredes: rectángulos estáticos representando muros/columnas.
+                   * Se renderizan antes de las mesas para que queden de fondo. */}
+                  {paredesZona.map(pared => {
+                    const paredZoom = {
+                      ...pared,
+                      pos_x: pared.pos_x * zoom,
+                      pos_y: pared.pos_y * zoom,
+                      ancho: pared.ancho * zoom,
+                      alto: pared.alto * zoom,
+                    };
+                    return (
+                      <div
+                        key={pared.id}
+                        className="absolute rounded-sm border border-border/50 cursor-pointer transition-shadow"
+                        style={{
+                          left: paredZoom.pos_x,
+                          top: paredZoom.pos_y,
+                          width: paredZoom.ancho,
+                          height: paredZoom.alto,
+                          backgroundColor: pared.color || '#6b7280',
+                          transform: pared.rotacion ? `rotate(${pared.rotacion}deg)` : undefined,
+                          transformOrigin: 'center center',
+                          boxShadow: paredSeleccionada?.id === pared.id
+                            ? '0 0 0 2px hsl(var(--primary))'
+                            : undefined,
+                          zIndex: 1,
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setParedSeleccionada(pared);
+                          setMesaSeleccionada(null);
+                        }}
+                      />
+                    );
+                  })}
                   {mesasZona.map(mesa => {
                     const pos = posicionesLocales[mesa.id];
                     const dims = dimensionesLocales[mesa.id];
@@ -266,7 +307,7 @@ function PlanoSala() {
         {/* [283A-17] Panel lateral derecho: config de mesa seleccionada */}
         {/* [303A-9][DataIV-6] key incluye todos los campos editables para forzar
          * remount al cambiar de mesa o cuando cambian valores tras un refetch. */}
-        {mesaSeleccionada && (
+        {mesaSeleccionada && !paredSeleccionada && (
           <div className="w-72 shrink-0">
             <PanelConfigMesa
               key={`${mesaSeleccionada.id}:${mesaSeleccionada.ancho}:${mesaSeleccionada.alto}:${mesaSeleccionada.forma}:${mesaSeleccionada.min_personas}:${mesaSeleccionada.max_personas}:${mesaSeleccionada.numero}:${mesaSeleccionada.activa}`}
@@ -274,6 +315,17 @@ function PlanoSala() {
               onGuardar={handleGuardarMesa}
               onEliminar={handleEliminarMesa}
               onCerrar={() => setMesaSeleccionada(null)}
+            />
+          </div>
+        )}
+        {paredSeleccionada && (
+          <div className="w-72 shrink-0">
+            <PanelConfigPared
+              key={`${paredSeleccionada.id}:${paredSeleccionada.ancho}:${paredSeleccionada.alto}:${paredSeleccionada.color}:${paredSeleccionada.rotacion}`}
+              pared={paredSeleccionada}
+              onGuardar={handleGuardarPared}
+              onEliminar={handleEliminarPared}
+              onCerrar={() => setParedSeleccionada(null)}
             />
           </div>
         )}
