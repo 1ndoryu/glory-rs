@@ -801,7 +801,7 @@ async fn seed_resenas(
     let mut count: u32 = 0;
     for (i, reserva) in completadas.iter().enumerate() {
         let id = Uuid::new_v4();
-        let token = format!("demo-token-{:04}", i);
+        let token = format!("demo-token-{i:04}");
         let (puntuacion, comentario, redirigido) = configs[i % configs.len()];
         let cliente_id = reserva.cliente_id.or_else(|| cliente_ids.get(i).copied());
 

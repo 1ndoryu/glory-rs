@@ -38,3 +38,5 @@ glory-rust-template.code-workspace
 extracted/
 /uploads
 /scripts
+prerendered/
+.cargo/config.toml

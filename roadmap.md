@@ -30,4 +30,8 @@
 
 ## Tareas pendientes
 
-(sin tareas pendientes)
+- 134A-29: Login de trabajadores — la página de login solo soporta propietario, los trabajadores no pueden ingresar
+- 134A-30: Inactividad UI — tabla sin bordes + modal labels pegados a inputs
+- 134A-31: Error email duplicado — toast genérico "error base de datos" en vez del mensaje específico
+- 134A-32: Reseñas UI — botón "Enviar a Google" no visible + solicitar reseña no muestra URL generada
+- 134A-33: Actualizar testing checklist con hallazgos y puntos faltantes

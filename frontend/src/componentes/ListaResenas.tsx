@@ -1,12 +1,15 @@
-/* [134A-3] Página de gestión de reseñas — review gating.
+/* [134A-32] Página de gestión de reseñas — review gating.
  * Lista admin de reseñas recibidas + botón para solicitar nueva reseña.
- * Las reseñas con 4-5 estrellas se marcan como "redirigidas a Google"
- * si el restaurante tiene configurada la URL de Google Reviews. */
+ * Las reseñas con 4-5 estrellas muestran botón "Enviar a Google" que abre
+ * la URL de Google Reviews configurada en Configuración.
+ * Al solicitar una reseña se muestra el enlace generado para copiar/compartir. */
 
 import { useState } from 'react';
 import { useResenas } from '../hooks/useResenas';
+import { useConfiguracion } from '../hooks/useConfiguracion';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import {
   Dialog,
   DialogContent,
@@ -21,7 +24,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Star, Send, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Star, Send, ChevronLeft, ChevronRight, ExternalLink, Copy } from 'lucide-react';
+import { toast } from 'sonner';
 
 function Estrellas({ puntuacion }: { puntuacion: number | null | undefined }) {
   if (!puntuacion) return <span className="text-muted-foreground text-sm">Sin respuesta</span>;
@@ -47,13 +51,23 @@ export default function ListaResenas() {
     setPage,
     solicitarResena,
     solicitando,
+    ultimaUrlGenerada,
   } = useResenas();
+
+  const { config } = useConfiguracion();
+  const googleUrl = config.google_review_url;
 
   const [modalSolicitar, setModalSolicitar] = useState(false);
 
   const handleSolicitar = () => {
     solicitarResena();
-    setModalSolicitar(false);
+  };
+
+  const copiarEnlace = () => {
+    if (ultimaUrlGenerada) {
+      navigator.clipboard.writeText(ultimaUrlGenerada);
+      toast.success('Enlace copiado al portapapeles');
+    }
   };
 
   return (
@@ -72,12 +86,28 @@ export default function ListaResenas() {
           </DialogHeader>
           <div className="flex flex-col gap-3">
             <p className="text-sm text-muted-foreground">
-              Genera un enlace único para que el cliente deje su valoración.
-              Si puntúa 4 o 5 estrellas, será redirigido a Google Reviews.
+              Genera un enlace único para enviar a un cliente. Al abrirlo, podrá dejar su
+              valoración. Si puntúa 4 o 5 estrellas, será redirigido automáticamente a Google Reviews.
             </p>
-            <Button onClick={handleSolicitar} disabled={solicitando}>
-              {solicitando ? 'Generando...' : 'Generar enlace'}
-            </Button>
+            {!ultimaUrlGenerada && (
+              <Button onClick={handleSolicitar} disabled={solicitando}>
+                {solicitando ? 'Generando...' : 'Generar enlace'}
+              </Button>
+            )}
+            {ultimaUrlGenerada && (
+              <div className="flex flex-col gap-2">
+                <p className="text-sm font-medium">Enlace generado:</p>
+                <div className="flex gap-2">
+                  <Input value={ultimaUrlGenerada} readOnly className="text-xs" />
+                  <Button variant="outline" size="icon" onClick={copiarEnlace} title="Copiar">
+                    <Copy className="size-4" />
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Comparte este enlace con el cliente por WhatsApp, email o SMS.
+                </p>
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>
@@ -110,6 +140,16 @@ export default function ListaResenas() {
                     <TableCell>
                       {r.redirigido_google ? (
                         <Badge variant="default">Redirigido</Badge>
+                      ) : r.puntuacion && r.puntuacion >= 4 && googleUrl ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.open(googleUrl, '_blank')}
+                          className="gap-1"
+                        >
+                          <ExternalLink className="size-3" />
+                          Enviar a Google
+                        </Button>
                       ) : r.respondida_at ? (
                         <Badge variant="secondary">Local</Badge>
                       ) : (

@@ -81,7 +81,7 @@ function FormularioRegla({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
+      <div className="flex flex-col gap-1.5">
         <Label htmlFor="nombre">Nombre de la regla</Label>
         <Input
           id="nombre"
@@ -91,7 +91,7 @@ function FormularioRegla({
         />
       </div>
 
-      <div>
+      <div className="flex flex-col gap-1.5">
         <Label htmlFor="dias">Días de inactividad</Label>
         <Input
           id="dias"
@@ -104,7 +104,7 @@ function FormularioRegla({
         />
       </div>
 
-      <div>
+      <div className="flex flex-col gap-1.5">
         <Label htmlFor="canal">Canal de envío</Label>
         <Select
           value={campos.canal}
@@ -123,7 +123,7 @@ function FormularioRegla({
         </Select>
       </div>
 
-      <div>
+      <div className="flex flex-col gap-1.5">
         <Label htmlFor="plantilla">Mensaje plantilla</Label>
         <Textarea
           id="plantilla"
@@ -181,6 +181,7 @@ export default function Inactividad() {
         </Button>
       </div>
 
+      <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
@@ -237,6 +238,7 @@ export default function Inactividad() {
           ))}
         </TableBody>
       </Table>
+      </div>
 
       {/* Modal crear */}
       <Dialog open={modalCrear} onOpenChange={(v: boolean) => !v && setModalCrear(false)}>

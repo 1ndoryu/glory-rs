@@ -124,7 +124,15 @@ pub async fn crear(
     )
     .await
     .map_err(|e| {
-        if e.to_string().contains("duplicate key") || e.to_string().contains("unique") {
+        /* [134A-31] Detectar email duplicado por SQLSTATE 23505 (unique_violation),
+         * no solo por texto — los mensajes pueden estar localizados. */
+        let es_duplicado = e
+            .as_database_error()
+            .and_then(sqlx::error::DatabaseError::code)
+            .is_some_and(|c| c == "23505")
+            || e.to_string().contains("duplicate key")
+            || e.to_string().contains("unique");
+        if es_duplicado {
             AppError::Conflict("Ya existe un trabajador con ese email".into())
         } else {
             AppError::from(e)
