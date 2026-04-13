@@ -169,6 +169,7 @@ function PlanoSala() {
                 ref={viewportRef}
                 className={`planoCanvas ${panning ? 'planoPanning' : ''} ${
                   activeTool === 'pan' ? (panning ? 'cursor-grabbing' : 'cursor-grab') :
+                  activeTool === 'delete' ? 'planoCanvasDelete' :
                   (activeTool === 'mesa-cuadrada' || activeTool === 'mesa-redonda' || activeTool === 'pared') ? 'cursor-crosshair' : ''
                 }`}
                 style={{ height: canvasHeight }}

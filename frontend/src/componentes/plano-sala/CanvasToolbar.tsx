@@ -24,7 +24,7 @@ interface Props {
 
 export default function CanvasToolbar({ activeTool, onToolChange, disabled }: Props) {
   return (
-    <div className="absolute top-2 right-2 z-50 bg-card border border-border rounded-lg shadow-md p-1.5 grid grid-cols-2 gap-1">
+    <div className="absolute top-2 left-2 z-50 bg-card border border-border rounded-lg shadow-md p-1.5 grid grid-cols-2 gap-1">
       {tools.map(tool => {
         const Icon = tool.icon;
         const isActive = activeTool === tool.id;

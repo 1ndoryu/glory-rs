@@ -332,10 +332,9 @@ export function usePlanoSala(
    * [283A-43] try/catch + refetch: si falla el PATCH, revierte posición local
    * y muestra toast error. Sin esto el drag parecía no guardar. */
   const handleDragEnd = useCallback(async (event: DragEndEvent) => {
-    setArrastrando(null);
     const mesaId = String(event.active.id);
     const mesa = mesasZona.find((m) => m.id === mesaId);
-    if (!mesa) return;
+    if (!mesa) { setArrastrando(null); return; }
     const prev = posicionesLocales[mesaId];
     const canvasWidth = canvasRef.current?.clientWidth ?? 800;
     const maxX = canvasWidth / zoom - mesa.ancho;
@@ -344,7 +343,11 @@ export function usePlanoSala(
     const dy = event.delta.y / zoom;
     const nuevoX = Math.min(maxX, Math.max(0, (prev?.x ?? mesa.pos_x) + dx));
     const nuevoY = Math.min(maxY, Math.max(0, (prev?.y ?? mesa.pos_y) + dy));
+    /* [134A-21] Actualizar posición local ANTES de limpiar arrastrando.
+     * Si se limpia primero, el CSS transform desaparece un frame antes de
+     * que React aplique la nueva posición → flicker visual. */
     setPosicionesLocales((p) => ({ ...p, [mesaId]: { x: nuevoX, y: nuevoY } }));
+    setArrastrando(null);
     const req: ActualizarPosicionesRequest = {
       posiciones: [{ id: mesaId, pos_x: Math.round(nuevoX), pos_y: Math.round(nuevoY) }],
     };

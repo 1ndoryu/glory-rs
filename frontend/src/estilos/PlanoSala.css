@@ -80,6 +80,12 @@
   user-select: none;
 }
 
+/* [134A-22] Cursor de eliminación (herramienta borrar activa) */
+.planoCanvas.planoCanvasDelete,
+.planoCanvas.planoCanvasDelete * {
+  cursor: not-allowed;
+}
+
 /* [303A-20] position:absolute saca al content del flujo normal.
  * Nunca puede empujar ni expandir el layout del padre. */
 .planoCanvasContent {
