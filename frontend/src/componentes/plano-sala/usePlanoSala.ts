@@ -367,11 +367,15 @@ export function usePlanoSala(
   const handleMoverPared = async (id: string, pos_x: number, pos_y: number) => {
     const pared = paredesZona.find(p => p.id === id);
     if (!pared) return;
+    /* [134A-13] Clamp igual que mesas en handleDragEnd — la pared regresa al canvas
+     * si se suelta fuera de los límites de la zona. */
+    const clampedX = zonaData ? Math.max(0, Math.min(zonaData.ancho, pos_x)) : pos_x;
+    const clampedY = zonaData ? Math.max(0, Math.min(zonaData.alto, pos_y)) : pos_y;
     try {
       await actualizarParedApi(id, {
         ancho: pared.ancho, alto: pared.alto,
         color: pared.color, rotacion: pared.rotacion,
-        pos_x, pos_y,
+        pos_x: clampedX, pos_y: clampedY,
       });
       refetchPlano();
     } catch {
