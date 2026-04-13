@@ -367,16 +367,26 @@ export function usePlanoSala(
   const handleMoverPared = async (id: string, pos_x: number, pos_y: number) => {
     const pared = paredesZona.find(p => p.id === id);
     if (!pared) return;
-    /* [134A-14] Snap-back con bounding box rotada.
-     * Una pared 120×10 a 90° ocupa 10px en X y 120px en Y.
-     * Sin esto el clamp actuaba como si siempre fuera horizontal. */
+    /* [134A-14] Snap-back correcto con rotación.
+     * pos_x/pos_y es la esquina top-left del rect sin rotar; CSS rota alrededor del centro.
+     * El clamp debe operar sobre el CENTRO del bounding box rotado, luego volver a top-left.
+     *
+     * centro visual = (pos_x + w/2, pos_y + h/2)
+     * bbW/bbH = dimensiones del bounding box rotado
+     * clamp centro a [bbW/2, zonaW - bbW/2] × [bbH/2, zonaH - bbH/2]
+     * clampedX = centro_clampado - w/2
+     */
+    const w = pared.ancho;
+    const h = pared.alto;
     const rad = (pared.rotacion * Math.PI) / 180;
-    const bbW = pared.ancho * Math.abs(Math.cos(rad)) + pared.alto * Math.abs(Math.sin(rad));
-    const bbH = pared.ancho * Math.abs(Math.sin(rad)) + pared.alto * Math.abs(Math.cos(rad));
-    const maxX = (zonaData?.ancho ?? 600) - bbW;
-    const maxY = (zonaData?.alto ?? 600) - bbH;
-    const clampedX = Math.min(maxX, Math.max(0, pos_x));
-    const clampedY = Math.min(maxY, Math.max(0, pos_y));
+    const bbW = w * Math.abs(Math.cos(rad)) + h * Math.abs(Math.sin(rad));
+    const bbH = w * Math.abs(Math.sin(rad)) + h * Math.abs(Math.cos(rad));
+    const zonaW = zonaData?.ancho ?? 600;
+    const zonaH = zonaData?.alto ?? 600;
+    const cx = Math.min(zonaW - bbW / 2, Math.max(bbW / 2, pos_x + w / 2));
+    const cy = Math.min(zonaH - bbH / 2, Math.max(bbH / 2, pos_y + h / 2));
+    const clampedX = cx - w / 2;
+    const clampedY = cy - h / 2;
     try {
       await actualizarParedApi(id, {
         ancho: pared.ancho, alto: pared.alto,
