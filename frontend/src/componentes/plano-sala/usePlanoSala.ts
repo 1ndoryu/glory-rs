@@ -367,13 +367,19 @@ export function usePlanoSala(
   const handleMoverPared = async (id: string, pos_x: number, pos_y: number) => {
     const pared = paredesZona.find(p => p.id === id);
     if (!pared) return;
-    /* [134A-14] Sin clamp — las paredes expanden contentBounds igual que las mesas.
-     * El canvas crece para acomodarlas, no hay límite artificial. */
+    /* [134A-14] Snap-back al soltar, mismo patrón que handleDragEnd de mesas:
+     * libre durante el drag (ParedDraggable no tiene clamp visual),
+     * pero al guardar clampea a [0, maxX/maxY] para que regrese al plano. */
+    const canvasWidth = canvasRef.current?.clientWidth ?? 800;
+    const maxX = canvasWidth / zoom - pared.ancho;
+    const maxY = (zonaData?.alto ?? 600) - pared.alto;
+    const clampedX = Math.min(maxX, Math.max(0, pos_x));
+    const clampedY = Math.min(maxY, Math.max(0, pos_y));
     try {
       await actualizarParedApi(id, {
         ancho: pared.ancho, alto: pared.alto,
         rotacion: pared.rotacion,
-        pos_x, pos_y,
+        pos_x: clampedX, pos_y: clampedY,
       });
       refetchPlano();
     } catch {
