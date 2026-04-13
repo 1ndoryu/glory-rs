@@ -385,8 +385,8 @@ export function usePlanoSala(
     const zonaH = zonaData?.alto ?? 600;
     const cx = Math.min(zonaW - bbW / 2, Math.max(bbW / 2, pos_x + w / 2));
     const cy = Math.min(zonaH - bbH / 2, Math.max(bbH / 2, pos_y + h / 2));
-    const clampedX = cx - w / 2;
-    const clampedY = cy - h / 2;
+    const clampedX = Math.round(cx - w / 2);
+    const clampedY = Math.round(cy - h / 2);
     try {
       await actualizarParedApi(id, {
         ancho: pared.ancho, alto: pared.alto,
