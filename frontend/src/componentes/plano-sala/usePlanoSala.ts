@@ -367,11 +367,10 @@ export function usePlanoSala(
   const handleMoverPared = async (id: string, pos_x: number, pos_y: number) => {
     const pared = paredesZona.find(p => p.id === id);
     if (!pared) return;
-    /* [134A-14] Snap-back al soltar, mismo patrón que handleDragEnd de mesas:
-     * libre durante el drag (ParedDraggable no tiene clamp visual),
-     * pero al guardar clampea a [0, maxX/maxY] para que regrese al plano. */
-    const canvasWidth = canvasRef.current?.clientWidth ?? 800;
-    const maxX = canvasWidth / zoom - pared.ancho;
+    /* [134A-14] Snap-back usando zonaData (el borde visual real del plano).
+     * canvasWidth no sirve porque contentBounds incluye la propia pared,
+     * creando un límite que crece con ella y nunca coincide con el borde. */
+    const maxX = (zonaData?.ancho ?? 600) - pared.ancho;
     const maxY = (zonaData?.alto ?? 600) - pared.alto;
     const clampedX = Math.min(maxX, Math.max(0, pos_x));
     const clampedY = Math.min(maxY, Math.max(0, pos_y));
