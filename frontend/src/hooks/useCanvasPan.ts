@@ -17,7 +17,7 @@ function clampOffset(offset: PanOffset, maxOffset: PanOffset): PanOffset {
   };
 }
 
-export function useCanvasPan(maxOffset: PanOffset) {
+export function useCanvasPan(maxOffset: PanOffset, forcePan = false) {
   const [panning, setPanning] = useState(false);
   const [panOffset, setPanOffset] = useState<PanOffset>({ x: 0, y: 0 });
   const startPos = useRef({ x: 0, y: 0 });
@@ -33,16 +33,17 @@ export function useCanvasPan(maxOffset: PanOffset) {
   }, []);
 
   const onMouseDown = useCallback((e: React.MouseEvent) => {
-    /* Middle-click (button=1) o shift+left-click activan el pan */
+    /* Middle-click (button=1), shift+left-click, o forcePan activan el pan */
     const isMiddle = e.button === 1;
     const isShiftLeft = e.button === 0 && e.shiftKey;
-    if (!isMiddle && !isShiftLeft) return;
+    const isForcePan = e.button === 0 && forcePan;
+    if (!isMiddle && !isShiftLeft && !isForcePan) return;
 
     e.preventDefault();
     startPos.current = { x: e.clientX, y: e.clientY };
     startPan.current = { ...panRef.current };
     setPanning(true);
-  }, []);
+  }, [forcePan]);
 
   useEffect(() => {
     if (!panning) return;

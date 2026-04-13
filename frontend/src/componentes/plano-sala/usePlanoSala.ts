@@ -10,6 +10,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import axios from '@/api/axios-instance';
 import { useZoomStore } from '../../stores/zoomStore';
+import type { CanvasTool } from './CanvasToolbar';
 import {
   useObtenerPlano,
   getObtenerOcupacionQueryKey,
@@ -85,6 +86,22 @@ export function usePlanoSala(
   const zoom = useZoomStore(s => s.zoom);
   const setZoom = useZoomStore(s => s.setZoom);
   const canvasHeight = useZoomStore(s => s.canvasHeight);
+
+  /* [134A-15] Sistema de herramientas tipo Illustrator */
+  const [activeTool, setActiveToolRaw] = useState<CanvasTool>('select');
+  /* Estado para dibujar paredes arrastrando de punto A a punto B */
+  const [wallDrawStart, setWallDrawStart] = useState<{ x: number; y: number } | null>(null);
+  const [wallDrawPreview, setWallDrawPreview] = useState<{
+    x: number; y: number; w: number; rotation: number;
+  } | null>(null);
+
+  const setActiveTool = useCallback((tool: CanvasTool) => {
+    setActiveToolRaw(tool);
+    setMesaSeleccionada(null);
+    setParedSeleccionada(null);
+    setWallDrawStart(null);
+    setWallDrawPreview(null);
+  }, []);
 
   /* Estado de diálogos — reemplazan prompt/confirm/alert nativos */
   const [dialogoEntrada, setDialogoEntrada] = useState<DialogoEntrada | null>(null);
@@ -162,6 +179,91 @@ export function usePlanoSala(
       },
     });
   };
+
+  /* [134A-15+134A-18] Creación rápida de mesa via herramienta del toolbar.
+   * Auto-genera el número (max actual + 1). Sin diálogo. */
+  const handleCrearMesaRapida = async (pos: { x: number; y: number }, forma: string) => {
+    if (!zonaActiva) return;
+    const nextNum = mesasZona.length > 0
+      ? Math.max(...mesasZona.map(m => m.numero)) + 1
+      : 1;
+    try {
+      await crearMesa({
+        zona_id: zonaActiva, numero: nextNum, forma,
+        ancho: forma === 'rectangular' ? 144 : 80,
+        alto: 80,
+        pos_x: pos.x, pos_y: pos.y,
+      } as CrearMesaRequest);
+      refetchPlano();
+      toast.success(`Mesa ${nextNum} creada`);
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { message?: string } } };
+      toast.error(axiosErr?.response?.data?.message || 'Error al crear mesa');
+    }
+  };
+
+  /* [134A-15] Eliminar directamente (herramienta borrar) sin diálogo de confirmación */
+  const handleEliminarMesaDirecta = async (id: string) => {
+    try {
+      await eliminarMesaApi(id);
+      setMesaSeleccionada(null);
+      refetchPlano();
+    } catch { toast.error('Error al eliminar mesa'); }
+  };
+
+  const handleEliminarParedDirecta = async (id: string) => {
+    try {
+      await eliminarParedApi(id);
+      setParedSeleccionada(null);
+      refetchPlano();
+    } catch { toast.error('Error al eliminar pared'); }
+  };
+
+  /* [134A-16] Dibujar pared arrastrando de punto A a punto B.
+   * mousedown → marca start. mousemove → calcula preview. mouseup → crea pared. */
+  const handleWallDrawStart = useCallback((canvasX: number, canvasY: number) => {
+    setWallDrawStart({ x: canvasX, y: canvasY });
+    setWallDrawPreview(null);
+  }, []);
+
+  const handleWallDrawMove = useCallback((canvasX: number, canvasY: number) => {
+    if (!wallDrawStart) return;
+    const dx = canvasX - wallDrawStart.x;
+    const dy = canvasY - wallDrawStart.y;
+    const length = Math.sqrt(dx * dx + dy * dy);
+    if (length < 5) return;
+    const angleDeg = Math.atan2(dy, dx) * (180 / Math.PI);
+    const midX = (wallDrawStart.x + canvasX) / 2;
+    const midY = (wallDrawStart.y + canvasY) / 2;
+    setWallDrawPreview({
+      x: midX - length / 2,
+      y: midY - 5,
+      w: length,
+      rotation: Math.round(angleDeg),
+    });
+  }, [wallDrawStart]);
+
+  const handleWallDrawEnd = useCallback(async () => {
+    if (!wallDrawStart || !wallDrawPreview || !zonaActiva) {
+      setWallDrawStart(null);
+      setWallDrawPreview(null);
+      return;
+    }
+    const rot = ((wallDrawPreview.rotation % 360) + 360) % 360;
+    try {
+      await crearPared({
+        zona_id: zonaActiva,
+        ancho: Math.round(wallDrawPreview.w),
+        alto: 10,
+        rotacion: rot,
+        pos_x: Math.round(wallDrawPreview.x),
+        pos_y: Math.round(wallDrawPreview.y),
+      } as CrearParedRequest);
+      refetchPlano();
+    } catch { toast.error('Error al crear pared'); }
+    setWallDrawStart(null);
+    setWallDrawPreview(null);
+  }, [wallDrawStart, wallDrawPreview, zonaActiva, refetchPlano]);
 
   const handleGuardarMesa = async (id: string, req: ActualizarMesaRequest) => {
     if (req.pos_x !== undefined || req.pos_y !== undefined) {
@@ -465,6 +567,11 @@ export function usePlanoSala(
     paredSeleccionada, setParedSeleccionada,
     posicionesLocales, dimensionesLocales, setMesaSeleccionada, cambiarZona, zoom, setZoom,
     canvasHeight,
+    /* [134A-15] Herramientas del toolbar */
+    activeTool, setActiveTool,
+    wallDrawStart, wallDrawPreview,
+    handleCrearMesaRapida, handleEliminarMesaDirecta, handleEliminarParedDirecta,
+    handleWallDrawStart, handleWallDrawMove, handleWallDrawEnd,
     handleCrearZona, handleEliminarZona, handleEditarZona,
     handleCrearMesa, handleGuardarMesa, handleResizeMesa, handleEliminarMesa,
     handleCrearPared, handleEliminarPared, handleGuardarPared,

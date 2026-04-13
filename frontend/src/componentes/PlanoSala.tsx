@@ -6,21 +6,21 @@
  * Lógica en usePlanoSala, mesa arrastrable en MesaDraggable, config en PanelConfigMesa. */
 
 import { useRef, useMemo } from 'react';
-import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
-import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
+import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { Button } from '@/components/ui/button';
-import { Pencil, Trash2, Download, Upload, Combine, ZoomIn, ZoomOut, BrickWall } from 'lucide-react';
+import { Pencil, Trash2, Download, Upload, ZoomIn, ZoomOut } from 'lucide-react';
 import MesaDraggable from './plano-sala/MesaDraggable';
-import MesaTemplate from './plano-sala/MesaTemplate';
 import PanelConfigMesa from './plano-sala/PanelConfigMesa';
 import PanelConfigPared from './plano-sala/PanelConfigPared';
 import ParedDraggable from './plano-sala/ParedDraggable';
+import CanvasToolbar from './plano-sala/CanvasToolbar';
+import CombinacionesList from './plano-sala/CombinacionesList';
+import PlanoOverlays from './plano-sala/PlanoOverlays';
 import PlanoDialogs from './plano-sala/PlanoDialogs';
-import CanvasMinimap from './plano-sala/CanvasMinimap';
-import OffScreenIndicators from './plano-sala/OffScreenIndicators';
 import { usePlanoSala } from './plano-sala/usePlanoSala';
 import { useCanvasResize } from '../hooks/useCanvasResize';
 import { useCanvasPan } from '../hooks/useCanvasPan';
+import { useCanvasViewport } from '../hooks/useCanvasViewport';
 import { useViewportSize } from '../hooks/useViewportSize';
 import { useZoomStore } from '../stores/zoomStore';
 import '../estilos/PlanoSala.css';
@@ -34,9 +34,13 @@ function PlanoSala() {
     paredSeleccionada, setParedSeleccionada,
     posicionesLocales, dimensionesLocales, setMesaSeleccionada, cambiarZona, zoom, setZoom,
     canvasHeight,
+    activeTool, setActiveTool,
+    wallDrawStart, wallDrawPreview,
+    handleCrearMesaRapida, handleEliminarMesaDirecta, handleEliminarParedDirecta,
+    handleWallDrawStart, handleWallDrawMove, handleWallDrawEnd,
     handleCrearZona, handleEliminarZona, handleEditarZona,
-    handleCrearMesa, handleGuardarMesa, handleResizeMesa, handleEliminarMesa,
-    handleCrearPared, handleEliminarPared, handleGuardarPared,
+    handleGuardarMesa, handleResizeMesa, handleEliminarMesa,
+    handleEliminarPared, handleGuardarPared,
     handleMoverPared, handleRotarPared, handleRedimensionarPared,
     handleDuplicarPared, handleDuplicarMesa,
     handleDragStart, handleDragEnd,
@@ -97,60 +101,35 @@ function PlanoSala() {
 
   /* [303A-12] Pan del canvas shift+drag o middle-click
    * [303A-20] Transform-based: panOffset state en vez de scrollLeft/scrollTop */
-  const { panning, panOffset, setPanOffset, onPanMouseDown } = useCanvasPan(maxPanOffset);
+  const { panning, panOffset, setPanOffset, onPanMouseDown } = useCanvasPan(maxPanOffset, activeTool === 'pan');
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   );
 
-  /* [283A-17] Handler unificado de drag: distingue mesa template vs mesa existente.
-   * Siempre llama handleDragStart para que 'arrastrando' (del hook) se setee. */
-  const onDragStart = (event: DragStartEvent) => {
-    handleDragStart(event);
-  };
-
-  const onDragEnd = (event: DragEndEvent) => {
-    const id = String(event.active.id);
-    if (id === 'new-mesa-template') {
-      if (!canvasRef.current || !zonaActiva || !zonaData) return;
-      const rect = canvasRef.current.getBoundingClientRect();
-      const pe = event.activatorEvent as PointerEvent;
-      /* [283A-25] Coordenadas de pantalla → canónicas dividiendo por zoom.
-       * Bounds usan ancho real del canvas / zoom. */
-      const rawX = Math.round((pe.clientX + event.delta.x - rect.left) / zoom);
-      const rawY = Math.round((pe.clientY + event.delta.y - rect.top) / zoom);
-      const canvasWidth = canvasRef.current.clientWidth;
-      const x = Math.min(canvasWidth / zoom - 80, Math.max(0, rawX));
-      const y = Math.min(zonaData.alto - 80, Math.max(0, rawY));
-      handleCrearMesa({ x, y });
-    } else {
-      handleDragEnd(event);
-    }
-  };
+  /* [134A-15+16] Handlers del viewport delegados a useCanvasViewport */
+  const { onViewportClick, onViewportMouseDown, onViewportMouseMove } = useCanvasViewport({
+    activeTool, wallDrawStart, zonaActiva, panOffset, zoom,
+    setMesaSeleccionada, setParedSeleccionada,
+    handleCrearCombinacion, handleCrearMesaRapida,
+    onPanMouseDown, handleWallDrawStart, handleWallDrawMove, handleWallDrawEnd,
+  });
 
   return (
-    <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd}>
+    <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
     <div className="flex flex-col gap-4">
-      {/* [283A-17] Toolbar: Mesa draggable + acciones zona + Combinación + Export/Import */}
+      {/* [134A-15] Toolbar simplificado: zona + export/import + zoom. Herramientas en toolbar flotante */}
       <div className="flex items-center gap-2 flex-wrap">
-        <MesaTemplate disabled={!zonaActiva} />
         {zonaActiva && (
           <>
             <Button size="sm" variant="ghost" onClick={handleEditarZona}><Pencil className="size-4 mr-1" />Renombrar</Button>
             <Button size="sm" variant="destructive" onClick={handleEliminarZona}><Trash2 className="size-4 mr-1" />Zona</Button>
           </>
         )}
-        <Button size="sm" variant="ghost" onClick={handleCrearCombinacion} disabled={!zonaActiva || mesasZona.length < 2}>
-          <Combine className="size-4 mr-1" />Combinación
-        </Button>
-        <Button size="sm" variant="ghost" onClick={handleCrearPared} disabled={!zonaActiva}>
-          <BrickWall className="size-4 mr-1" />Pared
-        </Button>
         <div className="ml-auto flex gap-2">
           <Button size="sm" variant="ghost" onClick={handleExportar}><Download className="size-4 mr-1" />Exportar</Button>
           <Button size="sm" variant="ghost" onClick={handleImportar}><Upload className="size-4 mr-1" />Importar</Button>
         </div>
-        {/* [283A-25] Controles de zoom para escalar el canvas visualmente */}
         <div className="flex items-center gap-1">
           <Button size="sm" variant="outline" onClick={() => setZoom(z => Math.max(0.5, +(z - 0.1).toFixed(2)))}><ZoomOut className="size-4" /></Button>
           <span className="text-xs w-12 text-center tabular-nums">{Math.round(zoom * 100)}%</span>
@@ -188,10 +167,14 @@ function PlanoSala() {
             <div style={{ position: 'relative' }}>
               <div
                 ref={viewportRef}
-                className={`planoCanvas ${panning ? 'planoPanning' : ''}`}
+                className={`planoCanvas ${panning ? 'planoPanning' : ''} ${
+                  activeTool === 'pan' ? (panning ? 'cursor-grabbing' : 'cursor-grab') :
+                  (activeTool === 'mesa-cuadrada' || activeTool === 'mesa-redonda' || activeTool === 'pared') ? 'cursor-crosshair' : ''
+                }`}
                 style={{ height: canvasHeight }}
-                onClick={() => { setMesaSeleccionada(null); setParedSeleccionada(null); }}
-                onMouseDown={onPanMouseDown}
+                onClick={onViewportClick}
+                onMouseDown={onViewportMouseDown}
+                onMouseMove={onViewportMouseMove}
               >
                 <div
                   ref={canvasRef}
@@ -219,8 +202,12 @@ function PlanoSala() {
                         zoom={zoom}
                         seleccionada={paredSeleccionada?.id === pared.id}
                         onClick={() => {
-                          setParedSeleccionada(pared);
-                          setMesaSeleccionada(null);
+                          if (activeTool === 'delete') {
+                            handleEliminarParedDirecta(pared.id);
+                          } else {
+                            setParedSeleccionada(pared);
+                            setMesaSeleccionada(null);
+                          }
                         }}
                         onMoveEnd={handleMoverPared}
                         onRotateEnd={handleRotarPared}
@@ -228,6 +215,23 @@ function PlanoSala() {
                       />
                     );
                   })}
+                  {/* [134A-16] Preview de pared durante dibujo A→B */}
+                  {wallDrawPreview && (
+                    <div
+                      className="absolute pointer-events-none"
+                      style={{
+                        left: wallDrawPreview.x * zoom,
+                        top: wallDrawPreview.y * zoom,
+                        width: wallDrawPreview.w * zoom,
+                        height: 10 * zoom,
+                        background: 'var(--foreground)',
+                        opacity: 0.3,
+                        transform: `rotate(${wallDrawPreview.rotation}deg)`,
+                        transformOrigin: 'center center',
+                        borderRadius: 'var(--radius)',
+                      }}
+                    />
+                  )}
                   {mesasZona.map(mesa => {
                     const pos = posicionesLocales[mesa.id];
                     const dims = dimensionesLocales[mesa.id];
@@ -255,55 +259,35 @@ function PlanoSala() {
                         zonaAncho={zonaData.ancho}
                         zonaAlto={zonaData.alto}
                         onResize={handleResizeMesa}
-                        onClick={() => { setMesaSeleccionada(base); setParedSeleccionada(null); }}
+                        onClick={() => {
+                          if (activeTool === 'delete') {
+                            handleEliminarMesaDirecta(mesa.id);
+                          } else {
+                            setMesaSeleccionada(base);
+                            setParedSeleccionada(null);
+                          }
+                        }}
                       />
                     );
                   })}
                 </div>
               </div>
-              {/* [303A-12] Minimap + indicadores off-screen */}
-              <CanvasMinimap
-                mesas={mesasZona.map(m => {
-                  const p = posicionesLocales[m.id];
-                  const d = dimensionesLocales[m.id];
-                  return {
-                    x: (p?.x ?? m.pos_x) * zoom,
-                    y: (p?.y ?? m.pos_y) * zoom,
-                    ancho: (d?.ancho ?? m.ancho) * zoom,
-                    alto: (d?.alto ?? m.alto) * zoom,
-                  };
-                })}
-                paredes={paredesZona.map(p => ({
-                  x: p.pos_x * zoom,
-                  y: p.pos_y * zoom,
-                  ancho: p.ancho * zoom,
-                  alto: p.alto * zoom,
-                  rotacion: p.rotacion,
-                }))}
-                contentWidth={contentBounds.w}
-                contentHeight={contentBounds.h}
-                viewportWidth={viewportSize.w}
-                viewportHeight={viewportSize.h}
-                scrollLeft={panOffset.x}
-                scrollTop={panOffset.y}
-                onNavigate={(x, y) => setPanOffset({ x, y })}
+              {/* [134A-15] Toolbar flotante tipo Illustrator */}
+              <CanvasToolbar
+                activeTool={activeTool}
+                onToolChange={setActiveTool}
+                disabled={!zonaActiva}
               />
-              <OffScreenIndicators
-                mesas={mesasZona.map(m => {
-                  const p = posicionesLocales[m.id];
-                  const d = dimensionesLocales[m.id];
-                  return {
-                    x: (p?.x ?? m.pos_x) * zoom,
-                    y: (p?.y ?? m.pos_y) * zoom,
-                    ancho: (d?.ancho ?? m.ancho) * zoom,
-                    alto: (d?.alto ?? m.alto) * zoom,
-                  };
-                })}
-                viewportWidth={viewportSize.w}
-                viewportHeight={viewportSize.h}
-                scrollLeft={panOffset.x}
-                scrollTop={panOffset.y}
-                onNavigate={(x, y) => setPanOffset({ x, y })}
+              <PlanoOverlays
+                mesasZona={mesasZona}
+                paredesZona={paredesZona}
+                posicionesLocales={posicionesLocales}
+                dimensionesLocales={dimensionesLocales}
+                zoom={zoom}
+                contentBounds={contentBounds}
+                viewportSize={viewportSize}
+                panOffset={panOffset}
+                setPanOffset={setPanOffset}
               />
             </div>
           ) : (
@@ -349,24 +333,11 @@ function PlanoSala() {
         )}
       </div>
 
-      {/* Combinaciones */}
-      {plano && plano.combinaciones.length > 0 && (
-        <div className="flex flex-col gap-2">
-          <h3 className="font-semibold text-sm">Combinaciones de mesas</h3>
-          {plano.combinaciones.map(c => (
-            <div key={c.id} className="flex items-center justify-between rounded-md border p-3">
-              <div>
-                <strong className="text-sm">{c.nombre}</strong>
-                <p className="text-xs text-muted-foreground">
-                  {c.min_personas}-{c.max_personas} personas · {c.mesas.map(m => `Mesa ${m.numero}`).join(', ')}
-                </p>
-              </div>
-              <Button size="sm" variant="destructive" onClick={() => handleEliminarCombinacion(c.id)}>
-                <Trash2 className="size-4" />
-              </Button>
-            </div>
-          ))}
-        </div>
+      {plano && (
+        <CombinacionesList
+          combinaciones={plano.combinaciones}
+          onEliminar={handleEliminarCombinacion}
+        />
       )}
       {/* [283A-25] Diálogos extraídos a PlanoDialogs para mantener < 300 líneas */}
       <PlanoDialogs
@@ -376,14 +347,6 @@ function PlanoSala() {
         mesasZona={mesasZona}
       />
     </div>
-    {/* [283A-17] DragOverlay: preview visual mientras se arrastra la mesa template */}
-    <DragOverlay>
-      {arrastrando === 'new-mesa-template' && (
-        <div className="planoMesa" style={{ width: 80, height: 80, position: 'relative' }}>
-          <span className="planoMesaNumero">?</span>
-        </div>
-      )}
-    </DragOverlay>
     </DndContext>
   );
 }
