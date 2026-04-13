@@ -194,10 +194,11 @@ Cada lección debe ser concisa y accionable.
 **Solución:** Añadir `#[serde(rename = "externalID")]` override explícito en los campos afectados. El `rename` tiene prioridad sobre `rename_all`.
 **Prevención:** Al integrar APIs de terceros, SIEMPRE comparar el JSON serializado contra la spec OpenAPI/Swagger real antes del primer deploy. Nunca confiar en que camelCase coincida con los nombres exactos de la API. Especial cuidado con campos que contienen acrónimos (ID, URL, API, HTML).
 
-## 2026-04-13 — Drag de mesas: clamp con zonaAncho crea "límite imaginario" (BUG RECURRENTE)
+## 2026-04-13 — Drag de mesas y paredes: clamp con pos_x/pos_y crea "límite imaginario" (BUG RECURRENTE)
 
-**Problema:** Las mesas no podían moverse libremente por el canvas — se detenían en un rectángulo invisible mucho menor que el plano visible. El bug reapareció con cada reescritura del drag.
-**Causa raíz:** `onPointerMove` clampeaba la posición a `[0, zonaAncho*zoom - mesa.ancho] × [0, zonaAlto*zoom - mesa.alto]`. Las dimensiones `zonaAncho`/`zonaAlto` son valores canónicos del backend (ej: 600×400) que no representan el canvas visible. El canvas real (contentBounds) puede ser mucho mayor que la zona.
-**Solución:** Eliminar el clamp de max durante el drag (como hace ParedDraggable). Solo evitar coordenadas negativas con `Math.max(0, ...)`. Las mesas se mueven libremente.
-**Patrón correcto (ParedDraggable):** Sin clamp durante drag, snap-back al soltar si se quiere. Nunca usar `zonaAncho`/`zonaAlto` como límite de arrastre — esos valores no corresponden al tamaño visible del canvas.
-**Prevención:** Para todo componente draggable en el plano: NO clampear a zonaData durante el drag. El canvas crece dinámicamente (contentBounds). Si se necesita límite, usar el DOM width del canvas via ref, no las dimensiones de la zona backend.
+**Problema:** Las mesas no podían moverse libremente (134A-23). Luego las paredes mostraban límite como si siempre fueran horizontales (134A-24+25). El bug reapareció con cada reescritura del drag.
+**Causa raíz — mesas:** `onPointerMove` clampeaba a `[0, zonaAncho*zoom - mesa.ancho]`. `zonaAncho/zonaAlto` son valores canónicos del backend que no representan el canvas visible.
+**Causa raíz — paredes (VARIANTE SUTIL):** `Math.max(0, pos_x)` aplicado sobre la esquina top-left de la pared SIN considerar su rotación. Para una pared vertical (90°), `pos_x = centro_x - largo/2` es negativo aunque la pared esté dentro del plano visualmente. El clamp sobre `pos_x` actúa como si la pared fuera horizontal → límite imaginario.
+**Solución:** Para todo elemento draggable en el plano: NO clampear nada con zonaData. NO hacer Math.max(0, pos_x) sobre coordenadas sin rotar. Pasar coordenadas directamente al API (solo Math.round).
+**Patrón correcto:** Sin clamp durante drag, sin clamp en onMoveEnd. Si se necesita un límite, calcularlo sobre el CENTRO del bounding box rotado (bbW/bbH), nunca sobre pos_x/pos_y directo.
+**Prevención:** Antes de agregar cualquier clamp en un elemento del plano, preguntarse: "¿Esta coordenada es la esquina top-left de algo que puede estar rotado?" Si sí, el clamp directo ES el bug.

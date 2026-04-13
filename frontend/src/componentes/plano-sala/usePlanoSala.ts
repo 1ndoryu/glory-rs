@@ -456,12 +456,14 @@ export function usePlanoSala() {
     const pared = paredesZona.find(p => p.id === id);
     if (!pared) return;
     /* [134A-14] pos_x/pos_y es la esquina top-left del rect sin rotar.
-     * [134A-23] Sin snap-back a zonaW/zonaH — el canvas crece dinámicamente
-     * (contentBounds) y zonaData.ancho/alto no representan el espacio visible.
-     * Solo evitamos coordenadas negativas (pared fuera del canvas por la izquierda/arriba).
-     * Lecc: nunca usar zonaData como límite de posición en el plano (bug recurrente). */
-    const clampedX = Math.max(0, Math.round(pos_x));
-    const clampedY = Math.max(0, Math.round(pos_y));
+     * [134A-23] Sin clamp de ningún tipo — ni zonaData ni Math.max(0).
+     * Cualquier clamp sobre pos_x/pos_y directo (sin considerar rotación) produce
+     * el bug de "límite horizontal imaginario": las paredes rotadas se detienen
+     * como si fueran horizontales porque pos_x no representa su borde visual real.
+     * La correcta posición visual de una pared rotada es su centro, no su top-left.
+     * Se pasan las coordenadas tal cual llegan de ParedDraggable (equivalente a handleMoverMesa). */
+    const clampedX = Math.round(pos_x);
+    const clampedY = Math.round(pos_y);
     try {
       await actualizarParedApi(id, {
         ancho: pared.ancho, alto: pared.alto,
