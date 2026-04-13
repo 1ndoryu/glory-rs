@@ -1,157 +1,220 @@
-/* [134A-3] Pared arrastrable del plano de sala.
- * Drag con mouse para mover; handle circular encima del centro para rotar en múltiplos de 15°.
- * Usa refs para los event listeners globales — sin reinstalar en cada render.
- * Patrón de previewX/Y en refs para evitar state stale dentro de los handlers. */
+/* [134A-3] Pared arrastrable — pointer events nativos con setPointerCapture.
+ * Modos: move (drag cuerpo), rotate (handle circular, snap 15°), resize-e/resize-s (handles de borde).
+ * setPointerCapture en el div padre garantiza que todos los modos reciben pointermove/up
+ * aunque el cursor salga del elemento. stopPropagation en pointerdown evita que dnd-kit
+ * del canvas capture el pointer (era la causa del bug de movimiento solo vertical). */
 
 import { useRef, useState, useEffect } from 'react';
 import { RotateCw } from 'lucide-react';
 import type { ParedSala } from '../../api/generated/gestionRestauranteAPI.schemas';
+import type { ActualizarParedRequest } from '../../api/generated';
+
+type DragMode = 'none' | 'move' | 'rotate' | 'resize-e' | 'resize-s';
 
 interface Props {
-  /* Pared en coords de display (pos × zoom, ancho × zoom) */
-  pared: ParedSala;
-  /* Pared en coords canónicas (sin escala) — para onMoveEnd y onRotateEnd */
-  canonical: ParedSala;
+  pared: ParedSala;       /* display coords (× zoom) */
+  canonical: ParedSala;   /* canonical coords (sin escala) — usado en callbacks */
   zoom: number;
-  zonaAncho: number; /* canónico */
-  zonaAlto: number;  /* canónico */
+  zonaAncho: number;      /* canónico */
+  zonaAlto: number;       /* canónico */
   seleccionada: boolean;
   onClick: () => void;
   onMoveEnd: (id: string, x: number, y: number) => void;
   onRotateEnd: (id: string, deg: number) => void;
+  onResizeEnd: (id: string, req: ActualizarParedRequest) => void;
 }
 
 export default function ParedDraggable({
-  pared, canonical, zoom, zonaAncho, zonaAlto, seleccionada, onClick, onMoveEnd, onRotateEnd,
+  pared, canonical, zoom, zonaAncho, zonaAlto, seleccionada, onClick, onMoveEnd, onRotateEnd, onResizeEnd,
 }: Props) {
   const divRef = useRef<HTMLDivElement>(null);
   const [, forceUpdate] = useState(0);
 
-  /* Refs de estado mutable — evitan reinstalar listeners en cada cambio */
-  const previewXRef = useRef(pared.pos_x);
-  const previewYRef = useRef(pared.pos_y);
-  const previewRotRef = useRef(canonical.rotacion);
-
-  const dragging = useRef(false);
-  const rotating = useRef(false);
+  /* Modo activo del drag */
+  const mode = useRef<DragMode>('none');
   const startMouse = useRef({ x: 0, y: 0 });
-  const startPos = useRef({ x: 0, y: 0 });
+  const startRect = useRef({ x: 0, y: 0, w: 0, h: 0 });
 
-  /* Refs sincronizados con props para que los handlers globales accedan al valor actual */
+  /* Valores de preview (display coords) */
+  const previewX = useRef(pared.pos_x);
+  const previewY = useRef(pared.pos_y);
+  const previewW = useRef(pared.ancho);
+  const previewH = useRef(pared.alto);
+  const previewRot = useRef(canonical.rotacion);
+
+  /* Refs para callbacks y valores que cambian sin reinstalar handlers */
+  const canonicalRef = useRef(canonical);
   const zoomRef = useRef(zoom);
-  const maxXRef = useRef(zonaAncho * zoom - pared.ancho);
-  const maxYRef = useRef(zonaAlto * zoom - pared.alto);
+  const zonaRef = useRef({ ancho: zonaAncho, alto: zonaAlto });
   const onMoveEndRef = useRef(onMoveEnd);
   const onRotateEndRef = useRef(onRotateEnd);
-  const idRef = useRef(canonical.id);
+  const onResizeEndRef = useRef(onResizeEnd);
 
+  useEffect(() => { canonicalRef.current = canonical; }, [canonical]);
   useEffect(() => { zoomRef.current = zoom; }, [zoom]);
+  useEffect(() => { zonaRef.current = { ancho: zonaAncho, alto: zonaAlto }; }, [zonaAncho, zonaAlto]);
   useEffect(() => { onMoveEndRef.current = onMoveEnd; }, [onMoveEnd]);
   useEffect(() => { onRotateEndRef.current = onRotateEnd; }, [onRotateEnd]);
-  useEffect(() => {
-    maxXRef.current = zonaAncho * zoom - pared.ancho;
-    maxYRef.current = zonaAlto * zoom - pared.alto;
-  }, [zonaAncho, zonaAlto, zoom, pared.ancho, pared.alto]);
+  useEffect(() => { onResizeEndRef.current = onResizeEnd; }, [onResizeEnd]);
 
   /* Sincronizar preview cuando llega dato nuevo del servidor (post-guardar) */
   useEffect(() => {
-    if (!dragging.current && !rotating.current) {
-      previewXRef.current = pared.pos_x;
-      previewYRef.current = pared.pos_y;
-      previewRotRef.current = canonical.rotacion;
+    if (mode.current === 'none') {
+      previewX.current = pared.pos_x;
+      previewY.current = pared.pos_y;
+      previewW.current = pared.ancho;
+      previewH.current = pared.alto;
+      previewRot.current = canonical.rotacion;
       forceUpdate(n => n + 1);
     }
-  }, [pared.pos_x, pared.pos_y, canonical.rotacion]);
+  }, [pared.pos_x, pared.pos_y, pared.ancho, pared.alto, canonical.rotacion]);
 
-  /* Listeners globales — instalados una sola vez, usan refs para valores variables */
-  useEffect(() => {
-    const onMouseMove = (e: MouseEvent) => {
-      if (dragging.current) {
-        const dx = e.clientX - startMouse.current.x;
-        const dy = e.clientY - startMouse.current.y;
-        previewXRef.current = Math.min(maxXRef.current, Math.max(0, startPos.current.x + dx));
-        previewYRef.current = Math.min(maxYRef.current, Math.max(0, startPos.current.y + dy));
-        forceUpdate(n => n + 1);
-      }
-      if (rotating.current && divRef.current) {
-        const rect = divRef.current.getBoundingClientRect();
-        const cx = rect.left + rect.width / 2;
-        const cy = rect.top + rect.height / 2;
-        let angle = Math.atan2(e.clientY - cy, e.clientX - cx) * (180 / Math.PI) + 90;
-        angle = Math.round(angle / 15) * 15;
-        previewRotRef.current = ((angle % 360) + 360) % 360;
-        forceUpdate(n => n + 1);
-      }
-    };
-
-    const onMouseUp = () => {
-      if (dragging.current) {
-        dragging.current = false;
-        onMoveEndRef.current(
-          idRef.current,
-          Math.round(previewXRef.current / zoomRef.current),
-          Math.round(previewYRef.current / zoomRef.current),
-        );
-      }
-      if (rotating.current) {
-        rotating.current = false;
-        onRotateEndRef.current(idRef.current, previewRotRef.current);
-      }
-    };
-
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
-    return () => {
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
-    };
-  }, []); /* sin deps — refs garantizan valores actuales */
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (e.shiftKey) return; /* shift reservado para pan del canvas */
-    e.stopPropagation();
-    e.preventDefault();
-    onClick();
-    dragging.current = true;
-    startMouse.current = { x: e.clientX, y: e.clientY };
-    startPos.current = { x: previewXRef.current, y: previewYRef.current };
+  /* Todos los modos capturan el pointer en el div padre para recibir pointermove/up
+   * incluso si el cursor sale del elemento. */
+  const captureOnParent = (e: React.PointerEvent) => {
+    divRef.current?.setPointerCapture(e.pointerId);
   };
 
-  const handleRotateMouseDown = (e: React.MouseEvent) => {
+  const onPointerDownBody = (e: React.PointerEvent) => {
+    if (e.shiftKey) return;  /* shift reservado para pan del canvas */
+    e.stopPropagation();     /* evita que dnd-kit vea el evento */
+    e.preventDefault();
+    onClick();
+    mode.current = 'move';
+    startMouse.current = { x: e.clientX, y: e.clientY };
+    startRect.current = { x: previewX.current, y: previewY.current, w: previewW.current, h: previewH.current };
+    captureOnParent(e);
+  };
+
+  const onPointerDownRotate = (e: React.PointerEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    rotating.current = true;
+    mode.current = 'rotate';
+    captureOnParent(e);
+  };
+
+  const onPointerDownResizeE = (e: React.PointerEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    mode.current = 'resize-e';
+    startMouse.current = { x: e.clientX, y: e.clientY };
+    startRect.current = { x: previewX.current, y: previewY.current, w: previewW.current, h: previewH.current };
+    captureOnParent(e);
+  };
+
+  const onPointerDownResizeS = (e: React.PointerEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    mode.current = 'resize-s';
+    startMouse.current = { x: e.clientX, y: e.clientY };
+    startRect.current = { x: previewX.current, y: previewY.current, w: previewW.current, h: previewH.current };
+    captureOnParent(e);
+  };
+
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (mode.current === 'none') return;
+    const dx = e.clientX - startMouse.current.x;
+    const dy = e.clientY - startMouse.current.y;
+    const z = zoomRef.current;
+    const zona = zonaRef.current;
+    const c = canonicalRef.current;
+
+    if (mode.current === 'move') {
+      const maxX = (zona.ancho - c.ancho) * z;
+      const maxY = (zona.alto - c.alto) * z;
+      previewX.current = Math.min(Math.max(maxX, 0), Math.max(0, startRect.current.x + dx));
+      previewY.current = Math.min(Math.max(maxY, 0), Math.max(0, startRect.current.y + dy));
+    } else if (mode.current === 'rotate' && divRef.current) {
+      const rect = divRef.current.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      let angle = Math.atan2(e.clientY - cy, e.clientX - cx) * (180 / Math.PI) + 90;
+      angle = Math.round(angle / 15) * 15;
+      previewRot.current = ((angle % 360) + 360) % 360;
+    } else if (mode.current === 'resize-e') {
+      previewW.current = Math.max(10 * z, startRect.current.w + dx);
+    } else if (mode.current === 'resize-s') {
+      previewH.current = Math.max(5 * z, startRect.current.h + dy);
+    }
+    forceUpdate(n => n + 1);
+  };
+
+  const onPointerUp = () => {
+    if (mode.current === 'none') return;
+    const z = zoomRef.current;
+    const c = canonicalRef.current;
+    const m = mode.current;
+    mode.current = 'none';
+
+    if (m === 'move') {
+      onMoveEndRef.current(c.id, Math.round(previewX.current / z), Math.round(previewY.current / z));
+    } else if (m === 'rotate') {
+      onRotateEndRef.current(c.id, previewRot.current);
+    } else if (m === 'resize-e' || m === 'resize-s') {
+      onResizeEndRef.current(c.id, {
+        pos_x: Math.round(previewX.current / z),
+        pos_y: Math.round(previewY.current / z),
+        ancho: Math.round(previewW.current / z),
+        alto: Math.round(previewH.current / z),
+        color: c.color,
+        rotacion: previewRot.current,
+      });
+    }
+    forceUpdate(n => n + 1);
   };
 
   return (
     <div
       ref={divRef}
-      className="absolute rounded-sm border border-border/50 select-none transition-shadow"
+      className="absolute rounded-sm border border-border/50 select-none"
       style={{
-        left: previewXRef.current,
-        top: previewYRef.current,
-        width: pared.ancho,
-        height: pared.alto,
+        left: previewX.current,
+        top: previewY.current,
+        width: previewW.current,
+        height: previewH.current,
         backgroundColor: canonical.color || '#6b7280',
-        transform: previewRotRef.current ? `rotate(${previewRotRef.current}deg)` : undefined,
+        transform: previewRot.current ? `rotate(${previewRot.current}deg)` : undefined,
         transformOrigin: 'center center',
         boxShadow: seleccionada ? '0 0 0 2px hsl(var(--primary))' : undefined,
-        cursor: dragging.current ? 'grabbing' : 'grab',
+        cursor: mode.current === 'move' ? 'grabbing' : 'grab',
         zIndex: 1,
+        touchAction: 'none',
       }}
-      onMouseDown={handleMouseDown}
+      onPointerDown={onPointerDownBody}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
       onClick={e => e.stopPropagation()}
     >
       {seleccionada && (
-        <div
-          className="absolute -top-7 left-1/2 -translate-x-1/2 w-5 h-5 rounded-full bg-primary flex items-center justify-center cursor-pointer shadow-md hover:scale-110 transition-transform"
-          style={{ zIndex: 2 }}
-          onMouseDown={handleRotateMouseDown}
-          title="Arrastrar para rotar (snap 15°)"
-        >
-          <RotateCw className="size-3 text-primary-foreground pointer-events-none" />
-        </div>
+        <>
+          {/* Handle de rotación — encima del centro */}
+          <div
+            className="absolute -top-7 left-1/2 -translate-x-1/2 w-5 h-5 rounded-full bg-primary flex items-center justify-center shadow-md hover:scale-110 transition-transform"
+            style={{ zIndex: 3, touchAction: 'none', cursor: 'grab' }}
+            onPointerDown={onPointerDownRotate}
+            title="Arrastrar para rotar (snap 15°)"
+          >
+            <RotateCw className="size-3 text-primary-foreground pointer-events-none" />
+          </div>
+          {/* Handle resize ancho (borde derecho) */}
+          <div
+            className="absolute top-1/2 -right-1.5 -translate-y-1/2 w-3 h-6 rounded-sm bg-primary/80 hover:bg-primary"
+            style={{ zIndex: 3, touchAction: 'none', cursor: 'ew-resize' }}
+            onPointerDown={onPointerDownResizeE}
+            title="Arrastrar para cambiar ancho"
+          />
+          {/* Handle resize alto (borde inferior) */}
+          <div
+            className="absolute left-1/2 -bottom-1.5 -translate-x-1/2 w-6 h-3 rounded-sm bg-primary/80 hover:bg-primary"
+            style={{ zIndex: 3, touchAction: 'none', cursor: 'ns-resize' }}
+            onPointerDown={onPointerDownResizeS}
+            title="Arrastrar para cambiar alto"
+          />
+        </>
       )}
     </div>
   );
 }
+
+
+

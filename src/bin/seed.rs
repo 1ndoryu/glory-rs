@@ -886,8 +886,8 @@ async fn seed_inactividad(pool: &PgPool, user_id: Uuid, _canal_ids: &[Uuid]) {
 async fn seed_paredes(pool: &PgPool, zona_id: Uuid) {
     /* (pos_x, pos_y, ancho, alto, rotacion, color) */
     let paredes: &[(i32, i32, i32, i32, f64, &str)] = &[
-        (0, 0, 10, 600, 0.0, "#8B4513"),
-        (0, 0, 800, 10, 0.0, "#8B4513"),
+        (100, 50, 10, 150, 0.0, "#8B4513"),
+        (50, 200, 200, 10, 0.0, "#8B4513"),
     ];
 
     for &(x, y, ancho, alto, rotacion, color) in paredes {

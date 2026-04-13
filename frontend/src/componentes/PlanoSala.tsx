@@ -37,7 +37,7 @@ function PlanoSala() {
     handleCrearZona, handleEliminarZona, handleEditarZona,
     handleCrearMesa, handleGuardarMesa, handleResizeMesa, handleEliminarMesa,
     handleCrearPared, handleEliminarPared, handleGuardarPared,
-    handleMoverPared, handleRotarPared,
+    handleMoverPared, handleRotarPared, handleRedimensionarPared,
     handleDragStart, handleDragEnd,
     handleExportar, handleImportar,
     handleCrearCombinacion, handleEliminarCombinacion,
@@ -210,6 +210,7 @@ function PlanoSala() {
                         }}
                         onMoveEnd={handleMoverPared}
                         onRotateEnd={handleRotarPared}
+                        onResizeEnd={handleRedimensionarPared}
                       />
                     );
                   })}

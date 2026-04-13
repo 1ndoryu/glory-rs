@@ -393,6 +393,15 @@ export function usePlanoSala(
     }
   };
 
+  const handleRedimensionarPared = async (id: string, req: ActualizarParedRequest) => {
+    try {
+      await actualizarParedApi(id, req);
+      refetchPlano();
+    } catch {
+      toast.error('Error al redimensionar pared');
+    }
+  };
+
   return {
     plano, zonaActiva, zonaData, mesasZona, paredesZona, mesaSeleccionada, arrastrando,
     paredSeleccionada, setParedSeleccionada,
@@ -401,7 +410,7 @@ export function usePlanoSala(
     handleCrearZona, handleEliminarZona, handleEditarZona,
     handleCrearMesa, handleGuardarMesa, handleResizeMesa, handleEliminarMesa,
     handleCrearPared, handleEliminarPared, handleGuardarPared,
-    handleMoverPared, handleRotarPared,
+    handleMoverPared, handleRotarPared, handleRedimensionarPared,
     handleDragStart, handleDragEnd,
     handleExportar, handleImportar,
     handleCrearCombinacion, handleEliminarCombinacion,
