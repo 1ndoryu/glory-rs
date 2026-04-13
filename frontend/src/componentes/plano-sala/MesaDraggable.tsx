@@ -40,20 +40,12 @@ function MesaDraggable({
 
   /* Refs estables para valores que cambian sin reinstalar handlers */
   const zoomRef = useRef(zoom);
-  const zonaAnchoRef = useRef(zonaAncho);
-  const zonaAltoRef = useRef(zonaAlto);
   const onMoveEndRef = useRef(onMoveEnd);
   const onClickRef = useRef(onClick);
-  const mesaAnchoRef = useRef(mesa.ancho);
-  const mesaAltoRef = useRef(mesa.alto);
 
   useEffect(() => { zoomRef.current = zoom; }, [zoom]);
-  useEffect(() => { zonaAnchoRef.current = zonaAncho; }, [zonaAncho]);
-  useEffect(() => { zonaAltoRef.current = zonaAlto; }, [zonaAlto]);
   useEffect(() => { onMoveEndRef.current = onMoveEnd; }, [onMoveEnd]);
   useEffect(() => { onClickRef.current = onClick; }, [onClick]);
-  useEffect(() => { mesaAnchoRef.current = mesa.ancho; }, [mesa.ancho]);
-  useEffect(() => { mesaAltoRef.current = mesa.alto; }, [mesa.alto]);
 
   /* Sincronizar preview desde el padre cuando no hay drag activo
    * (post refetch o cambio de posicionesLocales). */
@@ -98,11 +90,12 @@ function MesaDraggable({
       hasMoved.current = true;
     }
     if (!hasMoved.current) return;
-    const z = zoomRef.current;
-    const maxX = zonaAnchoRef.current * z - mesaAnchoRef.current;
-    const maxY = zonaAltoRef.current * z - mesaAltoRef.current;
-    previewX.current = Math.min(maxX, Math.max(0, startPos.current.x + dx));
-    previewY.current = Math.min(maxY, Math.max(0, startPos.current.y + dy));
+    /* [134A-21] Sin maxX/maxY — las mesas se mueven libremente por el canvas
+     * (mismo patrón que ParedDraggable). El clamp a zonaAncho/zonaAlto creaba
+     * un "límite imaginario" porque el canvas visible (contentBounds) puede ser
+     * mayor que la zona. Solo evitamos coordenadas negativas. */
+    previewX.current = Math.max(0, startPos.current.x + dx);
+    previewY.current = Math.max(0, startPos.current.y + dy);
     forceUpdate(n => n + 1);
   };
 
