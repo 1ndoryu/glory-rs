@@ -367,11 +367,14 @@ export function usePlanoSala(
   const handleMoverPared = async (id: string, pos_x: number, pos_y: number) => {
     const pared = paredesZona.find(p => p.id === id);
     if (!pared) return;
-    /* [134A-14] Snap-back usando zonaData (el borde visual real del plano).
-     * canvasWidth no sirve porque contentBounds incluye la propia pared,
-     * creando un límite que crece con ella y nunca coincide con el borde. */
-    const maxX = (zonaData?.ancho ?? 600) - pared.ancho;
-    const maxY = (zonaData?.alto ?? 600) - pared.alto;
+    /* [134A-14] Snap-back con bounding box rotada.
+     * Una pared 120×10 a 90° ocupa 10px en X y 120px en Y.
+     * Sin esto el clamp actuaba como si siempre fuera horizontal. */
+    const rad = (pared.rotacion * Math.PI) / 180;
+    const bbW = pared.ancho * Math.abs(Math.cos(rad)) + pared.alto * Math.abs(Math.sin(rad));
+    const bbH = pared.ancho * Math.abs(Math.sin(rad)) + pared.alto * Math.abs(Math.cos(rad));
+    const maxX = (zonaData?.ancho ?? 600) - bbW;
+    const maxY = (zonaData?.alto ?? 600) - bbH;
     const clampedX = Math.min(maxX, Math.max(0, pos_x));
     const clampedY = Math.min(maxY, Math.max(0, pos_y));
     try {
