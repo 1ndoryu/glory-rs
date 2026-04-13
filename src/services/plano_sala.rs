@@ -366,6 +366,8 @@ impl PlanoSalaService {
         let mut zonas_ocupacion = Vec::with_capacity(zonas.len());
         for zona in zonas {
             let mesas = Repo::listar_mesas_zona(pool, zona.id).await?;
+            /* [134A-12] Cargar paredes para que sean visibles en la vista de reservas */
+            let paredes = Repo::listar_paredes_zona(pool, zona.id).await?;
             let mesas_ocupacion = mesas
                 .into_iter()
                 .map(|mesa| {
@@ -380,6 +382,7 @@ impl PlanoSalaService {
             zonas_ocupacion.push(ZonaOcupacion {
                 zona,
                 mesas: mesas_ocupacion,
+                paredes,
             });
         }
 

@@ -69,8 +69,23 @@ function PlanoSala() {
       if (x > maxX) maxX = x;
       if (y > maxY) maxY = y;
     }
+    /* [134A-12] Incluir paredes en contentBounds para que el minimap y el canvas
+     * las consideren. Usamos la bounding box del rect rotado. */
+    for (const p of paredesZona) {
+      const rad = (p.rotacion * Math.PI) / 180;
+      const w = p.ancho * zoom;
+      const h = p.alto * zoom;
+      const bbW = w * Math.abs(Math.cos(rad)) + h * Math.abs(Math.sin(rad));
+      const bbH = w * Math.abs(Math.sin(rad)) + h * Math.abs(Math.cos(rad));
+      const cx = p.pos_x * zoom + w / 2;
+      const cy = p.pos_y * zoom + h / 2;
+      const ex = cx + bbW / 2;
+      const ey = cy + bbH / 2;
+      if (ex > maxX) maxX = ex;
+      if (ey > maxY) maxY = ey;
+    }
     return { w: maxX, h: maxY };
-  }, [dimensionesLocales, mesasZona, posicionesLocales, zonaData, zoom]);
+  }, [dimensionesLocales, mesasZona, paredesZona, posicionesLocales, zonaData, zoom]);
 
   const maxPanOffset = useMemo(() => ({
     x: Math.max(0, contentBounds.w - viewportSize.w),
@@ -202,8 +217,6 @@ function PlanoSala() {
                         pared={paredDisplay}
                         canonical={pared}
                         zoom={zoom}
-                        zonaAncho={zonaData.ancho}
-                        zonaAlto={zonaData.alto}
                         seleccionada={paredSeleccionada?.id === pared.id}
                         onClick={() => {
                           setParedSeleccionada(pared);
@@ -260,6 +273,13 @@ function PlanoSala() {
                     alto: (d?.alto ?? m.alto) * zoom,
                   };
                 })}
+                paredes={paredesZona.map(p => ({
+                  x: p.pos_x * zoom,
+                  y: p.pos_y * zoom,
+                  ancho: p.ancho * zoom,
+                  alto: p.alto * zoom,
+                  rotacion: p.rotacion,
+                }))}
                 contentWidth={contentBounds.w}
                 contentHeight={contentBounds.h}
                 viewportWidth={viewportSize.w}

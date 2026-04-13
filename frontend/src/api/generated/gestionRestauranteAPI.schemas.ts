@@ -1328,6 +1328,8 @@ export interface ZonaSala {
  */
 export type ZonaOcupacion = ZonaSala & {
   mesas: MesaOcupacion[];
+  /* [134A-12] Paredes visibles en reservas */
+  paredes: ParedSala[];
 };
 
 /**

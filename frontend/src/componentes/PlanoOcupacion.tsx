@@ -8,7 +8,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ZoomIn, ZoomOut } from 'lucide-react';
-import { useObtenerOcupacion, MesaOcupacion, ZonaOcupacion } from '../api/generated';
+import { useObtenerOcupacion, MesaOcupacion, ZonaOcupacion, ParedSala } from '../api/generated';
 import { useZoomStore } from '../stores/zoomStore';
 import { useCanvasResize } from '../hooks/useCanvasResize';
 import { useCanvasPan } from '../hooks/useCanvasPan';
@@ -82,6 +82,20 @@ function PlanoOcupacion({ fecha, turno }: Props) {
       if (x > maxX) maxX = x;
       if (y > maxY) maxY = y;
     }
+    /* [134A-12] Incluir paredes en contentBounds */
+    for (const p of (zonaData.paredes ?? [])) {
+      const rad = (p.rotacion * Math.PI) / 180;
+      const w = p.ancho * zoom;
+      const h = p.alto * zoom;
+      const bbW = w * Math.abs(Math.cos(rad)) + h * Math.abs(Math.sin(rad));
+      const bbH = w * Math.abs(Math.sin(rad)) + h * Math.abs(Math.cos(rad));
+      const cx = p.pos_x * zoom + w / 2;
+      const cy = p.pos_y * zoom + h / 2;
+      const ex = cx + bbW / 2;
+      const ey = cy + bbH / 2;
+      if (ex > maxX) maxX = ex;
+      if (ey > maxY) maxY = ey;
+    }
     return { w: maxX, h: maxY };
   }, [zonaData, zoom]);
 
@@ -147,6 +161,24 @@ function PlanoOcupacion({ fecha, turno }: Props) {
                 transform: `translate(${-panOffset.x}px, ${-panOffset.y}px)`,
               }}
             >
+              {/* [134A-12] Paredes read-only visibles en reservas */}
+              {(zonaData.paredes ?? []).map((pared: ParedSala) => (
+                <div
+                  key={pared.id}
+                  className="absolute rounded-sm"
+                  style={{
+                    left: pared.pos_x * zoom,
+                    top: pared.pos_y * zoom,
+                    width: pared.ancho * zoom,
+                    height: pared.alto * zoom,
+                    backgroundColor: pared.color || 'hsl(var(--border))',
+                    transform: pared.rotacion ? `rotate(${pared.rotacion}deg)` : undefined,
+                    transformOrigin: 'center center',
+                    pointerEvents: 'none',
+                    zIndex: 0,
+                  }}
+                />
+              ))}
               {zonaData.mesas.map((mesa: MesaOcupacion) => {
                 const estado = estadoMesa(mesa);
                 const esHover = mesaHover === mesa.id;
@@ -206,6 +238,13 @@ function PlanoOcupacion({ fecha, turno }: Props) {
               y: m.pos_y * zoom,
               ancho: m.ancho * zoom,
               alto: m.alto * zoom,
+            }))}
+            paredes={(zonaData.paredes ?? []).map((p: ParedSala) => ({
+              x: p.pos_x * zoom,
+              y: p.pos_y * zoom,
+              ancho: p.ancho * zoom,
+              alto: p.alto * zoom,
+              rotacion: p.rotacion,
             }))}
             contentWidth={contentBounds.w}
             contentHeight={contentBounds.h}

@@ -290,6 +290,8 @@ pub struct ZonaOcupacion {
     #[serde(flatten)]
     pub zona: ZonaSala,
     pub mesas: Vec<MesaOcupacion>,
+    /* [134A-12] Paredes visibles en reservas */
+    pub paredes: Vec<ParedSala>,
 }
 
 /// Plano de sala con ocupación — respuesta del endpoint

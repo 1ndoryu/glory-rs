@@ -21,8 +21,18 @@ interface MesaMinimapa {
   alto: number;
 }
 
+/* [134A-12] Pared en el minimap: posición + dimensiones + rotación */
+interface ParedMinimapa {
+  x: number;
+  y: number;
+  ancho: number;
+  alto: number;
+  rotacion: number;
+}
+
 interface CanvasMinimapProps {
   mesas: MesaMinimapa[];
+  paredes?: ParedMinimapa[];
   contentWidth: number;
   contentHeight: number;
   viewportWidth: number;
@@ -37,6 +47,7 @@ const MIN_MINIMAP_SIDE = 60;
 
 function CanvasMinimap({
   mesas,
+  paredes = [],
   contentWidth,
   contentHeight,
   viewportWidth,
@@ -50,7 +61,7 @@ function CanvasMinimap({
   /* [313A-2] Mostrar minimap siempre que haya mesas y contenido real.
    * Si el contenido cabe en el viewport, no hay scroll pero el minimap
    * sigue sirviendo de referencia visual. */
-  const visible = mesas.length > 0 && contentWidth > 0 && contentHeight > 0;
+  const visible = (mesas.length > 0 || paredes.length > 0) && contentWidth > 0 && contentHeight > 0;
 
   /* Usar la dimensión real que el usuario puede recorrer:
    * si el contenido es menor que el viewport, aún así mostramos todo el viewport. */
@@ -95,6 +106,22 @@ function CanvasMinimap({
       );
     }
 
+    /* [134A-12] Paredes como líneas rotadas.
+     * La pared es un rect con rotación CSS — en el minimap simulamos lo mismo
+     * usando translate+rotate en el canvas 2D. */
+    ctx.fillStyle = 'rgba(80, 80, 80, 0.6)';
+    for (const p of paredes) {
+      const cx = offsetX + (p.x + p.ancho / 2) * scale;
+      const cy = offsetY + (p.y + p.alto / 2) * scale;
+      const w = Math.max(2, p.ancho * scale);
+      const h = Math.max(1, p.alto * scale);
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate((p.rotacion * Math.PI) / 180);
+      ctx.fillRect(-w / 2, -h / 2, w, h);
+      ctx.restore();
+    }
+
     /* [313A-7] Viewport rect — mismas proporciones exactas para overlay y borde.
      * Antes el borde tenía un floor de 20px (MIN_VIEWPORT_RECT) que hacía que el
      * rectángulo azul fuera visualmente más grande que la zona clara del overlay,
@@ -125,7 +152,7 @@ function CanvasMinimap({
     /* Fill interior semitransparente */
     ctx.fillStyle = 'rgba(59, 130, 246, 0.12)';
     ctx.fillRect(vx + 1, vy + 1, vw - 2, vh - 2);
-  }, [visible, mesas, viewportWidth, viewportHeight, scrollLeft, scrollTop, scale, drawW, drawH, minimapWidth, minimapHeight, offsetX, offsetY, effectiveWidth, effectiveHeight]);
+  }, [visible, mesas, paredes, viewportWidth, viewportHeight, scrollLeft, scrollTop, scale, drawW, drawH, minimapWidth, minimapHeight, offsetX, offsetY, effectiveWidth, effectiveHeight]);
 
   if (!visible) return null;
 

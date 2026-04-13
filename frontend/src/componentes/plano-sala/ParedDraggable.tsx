@@ -28,8 +28,6 @@ interface Props {
   pared: ParedSala;       /* display coords (× zoom) */
   canonical: ParedSala;   /* canonical coords (sin escala) — usado en callbacks */
   zoom: number;
-  zonaAncho: number;      /* canónico */
-  zonaAlto: number;       /* canónico */
   seleccionada: boolean;
   onClick: () => void;
   onMoveEnd: (id: string, x: number, y: number) => void;
@@ -38,7 +36,7 @@ interface Props {
 }
 
 export default function ParedDraggable({
-  pared, canonical, zoom, zonaAncho, zonaAlto, seleccionada, onClick, onMoveEnd, onRotateEnd, onResizeEnd,
+  pared, canonical, zoom, seleccionada, onClick, onMoveEnd, onRotateEnd, onResizeEnd,
 }: Props) {
   const divRef = useRef<HTMLDivElement>(null);
   const [, forceUpdate] = useState(0);
@@ -58,14 +56,14 @@ export default function ParedDraggable({
   /* Refs para callbacks y valores que cambian sin reinstalar handlers */
   const canonicalRef = useRef(canonical);
   const zoomRef = useRef(zoom);
-  const zonaRef = useRef({ ancho: zonaAncho, alto: zonaAlto });
+
   const onMoveEndRef = useRef(onMoveEnd);
   const onRotateEndRef = useRef(onRotateEnd);
   const onResizeEndRef = useRef(onResizeEnd);
 
   useEffect(() => { canonicalRef.current = canonical; }, [canonical]);
   useEffect(() => { zoomRef.current = zoom; }, [zoom]);
-  useEffect(() => { zonaRef.current = { ancho: zonaAncho, alto: zonaAlto }; }, [zonaAncho, zonaAlto]);
+
   useEffect(() => { onMoveEndRef.current = onMoveEnd; }, [onMoveEnd]);
   useEffect(() => { onRotateEndRef.current = onRotateEnd; }, [onRotateEnd]);
   useEffect(() => { onResizeEndRef.current = onResizeEnd; }, [onResizeEnd]);
