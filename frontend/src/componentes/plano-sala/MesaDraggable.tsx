@@ -144,6 +144,11 @@ function MesaDraggable({
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
+      /* [134A-28] stopPropagation en click nativo: onPointerUp llama onClick() que
+       * selecciona la mesa, pero el browser luego dispara un click event que burbujea
+       * hasta el viewport → onViewportClick con tool='select' llama setMesaSeleccionada(null)
+       * → deselección inmediata. Mismo patrón que ParedDraggable line 199. */
+      onClick={e => e.stopPropagation()}
     >
       <span className="planoMesaNumero">{mesa.numero}</span>
       <span className="planoMesaCapacidad">
