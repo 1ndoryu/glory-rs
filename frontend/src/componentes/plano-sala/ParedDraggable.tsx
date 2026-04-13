@@ -119,28 +119,13 @@ export default function ParedDraggable({
     const dx = e.clientX - startMouse.current.x;
     const dy = e.clientY - startMouse.current.y;
     const z = zoomRef.current;
-    const zona = zonaRef.current;
 
     if (mode.current === 'move') {
-      /* [134A-10] Bounding box del elemento rotado para calcular límites correctos.
-       * CSS rotate(θ) gira alrededor del centro — la bbox visual es:
-       *   bbW = W·|cosθ| + H·|sinθ|,  bbH = W·|sinθ| + H·|cosθ|
-       * Límites del CSS left/top (esquina sup-izq sin rotar):
-       *   minX = bbW/2 - W/2,  maxX = zonaAncho·z - W/2 - bbW/2
-       * Antes se usaba c.ancho como si fuera el largo visual — fallaba con rotación. */
-      const W = previewW.current;
-      const H = GROSOR * z;
-      const rad = (previewRot.current * Math.PI) / 180;
-      const abscos = Math.abs(Math.cos(rad));
-      const abssin = Math.abs(Math.sin(rad));
-      const bbW = W * abscos + H * abssin;
-      const bbH = W * abssin + H * abscos;
-      const minX = bbW / 2 - W / 2;
-      const maxX = zona.ancho * z - W / 2 - bbW / 2;
-      const minY = bbH / 2 - H / 2;
-      const maxY = zona.alto * z - H / 2 - bbH / 2;
-      previewX.current = Math.min(Math.max(minX, startRect.current.x + dx), maxX);
-      previewY.current = Math.min(Math.max(minY, startRect.current.y + dy), maxY);
+      /* [134A-11] Sin maxX/maxY — las paredes se mueven libremente igual que las mesas.
+       * El canvas content puede ser más grande que zonaData.ancho/alto cuando hay elementos
+       * fuera de los límites de zona, así que no hay razón para restringir artificialmente. */
+      previewX.current = startRect.current.x + dx;
+      previewY.current = startRect.current.y + dy;
     } else if (mode.current === 'rotate' && divRef.current) {
       const rect = divRef.current.getBoundingClientRect();
       const cx = rect.left + rect.width / 2;
