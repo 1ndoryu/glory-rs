@@ -817,7 +817,7 @@ async fn seed_resenas(
             .bind(cliente_id)
             .bind(&token)
             .bind(puntuacion)
-            .bind(comentario)
+            .bind(comentario.unwrap_or(""))  /* evitar NULL explícito — usar '' como el DEFAULT */
             .bind(redirigido)
             .execute(pool)
             .await

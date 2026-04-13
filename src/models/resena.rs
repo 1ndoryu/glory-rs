@@ -17,7 +17,8 @@ pub struct Resena {
     pub cliente_id: Option<Uuid>,
     pub token: String,
     pub puntuacion: Option<i16>,
-    pub comentario: String,
+    /* Option porque la BD permite NULL (DEFAULT '') y el campo se rellena solo al responder */
+    pub comentario: Option<String>,
     pub redirigido_google: bool,
     pub created_at: DateTime<Utc>,
     pub respondida_at: Option<DateTime<Utc>>,
@@ -54,7 +55,7 @@ pub struct ResenaAdmin {
     pub reserva_id: Option<Uuid>,
     pub cliente_nombre: Option<String>,
     pub puntuacion: Option<i16>,
-    pub comentario: String,
+    pub comentario: Option<String>,
     pub redirigido_google: bool,
     pub created_at: DateTime<Utc>,
     pub respondida_at: Option<DateTime<Utc>>,
