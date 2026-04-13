@@ -58,7 +58,9 @@ async fn main() {
     let canal_ids = seed_canales(&pool, user_id).await;
     let clientes = seed_clientes(&pool, user_id).await;
     let cliente_ids: Vec<Uuid> = clientes.iter().map(|c| c.id).collect();
-    let mesa_ids = seed_zonas_mesas(&pool, user_id).await;
+    let zona_id = seed_zonas_mesas(&pool, user_id).await;
+    let mesa_ids = zona_id.1;
+    let zona_id = zona_id.0;
     let reserva_ids = seed_reservas(&pool, user_id, hoy, &canal_ids, &clientes, &mesa_ids).await;
     seed_ventas(&pool, user_id, hoy, &reserva_ids, &cliente_ids).await;
     seed_gastos(&pool, user_id, hoy).await;
@@ -67,6 +69,10 @@ async fn main() {
     seed_plantillas_whatsapp(&pool, user_id).await;
     seed_reglas_recordatorio(&pool, user_id).await;
     seed_notificaciones(&pool, user_id).await;
+    seed_trabajadores(&pool, user_id).await;
+    seed_resenas(&pool, user_id, &reserva_ids, &cliente_ids).await;
+    seed_inactividad(&pool, user_id, &canal_ids).await;
+    seed_paredes(&pool, zona_id).await;
 
     println!("\nSeed completado exitosamente.");
 }
@@ -90,7 +96,13 @@ async fn limpiar_datos(pool: &PgPool, user_id: Uuid) {
         "DELETE FROM clientes WHERE user_id = $1",
         "DELETE FROM canales_reserva WHERE user_id = $1",
         "DELETE FROM mesas WHERE zona_id IN (SELECT id FROM zonas_sala WHERE user_id = $1)",
+        "DELETE FROM paredes_sala WHERE zona_id IN (SELECT id FROM zonas_sala WHERE user_id = $1)",
         "DELETE FROM zonas_sala WHERE user_id = $1",
+        "DELETE FROM permisos_trabajador WHERE trabajador_id IN (SELECT id FROM trabajadores WHERE user_id = $1)",
+        "DELETE FROM trabajadores WHERE user_id = $1",
+        "DELETE FROM envios_inactividad WHERE regla_id IN (SELECT id FROM reglas_inactividad WHERE user_id = $1)",
+        "DELETE FROM reglas_inactividad WHERE user_id = $1",
+        "DELETE FROM resenas WHERE user_id = $1",
         "DELETE FROM api_keys WHERE user_id = $1",
     ];
     for sql in &sentencias {
@@ -107,9 +119,15 @@ async fn limpiar_datos(pool: &PgPool, user_id: Uuid) {
 async fn seed_configuracion(pool: &PgPool, user_id: Uuid) {
     sqlx::query(
         "INSERT INTO configuracion_restaurante (user_id, nombre_restaurante, iva_por_defecto, \
-         reserva_telefono_obligatorio, reserva_nombre_obligatorio) \
-         VALUES ($1, 'Demo Restaurante', 10.00, true, true) \
-         ON CONFLICT (user_id) DO UPDATE SET nombre_restaurante = 'Demo Restaurante'",
+         reserva_telefono_obligatorio, reserva_nombre_obligatorio, \
+         google_review_url, telefono_restaurante, url_reservas) \
+         VALUES ($1, 'Demo Restaurante', 10.00, true, true, \
+         'https://g.page/r/demo-restaurante/review', '912345678', 'https://demo-restaurante.com/reservar') \
+         ON CONFLICT (user_id) DO UPDATE SET \
+         nombre_restaurante = 'Demo Restaurante', \
+         google_review_url = 'https://g.page/r/demo-restaurante/review', \
+         telefono_restaurante = '912345678', \
+         url_reservas = 'https://demo-restaurante.com/reservar'",
     )
     .bind(user_id)
     .execute(pool)
@@ -176,8 +194,8 @@ async fn seed_clientes(pool: &PgPool, user_id: Uuid) -> Vec<ClienteCreado> {
     clientes
 }
 
-/* 1 zona de sala + 6 mesas posicionadas */
-async fn seed_zonas_mesas(pool: &PgPool, user_id: Uuid) -> Vec<Uuid> {
+/* 1 zona de sala + 6 mesas posicionadas. Retorna (zona_id, mesa_ids) */
+async fn seed_zonas_mesas(pool: &PgPool, user_id: Uuid) -> (Uuid, Vec<Uuid>) {
     let zona_id: Uuid = sqlx::query_scalar(
         "INSERT INTO zonas_sala (user_id, nombre, orden, ancho, alto) \
          VALUES ($1, 'Salón principal', 0, 800, 600) RETURNING id",
@@ -215,7 +233,7 @@ async fn seed_zonas_mesas(pool: &PgPool, user_id: Uuid) -> Vec<Uuid> {
         mesa_ids.push(id);
     }
     println!("  1 zona + {} mesas insertadas.", mesa_ids.len());
-    mesa_ids
+    (zona_id, mesa_ids)
 }
 
 /* Datos de cada cliente creado, para vincular reservas con nombre real */
@@ -717,6 +735,180 @@ async fn seed_reglas_recordatorio(pool: &PgPool, user_id: Uuid) {
         .expect("Error al insertar regla de recordatorio");
     }
     println!("  {} reglas de recordatorio insertadas.", reglas.len());
+}
+
+/* [134A-1] 3 trabajadores demo con distintos cargos y permisos */
+async fn seed_trabajadores(pool: &PgPool, user_id: Uuid) {
+    let salt = SaltString::generate(&mut OsRng);
+    let hash = Argon2::default()
+        .hash_password(b"trabajador123", &salt)
+        .expect("Error al hashear password trabajador")
+        .to_string();
+
+    /* (nombre, email, cargo) */
+    let trabajadores: &[(&str, &str, &str)] = &[
+        ("Sara López", "sara.lopez@demo.com", "Camarera"),
+        ("Tomás Ruiz", "tomas.ruiz@demo.com", "Jefe de sala"),
+        ("Marta Gil", "marta.gil@demo.com", "Hostess"),
+    ];
+
+    for &(nombre, email, cargo) in trabajadores {
+        let id = Uuid::new_v4();
+        let _ = sqlx::query(
+            "INSERT INTO trabajadores (id, user_id, nombre, email, password_hash, cargo) \
+             VALUES ($1, $2, $3, $4, $5, $6)",
+        )
+        .bind(id)
+        .bind(user_id)
+        .bind(nombre)
+        .bind(email)
+        .bind(&hash)
+        .bind(cargo)
+        .execute(pool)
+        .await
+        .expect("Error al insertar trabajador");
+    }
+    println!("  {} trabajadores insertados.", trabajadores.len());
+}
+
+/* [134A-1] 4 reseñas demo: 2 respondidas, 1 pendiente, 1 redirigida a Google */
+async fn seed_resenas(
+    pool: &PgPool,
+    user_id: Uuid,
+    reservas: &[ReservaCreada],
+    cliente_ids: &[Uuid],
+) {
+    /* Tomar reservas completadas para vincular reseñas */
+    let completadas: Vec<&ReservaCreada> = reservas
+        .iter()
+        .filter(|r| r.estado == "completada")
+        .take(4)
+        .collect();
+
+    if completadas.is_empty() {
+        println!("  Sin reservas completadas para vincular reseñas.");
+        return;
+    }
+
+    /* (puntuacion: Option, comentario: Option, redirigido_google) */
+    let configs: &[(Option<i16>, Option<&str>, bool)] = &[
+        (Some(5), Some("Excelente servicio, volveremos sin duda."), true),
+        (Some(4), Some("Muy buena comida, el ambiente es agradable."), false),
+        (Some(3), None, false),
+        (None, None, false),
+    ];
+
+    let mut count: u32 = 0;
+    for (i, reserva) in completadas.iter().enumerate() {
+        let id = Uuid::new_v4();
+        let token = format!("demo-token-{:04}", i);
+        let (puntuacion, comentario, redirigido) = configs[i % configs.len()];
+        let cliente_id = reserva.cliente_id.or_else(|| cliente_ids.get(i).copied());
+
+        if puntuacion.is_some() {
+            let _ = sqlx::query(
+                "INSERT INTO resenas (id, user_id, reserva_id, cliente_id, token, \
+                 puntuacion, comentario, redirigido_google, respondida_at) \
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW()) ON CONFLICT DO NOTHING",
+            )
+            .bind(id)
+            .bind(user_id)
+            .bind(reserva.id)
+            .bind(cliente_id)
+            .bind(&token)
+            .bind(puntuacion)
+            .bind(comentario)
+            .bind(redirigido)
+            .execute(pool)
+            .await
+            .expect("Error al insertar reseña respondida");
+        } else {
+            let _ = sqlx::query(
+                "INSERT INTO resenas (id, user_id, reserva_id, cliente_id, token) \
+                 VALUES ($1, $2, $3, $4, $5) ON CONFLICT DO NOTHING",
+            )
+            .bind(id)
+            .bind(user_id)
+            .bind(reserva.id)
+            .bind(cliente_id)
+            .bind(&token)
+            .execute(pool)
+            .await
+            .expect("Error al insertar reseña pendiente");
+        }
+        count += 1;
+    }
+    println!("  {count} reseñas insertadas.");
+}
+
+/* [134A-1] 3 reglas de inactividad con distintos canales y períodos */
+async fn seed_inactividad(pool: &PgPool, user_id: Uuid, _canal_ids: &[Uuid]) {
+    /* (nombre, dias_inactividad, canal, mensaje_plantilla) */
+    let reglas: &[(&str, i32, &str, &str)] = &[
+        (
+            "Clientes sin visita en 30 días",
+            30,
+            "whatsapp",
+            "Hola {nombre}, te echamos de menos. ¿Te apetece reservar una mesa esta semana?",
+        ),
+        (
+            "Clientes inactivos 60 días",
+            60,
+            "sms",
+            "Hola {nombre}, hace tiempo que no te vemos. ¡Vuelve y disfruta de nuestro menú!",
+        ),
+        (
+            "Reactivación trimestral",
+            90,
+            "email",
+            "Estimado/a {nombre}, te recordamos que puedes reservar tu mesa en cualquier momento.",
+        ),
+    ];
+
+    for &(nombre, dias, canal, mensaje) in reglas {
+        let _ = sqlx::query(
+            "INSERT INTO reglas_inactividad (user_id, nombre, dias_inactividad, canal, mensaje_plantilla) \
+             VALUES ($1, $2, $3, $4, $5)",
+        )
+        .bind(user_id)
+        .bind(nombre)
+        .bind(dias)
+        .bind(canal)
+        .bind(mensaje)
+        .execute(pool)
+        .await
+        .expect("Error al insertar regla de inactividad");
+    }
+    println!("  {} reglas de inactividad insertadas.", reglas.len());
+}
+
+/* [134A-1] 2 paredes demo para decorar el plano de sala */
+async fn seed_paredes(pool: &PgPool, zona_id: Uuid) {
+    /* (pos_x, pos_y, ancho, alto, rotacion, color) */
+    let paredes: &[(i32, i32, i32, i32, f64, &str)] = &[
+        (0, 0, 10, 600, 0.0, "#8B4513"),
+        (0, 0, 800, 10, 0.0, "#8B4513"),
+    ];
+
+    for &(x, y, ancho, alto, rotacion, color) in paredes {
+        let id = Uuid::new_v4();
+        let _ = sqlx::query(
+            "INSERT INTO paredes_sala (id, zona_id, pos_x, pos_y, ancho, alto, rotacion, color) \
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT DO NOTHING",
+        )
+        .bind(id)
+        .bind(zona_id)
+        .bind(x)
+        .bind(y)
+        .bind(ancho)
+        .bind(alto)
+        .bind(rotacion)
+        .bind(color)
+        .execute(pool)
+        .await
+        .expect("Error al insertar pared");
+    }
+    println!("  {} paredes insertadas.", paredes.len());
 }
 
 /* 3 notificaciones demo para probar el panel */
