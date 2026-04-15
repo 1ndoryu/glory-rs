@@ -4,10 +4,32 @@
 # Se ejecuta como ultimo paso antes de cerrar una tarea.
 # Fase 1: ejecuta npm run verify (cargo check + clippy + test + type-check).
 # Fase 2: imprime checklist de reglas para confirmacion del agente.
+# [144A-1] Usa el wrapper Node de Cargo para reportar la ausencia de rustup con un error accionable.
 
 param(
     [string]$TareaId = ""
 )
+
+function Invoke-ValidationCommand {
+    param(
+        [string]$FailureLabel,
+        [scriptblock]$Command
+    )
+
+    $commandOutput = & $Command 2>&1 | ForEach-Object { "$_" }
+
+    if ($LASTEXITCODE -ne 0) {
+        foreach ($line in $commandOutput) {
+            Write-Host "      $line" -ForegroundColor DarkYellow
+        }
+
+        Write-Host "    FALLO $FailureLabel" -ForegroundColor Red
+        $script:verifyExitCode = 1
+        return
+    }
+
+    Write-Host "    OK" -ForegroundColor Green
+}
 
 $reglas = @(
     @{ id = "-1"; nombre = "LO MAS DIFICIL PRIMERO"; pregunta = "Se abordo primero la tarea mas compleja?"; cond = $false }
@@ -55,23 +77,18 @@ Write-Host "--- FASE 1: VALIDACION AUTOMATICA (npm run verify) ---" -ForegroundC
 Write-Host ""
 
 $verifyExitCode = 0
+$cargoRunner = "scripts/run-cargo.mjs"
 
 # Detectar stack del proyecto: si existe Cargo.toml, ejecutar cargo checks
 if (Test-Path "Cargo.toml") {
     Write-Host "  [Rust] cargo check..." -ForegroundColor Cyan
-    cargo check 2>&1 | Out-Null
-    if ($LASTEXITCODE -ne 0) { Write-Host "    FALLO cargo check" -ForegroundColor Red; $verifyExitCode = 1 }
-    else { Write-Host "    OK" -ForegroundColor Green }
+    Invoke-ValidationCommand -FailureLabel "cargo check" -Command { node $cargoRunner check }
 
     Write-Host "  [Rust] cargo clippy -- -D warnings..." -ForegroundColor Cyan
-    cargo clippy -- -D warnings 2>&1 | Out-Null
-    if ($LASTEXITCODE -ne 0) { Write-Host "    FALLO cargo clippy" -ForegroundColor Red; $verifyExitCode = 1 }
-    else { Write-Host "    OK" -ForegroundColor Green }
+    Invoke-ValidationCommand -FailureLabel "cargo clippy" -Command { node $cargoRunner clippy -- -D warnings }
 
     Write-Host "  [Rust] cargo test..." -ForegroundColor Cyan
-    cargo test 2>&1 | Out-Null
-    if ($LASTEXITCODE -ne 0) { Write-Host "    FALLO cargo test" -ForegroundColor Red; $verifyExitCode = 1 }
-    else { Write-Host "    OK" -ForegroundColor Green }
+    Invoke-ValidationCommand -FailureLabel "cargo test" -Command { node $cargoRunner test }
 }
 
 # Detectar frontend: si existe frontend/package.json, ejecutar type-check

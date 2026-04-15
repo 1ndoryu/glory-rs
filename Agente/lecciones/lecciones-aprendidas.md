@@ -202,3 +202,10 @@ Cada lección debe ser concisa y accionable.
 **Solución:** Para todo elemento draggable en el plano: NO clampear nada con zonaData. NO hacer Math.max(0, pos_x) sobre coordenadas sin rotar. Pasar coordenadas directamente al API (solo Math.round).
 **Patrón correcto:** Sin clamp durante drag, sin clamp en onMoveEnd. Si se necesita un límite, calcularlo sobre el CENTRO del bounding box rotado (bbW/bbH), nunca sobre pos_x/pos_y directo.
 **Prevención:** Antes de agregar cualquier clamp en un elemento del plano, preguntarse: "¿Esta coordenada es la esquina top-left de algo que puede estar rotado?" Si sí, el clamp directo ES el bug.
+
+## 2026-04-14 — package.json no debe invocar cargo directo en Windows
+
+**Problema:** `npm run dev` devolvía el error opaco `"cargo" no se reconoce como un comando interno o externo` cuando Rust no estaba instalado o la terminal no había refrescado el PATH de rustup.
+**Causa raíz:** Los scripts npm llamaban `cargo` directamente desde `cmd.exe`/`concurrently`, sin resolver la ruta estándar `~/.cargo/bin` ni mostrar una instrucción accionable.
+**Solución:** Centralizar todas las llamadas a Rust en `scripts/run-cargo.mjs`, hacer que busque `cargo` en PATH y en la ruta estándar de rustup, y reutilizarlo también en `self-check.ps1`.
+**Prevención:** En este template, nunca invocar `cargo` directamente desde `package.json`; siempre pasar por el wrapper para que el fallo de prerrequisitos sea claro y consistente.

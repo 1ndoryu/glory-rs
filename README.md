@@ -27,9 +27,11 @@ Pensado para máxima velocidad de desarrollo, seguridad por defecto y escalabili
 
 ## Requisitos
 
-- Rust (stable, 1.75+)
+- Rust (stable, 1.75+) instalado via rustup
 - Node.js (18+) y npm
 - PostgreSQL corriendo localmente
+
+En Windows, instalar rustup con `winget install --id Rustlang.Rustup --exact --accept-source-agreements --accept-package-agreements` y reabrir la terminal para refrescar el PATH.
 
 ## Inicio rápido
 
@@ -126,6 +128,9 @@ La estructura es idéntica en cada rama. Solo cambia el contenido específico de
 ## Comandos útiles
 
 ```bash
+# Desarrollo completo
+npm run dev                  # Backend + frontend; avisa si falta Cargo/rustup
+
 # Comando unificado — verifica todo el proyecto (backend + frontend)
 npm run check
 

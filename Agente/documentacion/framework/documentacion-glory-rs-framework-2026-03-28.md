@@ -250,6 +250,7 @@ Actualmente el framework y el template coexisten en el mismo repo. La reorganiza
 1. Clonar template: `git clone https://github.com/1ndoryu/glory-rs-template nuevo-proyecto`
 2. Añadir submódulo: `git submodule add https://github.com/1ndoryu/glory-rs glory-rs`
 3. Configurar `.env` con DATABASE_URL, JWT_SECRET
-4. Ejecutar migraciones: `cargo run` (auto-aplica al iniciar)
-5. Instalar frontend: `cd frontend && npm install`
-6. Desarrollo: `./dev.ps1`
+4. En Windows, instalar rustup con `winget install --id Rustlang.Rustup --exact --accept-source-agreements --accept-package-agreements` y reabrir la terminal
+5. Ejecutar migraciones: `cargo run` (auto-aplica al iniciar)
+6. Instalar frontend: `cd frontend && npm install`
+7. Desarrollo: `./dev.ps1` o `npm run dev` (si falta Cargo, el wrapper indica como instalar rustup)

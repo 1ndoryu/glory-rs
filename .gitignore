@@ -37,6 +37,8 @@ glory-rust-template.code-workspace
 
 extracted/
 /uploads
-/scripts
+/scripts/*
+!/scripts/check-roadmap.mjs
+!/scripts/run-cargo.mjs
 prerendered/
 .cargo/config.toml
