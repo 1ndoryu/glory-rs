@@ -222,25 +222,38 @@ export function usePlanoSala() {
     setWallDrawPreview(null);
   }, []);
 
+  /* [154A-1] Snap a horizontal/vertical: solo se permite dibujar paredes a 0° o 90°.
+   * Se elige el eje según si |dx| >= |dy| (horizontal) o viceversa (vertical).
+   * La longitud se proyecta sobre ese eje para que el preview sea recto.
+   * Largo mínimo: 30px — por debajo se ignora el movimiento. */
   const handleWallDrawMove = useCallback((canvasX: number, canvasY: number) => {
     if (!wallDrawStart) return;
     const dx = canvasX - wallDrawStart.x;
     const dy = canvasY - wallDrawStart.y;
-    const length = Math.sqrt(dx * dx + dy * dy);
+    const isHorizontal = Math.abs(dx) >= Math.abs(dy);
+    const length = isHorizontal ? Math.abs(dx) : Math.abs(dy);
+    const MIN_WALL_LENGTH = 30;
     if (length < 5) return;
-    const angleDeg = Math.atan2(dy, dx) * (180 / Math.PI);
-    const midX = (wallDrawStart.x + canvasX) / 2;
-    const midY = (wallDrawStart.y + canvasY) / 2;
+    const snappedAngle = isHorizontal
+      ? (dx >= 0 ? 0 : 180)
+      : (dy >= 0 ? 90 : -90);
+    const endX = wallDrawStart.x + (isHorizontal ? dx : 0);
+    const endY = wallDrawStart.y + (isHorizontal ? 0 : dy);
+    const midX = (wallDrawStart.x + endX) / 2;
+    const midY = (wallDrawStart.y + endY) / 2;
     setWallDrawPreview({
       x: midX - length / 2,
       y: midY - 5,
-      w: length,
-      rotation: Math.round(angleDeg),
+      w: Math.max(length, MIN_WALL_LENGTH),
+      rotation: snappedAngle,
     });
   }, [wallDrawStart]);
 
+  /* [154A-1] Largo mínimo 30px al crear. Si el usuario suelta antes de alcanzarlo,
+   * se descarta silenciosamente en lugar de crear una pared diminuta. */
   const handleWallDrawEnd = useCallback(async () => {
-    if (!wallDrawStart || !wallDrawPreview || !zonaActiva) {
+    const MIN_WALL_LENGTH = 30;
+    if (!wallDrawStart || !wallDrawPreview || !zonaActiva || wallDrawPreview.w < MIN_WALL_LENGTH) {
       setWallDrawStart(null);
       setWallDrawPreview(null);
       return;
