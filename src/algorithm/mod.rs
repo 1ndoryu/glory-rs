@@ -14,7 +14,12 @@
  * (signals) + diversidad + cache stale-while-revalidate + warm async +
  * `similar_to_sample`. */
 
+/* [174A-53] PrecomputeService: vista materializada `mv_trending_samples`
+ * que pre-calcula likes/repro/descargas/follows recientes para alimentar
+ * `signals.tendencias` en O(1) por sample. */
+
 pub mod candidates;
+pub mod precompute;
 pub mod profile;
 pub mod recommender;
 pub mod signals;

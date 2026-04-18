@@ -1,0 +1,181 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT\n                s.id            AS \"id!\",\n                s.creador_id    AS \"creador_id!\",\n                s.titulo        AS \"titulo!\",\n                s.slug          AS \"slug!\",\n                s.tipo          AS \"tipo!\",\n                s.bpm           AS \"bpm?\",\n                s.key           AS \"key?\",\n                s.escala        AS \"escala?\",\n                s.tags          AS \"tags!\",\n                s.publicado_at  AS \"publicado_at?\",\n                s.total_likes,\n                s.total_reproducciones,\n                s.total_descargas,\n                s.verificado,\n                NULL::float8    AS \"embedding_distance?\",\n                COALESCE(mv.likes_24h, 0)::float8          AS \"likes_24h!\",\n                COALESCE(mv.reproducciones_24h, 0)::float8 AS \"reproducciones_24h!\",\n                COALESCE(mv.descargas_7d, 0)::float8       AS \"descargas_7d!\",\n                COALESCE(mv.follows_creador_7d, 0)::float8 AS \"follows_creador_7d!\",\n                EXISTS (SELECT 1 FROM follows f WHERE f.seguidor_id = $1 AND f.seguido_id = s.creador_id) AS \"creador_seguido!\",\n                COALESCE(b.likes_dados, 0)::float8         AS \"likes_dados!\",\n                COALESCE(b.reproducciones, 0)::float8      AS \"reproducciones!\",\n                COALESCE(b.tiempo_escucha, 0)::float8      AS \"tiempo_escucha!\",\n                COALESCE(b.descargas_propias, 0)::float8   AS \"descargas_propias!\",\n                COALESCE(b.completadas, 0)::float8         AS \"completadas!\",\n                COALESCE(b.dislike_penalty, 0)::float8     AS \"dislike_penalty!\",\n                NOT EXISTS (SELECT 1 FROM reproducciones r WHERE r.usuario_id = $1 AND r.sample_id = s.id) AS \"nunca_reproducido!\"\n            FROM samples s\n            LEFT JOIN mv_trending_samples mv ON mv.sample_id = s.id\n            LEFT JOIN LATERAL (\n                SELECT\n                    COUNT(DISTINCT lk.target_id) FILTER (WHERE lk.target_id = s.id) AS likes_dados,\n                    COUNT(*) FILTER (WHERE rp.sample_id = s.id) AS reproducciones,\n                    COALESCE(SUM(rp.duracion_escuchada) FILTER (WHERE rp.sample_id = s.id), 0)::float8 AS tiempo_escucha,\n                    COUNT(*) FILTER (WHERE dl.sample_id = s.id) AS descargas_propias,\n                    COUNT(*) FILTER (WHERE rp.sample_id = s.id AND rp.completada) AS completadas,\n                    COUNT(*) FILTER (WHERE lk.target_id = s.id AND lk.reaccion = 'dislike') AS dislike_penalty\n                FROM (SELECT 1) _\n                LEFT JOIN likes lk          ON lk.usuario_id = $1 AND lk.tipo = 'sample'\n                LEFT JOIN reproducciones rp ON rp.usuario_id = $1\n                LEFT JOIN descargas dl      ON dl.usuario_id = $1\n            ) b ON TRUE\n            WHERE s.estado = 'activo'\n              AND s.id = ANY($2::int[])\n              AND s.creador_id <> ALL($3::int[])\n            ORDER BY s.publicado_at DESC NULLS LAST\n            LIMIT $4\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "creador_id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "titulo!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "slug!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "tipo!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "bpm?",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 6,
+        "name": "key?",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 7,
+        "name": "escala?",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 8,
+        "name": "tags!",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 9,
+        "name": "publicado_at?",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 10,
+        "name": "total_likes",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 11,
+        "name": "total_reproducciones",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 12,
+        "name": "total_descargas",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 13,
+        "name": "verificado",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 14,
+        "name": "embedding_distance?",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 15,
+        "name": "likes_24h!",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 16,
+        "name": "reproducciones_24h!",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 17,
+        "name": "descargas_7d!",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 18,
+        "name": "follows_creador_7d!",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 19,
+        "name": "creador_seguido!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 20,
+        "name": "likes_dados!",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 21,
+        "name": "reproducciones!",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 22,
+        "name": "tiempo_escucha!",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 23,
+        "name": "descargas_propias!",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 24,
+        "name": "completadas!",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 25,
+        "name": "dislike_penalty!",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 26,
+        "name": "nunca_reproducido!",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4Array",
+        "Int4Array",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "a04f161c54fb7581802c7f700f807e3914bb65f436e7df5f51256d13e6f42695"
+}

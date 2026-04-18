@@ -627,10 +627,10 @@ async fn fetch_enriched(
                 s.total_descargas,
                 s.verificado,
                 NULL::float8    AS "embedding_distance?",
-                COALESCE(t.likes_24h, 0)::float8         AS "likes_24h!",
-                COALESCE(t.reproducciones_24h, 0)::float8 AS "reproducciones_24h!",
-                COALESCE(t.descargas_7d, 0)::float8      AS "descargas_7d!",
-                COALESCE(t.follows_creador_7d, 0)::float8 AS "follows_creador_7d!",
+                COALESCE(mv.likes_24h, 0)::float8          AS "likes_24h!",
+                COALESCE(mv.reproducciones_24h, 0)::float8 AS "reproducciones_24h!",
+                COALESCE(mv.descargas_7d, 0)::float8       AS "descargas_7d!",
+                COALESCE(mv.follows_creador_7d, 0)::float8 AS "follows_creador_7d!",
                 EXISTS (SELECT 1 FROM follows f WHERE f.seguidor_id = $1 AND f.seguido_id = s.creador_id) AS "creador_seguido!",
                 COALESCE(b.likes_dados, 0)::float8         AS "likes_dados!",
                 COALESCE(b.reproducciones, 0)::float8      AS "reproducciones!",
@@ -640,15 +640,7 @@ async fn fetch_enriched(
                 COALESCE(b.dislike_penalty, 0)::float8     AS "dislike_penalty!",
                 NOT EXISTS (SELECT 1 FROM reproducciones r WHERE r.usuario_id = $1 AND r.sample_id = s.id) AS "nunca_reproducido!"
             FROM samples s
-            LEFT JOIN LATERAL (
-                SELECT
-                    SUM(CASE WHEN l.created_at > NOW() - INTERVAL '24 hours' THEN 1 ELSE 0 END) AS likes_24h,
-                    NULL::int AS reproducciones_24h,
-                    NULL::int AS descargas_7d,
-                    NULL::int AS follows_creador_7d
-                FROM likes l
-                WHERE l.tipo = 'sample' AND l.target_id = s.id AND l.reaccion IN ('like','encanta')
-            ) t ON TRUE
+            LEFT JOIN mv_trending_samples mv ON mv.sample_id = s.id
             LEFT JOIN LATERAL (
                 SELECT
                     COUNT(DISTINCT lk.target_id) FILTER (WHERE lk.target_id = s.id) AS likes_dados,
@@ -710,8 +702,10 @@ async fn fetch_enriched(
             .collect());
     }
 
-    /* Sin candidatos: scan completo. Limita por `publicado_at DESC` para
-     * priorizar fresh y mantener cardinalidad acotada. */
+    /* Sin candidatos: scan completo con JOIN a la MV de tendencias. Limita
+     * por `publicado_at DESC` para priorizar fresh y mantener cardinalidad
+     * acotada. La MV puede no tener todas las filas (samples nuevos sin
+     * refrescar aún); COALESCE garantiza fallback a 0. */
     let rows = sqlx::query!(
         r#"
         SELECT
@@ -730,10 +724,10 @@ async fn fetch_enriched(
             s.total_descargas,
             s.verificado,
             NULL::float8    AS "embedding_distance?",
-            0.0::float8     AS "likes_24h!",
-            0.0::float8     AS "reproducciones_24h!",
-            0.0::float8     AS "descargas_7d!",
-            0.0::float8     AS "follows_creador_7d!",
+            COALESCE(mv.likes_24h, 0)::float8          AS "likes_24h!",
+            COALESCE(mv.reproducciones_24h, 0)::float8 AS "reproducciones_24h!",
+            COALESCE(mv.descargas_7d, 0)::float8       AS "descargas_7d!",
+            COALESCE(mv.follows_creador_7d, 0)::float8 AS "follows_creador_7d!",
             EXISTS (SELECT 1 FROM follows f WHERE f.seguidor_id = $1 AND f.seguido_id = s.creador_id) AS "creador_seguido!",
             0.0::float8 AS "likes_dados!",
             0.0::float8 AS "reproducciones!",
@@ -743,6 +737,7 @@ async fn fetch_enriched(
             0.0::float8 AS "dislike_penalty!",
             NOT EXISTS (SELECT 1 FROM reproducciones r WHERE r.usuario_id = $1 AND r.sample_id = s.id) AS "nunca_reproducido!"
         FROM samples s
+        LEFT JOIN mv_trending_samples mv ON mv.sample_id = s.id
         WHERE s.estado = 'activo'
           AND s.creador_id <> ALL($2::int[])
         ORDER BY s.publicado_at DESC NULLS LAST

@@ -1,0 +1,64 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT\n                sample_id              AS \"sample_id!\",\n                likes_24h              AS \"likes_24h!\",\n                reproducciones_24h     AS \"reproducciones_24h!\",\n                descargas_7d           AS \"descargas_7d!\",\n                follows_creador_7d     AS \"follows_creador_7d!\",\n                tiempo_escucha_24h     AS \"tiempo_escucha_24h!\",\n                completadas_24h        AS \"completadas_24h!\",\n                dislikes_7d            AS \"dislikes_7d!\"\n            FROM mv_trending_samples\n            WHERE sample_id = ANY($1::int[])\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "sample_id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "likes_24h!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "reproducciones_24h!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "descargas_7d!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "follows_creador_7d!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 5,
+        "name": "tiempo_escucha_24h!",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 6,
+        "name": "completadas_24h!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 7,
+        "name": "dislikes_7d!",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4Array"
+      ]
+    },
+    "nullable": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "99edfd3b856e95aadfeef70b7aceb2c2110de0923cb47917b1a42ae041a9e5a7"
+}
