@@ -19,9 +19,14 @@ pub mod ws;
 
 use sqlx::PgPool;
 
-/// Estado compartido de la aplicación — accesible desde handlers y middleware
+/* [174A-5] Estado compartido de la aplicación.
+ * - `pool`: PostgreSQL (siempre presente).
+ * - `redis`: pool opcional. Cuando es None, los servicios deben tener fallback
+ *   en memoria (DashMap/parking_lot) o degradarse limpiamente.
+ * - `jwt_secret`: clave HMAC para firmar/verificar tokens. */
 #[derive(Clone)]
 pub struct AppState {
     pub pool: PgPool,
+    pub redis: Option<deadpool_redis::Pool>,
     pub jwt_secret: String,
 }

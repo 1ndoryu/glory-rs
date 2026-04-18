@@ -27,18 +27,32 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let config = AppConfig::from_env()?;
 
     let pool = sqlx::postgres::PgPoolOptions::new()
-        .max_connections(10)
-        .min_connections(2)
+        .max_connections(config.db_max_connections)
+        .min_connections(config.db_min_connections)
         .connect(&config.database_url)
         .await?;
 
     sqlx::migrate!().run(&pool).await?;
 
+    /* [174A-5] Redis opcional. Si REDIS_URL está definido, creamos pool deadpool
+     * y testeamos conexión con PING; si falla, abortamos al arrancar. */
+    let redis = if let Some(url) = config.redis_url.clone() {
+        let cfg = deadpool_redis::Config::from_url(url);
+        let pool = cfg.create_pool(Some(deadpool_redis::Runtime::Tokio1))?;
+        let mut conn = pool.get().await?;
+        let _: String = redis::cmd("PING").query_async(&mut conn).await?;
+        tracing::info!("Redis conectado");
+        Some(pool)
+    } else {
+        tracing::warn!("REDIS_URL no definido — operando sin cache distribuido");
+        None
+    };
+
     let addr = format!("{}:{}", config.host, config.port);
     tracing::info!("Servidor iniciando en {addr}");
     tracing::info!("Swagger UI disponible en http://{addr}/swagger-ui/");
 
-    let app = handlers::create_router(pool, config);
+    let app = handlers::create_router(pool, redis, config);
     let listener = tokio::net::TcpListener::bind(&addr).await?;
     axum::serve(listener, app).await?;
 

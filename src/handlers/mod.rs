@@ -65,9 +65,14 @@ impl utoipa::Modify for SecurityAddon {
 pub struct ApiDoc;
 
 /// Crea el router principal con CORS, tracing, Swagger UI y todas las rutas
-pub fn create_router(pool: sqlx::PgPool, config: crate::config::AppConfig) -> Router {
+pub fn create_router(
+    pool: sqlx::PgPool,
+    redis: Option<deadpool_redis::Pool>,
+    config: crate::config::AppConfig,
+) -> Router {
     let state = AppState {
         pool,
+        redis,
         jwt_secret: config.jwt_secret,
     };
 
