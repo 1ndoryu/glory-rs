@@ -5,7 +5,8 @@ use axum::{Json, Router};
 use validator::Validate;
 
 use crate::errors::AppError;
-use crate::models::{AuthResponse, LoginRequest, RegisterRequest};
+use crate::middleware::CurrentUser;
+use crate::models::{AuthResponse, LoginRequest, LogoutRequest, RefreshRequest, RegisterRequest};
 use crate::services::AuthService;
 use crate::AppState;
 
@@ -18,7 +19,7 @@ use crate::AppState;
 pub async fn register(State(state): State<AppState>, Json(req): Json<RegisterRequest>)
     -> Result<(StatusCode, Json<AuthResponse>), AppError> {
     req.validate().map_err(|e| AppError::Validation(e.to_string()))?;
-    let resp = AuthService::register(&state.pool, req, &state.jwt_secret).await?;
+    let resp = AuthService::register(&state.pool, &state.redis, req, &state.jwt_secret).await?;
     Ok((StatusCode::CREATED, Json(resp)))
 }
 
@@ -31,12 +32,41 @@ pub async fn register(State(state): State<AppState>, Json(req): Json<RegisterReq
 pub async fn login(State(state): State<AppState>, Json(req): Json<LoginRequest>)
     -> Result<Json<AuthResponse>, AppError> {
     req.validate().map_err(|e| AppError::Validation(e.to_string()))?;
-    let resp = AuthService::login(&state.pool, req, &state.jwt_secret).await?;
+    let resp = AuthService::login(&state.pool, &state.redis, req, &state.jwt_secret).await?;
     Ok(Json(resp))
+}
+
+#[utoipa::path(post, path = "/api/auth/refresh", request_body = RefreshRequest,
+    responses(
+        (status = 200, description = "Tokens rotados", body = AuthResponse),
+        (status = 401, description = "Refresh token invalido o expirado", body = crate::errors::ErrorResponse)
+    ))]
+pub async fn refresh(State(state): State<AppState>, Json(req): Json<RefreshRequest>)
+    -> Result<Json<AuthResponse>, AppError> {
+    let resp = AuthService::refresh(&state.pool, &state.redis, &req.refresh_token, &state.jwt_secret).await?;
+    Ok(Json(resp))
+}
+
+#[utoipa::path(post, path = "/api/auth/logout",
+    request_body = LogoutRequest,
+    security(("bearer_auth" = [])),
+    responses(
+        (status = 204, description = "Logout OK"),
+        (status = 401, description = "No autenticado", body = crate::errors::ErrorResponse)
+    ))]
+pub async fn logout(
+    State(state): State<AppState>,
+    user: CurrentUser,
+    Json(req): Json<LogoutRequest>,
+) -> Result<StatusCode, AppError> {
+    AuthService::logout(&state.redis, &user.jti, req.refresh_token.as_deref()).await?;
+    Ok(StatusCode::NO_CONTENT)
 }
 
 pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/auth/register", post(register))
         .route("/auth/login", post(login))
+        .route("/auth/refresh", post(refresh))
+        .route("/auth/logout", post(logout))
 }

@@ -3,18 +3,18 @@ use axum::extract::FromRequestParts;
 use axum::http::request::Parts;
 
 use crate::errors::AppError;
-use crate::services::AuthService;
+use crate::services::{AuthService, TokenStore};
 use crate::AppState;
 
-/* [174A-19] Extractor obligatorio: rechaza la peticion con 401 si no hay JWT valido. */
+/* [174A-19+174A-20] Extractor obligatorio que ademas verifica blacklist de jti. */
 #[derive(Debug, Clone)]
 pub struct CurrentUser {
     pub user_id: i32,
+    pub jti: String,
     pub plan: String,
     pub rol: String,
 }
 
-/* [174A-18] Alias historico  preferir CurrentUser en codigo nuevo. */
 pub type AuthUser = CurrentUser;
 
 #[async_trait]
@@ -27,12 +27,13 @@ impl FromRequestParts<AppState> for CurrentUser {
             .ok_or(AppError::Unauthorized)?;
         let token = header.strip_prefix("Bearer ").ok_or(AppError::Unauthorized)?;
         let claims = AuthService::verify_token(token, &state.jwt_secret)?;
-        Ok(Self { user_id: claims.sub, plan: claims.plan, rol: claims.rol })
+        if TokenStore::is_access_revoked(&state.redis, &claims.jti).await? {
+            return Err(AppError::Unauthorized);
+        }
+        Ok(Self { user_id: claims.sub, jti: claims.jti, plan: claims.plan, rol: claims.rol })
     }
 }
 
-/* [174A-19] Extractor opcional: nunca falla; None si no hay token o es invalido.
- * Util para endpoints publicos que personalizan respuesta si el usuario esta logueado. */
 #[derive(Debug, Clone, Default)]
 pub struct OptionalUser(pub Option<CurrentUser>);
 
@@ -44,14 +45,22 @@ impl FromRequestParts<AppState> for OptionalUser {
         let token = parts.headers.get("Authorization")
             .and_then(|v| v.to_str().ok())
             .and_then(|s| s.strip_prefix("Bearer "));
-        let user = token
-            .and_then(|t| AuthService::verify_token(t, &state.jwt_secret).ok())
-            .map(|claims| CurrentUser { user_id: claims.sub, plan: claims.plan, rol: claims.rol });
+        let user = match token {
+            Some(t) => match AuthService::verify_token(t, &state.jwt_secret) {
+                Ok(c) => {
+                    let revoked = TokenStore::is_access_revoked(&state.redis, &c.jti)
+                        .await
+                        .unwrap_or(false);
+                    if revoked { None } else { Some(CurrentUser { user_id: c.sub, jti: c.jti, plan: c.plan, rol: c.rol }) }
+                }
+                Err(_) => None,
+            },
+            None => None,
+        };
         Ok(OptionalUser(user))
     }
 }
 
-/* [174A-19] Helper para handlers admin: 403 si rol != "admin". */
 impl CurrentUser {
     pub fn require_admin(&self) -> Result<(), AppError> {
         if self.rol == "admin" { Ok(()) } else { Err(AppError::Forbidden("Requiere rol admin".into())) }

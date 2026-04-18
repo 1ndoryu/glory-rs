@@ -4,7 +4,7 @@ use sqlx::FromRow;
 use utoipa::ToSchema;
 use validator::Validate;
 
-/* [174A-18] Modelo Usuario sobre `usuarios_ext` (PK i32 SERIAL). */
+/* [174A-18+174A-20] Modelo Usuario sobre `usuarios_ext`. */
 #[derive(Debug, Clone, FromRow)]
 pub struct User {
     pub id: i32,
@@ -53,8 +53,19 @@ pub struct LoginRequest {
     pub password: String,
 }
 
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct RefreshRequest {
+    pub refresh_token: String,
+}
+
+#[derive(Debug, Deserialize, ToSchema, Default)]
+pub struct LogoutRequest {
+    pub refresh_token: Option<String>,
+}
+
 #[derive(Debug, Serialize, ToSchema)]
 pub struct AuthResponse {
     pub token: String,
+    pub refresh_token: String,
     pub user: UserResponse,
 }

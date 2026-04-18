@@ -3,6 +3,9 @@
 #![allow(clippy::module_name_repetitions)]
 #![allow(clippy::missing_errors_doc)]
 #![allow(clippy::missing_panics_doc)]
+#![allow(clippy::ref_option)]
+#![allow(clippy::must_use_candidate)]
+#![allow(clippy::doc_markdown)]
 
 pub mod algorithm;
 pub mod audio;
