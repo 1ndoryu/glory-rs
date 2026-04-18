@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE algoritmo_estado SET cnt_likes_preciso = 0, cnt_reproducciones_preciso = 0, cnt_completas_preciso = 0, cnt_descargas_preciso = 0, cnt_follows_preciso = 0, cnt_comentarios_preciso = 0, ultimo_preciso = NOW(), version_perfil = version_perfil + 1 WHERE usuario_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "871befb55aa4022a712b353170e3a5385fd5038e18a3188421c872037bae3293"
+}

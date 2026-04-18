@@ -82,7 +82,6 @@
 ### Fase 6 â€” Samples CRUD + bÃºsqueda
 
 ### Fase 7 â€” Algoritmo de descubrimiento (lo mÃ¡s difÃ­cil #2)
-- 174A-55 â€” Worker `algo_planner.rs`
 - 174A-56 â€” Endpoints `GET /feed`, `GET /me/feed`, `GET /samples/random`
 - 174A-57 â€” MÃ©tricas algo_timing + endpoint admin
 

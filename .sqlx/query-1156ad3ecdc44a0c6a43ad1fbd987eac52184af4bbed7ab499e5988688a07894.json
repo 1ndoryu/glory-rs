@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT usuario_id AS \"usuario_id!\"\n            FROM algoritmo_estado\n            WHERE ultimo_rapido < NOW() - ($1 || ' seconds')::interval\n            LIMIT $2\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "usuario_id!",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "1156ad3ecdc44a0c6a43ad1fbd987eac52184af4bbed7ab499e5988688a07894"
+}

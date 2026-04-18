@@ -22,6 +22,11 @@
  * `user_tag_scores` para que el scoring lea con un JOIN indexado en lugar
  * de hacer UNNEST + 7 JOINs por request. */
 
+/* [174A-55] AlgoPlanner: orquesta recálculos rápidos/precisos por triggers
+ * de eventos + jobs background (refresh MV, recalc activos, process
+ * temporal). Reemplazo del PlanificadorAlgoritmo + WP-cron del legado. */
+
+pub mod algo_planner;
 pub mod candidates;
 pub mod precompute;
 pub mod profile;
