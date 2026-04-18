@@ -3,21 +3,23 @@ mod moderation;
 mod processing_queue;
 mod profile;
 mod sample;
+mod sample_catalog;
 mod user;
 
 pub use ia_queue::{
-	IaQueueFailureDisposition, IaQueueRepository, QueuedIaJob, retry_backoff_duration,
+    retry_backoff_duration, IaQueueFailureDisposition, IaQueueRepository, QueuedIaJob,
 };
 pub use moderation::ModerationRepository;
 pub use processing_queue::{
-	retry_backoff_minutes, ProcessingQueueRepository, QueueFailureDisposition,
-	QueuedAudioProcessingJob,
+    retry_backoff_minutes, ProcessingQueueRepository, QueueFailureDisposition,
+    QueuedAudioProcessingJob,
 };
 pub use profile::ProfileRepository;
 pub use sample::{
-	ApplyAudioIaMetadataParams, AudioIaSample, AudioPipelineSample,
-	CompleteAudioPipelineParams, CreateUploadSampleParams, CreatedUploadSample,
-	DuplicateSampleCandidate, MarkAudioPipelineFailedParams, SampleRepository,
-	SaveAudioAnalysisParams, SaveAudioAssetsParams,
+    ApplyAudioIaMetadataParams, AudioIaSample, AudioPipelineSample, CompleteAudioPipelineParams,
+    CreateUploadSampleParams, CreatedUploadSample, DuplicateSampleCandidate,
+    MarkAudioPipelineFailedParams, SampleRepository, SaveAudioAnalysisParams,
+    SaveAudioAssetsParams,
 };
+pub use sample_catalog::{SampleListFilters, SampleListResult};
 pub use user::{OAuthRepository, UserRepository};

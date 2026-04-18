@@ -3,12 +3,13 @@
 mod admin;
 mod auth;
 mod health;
+mod sample_catalog;
 mod samples;
 mod users;
 
 use axum::Router;
-use tower_http::services::ServeDir;
 use tower_http::cors::{Any, CorsLayer};
+use tower_http::services::ServeDir;
 use tower_http::trace::TraceLayer;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
@@ -44,6 +45,7 @@ impl utoipa::Modify for SecurityAddon {
         auth::logout,
         auth::google_login,
         auth::google_pkce,
+        sample_catalog::list_samples,
         samples::check_duplicate,
         samples::upload,
         users::me,
@@ -66,8 +68,13 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::GooglePkceRequest,
         crate::models::AuthResponse,
         crate::models::UserResponse,
+        crate::models::SampleCreatorSummary,
         crate::models::CheckDuplicateRequest,
         crate::models::CheckDuplicateResponse,
+        crate::models::ListSamplesQuery,
+        crate::models::ListSamplesResponse,
+        crate::models::SampleSummary,
+        crate::models::SamplesPagination,
         crate::models::UploadSampleRequestDoc,
         crate::models::UploadSampleResponse,
         crate::models::UpdateProfileRequest,
@@ -101,7 +108,9 @@ pub fn create_router(
         pool,
         redis,
         jwt_secret: config.jwt_secret,
-        google: std::sync::Arc::new(crate::services::GoogleVerifier::new(config.google_client_ids)),
+        google: std::sync::Arc::new(crate::services::GoogleVerifier::new(
+            config.google_client_ids,
+        )),
         storage,
         public_base_url,
     };
@@ -115,12 +124,15 @@ pub fn create_router(
     Router::new()
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
         /* [174A-6] Alias /docs → /swagger-ui/ para acceso más natural. */
-        .route("/docs", axum::routing::get(|| async {
-            axum::response::Redirect::permanent("/swagger-ui/")
-        }))
+        .route(
+            "/docs",
+            axum::routing::get(|| async { axum::response::Redirect::permanent("/swagger-ui/") }),
+        )
         .nest_service("/uploads", ServeDir::new(storage_root))
         .nest("/api", api_routes())
-        .layer(axum::middleware::from_fn(crate::middleware::request_id_middleware))
+        .layer(axum::middleware::from_fn(
+            crate::middleware::request_id_middleware,
+        ))
         .layer(TraceLayer::new_for_http())
         .layer(cors)
         .with_state(state)
@@ -130,6 +142,7 @@ fn api_routes() -> Router<AppState> {
     Router::new()
         .merge(health::routes())
         .merge(auth::routes())
+        .merge(sample_catalog::routes())
         .merge(samples::routes())
         .merge(users::routes())
         .merge(admin::routes())
