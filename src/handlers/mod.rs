@@ -65,6 +65,7 @@ impl utoipa::Modify for SecurityAddon {
         admin::suspend,
         admin::activate,
         admin::mark_delete,
+        admin::algo_timing_history,
     ),
     components(schemas(
         health::HealthResponse,
@@ -98,6 +99,8 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::BlockUserRequest,
         crate::models::SuspendUserRequest,
         crate::models::DeleteUserRequest,
+        crate::services::algo_timing::TimingEntry,
+        crate::services::algo_timing::TimingStage,
         crate::errors::ErrorResponse,
     )),
     modifiers(&SecurityAddon),

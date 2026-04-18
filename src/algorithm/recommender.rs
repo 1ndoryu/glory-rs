@@ -190,20 +190,41 @@ impl RecommenderService {
             return Ok(Vec::new());
         }
 
+        /* [174A-57] Profiling fino para usuario QA. No-op para el resto. */
+        crate::services::algo_timing::ALGO_TIMING.start(user_id);
+
         let cache_key = fresh_cache_key(user_id, limit, offset);
         if let Some(hit) = cache_get(&redis, &cache_key).await? {
             debug!(target: "kamples.feed", "cache hit fresh: {}", cache_key);
+            crate::services::algo_timing::ALGO_TIMING.mark(user_id, "cache_fresh_hit");
+            crate::services::algo_timing::ALGO_TIMING.save(
+                user_id,
+                serde_json::json!({"source": "cache_fresh", "items": hit.len()}),
+            );
             return Ok(hit);
         }
+        crate::services::algo_timing::ALGO_TIMING.mark(user_id, "cache_fresh_miss");
 
         let stale_key = stale_cache_key(user_id, limit, offset);
         if let Some(stale) = cache_get(&redis, &stale_key).await? {
             debug!(target: "kamples.feed", "cache hit stale: {}", stale_key);
+            crate::services::algo_timing::ALGO_TIMING.mark(user_id, "cache_stale_hit");
             spawn_warm(pool.clone(), redis.clone(), user_id, limit, offset, *config);
+            crate::services::algo_timing::ALGO_TIMING.save(
+                user_id,
+                serde_json::json!({"source": "cache_stale", "items": stale.len()}),
+            );
             return Ok(stale);
         }
+        crate::services::algo_timing::ALGO_TIMING.mark(user_id, "cache_stale_miss");
 
-        compute_and_cache(&pool, &redis, user_id, limit, offset, config).await
+        let items = compute_and_cache(&pool, &redis, user_id, limit, offset, config).await?;
+        crate::services::algo_timing::ALGO_TIMING.mark(user_id, "compute_and_cache");
+        crate::services::algo_timing::ALGO_TIMING.save(
+            user_id,
+            serde_json::json!({"source": "compute", "items": items.len(), "limit": limit, "offset": offset}),
+        );
+        Ok(items)
     }
 
     /// "Más como esto": top N samples similares a uno dado, vía pgvector.

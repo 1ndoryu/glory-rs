@@ -82,7 +82,7 @@
 ### Fase 6 â€” Samples CRUD + bÃºsqueda
 
 ### Fase 7 â€” Algoritmo de descubrimiento (lo mÃ¡s difÃ­cil #2)
-- 174A-57 â€” MÃ©tricas algo_timing + endpoint admin
+
 
 ### Fase 8 â€” Reproducciones, likes, follows, downloads
 - 174A-58 â€” `POST /samples/{id}/play`

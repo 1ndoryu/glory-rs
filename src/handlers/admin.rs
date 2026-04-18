@@ -1,13 +1,16 @@
-use axum::extract::{Path, State};
+use axum::extract::{Path, Query, State};
 use axum::http::StatusCode;
-use axum::routing::post;
+use axum::routing::{get, post};
 use axum::{Json, Router};
+use serde::Deserialize;
+use utoipa::IntoParams;
 use validator::Validate;
 
 use crate::errors::AppError;
 use crate::middleware::CurrentUser;
 use crate::models::{DeleteUserRequest, SuspendUserRequest};
 use crate::repositories::ModerationRepository;
+use crate::services::algo_timing::{TimingEntry, ALGO_TIMING};
 use crate::AppState;
 
 /* [174A-25] Endpoints admin: requiere rol admin (validado via require_admin). */
@@ -60,9 +63,39 @@ pub async fn mark_delete(
     Ok(StatusCode::NO_CONTENT)
 }
 
+/* [174A-57] Endpoint admin para inspeccionar las últimas mediciones del
+ * algoritmo. Solo se acumulan para `KAMPLES_ALGO_TIMING_USER_ID` (default 1). */
+
+#[derive(Debug, Clone, Deserialize, IntoParams)]
+pub struct AlgoTimingQuery {
+    /// Máximo de entradas a devolver. Default 50, máximo 100.
+    pub limit: Option<usize>,
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/admin/algo-timing",
+    params(AlgoTimingQuery),
+    security(("bearer_auth" = [])),
+    responses(
+        (status = 200, description = "Historial de mediciones del feed (más reciente primero)", body = Vec<TimingEntry>),
+        (status = 401, description = "no auth"),
+        (status = 403, description = "no admin")
+    )
+)]
+pub async fn algo_timing_history(
+    user: CurrentUser,
+    Query(query): Query<AlgoTimingQuery>,
+) -> Result<Json<Vec<TimingEntry>>, AppError> {
+    user.require_admin()?;
+    let limit = query.limit.unwrap_or(50).clamp(1, 100);
+    Ok(Json(ALGO_TIMING.history(limit)))
+}
+
 pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/admin/users/:id/suspend", post(suspend))
         .route("/admin/users/:id/activate", post(activate))
         .route("/admin/users/:id/delete", post(mark_delete))
+        .route("/admin/algo-timing", get(algo_timing_history))
 }

@@ -404,6 +404,22 @@ export interface SuspendUserRequest {
   razon: string;
 }
 
+export interface TimingStage {
+  ms: number;
+  name: string;
+}
+
+/**
+ * Una medición completa de un request al feed.
+ */
+export interface TimingEntry {
+  /** Etapas en orden de inserción con duración relativa a la marca anterior. */
+  etapas: TimingStage[];
+  meta: unknown;
+  total_ms: number;
+  ts: string;
+}
+
 /**
  * @nullable
  */
@@ -491,6 +507,15 @@ export interface UploadSampleResponse {
   slug: string;
   url: string;
 }
+
+export type AlgoTimingHistoryParams = {
+/**
+ * Máximo de entradas a devolver. Default 50, máximo 100.
+ * @minimum 0
+ * @nullable
+ */
+limit?: number | null;
+};
 
 export type GetFeedParams = {
 /**
@@ -580,6 +605,130 @@ limit?: number | null;
 };
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
+
+
+export type algoTimingHistoryResponse200 = {
+  data: TimingEntry[]
+  status: 200
+}
+
+export type algoTimingHistoryResponse401 = {
+  data: void
+  status: 401
+}
+
+export type algoTimingHistoryResponse403 = {
+  data: void
+  status: 403
+}
+
+export type algoTimingHistoryResponseSuccess = (algoTimingHistoryResponse200) & {
+  headers: Headers;
+};
+export type algoTimingHistoryResponseError = (algoTimingHistoryResponse401 | algoTimingHistoryResponse403) & {
+  headers: Headers;
+};
+
+export type algoTimingHistoryResponse = (algoTimingHistoryResponseSuccess | algoTimingHistoryResponseError)
+
+export const getAlgoTimingHistoryUrl = (params?: AlgoTimingHistoryParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/admin/algo-timing?${stringifiedParams}` : `/api/admin/algo-timing`
+}
+
+export const algoTimingHistory = async (params?: AlgoTimingHistoryParams, options?: RequestInit): Promise<algoTimingHistoryResponse> => {
+
+  return customInstance<algoTimingHistoryResponse>(getAlgoTimingHistoryUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getAlgoTimingHistoryQueryKey = (params?: AlgoTimingHistoryParams,) => {
+    return [
+    `/api/admin/algo-timing`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getAlgoTimingHistoryQueryOptions = <TData = Awaited<ReturnType<typeof algoTimingHistory>>, TError = void>(params?: AlgoTimingHistoryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof algoTimingHistory>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAlgoTimingHistoryQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof algoTimingHistory>>> = ({ signal }) => algoTimingHistory(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof algoTimingHistory>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type AlgoTimingHistoryQueryResult = NonNullable<Awaited<ReturnType<typeof algoTimingHistory>>>
+export type AlgoTimingHistoryQueryError = void
+
+
+export function useAlgoTimingHistory<TData = Awaited<ReturnType<typeof algoTimingHistory>>, TError = void>(
+ params: undefined |  AlgoTimingHistoryParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof algoTimingHistory>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof algoTimingHistory>>,
+          TError,
+          Awaited<ReturnType<typeof algoTimingHistory>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAlgoTimingHistory<TData = Awaited<ReturnType<typeof algoTimingHistory>>, TError = void>(
+ params?: AlgoTimingHistoryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof algoTimingHistory>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof algoTimingHistory>>,
+          TError,
+          Awaited<ReturnType<typeof algoTimingHistory>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAlgoTimingHistory<TData = Awaited<ReturnType<typeof algoTimingHistory>>, TError = void>(
+ params?: AlgoTimingHistoryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof algoTimingHistory>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useAlgoTimingHistory<TData = Awaited<ReturnType<typeof algoTimingHistory>>, TError = void>(
+ params?: AlgoTimingHistoryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof algoTimingHistory>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getAlgoTimingHistoryQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
 
 
 

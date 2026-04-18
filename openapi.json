@@ -12,6 +12,53 @@
     "version": "0.1.0"
   },
   "paths": {
+    "/api/admin/algo-timing": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "operationId": "algo_timing_history",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Máximo de entradas a devolver. Default 50, máximo 100.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "nullable": true,
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Historial de mediciones del feed (más reciente primero)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TimingEntry"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "no auth"
+          },
+          "403": {
+            "description": "no admin"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
     "/api/admin/users/{id}/activate": {
       "post": {
         "tags": [
@@ -2264,6 +2311,50 @@
             "nullable": true
           },
           "razon": {
+            "type": "string"
+          }
+        }
+      },
+      "TimingEntry": {
+        "type": "object",
+        "description": "Una medición completa de un request al feed.",
+        "required": [
+          "ts",
+          "total_ms",
+          "etapas",
+          "meta"
+        ],
+        "properties": {
+          "etapas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimingStage"
+            },
+            "description": "Etapas en orden de inserción con duración relativa a la marca anterior."
+          },
+          "meta": {},
+          "total_ms": {
+            "type": "number",
+            "format": "double"
+          },
+          "ts": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TimingStage": {
+        "type": "object",
+        "required": [
+          "name",
+          "ms"
+        ],
+        "properties": {
+          "ms": {
+            "type": "number",
+            "format": "double"
+          },
+          "name": {
             "type": "string"
           }
         }
