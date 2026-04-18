@@ -10,6 +10,11 @@
  * (trending, embedding ANN, seguidos, top-tags, populares, no reproducidos)
  * con filtro bidireccional de bloqueos. */
 
+/* [174A-52] MotorRecomendacion: orquesta perfil + candidatos + scoring
+ * (signals) + diversidad + cache stale-while-revalidate + warm async +
+ * `similar_to_sample`. */
+
 pub mod candidates;
 pub mod profile;
+pub mod recommender;
 pub mod signals;

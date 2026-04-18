@@ -1,0 +1,101 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT id AS \"id!\", creador_id AS \"creador_id!\", titulo AS \"titulo!\",\n                   slug AS \"slug!\", tipo AS \"tipo!\", bpm AS \"bpm?\", key AS \"key?\",\n                   escala AS \"escala?\", tags AS \"tags!\", publicado_at AS \"publicado_at?\",\n                   total_likes, total_reproducciones, total_descargas, verificado\n              FROM samples\n             WHERE estado = 'activo'\n               AND creador_id <> ALL($1::int[])\n             ORDER BY (total_likes * 2 + total_reproducciones + total_descargas * 3) DESC\n             LIMIT $2\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "creador_id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "titulo!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "slug!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "tipo!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "bpm?",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 6,
+        "name": "key?",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 7,
+        "name": "escala?",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 8,
+        "name": "tags!",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 9,
+        "name": "publicado_at?",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 10,
+        "name": "total_likes",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 11,
+        "name": "total_reproducciones",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 12,
+        "name": "total_descargas",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 13,
+        "name": "verificado",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4Array",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "f95a6ad2fdc2bbab7274a0a50d9d904891dd0b10a96188c91c7a84b6a87107b7"
+}

@@ -1,0 +1,104 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            s.id            AS \"id!\",\n            s.creador_id    AS \"creador_id!\",\n            s.titulo        AS \"titulo!\",\n            s.slug          AS \"slug!\",\n            s.tipo          AS \"tipo!\",\n            s.bpm           AS \"bpm?\",\n            s.key           AS \"key?\",\n            s.escala        AS \"escala?\",\n            s.tags          AS \"tags!\",\n            s.publicado_at  AS \"publicado_at?\",\n            s.total_likes,\n            s.total_reproducciones,\n            s.total_descargas,\n            s.verificado\n        FROM samples s\n        WHERE s.estado = 'activo'\n          AND s.id <> $1\n          AND (s.tags && $2::text[] OR s.tipo = $3)\n          AND s.creador_id <> ALL($4::int[])\n        ORDER BY s.publicado_at DESC NULLS LAST\n        LIMIT $5\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "creador_id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "titulo!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "slug!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "tipo!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "bpm?",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 6,
+        "name": "key?",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 7,
+        "name": "escala?",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 8,
+        "name": "tags!",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 9,
+        "name": "publicado_at?",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 10,
+        "name": "total_likes",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 11,
+        "name": "total_reproducciones",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 12,
+        "name": "total_descargas",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 13,
+        "name": "verificado",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "TextArray",
+        "Text",
+        "Int4Array",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "2ccae973b2b73d52115ee522ff5f8b8797f0868a1e6d908c639571d3f1ddf1b2"
+}
