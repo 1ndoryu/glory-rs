@@ -1,8 +1,9 @@
 use super::{
     asset_to_public_url, build_sample_detail, normalize_creator, normalize_music_key,
-    normalize_sample_type, normalize_search, normalize_tags, normalize_update_request,
+    normalize_sample_type, normalize_search, normalize_similar_limit, normalize_tags,
+    normalize_update_request,
 };
-use crate::models::UpdateSampleRequest;
+use crate::models::{SimilarSamplesQuery, UpdateSampleRequest};
 use crate::repositories::SampleCatalogDetailRecord;
 
 #[test]
@@ -66,6 +67,19 @@ fn normalizes_search_and_optional_normalized_variant() {
 #[test]
 fn rejects_too_short_search_terms() {
     assert!(normalize_search(Some("x".into()), None).is_err());
+}
+
+#[test]
+fn uses_default_similar_limit_when_query_is_empty() {
+    assert_eq!(normalize_similar_limit(&SimilarSamplesQuery::default()), 5);
+}
+
+#[test]
+fn similar_query_accepts_legacy_limite_alias() {
+    let query: SimilarSamplesQuery =
+        serde_json::from_value(serde_json::json!({ "limite": 12 })).expect("alias should deserialize");
+
+    assert_eq!(query.limit, Some(12));
 }
 
 #[test]

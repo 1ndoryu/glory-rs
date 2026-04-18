@@ -3,7 +3,8 @@ use validator::Validate;
 use crate::errors::AppError;
 use crate::models::{
     DeleteSampleResponse, ListSamplesQuery, ListSamplesResponse, SampleCreatorSummary,
-    SampleDetailResponse, SampleSummary, SamplesPagination, UpdateSampleRequest,
+    SampleDetailResponse, SampleSummary, SamplesPagination, SimilarSamplesQuery,
+    SimilarSamplesResponse, UpdateSampleRequest,
 };
 use crate::repositories::{
     OwnedSampleRecord, SampleCatalogDetailRecord, SampleCatalogSummaryRecord,
@@ -20,6 +21,7 @@ const MAX_CREATOR_LENGTH: usize = 50;
 const MIN_SAMPLE_TAGS: usize = 2;
 const MAX_SAMPLE_TAGS: usize = 20;
 const MAX_SEARCH_LENGTH: usize = 120;
+const DEFAULT_SIMILAR_LIMIT: i64 = 5;
 
 /* [174A-44] Servicio de catálogo público de samples.
  * Centraliza la normalización de filtros para que el handler quede fino y el
@@ -94,6 +96,29 @@ impl SampleCatalogService {
             public_base_url,
             current_user_id,
         ))
+    }
+
+    pub async fn get_similar_samples(
+        pool: &sqlx::PgPool,
+        public_base_url: Option<&str>,
+        sample_id: i32,
+        query: SimilarSamplesQuery,
+    ) -> Result<SimilarSamplesResponse, AppError> {
+        query
+            .validate()
+            .map_err(|error| AppError::Validation(error.to_string()))?;
+
+        let limit = normalize_similar_limit(&query);
+        let records = SampleRepository::find_public_similar_samples(pool, sample_id, limit)
+            .await?
+            .ok_or_else(|| AppError::NotFound(format!("sample {sample_id}")))?;
+
+        Ok(SimilarSamplesResponse {
+            data: records
+                .into_iter()
+                .map(|record| build_sample_summary(record, public_base_url))
+                .collect(),
+        })
     }
 
     pub async fn update_owned_sample(
@@ -318,6 +343,10 @@ fn normalize_filters(query: ListSamplesQuery) -> Result<SampleListFilters, AppEr
         premium: query.premium,
         creator,
     })
+}
+
+fn normalize_similar_limit(query: &SimilarSamplesQuery) -> i64 {
+    query.limit.unwrap_or(DEFAULT_SIMILAR_LIMIT)
 }
 
 fn normalize_search(

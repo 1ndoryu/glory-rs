@@ -147,6 +147,20 @@ pub struct ListSamplesResponse {
     pub pagination: SamplesPagination,
 }
 
+/// Query params de `GET /api/samples/{id}/similar`.
+#[derive(Debug, Clone, Deserialize, Validate, ToSchema, Default)]
+pub struct SimilarSamplesQuery {
+    #[serde(alias = "limite")]
+    #[validate(range(min = 1, max = 50))]
+    pub limit: Option<i64>,
+}
+
+/// Respuesta de `GET /api/samples/{id}/similar`.
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+pub struct SimilarSamplesResponse {
+    pub data: Vec<SampleSummary>,
+}
+
 /// Respuesta de `GET /api/samples/{slug}` y `GET /api/samples/random`.
 #[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 #[allow(clippy::struct_excessive_bools)]

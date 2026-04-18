@@ -10,7 +10,8 @@ pub use profile::{
 pub use sample::{
     CheckDuplicateRequest, CheckDuplicateResponse, DeleteSampleResponse, ListSamplesQuery,
     ListSamplesResponse, SampleCreatorSummary, SampleDetailResponse, SampleSummary,
-    SamplesPagination, UpdateSampleRequest, UploadSampleRequestDoc, UploadSampleResponse,
+    SamplesPagination, SimilarSamplesQuery, SimilarSamplesResponse, UpdateSampleRequest,
+    UploadSampleRequestDoc, UploadSampleResponse,
 };
 pub use user::{
     AuthResponse, GoogleAuthRequest, GooglePkceRequest, LoginRequest, LogoutRequest,

@@ -8,7 +8,7 @@ use crate::errors::ErrorResponse;
 use crate::middleware::{CurrentUser, OptionalUser};
 use crate::models::{
     DeleteSampleResponse, ListSamplesQuery, ListSamplesResponse, SampleDetailResponse,
-    UpdateSampleRequest,
+    SimilarSamplesQuery, SimilarSamplesResponse, UpdateSampleRequest,
 };
 use crate::services::SampleCatalogService;
 use crate::AppState;
@@ -69,6 +69,35 @@ pub async fn random_sample(
         user.map(|current| current.user_id),
     )
     .await?;
+    Ok(Json(response))
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/samples/{id}/similar",
+    params(
+        ("id" = i32, Path, description = "ID numérico del sample base"),
+        ("limit" = Option<i64>, Query, description = "Cantidad máxima de resultados. También acepta alias legacy `limite`. Default: 5, máximo: 50")
+    ),
+    responses(
+        (status = 200, description = "Samples similares usando pgvector con fallback contextual", body = SimilarSamplesResponse),
+        (status = 404, description = "Sample no encontrado o no visible públicamente", body = ErrorResponse),
+        (status = 422, description = "Query inválida", body = ErrorResponse)
+    )
+)]
+pub async fn similar_samples(
+    State(state): State<AppState>,
+    Path(id): Path<i32>,
+    Query(query): Query<SimilarSamplesQuery>,
+) -> Result<Json<SimilarSamplesResponse>, AppError> {
+    let response = SampleCatalogService::get_similar_samples(
+        &state.pool,
+        state.public_base_url.as_deref(),
+        id,
+        query,
+    )
+    .await?;
+
     Ok(Json(response))
 }
 
@@ -153,6 +182,7 @@ pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/samples", get(list_samples))
         .route("/samples/random", get(random_sample))
+        .route("/samples/:id/similar", get(similar_samples))
         .route(
             "/samples/:slug",
             get(get_sample).patch(update_sample).delete(delete_sample),
