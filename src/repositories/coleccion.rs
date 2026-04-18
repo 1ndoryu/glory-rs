@@ -230,6 +230,68 @@ impl ColeccionesRepository {
         Ok(deleted)
     }
 
+    /* [174A-65] Merge: mueve todos los samples de `source_id` a `target_id`
+     * (sin duplicados, conserva ORDEN re-asignando incrementalmente al final
+     * de target) y soft-deletea source. Ambas colecciones deben pertenecer al
+     * mismo usuario, lo cual se valida en el handler antes de llamar.
+     * Devuelve el número de samples efectivamente movidos. */
+    pub async fn merge(
+        pool: &PgPool,
+        target_id: i64,
+        source_id: i64,
+    ) -> Result<i64, AppError> {
+        if target_id == source_id {
+            return Err(AppError::BadRequest("source y target no pueden ser iguales".into()));
+        }
+        let mut tx = pool.begin().await?;
+        let next_orden: i32 = sqlx::query_scalar!(
+            r#"SELECT COALESCE(MAX(orden), -1) + 1 AS "n!" FROM coleccion_samples WHERE coleccion_id = $1"#,
+            target_id
+        )
+        .fetch_one(&mut *tx)
+        .await?;
+        /* Inserta en target los samples del source que aún no estén en target. */
+        let inserted = sqlx::query!(
+            r#"INSERT INTO coleccion_samples (coleccion_id, sample_id, orden)
+               SELECT $1, s.sample_id,
+                      $2 + (ROW_NUMBER() OVER (ORDER BY s.orden, s.added_at) - 1)::int
+               FROM coleccion_samples s
+               WHERE s.coleccion_id = $3
+                 AND NOT EXISTS (
+                     SELECT 1 FROM coleccion_samples t
+                     WHERE t.coleccion_id = $1 AND t.sample_id = s.sample_id
+                 )"#,
+            target_id,
+            next_orden,
+            source_id,
+        )
+        .execute(&mut *tx)
+        .await?;
+        let moved = i64::try_from(inserted.rows_affected()).unwrap_or(i64::MAX);
+        /* Borra todos los samples de source y soft-deletea la colección. */
+        sqlx::query!("DELETE FROM coleccion_samples WHERE coleccion_id = $1", source_id)
+            .execute(&mut *tx)
+            .await?;
+        sqlx::query!(
+            "UPDATE colecciones SET eliminado_en = NOW() WHERE id = $1 AND eliminado_en IS NULL",
+            source_id
+        )
+        .execute(&mut *tx)
+        .await?;
+        if moved > 0 {
+            let moved_i32 = i32::try_from(moved).unwrap_or(i32::MAX);
+            sqlx::query!(
+                "UPDATE colecciones SET total_samples = total_samples + $2, updated_at = NOW() WHERE id = $1",
+                target_id,
+                moved_i32,
+            )
+            .execute(&mut *tx)
+            .await?;
+        }
+        tx.commit().await?;
+        Ok(moved)
+    }
+
     pub async fn list_samples(
         pool: &PgPool,
         coleccion_id: i64,

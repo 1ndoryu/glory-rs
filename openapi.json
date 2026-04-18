@@ -770,6 +770,62 @@
         ]
       }
     },
+    "/api/colecciones/{id}/merge": {
+      "post": {
+        "tags": [
+          "colecciones"
+        ],
+        "operationId": "merge_coleccion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID de la coleccion target",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MergeColeccionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MergeColeccionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "source == target"
+          },
+          "403": {
+            "description": "No autorizado en alguna de las dos colecciones"
+          },
+          "404": {
+            "description": "Alguna coleccion no existe"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
     "/api/colecciones/{id}/samples": {
       "get": {
         "tags": [
@@ -2839,6 +2895,34 @@
           "refresh_token": {
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "MergeColeccionRequest": {
+        "type": "object",
+        "required": [
+          "source_id"
+        ],
+        "properties": {
+          "source_id": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "MergeColeccionResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "moved"
+        ],
+        "properties": {
+          "moved": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ok": {
+            "type": "boolean"
           }
         }
       },

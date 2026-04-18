@@ -372,6 +372,15 @@ export interface LogoutRequest {
   refresh_token?: string | null;
 }
 
+export interface MergeColeccionRequest {
+  source_id: number;
+}
+
+export interface MergeColeccionResponse {
+  moved: number;
+  ok: boolean;
+}
+
 export interface OkResponse {
   ok: boolean;
 }
@@ -2358,6 +2367,101 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getDeleteColeccionMutationOptions(options), queryClient);
+    }
+
+export type mergeColeccionResponse200 = {
+  data: MergeColeccionResponse
+  status: 200
+}
+
+export type mergeColeccionResponse400 = {
+  data: void
+  status: 400
+}
+
+export type mergeColeccionResponse403 = {
+  data: void
+  status: 403
+}
+
+export type mergeColeccionResponse404 = {
+  data: void
+  status: 404
+}
+
+export type mergeColeccionResponseSuccess = (mergeColeccionResponse200) & {
+  headers: Headers;
+};
+export type mergeColeccionResponseError = (mergeColeccionResponse400 | mergeColeccionResponse403 | mergeColeccionResponse404) & {
+  headers: Headers;
+};
+
+export type mergeColeccionResponse = (mergeColeccionResponseSuccess | mergeColeccionResponseError)
+
+export const getMergeColeccionUrl = (id: number,) => {
+
+
+
+
+  return `/api/colecciones/${id}/merge`
+}
+
+export const mergeColeccion = async (id: number,
+    mergeColeccionRequest: MergeColeccionRequest, options?: RequestInit): Promise<mergeColeccionResponse> => {
+
+  return customInstance<mergeColeccionResponse>(getMergeColeccionUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      mergeColeccionRequest,)
+  }
+);}
+
+
+
+
+export const getMergeColeccionMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof mergeColeccion>>, TError,{id: number;data: MergeColeccionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof mergeColeccion>>, TError,{id: number;data: MergeColeccionRequest}, TContext> => {
+
+const mutationKey = ['mergeColeccion'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof mergeColeccion>>, {id: number;data: MergeColeccionRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  mergeColeccion(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type MergeColeccionMutationResult = NonNullable<Awaited<ReturnType<typeof mergeColeccion>>>
+    export type MergeColeccionMutationBody = MergeColeccionRequest
+    export type MergeColeccionMutationError = void
+
+    export const useMergeColeccion = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof mergeColeccion>>, TError,{id: number;data: MergeColeccionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof mergeColeccion>>,
+        TError,
+        {id: number;data: MergeColeccionRequest},
+        TContext
+      > => {
+      return useMutation(getMergeColeccionMutationOptions(options), queryClient);
     }
 
 export type listSamplesResponse200 = {
