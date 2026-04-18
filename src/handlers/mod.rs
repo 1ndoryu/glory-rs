@@ -2,6 +2,7 @@
 
 mod auth;
 mod health;
+mod users;
 
 use axum::Router;
 use tower_http::cors::{Any, CorsLayer};
@@ -40,6 +41,9 @@ impl utoipa::Modify for SecurityAddon {
         auth::logout,
         auth::google_login,
         auth::google_pkce,
+        users::me,
+        users::update_me,
+        users::public_profile,
     ),
     components(schemas(
         health::HealthResponse,
@@ -51,6 +55,9 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::GooglePkceRequest,
         crate::models::AuthResponse,
         crate::models::UserResponse,
+        crate::models::UpdateProfileRequest,
+        crate::models::PublicProfileResponse,
+        crate::models::PrivateProfileResponse,
         crate::errors::ErrorResponse,
     )),
     modifiers(&SecurityAddon),
@@ -97,4 +104,5 @@ fn api_routes() -> Router<AppState> {
     Router::new()
         .merge(health::routes())
         .merge(auth::routes())
+        .merge(users::routes())
 }
