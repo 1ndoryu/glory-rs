@@ -41,9 +41,27 @@ export interface AuthResponse {
   user: UserResponse;
 }
 
+export interface BlockRequest {
+  /** @nullable */
+  razon?: string | null;
+}
+
 export interface BlockUserRequest {
   /** @nullable */
   razon?: string | null;
+}
+
+export interface BlockedUser {
+  bloqueado_id: number;
+  created_at: string;
+  id: number;
+  razon: string;
+  /** @nullable */
+  username?: string | null;
+}
+
+export interface BlockedListResponse {
+  data: BlockedUser[];
 }
 
 /**
@@ -289,6 +307,10 @@ export interface LoginRequest {
 export interface LogoutRequest {
   /** @nullable */
   refresh_token?: string | null;
+}
+
+export interface OkResponse {
+  ok: boolean;
 }
 
 export interface PlayTriggered {
@@ -1583,6 +1605,184 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getRegisterMutationOptions(options), queryClient);
     }
 
+export type blockUserResponse200 = {
+  data: OkResponse
+  status: 200
+}
+
+export type blockUserResponse400 = {
+  data: void
+  status: 400
+}
+
+export type blockUserResponse401 = {
+  data: void
+  status: 401
+}
+
+export type blockUserResponse404 = {
+  data: void
+  status: 404
+}
+
+export type blockUserResponseSuccess = (blockUserResponse200) & {
+  headers: Headers;
+};
+export type blockUserResponseError = (blockUserResponse400 | blockUserResponse401 | blockUserResponse404) & {
+  headers: Headers;
+};
+
+export type blockUserResponse = (blockUserResponseSuccess | blockUserResponseError)
+
+export const getBlockUserUrl = (userId: number,) => {
+
+
+
+
+  return `/api/block/${userId}`
+}
+
+export const blockUser = async (userId: number,
+    blockRequest: BlockRequest, options?: RequestInit): Promise<blockUserResponse> => {
+
+  return customInstance<blockUserResponse>(getBlockUserUrl(userId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      blockRequest,)
+  }
+);}
+
+
+
+
+export const getBlockUserMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof blockUser>>, TError,{userId: number;data: BlockRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof blockUser>>, TError,{userId: number;data: BlockRequest}, TContext> => {
+
+const mutationKey = ['blockUser'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof blockUser>>, {userId: number;data: BlockRequest}> = (props) => {
+          const {userId,data} = props ?? {};
+
+          return  blockUser(userId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type BlockUserMutationResult = NonNullable<Awaited<ReturnType<typeof blockUser>>>
+    export type BlockUserMutationBody = BlockRequest
+    export type BlockUserMutationError = void
+
+    export const useBlockUser = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof blockUser>>, TError,{userId: number;data: BlockRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof blockUser>>,
+        TError,
+        {userId: number;data: BlockRequest},
+        TContext
+      > => {
+      return useMutation(getBlockUserMutationOptions(options), queryClient);
+    }
+
+export type unblockUserResponse200 = {
+  data: OkResponse
+  status: 200
+}
+
+export type unblockUserResponse401 = {
+  data: void
+  status: 401
+}
+
+export type unblockUserResponseSuccess = (unblockUserResponse200) & {
+  headers: Headers;
+};
+export type unblockUserResponseError = (unblockUserResponse401) & {
+  headers: Headers;
+};
+
+export type unblockUserResponse = (unblockUserResponseSuccess | unblockUserResponseError)
+
+export const getUnblockUserUrl = (userId: number,) => {
+
+
+
+
+  return `/api/block/${userId}`
+}
+
+export const unblockUser = async (userId: number, options?: RequestInit): Promise<unblockUserResponse> => {
+
+  return customInstance<unblockUserResponse>(getUnblockUserUrl(userId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getUnblockUserMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unblockUser>>, TError,{userId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof unblockUser>>, TError,{userId: number}, TContext> => {
+
+const mutationKey = ['unblockUser'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof unblockUser>>, {userId: number}> = (props) => {
+          const {userId} = props ?? {};
+
+          return  unblockUser(userId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UnblockUserMutationResult = NonNullable<Awaited<ReturnType<typeof unblockUser>>>
+
+    export type UnblockUserMutationError = void
+
+    export const useUnblockUser = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unblockUser>>, TError,{userId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof unblockUser>>,
+        TError,
+        {userId: number},
+        TContext
+      > => {
+      return useMutation(getUnblockUserMutationOptions(options), queryClient);
+    }
+
 export type getFeedResponse200 = {
   data: FeedResponse
   status: 200
@@ -1701,6 +1901,182 @@ export function useGetFeed<TData = Awaited<ReturnType<typeof getFeed>>, TError =
 
 
 
+
+export type followUserResponse200 = {
+  data: OkResponse
+  status: 200
+}
+
+export type followUserResponse400 = {
+  data: void
+  status: 400
+}
+
+export type followUserResponse401 = {
+  data: void
+  status: 401
+}
+
+export type followUserResponse404 = {
+  data: void
+  status: 404
+}
+
+export type followUserResponseSuccess = (followUserResponse200) & {
+  headers: Headers;
+};
+export type followUserResponseError = (followUserResponse400 | followUserResponse401 | followUserResponse404) & {
+  headers: Headers;
+};
+
+export type followUserResponse = (followUserResponseSuccess | followUserResponseError)
+
+export const getFollowUserUrl = (userId: number,) => {
+
+
+
+
+  return `/api/follow/${userId}`
+}
+
+export const followUser = async (userId: number, options?: RequestInit): Promise<followUserResponse> => {
+
+  return customInstance<followUserResponse>(getFollowUserUrl(userId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getFollowUserMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof followUser>>, TError,{userId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof followUser>>, TError,{userId: number}, TContext> => {
+
+const mutationKey = ['followUser'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof followUser>>, {userId: number}> = (props) => {
+          const {userId} = props ?? {};
+
+          return  followUser(userId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type FollowUserMutationResult = NonNullable<Awaited<ReturnType<typeof followUser>>>
+
+    export type FollowUserMutationError = void
+
+    export const useFollowUser = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof followUser>>, TError,{userId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof followUser>>,
+        TError,
+        {userId: number},
+        TContext
+      > => {
+      return useMutation(getFollowUserMutationOptions(options), queryClient);
+    }
+
+export type unfollowUserResponse200 = {
+  data: OkResponse
+  status: 200
+}
+
+export type unfollowUserResponse401 = {
+  data: void
+  status: 401
+}
+
+export type unfollowUserResponseSuccess = (unfollowUserResponse200) & {
+  headers: Headers;
+};
+export type unfollowUserResponseError = (unfollowUserResponse401) & {
+  headers: Headers;
+};
+
+export type unfollowUserResponse = (unfollowUserResponseSuccess | unfollowUserResponseError)
+
+export const getUnfollowUserUrl = (userId: number,) => {
+
+
+
+
+  return `/api/follow/${userId}`
+}
+
+export const unfollowUser = async (userId: number, options?: RequestInit): Promise<unfollowUserResponse> => {
+
+  return customInstance<unfollowUserResponse>(getUnfollowUserUrl(userId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getUnfollowUserMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unfollowUser>>, TError,{userId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof unfollowUser>>, TError,{userId: number}, TContext> => {
+
+const mutationKey = ['unfollowUser'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof unfollowUser>>, {userId: number}> = (props) => {
+          const {userId} = props ?? {};
+
+          return  unfollowUser(userId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UnfollowUserMutationResult = NonNullable<Awaited<ReturnType<typeof unfollowUser>>>
+
+    export type UnfollowUserMutationError = void
+
+    export const useUnfollowUser = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unfollowUser>>, TError,{userId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof unfollowUser>>,
+        TError,
+        {userId: number},
+        TContext
+      > => {
+      return useMutation(getUnfollowUserMutationOptions(options), queryClient);
+    }
 
 /**
  * @summary Endpoint de health check — siempre público
@@ -2001,6 +2377,118 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getDeleteLikeMutationOptions(options), queryClient);
     }
+
+export type myBlocksResponse200 = {
+  data: BlockedListResponse
+  status: 200
+}
+
+export type myBlocksResponse401 = {
+  data: void
+  status: 401
+}
+
+export type myBlocksResponseSuccess = (myBlocksResponse200) & {
+  headers: Headers;
+};
+export type myBlocksResponseError = (myBlocksResponse401) & {
+  headers: Headers;
+};
+
+export type myBlocksResponse = (myBlocksResponseSuccess | myBlocksResponseError)
+
+export const getMyBlocksUrl = () => {
+
+
+
+
+  return `/api/me/bloqueados`
+}
+
+export const myBlocks = async ( options?: RequestInit): Promise<myBlocksResponse> => {
+
+  return customInstance<myBlocksResponse>(getMyBlocksUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getMyBlocksQueryKey = () => {
+    return [
+    `/api/me/bloqueados`
+    ] as const;
+    }
+
+
+export const getMyBlocksQueryOptions = <TData = Awaited<ReturnType<typeof myBlocks>>, TError = void>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof myBlocks>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getMyBlocksQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof myBlocks>>> = ({ signal }) => myBlocks({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof myBlocks>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type MyBlocksQueryResult = NonNullable<Awaited<ReturnType<typeof myBlocks>>>
+export type MyBlocksQueryError = void
+
+
+export function useMyBlocks<TData = Awaited<ReturnType<typeof myBlocks>>, TError = void>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof myBlocks>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof myBlocks>>,
+          TError,
+          Awaited<ReturnType<typeof myBlocks>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useMyBlocks<TData = Awaited<ReturnType<typeof myBlocks>>, TError = void>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof myBlocks>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof myBlocks>>,
+          TError,
+          Awaited<ReturnType<typeof myBlocks>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useMyBlocks<TData = Awaited<ReturnType<typeof myBlocks>>, TError = void>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof myBlocks>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useMyBlocks<TData = Awaited<ReturnType<typeof myBlocks>>, TError = void>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof myBlocks>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getMyBlocksQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
 
 export type getMeFeedResponse200 = {
   data: FeedResponse

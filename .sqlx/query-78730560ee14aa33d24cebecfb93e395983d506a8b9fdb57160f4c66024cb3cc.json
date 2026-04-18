@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM bloqueos WHERE bloqueador_id = $1 AND bloqueado_id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "78730560ee14aa33d24cebecfb93e395983d506a8b9fdb57160f4c66024cb3cc"
+}

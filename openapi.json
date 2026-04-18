@@ -474,6 +474,100 @@
         }
       }
     },
+    "/api/block/{userId}": {
+      "post": {
+        "tags": [
+          "social"
+        ],
+        "operationId": "block_user",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "ID del usuario a bloquear",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlockRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Bloqueo registrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Auto-bloqueo prohibido"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "404": {
+            "description": "Usuario no encontrado"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "social"
+        ],
+        "operationId": "unblock_user",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "ID del usuario a desbloquear",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Desbloqueo registrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
     "/api/feed": {
       "get": {
         "tags": [
@@ -524,6 +618,90 @@
                 }
               }
             }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/follow/{userId}": {
+      "post": {
+        "tags": [
+          "social"
+        ],
+        "operationId": "follow_user",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "ID del usuario a seguir",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Follow registrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Auto-follow prohibido"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "404": {
+            "description": "Usuario no encontrado"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "social"
+        ],
+        "operationId": "unfollow_user",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "ID del usuario a dejar de seguir",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Unfollow registrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado"
           }
         },
         "security": [
@@ -634,6 +812,34 @@
           },
           "400": {
             "description": "Tipo inválido"
+          },
+          "401": {
+            "description": "No autenticado"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/me/bloqueados": {
+      "get": {
+        "tags": [
+          "social"
+        ],
+        "operationId": "my_blocks",
+        "responses": {
+          "200": {
+            "description": "Lista de usuarios bloqueados",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlockedListResponse"
+                }
+              }
+            }
           },
           "401": {
             "description": "No autenticado"
@@ -1605,10 +1811,63 @@
           }
         }
       },
+      "BlockRequest": {
+        "type": "object",
+        "properties": {
+          "razon": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
       "BlockUserRequest": {
         "type": "object",
         "properties": {
           "razon": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "BlockedListResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BlockedUser"
+            }
+          }
+        }
+      },
+      "BlockedUser": {
+        "type": "object",
+        "required": [
+          "id",
+          "bloqueado_id",
+          "razon",
+          "created_at"
+        ],
+        "properties": {
+          "bloqueado_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "razon": {
+            "type": "string"
+          },
+          "username": {
             "type": "string",
             "nullable": true
           }
@@ -1923,6 +2182,17 @@
           "refresh_token": {
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "OkResponse": {
+        "type": "object",
+        "required": [
+          "ok"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean"
           }
         }
       },

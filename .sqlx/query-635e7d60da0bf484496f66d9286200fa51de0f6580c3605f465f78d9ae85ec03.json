@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO bloqueos (bloqueador_id, bloqueado_id, razon) VALUES ($1, $2, $3) ON CONFLICT (bloqueador_id, bloqueado_id) DO UPDATE SET razon = EXCLUDED.razon",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4",
+        "Varchar"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "635e7d60da0bf484496f66d9286200fa51de0f6580c3605f465f78d9ae85ec03"
+}

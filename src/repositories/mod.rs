@@ -1,3 +1,5 @@
+mod block;
+mod follow;
 mod ia_queue;
 mod like;
 mod moderation;
@@ -8,6 +10,8 @@ mod sample;
 mod sample_catalog;
 mod user;
 
+pub use block::{BlockRepository, BlockedUser};
+pub use follow::FollowRepository;
 pub use ia_queue::{
     retry_backoff_duration, IaQueueFailureDisposition, IaQueueRepository, QueuedIaJob,
 };
