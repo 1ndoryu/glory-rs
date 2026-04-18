@@ -71,8 +71,6 @@
 ### Fase 1 â€” Schema base PostgreSQL
 
 ### Fase 2 â€” Auth y usuarios
-- 174A-18 â€” `glory-rs/backend/auth` (argon2, JWT, refresh tokens Redis)
-- 174A-19 â€” Middleware `AuthLayer` + extractor `CurrentUser`
 - 174A-20 â€” Endpoints register/login/logout/refresh + tests
 - 174A-21 â€” OAuth Google ID token (web)
 - 174A-22 â€” OAuth Google PKCE (desktop)
