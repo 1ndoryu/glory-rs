@@ -82,6 +82,7 @@ parking_lot = "0.12"
 mime = "0.3"
 mime_guess = "2"
 url = "2"
+zip = { version = "2", default-features = false, features = ["deflate"] }
 
 # Storage S3 (feature-gated, 174A-27)
 aws-config = { version = "1", default-features = false, features = ["rustls", "rt-tokio", "behavior-version-latest"], optional = true }

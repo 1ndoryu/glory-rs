@@ -30,6 +30,9 @@ use crate::middleware::CurrentUser;
 use crate::repositories::{Coleccion, ColeccionSample, ColeccionesRepository, SavedColeccion, SavedCollectionsRepository};
 use crate::AppState;
 
+pub mod zip;
+pub use zip::descargar_zip_coleccion;
+
 #[derive(Debug, Deserialize, ToSchema)]
 pub struct CreateColeccionRequest {
     pub nombre: String,
@@ -331,6 +334,7 @@ pub fn routes() -> Router<AppState> {
             post(save_coleccion).delete(unsave_coleccion),
         )
         .route("/me/colecciones-guardadas", get(list_saved_colecciones))
+        .route("/colecciones/:id/descargar-zip", post(descargar_zip_coleccion))
 }
 
 #[derive(Debug, Deserialize, ToSchema)]

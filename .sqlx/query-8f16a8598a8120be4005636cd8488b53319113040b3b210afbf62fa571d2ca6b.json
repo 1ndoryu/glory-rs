@@ -1,0 +1,52 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT s.id AS \"id!\", s.titulo AS \"titulo!\",\n                      s.ruta_original, s.ruta_optimizada,\n                      s.es_premium AS \"es_premium!\", s.creador_id AS \"creador_id!\"\n               FROM coleccion_samples cs\n               JOIN samples s ON s.id = cs.sample_id\n               WHERE cs.coleccion_id = $1 AND s.eliminado_en IS NULL\n               ORDER BY cs.orden ASC, cs.added_at ASC",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "titulo!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "ruta_original",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "ruta_optimizada",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "es_premium!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 5,
+        "name": "creador_id!",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      true,
+      false
+    ]
+  },
+  "hash": "8f16a8598a8120be4005636cd8488b53319113040b3b210afbf62fa571d2ca6b"
+}

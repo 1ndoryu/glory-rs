@@ -770,6 +770,48 @@
         ]
       }
     },
+    "/api/colecciones/{id}/descargar-zip": {
+      "post": {
+        "tags": [
+          "colecciones"
+        ],
+        "operationId": "descargar_zip_coleccion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID de la coleccion a descargar como ZIP",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Stream binario application/zip"
+          },
+          "400": {
+            "description": "Coleccion vacia o demasiado grande"
+          },
+          "403": {
+            "description": "Sin acceso o samples premium en plan free"
+          },
+          "404": {
+            "description": "Coleccion no encontrada"
+          },
+          "429": {
+            "description": "Creditos insuficientes para los samples nuevos"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
     "/api/colecciones/{id}/merge": {
       "post": {
         "tags": [

@@ -14,7 +14,7 @@ mod saved_collection;
 mod user;
 
 pub use block::{BlockRepository, BlockedUser};
-pub use coleccion::{Coleccion, ColeccionSample, ColeccionesRepository};
+pub use coleccion::{Coleccion, ColeccionSample, ColeccionSampleFile, ColeccionesRepository};
 pub use download::{DownloadRepository, SampleDownloadInfo, SampleFileInfo};
 pub use follow::FollowRepository;
 pub use ia_queue::{

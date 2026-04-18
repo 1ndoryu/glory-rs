@@ -48,6 +48,16 @@ pub struct ColeccionSample {
     pub added_at: chrono::DateTime<chrono::Utc>,
 }
 
+/* [174A-62] Info de un sample lista para empacar en ZIP. */
+#[derive(Debug, Clone)]
+pub struct ColeccionSampleFile {
+    pub sample_id: i32,
+    pub titulo: String,
+    pub storage_key: String,
+    pub es_premium: bool,
+    pub creador_id: i32,
+}
+
 impl ColeccionesRepository {
     pub async fn create(
         pool: &PgPool,
@@ -307,6 +317,42 @@ impl ColeccionesRepository {
         .fetch_all(pool)
         .await?;
         Ok(rows)
+    }
+
+    /* [174A-62] Lista los samples de una colección con la metadata necesaria
+     * para empacar un ZIP: id, título, key de storage (prefiere ruta_original)
+     * y flags relevantes para créditos / revenue share. Filtra ya samples
+     * soft-deleted y los que no tengan ninguna ruta de archivo disponible. */
+    pub async fn list_samples_for_zip(
+        pool: &PgPool,
+        coleccion_id: i64,
+    ) -> Result<Vec<ColeccionSampleFile>, AppError> {
+        let rows = sqlx::query!(
+            r#"SELECT s.id AS "id!", s.titulo AS "titulo!",
+                      s.ruta_original, s.ruta_optimizada,
+                      s.es_premium AS "es_premium!", s.creador_id AS "creador_id!"
+               FROM coleccion_samples cs
+               JOIN samples s ON s.id = cs.sample_id
+               WHERE cs.coleccion_id = $1 AND s.eliminado_en IS NULL
+               ORDER BY cs.orden ASC, cs.added_at ASC"#,
+            coleccion_id,
+        )
+        .fetch_all(pool)
+        .await?;
+        let out = rows
+            .into_iter()
+            .filter_map(|r| {
+                let key = r.ruta_original.or(r.ruta_optimizada)?;
+                Some(ColeccionSampleFile {
+                    sample_id: r.id,
+                    titulo: r.titulo,
+                    storage_key: key,
+                    es_premium: r.es_premium,
+                    creador_id: r.creador_id,
+                })
+            })
+            .collect();
+        Ok(out)
     }
 
     /* Verifica que el usuario sea dueño y la coleccion exista (no soft-deleted). */

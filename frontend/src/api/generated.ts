@@ -2399,6 +2399,104 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getDeleteColeccionMutationOptions(options), queryClient);
     }
 
+export type descargarZipColeccionResponse200 = {
+  data: void
+  status: 200
+}
+
+export type descargarZipColeccionResponse400 = {
+  data: void
+  status: 400
+}
+
+export type descargarZipColeccionResponse403 = {
+  data: void
+  status: 403
+}
+
+export type descargarZipColeccionResponse404 = {
+  data: void
+  status: 404
+}
+
+export type descargarZipColeccionResponse429 = {
+  data: void
+  status: 429
+}
+
+export type descargarZipColeccionResponseSuccess = (descargarZipColeccionResponse200) & {
+  headers: Headers;
+};
+export type descargarZipColeccionResponseError = (descargarZipColeccionResponse400 | descargarZipColeccionResponse403 | descargarZipColeccionResponse404 | descargarZipColeccionResponse429) & {
+  headers: Headers;
+};
+
+export type descargarZipColeccionResponse = (descargarZipColeccionResponseSuccess | descargarZipColeccionResponseError)
+
+export const getDescargarZipColeccionUrl = (id: number,) => {
+
+
+
+
+  return `/api/colecciones/${id}/descargar-zip`
+}
+
+export const descargarZipColeccion = async (id: number, options?: RequestInit): Promise<descargarZipColeccionResponse> => {
+
+  return customInstance<descargarZipColeccionResponse>(getDescargarZipColeccionUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getDescargarZipColeccionMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof descargarZipColeccion>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof descargarZipColeccion>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['descargarZipColeccion'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof descargarZipColeccion>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  descargarZipColeccion(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DescargarZipColeccionMutationResult = NonNullable<Awaited<ReturnType<typeof descargarZipColeccion>>>
+
+    export type DescargarZipColeccionMutationError = void
+
+    export const useDescargarZipColeccion = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof descargarZipColeccion>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof descargarZipColeccion>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDescargarZipColeccionMutationOptions(options), queryClient);
+    }
+
 export type mergeColeccionResponse200 = {
   data: MergeColeccionResponse
   status: 200

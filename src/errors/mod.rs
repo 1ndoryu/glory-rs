@@ -28,6 +28,9 @@ pub enum AppError {
     #[error("Demasiadas solicitudes")]
     RateLimited,
 
+    #[error("Demasiadas solicitudes: {0}")]
+    TooManyRequests(String),
+
     #[error("Carga demasiado grande")]
     PayloadTooLarge,
 
@@ -72,6 +75,11 @@ impl IntoResponse for AppError {
                 StatusCode::TOO_MANY_REQUESTS,
                 "rate_limited",
                 "Demasiadas solicitudes, espera un momento".to_string(),
+            ),
+            Self::TooManyRequests(msg) => (
+                StatusCode::TOO_MANY_REQUESTS,
+                "too_many_requests",
+                msg.clone(),
             ),
             Self::PayloadTooLarge => (
                 StatusCode::PAYLOAD_TOO_LARGE,

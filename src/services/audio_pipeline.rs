@@ -608,7 +608,8 @@ fn map_storage_error(stage: AudioPipelineStage, sample_id: i32, error: AppError)
         | AppError::Conflict(message)
         | AppError::Internal(message)
         | AppError::UnsupportedMediaType(message)
-        | AppError::Validation(message) => AudioPipelineError::stage(stage, message, true),
+        | AppError::Validation(message)
+        | AppError::TooManyRequests(message) => AudioPipelineError::stage(stage, message, true),
         AppError::Unauthorized | AppError::RateLimited | AppError::PayloadTooLarge => {
             AudioPipelineError::stage(stage, error.to_string(), true)
         }

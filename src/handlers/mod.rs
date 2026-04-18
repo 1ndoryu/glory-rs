@@ -84,6 +84,7 @@ impl utoipa::Modify for SecurityAddon {
         colecciones::save_coleccion,
         colecciones::unsave_coleccion,
         colecciones::list_saved_colecciones,
+        colecciones::zip::descargar_zip_coleccion,
         users::me,
         users::update_me,
         users::public_profile,
