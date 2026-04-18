@@ -1,4 +1,5 @@
 use sqlx::PgPool;
+use pgvector::Vector;
 
 /* [174A-28] Repositorio mínimo para deduplicación previa de uploads.
  * Solo expone lo necesario para el precheck; el CRUD completo de samples llega
@@ -20,6 +21,48 @@ pub struct CreatedUploadSample {
     pub slug: String,
     pub estado: String,
     pub ruta_original: String,
+}
+
+#[derive(Debug, Clone)]
+pub struct AudioPipelineSample {
+    pub id: i32,
+    pub id_corto: String,
+    pub formato: String,
+    pub tags: Vec<String>,
+    pub tipo: String,
+    pub es_premium: bool,
+    pub metadata: serde_json::Value,
+    pub estado: String,
+    pub ruta_original: String,
+}
+
+pub struct SaveAudioAnalysisParams {
+    pub sample_id: i32,
+    pub duration_seconds: f32,
+    pub formato: String,
+    pub tamano: i64,
+    pub bpm: Option<i32>,
+    pub music_key: Option<String>,
+    pub scale: Option<String>,
+    pub metadata: serde_json::Value,
+}
+
+pub struct SaveAudioAssetsParams {
+    pub sample_id: i32,
+    pub ruta_waveform: Option<String>,
+    pub ruta_optimizada: Option<String>,
+    pub metadata: serde_json::Value,
+}
+
+pub struct CompleteAudioPipelineParams {
+    pub sample_id: i32,
+    pub embedding: Vector,
+    pub metadata: serde_json::Value,
+}
+
+pub struct MarkAudioPipelineFailedParams {
+    pub sample_id: i32,
+    pub metadata: serde_json::Value,
 }
 
 #[allow(clippy::struct_excessive_bools)]
@@ -44,6 +87,32 @@ pub struct CreateUploadSampleParams<'a> {
 }
 
 impl SampleRepository {
+    pub async fn find_pipeline_sample(
+        pool: &PgPool,
+        sample_id: i32,
+    ) -> Result<Option<AudioPipelineSample>, sqlx::Error> {
+        sqlx::query_as!(
+            AudioPipelineSample,
+            "SELECT
+                id,
+                id_corto as \"id_corto!\",
+                formato as \"formato!\",
+                COALESCE(tags, ARRAY[]::text[]) as \"tags!: Vec<String>\",
+                tipo as \"tipo!\",
+                es_premium as \"es_premium!\",
+                COALESCE(metadata, '{}'::jsonb) as \"metadata!: serde_json::Value\",
+                estado as \"estado!\",
+                ruta_original as \"ruta_original!\"
+             FROM samples
+             WHERE id = $1
+               AND eliminado_en IS NULL
+             LIMIT 1",
+            sample_id
+        )
+        .fetch_optional(pool)
+        .await
+    }
+
     /// Busca el primer sample visible (activo o en supervisión) con ese hash exacto.
     pub async fn find_duplicate_by_audio_hash(
         pool: &PgPool,
@@ -129,5 +198,97 @@ impl SampleRepository {
 
         tx.commit().await?;
         Ok(created)
+    }
+
+    pub async fn save_audio_analysis(
+        pool: &PgPool,
+        params: SaveAudioAnalysisParams,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query!(
+            "UPDATE samples
+             SET duracion = $2,
+                 formato = $3,
+                 tamano = $4,
+                 bpm = $5,
+                 key = $6,
+                 escala = $7,
+                 metadata = COALESCE(metadata, '{}'::jsonb) || $8
+             WHERE id = $1
+               AND eliminado_en IS NULL",
+            params.sample_id,
+            params.duration_seconds,
+            params.formato,
+            params.tamano,
+            params.bpm,
+            params.music_key,
+            params.scale,
+            params.metadata,
+        )
+        .execute(pool)
+        .await?;
+
+        Ok(())
+    }
+
+    pub async fn save_audio_assets(
+        pool: &PgPool,
+        params: SaveAudioAssetsParams,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query!(
+            "UPDATE samples
+             SET ruta_waveform = COALESCE($2, ruta_waveform),
+                 ruta_optimizada = COALESCE($3, ruta_optimizada),
+                 metadata = COALESCE(metadata, '{}'::jsonb) || $4
+             WHERE id = $1
+               AND eliminado_en IS NULL",
+            params.sample_id,
+            params.ruta_waveform,
+            params.ruta_optimizada,
+            params.metadata,
+        )
+        .execute(pool)
+        .await?;
+
+        Ok(())
+    }
+
+    pub async fn complete_audio_pipeline(
+        pool: &PgPool,
+        params: CompleteAudioPipelineParams,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query!(
+            "UPDATE samples
+             SET embedding = $2,
+                 estado = 'activo',
+                 publicado_at = COALESCE(publicado_at, NOW()),
+                 metadata = COALESCE(metadata, '{}'::jsonb) || $3
+             WHERE id = $1
+               AND eliminado_en IS NULL",
+            params.sample_id,
+            params.embedding as _,
+            params.metadata,
+        )
+        .execute(pool)
+        .await?;
+
+        Ok(())
+    }
+
+    pub async fn mark_audio_pipeline_failed(
+        pool: &PgPool,
+        params: MarkAudioPipelineFailedParams,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query!(
+            "UPDATE samples
+             SET metadata = COALESCE(metadata, '{}'::jsonb) || $2
+             WHERE id = $1
+               AND eliminado_en IS NULL",
+            params.sample_id,
+            params.metadata,
+        )
+        .execute(pool)
+        .await?;
+
+        Ok(())
     }
 }

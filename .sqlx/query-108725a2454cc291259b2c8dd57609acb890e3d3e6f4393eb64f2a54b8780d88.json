@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE samples\n             SET ruta_waveform = COALESCE($2, ruta_waveform),\n                 ruta_optimizada = COALESCE($3, ruta_optimizada),\n                 metadata = COALESCE(metadata, '{}'::jsonb) || $4\n             WHERE id = $1\n               AND eliminado_en IS NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Text",
+        "Text",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "108725a2454cc291259b2c8dd57609acb890e3d3e6f4393eb64f2a54b8780d88"
+}

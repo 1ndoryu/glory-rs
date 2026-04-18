@@ -1,0 +1,70 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n                id,\n                id_corto as \"id_corto!\",\n                formato as \"formato!\",\n                COALESCE(tags, ARRAY[]::text[]) as \"tags!: Vec<String>\",\n                tipo as \"tipo!\",\n                es_premium as \"es_premium!\",\n                COALESCE(metadata, '{}'::jsonb) as \"metadata!: serde_json::Value\",\n                estado as \"estado!\",\n                ruta_original as \"ruta_original!\"\n             FROM samples\n             WHERE id = $1\n               AND eliminado_en IS NULL\n             LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "id_corto!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "formato!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "tags!: Vec<String>",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 4,
+        "name": "tipo!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "es_premium!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 6,
+        "name": "metadata!: serde_json::Value",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 7,
+        "name": "estado!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 8,
+        "name": "ruta_original!",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      false,
+      null,
+      false,
+      true,
+      null,
+      false,
+      true
+    ]
+  },
+  "hash": "e47101be3abbd50568acb1914c73d9b41f60e565ea2c1980c24ac37097d897c7"
+}
