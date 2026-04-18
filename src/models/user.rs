@@ -63,6 +63,12 @@ pub struct LogoutRequest {
     pub refresh_token: Option<String>,
 }
 
+#[derive(Debug, Deserialize, Validate, ToSchema)]
+pub struct GoogleAuthRequest {
+    #[validate(length(min = 10))]
+    pub id_token: String,
+}
+
 #[derive(Debug, Serialize, ToSchema)]
 pub struct AuthResponse {
     pub token: String,

@@ -19,6 +19,8 @@ pub struct AppConfig {
     pub port: u16,
     pub db_max_connections: u32,
     pub db_min_connections: u32,
+    /// Lista CSV de Google OAuth client_ids aceptados (web/android/ios).
+    pub google_client_ids: Vec<String>,
 }
 
 impl AppConfig {
@@ -42,6 +44,13 @@ impl AppConfig {
             db_min_connections: std::env::var("DB_MIN_CONNECTIONS")
                 .unwrap_or_else(|_| "2".to_string())
                 .parse()?,
+            google_client_ids: std::env::var("GOOGLE_CLIENT_IDS")
+                .unwrap_or_default()
+                .split(',')
+                .map(str::trim)
+                .filter(|s| !s.is_empty())
+                .map(String::from)
+                .collect(),
         })
     }
 }

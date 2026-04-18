@@ -38,6 +38,7 @@ impl utoipa::Modify for SecurityAddon {
         auth::login,
         auth::refresh,
         auth::logout,
+        auth::google_login,
     ),
     components(schemas(
         health::HealthResponse,
@@ -45,6 +46,7 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::LoginRequest,
         crate::models::RefreshRequest,
         crate::models::LogoutRequest,
+        crate::models::GoogleAuthRequest,
         crate::models::AuthResponse,
         crate::models::UserResponse,
         crate::errors::ErrorResponse,
@@ -67,6 +69,7 @@ pub fn create_router(
         pool,
         redis,
         jwt_secret: config.jwt_secret,
+        google: std::sync::Arc::new(crate::services::GoogleVerifier::new(config.google_client_ids)),
     };
 
     /* CORS: en desarrollo se permite todo. En producción, restringir orígenes */

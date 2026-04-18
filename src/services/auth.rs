@@ -10,8 +10,8 @@ use uuid::Uuid;
 
 use crate::errors::AppError;
 use crate::models::{AuthResponse, LoginRequest, RegisterRequest, UserResponse};
-use crate::repositories::UserRepository;
-use crate::services::TokenStore;
+use crate::repositories::{OAuthRepository, UserRepository};
+use crate::services::{GoogleVerifier, TokenStore};
 
 /* [174A-18+174A-20] JWT claims sobre `usuarios_ext`.
  * jti = identificador unico del access token (para revocacion via blacklist). */
@@ -93,6 +93,45 @@ impl AuthService {
             TokenStore::revoke_refresh(redis, rt).await?;
         }
         Ok(())
+    }
+
+    /// [174A-21] Login/registro con Google ID token.
+    /// Si existe link en `usuarios_ext_oauth` -> login.
+    /// Si no, busca por email; si existe, vincula. Si no, crea usuario nuevo y vincula.
+    pub async fn google_login(
+        pool: &PgPool,
+        redis: &Option<RedisPool>,
+        google: &GoogleVerifier,
+        id_token: &str,
+        jwt_secret: &str,
+    ) -> Result<AuthResponse, AppError> {
+        let claims = google.verify(id_token).await?;
+        if !claims.email_verified.unwrap_or(false) {
+            return Err(AppError::Forbidden("Email no verificado por Google".into()));
+        }
+        let provider = "google";
+        let user = if let Some(u) = OAuthRepository::find_user_by_provider(pool, provider, &claims.sub).await? {
+            u
+        } else {
+            let email = claims.email.as_deref();
+            let by_email = if let Some(e) = email { UserRepository::find_by_email(pool, e).await? } else { None };
+            let user = if let Some(u) = by_email {
+                u
+            } else {
+                let base_username = email
+                    .and_then(|e| e.split('@').next().map(String::from))
+                    .or(claims.given_name.clone())
+                    .unwrap_or_else(|| format!("g{}", &claims.sub[..claims.sub.len().min(8)]));
+                let nombre = claims.name.clone().unwrap_or_else(|| base_username.clone());
+                UserRepository::create_oauth(pool, &base_username, email, &nombre).await?
+            };
+            OAuthRepository::link(pool, user.id, provider, &claims.sub, email).await?;
+            user
+        };
+        if user.estado != "activo" {
+            return Err(AppError::Forbidden(format!("Cuenta {}", user.estado)));
+        }
+        Self::issue_pair(redis, &user, jwt_secret).await
     }
 
     async fn issue_pair(

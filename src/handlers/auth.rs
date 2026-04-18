@@ -6,7 +6,7 @@ use validator::Validate;
 
 use crate::errors::AppError;
 use crate::middleware::CurrentUser;
-use crate::models::{AuthResponse, LoginRequest, LogoutRequest, RefreshRequest, RegisterRequest};
+use crate::models::{AuthResponse, GoogleAuthRequest, LoginRequest, LogoutRequest, RefreshRequest, RegisterRequest};
 use crate::services::AuthService;
 use crate::AppState;
 
@@ -69,4 +69,18 @@ pub fn routes() -> Router<AppState> {
         .route("/auth/login", post(login))
         .route("/auth/refresh", post(refresh))
         .route("/auth/logout", post(logout))
+        .route("/auth/google", post(google_login))
+}
+
+#[utoipa::path(post, path = "/api/auth/google", request_body = GoogleAuthRequest,
+    responses(
+        (status = 200, description = "Login Google OK", body = AuthResponse),
+        (status = 401, description = "ID token invalido", body = crate::errors::ErrorResponse),
+        (status = 403, description = "Email no verificado o cuenta bloqueada", body = crate::errors::ErrorResponse)
+    ))]
+pub async fn google_login(State(state): State<AppState>, Json(req): Json<GoogleAuthRequest>)
+    -> Result<Json<AuthResponse>, AppError> {
+    req.validate().map_err(|e| AppError::Validation(e.to_string()))?;
+    let resp = AuthService::google_login(&state.pool, &state.redis, &state.google, &req.id_token, &state.jwt_secret).await?;
+    Ok(Json(resp))
 }

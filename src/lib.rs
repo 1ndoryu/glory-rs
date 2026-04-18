@@ -21,15 +21,18 @@ pub mod workers;
 pub mod ws;
 
 use sqlx::PgPool;
+use std::sync::Arc;
 
-/* [174A-5] Estado compartido de la aplicación.
+/* [174A-5+174A-21] Estado compartido de la aplicación.
  * - `pool`: PostgreSQL (siempre presente).
  * - `redis`: pool opcional. Cuando es None, los servicios deben tener fallback
  *   en memoria (DashMap/parking_lot) o degradarse limpiamente.
- * - `jwt_secret`: clave HMAC para firmar/verificar tokens. */
+ * - `jwt_secret`: clave HMAC para firmar/verificar tokens.
+ * - `google`: verificador OAuth Google ID-token (compartido). */
 #[derive(Clone)]
 pub struct AppState {
     pub pool: PgPool,
     pub redis: Option<deadpool_redis::Pool>,
     pub jwt_secret: String,
+    pub google: Arc<services::GoogleVerifier>,
 }
