@@ -73,7 +73,6 @@
 ### Fase 2 â€” Auth y usuarios
 
 ### Fase 3 â€” Storage + uploads
-- 174A-28 â€” `POST /samples/check-duplicate` (SHA-256 streaming)
 - 174A-29 â€” `POST /samples/upload` (multipart + idempotency + MIME)
 
 ### Fase 4 â€” Audio pipeline (lo mÃ¡s difÃ­cil)

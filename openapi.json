@@ -448,6 +448,72 @@
         }
       }
     },
+    "/api/samples/check-duplicate": {
+      "post": {
+        "tags": [
+          "samples"
+        ],
+        "operationId": "check_duplicate",
+        "requestBody": {
+          "description": "Acepta JSON { audio_hash } o body binario crudo para calcular SHA-256 en streaming",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckDuplicateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Resultado del precheck de duplicado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckDuplicateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Hash inválido o body vacío",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/crate.errors.ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/crate.errors.ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body demasiado grande",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/crate.errors.ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
     "/api/users/me": {
       "get": {
         "tags": [
@@ -717,6 +783,65 @@
         "properties": {
           "razon": {
             "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "CheckDuplicateRequest": {
+        "type": "object",
+        "description": "Request alternativo: el cliente ya calculó el hash y solo quiere consultar.",
+        "required": [
+          "audio_hash"
+        ],
+        "properties": {
+          "audio_hash": {
+            "type": "string",
+            "description": "SHA-256 hex precomputado por el cliente (64 chars)."
+          }
+        }
+      },
+      "CheckDuplicateResponse": {
+        "type": "object",
+        "description": "Respuesta de `POST /api/samples/check-duplicate`.",
+        "required": [
+          "audio_hash",
+          "possible_duplicate",
+          "bytes_hashed"
+        ],
+        "properties": {
+          "audio_hash": {
+            "type": "string",
+            "description": "SHA-256 hex (64 chars) del archivo recibido o del hash precomputado."
+          },
+          "bytes_hashed": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Bytes leídos durante el cálculo (informativo). 0 si solo se mandó el hash.",
+            "minimum": 0
+          },
+          "message": {
+            "type": "string",
+            "description": "Mensaje orientado a UX para el cliente consumidor.",
+            "nullable": true
+          },
+          "possible_duplicate": {
+            "type": "boolean",
+            "description": "True si ya existe un sample con ese hash y no está marcado como eliminado."
+          },
+          "same_owner": {
+            "type": "boolean",
+            "description": "True si el sample encontrado pertenece al mismo usuario autenticado.",
+            "nullable": true
+          },
+          "sample_id": {
+            "type": "integer",
+            "format": "int32",
+            "description": "ID del sample existente (solo si `possible_duplicate == true`).",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "description": "Título del sample existente, útil para UI/desktop.",
             "nullable": true
           }
         }

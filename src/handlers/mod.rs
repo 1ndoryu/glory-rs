@@ -3,6 +3,7 @@
 mod admin;
 mod auth;
 mod health;
+mod samples;
 mod users;
 
 use axum::Router;
@@ -42,6 +43,7 @@ impl utoipa::Modify for SecurityAddon {
         auth::logout,
         auth::google_login,
         auth::google_pkce,
+        samples::check_duplicate,
         users::me,
         users::update_me,
         users::public_profile,
@@ -62,6 +64,8 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::GooglePkceRequest,
         crate::models::AuthResponse,
         crate::models::UserResponse,
+        crate::models::CheckDuplicateRequest,
+        crate::models::CheckDuplicateResponse,
         crate::models::UpdateProfileRequest,
         crate::models::PublicProfileResponse,
         crate::models::PrivateProfileResponse,
@@ -78,8 +82,9 @@ impl utoipa::Modify for SecurityAddon {
     )
 )]
 #[allow(clippy::needless_for_each)]
-pub struct ApiDoc;/// Crea el router principal con CORS, tracing, Swagger UI y todas las rutas
-/// Crea el router principal con CORS, tracing, Swagger UI y todas las rutas
+pub struct ApiDoc;
+
+/// Crea el router principal con CORS, tracing, Swagger UI y todas las rutas.
 pub fn create_router(
     pool: sqlx::PgPool,
     redis: Option<deadpool_redis::Pool>,
@@ -117,6 +122,7 @@ fn api_routes() -> Router<AppState> {
     Router::new()
         .merge(health::routes())
         .merge(auth::routes())
+    .merge(samples::routes())
         .merge(users::routes())
         .merge(admin::routes())
 }

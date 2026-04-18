@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, creador_id, titulo\n                         FROM samples\n                         WHERE audio_hash = $1\n                             AND eliminado_en IS NULL\n                             AND estado IN ('activo', 'en_supervision')\n                         ORDER BY CASE estado WHEN 'activo' THEN 0 ELSE 1 END,\n                                            publicado_at DESC NULLS LAST,\n                                            created_at DESC\n                         LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "creador_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "titulo",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "45511889da34b9bec9a5113ec182f239e286207555022359c3e6d4a7e5b6db6d"
+}
