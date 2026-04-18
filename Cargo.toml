@@ -2,23 +2,32 @@
 name = "glory-backend"
 version = "0.1.0"
 edition = "2021"
-description = "Glory RS — Template para sitios web con Rust + React + OpenAPI"
+description = "Kamples backend (Rust + Axum + SQLx) — migración desde glorytemplate PHP"
 license = "MIT"
 authors = ["1ndoryu"]
 
 [dependencies]
 # Web framework
-axum = { version = "0.7", features = ["macros"] }
+axum = { version = "0.7", features = ["macros", "ws", "multipart"] }
 tokio = { version = "1", features = ["full"] }
+tokio-util = { version = "0.7", features = ["io"] }
 tower = "0.4"
-tower-http = { version = "0.5", features = ["cors", "trace"] }
+tower-http = { version = "0.5", features = ["cors", "trace", "compression-gzip", "request-id", "limit"] }
+futures = "0.3"
+async-trait = "0.1"
 
 # Serialization
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+serde_with = "3"
 
 # Database
-sqlx = { version = "0.8", features = ["runtime-tokio", "tls-rustls", "postgres", "migrate", "uuid", "chrono"] }
+sqlx = { version = "0.8", features = ["runtime-tokio", "tls-rustls", "postgres", "migrate", "uuid", "chrono", "json", "macros", "ipnetwork"] }
+pgvector = { version = "0.4", features = ["sqlx"] }
+
+# Cache / Redis
+redis = { version = "0.27", features = ["tokio-comp", "tokio-rustls-comp", "connection-manager"] }
+deadpool-redis = "0.18"
 
 # OpenAPI
 utoipa = { version = "4", features = ["axum_extras", "uuid", "chrono"] }
@@ -27,27 +36,62 @@ utoipa-swagger-ui = { version = "7", features = ["axum"] }
 # Validation
 validator = { version = "0.18", features = ["derive"] }
 
-# Environment
+# Environment / Config
 dotenvy = "0.15"
 
-# Logging
+# Logging / observabilidad
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
 
 # Error handling
 thiserror = "2"
+anyhow = "1"
 
 # Auth
 jsonwebtoken = "9"
 argon2 = "0.5"
 
-# Utils
-uuid = { version = "1", features = ["serde", "v4"] }
+# HTTP cliente externo (Stripe, Groq, OpenAI, FCM, OAuth Google) — añadiremos features según fase
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "stream", "multipart"] }
+
+# Crypto / hashes / IDs
+sha2 = "0.10"
+hmac = "0.12"
+hex = "0.4"
+base64 = "0.22"
+rand = "0.8"
+nanoid = "0.4"
+slug = "0.1"
+
+# Time
 chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1", features = ["serde", "v4", "v7"] }
+
+# Audio DSP (Fase 4)
+symphonia = { version = "0.5", features = ["all-codecs", "all-formats"] }
+rustfft = "6"
+ndarray = "0.16"
+
+# Concurrencia
+dashmap = "6"
+parking_lot = "0.12"
+
+# Utilidades varias
+mime = "0.3"
+mime_guess = "2"
+url = "2"
+
+# NOTA: dependencias diferidas a fases posteriores (se añaden cuando se necesiten):
+# - oauth2 (Fase 2): OAuth Google PKCE
+# - lettre (Fase 11): SMTP
+# - web-push (Fase 11): VAPID
+# - async-stripe (Fase 12): Stripe SDK
+# - gcp_auth (Fase 11): FCM service-account
+# Esto evita pull-in de openssl-sys en Windows (rustls-tls preferido).
 
 [dev-dependencies]
-reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
 tokio-test = "0.4"
+serial_test = "3"
 
 [lints.clippy]
 all = { level = "deny", priority = -1 }

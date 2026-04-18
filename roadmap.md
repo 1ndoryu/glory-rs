@@ -67,7 +67,6 @@
 > Cada tarea atómica de abajo se ejecuta como un commit independiente siguiendo los 10 pasos del protocolo. La descripción detallada de cada una está en el plan.
 
 ### Fase 0 — Bootstrap del proyecto Rust
-- 174A-2 — Verificar `Cargo.toml` y dependencias base del stack
 - 174A-3 — Crear estructura de carpetas (`config/handlers/services/repositories/models/middleware/errors/audio/algorithm/workers/ws/domain`)
 - 174A-4 — `AppError` global + `IntoResponse` + middleware `request_id` + `tracing-subscriber`
 - 174A-5 — Pool SQLx + Redis pool + `AppState` compartido
