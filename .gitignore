@@ -35,3 +35,5 @@ frontend/tsconfig.tsbuildinfo
 glory-rust-template.code-workspace
 .sentinel-report.md
 .cargo/config.toml
+
+glory-rs/
