@@ -4,7 +4,10 @@ use axum::Json;
 use serde::Serialize;
 use utoipa::ToSchema;
 
-/// Tipos de error de la aplicación — cada variante mapea a un HTTP status code
+/* [174A-4] Error global del backend Kamples.
+ * Cada variante mapea a un HTTP status. Los handlers retornan AppError;
+ * el IntoResponse convierte a JSON {error, message, request_id?}.
+ * Errores 5xx se loggean con tracing::error! antes de responder. */
 #[derive(Debug, thiserror::Error)]
 pub enum AppError {
     #[error("No encontrado: {0}")]
@@ -16,14 +19,29 @@ pub enum AppError {
     #[error("No autorizado")]
     Unauthorized,
 
+    #[error("Prohibido: {0}")]
+    Forbidden(String),
+
     #[error("Conflicto: {0}")]
     Conflict(String),
+
+    #[error("Demasiadas solicitudes")]
+    RateLimited,
+
+    #[error("Carga demasiado grande")]
+    PayloadTooLarge,
+
+    #[error("Tipo de medio no soportado: {0}")]
+    UnsupportedMediaType(String),
 
     #[error("Error interno: {0}")]
     Internal(String),
 
     #[error("Error de base de datos: {0}")]
     Database(#[from] sqlx::Error),
+
+    #[error("Error de servicio externo ({service}): {message}")]
+    ExternalService { service: String, message: String },
 
     #[error("Error de validación: {0}")]
     Validation(String),
@@ -48,9 +66,25 @@ impl IntoResponse for AppError {
                 "unauthorized",
                 "Credenciales inválidas o ausentes".to_string(),
             ),
+            Self::Forbidden(msg) => (StatusCode::FORBIDDEN, "forbidden", msg.clone()),
             Self::Conflict(msg) => (StatusCode::CONFLICT, "conflict", msg.clone()),
+            Self::RateLimited => (
+                StatusCode::TOO_MANY_REQUESTS,
+                "rate_limited",
+                "Demasiadas solicitudes, espera un momento".to_string(),
+            ),
+            Self::PayloadTooLarge => (
+                StatusCode::PAYLOAD_TOO_LARGE,
+                "payload_too_large",
+                "El archivo o solicitud excede el límite permitido".to_string(),
+            ),
+            Self::UnsupportedMediaType(msg) => (
+                StatusCode::UNSUPPORTED_MEDIA_TYPE,
+                "unsupported_media_type",
+                msg.clone(),
+            ),
             Self::Internal(msg) => {
-                tracing::error!("Error interno: {msg}");
+                tracing::error!(error.kind = "internal", error.detail = %msg, "internal error");
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     "internal_error",
@@ -58,11 +92,19 @@ impl IntoResponse for AppError {
                 )
             }
             Self::Database(err) => {
-                tracing::error!("Error de base de datos: {err}");
+                tracing::error!(error.kind = "database", error.detail = %err, "database error");
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     "database_error",
                     "Ocurrió un error de base de datos".to_string(),
+                )
+            }
+            Self::ExternalService { service, message } => {
+                tracing::error!(error.kind = "external", error.service = %service, error.detail = %message, "external service error");
+                (
+                    StatusCode::BAD_GATEWAY,
+                    "external_service_error",
+                    format!("Error en servicio externo: {service}"),
                 )
             }
             Self::Validation(msg) => (
@@ -80,3 +122,6 @@ impl IntoResponse for AppError {
         (status, Json(body)).into_response()
     }
 }
+
+/// Resultado canónico del backend.
+pub type AppResult<T> = std::result::Result<T, AppError>;

@@ -68,7 +68,6 @@
 
 ### Fase 0 — Bootstrap del proyecto Rust
 
-- 174A-4 — `AppError` global + `IntoResponse` + middleware `request_id` + `tracing-subscriber`
 - 174A-5 — Pool SQLx + Redis pool + `AppState` compartido
 - 174A-6 — OpenAPI scaffold (`utoipa`) + Swagger UI `/docs` + comando CLI `--emit-openapi`
 

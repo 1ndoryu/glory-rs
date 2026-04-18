@@ -80,6 +80,7 @@ pub fn create_router(pool: sqlx::PgPool, config: crate::config::AppConfig) -> Ro
     Router::new()
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
         .nest("/api", api_routes())
+        .layer(axum::middleware::from_fn(crate::middleware::request_id_middleware))
         .layer(TraceLayer::new_for_http())
         .layer(cors)
         .with_state(state)

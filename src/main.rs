@@ -1,17 +1,28 @@
 use glory_backend::config::AppConfig;
 use glory_backend::handlers;
+use tracing_subscriber::layer::SubscriberExt;
+use tracing_subscriber::util::SubscriberInitExt;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenvy::dotenv().ok();
 
-    tracing_subscriber::fmt()
-        .with_env_filter(
-            tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| {
-                tracing_subscriber::EnvFilter::new("glory_backend=debug,tower_http=debug")
-            }),
-        )
-        .init();
+    /* [174A-4] Tracing: EnvFilter (RUST_LOG) + formato. JSON si LOG_FORMAT=json,
+     * si no formato compacto con spans para correlacionar request_id. */
+    let env_filter = tracing_subscriber::EnvFilter::try_from_default_env()
+        .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("glory_backend=debug,tower_http=info,sqlx=warn"));
+
+    let registry = tracing_subscriber::registry().with(env_filter);
+
+    if std::env::var("LOG_FORMAT").as_deref() == Ok("json") {
+        registry
+            .with(tracing_subscriber::fmt::layer().json().with_current_span(true).with_span_list(false))
+            .init();
+    } else {
+        registry
+            .with(tracing_subscriber::fmt::layer().compact().with_target(false))
+            .init();
+    }
 
     let config = AppConfig::from_env()?;
 
