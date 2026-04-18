@@ -23,6 +23,12 @@ pub struct AppConfig {
     pub google_client_ids: Vec<String>,
     /// Directorio raiz para storage local (LocalFs). Default: "./uploads"
     pub storage_root: String,
+    /// Backend de storage: "local" (default) o "s3" (requiere feature `s3`).
+    pub storage_backend: String,
+    /// Bucket S3 (requerido si storage_backend == "s3").
+    pub s3_bucket: Option<String>,
+    /// Endpoint URL custom para S3-compatibles (R2/MinIO). Opcional.
+    pub s3_endpoint_url: Option<String>,
 }
 
 impl AppConfig {
@@ -55,6 +61,10 @@ impl AppConfig {
                 .collect(),
             storage_root: std::env::var("STORAGE_ROOT")
                 .unwrap_or_else(|_| "./uploads".to_string()),
+            storage_backend: std::env::var("STORAGE_BACKEND")
+                .unwrap_or_else(|_| "local".to_string()),
+            s3_bucket: std::env::var("S3_BUCKET").ok(),
+            s3_endpoint_url: std::env::var("S3_ENDPOINT_URL").ok(),
         })
     }
 }

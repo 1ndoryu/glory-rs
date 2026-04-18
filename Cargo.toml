@@ -81,6 +81,12 @@ mime = "0.3"
 mime_guess = "2"
 url = "2"
 
+# Storage S3 (feature-gated, 174A-27)
+aws-config = { version = "1", default-features = false, features = ["rustls", "rt-tokio", "behavior-version-latest"], optional = true }
+aws-sdk-s3 = { version = "1", default-features = false, features = ["rustls", "rt-tokio", "behavior-version-latest"], optional = true }
+aws-credential-types = { version = "1", optional = true }
+aws-smithy-types = { version = "1", features = ["byte-stream-poll-next"], optional = true }
+
 # NOTA: dependencias diferidas a fases posteriores (se añaden cuando se necesiten):
 # - oauth2 (Fase 2): OAuth Google PKCE
 # - lettre (Fase 11): SMTP
@@ -92,6 +98,12 @@ url = "2"
 [dev-dependencies]
 tokio-test = "0.4"
 serial_test = "3"
+
+[features]
+default = []
+# Habilita el backend S3Storage (aws-sdk-s3 + aws-config). En produccion en cloud
+# compilar con `--features s3`. Por defecto se usa LocalFs (cero deps extra).
+s3 = ["dep:aws-config", "dep:aws-sdk-s3", "dep:aws-credential-types", "dep:aws-smithy-types"]
 
 [lints.clippy]
 all = { level = "deny", priority = -1 }

@@ -66,12 +66,25 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing::info!("Servidor iniciando en {addr}");
     tracing::info!("Swagger UI disponible en http://{addr}/swagger-ui/");
 
-    /* [174A-26] Storage backend. Por ahora siempre LocalFs apuntando a `STORAGE_ROOT`
-     * (default ./uploads). En 174A-27 se añadirá selector S3 feature-gated. */
-    let storage: std::sync::Arc<dyn glory_backend::services::FileStorage> = std::sync::Arc::new(
-        glory_backend::services::LocalFs::new(&config.storage_root).await?,
-    );
-    tracing::info!("Storage LocalFs en {}", config.storage_root);
+    /* [174A-26+174A-27] Storage backend. STORAGE_BACKEND="local" usa LocalFs (default).
+     * STORAGE_BACKEND="s3" requiere compilar con `--features s3` y env S3_BUCKET. */
+    let storage: std::sync::Arc<dyn glory_backend::services::FileStorage> =
+        if config.storage_backend == "s3" {
+            #[cfg(feature = "s3")]
+            {
+                let bucket = config.s3_bucket.clone().ok_or("S3_BUCKET requerido cuando STORAGE_BACKEND=s3")?;
+                let endpoint = config.s3_endpoint_url.clone();
+                tracing::info!("Storage S3 bucket={bucket} endpoint={endpoint:?}");
+                std::sync::Arc::new(glory_backend::services::S3Storage::new(bucket, endpoint).await?)
+            }
+            #[cfg(not(feature = "s3"))]
+            {
+                return Err("STORAGE_BACKEND=s3 pero binario compilado sin feature `s3`".into());
+            }
+        } else {
+            tracing::info!("Storage LocalFs en {}", config.storage_root);
+            std::sync::Arc::new(glory_backend::services::LocalFs::new(&config.storage_root).await?)
+        };
 
     let app = handlers::create_router(pool, redis, config, storage);
     let listener = tokio::net::TcpListener::bind(&addr).await?;
