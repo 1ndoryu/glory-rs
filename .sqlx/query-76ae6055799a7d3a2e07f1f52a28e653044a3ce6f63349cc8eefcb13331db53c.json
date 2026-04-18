@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE push_subscriptions\n               SET activa = FALSE,\n                   updated_at = NOW()\n               WHERE endpoint = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "76ae6055799a7d3a2e07f1f52a28e653044a3ce6f63349cc8eefcb13331db53c"
+}

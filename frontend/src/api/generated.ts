@@ -676,6 +676,26 @@ export type PrivateProfileResponse = PublicProfileResponse & ({
   estado: string;
 });
 
+export interface PushSubscriptionKeysRequest {
+  auth: string;
+  p256dh: string;
+}
+
+export type PushSubscriptionPlatform = typeof PushSubscriptionPlatform[keyof typeof PushSubscriptionPlatform];
+
+
+export const PushSubscriptionPlatform = {
+  web: 'web',
+  android: 'android',
+  desktop: 'desktop',
+} as const;
+
+export interface PushVapidKeyResponse {
+  habilitado: boolean;
+  /** @nullable */
+  vapidKey?: string | null;
+}
+
 export interface RefreshRequest {
   refresh_token: string;
 }
@@ -803,6 +823,12 @@ export interface StartConversationRequest {
   usuario_id: number;
 }
 
+export interface SubscribePushRequest {
+  endpoint: string;
+  keys: PushSubscriptionKeysRequest;
+  plataforma?: PushSubscriptionPlatform;
+}
+
 export interface SuspendUserRequest {
   /**
      * Si se omite, suspension indefinida.
@@ -826,6 +852,10 @@ export interface TimingEntry {
   meta: unknown;
   total_ms: number;
   ts: string;
+}
+
+export interface UnsubscribePushRequest {
+  endpoint: string;
 }
 
 export interface UpdateColeccionRequest {
@@ -7022,6 +7052,289 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getUnrepostPostMutationOptions(options), queryClient);
     }
+
+export type subscribePushResponse200 = {
+  data: OkResponse
+  status: 200
+}
+
+export type subscribePushResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type subscribePushResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type subscribePushResponseSuccess = (subscribePushResponse200) & {
+  headers: Headers;
+};
+export type subscribePushResponseError = (subscribePushResponse400 | subscribePushResponse401) & {
+  headers: Headers;
+};
+
+export type subscribePushResponse = (subscribePushResponseSuccess | subscribePushResponseError)
+
+export const getSubscribePushUrl = () => {
+
+
+
+
+  return `/api/push/subscribe`
+}
+
+export const subscribePush = async (subscribePushRequest: SubscribePushRequest, options?: RequestInit): Promise<subscribePushResponse> => {
+
+  return customInstance<subscribePushResponse>(getSubscribePushUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      subscribePushRequest,)
+  }
+);}
+
+
+
+
+export const getSubscribePushMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof subscribePush>>, TError,{data: SubscribePushRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof subscribePush>>, TError,{data: SubscribePushRequest}, TContext> => {
+
+const mutationKey = ['subscribePush'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof subscribePush>>, {data: SubscribePushRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  subscribePush(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SubscribePushMutationResult = NonNullable<Awaited<ReturnType<typeof subscribePush>>>
+    export type SubscribePushMutationBody = SubscribePushRequest
+    export type SubscribePushMutationError = ErrorResponse
+
+    export const useSubscribePush = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof subscribePush>>, TError,{data: SubscribePushRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof subscribePush>>,
+        TError,
+        {data: SubscribePushRequest},
+        TContext
+      > => {
+      return useMutation(getSubscribePushMutationOptions(options), queryClient);
+    }
+
+export type unsubscribePushResponse200 = {
+  data: OkResponse
+  status: 200
+}
+
+export type unsubscribePushResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type unsubscribePushResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type unsubscribePushResponseSuccess = (unsubscribePushResponse200) & {
+  headers: Headers;
+};
+export type unsubscribePushResponseError = (unsubscribePushResponse400 | unsubscribePushResponse401) & {
+  headers: Headers;
+};
+
+export type unsubscribePushResponse = (unsubscribePushResponseSuccess | unsubscribePushResponseError)
+
+export const getUnsubscribePushUrl = () => {
+
+
+
+
+  return `/api/push/unsubscribe`
+}
+
+export const unsubscribePush = async (unsubscribePushRequest: UnsubscribePushRequest, options?: RequestInit): Promise<unsubscribePushResponse> => {
+
+  return customInstance<unsubscribePushResponse>(getUnsubscribePushUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      unsubscribePushRequest,)
+  }
+);}
+
+
+
+
+export const getUnsubscribePushMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unsubscribePush>>, TError,{data: UnsubscribePushRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof unsubscribePush>>, TError,{data: UnsubscribePushRequest}, TContext> => {
+
+const mutationKey = ['unsubscribePush'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof unsubscribePush>>, {data: UnsubscribePushRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  unsubscribePush(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UnsubscribePushMutationResult = NonNullable<Awaited<ReturnType<typeof unsubscribePush>>>
+    export type UnsubscribePushMutationBody = UnsubscribePushRequest
+    export type UnsubscribePushMutationError = ErrorResponse
+
+    export const useUnsubscribePush = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unsubscribePush>>, TError,{data: UnsubscribePushRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof unsubscribePush>>,
+        TError,
+        {data: UnsubscribePushRequest},
+        TContext
+      > => {
+      return useMutation(getUnsubscribePushMutationOptions(options), queryClient);
+    }
+
+export type getVapidKeyResponse200 = {
+  data: PushVapidKeyResponse
+  status: 200
+}
+
+export type getVapidKeyResponseSuccess = (getVapidKeyResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getVapidKeyResponse = (getVapidKeyResponseSuccess)
+
+export const getGetVapidKeyUrl = () => {
+
+
+
+
+  return `/api/push/vapid-key`
+}
+
+export const getVapidKey = async ( options?: RequestInit): Promise<getVapidKeyResponse> => {
+
+  return customInstance<getVapidKeyResponse>(getGetVapidKeyUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetVapidKeyQueryKey = () => {
+    return [
+    `/api/push/vapid-key`
+    ] as const;
+    }
+
+
+export const getGetVapidKeyQueryOptions = <TData = Awaited<ReturnType<typeof getVapidKey>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getVapidKey>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetVapidKeyQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getVapidKey>>> = ({ signal }) => getVapidKey({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getVapidKey>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetVapidKeyQueryResult = NonNullable<Awaited<ReturnType<typeof getVapidKey>>>
+export type GetVapidKeyQueryError = unknown
+
+
+export function useGetVapidKey<TData = Awaited<ReturnType<typeof getVapidKey>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getVapidKey>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getVapidKey>>,
+          TError,
+          Awaited<ReturnType<typeof getVapidKey>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetVapidKey<TData = Awaited<ReturnType<typeof getVapidKey>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getVapidKey>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getVapidKey>>,
+          TError,
+          Awaited<ReturnType<typeof getVapidKey>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetVapidKey<TData = Awaited<ReturnType<typeof getVapidKey>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getVapidKey>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetVapidKey<TData = Awaited<ReturnType<typeof getVapidKey>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getVapidKey>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetVapidKeyQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
 
 export type checkDuplicateResponse200 = {
   data: CheckDuplicateResponse

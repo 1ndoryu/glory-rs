@@ -89,7 +89,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let _audio_pipeline_workers = glory_backend::workers::spawn_audio_pipeline_workers(&pool, &storage);
     let _ia_queue_workers = glory_backend::workers::spawn_ia_queue_workers(&pool);
 
-    let app = handlers::create_router(pool, redis, config, storage);
+    let push_runtime = glory_backend::services::PushDeliveryRuntime::from_config(&config)?;
+    if let Some(runtime) = push_runtime.as_ref() {
+        tracing::info!(
+            vapid_subject = %runtime.subject(),
+            "Web Push VAPID habilitado"
+        );
+    } else {
+        tracing::warn!("VAPID no configurado — Web Push deshabilitado");
+    }
+
+    let app = handlers::create_router(pool, redis, config, storage, push_runtime);
     let listener = tokio::net::TcpListener::bind(&addr).await?;
     axum::serve(listener, app).await?;
 

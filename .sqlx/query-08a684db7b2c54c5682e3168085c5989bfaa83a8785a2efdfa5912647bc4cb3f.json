@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT endpoint AS \"endpoint!\",\n                      p256dh AS \"p256dh!\",\n                      auth AS \"auth!\",\n                      plataforma AS \"platform!\"\n               FROM push_subscriptions\n               WHERE usuario_id = $1 AND activa = TRUE\n               ORDER BY id DESC",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "endpoint!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "p256dh!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "auth!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "platform!",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "08a684db7b2c54c5682e3168085c5989bfaa83a8785a2efdfa5912647bc4cb3f"
+}

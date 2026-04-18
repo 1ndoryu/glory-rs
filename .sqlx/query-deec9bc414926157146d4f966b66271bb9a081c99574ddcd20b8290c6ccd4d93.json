@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO push_subscriptions (\n                    usuario_id,\n                    endpoint,\n                    p256dh,\n                    auth,\n                    plataforma,\n                    activa\n               )\n               VALUES ($1, $2, $3, $4, $5, TRUE)\n               ON CONFLICT (endpoint)\n               DO UPDATE SET\n                    usuario_id = EXCLUDED.usuario_id,\n                    p256dh = EXCLUDED.p256dh,\n                    auth = EXCLUDED.auth,\n                    plataforma = EXCLUDED.plataforma,\n                    activa = TRUE,\n                    updated_at = NOW()",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Text",
+        "Text",
+        "Text",
+        "Varchar"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "deec9bc414926157146d4f966b66271bb9a081c99574ddcd20b8290c6ccd4d93"
+}

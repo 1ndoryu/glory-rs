@@ -13,6 +13,7 @@ mod post;
 mod play;
 mod processing_queue;
 mod profile;
+mod push;
 mod sample;
 mod sample_catalog;
 mod saved_collection;
@@ -48,6 +49,9 @@ pub use processing_queue::{
     QueuedAudioProcessingJob,
 };
 pub use profile::ProfileRepository;
+pub use push::{
+    PushSubscriptionRecord, PushSubscriptionRepository, RegisterPushSubscriptionRecord,
+};
 pub use saved_collection::{SavedColeccion, SavedCollectionsRepository};
 pub use sample::{
     ApplyAudioIaMetadataParams, AudioIaSample, AudioPipelineSample, CompleteAudioPipelineParams,

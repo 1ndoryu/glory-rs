@@ -37,6 +37,12 @@ pub struct AppConfig {
     pub ws_public_url: Option<String>,
     /// TTL por defecto de tickets websocket, en segundos.
     pub ws_ticket_ttl_secs: i64,
+    /// Clave pública VAPID opcional. Se acepta por compatibilidad con el legado.
+    pub vapid_public_key: Option<String>,
+    /// Clave privada VAPID opcional. Si existe, habilita Web Push.
+    pub vapid_private_key: Option<String>,
+    /// Subject VAPID opcional (`mailto:` o URL pública).
+    pub vapid_subject: Option<String>,
 }
 
 impl AppConfig {
@@ -81,6 +87,18 @@ impl AppConfig {
             ws_ticket_ttl_secs: std::env::var("WS_TICKET_TTL_SECS")
                 .unwrap_or_else(|_| "60".to_string())
                 .parse()?,
+            vapid_public_key: first_env(&["VAPID_PUBLIC_KEY", "KAMPLES_VAPID_PUBLIC_KEY"]),
+            vapid_private_key: first_env(&["VAPID_PRIVATE_KEY", "KAMPLES_VAPID_PRIVATE_KEY"]),
+            vapid_subject: first_env(&["VAPID_SUBJECT", "KAMPLES_VAPID_SUBJECT"]),
         })
     }
+}
+
+fn first_env(names: &[&str]) -> Option<String> {
+    names.iter().find_map(|name| {
+        std::env::var(name)
+            .ok()
+            .map(|value| value.trim().to_string())
+            .filter(|value| !value.is_empty())
+    })
 }

@@ -2812,6 +2812,136 @@
         ]
       }
     },
+    "/api/push/subscribe": {
+      "post": {
+        "tags": [
+          "push"
+        ],
+        "operationId": "subscribe_push",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubscribePushRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Suscripción push registrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Payload inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/push/unsubscribe": {
+      "post": {
+        "tags": [
+          "push"
+        ],
+        "operationId": "unsubscribe_push",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnsubscribePushRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Suscripción push eliminada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Payload inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/push/vapid-key": {
+      "get": {
+        "tags": [
+          "push"
+        ],
+        "operationId": "get_vapid_key",
+        "responses": {
+          "200": {
+            "description": "Clave pública VAPID o estado deshabilitado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PushVapidKeyResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/samples": {
       "get": {
         "tags": [
@@ -5259,6 +5389,44 @@
           }
         }
       },
+      "PushSubscriptionKeysRequest": {
+        "type": "object",
+        "required": [
+          "p256dh",
+          "auth"
+        ],
+        "properties": {
+          "auth": {
+            "type": "string"
+          },
+          "p256dh": {
+            "type": "string"
+          }
+        }
+      },
+      "PushSubscriptionPlatform": {
+        "type": "string",
+        "enum": [
+          "web",
+          "android",
+          "desktop"
+        ]
+      },
+      "PushVapidKeyResponse": {
+        "type": "object",
+        "required": [
+          "habilitado"
+        ],
+        "properties": {
+          "habilitado": {
+            "type": "boolean"
+          },
+          "vapidKey": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
       "RankedSample": {
         "type": "object",
         "required": [
@@ -5919,6 +6087,24 @@
           }
         }
       },
+      "SubscribePushRequest": {
+        "type": "object",
+        "required": [
+          "endpoint",
+          "keys"
+        ],
+        "properties": {
+          "endpoint": {
+            "type": "string"
+          },
+          "keys": {
+            "$ref": "#/components/schemas/PushSubscriptionKeysRequest"
+          },
+          "plataforma": {
+            "$ref": "#/components/schemas/PushSubscriptionPlatform"
+          }
+        }
+      },
       "SuspendUserRequest": {
         "type": "object",
         "required": [
@@ -5976,6 +6162,17 @@
             "format": "double"
           },
           "name": {
+            "type": "string"
+          }
+        }
+      },
+      "UnsubscribePushRequest": {
+        "type": "object",
+        "required": [
+          "endpoint"
+        ],
+        "properties": {
+          "endpoint": {
             "type": "string"
           }
         }

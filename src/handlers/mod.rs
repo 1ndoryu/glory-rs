@@ -15,6 +15,7 @@ mod plays;
 mod social;
 mod sample_catalog;
 mod samples;
+mod push;
 mod users;
 mod ws;
 
@@ -79,6 +80,9 @@ impl utoipa::Modify for SecurityAddon {
         notifications::mark_notification_read,
         notifications::mark_all_notifications_read,
         notifications::unread_notifications_count,
+        push::get_vapid_key,
+        push::subscribe_push,
+        push::unsubscribe_push,
         comments::list_comments,
         comments::list_replies,
         comments::create_comment,
@@ -156,6 +160,11 @@ impl utoipa::Modify for SecurityAddon {
         messages::MessageMutationResponse,
         notifications::NotificationListResponse,
         notifications::NotificationCountResponse,
+        push::PushSubscriptionKeysRequest,
+        push::SubscribePushRequest,
+        push::UnsubscribePushRequest,
+        push::PushVapidKeyResponse,
+        crate::services::PushSubscriptionPlatform,
         crate::repositories::ConversationParticipantSummary,
         crate::repositories::ConversationSummary,
         crate::repositories::ConversationMessage,
@@ -237,6 +246,7 @@ pub fn create_router(
     redis: Option<deadpool_redis::Pool>,
     config: crate::config::AppConfig,
     storage: std::sync::Arc<dyn crate::services::FileStorage>,
+    push_runtime: Option<crate::services::PushDeliveryRuntime>,
 ) -> Router {
     let public_base_url = config.public_base_url.clone();
     let ws_public_url = config.ws_public_url.clone();
@@ -263,6 +273,7 @@ pub fn create_router(
         )),
         storage,
         public_base_url,
+        push_runtime: push_runtime.map(std::sync::Arc::new),
         ws_public_url,
         ws_ticket_ttl_secs: config.ws_ticket_ttl_secs,
         ws_hub,
@@ -304,6 +315,7 @@ fn api_routes() -> Router<AppState> {
         .merge(likes::routes())
         .merge(messages::routes())
         .merge(notifications::routes())
+        .merge(push::routes())
         .merge(comments::routes())
         .merge(posts::routes())
         .merge(social::routes())
