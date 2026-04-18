@@ -292,7 +292,7 @@ pub async fn send_message(
         .ok_or_else(|| AppError::NotFound(format!("mensaje {message_id} no existe")))?;
     let message = normalize_message(message, state.public_base_url.as_deref());
 
-    emit_new_message_event(&state, other_id, &message);
+    emit_new_message_event(&state, other_id, &message).await;
 
     Ok((
         StatusCode::CREATED,

@@ -231,10 +231,19 @@ pub fn create_router(
 ) -> Router {
     let public_base_url = config.public_base_url.clone();
     let ws_public_url = config.ws_public_url.clone();
+    let redis_url = config.redis_url.clone();
     let storage_root = config.storage_root.clone();
     let algo_planner =
         crate::algorithm::AlgoPlanner::new(crate::algorithm::AlgoPlannerConfig::legacy_defaults());
-    let ws_hub = glory_rs::websocket::WebSocketHub::new(glory_rs::websocket::HubConfig::default());
+    let ws_hub = std::sync::Arc::new(glory_rs::websocket::WebSocketHub::new(
+        glory_rs::websocket::HubConfig::default(),
+    ));
+    let ws_node_id = uuid::Uuid::new_v4();
+    if redis.is_some() {
+        if let Some(redis_url) = redis_url {
+            crate::ws::spawn_pubsub_bridge(&redis_url, std::sync::Arc::clone(&ws_hub), ws_node_id);
+        }
+    }
     let state = AppState {
         pool,
         redis,
@@ -247,7 +256,8 @@ pub fn create_router(
         public_base_url,
         ws_public_url,
         ws_ticket_ttl_secs: config.ws_ticket_ttl_secs,
-        ws_hub: std::sync::Arc::new(ws_hub),
+        ws_hub,
+        ws_node_id,
         algo_planner,
     };
 

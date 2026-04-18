@@ -44,6 +44,7 @@ pub struct AppState {
     pub ws_public_url: Option<String>,
     pub ws_ticket_ttl_secs: i64,
     pub ws_hub: Arc<glory_rs::websocket::WebSocketHub>,
+    pub ws_node_id: uuid::Uuid,
     /* [174A-58] Planificador del algoritmo (umbrales fast/precise + recálculos). */
     pub algo_planner: Arc<algorithm::AlgoPlanner>,
 }

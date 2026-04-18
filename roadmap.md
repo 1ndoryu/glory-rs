@@ -89,7 +89,6 @@
 ### Fase 9 â€” Colecciones y sociales
 
 ### Fase 10 â€” MensajerÃ­a + WebSocket
-- 174A-73 â€” Multi-instancia: Redis pub/sub
 
 ### Fase 11 â€” Notificaciones (5 canales)
 - 174A-74 â€” Tabla notifications + service base

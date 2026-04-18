@@ -27,14 +27,13 @@ struct RealtimeConversationMessage {
     creado_at: chrono::DateTime<chrono::Utc>,
 }
 
-pub fn emit_new_message_event(state: &AppState, recipient_id: i32, message: &ConversationMessage) {
+pub async fn emit_new_message_event(
+    state: &AppState,
+    recipient_id: i32,
+    message: &ConversationMessage,
+) {
     let payload = build_message_created_event_payload(message);
-    match crate::ws::emit_event(
-        &state.ws_hub,
-        recipient_id,
-        WS_EVENT_MESSAGE_CREATED,
-        &payload,
-    ) {
+    match crate::ws::emit_event(state, recipient_id, WS_EVENT_MESSAGE_CREATED, &payload).await {
         Ok(delivered) => {
             tracing::debug!(
                 recipient_id,
