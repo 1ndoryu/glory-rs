@@ -78,7 +78,6 @@
 ### Fase 4 â€” Audio pipeline (lo mÃ¡s difÃ­cil)
 
 ### Fase 5 â€” IA pipeline
-- 174A-37 â€” Cliente Groq con rotaciÃ³n 3 keys + retry + fallback chain modelos
 - 174A-38 â€” Cliente OpenAI (fallback final)
 - 174A-39 â€” `JsonRepairer`
 - 174A-40 â€” `prompts.rs`
