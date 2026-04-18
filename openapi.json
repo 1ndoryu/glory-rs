@@ -1,8 +1,8 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "Glory RS API",
-    "description": "Template API — Rust + Axum + OpenAPI",
+    "title": "Glory Kamples API",
+    "description": "API Kamples — Rust + Axum + OpenAPI",
     "contact": {
       "name": "1ndoryu"
     },
@@ -17,7 +17,6 @@
         "tags": [
           "auth"
         ],
-        "summary": "Iniciar sesión",
         "operationId": "login",
         "requestBody": {
           "content": {
@@ -31,7 +30,7 @@
         },
         "responses": {
           "200": {
-            "description": "Login exitoso",
+            "description": "Login OK",
             "content": {
               "application/json": {
                 "schema": {
@@ -41,7 +40,17 @@
             }
           },
           "401": {
-            "description": "Credenciales inválidas",
+            "description": "Credenciales invalidas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/crate.errors.ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Cuenta no activa",
             "content": {
               "application/json": {
                 "schema": {
@@ -58,7 +67,6 @@
         "tags": [
           "auth"
         ],
-        "summary": "Registrar nuevo usuario",
         "operationId": "register",
         "requestBody": {
           "content": {
@@ -82,7 +90,7 @@
             }
           },
           "409": {
-            "description": "Email ya registrado",
+            "description": "Email/username duplicado",
             "content": {
               "application/json": {
                 "schema": {
@@ -92,7 +100,7 @@
             }
           },
           "422": {
-            "description": "Error de validación",
+            "description": "Validacion",
             "content": {
               "application/json": {
                 "schema": {
@@ -124,325 +132,22 @@
           }
         }
       }
-    },
-    "/api/notes": {
-      "get": {
-        "tags": [
-          "notes"
-        ],
-        "summary": "Listar notas con paginación",
-        "operationId": "list_notes",
-        "parameters": [
-          {
-            "name": "page",
-            "in": "query",
-            "description": "Página (empezando en 1)",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          {
-            "name": "per_page",
-            "in": "query",
-            "description": "Resultados por página",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Lista de notas",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PaginatedNotes"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "No autorizado",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/crate.errors.ErrorResponse"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer_auth": []
-          }
-        ]
-      },
-      "post": {
-        "tags": [
-          "notes"
-        ],
-        "summary": "Crear una nota",
-        "operationId": "create_note",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateNoteRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "description": "Nota creada",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Note"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "No autorizado",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/crate.errors.ErrorResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Error de validación",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/crate.errors.ErrorResponse"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer_auth": []
-          }
-        ]
-      }
-    },
-    "/api/notes/{id}": {
-      "get": {
-        "tags": [
-          "notes"
-        ],
-        "summary": "Obtener una nota por ID",
-        "operationId": "get_note",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "ID de la nota",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Nota encontrada",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Note"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "No autorizado",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/crate.errors.ErrorResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Nota no encontrada",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/crate.errors.ErrorResponse"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer_auth": []
-          }
-        ]
-      },
-      "put": {
-        "tags": [
-          "notes"
-        ],
-        "summary": "Actualizar una nota",
-        "operationId": "update_note",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "ID de la nota",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateNoteRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Nota actualizada",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Note"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "No autorizado",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/crate.errors.ErrorResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "No encontrada",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/crate.errors.ErrorResponse"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer_auth": []
-          }
-        ]
-      },
-      "delete": {
-        "tags": [
-          "notes"
-        ],
-        "summary": "Eliminar una nota",
-        "operationId": "delete_note",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "ID de la nota",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Nota eliminada"
-          },
-          "401": {
-            "description": "No autorizado",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/crate.errors.ErrorResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "No encontrada",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/crate.errors.ErrorResponse"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer_auth": []
-          }
-        ]
-      }
     }
   },
   "components": {
     "schemas": {
       "AuthResponse": {
         "type": "object",
-        "description": "Response con token JWT después de autenticarse",
         "required": [
           "token",
-          "user_id"
+          "user"
         ],
         "properties": {
           "token": {
             "type": "string"
           },
-          "user_id": {
-            "type": "string",
-            "format": "uuid"
-          }
-        }
-      },
-      "CreateNoteRequest": {
-        "type": "object",
-        "description": "Request para crear una nota",
-        "required": [
-          "title",
-          "content"
-        ],
-        "properties": {
-          "content": {
-            "type": "string"
-          },
-          "title": {
-            "type": "string"
+          "user": {
+            "$ref": "#/components/schemas/UserResponse"
           }
         }
       },
@@ -481,90 +186,23 @@
       },
       "LoginRequest": {
         "type": "object",
-        "description": "Request body para iniciar sesión",
         "required": [
-          "email",
+          "identifier",
           "password"
         ],
         "properties": {
-          "email": {
+          "identifier": {
             "type": "string"
           },
           "password": {
             "type": "string"
-          }
-        }
-      },
-      "Note": {
-        "type": "object",
-        "description": "Nota almacenada en base de datos",
-        "required": [
-          "id",
-          "user_id",
-          "title",
-          "content",
-          "created_at",
-          "updated_at"
-        ],
-        "properties": {
-          "content": {
-            "type": "string"
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "title": {
-            "type": "string"
-          },
-          "updated_at": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "user_id": {
-            "type": "string",
-            "format": "uuid"
-          }
-        }
-      },
-      "PaginatedNotes": {
-        "type": "object",
-        "description": "Response paginada de notas",
-        "required": [
-          "items",
-          "total",
-          "page",
-          "per_page"
-        ],
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Note"
-            }
-          },
-          "page": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "per_page": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
           }
         }
       },
       "RegisterRequest": {
         "type": "object",
-        "description": "Request body para registrar un nuevo usuario",
         "required": [
+          "username",
           "email",
           "password"
         ],
@@ -572,22 +210,47 @@
           "email": {
             "type": "string"
           },
+          "nombre_visible": {
+            "type": "string",
+            "nullable": true
+          },
           "password": {
+            "type": "string"
+          },
+          "username": {
             "type": "string"
           }
         }
       },
-      "UpdateNoteRequest": {
+      "UserResponse": {
         "type": "object",
-        "description": "Request para actualizar una nota",
+        "required": [
+          "id",
+          "username",
+          "nombre_visible",
+          "plan",
+          "rol"
+        ],
         "properties": {
-          "content": {
+          "email": {
             "type": "string",
             "nullable": true
           },
-          "title": {
-            "type": "string",
-            "nullable": true
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nombre_visible": {
+            "type": "string"
+          },
+          "plan": {
+            "type": "string"
+          },
+          "rol": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
           }
         }
       }

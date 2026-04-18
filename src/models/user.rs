@@ -2,56 +2,59 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use utoipa::ToSchema;
-use uuid::Uuid;
 use validator::Validate;
 
-/// Modelo de usuario almacenado en base de datos
+/* [174A-18] Modelo Usuario sobre `usuarios_ext` (PK i32 SERIAL). */
 #[derive(Debug, Clone, FromRow)]
 pub struct User {
-    pub id: Uuid,
-    pub email: String,
-    pub password_hash: String,
-    pub created_at: DateTime<Utc>,
+    pub id: i32,
+    pub username: String,
+    pub email: Option<String>,
+    pub nombre_visible: String,
+    pub password_hash: Option<String>,
+    pub plan: String,
+    pub rol: String,
+    pub estado: String,
+    pub created_at: Option<DateTime<Utc>>,
 }
 
-/// Response público de usuario — sin datos sensibles
-#[derive(Debug, Serialize, ToSchema)]
+#[derive(Debug, Serialize, ToSchema, Clone)]
 pub struct UserResponse {
-    pub id: Uuid,
-    pub email: String,
-    pub created_at: DateTime<Utc>,
+    pub id: i32,
+    pub username: String,
+    pub email: Option<String>,
+    pub nombre_visible: String,
+    pub plan: String,
+    pub rol: String,
 }
 
 impl From<User> for UserResponse {
-    fn from(user: User) -> Self {
-        Self {
-            id: user.id,
-            email: user.email,
-            created_at: user.created_at,
-        }
+    fn from(u: User) -> Self {
+        Self { id: u.id, username: u.username, email: u.email, nombre_visible: u.nombre_visible, plan: u.plan, rol: u.rol }
     }
 }
 
-/// Request body para registrar un nuevo usuario
 #[derive(Debug, Deserialize, Validate, ToSchema)]
 pub struct RegisterRequest {
-    #[validate(email(message = "Formato de email inválido"))]
+    #[validate(length(min = 3, max = 50, message = "Username 3-50 caracteres"))]
+    pub username: String,
+    #[validate(email(message = "Email invalido"))]
     pub email: String,
-    #[validate(length(min = 8, message = "La contraseña debe tener al menos 8 caracteres"))]
+    #[validate(length(min = 8, message = "Contrasena minimo 8 caracteres"))]
     pub password: String,
+    #[validate(length(max = 100))]
+    pub nombre_visible: Option<String>,
 }
 
-/// Request body para iniciar sesión
 #[derive(Debug, Deserialize, Validate, ToSchema)]
 pub struct LoginRequest {
-    #[validate(email)]
-    pub email: String,
+    #[validate(length(min = 3))]
+    pub identifier: String,
     pub password: String,
 }
 
-/// Response con token JWT después de autenticarse
 #[derive(Debug, Serialize, ToSchema)]
 pub struct AuthResponse {
     pub token: String,
-    pub user_id: Uuid,
+    pub user: UserResponse,
 }

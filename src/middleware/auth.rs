@@ -1,16 +1,16 @@
 use axum::async_trait;
 use axum::extract::FromRequestParts;
 use axum::http::request::Parts;
-use uuid::Uuid;
 
 use crate::errors::AppError;
 use crate::services::AuthService;
 use crate::AppState;
 
-/// Extractor que valida el JWT del header Authorization y extrae el `user_id`.
-/// Usar como parámetro en handlers que requieren autenticación.
+/* [174A-18] Extractor de usuario autenticado. user_id es i32 (PK usuarios_ext). */
 pub struct AuthUser {
-    pub user_id: Uuid,
+    pub user_id: i32,
+    pub plan: String,
+    pub rol: String,
 }
 
 #[async_trait]
@@ -35,6 +35,8 @@ impl FromRequestParts<AppState> for AuthUser {
 
         Ok(Self {
             user_id: claims.sub,
+            plan: claims.plan,
+            rol: claims.rol,
         })
     }
 }

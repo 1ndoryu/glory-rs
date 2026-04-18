@@ -1,47 +1,47 @@
 use sqlx::PgPool;
-use uuid::Uuid;
 
 use crate::models::User;
 
+/* [174A-18] Repositorio sobre `usuarios_ext`. */
 pub struct UserRepository;
 
+const USER_COLS: &str = "id, username, email, nombre_visible, password_hash, plan, rol, estado, created_at";
+
 impl UserRepository {
-    /// Crea un usuario y retorna el registro completo
-    pub async fn create(
+    pub async fn create_native(
         pool: &PgPool,
+        username: &str,
         email: &str,
         password_hash: &str,
+        nombre_visible: &str,
     ) -> Result<User, sqlx::Error> {
-        let id = Uuid::new_v4();
-        sqlx::query_as::<_, User>(
-            "INSERT INTO users (id, email, password_hash) \
-             VALUES ($1, $2, $3) \
-             RETURNING id, email, password_hash, created_at",
-        )
-        .bind(id)
-        .bind(email)
-        .bind(password_hash)
-        .fetch_one(pool)
-        .await
+        let sql = format!(
+            "INSERT INTO usuarios_ext (username, email, password_hash, nombre_visible) \
+             VALUES ($1, $2, $3, $4) \
+             RETURNING {USER_COLS}"
+        );
+        sqlx::query_as::<_, User>(&sql)
+            .bind(username).bind(email).bind(password_hash).bind(nombre_visible)
+            .fetch_one(pool).await
     }
 
-    /// Busca un usuario por email
     pub async fn find_by_email(pool: &PgPool, email: &str) -> Result<Option<User>, sqlx::Error> {
-        sqlx::query_as::<_, User>(
-            "SELECT id, email, password_hash, created_at FROM users WHERE email = $1",
-        )
-        .bind(email)
-        .fetch_optional(pool)
-        .await
+        let sql = format!("SELECT {USER_COLS} FROM usuarios_ext WHERE LOWER(email) = LOWER($1) LIMIT 1");
+        sqlx::query_as::<_, User>(&sql).bind(email).fetch_optional(pool).await
     }
 
-    /// Busca un usuario por ID
-    pub async fn find_by_id(pool: &PgPool, id: Uuid) -> Result<Option<User>, sqlx::Error> {
-        sqlx::query_as::<_, User>(
-            "SELECT id, email, password_hash, created_at FROM users WHERE id = $1",
-        )
-        .bind(id)
-        .fetch_optional(pool)
-        .await
+    pub async fn find_by_username(pool: &PgPool, username: &str) -> Result<Option<User>, sqlx::Error> {
+        let sql = format!("SELECT {USER_COLS} FROM usuarios_ext WHERE username = $1 LIMIT 1");
+        sqlx::query_as::<_, User>(&sql).bind(username).fetch_optional(pool).await
+    }
+
+    pub async fn find_by_identifier(pool: &PgPool, identifier: &str) -> Result<Option<User>, sqlx::Error> {
+        if identifier.contains('@') { Self::find_by_email(pool, identifier).await }
+        else { Self::find_by_username(pool, identifier).await }
+    }
+
+    pub async fn find_by_id(pool: &PgPool, id: i32) -> Result<Option<User>, sqlx::Error> {
+        let sql = format!("SELECT {USER_COLS} FROM usuarios_ext WHERE id = $1");
+        sqlx::query_as::<_, User>(&sql).bind(id).fetch_optional(pool).await
     }
 }

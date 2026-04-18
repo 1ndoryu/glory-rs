@@ -42,6 +42,7 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::RegisterRequest,
         crate::models::LoginRequest,
         crate::models::AuthResponse,
+        crate::models::UserResponse,
         crate::errors::ErrorResponse,
     )),
     modifiers(&SecurityAddon),
