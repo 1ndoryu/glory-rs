@@ -1,0 +1,46 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        WITH interacciones AS (\n            SELECT target_id AS sample_id\n              FROM likes\n             WHERE usuario_id = $1\n               AND tipo = 'sample'\n               AND reaccion IN ('like', 'encanta')\n            UNION\n            SELECT sample_id\n              FROM reproducciones\n             WHERE usuario_id = $1\n        ),\n        total AS (\n            SELECT\n                (SELECT COUNT(*) FROM likes WHERE usuario_id = $1 AND tipo = 'sample')\n              + (SELECT COUNT(*) FROM reproducciones WHERE usuario_id = $1)\n              + (SELECT COUNT(*) FROM descargas WHERE usuario_id = $1) AS val\n        ),\n        bpm AS (\n            SELECT AVG(s.bpm)::int AS val\n              FROM samples s\n              JOIN interacciones i ON s.id = i.sample_id\n             WHERE s.bpm IS NOT NULL\n        ),\n        key_fav AS (\n            SELECT s.key AS val\n              FROM samples s\n              JOIN interacciones i ON s.id = i.sample_id\n             WHERE s.key IS NOT NULL\n             GROUP BY s.key\n             ORDER BY COUNT(*) DESC\n             LIMIT 1\n        ),\n        escala_fav AS (\n            SELECT LOWER(s.escala) AS val\n              FROM samples s\n              JOIN interacciones i ON s.id = i.sample_id\n             WHERE s.escala IS NOT NULL AND s.escala <> ''\n             GROUP BY LOWER(s.escala)\n             ORDER BY COUNT(*) DESC\n             LIMIT 1\n        ),\n        tipo_fav AS (\n            SELECT s.tipo AS val\n              FROM samples s\n              JOIN interacciones i ON s.id = i.sample_id\n             GROUP BY s.tipo\n             ORDER BY COUNT(*) DESC\n             LIMIT 1\n        )\n        SELECT\n            (SELECT val FROM total)      AS \"interactions!\",\n            (SELECT val FROM bpm)        AS \"bpm_avg?\",\n            (SELECT val FROM key_fav)    AS \"key_fav?\",\n            (SELECT val FROM escala_fav) AS \"scale_fav?\",\n            (SELECT val FROM tipo_fav)   AS \"type_fav?\"\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "interactions!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "bpm_avg?",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "key_fav?",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "scale_fav?",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "type_fav?",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "afc05e51f1de7da379bc2d80aa68bbfa8c9989eb83fea39008e93e1fa153a16e"
+}

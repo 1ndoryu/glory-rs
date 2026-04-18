@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT s.creador_id AS \"creador_id!\"\n          FROM (\n              SELECT s.creador_id,\n                     CASE WHEN l.reaccion = 'encanta' THEN 2.0::float8 ELSE 1.0::float8 END AS score\n                FROM likes l\n                JOIN samples s ON l.target_id = s.id\n               WHERE l.usuario_id = $1\n                 AND l.tipo = 'sample'\n                 AND l.reaccion IN ('like', 'encanta')\n              UNION ALL\n              SELECT s.creador_id, 0.5::float8 AS score\n                FROM reproducciones r\n                JOIN samples s ON r.sample_id = s.id\n               WHERE r.usuario_id = $1\n              UNION ALL\n              SELECT s.creador_id, 1.5::float8 AS score\n                FROM descargas d\n                JOIN samples s ON d.sample_id = s.id\n               WHERE d.usuario_id = $1\n          ) s\n         WHERE s.creador_id <> $1\n         GROUP BY s.creador_id\n        HAVING SUM(s.score) >= $2\n         ORDER BY SUM(s.score) DESC\n         LIMIT $3\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "creador_id!",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Float8",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "2ceea36701be3af36c0f3ed9cc4a5996c20c7f9469a9bb969a63784a657a066d"
+}
