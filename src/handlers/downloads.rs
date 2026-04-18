@@ -1,13 +1,16 @@
-use axum::extract::{Path, State};
+use axum::extract::{Path, Query, State};
+use axum::http::{header, HeaderMap, HeaderValue, StatusCode};
+use axum::response::{IntoResponse, Response};
 use axum::routing::{get, post};
 use axum::{Json, Router};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
 use crate::algorithm::InteractionKind;
 use crate::errors::AppError;
 use crate::middleware::CurrentUser;
 use crate::repositories::DownloadRepository;
+use crate::services::download_token;
 use crate::AppState;
 
 /* [174A-61] Downloads — port mínimo de DescargasController.php.
@@ -34,7 +37,13 @@ use crate::AppState;
  *   samples con precio bloquean a free → coherente con UX legacy).
  * - Anti-abuso por IP.
  * - Calidad por plan (siempre se sirve `wav` legacy).
- * - Stream con token HMAC (174A-63).
+ *
+ * [174A-63] Stream firmado HMAC:
+ * - `GET /api/descargas/stream?token=...` valida token (HMAC sha256, exp 5min)
+ *   y entrega el archivo desde el storage abstracto. NO requiere Authorization
+ *   header (el token es la auth) — se puede usar desde un <a href> directo.
+ * - `register_download` ahora devuelve URL absoluta `/api/descargas/stream?token=...`.
+ * - Sin soporte de Range todavía (se sirve el archivo completo via storage.get_bytes).
  */
 
 const PLAN_LIMIT_FREE: i64 = 5;
@@ -145,9 +154,13 @@ pub async fn register_download(
 
     let restantes_post = limite.map(|l| (l - usadas - i64::from(consume_credito)).max(0));
 
+    /* [174A-63] Token firmado HMAC válido 5 min para servir el archivo. */
+    let token = download_token::generate(sample_id, user.user_id, 300, &state.jwt_secret);
+    let url = format!("/api/descargas/stream?token={token}");
+
     Ok(Json(DownloadResponse {
         ok: true,
-        url: format!("/api/samples/{sample_id}/file"),
+        url,
         calidad: "wav".into(),
         consume_credito,
         restantes: restantes_post.or(restantes),
@@ -185,4 +198,63 @@ pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/samples/:id/descargar", post(register_download))
         .route("/descargas/limites", get(download_limits))
+        .route("/descargas/stream", get(stream_download))
+}
+
+#[derive(Debug, Deserialize)]
+pub struct StreamQuery {
+    pub token: String,
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/descargas/stream",
+    tag = "downloads",
+    params(("token" = String, Query, description = "Token HMAC firmado emitido por register_download")),
+    responses(
+        (status = 200, description = "Archivo entregado", content_type = "application/octet-stream"),
+        (status = 401, description = "Token inválido o ausente"),
+        (status = 403, description = "Token expirado"),
+        (status = 404, description = "Sample o archivo no encontrado"),
+    )
+)]
+pub async fn stream_download(
+    State(state): State<AppState>,
+    Query(q): Query<StreamQuery>,
+) -> Result<Response, AppError> {
+    let (sample_id, _user_id) = download_token::verify(&q.token, &state.jwt_secret)?;
+
+    let info = DownloadRepository::fetch_file_info(&state.pool, sample_id)
+        .await?
+        .ok_or_else(|| AppError::NotFound(format!("sample {sample_id} no existe")))?;
+
+    let bytes = state.storage.get_bytes(&info.storage_key).await?;
+
+    let extension = std::path::Path::new(&info.storage_key)
+        .extension()
+        .and_then(|e| e.to_str())
+        .unwrap_or("bin");
+    let safe_titulo: String = info
+        .titulo
+        .chars()
+        .map(|c| if c.is_ascii_alphanumeric() || c == '-' || c == '_' { c } else { '_' })
+        .take(100)
+        .collect();
+    let nombre = format!("{safe_titulo}.{extension}");
+
+    let mut headers = HeaderMap::new();
+    headers.insert(header::CONTENT_TYPE, HeaderValue::from_static("application/octet-stream"));
+    if let Ok(v) = HeaderValue::from_str(&format!("attachment; filename=\"{nombre}\"")) {
+        headers.insert(header::CONTENT_DISPOSITION, v);
+    }
+    headers.insert(
+        header::CACHE_CONTROL,
+        HeaderValue::from_static("no-store, no-cache, must-revalidate"),
+    );
+    headers.insert(
+        header::X_CONTENT_TYPE_OPTIONS,
+        HeaderValue::from_static("nosniff"),
+    );
+
+    Ok((StatusCode::OK, headers, bytes).into_response())
 }

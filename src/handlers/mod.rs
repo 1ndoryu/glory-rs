@@ -70,6 +70,7 @@ impl utoipa::Modify for SecurityAddon {
         social::my_blocks,
         downloads::register_download,
         downloads::download_limits,
+        downloads::stream_download,
         users::me,
         users::update_me,
         users::public_profile,

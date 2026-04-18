@@ -596,6 +596,39 @@
         ]
       }
     },
+    "/api/descargas/stream": {
+      "get": {
+        "tags": [
+          "downloads"
+        ],
+        "operationId": "stream_download",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "description": "Token HMAC firmado emitido por register_download",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Archivo entregado"
+          },
+          "401": {
+            "description": "Token inválido o ausente"
+          },
+          "403": {
+            "description": "Token expirado"
+          },
+          "404": {
+            "description": "Sample o archivo no encontrado"
+          }
+        }
+      }
+    },
     "/api/feed": {
       "get": {
         "tags": [

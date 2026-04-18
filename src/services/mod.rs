@@ -1,6 +1,7 @@
 mod audio_pipeline;
 mod auth;
 pub mod algo_timing;
+pub mod download_token;
 mod google_oauth;
 mod ia_queue;
 mod ia_service;

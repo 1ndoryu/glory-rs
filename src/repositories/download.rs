@@ -115,4 +115,32 @@ impl DownloadRepository {
         .unwrap_or_else(|| "free".to_string());
         Ok(plan)
     }
+
+    /* [174A-63] Devuelve datos de archivo para servir vía stream firmado HMAC.
+     * Prefiere `ruta_original`; si no existe usa `ruta_optimizada`. */
+    pub async fn fetch_file_info(
+        pool: &PgPool,
+        sample_id: i32,
+    ) -> Result<Option<SampleFileInfo>, AppError> {
+        let row = sqlx::query!(
+            "SELECT titulo, ruta_original, ruta_optimizada \
+             FROM samples WHERE id = $1 AND eliminado_en IS NULL",
+            sample_id
+        )
+        .fetch_optional(pool)
+        .await?;
+        Ok(row.and_then(|r| {
+            let key = r.ruta_original.or(r.ruta_optimizada)?;
+            Some(SampleFileInfo {
+                titulo: r.titulo,
+                storage_key: key,
+            })
+        }))
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct SampleFileInfo {
+    pub titulo: String,
+    pub storage_key: String,
 }

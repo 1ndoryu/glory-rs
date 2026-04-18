@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT titulo, ruta_original, ruta_optimizada FROM samples WHERE id = $1 AND eliminado_en IS NULL",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "titulo",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 1,
+        "name": "ruta_original",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "ruta_optimizada",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "d11544a1004f7d1aa6678c1234aa614aee54aa5ecef398581232a1fcd40615a8"
+}

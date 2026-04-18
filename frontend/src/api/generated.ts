@@ -597,6 +597,13 @@ export type AlgoTimingHistoryParams = {
 limit?: number | null;
 };
 
+export type StreamDownloadParams = {
+/**
+ * Token HMAC firmado emitido por register_download
+ */
+token: string;
+};
+
 export type GetFeedParams = {
 /**
  * Tamaño de página. Default: 20, máximo: 100.
@@ -1904,6 +1911,135 @@ export function useDownloadLimits<TData = Awaited<ReturnType<typeof downloadLimi
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getDownloadLimitsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+export type streamDownloadResponse200 = {
+  data: void
+  status: 200
+}
+
+export type streamDownloadResponse401 = {
+  data: void
+  status: 401
+}
+
+export type streamDownloadResponse403 = {
+  data: void
+  status: 403
+}
+
+export type streamDownloadResponse404 = {
+  data: void
+  status: 404
+}
+
+export type streamDownloadResponseSuccess = (streamDownloadResponse200) & {
+  headers: Headers;
+};
+export type streamDownloadResponseError = (streamDownloadResponse401 | streamDownloadResponse403 | streamDownloadResponse404) & {
+  headers: Headers;
+};
+
+export type streamDownloadResponse = (streamDownloadResponseSuccess | streamDownloadResponseError)
+
+export const getStreamDownloadUrl = (params: StreamDownloadParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/descargas/stream?${stringifiedParams}` : `/api/descargas/stream`
+}
+
+export const streamDownload = async (params: StreamDownloadParams, options?: RequestInit): Promise<streamDownloadResponse> => {
+
+  return customInstance<streamDownloadResponse>(getStreamDownloadUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getStreamDownloadQueryKey = (params?: StreamDownloadParams,) => {
+    return [
+    `/api/descargas/stream`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getStreamDownloadQueryOptions = <TData = Awaited<ReturnType<typeof streamDownload>>, TError = void>(params: StreamDownloadParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof streamDownload>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getStreamDownloadQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof streamDownload>>> = ({ signal }) => streamDownload(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof streamDownload>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type StreamDownloadQueryResult = NonNullable<Awaited<ReturnType<typeof streamDownload>>>
+export type StreamDownloadQueryError = void
+
+
+export function useStreamDownload<TData = Awaited<ReturnType<typeof streamDownload>>, TError = void>(
+ params: StreamDownloadParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof streamDownload>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof streamDownload>>,
+          TError,
+          Awaited<ReturnType<typeof streamDownload>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useStreamDownload<TData = Awaited<ReturnType<typeof streamDownload>>, TError = void>(
+ params: StreamDownloadParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof streamDownload>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof streamDownload>>,
+          TError,
+          Awaited<ReturnType<typeof streamDownload>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useStreamDownload<TData = Awaited<ReturnType<typeof streamDownload>>, TError = void>(
+ params: StreamDownloadParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof streamDownload>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useStreamDownload<TData = Awaited<ReturnType<typeof streamDownload>>, TError = void>(
+ params: StreamDownloadParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof streamDownload>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getStreamDownloadQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
