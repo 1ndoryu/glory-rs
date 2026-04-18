@@ -42,9 +42,10 @@ const SPAM_TERMS: [&str; 9] = [
     "cashapp",
 ];
 
-/* [174A-71/174A-72] Mensajería directa: conversaciones, listado paginado, envío
- * texto/media/sample y marcación de leídos. El corte actual ya emite el evento
- * websocket legado `mensaje_nuevo`; las notificaciones persistentes siguen para 174A-74. */
+/* [174A-71/174A-72/174A-74] Mensajería directa: conversaciones, listado
+ * paginado, envío texto/media/sample y marcación de leídos. El corte actual ya
+ * emite el evento websocket legado `mensaje_nuevo`; la persistencia base de
+ * notificaciones vive en 174A-74 y el pipeline emisor unificado queda para 174A-78. */
 
 #[derive(Debug, Clone, Deserialize, IntoParams)]
 pub struct MessageListQuery {

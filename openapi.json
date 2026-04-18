@@ -2349,6 +2349,169 @@
         ]
       }
     },
+    "/api/notificaciones": {
+      "get": {
+        "tags": [
+          "notifications"
+        ],
+        "operationId": "list_notifications",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de notificaciones del usuario",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/notificaciones/conteo": {
+      "get": {
+        "tags": [
+          "notifications"
+        ],
+        "operationId": "unread_notifications_count",
+        "responses": {
+          "200": {
+            "description": "Conteo de notificaciones no leídas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationCountResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/notificaciones/leer-todas": {
+      "post": {
+        "tags": [
+          "notifications"
+        ],
+        "operationId": "mark_all_notifications_read",
+        "responses": {
+          "200": {
+            "description": "Todas las notificaciones marcadas como leídas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/notificaciones/{id}/leer": {
+      "post": {
+        "tags": [
+          "notifications"
+        ],
+        "operationId": "mark_notification_read",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID de la notificación",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Notificación marcada como leída",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
     "/api/publicaciones": {
       "get": {
         "tags": [
@@ -4764,6 +4927,51 @@
           }
         }
       },
+      "NotificationActor": {
+        "type": "object",
+        "required": [
+          "username",
+          "nombreVisible"
+        ],
+        "properties": {
+          "avatarUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "nombreVisible": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          }
+        }
+      },
+      "NotificationCountResponse": {
+        "type": "object",
+        "required": [
+          "total"
+        ],
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "NotificationListResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserNotification"
+            }
+          }
+        }
+      },
       "OkResponse": {
         "type": "object",
         "required": [
@@ -5990,6 +6198,55 @@
             "type": "string"
           },
           "url": {
+            "type": "string"
+          }
+        }
+      },
+      "UserNotification": {
+        "type": "object",
+        "required": [
+          "id",
+          "tipo",
+          "titulo",
+          "mensaje",
+          "datos",
+          "leida",
+          "creadaAt"
+        ],
+        "properties": {
+          "actor": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NotificationActor"
+              }
+            ],
+            "nullable": true
+          },
+          "creadaAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "datos": {
+            "type": "object"
+          },
+          "enlace": {
+            "type": "string",
+            "nullable": true
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "leida": {
+            "type": "boolean"
+          },
+          "mensaje": {
+            "type": "string"
+          },
+          "tipo": {
+            "type": "string"
+          },
+          "titulo": {
             "type": "string"
           }
         }

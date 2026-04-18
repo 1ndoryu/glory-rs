@@ -8,6 +8,7 @@ mod ia_queue;
 mod like;
 mod message;
 mod moderation;
+mod notification;
 mod post;
 mod play;
 mod processing_queue;
@@ -32,6 +33,9 @@ pub use ia_queue::{
     retry_backoff_duration, IaQueueFailureDisposition, IaQueueRepository, QueuedIaJob,
 };
 pub use moderation::ModerationRepository;
+pub use notification::{
+    CreateNotificationRecord, NotificationActor, NotificationRepository, UserNotification,
+};
 pub use like::{LikeKind, LikeRepository, Reaction};
 pub use message::{
     ConversationMessage, CreateMessageParams, DirectMessageKind, MessageRepository,

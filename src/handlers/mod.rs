@@ -9,6 +9,7 @@ mod feed;
 mod health;
 mod likes;
 mod messages;
+mod notifications;
 mod posts;
 mod plays;
 mod social;
@@ -74,6 +75,10 @@ impl utoipa::Modify for SecurityAddon {
         messages::mark_read,
         messages::mark_all_read,
         messages::start_conversation,
+        notifications::list_notifications,
+        notifications::mark_notification_read,
+        notifications::mark_all_notifications_read,
+        notifications::unread_notifications_count,
         comments::list_comments,
         comments::list_replies,
         comments::create_comment,
@@ -149,10 +154,14 @@ impl utoipa::Modify for SecurityAddon {
         messages::MessageListResponse,
         messages::ConversationMutationResponse,
         messages::MessageMutationResponse,
+        notifications::NotificationListResponse,
+        notifications::NotificationCountResponse,
         crate::repositories::ConversationParticipantSummary,
         crate::repositories::ConversationSummary,
         crate::repositories::ConversationMessage,
         crate::repositories::DirectMessageKind,
+        crate::repositories::NotificationActor,
+        crate::repositories::UserNotification,
         comments::CreateCommentJsonRequest,
         comments::CreateCommentMultipartRequestDoc,
         comments::UpdateCommentRequest,
@@ -294,6 +303,7 @@ fn api_routes() -> Router<AppState> {
         .merge(plays::routes())
         .merge(likes::routes())
         .merge(messages::routes())
+        .merge(notifications::routes())
         .merge(comments::routes())
         .merge(posts::routes())
         .merge(social::routes())

@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO notificaciones (\n                    usuario_id,\n                    tipo,\n                    titulo,\n                    mensaje,\n                    datos,\n                    actor_id,\n                    enlace\n               )\n               VALUES ($1, $2, $3, $4, $5, $6, $7)\n               RETURNING id AS \"id!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Varchar",
+        "Varchar",
+        "Text",
+        "Jsonb",
+        "Int4",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "17286346da5ef21c8e2c7e8911437c9aa0a320dcc61292c2a9a25c12fd4c25a3"
+}

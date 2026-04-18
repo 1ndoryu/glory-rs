@@ -7,6 +7,7 @@ mod ia_queue;
 mod ia_service;
 mod idempotency;
 mod moderation;
+mod notification;
 #[cfg(feature = "s3")]
 pub mod s3_storage;
 mod sample_catalog;
@@ -33,6 +34,7 @@ pub use moderation::{
     ModerationProvider, ModerationProviderFailure, ModerationRequest, ModerationResult,
     ModerationService, ModerationServiceError, ModerationVerdict,
 };
+pub use notification::{CreateNotificationInput, NotificationService, DEFAULT_NOTIFICATION_PAGE_SIZE};
 #[cfg(feature = "s3")]
 pub use s3_storage::S3Storage;
 pub use sample_catalog::SampleCatalogService;

@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS(\n                    SELECT 1\n                    FROM notificaciones\n                    WHERE usuario_id = $1\n                      AND tipo = $2\n                                            AND created_at > NOW() - ($3::int4 * INTERVAL '1 second')\n                      AND (($4::int4 IS NULL AND actor_id IS NULL) OR actor_id = $4)\n                      AND ($5::jsonb IS NULL OR datos = $5)\n                ) AS \"exists!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "exists!",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Text",
+        "Int4",
+        "Int4",
+        "Jsonb"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "d7ce92f0036553bd090745aedcc38e815b743cbb71ec43dcc46b5556f1bb9b52"
+}

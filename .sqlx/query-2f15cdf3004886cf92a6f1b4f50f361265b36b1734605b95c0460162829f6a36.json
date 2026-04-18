@@ -1,0 +1,85 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT n.id AS \"id!\",\n                      COALESCE(n.tipo, 'sistema') AS \"tipo!\",\n                      COALESCE(n.titulo, '') AS \"titulo!\",\n                      COALESCE(n.mensaje, '') AS \"mensaje!\",\n                      COALESCE(n.datos, '{}'::jsonb) AS \"datos!: serde_json::Value\",\n                      COALESCE(n.leida, FALSE) AS \"leida!\",\n                      n.enlace AS \"enlace\",\n                      n.created_at AS \"creada_at!: chrono::DateTime<chrono::Utc>\",\n                      u.username AS \"actor_username\",\n                      COALESCE(u.nombre_visible, u.username) AS \"actor_display_name\",\n                      u.avatar_url AS \"actor_avatar_url\"\n               FROM notificaciones n\n               LEFT JOIN usuarios_ext u\n                 ON u.id = n.actor_id\n                AND u.estado = 'activo'\n               WHERE n.usuario_id = $1\n                 AND (n.actor_id IS NULL OR u.id IS NOT NULL)\n                 AND NOT COALESCE(n.actor_id = ANY($2::int4[]), FALSE)\n               ORDER BY n.created_at DESC, n.id DESC\n               LIMIT $3 OFFSET $4",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "tipo!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "titulo!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "mensaje!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "datos!: serde_json::Value",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 5,
+        "name": "leida!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 6,
+        "name": "enlace",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 7,
+        "name": "creada_at!: chrono::DateTime<chrono::Utc>",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 8,
+        "name": "actor_username",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 9,
+        "name": "actor_display_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 10,
+        "name": "actor_avatar_url",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4Array",
+        "Int8",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      null,
+      null,
+      null,
+      null,
+      true,
+      true,
+      false,
+      null,
+      true
+    ]
+  },
+  "hash": "2f15cdf3004886cf92a6f1b4f50f361265b36b1734605b95c0460162829f6a36"
+}
