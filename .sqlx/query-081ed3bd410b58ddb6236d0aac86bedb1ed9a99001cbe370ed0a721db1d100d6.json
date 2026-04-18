@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT id AS \"id!\", completada AS \"completada!\"\n              FROM reproducciones\n             WHERE usuario_id = $1\n               AND sample_id  = $2\n               AND created_at >= NOW() - make_interval(secs => $3::double precision)\n             ORDER BY created_at DESC\n             LIMIT 1\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "completada!",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4",
+        "Float8"
+      ]
+    },
+    "nullable": [
+      false,
+      true
+    ]
+  },
+  "hash": "081ed3bd410b58ddb6236d0aac86bedb1ed9a99001cbe370ed0a721db1d100d6"
+}

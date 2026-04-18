@@ -4,6 +4,7 @@ mod admin;
 mod auth;
 mod feed;
 mod health;
+mod plays;
 mod sample_catalog;
 mod samples;
 mod users;
@@ -56,6 +57,7 @@ impl utoipa::Modify for SecurityAddon {
         sample_catalog::update_sample,
         samples::check_duplicate,
         samples::upload,
+        plays::register_play,
         users::me,
         users::update_me,
         users::public_profile,
@@ -82,6 +84,9 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::SampleCreatorSummary,
         crate::models::CheckDuplicateRequest,
         crate::models::CheckDuplicateResponse,
+        plays::RegisterPlayRequest,
+        plays::RegisterPlayResponse,
+        plays::PlayTriggered,
         crate::models::DeleteSampleResponse,
         crate::models::ListSamplesQuery,
         crate::models::ListSamplesResponse,
@@ -122,6 +127,8 @@ pub fn create_router(
 ) -> Router {
     let public_base_url = config.public_base_url.clone();
     let storage_root = config.storage_root.clone();
+    let algo_planner =
+        crate::algorithm::AlgoPlanner::new(crate::algorithm::AlgoPlannerConfig::legacy_defaults());
     let state = AppState {
         pool,
         redis,
@@ -131,6 +138,7 @@ pub fn create_router(
         )),
         storage,
         public_base_url,
+        algo_planner,
     };
 
     /* CORS: en desarrollo se permite todo. En producción, restringir orígenes */
@@ -163,6 +171,7 @@ fn api_routes() -> Router<AppState> {
         .merge(feed::routes())
         .merge(sample_catalog::routes())
         .merge(samples::routes())
+        .merge(plays::routes())
         .merge(users::routes())
         .merge(admin::routes())
 }

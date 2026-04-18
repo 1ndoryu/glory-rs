@@ -930,6 +930,83 @@
         ]
       }
     },
+    "/api/samples/{id}/play": {
+      "post": {
+        "tags": [
+          "samples"
+        ],
+        "operationId": "register_play",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID del sample reproducido",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterPlayRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Play debounced (fusionado con uno reciente)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterPlayResponse"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Play registrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterPlayResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Body inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
     "/api/samples/{id}/similar": {
       "get": {
         "tags": [
@@ -1716,6 +1793,23 @@
           }
         }
       },
+      "PlayTriggered": {
+        "type": "object",
+        "required": [
+          "fast",
+          "precise"
+        ],
+        "properties": {
+          "fast": {
+            "type": "boolean",
+            "description": "`true` cuando el planificador disparó el recálculo rápido."
+          },
+          "precise": {
+            "type": "boolean",
+            "description": "`true` cuando el planificador disparó el recálculo preciso."
+          }
+        }
+      },
       "PrivateProfileResponse": {
         "allOf": [
           {
@@ -1905,6 +1999,40 @@
         "properties": {
           "refresh_token": {
             "type": "string"
+          }
+        }
+      },
+      "RegisterPlayRequest": {
+        "type": "object",
+        "properties": {
+          "completada": {
+            "type": "boolean",
+            "description": "`true` si el sample se reprodujo hasta el final (>=80% típico)."
+          },
+          "duracion_escuchada": {
+            "type": "number",
+            "format": "float",
+            "description": "Segundos de audio efectivamente escuchados antes del POST."
+          }
+        }
+      },
+      "RegisterPlayResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "debounce",
+          "triggered"
+        ],
+        "properties": {
+          "debounce": {
+            "type": "boolean",
+            "description": "`true` cuando el play se fusionó con uno reciente en lugar de crear fila."
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "triggered": {
+            "$ref": "#/components/schemas/PlayTriggered"
           }
         }
       },

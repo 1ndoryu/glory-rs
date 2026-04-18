@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO reproducciones (usuario_id, sample_id, duracion_escuchada, completada) VALUES ($1, $2, $3, $4)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4",
+        "Float4",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f2c2ddb47b0c213d38469cb5056a11cdecee24cce635a6ae99a635e3f2429a64"
+}

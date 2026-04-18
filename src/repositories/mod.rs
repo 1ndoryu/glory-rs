@@ -1,5 +1,6 @@
 mod ia_queue;
 mod moderation;
+mod play;
 mod processing_queue;
 mod profile;
 mod sample;
@@ -10,6 +11,7 @@ pub use ia_queue::{
     retry_backoff_duration, IaQueueFailureDisposition, IaQueueRepository, QueuedIaJob,
 };
 pub use moderation::ModerationRepository;
+pub use play::{PlayRepository, RegisterPlayOutcome};
 pub use processing_queue::{
     retry_backoff_minutes, ProcessingQueueRepository, QueueFailureDisposition,
     QueuedAudioProcessingJob,

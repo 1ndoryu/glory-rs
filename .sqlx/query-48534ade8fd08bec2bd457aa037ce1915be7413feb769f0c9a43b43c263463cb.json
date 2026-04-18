@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE samples SET total_reproducciones = total_reproducciones + 1 WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "48534ade8fd08bec2bd457aa037ce1915be7413feb769f0c9a43b43c263463cb"
+}

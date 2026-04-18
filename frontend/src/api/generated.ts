@@ -273,6 +273,13 @@ export interface LogoutRequest {
   refresh_token?: string | null;
 }
 
+export interface PlayTriggered {
+  /** `true` cuando el planificador disparó el recálculo rápido. */
+  fast: boolean;
+  /** `true` cuando el planificador disparó el recálculo preciso. */
+  precise: boolean;
+}
+
 /**
  * @nullable
  */
@@ -311,6 +318,20 @@ export type PrivateProfileResponse = PublicProfileResponse & ({
 
 export interface RefreshRequest {
   refresh_token: string;
+}
+
+export interface RegisterPlayRequest {
+  /** `true` si el sample se reprodujo hasta el final (>=80% típico). */
+  completada?: boolean;
+  /** Segundos de audio efectivamente escuchados antes del POST. */
+  duracion_escuchada?: number;
+}
+
+export interface RegisterPlayResponse {
+  /** `true` cuando el play se fusionó con uno reciente en lugar de crear fila. */
+  debounce: boolean;
+  ok: boolean;
+  triggered: PlayTriggered;
 }
 
 export interface RegisterRequest {
@@ -2347,6 +2368,101 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getUploadMutationOptions(options), queryClient);
+    }
+
+export type registerPlayResponse200 = {
+  data: RegisterPlayResponse
+  status: 200
+}
+
+export type registerPlayResponse201 = {
+  data: RegisterPlayResponse
+  status: 201
+}
+
+export type registerPlayResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type registerPlayResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type registerPlayResponseSuccess = (registerPlayResponse200 | registerPlayResponse201) & {
+  headers: Headers;
+};
+export type registerPlayResponseError = (registerPlayResponse400 | registerPlayResponse401) & {
+  headers: Headers;
+};
+
+export type registerPlayResponse = (registerPlayResponseSuccess | registerPlayResponseError)
+
+export const getRegisterPlayUrl = (id: number,) => {
+
+
+
+
+  return `/api/samples/${id}/play`
+}
+
+export const registerPlay = async (id: number,
+    registerPlayRequest: RegisterPlayRequest, options?: RequestInit): Promise<registerPlayResponse> => {
+
+  return customInstance<registerPlayResponse>(getRegisterPlayUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      registerPlayRequest,)
+  }
+);}
+
+
+
+
+export const getRegisterPlayMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof registerPlay>>, TError,{id: number;data: RegisterPlayRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof registerPlay>>, TError,{id: number;data: RegisterPlayRequest}, TContext> => {
+
+const mutationKey = ['registerPlay'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof registerPlay>>, {id: number;data: RegisterPlayRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  registerPlay(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RegisterPlayMutationResult = NonNullable<Awaited<ReturnType<typeof registerPlay>>>
+    export type RegisterPlayMutationBody = RegisterPlayRequest
+    export type RegisterPlayMutationError = ErrorResponse
+
+    export const useRegisterPlay = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof registerPlay>>, TError,{id: number;data: RegisterPlayRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof registerPlay>>,
+        TError,
+        {id: number;data: RegisterPlayRequest},
+        TContext
+      > => {
+      return useMutation(getRegisterPlayMutationOptions(options), queryClient);
     }
 
 export type similarSamplesResponse200 = {

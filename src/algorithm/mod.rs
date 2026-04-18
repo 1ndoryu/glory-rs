@@ -33,3 +33,5 @@ pub mod profile;
 pub mod recommender;
 pub mod signals;
 pub mod tag_affinity;
+
+pub use algo_planner::{AlgoPlanner, AlgoPlannerConfig, InteractionKind, Triggered};

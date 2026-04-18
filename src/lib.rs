@@ -39,4 +39,6 @@ pub struct AppState {
     pub google: Arc<services::GoogleVerifier>,
     pub storage: Arc<dyn services::FileStorage>,
     pub public_base_url: Option<String>,
+    /* [174A-58] Planificador del algoritmo (umbrales fast/precise + recálculos). */
+    pub algo_planner: Arc<algorithm::AlgoPlanner>,
 }
