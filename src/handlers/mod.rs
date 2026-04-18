@@ -62,9 +62,7 @@ impl utoipa::Modify for SecurityAddon {
     )
 )]
 #[allow(clippy::needless_for_each)]
-pub struct ApiDoc;
-
-/// Crea el router principal con CORS, tracing, Swagger UI y todas las rutas
+pub struct ApiDoc;/// Crea el router principal con CORS, tracing, Swagger UI y todas las rutas
 pub fn create_router(
     pool: sqlx::PgPool,
     redis: Option<deadpool_redis::Pool>,
@@ -84,6 +82,10 @@ pub fn create_router(
 
     Router::new()
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
+        /* [174A-6] Alias /docs → /swagger-ui/ para acceso más natural. */
+        .route("/docs", axum::routing::get(|| async {
+            axum::response::Redirect::permanent("/swagger-ui/")
+        }))
         .nest("/api", api_routes())
         .layer(axum::middleware::from_fn(crate::middleware::request_id_middleware))
         .layer(TraceLayer::new_for_http())

@@ -68,8 +68,6 @@
 
 ### Fase 0 — Bootstrap del proyecto Rust
 
-- 174A-6 — OpenAPI scaffold (`utoipa`) + Swagger UI `/docs` + comando CLI `--emit-openapi`
-
 ### Fase 1 — Schema base PostgreSQL
 - 174A-7 — Migración 0001 extensions (pgvector, pg_trgm)
 - 174A-8 — Migración 0002 users + trigger updated_at

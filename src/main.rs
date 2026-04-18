@@ -2,10 +2,24 @@ use glory_backend::config::AppConfig;
 use glory_backend::handlers;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
+use utoipa::OpenApi;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenvy::dotenv().ok();
+
+    /* [174A-6] CLI mínima: --emit-openapi <ruta> escribe el schema a disco
+     * y termina sin arrancar el servidor. Usado por el frontend (Orval)
+     * para regenerar el cliente sin necesidad de un backend corriendo. */
+    let args: Vec<String> = std::env::args().collect();
+    if let Some(idx) = args.iter().position(|a| a == "--emit-openapi") {
+        let path = args.get(idx + 1).cloned().unwrap_or_else(|| "openapi.json".to_string());
+        let doc = handlers::ApiDoc::openapi();
+        let json = serde_json::to_string_pretty(&doc)?;
+        std::fs::write(&path, json)?;
+        println!("OpenAPI schema escrito en {path}");
+        return Ok(());
+    }
 
     /* [174A-4] Tracing: EnvFilter (RUST_LOG) + formato. JSON si LOG_FORMAT=json,
      * si no formato compacto con spans para correlacionar request_id. */
