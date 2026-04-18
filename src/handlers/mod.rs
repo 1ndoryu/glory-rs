@@ -2,7 +2,6 @@
 
 mod auth;
 mod health;
-mod notes;
 
 use axum::Router;
 use tower_http::cors::{Any, CorsLayer};
@@ -37,28 +36,19 @@ impl utoipa::Modify for SecurityAddon {
         health::health_check,
         auth::register,
         auth::login,
-        notes::create_note,
-        notes::get_note,
-        notes::list_notes,
-        notes::update_note,
-        notes::delete_note,
     ),
     components(schemas(
         health::HealthResponse,
         crate::models::RegisterRequest,
         crate::models::LoginRequest,
         crate::models::AuthResponse,
-        crate::models::Note,
-        crate::models::CreateNoteRequest,
-        crate::models::UpdateNoteRequest,
-        crate::models::PaginatedNotes,
         crate::errors::ErrorResponse,
     )),
     modifiers(&SecurityAddon),
     info(
-        title = "Glory RS API",
+        title = "Glory Kamples API",
         version = "0.1.0",
-        description = "Template API — Rust + Axum + OpenAPI"
+        description = "API Kamples — Rust + Axum + OpenAPI"
     )
 )]
 #[allow(clippy::needless_for_each)]
@@ -97,5 +87,4 @@ fn api_routes() -> Router<AppState> {
     Router::new()
         .merge(health::routes())
         .merge(auth::routes())
-        .merge(notes::routes())
 }

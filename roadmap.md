@@ -69,17 +69,6 @@
 ### Fase 0 — Bootstrap del proyecto Rust
 
 ### Fase 1 — Schema base PostgreSQL
-- 174A-7 — Migración 0001 extensions (pgvector, pg_trgm)
-- 174A-8 — Migración 0002 users + trigger updated_at
-- 174A-9 — Migración 0003 samples + trigger enriched_tags + índices (gin/trgm/hnsw)
-- 174A-10 — Migración 0004 collections + collection_samples
-- 174A-11 — Migración 0005 social graph (follows, blocks, likes, plays, downloads, comments, posts, reposts)
-- 174A-12 — Migración 0006 messaging (conversations, messages)
-- 174A-13 — Migración 0007 notifications + push_subscriptions + fcm_tokens
-- 174A-14 — Migración 0008 payments (subscriptions, transactions, free_codes, upload_idempotency)
-- 174A-15 — Migración 0009 blog (articles, article_likes)
-- 174A-16 — Migración 0010 catalog (artists, songs, sample_song_relations)
-- 174A-17 — Migración 0011 algo + colas + sync (algo_state, user_tag_scores, batch_jobs, ia_queue, scraping_*, moderation_queue, reports, legal_reports, duplicate_pairs, sync_changelog, audit_log)
 
 ### Fase 2 — Auth y usuarios
 - 174A-18 — `glory-rs/backend/auth` (argon2, JWT, refresh tokens Redis)
