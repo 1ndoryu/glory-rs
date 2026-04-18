@@ -304,6 +304,10 @@ export interface CreatePostRequest {
   samples_adjuntos?: number[];
 }
 
+export interface DeleteFcmTokenRequest {
+  token: string;
+}
+
 /**
  * Respuesta de `DELETE /api/samples/{slug}`.
  */
@@ -348,6 +352,15 @@ export interface ErrorResponse {
   /** Mensaje legible para el usuario */
   message: string;
 }
+
+export type FcmTokenPlatform = typeof FcmTokenPlatform[keyof typeof FcmTokenPlatform];
+
+
+export const FcmTokenPlatform = {
+  android: 'android',
+  web: 'web',
+  ios: 'ios',
+} as const;
 
 export interface RankedSample {
   /** @nullable */
@@ -698,6 +711,12 @@ export interface PushVapidKeyResponse {
 
 export interface RefreshRequest {
   refresh_token: string;
+}
+
+export interface RegisterFcmTokenRequest {
+  /** @nullable */
+  plataforma?: string | null;
+  token: string;
 }
 
 export interface RegisterPlayRequest {
@@ -4425,6 +4444,184 @@ export function useStreamDownload<TData = Awaited<ReturnType<typeof streamDownlo
 
 
 
+
+export type deleteFcmTokenResponse200 = {
+  data: OkResponse
+  status: 200
+}
+
+export type deleteFcmTokenResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type deleteFcmTokenResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type deleteFcmTokenResponseSuccess = (deleteFcmTokenResponse200) & {
+  headers: Headers;
+};
+export type deleteFcmTokenResponseError = (deleteFcmTokenResponse400 | deleteFcmTokenResponse401) & {
+  headers: Headers;
+};
+
+export type deleteFcmTokenResponse = (deleteFcmTokenResponseSuccess | deleteFcmTokenResponseError)
+
+export const getDeleteFcmTokenUrl = () => {
+
+
+
+
+  return `/api/fcm/eliminar`
+}
+
+export const deleteFcmToken = async (deleteFcmTokenRequest: DeleteFcmTokenRequest, options?: RequestInit): Promise<deleteFcmTokenResponse> => {
+
+  return customInstance<deleteFcmTokenResponse>(getDeleteFcmTokenUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      deleteFcmTokenRequest,)
+  }
+);}
+
+
+
+
+export const getDeleteFcmTokenMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteFcmToken>>, TError,{data: DeleteFcmTokenRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteFcmToken>>, TError,{data: DeleteFcmTokenRequest}, TContext> => {
+
+const mutationKey = ['deleteFcmToken'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteFcmToken>>, {data: DeleteFcmTokenRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  deleteFcmToken(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteFcmTokenMutationResult = NonNullable<Awaited<ReturnType<typeof deleteFcmToken>>>
+    export type DeleteFcmTokenMutationBody = DeleteFcmTokenRequest
+    export type DeleteFcmTokenMutationError = ErrorResponse
+
+    export const useDeleteFcmToken = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteFcmToken>>, TError,{data: DeleteFcmTokenRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteFcmToken>>,
+        TError,
+        {data: DeleteFcmTokenRequest},
+        TContext
+      > => {
+      return useMutation(getDeleteFcmTokenMutationOptions(options), queryClient);
+    }
+
+export type registerFcmTokenResponse200 = {
+  data: OkResponse
+  status: 200
+}
+
+export type registerFcmTokenResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type registerFcmTokenResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type registerFcmTokenResponseSuccess = (registerFcmTokenResponse200) & {
+  headers: Headers;
+};
+export type registerFcmTokenResponseError = (registerFcmTokenResponse400 | registerFcmTokenResponse401) & {
+  headers: Headers;
+};
+
+export type registerFcmTokenResponse = (registerFcmTokenResponseSuccess | registerFcmTokenResponseError)
+
+export const getRegisterFcmTokenUrl = () => {
+
+
+
+
+  return `/api/fcm/registrar`
+}
+
+export const registerFcmToken = async (registerFcmTokenRequest: RegisterFcmTokenRequest, options?: RequestInit): Promise<registerFcmTokenResponse> => {
+
+  return customInstance<registerFcmTokenResponse>(getRegisterFcmTokenUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      registerFcmTokenRequest,)
+  }
+);}
+
+
+
+
+export const getRegisterFcmTokenMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof registerFcmToken>>, TError,{data: RegisterFcmTokenRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof registerFcmToken>>, TError,{data: RegisterFcmTokenRequest}, TContext> => {
+
+const mutationKey = ['registerFcmToken'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof registerFcmToken>>, {data: RegisterFcmTokenRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  registerFcmToken(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RegisterFcmTokenMutationResult = NonNullable<Awaited<ReturnType<typeof registerFcmToken>>>
+    export type RegisterFcmTokenMutationBody = RegisterFcmTokenRequest
+    export type RegisterFcmTokenMutationError = ErrorResponse
+
+    export const useRegisterFcmToken = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof registerFcmToken>>, TError,{data: RegisterFcmTokenRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof registerFcmToken>>,
+        TError,
+        {data: RegisterFcmTokenRequest},
+        TContext
+      > => {
+      return useMutation(getRegisterFcmTokenMutationOptions(options), queryClient);
+    }
 
 export type getFeedResponse200 = {
   data: FeedResponse

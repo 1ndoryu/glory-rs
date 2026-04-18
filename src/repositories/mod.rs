@@ -3,6 +3,7 @@ mod coleccion;
 mod comment;
 mod conversation;
 mod download;
+mod fcm;
 mod follow;
 mod ia_queue;
 mod like;
@@ -29,6 +30,7 @@ pub use conversation::{
     ConversationParticipantSummary, ConversationRepository, ConversationSummary,
 };
 pub use download::{DownloadRepository, SampleDownloadInfo, SampleFileInfo};
+pub use fcm::{FcmTokenRecord, FcmTokenRepository, RegisterFcmTokenRecord};
 pub use follow::FollowRepository;
 pub use ia_queue::{
     retry_backoff_duration, IaQueueFailureDisposition, IaQueueRepository, QueuedIaJob,

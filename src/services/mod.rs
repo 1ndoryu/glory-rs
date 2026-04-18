@@ -1,4 +1,5 @@
 mod audio_pipeline;
+mod fcm;
 mod auth;
 pub mod algo_timing;
 pub mod download_token;
@@ -18,6 +19,10 @@ mod token_store;
 pub use audio_pipeline::{
     AudioPipelineError, AudioPipelineRequest, AudioPipelineResult, AudioPipelineService,
     AudioPipelineStage, AudioTechnicalAnalysis, GeneratedAudioAssets,
+};
+pub use fcm::{
+    FcmDeliveryRuntime, FcmDeliveryRuntimeError, FcmNotificationPayload,
+    FcmNotificationService, FcmSendSummary, FcmTokenPlatform,
 };
 pub use auth::{AuthService, Claims};
 pub use google_oauth::{GoogleIdClaims, GoogleVerifier};

@@ -91,7 +91,6 @@
 ### Fase 10 â€” MensajerÃ­a + WebSocket
 
 ### Fase 11 â€” Notificaciones (5 canales)
-- 174A-76 â€” FCM Android (service-account + envÃ­o)
 - 174A-77 â€” Email SMTP + plantillas
 - 174A-78 â€” Pipeline `notify(user, event)` integrado
 

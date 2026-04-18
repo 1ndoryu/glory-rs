@@ -1533,6 +1533,116 @@
         }
       }
     },
+    "/api/fcm/eliminar": {
+      "post": {
+        "tags": [
+          "fcm"
+        ],
+        "operationId": "delete_fcm_token",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteFcmTokenRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Token FCM eliminado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Payload inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/fcm/registrar": {
+      "post": {
+        "tags": [
+          "fcm"
+        ],
+        "operationId": "register_fcm_token",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterFcmTokenRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Token FCM registrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Payload inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
     "/api/feed": {
       "get": {
         "tags": [
@@ -4675,6 +4785,17 @@
           }
         }
       },
+      "DeleteFcmTokenRequest": {
+        "type": "object",
+        "required": [
+          "token"
+        ],
+        "properties": {
+          "token": {
+            "type": "string"
+          }
+        }
+      },
       "DeleteSampleResponse": {
         "type": "object",
         "description": "Respuesta de `DELETE /api/samples/{slug}`.",
@@ -4786,6 +4907,14 @@
             "description": "Mensaje legible para el usuario"
           }
         }
+      },
+      "FcmTokenPlatform": {
+        "type": "string",
+        "enum": [
+          "android",
+          "web",
+          "ios"
+        ]
       },
       "FeedResponse": {
         "type": "object",
@@ -5516,6 +5645,21 @@
         ],
         "properties": {
           "refresh_token": {
+            "type": "string"
+          }
+        }
+      },
+      "RegisterFcmTokenRequest": {
+        "type": "object",
+        "required": [
+          "token"
+        ],
+        "properties": {
+          "plataforma": {
+            "type": "string",
+            "nullable": true
+          },
+          "token": {
             "type": "string"
           }
         }

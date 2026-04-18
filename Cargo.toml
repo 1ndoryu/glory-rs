@@ -99,7 +99,6 @@ aws-smithy-types = { version = "1", features = ["byte-stream-poll-next"], option
 # - lettre (Fase 11): SMTP
 # - web-push (Fase 11): VAPID
 # - async-stripe (Fase 12): Stripe SDK
-# - gcp_auth (Fase 11): FCM service-account
 # Esto evita pull-in de openssl-sys en Windows (rustls-tls preferido).
 
 [dev-dependencies]

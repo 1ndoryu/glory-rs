@@ -42,6 +42,7 @@ pub struct AppState {
     pub storage: Arc<dyn services::FileStorage>,
     pub public_base_url: Option<String>,
     pub push_runtime: Option<Arc<services::PushDeliveryRuntime>>,
+    pub fcm_runtime: Option<Arc<services::FcmDeliveryRuntime>>,
     pub ws_public_url: Option<String>,
     pub ws_ticket_ttl_secs: i64,
     pub ws_hub: Arc<glory_rs::websocket::WebSocketHub>,

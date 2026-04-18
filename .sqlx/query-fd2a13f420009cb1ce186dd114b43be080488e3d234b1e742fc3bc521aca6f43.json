@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE fcm_tokens\n               SET activo = FALSE,\n                   updated_at = NOW()\n               WHERE token = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "fd2a13f420009cb1ce186dd114b43be080488e3d234b1e742fc3bc521aca6f43"
+}

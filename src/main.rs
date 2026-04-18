@@ -99,7 +99,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         tracing::warn!("VAPID no configurado — Web Push deshabilitado");
     }
 
-    let app = handlers::create_router(pool, redis, config, storage, push_runtime);
+    let fcm_runtime = glory_backend::services::FcmDeliveryRuntime::from_config(&config)?;
+    if let Some(runtime) = fcm_runtime.as_ref() {
+        tracing::info!(
+            project_id = %runtime.project_id(),
+            "FCM Android habilitado"
+        );
+    } else {
+        tracing::warn!("FCM no configurado — Android push deshabilitado");
+    }
+
+    let app = handlers::create_router(pool, redis, config, storage, push_runtime, fcm_runtime);
     let listener = tokio::net::TcpListener::bind(&addr).await?;
     axum::serve(listener, app).await?;
 

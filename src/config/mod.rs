@@ -43,6 +43,8 @@ pub struct AppConfig {
     pub vapid_private_key: Option<String>,
     /// Subject VAPID opcional (`mailto:` o URL pública).
     pub vapid_subject: Option<String>,
+    /// JSON completo de service-account para FCM HTTP v1.
+    pub fcm_service_account_json: Option<String>,
 }
 
 impl AppConfig {
@@ -90,6 +92,10 @@ impl AppConfig {
             vapid_public_key: first_env(&["VAPID_PUBLIC_KEY", "KAMPLES_VAPID_PUBLIC_KEY"]),
             vapid_private_key: first_env(&["VAPID_PRIVATE_KEY", "KAMPLES_VAPID_PRIVATE_KEY"]),
             vapid_subject: first_env(&["VAPID_SUBJECT", "KAMPLES_VAPID_SUBJECT"]),
+            fcm_service_account_json: first_env(&[
+                "FCM_SERVICE_ACCOUNT_JSON",
+                "KAMPLES_FCM_SERVICE_ACCOUNT_JSON",
+            ]),
         })
     }
 }

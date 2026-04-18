@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO fcm_tokens (\n                    usuario_id,\n                    token,\n                    plataforma,\n                    activo\n               )\n               VALUES ($1, $2, $3, TRUE)\n               ON CONFLICT (token)\n               DO UPDATE SET\n                    usuario_id = EXCLUDED.usuario_id,\n                    plataforma = EXCLUDED.plataforma,\n                    activo = TRUE,\n                    updated_at = NOW()",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Text",
+        "Varchar"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "195337750bca3c6eb59115ed75f02688481ba8bc3a11d3cb0e8140f0a4d1c883"
+}
