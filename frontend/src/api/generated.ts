@@ -164,6 +164,24 @@ export interface HealthResponse {
   version: string;
 }
 
+export interface LikeRequest {
+  /**
+     * Reacción opcional. Valores: `like`, `dislike`, `encanta`. Default `like`.
+     * @nullable
+     */
+  reaccion?: string | null;
+  target_id: number;
+  /** Tipo de target. Valores: `sample`, `publicacion`, `cancion`, `relacion`. */
+  tipo: string;
+}
+
+export interface LikeResponse {
+  liked: boolean;
+  ok: boolean;
+  /** @nullable */
+  reaccion?: string | null;
+}
+
 /**
  * Query params de `GET /api/samples`.
  */
@@ -549,6 +567,11 @@ limit?: number | null;
  * @nullable
  */
 offset?: number | null;
+};
+
+export type DeleteLikeParams = {
+tipo: string;
+target_id: number;
 };
 
 export type GetMeFeedParams = {
@@ -1789,6 +1812,195 @@ export function useHealthCheck<TData = Awaited<ReturnType<typeof healthCheck>>, 
 
 
 
+
+export type createLikeResponse200 = {
+  data: LikeResponse
+  status: 200
+}
+
+export type createLikeResponse400 = {
+  data: void
+  status: 400
+}
+
+export type createLikeResponse401 = {
+  data: void
+  status: 401
+}
+
+export type createLikeResponse404 = {
+  data: void
+  status: 404
+}
+
+export type createLikeResponseSuccess = (createLikeResponse200) & {
+  headers: Headers;
+};
+export type createLikeResponseError = (createLikeResponse400 | createLikeResponse401 | createLikeResponse404) & {
+  headers: Headers;
+};
+
+export type createLikeResponse = (createLikeResponseSuccess | createLikeResponseError)
+
+export const getCreateLikeUrl = () => {
+
+
+
+
+  return `/api/like`
+}
+
+export const createLike = async (likeRequest: LikeRequest, options?: RequestInit): Promise<createLikeResponse> => {
+
+  return customInstance<createLikeResponse>(getCreateLikeUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      likeRequest,)
+  }
+);}
+
+
+
+
+export const getCreateLikeMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createLike>>, TError,{data: LikeRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof createLike>>, TError,{data: LikeRequest}, TContext> => {
+
+const mutationKey = ['createLike'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createLike>>, {data: LikeRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createLike(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateLikeMutationResult = NonNullable<Awaited<ReturnType<typeof createLike>>>
+    export type CreateLikeMutationBody = LikeRequest
+    export type CreateLikeMutationError = void
+
+    export const useCreateLike = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createLike>>, TError,{data: LikeRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createLike>>,
+        TError,
+        {data: LikeRequest},
+        TContext
+      > => {
+      return useMutation(getCreateLikeMutationOptions(options), queryClient);
+    }
+
+export type deleteLikeResponse200 = {
+  data: LikeResponse
+  status: 200
+}
+
+export type deleteLikeResponse400 = {
+  data: void
+  status: 400
+}
+
+export type deleteLikeResponse401 = {
+  data: void
+  status: 401
+}
+
+export type deleteLikeResponseSuccess = (deleteLikeResponse200) & {
+  headers: Headers;
+};
+export type deleteLikeResponseError = (deleteLikeResponse400 | deleteLikeResponse401) & {
+  headers: Headers;
+};
+
+export type deleteLikeResponse = (deleteLikeResponseSuccess | deleteLikeResponseError)
+
+export const getDeleteLikeUrl = (params: DeleteLikeParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/like?${stringifiedParams}` : `/api/like`
+}
+
+export const deleteLike = async (params: DeleteLikeParams, options?: RequestInit): Promise<deleteLikeResponse> => {
+
+  return customInstance<deleteLikeResponse>(getDeleteLikeUrl(params),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteLikeMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteLike>>, TError,{params: DeleteLikeParams}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteLike>>, TError,{params: DeleteLikeParams}, TContext> => {
+
+const mutationKey = ['deleteLike'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteLike>>, {params: DeleteLikeParams}> = (props) => {
+          const {params} = props ?? {};
+
+          return  deleteLike(params,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteLikeMutationResult = NonNullable<Awaited<ReturnType<typeof deleteLike>>>
+
+    export type DeleteLikeMutationError = void
+
+    export const useDeleteLike = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteLike>>, TError,{params: DeleteLikeParams}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteLike>>,
+        TError,
+        {params: DeleteLikeParams},
+        TContext
+      > => {
+      return useMutation(getDeleteLikeMutationOptions(options), queryClient);
+    }
 
 export type getMeFeedResponse200 = {
   data: FeedResponse

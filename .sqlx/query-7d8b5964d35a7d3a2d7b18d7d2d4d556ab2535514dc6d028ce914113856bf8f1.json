@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO likes (usuario_id, tipo, target_id, reaccion) VALUES ($1, $2, $3, $4) ON CONFLICT (usuario_id, tipo, target_id) DO UPDATE SET reaccion = EXCLUDED.reaccion, created_at = NOW()",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Varchar",
+        "Int4",
+        "Varchar"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7d8b5964d35a7d3a2d7b18d7d2d4d556ab2535514dc6d028ce914113856bf8f1"
+}

@@ -554,6 +554,98 @@
         }
       }
     },
+    "/api/like": {
+      "post": {
+        "tags": [
+          "social"
+        ],
+        "operationId": "create_like",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LikeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Like creado o actualizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LikeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Tipo o reacción inválidos"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "404": {
+            "description": "Target no encontrado"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "social"
+        ],
+        "operationId": "delete_like",
+        "parameters": [
+          {
+            "name": "tipo",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "target_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reacción eliminada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LikeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Tipo inválido"
+          },
+          "401": {
+            "description": "No autenticado"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
     "/api/me/feed": {
       "get": {
         "tags": [
@@ -1697,6 +1789,47 @@
           },
           "version": {
             "type": "string"
+          }
+        }
+      },
+      "LikeRequest": {
+        "type": "object",
+        "required": [
+          "tipo",
+          "target_id"
+        ],
+        "properties": {
+          "reaccion": {
+            "type": "string",
+            "description": "Reacción opcional. Valores: `like`, `dislike`, `encanta`. Default `like`.",
+            "nullable": true
+          },
+          "target_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tipo": {
+            "type": "string",
+            "description": "Tipo de target. Valores: `sample`, `publicacion`, `cancion`, `relacion`."
+          }
+        }
+      },
+      "LikeResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "liked"
+        ],
+        "properties": {
+          "liked": {
+            "type": "boolean"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "reaccion": {
+            "type": "string",
+            "nullable": true
           }
         }
       },

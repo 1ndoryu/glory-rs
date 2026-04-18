@@ -4,6 +4,7 @@ mod admin;
 mod auth;
 mod feed;
 mod health;
+mod likes;
 mod plays;
 mod sample_catalog;
 mod samples;
@@ -58,6 +59,8 @@ impl utoipa::Modify for SecurityAddon {
         samples::check_duplicate,
         samples::upload,
         plays::register_play,
+        likes::create_like,
+        likes::delete_like,
         users::me,
         users::update_me,
         users::public_profile,
@@ -87,6 +90,8 @@ impl utoipa::Modify for SecurityAddon {
         plays::RegisterPlayRequest,
         plays::RegisterPlayResponse,
         plays::PlayTriggered,
+        likes::LikeRequest,
+        likes::LikeResponse,
         crate::models::DeleteSampleResponse,
         crate::models::ListSamplesQuery,
         crate::models::ListSamplesResponse,
@@ -172,6 +177,7 @@ fn api_routes() -> Router<AppState> {
         .merge(sample_catalog::routes())
         .merge(samples::routes())
         .merge(plays::routes())
+        .merge(likes::routes())
         .merge(users::routes())
         .merge(admin::routes())
 }

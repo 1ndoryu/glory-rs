@@ -1,4 +1,5 @@
 mod ia_queue;
+mod like;
 mod moderation;
 mod play;
 mod processing_queue;
@@ -11,6 +12,7 @@ pub use ia_queue::{
     retry_backoff_duration, IaQueueFailureDisposition, IaQueueRepository, QueuedIaJob,
 };
 pub use moderation::ModerationRepository;
+pub use like::{LikeKind, LikeRepository, Reaction};
 pub use play::{PlayRepository, RegisterPlayOutcome};
 pub use processing_queue::{
     retry_backoff_minutes, ProcessingQueueRepository, QueueFailureDisposition,

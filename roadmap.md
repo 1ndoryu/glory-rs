@@ -86,7 +86,6 @@
 
 ### Fase 8 â€” Reproducciones, likes, follows, downloads
 
-- 174A-59 â€” Likes polimÃ³rficos
 - 174A-60 â€” Follows + Blocks
 - 174A-61 â€” Downloads (lÃ­mites por plan + tracking)
 - 174A-62 â€” `POST /downloads/{sample_id}/zip`
