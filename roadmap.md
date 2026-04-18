@@ -76,7 +76,6 @@
 - nota: me di cuenta que hay lugares en donde no se esta usando query! y en vez se usa sin !, necesitamos comprobaciones reales en tiempo real para ir chqueando que todo va quedando bien, corrige todo los query posibles.
 
 ### Fase 4 â€” Audio pipeline (lo mÃ¡s difÃ­cil)
-- 174A-36 â€” Tests con audio fixtures
 
 ### Fase 5 â€” IA pipeline
 - 174A-37 â€” Cliente Groq con rotaciÃ³n 3 keys + retry + fallback chain modelos
