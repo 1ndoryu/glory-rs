@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE publicaciones\n               SET total_reposts = (\n                   SELECT COUNT(*) FROM publicaciones\n                   WHERE repost_id = $1 AND eliminado_en IS NULL\n               )\n               WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "694f5410f429484e00657d3daf740946c624e4faf51b0cc707328ce74faafdcd"
+}

@@ -1,0 +1,25 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO publicaciones (\n                    autor_id, tipo, contenido, imagenes, samples_adjuntos, repost_id, moderacion_estado\n               ) VALUES ($1, 'social', '', $3, $4, $2, 'aprobado')\n               ON CONFLICT DO NOTHING\n               RETURNING id AS \"id!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4",
+        "TextArray",
+        "Int4Array"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "d4e186c996882339fcdb8ded630c7b75974ecbfe9dc4f14d43af6bc50b1705b0"
+}

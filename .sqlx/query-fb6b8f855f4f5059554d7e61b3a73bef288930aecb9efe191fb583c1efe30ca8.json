@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COUNT(*) AS \"count!\"\n               FROM samples\n               WHERE id = ANY($1::int[]) AND eliminado_en IS NULL",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "count!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4Array"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "fb6b8f855f4f5059554d7e61b3a73bef288930aecb9efe191fb583c1efe30ca8"
+}

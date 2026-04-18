@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT EXISTS(SELECT 1 FROM publicaciones WHERE id = $1) AS \"e!\"",
+  "query": "SELECT EXISTS(SELECT 1 FROM publicaciones WHERE id = $1 AND eliminado_en IS NULL) AS \"e!\"",
   "describe": {
     "columns": [
       {
@@ -18,5 +18,5 @@
       null
     ]
   },
-  "hash": "1c0fa92ce949528d5c0bef69830436450e42cb4338a51ea87e9bfc7b99d003a3"
+  "hash": "3d590085186040e582135d71c22b5428ac9092b84a2ada7fd3e1695c0897a0b1"
 }

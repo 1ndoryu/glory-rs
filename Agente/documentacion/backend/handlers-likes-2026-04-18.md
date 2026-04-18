@@ -34,6 +34,9 @@ Elimina la reacción del usuario al target. Idempotente.
 4. Recontar `total_likes` en la tabla destino contando solo reacciones positivas (`like` + `encanta`). Los dislikes son privados.
 5. Disparar `AlgoPlanner::register_interaction(user, InteractionKind::Like)` para refrescar buckets.
 
+## Ajuste posterior — 174A-67
+- El branch `tipo=publicacion` ahora exige `eliminado_en IS NULL` en `LikeRepository::target_exists`. Un post soft-deleted deja de ser target válido para likes aunque el ID siga existiendo.
+
 ## Decisiones vs legado PHP (`SocialController::darLike/quitarLike`)
 - **Dislike:** El legado llamaba `PlanificadorAlgoritmo::registrarInteraccion(user, 'dislike')`, pero `algoritmo_estado` solo tiene contador `cnt_likes`. En Rust se usa `InteractionKind::Like` para todas las reacciones (mismo bucket).
 - **Rate limit (30/min):** NO portado. Pendiente cuando exista `RateLimiter` global.

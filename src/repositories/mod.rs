@@ -5,6 +5,7 @@ mod follow;
 mod ia_queue;
 mod like;
 mod moderation;
+mod post;
 mod play;
 mod processing_queue;
 mod profile;
@@ -22,6 +23,7 @@ pub use ia_queue::{
 };
 pub use moderation::ModerationRepository;
 pub use like::{LikeKind, LikeRepository, Reaction};
+pub use post::{PostAuthorSummary, PostDetail, PostListParams, PostRepository, RepostedPostSummary};
 pub use play::{PlayRepository, RegisterPlayOutcome};
 pub use processing_queue::{
     retry_backoff_minutes, ProcessingQueueRepository, QueueFailureDisposition,

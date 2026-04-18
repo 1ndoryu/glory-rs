@@ -151,6 +151,12 @@ export interface CreateColeccionRequest {
   publica?: boolean;
 }
 
+export interface CreatePostRequest {
+  contenido?: string;
+  imagenes?: string[];
+  samples_adjuntos?: number[];
+}
+
 /**
  * Respuesta de `DELETE /api/samples/{slug}`.
  */
@@ -392,6 +398,61 @@ export interface PlayTriggered {
   precise: boolean;
 }
 
+export interface PostAuthorSummary {
+  /** @nullable */
+  avatar_url?: string | null;
+  id: number;
+  /** @nullable */
+  nombre_visible?: string | null;
+  username: string;
+  verificado: boolean;
+}
+
+export interface RepostedPostSummary {
+  autor: PostAuthorSummary;
+  contenido: string;
+  created_at: string;
+  id: number;
+  imagenes: string[];
+  samples_adjuntos: number[];
+  total_comentarios: number;
+  total_likes: number;
+  total_reposts: number;
+}
+
+export interface PostDetail {
+  autor: PostAuthorSummary;
+  autor_id: number;
+  contenido: string;
+  created_at: string;
+  id: number;
+  imagenes: string[];
+  /** @nullable */
+  mi_reaccion?: string | null;
+  moderacion_estado: string;
+  /** @nullable */
+  repost_id?: number | null;
+  repost_original?: RepostedPostSummary | null;
+  samples_adjuntos: number[];
+  siguiendo_autor: boolean;
+  tipo: string;
+  total_comentarios: number;
+  total_likes: number;
+  total_reposts: number;
+  yo_ya_repostee: boolean;
+}
+
+export interface PostListResponse {
+  items: PostDetail[];
+  page: number;
+  per_page: number;
+}
+
+export interface PostMutationResponse {
+  ok: boolean;
+  post: PostDetail;
+}
+
 /**
  * @nullable
  */
@@ -452,6 +513,12 @@ export interface RegisterRequest {
   nombre_visible?: string | null;
   password: string;
   username: string;
+}
+
+export interface RepostResponse {
+  already_exists: boolean;
+  ok: boolean;
+  post: PostDetail;
 }
 
 export type SampleDetailResponseMetadata = { [key: string]: unknown };
@@ -581,6 +648,12 @@ export interface UpdateColeccionRequest {
   parent_id?: number | null;
   /** @nullable */
   publica?: boolean | null;
+}
+
+export interface UpdatePostRequest {
+  contenido?: string;
+  imagenes?: string[];
+  samples_adjuntos?: number[];
 }
 
 /**
@@ -729,6 +802,16 @@ limit?: number | null;
  * @nullable
  */
 offset?: number | null;
+};
+
+export type ListPostsParams = {
+page?: number;
+per_page?: number;
+filtro?: string;
+/**
+ * @nullable
+ */
+author_id?: number | null;
 };
 
 export type ListSamplesParams = {
@@ -4228,6 +4311,641 @@ export function useGetMeFeed<TData = Awaited<ReturnType<typeof getMeFeed>>, TErr
 
 
 
+
+export type listPostsResponse200 = {
+  data: PostListResponse
+  status: 200
+}
+
+export type listPostsResponseSuccess = (listPostsResponse200) & {
+  headers: Headers;
+};
+;
+
+export type listPostsResponse = (listPostsResponseSuccess)
+
+export const getListPostsUrl = (params?: ListPostsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/publicaciones?${stringifiedParams}` : `/api/publicaciones`
+}
+
+export const listPosts = async (params?: ListPostsParams, options?: RequestInit): Promise<listPostsResponse> => {
+
+  return customInstance<listPostsResponse>(getListPostsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListPostsQueryKey = (params?: ListPostsParams,) => {
+    return [
+    `/api/publicaciones`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListPostsQueryOptions = <TData = Awaited<ReturnType<typeof listPosts>>, TError = unknown>(params?: ListPostsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listPosts>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListPostsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listPosts>>> = ({ signal }) => listPosts(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listPosts>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListPostsQueryResult = NonNullable<Awaited<ReturnType<typeof listPosts>>>
+export type ListPostsQueryError = unknown
+
+
+export function useListPosts<TData = Awaited<ReturnType<typeof listPosts>>, TError = unknown>(
+ params: undefined |  ListPostsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listPosts>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listPosts>>,
+          TError,
+          Awaited<ReturnType<typeof listPosts>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListPosts<TData = Awaited<ReturnType<typeof listPosts>>, TError = unknown>(
+ params?: ListPostsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listPosts>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listPosts>>,
+          TError,
+          Awaited<ReturnType<typeof listPosts>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListPosts<TData = Awaited<ReturnType<typeof listPosts>>, TError = unknown>(
+ params?: ListPostsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listPosts>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useListPosts<TData = Awaited<ReturnType<typeof listPosts>>, TError = unknown>(
+ params?: ListPostsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listPosts>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListPostsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+export type createPostResponse201 = {
+  data: PostMutationResponse
+  status: 201
+}
+
+export type createPostResponse400 = {
+  data: void
+  status: 400
+}
+
+export type createPostResponseSuccess = (createPostResponse201) & {
+  headers: Headers;
+};
+export type createPostResponseError = (createPostResponse400) & {
+  headers: Headers;
+};
+
+export type createPostResponse = (createPostResponseSuccess | createPostResponseError)
+
+export const getCreatePostUrl = () => {
+
+
+
+
+  return `/api/publicaciones`
+}
+
+export const createPost = async (createPostRequest: CreatePostRequest, options?: RequestInit): Promise<createPostResponse> => {
+
+  return customInstance<createPostResponse>(getCreatePostUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      createPostRequest,)
+  }
+);}
+
+
+
+
+export const getCreatePostMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createPost>>, TError,{data: CreatePostRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof createPost>>, TError,{data: CreatePostRequest}, TContext> => {
+
+const mutationKey = ['createPost'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createPost>>, {data: CreatePostRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createPost(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreatePostMutationResult = NonNullable<Awaited<ReturnType<typeof createPost>>>
+    export type CreatePostMutationBody = CreatePostRequest
+    export type CreatePostMutationError = void
+
+    export const useCreatePost = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createPost>>, TError,{data: CreatePostRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createPost>>,
+        TError,
+        {data: CreatePostRequest},
+        TContext
+      > => {
+      return useMutation(getCreatePostMutationOptions(options), queryClient);
+    }
+
+export type getPostResponse200 = {
+  data: PostMutationResponse
+  status: 200
+}
+
+export type getPostResponse404 = {
+  data: void
+  status: 404
+}
+
+export type getPostResponseSuccess = (getPostResponse200) & {
+  headers: Headers;
+};
+export type getPostResponseError = (getPostResponse404) & {
+  headers: Headers;
+};
+
+export type getPostResponse = (getPostResponseSuccess | getPostResponseError)
+
+export const getGetPostUrl = (id: number,) => {
+
+
+
+
+  return `/api/publicaciones/${id}`
+}
+
+export const getPost = async (id: number, options?: RequestInit): Promise<getPostResponse> => {
+
+  return customInstance<getPostResponse>(getGetPostUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPostQueryKey = (id: number,) => {
+    return [
+    `/api/publicaciones/${id}`
+    ] as const;
+    }
+
+
+export const getGetPostQueryOptions = <TData = Awaited<ReturnType<typeof getPost>>, TError = void>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPost>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPostQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPost>>> = ({ signal }) => getPost(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPost>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetPostQueryResult = NonNullable<Awaited<ReturnType<typeof getPost>>>
+export type GetPostQueryError = void
+
+
+export function useGetPost<TData = Awaited<ReturnType<typeof getPost>>, TError = void>(
+ id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPost>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPost>>,
+          TError,
+          Awaited<ReturnType<typeof getPost>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPost<TData = Awaited<ReturnType<typeof getPost>>, TError = void>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPost>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPost>>,
+          TError,
+          Awaited<ReturnType<typeof getPost>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPost<TData = Awaited<ReturnType<typeof getPost>>, TError = void>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPost>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetPost<TData = Awaited<ReturnType<typeof getPost>>, TError = void>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPost>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetPostQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+export type updatePostResponse200 = {
+  data: PostMutationResponse
+  status: 200
+}
+
+export type updatePostResponse403 = {
+  data: void
+  status: 403
+}
+
+export type updatePostResponseSuccess = (updatePostResponse200) & {
+  headers: Headers;
+};
+export type updatePostResponseError = (updatePostResponse403) & {
+  headers: Headers;
+};
+
+export type updatePostResponse = (updatePostResponseSuccess | updatePostResponseError)
+
+export const getUpdatePostUrl = (id: number,) => {
+
+
+
+
+  return `/api/publicaciones/${id}`
+}
+
+export const updatePost = async (id: number,
+    updatePostRequest: UpdatePostRequest, options?: RequestInit): Promise<updatePostResponse> => {
+
+  return customInstance<updatePostResponse>(getUpdatePostUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      updatePostRequest,)
+  }
+);}
+
+
+
+
+export const getUpdatePostMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePost>>, TError,{id: number;data: UpdatePostRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof updatePost>>, TError,{id: number;data: UpdatePostRequest}, TContext> => {
+
+const mutationKey = ['updatePost'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updatePost>>, {id: number;data: UpdatePostRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updatePost(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdatePostMutationResult = NonNullable<Awaited<ReturnType<typeof updatePost>>>
+    export type UpdatePostMutationBody = UpdatePostRequest
+    export type UpdatePostMutationError = void
+
+    export const useUpdatePost = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePost>>, TError,{id: number;data: UpdatePostRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updatePost>>,
+        TError,
+        {id: number;data: UpdatePostRequest},
+        TContext
+      > => {
+      return useMutation(getUpdatePostMutationOptions(options), queryClient);
+    }
+
+export type deletePostResponse200 = {
+  data: OkResponse
+  status: 200
+}
+
+export type deletePostResponse403 = {
+  data: void
+  status: 403
+}
+
+export type deletePostResponseSuccess = (deletePostResponse200) & {
+  headers: Headers;
+};
+export type deletePostResponseError = (deletePostResponse403) & {
+  headers: Headers;
+};
+
+export type deletePostResponse = (deletePostResponseSuccess | deletePostResponseError)
+
+export const getDeletePostUrl = (id: number,) => {
+
+
+
+
+  return `/api/publicaciones/${id}`
+}
+
+export const deletePost = async (id: number, options?: RequestInit): Promise<deletePostResponse> => {
+
+  return customInstance<deletePostResponse>(getDeletePostUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeletePostMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deletePost>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof deletePost>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['deletePost'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deletePost>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deletePost(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeletePostMutationResult = NonNullable<Awaited<ReturnType<typeof deletePost>>>
+
+    export type DeletePostMutationError = void
+
+    export const useDeletePost = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deletePost>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deletePost>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeletePostMutationOptions(options), queryClient);
+    }
+
+export type repostPostResponse200 = {
+  data: RepostResponse
+  status: 200
+}
+
+export type repostPostResponse400 = {
+  data: void
+  status: 400
+}
+
+export type repostPostResponseSuccess = (repostPostResponse200) & {
+  headers: Headers;
+};
+export type repostPostResponseError = (repostPostResponse400) & {
+  headers: Headers;
+};
+
+export type repostPostResponse = (repostPostResponseSuccess | repostPostResponseError)
+
+export const getRepostPostUrl = (id: number,) => {
+
+
+
+
+  return `/api/publicaciones/${id}/repost`
+}
+
+export const repostPost = async (id: number, options?: RequestInit): Promise<repostPostResponse> => {
+
+  return customInstance<repostPostResponse>(getRepostPostUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getRepostPostMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof repostPost>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof repostPost>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['repostPost'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof repostPost>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  repostPost(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RepostPostMutationResult = NonNullable<Awaited<ReturnType<typeof repostPost>>>
+
+    export type RepostPostMutationError = void
+
+    export const useRepostPost = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof repostPost>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof repostPost>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getRepostPostMutationOptions(options), queryClient);
+    }
+
+export type unrepostPostResponse200 = {
+  data: OkResponse
+  status: 200
+}
+
+export type unrepostPostResponseSuccess = (unrepostPostResponse200) & {
+  headers: Headers;
+};
+;
+
+export type unrepostPostResponse = (unrepostPostResponseSuccess)
+
+export const getUnrepostPostUrl = (id: number,) => {
+
+
+
+
+  return `/api/publicaciones/${id}/repost`
+}
+
+export const unrepostPost = async (id: number, options?: RequestInit): Promise<unrepostPostResponse> => {
+
+  return customInstance<unrepostPostResponse>(getUnrepostPostUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getUnrepostPostMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unrepostPost>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof unrepostPost>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['unrepostPost'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof unrepostPost>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  unrepostPost(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UnrepostPostMutationResult = NonNullable<Awaited<ReturnType<typeof unrepostPost>>>
+
+    export type UnrepostPostMutationError = unknown
+
+    export const useUnrepostPost = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unrepostPost>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof unrepostPost>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getUnrepostPostMutationOptions(options), queryClient);
+    }
 
 export type checkDuplicateResponse200 = {
   data: CheckDuplicateResponse

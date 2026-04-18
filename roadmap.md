@@ -87,7 +87,6 @@
 ### Fase 8 â€” Reproducciones, likes, follows, downloads
 
 ### Fase 9 â€” Colecciones y sociales
-- 174A-67 â€” Posts + reposts + likes
 - 174A-68 â€” Comments polimÃ³rficos + likes + multimedia
 
 ### Fase 10 â€” MensajerÃ­a + WebSocket

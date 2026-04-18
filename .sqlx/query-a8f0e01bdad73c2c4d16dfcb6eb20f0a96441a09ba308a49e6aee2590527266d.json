@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM publicaciones\n               WHERE autor_id = $1 AND repost_id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a8f0e01bdad73c2c4d16dfcb6eb20f0a96441a09ba308a49e6aee2590527266d"
+}

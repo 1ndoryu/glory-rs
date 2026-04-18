@@ -29,17 +29,6 @@ impl LikeKind {
         }
     }
 
-    /// Tabla destino y columna PK donde vive `total_likes`. Se usa para
-    /// recontar tras upsert/delete. No se interpola con input de usuario:
-    /// proviene de un enum cerrado.
-    fn target_table(self) -> &'static str {
-        match self {
-            Self::Sample => "samples",
-            Self::Publicacion => "publicaciones",
-            Self::Cancion => "canciones",
-            Self::Relacion => "relaciones_sample",
-        }
-    }
 }
 
 impl FromStr for LikeKind {
@@ -105,7 +94,7 @@ impl LikeRepository {
             .fetch_one(pool)
             .await?,
             LikeKind::Publicacion => sqlx::query_scalar!(
-                "SELECT EXISTS(SELECT 1 FROM publicaciones WHERE id = $1) AS \"e!\"",
+                "SELECT EXISTS(SELECT 1 FROM publicaciones WHERE id = $1 AND eliminado_en IS NULL) AS \"e!\"",
                 target_id
             )
             .fetch_one(pool)
@@ -175,20 +164,56 @@ impl LikeRepository {
         kind: LikeKind,
         target_id: i32,
     ) -> Result<(), AppError> {
-        /* Whitelisted via enum: no es inyección. */
-        let table = kind.target_table();
-        let sql = format!(
-            "UPDATE {table} SET total_likes = ( \
-                SELECT COUNT(*) FROM likes \
-                 WHERE tipo = $1 AND target_id = $2 \
-                   AND reaccion IN ('like', 'encanta') \
-             ) WHERE id = $2",
-        );
-        sqlx::query(&sql)
-            .bind(kind.as_db_str())
-            .bind(target_id)
-            .execute(pool)
-            .await?;
+        match kind {
+            LikeKind::Sample => {
+                sqlx::query!(
+                    "UPDATE samples SET total_likes = ( \
+                        SELECT COUNT(*) FROM likes \
+                        WHERE tipo = 'sample' AND target_id = $1 \
+                          AND reaccion IN ('like', 'encanta') \
+                    ) WHERE id = $1",
+                    target_id,
+                )
+                .execute(pool)
+                .await?;
+            }
+            LikeKind::Publicacion => {
+                sqlx::query!(
+                    "UPDATE publicaciones SET total_likes = ( \
+                        SELECT COUNT(*) FROM likes \
+                        WHERE tipo = 'publicacion' AND target_id = $1 \
+                          AND reaccion IN ('like', 'encanta') \
+                    ) WHERE id = $1",
+                    target_id,
+                )
+                .execute(pool)
+                .await?;
+            }
+            LikeKind::Cancion => {
+                sqlx::query!(
+                    "UPDATE canciones SET total_likes = ( \
+                        SELECT COUNT(*) FROM likes \
+                        WHERE tipo = 'cancion' AND target_id = $1 \
+                          AND reaccion IN ('like', 'encanta') \
+                    ) WHERE id = $1",
+                    target_id,
+                )
+                .execute(pool)
+                .await?;
+            }
+            LikeKind::Relacion => {
+                sqlx::query!(
+                    "UPDATE relaciones_sample SET total_likes = ( \
+                        SELECT COUNT(*) FROM likes \
+                        WHERE tipo = 'relacion' AND target_id = $1 \
+                          AND reaccion IN ('like', 'encanta') \
+                    ) WHERE id = $1",
+                    target_id,
+                )
+                .execute(pool)
+                .await?;
+            }
+        }
         Ok(())
     }
 }

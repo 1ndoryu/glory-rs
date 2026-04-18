@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE relaciones_sample SET total_likes = ( SELECT COUNT(*) FROM likes WHERE tipo = 'relacion' AND target_id = $1 AND reaccion IN ('like', 'encanta') ) WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "2990e522635abe4bae805defc7e869e62079c8c5cc20f850afdc46241cfdfe6a"
+}

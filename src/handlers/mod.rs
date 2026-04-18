@@ -7,6 +7,7 @@ mod downloads;
 mod feed;
 mod health;
 mod likes;
+mod posts;
 mod plays;
 mod social;
 mod sample_catalog;
@@ -64,6 +65,13 @@ impl utoipa::Modify for SecurityAddon {
         plays::register_play,
         likes::create_like,
         likes::delete_like,
+        posts::create_post,
+        posts::list_posts,
+        posts::get_post,
+        posts::update_post,
+        posts::delete_post,
+        posts::repost_post,
+        posts::unrepost_post,
         social::follow_user,
         social::unfollow_user,
         social::block_user,
@@ -116,6 +124,15 @@ impl utoipa::Modify for SecurityAddon {
         plays::PlayTriggered,
         likes::LikeRequest,
         likes::LikeResponse,
+        posts::CreatePostRequest,
+        posts::UpdatePostRequest,
+        posts::PostListResponse,
+        posts::PostMutationResponse,
+        posts::RepostResponse,
+        posts::OkResponse,
+        crate::repositories::PostAuthorSummary,
+        crate::repositories::RepostedPostSummary,
+        crate::repositories::PostDetail,
         social::OkResponse,
         social::BlockRequest,
         social::BlockedListResponse,
@@ -220,6 +237,7 @@ fn api_routes() -> Router<AppState> {
         .merge(samples::routes())
         .merge(plays::routes())
         .merge(likes::routes())
+        .merge(posts::routes())
         .merge(social::routes())
         .merge(downloads::routes())
         .merge(colecciones::routes())

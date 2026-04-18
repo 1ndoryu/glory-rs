@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE publicaciones\n               SET eliminado_en = NOW()\n               WHERE id = $1\n                 AND autor_id = $2\n                 AND eliminado_en IS NULL\n                 AND repost_id IS NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a815b36095412272deeb34c6eeb9a676997337258db1c37298b20dffa96f4f94"
+}

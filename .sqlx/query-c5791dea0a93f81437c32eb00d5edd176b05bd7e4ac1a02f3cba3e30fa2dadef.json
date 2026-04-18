@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT autor_id AS \"autor_id!\", repost_id\n               FROM publicaciones\n               WHERE id = $1 AND eliminado_en IS NULL",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "autor_id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "repost_id",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      true
+    ]
+  },
+  "hash": "c5791dea0a93f81437c32eb00d5edd176b05bd7e4ac1a02f3cba3e30fa2dadef"
+}

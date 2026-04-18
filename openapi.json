@@ -1543,6 +1543,306 @@
         ]
       }
     },
+    "/api/publicaciones": {
+      "get": {
+        "tags": [
+          "posts"
+        ],
+        "operationId": "list_posts",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "filtro",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "author_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostListResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "posts"
+        ],
+        "operationId": "create_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePostRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostMutationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Payload inválido"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/publicaciones/{id}": {
+      "get": {
+        "tags": [
+          "posts"
+        ],
+        "operationId": "get_post",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID de la publicación",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostMutationResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No encontrada"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "posts"
+        ],
+        "operationId": "update_post",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID de la publicación a editar",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePostRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostMutationResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "No autorizado"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "posts"
+        ],
+        "operationId": "delete_post",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID de la publicación a eliminar",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "No autorizado"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/publicaciones/{id}/repost": {
+      "post": {
+        "tags": [
+          "posts"
+        ],
+        "operationId": "repost_post",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID de la publicación original a repostear",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RepostResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No se puede repostear"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "posts"
+        ],
+        "operationId": "unrepost_post",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID de la publicación original cuyo repost se quiere quitar",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
     "/api/samples": {
       "get": {
         "tags": [
@@ -2756,6 +3056,27 @@
           }
         }
       },
+      "CreatePostRequest": {
+        "type": "object",
+        "properties": {
+          "contenido": {
+            "type": "string"
+          },
+          "imagenes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "samples_adjuntos": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        }
+      },
       "DeleteSampleResponse": {
         "type": "object",
         "description": "Respuesta de `DELETE /api/samples/{slug}`.",
@@ -3123,6 +3444,166 @@
           }
         }
       },
+      "PostAuthorSummary": {
+        "type": "object",
+        "required": [
+          "id",
+          "username",
+          "verificado"
+        ],
+        "properties": {
+          "avatar_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nombre_visible": {
+            "type": "string",
+            "nullable": true
+          },
+          "username": {
+            "type": "string"
+          },
+          "verificado": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PostDetail": {
+        "type": "object",
+        "required": [
+          "id",
+          "autor_id",
+          "tipo",
+          "contenido",
+          "imagenes",
+          "samples_adjuntos",
+          "moderacion_estado",
+          "total_likes",
+          "total_comentarios",
+          "total_reposts",
+          "created_at",
+          "autor",
+          "siguiendo_autor",
+          "yo_ya_repostee"
+        ],
+        "properties": {
+          "autor": {
+            "$ref": "#/components/schemas/PostAuthorSummary"
+          },
+          "autor_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "contenido": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "imagenes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "mi_reaccion": {
+            "type": "string",
+            "nullable": true
+          },
+          "moderacion_estado": {
+            "type": "string"
+          },
+          "repost_id": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "repost_original": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RepostedPostSummary"
+              }
+            ],
+            "nullable": true
+          },
+          "samples_adjuntos": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "siguiendo_autor": {
+            "type": "boolean"
+          },
+          "tipo": {
+            "type": "string"
+          },
+          "total_comentarios": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total_likes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total_reposts": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "yo_ya_repostee": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PostListResponse": {
+        "type": "object",
+        "required": [
+          "items",
+          "page",
+          "per_page"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PostDetail"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "per_page": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PostMutationResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "post"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "post": {
+            "$ref": "#/components/schemas/PostDetail"
+          }
+        }
+      },
       "PrivateProfileResponse": {
         "allOf": [
           {
@@ -3369,6 +3850,80 @@
           },
           "username": {
             "type": "string"
+          }
+        }
+      },
+      "RepostResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "already_exists",
+          "post"
+        ],
+        "properties": {
+          "already_exists": {
+            "type": "boolean"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "post": {
+            "$ref": "#/components/schemas/PostDetail"
+          }
+        }
+      },
+      "RepostedPostSummary": {
+        "type": "object",
+        "required": [
+          "id",
+          "contenido",
+          "imagenes",
+          "samples_adjuntos",
+          "total_likes",
+          "total_comentarios",
+          "total_reposts",
+          "created_at",
+          "autor"
+        ],
+        "properties": {
+          "autor": {
+            "$ref": "#/components/schemas/PostAuthorSummary"
+          },
+          "contenido": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "imagenes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "samples_adjuntos": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "total_comentarios": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total_likes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total_reposts": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -3880,6 +4435,27 @@
           "publica": {
             "type": "boolean",
             "nullable": true
+          }
+        }
+      },
+      "UpdatePostRequest": {
+        "type": "object",
+        "properties": {
+          "contenido": {
+            "type": "string"
+          },
+          "imagenes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "samples_adjuntos": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
           }
         }
       },

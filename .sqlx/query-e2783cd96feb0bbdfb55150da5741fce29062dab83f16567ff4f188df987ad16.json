@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE publicaciones\n               SET contenido = $3,\n                   imagenes = $4,\n                   samples_adjuntos = $5,\n                   moderacion_estado = 'aprobado'\n               WHERE id = $1\n                 AND autor_id = $2\n                 AND eliminado_en IS NULL\n                 AND repost_id IS NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4",
+        "Text",
+        "TextArray",
+        "Int4Array"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e2783cd96feb0bbdfb55150da5741fce29062dab83f16567ff4f188df987ad16"
+}
