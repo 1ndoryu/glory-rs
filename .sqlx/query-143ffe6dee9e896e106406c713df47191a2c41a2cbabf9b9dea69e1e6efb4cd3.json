@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT DISTINCT LOWER(t) AS \"tag!\"\n          FROM (\n              SELECT UNNEST(s.tags) AS t\n                FROM likes l\n                JOIN samples s ON l.target_id = s.id\n               WHERE l.usuario_id = $1\n                 AND l.tipo = 'sample'\n                 AND l.reaccion IN ('like', 'encanta')\n               LIMIT $2\n          ) sub\n         WHERE t IS NOT NULL AND TRIM(t) <> ''\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "tag!",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "143ffe6dee9e896e106406c713df47191a2c41a2cbabf9b9dea69e1e6efb4cd3"
+}

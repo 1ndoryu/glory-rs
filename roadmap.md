@@ -82,7 +82,6 @@
 ### Fase 6 â€” Samples CRUD + bÃºsqueda
 
 ### Fase 7 â€” Algoritmo de descubrimiento (lo mÃ¡s difÃ­cil #2)
-- 174A-51 â€” `algorithm/candidates.rs` (SelectorCandidatos)
 - 174A-52 â€” `algorithm/recommender.rs` (MotorRecomendacion + cache stale-while-revalidate)
 - 174A-53 â€” `algorithm/precompute.rs` (PrecomputadorFeed + bulk LIMIT*3)
 - 174A-54 â€” `tag_affinity.rs`

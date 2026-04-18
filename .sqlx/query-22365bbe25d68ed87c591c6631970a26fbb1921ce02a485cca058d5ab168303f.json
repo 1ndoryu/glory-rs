@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT s.id AS \"id!\"\n          FROM samples s\n         WHERE s.estado = 'activo'\n           AND s.embedding IS NOT NULL\n           AND s.creador_id <> ALL($1::int[])\n         ORDER BY s.embedding <=> $2\n         LIMIT $3\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4Array",
+        {
+          "Custom": {
+            "name": "vector",
+            "kind": "Simple"
+          }
+        },
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "22365bbe25d68ed87c591c6631970a26fbb1921ce02a485cca058d5ab168303f"
+}

@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT s.id AS \"id!\"\n          FROM samples s\n         WHERE s.estado = 'activo'\n           AND s.creador_id <> ALL($1::int[])\n         ORDER BY (s.total_likes + s.total_reproducciones + s.total_descargas) DESC\n         LIMIT $2\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4Array",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "6eb434a52654b916efdddfe59a49455b1a0cee5a64e7b38de96770a89d85a579"
+}

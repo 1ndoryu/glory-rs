@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT s.id AS \"id!\"\n          FROM samples s\n         WHERE s.estado = 'activo'\n           AND s.creador_id IN (SELECT seguido_id FROM follows WHERE seguidor_id = $1)\n           AND s.creador_id <> ALL($2::int[])\n         ORDER BY s.publicado_at DESC NULLS LAST\n         LIMIT $3\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4Array",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "3b2e660d8d9ff336919a91ccc0d9314deefac0f7d27f8d2fb39e3838074a68a5"
+}

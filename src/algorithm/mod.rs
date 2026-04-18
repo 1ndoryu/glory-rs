@@ -6,5 +6,10 @@
 /* [174A-50] Perfil de usuario para recomendación: BPM/key/scale/tipo/creadores
  * favoritos + géneros declarados, con cache TTL 30min (Redis o memoria). */
 
+/* [174A-51] Selector de candidatos: pre-filtra ~1000 IDs vía 6 fuentes
+ * (trending, embedding ANN, seguidos, top-tags, populares, no reproducidos)
+ * con filtro bidireccional de bloqueos. */
+
+pub mod candidates;
 pub mod profile;
 pub mod signals;

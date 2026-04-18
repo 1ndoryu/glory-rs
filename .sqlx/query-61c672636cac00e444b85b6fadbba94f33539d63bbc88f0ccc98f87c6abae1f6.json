@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT s.id AS \"id!\"\n          FROM samples s\n         WHERE s.estado = 'activo'\n           AND s.creador_id <> ALL($2::int[])\n           AND NOT EXISTS (\n               SELECT 1 FROM reproducciones r\n                WHERE r.usuario_id = $1\n                  AND r.sample_id = s.id\n           )\n         ORDER BY RANDOM()\n         LIMIT $3\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4Array",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "61c672636cac00e444b85b6fadbba94f33539d63bbc88f0ccc98f87c6abae1f6"
+}

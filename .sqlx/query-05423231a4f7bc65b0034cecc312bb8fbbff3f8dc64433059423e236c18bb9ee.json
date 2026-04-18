@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT s.id AS \"id!\"\n          FROM samples s\n         WHERE s.estado = 'activo'\n           AND s.tags && $1::text[]\n           AND s.creador_id <> ALL($2::int[])\n         ORDER BY s.publicado_at DESC NULLS LAST\n         LIMIT $3\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "TextArray",
+        "Int4Array",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "05423231a4f7bc65b0034cecc312bb8fbbff3f8dc64433059423e236c18bb9ee"
+}
