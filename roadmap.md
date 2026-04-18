@@ -82,7 +82,6 @@
 ### Fase 6 â€” Samples CRUD + bÃºsqueda
 
 ### Fase 7 â€” Algoritmo de descubrimiento (lo mÃ¡s difÃ­cil #2)
-- 174A-54 â€” `tag_affinity.rs`
 - 174A-55 â€” Worker `algo_planner.rs`
 - 174A-56 â€” Endpoints `GET /feed`, `GET /me/feed`, `GET /samples/random`
 - 174A-57 â€” MÃ©tricas algo_timing + endpoint admin
@@ -164,6 +163,7 @@
 - 174A-111 â€” Adaptar desktop (Tauri) + auto-updates
 
 ### Fase 19 â€” Despliegue
+- Nota: un error pasado hizo que se borrara la base de datos, hay que reforzar para que no vuelva a suceder, el error problemente fue causado al desplegar directamente o alguna otra razón, se debe tomar todo los medios necesarios para evitar la perdida de datos, tanto de la base de datos tanto como los archivos fisicos que deben perdurar, esto debe tomarse muy en serio porque ya es un error que se cometio en el pasado.
 - 174A-112 â€” Dockerfile multi-stage Rust
 - 174A-113 â€” Dockerfile frontend (Vite â†’ nginx)
 - 174A-114 â€” `docker-compose.yml` Coolify

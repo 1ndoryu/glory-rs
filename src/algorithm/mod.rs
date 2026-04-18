@@ -18,8 +18,13 @@
  * que pre-calcula likes/repro/descargas/follows recientes para alimentar
  * `signals.tendencias` en O(1) por sample. */
 
+/* [174A-54] TagAffinityService: pre-calcula afinidad tag↔usuario en
+ * `user_tag_scores` para que el scoring lea con un JOIN indexado en lugar
+ * de hacer UNNEST + 7 JOINs por request. */
+
 pub mod candidates;
 pub mod precompute;
 pub mod profile;
 pub mod recommender;
 pub mod signals;
+pub mod tag_affinity;

@@ -1,0 +1,64 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT\n                tag           AS \"tag!\",\n                w_likes       AS \"w_likes!\",\n                w_repro       AS \"w_repro!\",\n                w_tiempo      AS \"w_tiempo!\",\n                w_descargas   AS \"w_descargas!\",\n                w_completadas AS \"w_completadas!\",\n                w_dislikes    AS \"w_dislikes!\",\n                w_ctx         AS \"w_ctx!\"\n            FROM user_tag_scores\n            WHERE user_id = $1\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "tag!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "w_likes!",
+        "type_info": "Float4"
+      },
+      {
+        "ordinal": 2,
+        "name": "w_repro!",
+        "type_info": "Float4"
+      },
+      {
+        "ordinal": 3,
+        "name": "w_tiempo!",
+        "type_info": "Float4"
+      },
+      {
+        "ordinal": 4,
+        "name": "w_descargas!",
+        "type_info": "Float4"
+      },
+      {
+        "ordinal": 5,
+        "name": "w_completadas!",
+        "type_info": "Float4"
+      },
+      {
+        "ordinal": 6,
+        "name": "w_dislikes!",
+        "type_info": "Float4"
+      },
+      {
+        "ordinal": 7,
+        "name": "w_ctx!",
+        "type_info": "Float4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "15b861464f8c529c2a7dc76b71aa6248edef1ec82361bb7cb4a995bdff2da1e0"
+}
