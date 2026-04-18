@@ -4,13 +4,18 @@
 #![allow(clippy::missing_errors_doc)]
 #![allow(clippy::missing_panics_doc)]
 
+pub mod algorithm;
+pub mod audio;
 pub mod config;
+pub mod domain;
 pub mod errors;
 pub mod handlers;
 pub mod middleware;
 pub mod models;
 pub mod repositories;
 pub mod services;
+pub mod workers;
+pub mod ws;
 
 use sqlx::PgPool;
 
