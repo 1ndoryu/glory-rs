@@ -1,0 +1,19 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE ia_queue\n             SET status = $2,\n                 attempts = $3,\n                 last_error = $4,\n                 next_retry_at = $5,\n                 processed_at = COALESCE($6, processed_at),\n                 updated_at = NOW()\n             WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Text",
+        "Int4",
+        "Text",
+        "Timestamptz",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a2e237dacf206d5a5b202bbb44eb0e010f8e2858b5f516f54613b207acb8c8e3"
+}

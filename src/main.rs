@@ -87,6 +87,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         };
 
     let _audio_pipeline_workers = glory_backend::workers::spawn_audio_pipeline_workers(&pool, &storage);
+    let _ia_queue_workers = glory_backend::workers::spawn_ia_queue_workers(&pool);
 
     let app = handlers::create_router(pool, redis, config, storage);
     let listener = tokio::net::TcpListener::bind(&addr).await?;

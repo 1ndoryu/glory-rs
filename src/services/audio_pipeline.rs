@@ -8,6 +8,7 @@ use crate::repositories::{
 };
 use crate::services::FileStorage;
 use crate::{errors::AppError, repositories::MarkAudioPipelineFailedParams};
+use chrono::Utc;
 use serde_json::json;
 use sqlx::PgPool;
 use std::future::Future;
@@ -430,12 +431,23 @@ impl AudioPipelineService {
         embedding: &AudioEmbedding,
     ) -> Result<(), AudioPipelineError> {
         progress.stage = AudioPipelineStage::ActivateSample;
+        let mut metadata = build_pipeline_metadata(progress, "completed", None);
+        if let Some(object) = metadata.as_object_mut() {
+            object.insert("ia_pending".to_owned(), json!(true));
+            object.insert("ia_queue_status".to_owned(), json!("pending"));
+            object.insert("ia_enqueued_at".to_owned(), json!(Utc::now()));
+        }
+
         SampleRepository::complete_audio_pipeline(
             &self.pool,
             CompleteAudioPipelineParams {
                 sample_id: sample.id,
                 embedding: embedding.to_pgvector(),
-                metadata: build_pipeline_metadata(progress, "completed", None),
+                metadata,
+                ia_queue_metadata: json!({
+                    "queued_from": "audio_pipeline",
+                    "queued_at": Utc::now(),
+                }),
             },
         )
         .await

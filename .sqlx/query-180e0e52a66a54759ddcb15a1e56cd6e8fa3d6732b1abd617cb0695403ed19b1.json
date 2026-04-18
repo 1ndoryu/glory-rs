@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE samples\n             SET embedding = $2,\n                 estado = 'activo',\n                 publicado_at = COALESCE(publicado_at, NOW()),\n                 metadata = COALESCE(metadata, '{}'::jsonb) || $3,\n                 updated_at = NOW()\n             WHERE id = $1\n               AND eliminado_en IS NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        {
+          "Custom": {
+            "name": "vector",
+            "kind": "Simple"
+          }
+        },
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "180e0e52a66a54759ddcb15a1e56cd6e8fa3d6732b1abd617cb0695403ed19b1"
+}

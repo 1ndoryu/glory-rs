@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE ia_queue\n             SET status = 'completed',\n                 last_error = NULL,\n                 next_retry_at = NULL,\n                 processed_at = NOW(),\n                 updated_at = NOW()\n             WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f3cee0d7c20efc59bd895f2679dcd39ce99c2ce053f2c6d60ed1c41c034beeb0"
+}

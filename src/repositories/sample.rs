@@ -36,6 +36,21 @@ pub struct AudioPipelineSample {
     pub ruta_original: String,
 }
 
+#[derive(Debug, Clone)]
+pub struct AudioIaSample {
+    pub id: i32,
+    pub id_corto: String,
+    pub titulo: String,
+    pub descripcion: String,
+    pub tags: Vec<String>,
+    pub bpm: Option<i32>,
+    pub music_key: Option<String>,
+    pub scale: Option<String>,
+    pub duration_seconds: f32,
+    pub metadata: serde_json::Value,
+    pub estado: String,
+}
+
 pub struct SaveAudioAnalysisParams {
     pub sample_id: i32,
     pub duration_seconds: f32,
@@ -58,10 +73,20 @@ pub struct CompleteAudioPipelineParams {
     pub sample_id: i32,
     pub embedding: Vector,
     pub metadata: serde_json::Value,
+    pub ia_queue_metadata: serde_json::Value,
 }
 
 pub struct MarkAudioPipelineFailedParams {
     pub sample_id: i32,
+    pub metadata: serde_json::Value,
+}
+
+pub struct ApplyAudioIaMetadataParams {
+    pub sample_id: i32,
+    pub titulo: Option<String>,
+    pub slug: Option<String>,
+    pub descripcion: Option<String>,
+    pub tipo: String,
     pub metadata: serde_json::Value,
 }
 
@@ -256,16 +281,92 @@ impl SampleRepository {
         pool: &PgPool,
         params: CompleteAudioPipelineParams,
     ) -> Result<(), sqlx::Error> {
+        /* [174A-42] Activación técnica + enqueue IA deben ser atómicos.
+         * Si el sample se publica pero el enqueue falla, nunca recibiría metadata
+         * creativa; por eso ambas operaciones comparten transacción. */
+        let mut tx = pool.begin().await?;
+
         sqlx::query!(
             "UPDATE samples
              SET embedding = $2,
                  estado = 'activo',
                  publicado_at = COALESCE(publicado_at, NOW()),
-                 metadata = COALESCE(metadata, '{}'::jsonb) || $3
+                 metadata = COALESCE(metadata, '{}'::jsonb) || $3,
+                 updated_at = NOW()
              WHERE id = $1
                AND eliminado_en IS NULL",
             params.sample_id,
             params.embedding as _,
+            params.metadata,
+        )
+        .execute(&mut *tx)
+        .await?;
+
+        sqlx::query!(
+            "INSERT INTO ia_queue (sample_id, metadata)
+             VALUES ($1, $2)
+             ON CONFLICT DO NOTHING",
+            params.sample_id,
+            params.ia_queue_metadata,
+        )
+        .execute(&mut *tx)
+        .await?;
+
+        tx.commit().await?;
+
+        Ok(())
+    }
+
+    pub async fn find_audio_ia_sample(
+        pool: &PgPool,
+        sample_id: i32,
+    ) -> Result<Option<AudioIaSample>, sqlx::Error> {
+        sqlx::query_as!(
+            AudioIaSample,
+            "SELECT
+                id,
+                id_corto as \"id_corto!\",
+                titulo as \"titulo!\",
+                descripcion as \"descripcion!\",
+                COALESCE(tags, ARRAY[]::text[]) as \"tags!: Vec<String>\",
+                bpm,
+                key as \"music_key?\",
+                escala as \"scale?\",
+                duracion as \"duration_seconds!\",
+                COALESCE(metadata, '{}'::jsonb) as \"metadata!: serde_json::Value\",
+                estado as \"estado!\"
+             FROM samples
+             WHERE id = $1
+               AND eliminado_en IS NULL
+             LIMIT 1",
+            sample_id,
+        )
+        .fetch_optional(pool)
+        .await
+    }
+
+    pub async fn apply_audio_ia_metadata(
+        pool: &PgPool,
+        params: ApplyAudioIaMetadataParams,
+    ) -> Result<(), sqlx::Error> {
+        /* [174A-42] La metadata IA se mergea sobre JSONB para preservar audio_pipeline,
+         * origen_subida y cualquier carpeta manual existente; el trigger DB recalcula
+         * `tags_enriquecidos` al tocar `metadata`, así que no se duplica esa lógica aquí. */
+        sqlx::query!(
+            "UPDATE samples
+             SET titulo = COALESCE($2, titulo),
+                 slug = COALESCE($3, slug),
+                 descripcion = COALESCE($4, descripcion),
+                 tipo = $5,
+                 metadata = COALESCE(metadata, '{}'::jsonb) || $6,
+                 updated_at = NOW()
+             WHERE id = $1
+               AND eliminado_en IS NULL",
+            params.sample_id,
+            params.titulo,
+            params.slug,
+            params.descripcion,
+            params.tipo,
             params.metadata,
         )
         .execute(pool)

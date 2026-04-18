@@ -1,0 +1,50 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH picked AS (\n                SELECT id\n                FROM ia_queue\n                WHERE status = 'pending'\n                   OR (status = 'retry_scheduled' AND (next_retry_at IS NULL OR next_retry_at <= NOW()))\n                ORDER BY created_at ASC\n                FOR UPDATE SKIP LOCKED\n                LIMIT 1\n            )\n            UPDATE ia_queue AS queue\n            SET status = 'processing',\n                updated_at = NOW()\n            FROM picked\n            WHERE queue.id = picked.id\n            RETURNING\n                queue.id,\n                queue.sample_id,\n                queue.attempts,\n                queue.max_attempts,\n                queue.metadata as \"metadata!: serde_json::Value\",\n                queue.created_at as \"created_at!: DateTime<Utc>\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "sample_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "attempts",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "max_attempts",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "metadata!: serde_json::Value",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 5,
+        "name": "created_at!: DateTime<Utc>",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "528261fcca8aead9b2feffe3a7f3df50ed42327e4c45b6650ddaf7f2d0c4271d"
+}

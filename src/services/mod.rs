@@ -1,6 +1,7 @@
 mod audio_pipeline;
 mod auth;
 mod google_oauth;
+mod ia_queue;
 mod ia_service;
 mod idempotency;
 pub mod storage;
@@ -14,6 +15,10 @@ pub use audio_pipeline::{
 };
 pub use auth::{AuthService, Claims};
 pub use google_oauth::{GoogleIdClaims, GoogleVerifier};
+pub use ia_queue::{
+	IaQueueProcessRequest, IaQueueProcessResult, IaQueueService,
+	IaQueueServiceError,
+};
 pub use ia_service::{
 	AudioIaAnalysisRequest, AudioIaAnalysisResult, AudioIaFailure,
 	AudioIaProvider, AudioIaService, AudioIaServiceError, OpenAiAttemptFailure,

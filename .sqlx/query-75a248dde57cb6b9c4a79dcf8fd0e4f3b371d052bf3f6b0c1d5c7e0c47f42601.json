@@ -1,0 +1,19 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE samples\n             SET titulo = COALESCE($2, titulo),\n                 slug = COALESCE($3, slug),\n                 descripcion = COALESCE($4, descripcion),\n                 tipo = $5,\n                 metadata = COALESCE(metadata, '{}'::jsonb) || $6,\n                 updated_at = NOW()\n             WHERE id = $1\n               AND eliminado_en IS NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Varchar",
+        "Varchar",
+        "Text",
+        "Varchar",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "75a248dde57cb6b9c4a79dcf8fd0e4f3b371d052bf3f6b0c1d5c7e0c47f42601"
+}

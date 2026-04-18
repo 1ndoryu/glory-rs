@@ -1,0 +1,82 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n                id,\n                id_corto as \"id_corto!\",\n                titulo as \"titulo!\",\n                descripcion as \"descripcion!\",\n                COALESCE(tags, ARRAY[]::text[]) as \"tags!: Vec<String>\",\n                bpm,\n                key as \"music_key?\",\n                escala as \"scale?\",\n                duracion as \"duration_seconds!\",\n                COALESCE(metadata, '{}'::jsonb) as \"metadata!: serde_json::Value\",\n                estado as \"estado!\"\n             FROM samples\n             WHERE id = $1\n               AND eliminado_en IS NULL\n             LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "id_corto!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "titulo!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "descripcion!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "tags!: Vec<String>",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 5,
+        "name": "bpm",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 6,
+        "name": "music_key?",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 7,
+        "name": "scale?",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 8,
+        "name": "duration_seconds!",
+        "type_info": "Float4"
+      },
+      {
+        "ordinal": 9,
+        "name": "metadata!: serde_json::Value",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 10,
+        "name": "estado!",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      false,
+      true,
+      null,
+      true,
+      true,
+      true,
+      false,
+      null,
+      false
+    ]
+  },
+  "hash": "0322d15289521d9d6c0dc9efb885f7f971b98e1d13a1f1ef4395a7f47f0bd971"
+}

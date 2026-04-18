@@ -78,7 +78,6 @@
 ### Fase 4 â€” Audio pipeline (lo mÃ¡s difÃ­cil)
 
 ### Fase 5 â€” IA pipeline
-- 174A-42 â€” Worker `ia_queue_worker.rs` (rate limit + backoff)
 - 174A-43 â€” Service moderaciÃ³n (4 capas)
 
 ### Fase 6 â€” Samples CRUD + bÃºsqueda
