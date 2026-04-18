@@ -4,9 +4,9 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 use thiserror::Error;
 
+use crate::audio::ia::prompts::AUDIO_CLASSIFICATION_SYSTEM_PROMPT;
+
 const GROQ_CHAT_COMPLETIONS_URL: &str = "https://api.groq.com/openai/v1/chat/completions";
-const DEFAULT_SYSTEM_PROMPT: &str =
-    "Eres un experto en produccion musical y clasificacion de audio. Responde unicamente con JSON valido, sin texto adicional.";
 const DEFAULT_MAX_ATTEMPTS_PER_MODEL: usize = 3;
 
 pub const DEFAULT_GROQ_MODEL_CHAIN: [&str; 8] = [
@@ -82,7 +82,7 @@ impl GroqChatRequest {
     pub fn new(user_prompt: impl Into<String>) -> Self {
         Self {
             user_prompt: user_prompt.into(),
-            system_prompt: DEFAULT_SYSTEM_PROMPT.to_owned(),
+            system_prompt: AUDIO_CLASSIFICATION_SYSTEM_PROMPT.to_owned(),
             temperature: 0.2,
             max_tokens: 1_500,
             require_json_object: true,

@@ -2,10 +2,10 @@ use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
+use crate::audio::ia::prompts::AUDIO_CLASSIFICATION_SYSTEM_PROMPT;
+
 const OPENAI_CHAT_COMPLETIONS_URL: &str = "https://api.openai.com/v1/chat/completions";
 const DEFAULT_OPENAI_MODEL: &str = "gpt-4o-mini";
-const DEFAULT_SYSTEM_PROMPT: &str =
-    "Eres un experto en produccion musical y clasificacion de audio. Responde unicamente con JSON valido, sin texto adicional.";
 
 #[derive(Clone)]
 pub struct OpenAiClient {
@@ -51,7 +51,7 @@ impl OpenAiChatRequest {
     pub fn new(user_prompt: impl Into<String>) -> Self {
         Self {
             user_prompt: user_prompt.into(),
-            system_prompt: DEFAULT_SYSTEM_PROMPT.to_owned(),
+            system_prompt: AUDIO_CLASSIFICATION_SYSTEM_PROMPT.to_owned(),
             temperature: 0.2,
             max_tokens: 1_500,
             require_json_object: true,

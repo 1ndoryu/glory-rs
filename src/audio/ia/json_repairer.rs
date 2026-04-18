@@ -3,6 +3,16 @@ use serde_json::{Map, Value};
 use thiserror::Error;
 
 const DEFAULT_TIPO: &str = "oneshot";
+const DEFAULT_FOLDER: &str = "General";
+const PRIMARY_FOLDERS: [(&str, &str); 7] = [
+    ("drums", "Drums"),
+    ("loops", "Loops"),
+    ("samples", "Samples"),
+    ("fx", "FX"),
+    ("instruments", "Instruments"),
+    ("vocals", "Vocals"),
+    ("general", DEFAULT_FOLDER),
+];
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct AudioCreativeMetadata {
@@ -19,6 +29,8 @@ pub struct AudioCreativeMetadata {
     pub descripcion_corta_es: String,
     pub descripcion: String,
     pub descripcion_es: String,
+    pub carpeta_primaria: String,
+    pub carpeta_secundaria: String,
 }
 
 #[derive(Debug, Error, Clone, PartialEq, Eq)]
@@ -95,6 +107,8 @@ impl AudioCreativeMetadata {
             descripcion_corta_es: sanitize_scalar_text(get_string(object, "descripcion_corta_es"), 150),
             descripcion: sanitize_scalar_text(get_string(object, "descripcion"), 500),
             descripcion_es: sanitize_scalar_text(get_string(object, "descripcion_es"), 500),
+            carpeta_primaria: normalize_primary_folder(get_string(object, "carpeta_primaria")),
+            carpeta_secundaria: normalize_secondary_folder(get_string(object, "carpeta_secundaria")),
         }
     }
 
@@ -332,6 +346,23 @@ fn normalize_tipo(tipo_raw: &str) -> String {
     match tipo_raw.trim().to_ascii_lowercase().as_str() {
         "loop" => "loop".to_owned(),
         _ => DEFAULT_TIPO.to_owned(),
+    }
+}
+
+fn normalize_primary_folder(folder_raw: &str) -> String {
+    let normalized = folder_raw.trim().to_ascii_lowercase();
+    PRIMARY_FOLDERS
+        .iter()
+        .find_map(|(candidate, label)| (*candidate == normalized).then(|| (*label).to_owned()))
+        .unwrap_or_else(|| DEFAULT_FOLDER.to_owned())
+}
+
+fn normalize_secondary_folder(folder_raw: &str) -> String {
+    let sanitized = sanitize_scalar_text(folder_raw, 60);
+    if sanitized.is_empty() {
+        DEFAULT_FOLDER.to_owned()
+    } else {
+        sanitized
     }
 }
 
