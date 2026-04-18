@@ -1,4 +1,5 @@
 pub mod groq;
+pub mod json_repairer;
 pub mod openai;
 
 /* [174A-37] Clientes IA específicos del pipeline de audio.
