@@ -82,7 +82,6 @@
 ### Fase 6 â€” Samples CRUD + bÃºsqueda
 
 ### Fase 7 â€” Algoritmo de descubrimiento (lo mÃ¡s difÃ­cil #2)
-- 174A-49 â€” `algorithm/signals.rs` (6 seÃ±ales con pesos exactos)
 - 174A-50 â€” `algorithm/profile.rs` (PerfilUsuario, TTL 30min)
 - 174A-51 â€” `algorithm/candidates.rs` (SelectorCandidatos)
 - 174A-52 â€” `algorithm/recommender.rs` (MotorRecomendacion + cache stale-while-revalidate)

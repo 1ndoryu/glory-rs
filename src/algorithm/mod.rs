@@ -1,3 +1,6 @@
-/* [174A-3] Algoritmo de recomendación 6 señales. Fase 8.
- * Pesos: similitud sonora 0.25, afinidad usuario 0.25, frescura 0.15,
- * popularidad 0.15, diversidad 0.10, serendipia 0.10. */
+/* [174A-49] Algoritmo de descubrimiento del feed.
+ * La fase actual arranca por `signals.rs`: pesos, breakdown y fórmulas puras de
+ * las 6 señales del legado vigente. Perfil, candidatos y recomendador llegan en
+ * las tareas siguientes para evitar acoplar el módulo demasiado pronto. */
+
+pub mod signals;
