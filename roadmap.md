@@ -76,7 +76,6 @@
 - nota: me di cuenta que hay lugares en donde no se esta usando query! y en vez se usa sin !, necesitamos comprobaciones reales en tiempo real para ir chqueando que todo va quedando bien, corrige todo los query posibles.
 
 ### Fase 4 â€” Audio pipeline (lo mÃ¡s difÃ­cil)
-- 174A-32 â€” `audio/key.rs` (cromagramas + scale)
 - 174A-33 â€” `audio/embeddings.rs` (vector 128d determinista)
 - 174A-34 â€” Service orquestador `audio_pipeline.rs`
 - 174A-35 â€” Worker async que consume `pending_processing`
