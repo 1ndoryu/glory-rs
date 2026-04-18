@@ -1,3 +1,4 @@
+mod events;
 mod payload;
 
 use axum::extract::{Path, Query, Request, State};
@@ -18,7 +19,10 @@ use crate::repositories::{
 };
 use crate::AppState;
 
-use self::payload::{build_message_storage_key, parse_create_message_request};
+use self::{
+    events::emit_new_message_event,
+    payload::{build_message_storage_key, parse_create_message_request},
+};
 
 const MAX_MESSAGE_CHARS: usize = 5_000;
 const MAX_JSON_BODY_BYTES: usize = 64 * 1024;
@@ -38,9 +42,9 @@ const SPAM_TERMS: [&str; 9] = [
     "cashapp",
 ];
 
-/* [174A-71] Mensajería directa: conversaciones, listado paginado, envío texto/media/sample
- * y marcación de leídos. Este corte deja el dominio REST completo, pero todavía
- * no emite eventos websocket ni crea notificaciones persistentes. */
+/* [174A-71/174A-72] Mensajería directa: conversaciones, listado paginado, envío
+ * texto/media/sample y marcación de leídos. El corte actual ya emite el evento
+ * websocket legado `mensaje_nuevo`; las notificaciones persistentes siguen para 174A-74. */
 
 #[derive(Debug, Clone, Deserialize, IntoParams)]
 pub struct MessageListQuery {
@@ -113,12 +117,17 @@ pub async fn list_conversations(
     user: CurrentUser,
 ) -> Result<Json<ConversationListResponse>, AppError> {
     let hidden_ids = collect_hidden_user_ids(&state, user.user_id).await?;
-    let conversations = ConversationRepository::list_for_user(&state.pool, user.user_id, &hidden_ids)
-        .await?
-        .into_iter()
-        .map(|conversation| normalize_conversation_summary(conversation, state.public_base_url.as_deref()))
-        .collect();
-    Ok(Json(ConversationListResponse { data: conversations }))
+    let conversations =
+        ConversationRepository::list_for_user(&state.pool, user.user_id, &hidden_ids)
+            .await?
+            .into_iter()
+            .map(|conversation| {
+                normalize_conversation_summary(conversation, state.public_base_url.as_deref())
+            })
+            .collect();
+    Ok(Json(ConversationListResponse {
+        data: conversations,
+    }))
 }
 
 #[utoipa::path(
@@ -147,14 +156,21 @@ pub async fn list_messages(
     ensure_not_blocked_pair(&state, user.user_id, other_id).await?;
 
     let limit = query.limit.clamp(1, MAX_MESSAGES_LIMIT);
-    let messages = MessageRepository::list_by_conversation(&state.pool, conversacion_id, limit, query.before_id)
-        .await?
-        .into_iter()
-        .map(|message| normalize_message(message, state.public_base_url.as_deref()))
-        .collect::<Vec<_>>();
+    let messages = MessageRepository::list_by_conversation(
+        &state.pool,
+        conversacion_id,
+        limit,
+        query.before_id,
+    )
+    .await?
+    .into_iter()
+    .map(|message| normalize_message(message, state.public_base_url.as_deref()))
+    .collect::<Vec<_>>();
     let total = MessageRepository::count_by_conversation(&state.pool, conversacion_id).await?;
     let hay_mas = match messages.first() {
-        Some(message) => MessageRepository::has_previous(&state.pool, conversacion_id, message.id).await?,
+        Some(message) => {
+            MessageRepository::has_previous(&state.pool, conversacion_id, message.id).await?
+        }
         None => false,
     };
 
@@ -231,7 +247,9 @@ pub async fn send_message(
                 .ok_or_else(|| AppError::Validation("sample_id es obligatorio".into()))?;
             let sample = MessageRepository::find_sample_for_share(&state.pool, sample_id)
                 .await?
-                .ok_or_else(|| AppError::NotFound(format!("sample {sample_id} no existe o no está activo")))?;
+                .ok_or_else(|| {
+                    AppError::NotFound(format!("sample {sample_id} no existe o no está activo"))
+                })?;
             if contenido.is_empty() {
                 contenido.clone_from(&sample.titulo);
             }
@@ -272,12 +290,13 @@ pub async fn send_message(
     let message = MessageRepository::get(&state.pool, message_id)
         .await?
         .ok_or_else(|| AppError::NotFound(format!("mensaje {message_id} no existe")))?;
+    let message = normalize_message(message, state.public_base_url.as_deref());
+
+    emit_new_message_event(&state, other_id, &message);
 
     Ok((
         StatusCode::CREATED,
-        Json(MessageMutationResponse {
-            data: normalize_message(message, state.public_base_url.as_deref()),
-        }),
+        Json(MessageMutationResponse { data: message }),
     ))
 }
 
@@ -348,29 +367,48 @@ pub async fn start_conversation(
         return Err(AppError::Validation("usuario_id inválido".into()));
     }
     if body.usuario_id == user.user_id {
-        return Err(AppError::Validation("no puedes chatear contigo mismo".into()));
+        return Err(AppError::Validation(
+            "no puedes chatear contigo mismo".into(),
+        ));
     }
 
     ensure_active_profile(&state, body.usuario_id, "recibir mensajes").await?;
     ensure_not_blocked_pair(&state, user.user_id, body.usuario_id).await?;
 
     let hidden_ids = collect_hidden_user_ids(&state, user.user_id).await?;
-    if let Some(existing_id) = ConversationRepository::find_between_users(&state.pool, user.user_id, body.usuario_id).await? {
-        let conversation = ConversationRepository::get_for_user(&state.pool, user.user_id, existing_id, &hidden_ids)
+    if let Some(existing_id) =
+        ConversationRepository::find_between_users(&state.pool, user.user_id, body.usuario_id)
             .await?
-            .ok_or_else(|| AppError::NotFound(format!("conversación {existing_id} no existe")))?;
+    {
+        let conversation = ConversationRepository::get_for_user(
+            &state.pool,
+            user.user_id,
+            existing_id,
+            &hidden_ids,
+        )
+        .await?
+        .ok_or_else(|| AppError::NotFound(format!("conversación {existing_id} no existe")))?;
         return Ok((
             StatusCode::OK,
             Json(ConversationMutationResponse {
-                data: normalize_conversation_summary(conversation, state.public_base_url.as_deref()),
+                data: normalize_conversation_summary(
+                    conversation,
+                    state.public_base_url.as_deref(),
+                ),
             }),
         ));
     }
 
-    let conversation_id = ConversationRepository::create(&state.pool, user.user_id, body.usuario_id).await?;
-    let conversation = ConversationRepository::get_for_user(&state.pool, user.user_id, conversation_id, &hidden_ids)
-        .await?
-        .ok_or_else(|| AppError::NotFound(format!("conversación {conversation_id} no existe")))?;
+    let conversation_id =
+        ConversationRepository::create(&state.pool, user.user_id, body.usuario_id).await?;
+    let conversation = ConversationRepository::get_for_user(
+        &state.pool,
+        user.user_id,
+        conversation_id,
+        &hidden_ids,
+    )
+    .await?
+    .ok_or_else(|| AppError::NotFound(format!("conversación {conversation_id} no existe")))?;
 
     Ok((
         StatusCode::CREATED,
@@ -385,7 +423,10 @@ pub fn routes() -> Router<AppState> {
         .route("/mensajes/conversaciones", get(list_conversations))
         .route("/mensajes/nueva", post(start_conversation))
         .route("/mensajes/leer-todas", post(mark_all_read))
-        .route("/mensajes/:conversacion_id", get(list_messages).post(send_message))
+        .route(
+            "/mensajes/:conversacion_id",
+            get(list_messages).post(send_message),
+        )
         .route("/mensajes/:conversacion_id/leer", post(mark_read))
 }
 
@@ -395,7 +436,9 @@ async fn require_conversation_access(
     conversation_id: i32,
 ) -> Result<i32, AppError> {
     if !ConversationRepository::verify_participation(&state.pool, conversation_id, user_id).await? {
-        return Err(AppError::NotFound(format!("conversación {conversation_id} no existe")));
+        return Err(AppError::NotFound(format!(
+            "conversación {conversation_id} no existe"
+        )));
     }
 
     ConversationRepository::other_participant_id(&state.pool, conversation_id, user_id)
@@ -451,11 +494,7 @@ fn ensure_not_spam(content: &str) -> Result<(), AppError> {
         .iter()
         .map(|needle| normalized.matches(needle).count())
         .sum();
-    if url_count >= 2
-        || SPAM_TERMS
-            .iter()
-            .any(|needle| normalized.contains(needle))
-    {
+    if url_count >= 2 || SPAM_TERMS.iter().any(|needle| normalized.contains(needle)) {
         return Err(AppError::Validation(
             "el mensaje fue bloqueado por patrón de spam".into(),
         ));
