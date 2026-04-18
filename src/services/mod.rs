@@ -4,6 +4,7 @@ mod google_oauth;
 mod ia_queue;
 mod ia_service;
 mod idempotency;
+mod moderation;
 pub mod storage;
 #[cfg(feature = "s3")]
 pub mod s3_storage;
@@ -24,6 +25,13 @@ pub use ia_service::{
 	AudioIaProvider, AudioIaService, AudioIaServiceError, OpenAiAttemptFailure,
 };
 pub use idempotency::IdempotencyStore;
+pub use moderation::{
+	ModerationAdminPanel, ModerationAiAssessment, ModerationCategory,
+	ModerationDecision, ModerationEntityKind, ModerationLocalFinding,
+	ModerationOpenAiFailure, ModerationParseFailure, ModerationProvider,
+	ModerationProviderFailure, ModerationRequest, ModerationResult,
+	ModerationService, ModerationServiceError, ModerationVerdict,
+};
 pub use storage::{FileStorage, LocalFs};
 #[cfg(feature = "s3")]
 pub use s3_storage::S3Storage;

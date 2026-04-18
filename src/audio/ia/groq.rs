@@ -95,6 +95,12 @@ impl GroqClient {
         Self::new(load_groq_api_keys())
     }
 
+    pub fn from_env_with_model_chain(
+        model_chain: Vec<String>,
+    ) -> Result<Self, GroqClientError> {
+        Self::with_model_chain(load_groq_api_keys(), model_chain)
+    }
+
     pub fn new(api_keys: Vec<String>) -> Result<Self, GroqClientError> {
         if api_keys.is_empty() {
             return Err(GroqClientError::MissingApiKeys);

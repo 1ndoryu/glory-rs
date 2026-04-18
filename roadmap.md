@@ -78,7 +78,6 @@
 ### Fase 4 â€” Audio pipeline (lo mÃ¡s difÃ­cil)
 
 ### Fase 5 â€” IA pipeline
-- 174A-43 â€” Service moderaciÃ³n (4 capas)
 
 ### Fase 6 â€” Samples CRUD + bÃºsqueda
 - 174A-44 â€” `GET /samples` (paginaciÃ³n + filtros)
