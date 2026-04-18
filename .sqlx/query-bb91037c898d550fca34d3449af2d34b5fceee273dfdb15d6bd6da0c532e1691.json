@@ -1,0 +1,19 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE cola_procesamiento_ia\n             SET estado = $2,\n                 intentos = $3,\n                 ultimo_error = $4,\n                 proximo_intento = $5,\n                 procesado_at = COALESCE($6, procesado_at)\n             WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Text",
+        "Int4",
+        "Text",
+        "Timestamptz",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "bb91037c898d550fca34d3449af2d34b5fceee273dfdb15d6bd6da0c532e1691"
+}

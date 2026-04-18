@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE cola_procesamiento_ia\n             SET estado = 'completado',\n                 ultimo_error = NULL,\n                 proximo_intento = NULL,\n                 procesado_at = NOW()\n             WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "cfd095508489697b6598cc0375476db563ac5470c23ec151ff3e8229746cb436"
+}

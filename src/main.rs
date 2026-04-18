@@ -86,6 +86,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             std::sync::Arc::new(glory_backend::services::LocalFs::new(&config.storage_root).await?)
         };
 
+    let _audio_pipeline_workers = glory_backend::workers::spawn_audio_pipeline_workers(&pool, &storage);
+
     let app = handlers::create_router(pool, redis, config, storage);
     let listener = tokio::net::TcpListener::bind(&addr).await?;
     axum::serve(listener, app).await?;
