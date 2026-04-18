@@ -5,6 +5,8 @@ use axum::{Json, Router};
 use validator::Validate;
 
 use crate::errors::AppError;
+#[allow(unused_imports)]
+use crate::errors::ErrorResponse;
 use crate::middleware::CurrentUser;
 use crate::models::{AuthResponse, GoogleAuthRequest, GooglePkceRequest, LoginRequest, LogoutRequest, RefreshRequest, RegisterRequest};
 use crate::services::AuthService;
@@ -13,8 +15,8 @@ use crate::AppState;
 #[utoipa::path(post, path = "/api/auth/register", request_body = RegisterRequest,
     responses(
         (status = 201, description = "Usuario registrado", body = AuthResponse),
-        (status = 409, description = "Email/username duplicado", body = crate::errors::ErrorResponse),
-        (status = 422, description = "Validacion", body = crate::errors::ErrorResponse)
+        (status = 409, description = "Email/username duplicado", body = ErrorResponse),
+        (status = 422, description = "Validacion", body = ErrorResponse)
     ))]
 pub async fn register(State(state): State<AppState>, Json(req): Json<RegisterRequest>)
     -> Result<(StatusCode, Json<AuthResponse>), AppError> {
@@ -26,8 +28,8 @@ pub async fn register(State(state): State<AppState>, Json(req): Json<RegisterReq
 #[utoipa::path(post, path = "/api/auth/login", request_body = LoginRequest,
     responses(
         (status = 200, description = "Login OK", body = AuthResponse),
-        (status = 401, description = "Credenciales invalidas", body = crate::errors::ErrorResponse),
-        (status = 403, description = "Cuenta no activa", body = crate::errors::ErrorResponse)
+        (status = 401, description = "Credenciales invalidas", body = ErrorResponse),
+        (status = 403, description = "Cuenta no activa", body = ErrorResponse)
     ))]
 pub async fn login(State(state): State<AppState>, Json(req): Json<LoginRequest>)
     -> Result<Json<AuthResponse>, AppError> {
@@ -39,7 +41,7 @@ pub async fn login(State(state): State<AppState>, Json(req): Json<LoginRequest>)
 #[utoipa::path(post, path = "/api/auth/refresh", request_body = RefreshRequest,
     responses(
         (status = 200, description = "Tokens rotados", body = AuthResponse),
-        (status = 401, description = "Refresh token invalido o expirado", body = crate::errors::ErrorResponse)
+        (status = 401, description = "Refresh token invalido o expirado", body = ErrorResponse)
     ))]
 pub async fn refresh(State(state): State<AppState>, Json(req): Json<RefreshRequest>)
     -> Result<Json<AuthResponse>, AppError> {
@@ -52,7 +54,7 @@ pub async fn refresh(State(state): State<AppState>, Json(req): Json<RefreshReque
     security(("bearer_auth" = [])),
     responses(
         (status = 204, description = "Logout OK"),
-        (status = 401, description = "No autenticado", body = crate::errors::ErrorResponse)
+        (status = 401, description = "No autenticado", body = ErrorResponse)
     ))]
 pub async fn logout(
     State(state): State<AppState>,
@@ -76,8 +78,8 @@ pub fn routes() -> Router<AppState> {
 #[utoipa::path(post, path = "/api/auth/google", request_body = GoogleAuthRequest,
     responses(
         (status = 200, description = "Login Google OK", body = AuthResponse),
-        (status = 401, description = "ID token invalido", body = crate::errors::ErrorResponse),
-        (status = 403, description = "Email no verificado o cuenta bloqueada", body = crate::errors::ErrorResponse)
+        (status = 401, description = "ID token invalido", body = ErrorResponse),
+        (status = 403, description = "Email no verificado o cuenta bloqueada", body = ErrorResponse)
     ))]
 pub async fn google_login(State(state): State<AppState>, Json(req): Json<GoogleAuthRequest>)
     -> Result<Json<AuthResponse>, AppError> {
@@ -89,8 +91,8 @@ pub async fn google_login(State(state): State<AppState>, Json(req): Json<GoogleA
 #[utoipa::path(post, path = "/api/auth/google/pkce", request_body = GooglePkceRequest,
     responses(
         (status = 200, description = "Login Google PKCE OK", body = AuthResponse),
-        (status = 401, description = "code/verifier invalido", body = crate::errors::ErrorResponse),
-        (status = 403, description = "Email no verificado o cuenta bloqueada", body = crate::errors::ErrorResponse)
+        (status = 401, description = "code/verifier invalido", body = ErrorResponse),
+        (status = 403, description = "Email no verificado o cuenta bloqueada", body = ErrorResponse)
     ))]
 pub async fn google_pkce(State(state): State<AppState>, Json(req): Json<GooglePkceRequest>)
     -> Result<Json<AuthResponse>, AppError> {

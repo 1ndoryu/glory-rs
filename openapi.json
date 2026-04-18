@@ -181,7 +181,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/crate.errors.ErrorResponse"
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -191,7 +191,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/crate.errors.ErrorResponse"
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -231,7 +231,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/crate.errors.ErrorResponse"
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -241,7 +241,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/crate.errors.ErrorResponse"
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -281,7 +281,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/crate.errors.ErrorResponse"
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -291,7 +291,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/crate.errors.ErrorResponse"
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -324,7 +324,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/crate.errors.ErrorResponse"
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -369,7 +369,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/crate.errors.ErrorResponse"
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -409,7 +409,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/crate.errors.ErrorResponse"
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -419,7 +419,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/crate.errors.ErrorResponse"
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -481,7 +481,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/crate.errors.ErrorResponse"
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -491,7 +491,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/crate.errors.ErrorResponse"
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -501,7 +501,93 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/crate.errors.ErrorResponse"
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/samples/upload": {
+      "post": {
+        "tags": [
+          "samples"
+        ],
+        "operationId": "upload",
+        "requestBody": {
+          "description": "Upload multipart de audio con tags mínimos, flags y clave opcional de idempotencia",
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadSampleRequestDoc"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Resultado recuperado por idempotencia",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadSampleResponse"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Sample subido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadSampleResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validacion multipart/MIME/tags",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Cuenta no activa o limite de plan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Archivo demasiado grande",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -536,7 +622,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/crate.errors.ErrorResponse"
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -579,7 +665,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/crate.errors.ErrorResponse"
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -589,7 +675,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/crate.errors.ErrorResponse"
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -667,7 +753,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/crate.errors.ErrorResponse"
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -1000,11 +1086,7 @@
             "nullable": true
           },
           "generos_favoritos": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/JsonValue"
-              }
-            ],
+            "type": "object",
             "nullable": true
           },
           "id": {
@@ -1115,11 +1197,7 @@
             "nullable": true
           },
           "generos_favoritos": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/JsonValue"
-              }
-            ],
+            "type": "object",
             "nullable": true
           },
           "nombre_visible": {
@@ -1133,6 +1211,94 @@
           "sitio_web": {
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "UploadSampleRequestDoc": {
+        "type": "object",
+        "description": "Schema documental para `multipart/form-data` en `POST /api/samples/upload`.",
+        "required": [
+          "audio"
+        ],
+        "properties": {
+          "audio": {
+            "type": "string",
+            "format": "binary"
+          },
+          "contenido": {
+            "type": "string",
+            "nullable": true
+          },
+          "es_premium": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "licencia_libre": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "mostrar_en_comunidad": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "origen_subida": {
+            "type": "string",
+            "nullable": true
+          },
+          "permitir_descarga": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "precio": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "sync_upload": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "tags": {
+            "type": "string",
+            "description": "JSON array (`[\"tag1\",\"tag2\"]`) o CSV (`tag1,tag2`).",
+            "nullable": true
+          },
+          "titulo": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "UploadSampleResponse": {
+        "type": "object",
+        "description": "Respuesta de `POST /api/samples/upload`.",
+        "required": [
+          "ok",
+          "sample_id",
+          "id_corto",
+          "slug",
+          "url",
+          "estado"
+        ],
+        "properties": {
+          "estado": {
+            "type": "string"
+          },
+          "id_corto": {
+            "type": "string"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "sample_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
           }
         }
       },

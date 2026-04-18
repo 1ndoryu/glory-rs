@@ -48,6 +48,22 @@ impl S3Storage {
 
 #[async_trait]
 impl FileStorage for S3Storage {
+    async fn put_bytes(&self, key: &str, bytes: &[u8]) -> Result<u64, AppError> {
+        validate_key(key)?;
+        self.client
+            .put_object()
+            .bucket(&self.bucket)
+            .key(key)
+            .body(ByteStream::from(bytes.to_vec()))
+            .send()
+            .await
+            .map_err(|e| AppError::ExternalService {
+                service: "s3".into(),
+                message: format!("put_object: {e}"),
+            })?;
+        Ok(u64::try_from(bytes.len()).unwrap_or(0))
+    }
+
     async fn put_stream(
         &self,
         key: &str,
@@ -59,18 +75,8 @@ impl FileStorage for S3Storage {
             .read_to_end(&mut buf)
             .await
             .map_err(|e| AppError::Internal(format!("leer stream s3: {e}")))?;
-        let len = buf.len() as u64;
-        self.client
-            .put_object()
-            .bucket(&self.bucket)
-            .key(key)
-            .body(ByteStream::from(buf))
-            .send()
-            .await
-            .map_err(|e| AppError::ExternalService {
-                service: "s3".into(),
-                message: format!("put_object: {e}"),
-            })?;
+        let len = u64::try_from(buf.len()).unwrap_or(0);
+        self.put_bytes(key, &buf).await?;
         Ok(len)
     }
 

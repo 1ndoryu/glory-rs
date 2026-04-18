@@ -5,6 +5,8 @@ use axum::{Json, Router};
 use validator::Validate;
 
 use crate::errors::AppError;
+#[allow(unused_imports)]
+use crate::errors::ErrorResponse;
 use crate::middleware::CurrentUser;
 use crate::models::{BlockUserRequest, PrivateProfileResponse, PublicProfileResponse, UpdateProfileRequest};
 use crate::repositories::{ModerationRepository, ProfileRepository};
@@ -16,7 +18,7 @@ use crate::AppState;
     security(("bearer_auth" = [])),
     responses(
         (status = 200, description = "Perfil propio", body = PrivateProfileResponse),
-        (status = 401, body = crate::errors::ErrorResponse)
+        (status = 401, body = ErrorResponse)
     ))]
 pub async fn me(State(state): State<AppState>, user: CurrentUser)
     -> Result<Json<PrivateProfileResponse>, AppError> {
@@ -30,8 +32,8 @@ pub async fn me(State(state): State<AppState>, user: CurrentUser)
     security(("bearer_auth" = [])),
     responses(
         (status = 200, description = "Perfil actualizado", body = PrivateProfileResponse),
-        (status = 401, body = crate::errors::ErrorResponse),
-        (status = 422, body = crate::errors::ErrorResponse)
+        (status = 401, body = ErrorResponse),
+        (status = 422, body = ErrorResponse)
     ))]
 pub async fn update_me(
     State(state): State<AppState>,
@@ -47,7 +49,7 @@ pub async fn update_me(
     params(("username" = String, Path, description = "Username publico")),
     responses(
         (status = 200, description = "Perfil publico", body = PublicProfileResponse),
-        (status = 404, body = crate::errors::ErrorResponse)
+        (status = 404, body = ErrorResponse)
     ))]
 pub async fn public_profile(State(state): State<AppState>, Path(username): Path<String>)
     -> Result<Json<PublicProfileResponse>, AppError> {

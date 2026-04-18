@@ -39,6 +39,7 @@ pub struct PublicProfileResponse {
     pub avatar_url: Option<String>,
     pub portada_url: Option<String>,
     pub sitio_web: Option<String>,
+    #[schema(value_type = Option<Object>)]
     pub generos_favoritos: Option<JsonValue>,
     pub plan: String,
     pub rol: String,
@@ -102,5 +103,6 @@ pub struct UpdateProfileRequest {
     pub portada_url: Option<String>,
     #[validate(url)]
     pub sitio_web: Option<String>,
+    #[schema(value_type = Option<Object>)]
     pub generos_favoritos: Option<JsonValue>,
 }

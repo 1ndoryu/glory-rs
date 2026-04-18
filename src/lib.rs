@@ -29,7 +29,8 @@ use std::sync::Arc;
  *   en memoria (DashMap/parking_lot) o degradarse limpiamente.
  * - `jwt_secret`: clave HMAC para firmar/verificar tokens.
  * - `google`: verificador OAuth Google ID-token (compartido).
- * - `storage`: backend de almacenamiento (LocalFs/S3) detrás de trait. */
+ * - `storage`: backend de almacenamiento (LocalFs/S3) detrás de trait.
+ * - `public_base_url`: prefijo opcional para construir URLs absolutas. */
 #[derive(Clone)]
 pub struct AppState {
     pub pool: PgPool,
@@ -37,4 +38,5 @@ pub struct AppState {
     pub jwt_secret: String,
     pub google: Arc<services::GoogleVerifier>,
     pub storage: Arc<dyn services::FileStorage>,
+    pub public_base_url: Option<String>,
 }

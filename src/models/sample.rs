@@ -35,3 +35,32 @@ pub struct CheckDuplicateRequest {
     /// SHA-256 hex precomputado por el cliente (64 chars).
     pub audio_hash: String,
 }
+
+/// Schema documental para `multipart/form-data` en `POST /api/samples/upload`.
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct UploadSampleRequestDoc {
+    #[schema(value_type = String, format = Binary)]
+    pub audio: Vec<u8>,
+    pub titulo: Option<String>,
+    pub contenido: Option<String>,
+    /// JSON array (`["tag1","tag2"]`) o CSV (`tag1,tag2`).
+    pub tags: Option<String>,
+    pub permitir_descarga: Option<bool>,
+    pub licencia_libre: Option<bool>,
+    pub es_premium: Option<bool>,
+    pub mostrar_en_comunidad: Option<bool>,
+    pub sync_upload: Option<bool>,
+    pub origen_subida: Option<String>,
+    pub precio: Option<f64>,
+}
+
+/// Respuesta de `POST /api/samples/upload`.
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+pub struct UploadSampleResponse {
+    pub ok: bool,
+    pub sample_id: i32,
+    pub id_corto: String,
+    pub slug: String,
+    pub url: String,
+    pub estado: String,
+}

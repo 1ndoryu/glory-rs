@@ -29,6 +29,8 @@ pub struct AppConfig {
     pub s3_bucket: Option<String>,
     /// Endpoint URL custom para S3-compatibles (R2/MinIO). Opcional.
     pub s3_endpoint_url: Option<String>,
+    /// Base URL pública opcional para construir enlaces absolutos de uploads.
+    pub public_base_url: Option<String>,
 }
 
 impl AppConfig {
@@ -65,6 +67,7 @@ impl AppConfig {
                 .unwrap_or_else(|_| "local".to_string()),
             s3_bucket: std::env::var("S3_BUCKET").ok(),
             s3_endpoint_url: std::env::var("S3_ENDPOINT_URL").ok(),
+            public_base_url: std::env::var("PUBLIC_BASE_URL").ok(),
         })
     }
 }

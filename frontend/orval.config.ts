@@ -3,8 +3,9 @@ import { defineConfig } from 'orval';
 export default defineConfig({
   glory: {
     input: {
-      /* Apuntar al backend corriendo localmente para obtener el schema OpenAPI */
-      target: 'http://localhost:3000/api-docs/openapi.json',
+      /* [174A-29] Consumir el schema versionado evita depender de un backend vivo
+       * al regenerar el cliente. El contrato se actualiza con `cargo run -- --emit-openapi`. */
+      target: '../openapi.json',
     },
     output: {
       target: './src/api/generated.ts',

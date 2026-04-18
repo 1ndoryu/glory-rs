@@ -19,6 +19,9 @@ use tokio::io::{AsyncRead, AsyncReadExt, AsyncWriteExt};
 
 #[async_trait]
 pub trait FileStorage: Send + Sync {
+    /// Guarda un buffer completo de bytes y devuelve la cantidad escrita.
+    async fn put_bytes(&self, key: &str, bytes: &[u8]) -> Result<u64, AppError>;
+
     /// Guarda bytes leyendo desde un `AsyncRead` y devuelve la cantidad escrita.
     async fn put_stream(
         &self,
@@ -80,6 +83,19 @@ impl LocalFs {
 
 #[async_trait]
 impl FileStorage for LocalFs {
+    async fn put_bytes(&self, key: &str, bytes: &[u8]) -> Result<u64, AppError> {
+        let path = self.resolve(key)?;
+        if let Some(parent) = path.parent() {
+            tokio::fs::create_dir_all(parent)
+                .await
+                .map_err(|e| AppError::Internal(format!("crear dir {}: {e}", parent.display())))?;
+        }
+        tokio::fs::write(&path, bytes)
+            .await
+            .map_err(|e| AppError::Internal(format!("escribir {}: {e}", path.display())))?;
+        Ok(u64::try_from(bytes.len()).unwrap_or(0))
+    }
+
     async fn put_stream(
         &self,
         key: &str,
@@ -165,6 +181,10 @@ mod tests {
         let fs = LocalFs::new(&tmp).await.unwrap();
 
         let data = b"hello world".to_vec();
+        let bytes_written = fs.put_bytes("a/b/direct.bin", &data).await.unwrap();
+        assert_eq!(bytes_written, data.len() as u64);
+        assert_eq!(fs.get_bytes("a/b/direct.bin").await.unwrap(), data);
+
         let mut cur = std::io::Cursor::new(data.clone());
         let n = fs.put_stream("a/b/test.bin", &mut cur).await.unwrap();
         assert_eq!(n, data.len() as u64);

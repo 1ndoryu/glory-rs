@@ -1,0 +1,61 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO samples (\n                creador_id, titulo, slug, id_corto, descripcion, formato, tamano,\n                tags, audio_hash, estado, ruta_original, permitir_descarga,\n                licencia_libre, es_premium, precio, mostrar_en_comunidad, metadata\n             )\n             VALUES (\n                $1, $2, $3, $4, $5, $6, $7,\n                $8, $9, 'procesando', $10, $11,\n                     $12, $13, ROUND(CAST($14 AS double precision)::numeric, 2), $15, $16\n             )\n             RETURNING id, id_corto as \"id_corto!\", slug, estado, ruta_original as \"ruta_original!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "id_corto!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "slug",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "estado",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "ruta_original!",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Text",
+        "Varchar",
+        "Int8",
+        "TextArray",
+        "Varchar",
+        "Text",
+        "Bool",
+        "Bool",
+        "Bool",
+        "Float8",
+        "Bool",
+        "Jsonb"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "e33bb76ce2a5299e00bea9115fae7b97ceb52a7caac1f2126c0006a5ce0a156f"
+}

@@ -73,7 +73,7 @@
 ### Fase 2 â€” Auth y usuarios
 
 ### Fase 3 â€” Storage + uploads
-- 174A-29 â€” `POST /samples/upload` (multipart + idempotency + MIME)
+- nota: me di cuenta que hay lugares en donde no se esta usando query! y en vez se usa sin !, necesitamos comprobaciones reales en tiempo real para ir chqueando que todo va quedando bien, corrige todo los query posibles.
 
 ### Fase 4 â€” Audio pipeline (lo mÃ¡s difÃ­cil)
 - 174A-30 â€” `audio/ffmpeg.rs` (detect, duration, convert MP3/FLAC, waveform peaks)

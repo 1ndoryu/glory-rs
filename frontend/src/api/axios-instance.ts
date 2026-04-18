@@ -18,12 +18,52 @@ instance.interceptors.request.use((config) => {
  * Mutator para Orval — envuelve axios para que los hooks generados
  * funcionen con React Query y cancellation.
  */
-export const customInstance = <T>(config: AxiosRequestConfig): Promise<T> => {
+type OrvalRequestOptions = RequestInit & {
+  params?: AxiosRequestConfig['params'];
+  responseType?: AxiosRequestConfig['responseType'];
+  timeout?: AxiosRequestConfig['timeout'];
+};
+
+function normalizeHeaders(headers?: HeadersInit): AxiosRequestConfig['headers'] {
+  if (!headers) {
+    return undefined;
+  }
+  if (headers instanceof Headers) {
+    return Object.fromEntries(headers.entries());
+  }
+  if (Array.isArray(headers)) {
+    return Object.fromEntries(headers);
+  }
+  return headers;
+}
+
+export const customInstance = <T>(
+  urlOrConfig: string | AxiosRequestConfig,
+  options?: OrvalRequestOptions,
+): Promise<T> => {
+  const requestConfig: AxiosRequestConfig = typeof urlOrConfig === 'string'
+    ? (() => {
+        const { body, headers, method, signal, ...restOptions } = options ?? {};
+        return {
+          ...(restOptions as AxiosRequestConfig),
+          url: urlOrConfig,
+          method: method as AxiosRequestConfig['method'],
+          data: body,
+          signal: signal ?? undefined,
+          headers: normalizeHeaders(headers),
+        };
+      })()
+    : urlOrConfig;
+
   const source = axios.CancelToken.source();
   const promise = instance({
-    ...config,
+    ...requestConfig,
     cancelToken: source.token,
-  }).then(({ data }) => data);
+  }).then(({ data, headers, status }) => ({
+    data,
+    headers: toFetchHeaders(headers),
+    status,
+  }) as T);
 
   // @ts-expect-error -- propiedad cancel para React Query
   promise.cancel = () => source.cancel('Query cancelado');
@@ -32,3 +72,23 @@ export const customInstance = <T>(config: AxiosRequestConfig): Promise<T> => {
 };
 
 export default instance;
+
+function toFetchHeaders(headers: AxiosRequestConfig['headers']): Headers {
+  const normalized = new Headers();
+  if (!headers) {
+    return normalized;
+  }
+
+  const asObject = (typeof (headers as { toJSON?: () => unknown }).toJSON === 'function'
+    ? (headers as { toJSON: () => unknown }).toJSON()
+    : headers) as Record<string, unknown>;
+
+  for (const [key, value] of Object.entries(asObject)) {
+    if (value == null) {
+      continue;
+    }
+    normalized.set(key, String(value));
+  }
+
+  return normalized;
+}

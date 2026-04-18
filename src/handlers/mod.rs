@@ -7,6 +7,7 @@ mod samples;
 mod users;
 
 use axum::Router;
+use tower_http::services::ServeDir;
 use tower_http::cors::{Any, CorsLayer};
 use tower_http::trace::TraceLayer;
 use utoipa::OpenApi;
@@ -44,6 +45,7 @@ impl utoipa::Modify for SecurityAddon {
         auth::google_login,
         auth::google_pkce,
         samples::check_duplicate,
+        samples::upload,
         users::me,
         users::update_me,
         users::public_profile,
@@ -66,6 +68,8 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::UserResponse,
         crate::models::CheckDuplicateRequest,
         crate::models::CheckDuplicateResponse,
+        crate::models::UploadSampleRequestDoc,
+        crate::models::UploadSampleResponse,
         crate::models::UpdateProfileRequest,
         crate::models::PublicProfileResponse,
         crate::models::PrivateProfileResponse,
@@ -91,12 +95,15 @@ pub fn create_router(
     config: crate::config::AppConfig,
     storage: std::sync::Arc<dyn crate::services::FileStorage>,
 ) -> Router {
+    let public_base_url = config.public_base_url.clone();
+    let storage_root = config.storage_root.clone();
     let state = AppState {
         pool,
         redis,
         jwt_secret: config.jwt_secret,
         google: std::sync::Arc::new(crate::services::GoogleVerifier::new(config.google_client_ids)),
         storage,
+        public_base_url,
     };
 
     /* CORS: en desarrollo se permite todo. En producción, restringir orígenes */
@@ -111,6 +118,7 @@ pub fn create_router(
         .route("/docs", axum::routing::get(|| async {
             axum::response::Redirect::permanent("/swagger-ui/")
         }))
+        .nest_service("/uploads", ServeDir::new(storage_root))
         .nest("/api", api_routes())
         .layer(axum::middleware::from_fn(crate::middleware::request_id_middleware))
         .layer(TraceLayer::new_for_http())
@@ -122,7 +130,7 @@ fn api_routes() -> Router<AppState> {
     Router::new()
         .merge(health::routes())
         .merge(auth::routes())
-    .merge(samples::routes())
+        .merge(samples::routes())
         .merge(users::routes())
         .merge(admin::routes())
 }
