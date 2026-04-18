@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n                s.id,\n                s.id_corto,\n                s.slug AS \"slug!\",\n                s.creador_id AS \"creator_id!\"\n             FROM samples s\n             WHERE s.eliminado_en IS NULL\n               AND (LOWER(s.slug) = LOWER($1) OR s.id_corto = $1)\n             ORDER BY CASE WHEN LOWER(s.slug) = LOWER($1) THEN 0 ELSE 1 END, s.id DESC\n             LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "id_corto",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "slug!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "creator_id!",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "a7e7a1e955d29b0c7289ed089e14c8d158fe42c3a2673a30de27b0ec75c8378f"
+}

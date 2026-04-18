@@ -5,8 +5,11 @@ use axum::{Json, Router};
 use crate::errors::AppError;
 #[allow(unused_imports)]
 use crate::errors::ErrorResponse;
-use crate::middleware::OptionalUser;
-use crate::models::{ListSamplesQuery, ListSamplesResponse, SampleDetailResponse};
+use crate::middleware::{CurrentUser, OptionalUser};
+use crate::models::{
+    DeleteSampleResponse, ListSamplesQuery, ListSamplesResponse, SampleDetailResponse,
+    UpdateSampleRequest,
+};
 use crate::services::SampleCatalogService;
 use crate::AppState;
 
@@ -91,9 +94,65 @@ pub async fn get_sample(
     Ok(Json(response))
 }
 
+#[utoipa::path(
+    patch,
+    path = "/api/samples/{slug}",
+    request_body = UpdateSampleRequest,
+    params(("slug" = String, Path, description = "Slug público o id_corto del sample")),
+    responses(
+        (status = 200, description = "Sample actualizado por su creador", body = SampleDetailResponse),
+        (status = 401, description = "Autenticación requerida", body = ErrorResponse),
+        (status = 403, description = "El sample no pertenece al usuario autenticado", body = ErrorResponse),
+        (status = 404, description = "Sample no encontrado", body = ErrorResponse),
+        (status = 422, description = "Payload inválido o sin cambios", body = ErrorResponse)
+    )
+)]
+pub async fn update_sample(
+    State(state): State<AppState>,
+    current_user: CurrentUser,
+    Path(slug): Path<String>,
+    Json(request): Json<UpdateSampleRequest>,
+) -> Result<Json<SampleDetailResponse>, AppError> {
+    let response = SampleCatalogService::update_owned_sample(
+        &state.pool,
+        state.public_base_url.as_deref(),
+        current_user.user_id,
+        &slug,
+        request,
+    )
+    .await?;
+
+    Ok(Json(response))
+}
+
+#[utoipa::path(
+    delete,
+    path = "/api/samples/{slug}",
+    params(("slug" = String, Path, description = "Slug público o id_corto del sample")),
+    responses(
+        (status = 200, description = "Sample enviado a papelera", body = DeleteSampleResponse),
+        (status = 401, description = "Autenticación requerida", body = ErrorResponse),
+        (status = 403, description = "El sample no pertenece al usuario autenticado", body = ErrorResponse),
+        (status = 404, description = "Sample no encontrado", body = ErrorResponse)
+    )
+)]
+pub async fn delete_sample(
+    State(state): State<AppState>,
+    current_user: CurrentUser,
+    Path(slug): Path<String>,
+) -> Result<Json<DeleteSampleResponse>, AppError> {
+    let response = SampleCatalogService::delete_owned_sample(&state.pool, current_user.user_id, &slug)
+        .await?;
+
+    Ok(Json(response))
+}
+
 pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/samples", get(list_samples))
         .route("/samples/random", get(random_sample))
-        .route("/samples/:slug", get(get_sample))
+        .route(
+            "/samples/:slug",
+            get(get_sample).patch(update_sample).delete(delete_sample),
+        )
 }

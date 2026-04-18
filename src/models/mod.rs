@@ -8,9 +8,9 @@ pub use profile::{
     PrivateProfileResponse, PublicProfileResponse, UpdateProfileRequest, UserProfile,
 };
 pub use sample::{
-    CheckDuplicateRequest, CheckDuplicateResponse, ListSamplesQuery, ListSamplesResponse,
-    SampleCreatorSummary, SampleDetailResponse, SampleSummary, SamplesPagination, UploadSampleRequestDoc,
-    UploadSampleResponse,
+    CheckDuplicateRequest, CheckDuplicateResponse, DeleteSampleResponse, ListSamplesQuery,
+    ListSamplesResponse, SampleCreatorSummary, SampleDetailResponse, SampleSummary,
+    SamplesPagination, UpdateSampleRequest, UploadSampleRequestDoc, UploadSampleResponse,
 };
 pub use user::{
     AuthResponse, GoogleAuthRequest, GooglePkceRequest, LoginRequest, LogoutRequest,

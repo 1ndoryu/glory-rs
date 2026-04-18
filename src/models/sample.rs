@@ -188,3 +188,35 @@ pub struct SampleDetailResponse {
     pub relacion_sampleo_id: Option<i32>,
     pub creador: SampleCreatorSummary,
 }
+
+/// Payload parcial para `PATCH /api/samples/{slug}`.
+#[derive(Debug, Clone, Deserialize, Validate, ToSchema, Default)]
+#[allow(clippy::struct_excessive_bools)]
+pub struct UpdateSampleRequest {
+    #[validate(length(min = 1, max = 200))]
+    pub titulo: Option<String>,
+    #[validate(length(max = 5_000))]
+    pub descripcion: Option<String>,
+    pub tags: Option<Vec<String>>,
+    #[serde(rename = "type", alias = "tipo")]
+    pub sample_type: Option<String>,
+    #[serde(alias = "esPremium")]
+    pub es_premium: Option<bool>,
+    #[validate(range(min = 0.0, max = 9_999.0))]
+    pub precio: Option<f64>,
+    #[serde(alias = "permitirDescarga")]
+    pub permitir_descarga: Option<bool>,
+    #[serde(alias = "licenciaLibre")]
+    pub licencia_libre: Option<bool>,
+    #[serde(alias = "mostrarEnComunidad")]
+    pub mostrar_en_comunidad: Option<bool>,
+    #[serde(alias = "imagenUrl")]
+    pub imagen_url: Option<String>,
+}
+
+/// Respuesta de `DELETE /api/samples/{slug}`.
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+pub struct DeleteSampleResponse {
+    pub ok: bool,
+    pub eliminado: bool,
+}

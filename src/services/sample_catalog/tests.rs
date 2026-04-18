@@ -1,7 +1,8 @@
 use super::{
     asset_to_public_url, build_sample_detail, normalize_creator, normalize_music_key,
-    normalize_sample_type, normalize_tags,
+    normalize_sample_type, normalize_tags, normalize_update_request,
 };
+use crate::models::UpdateSampleRequest;
 use crate::repositories::SampleCatalogDetailRecord;
 
 #[test]
@@ -126,4 +127,44 @@ fn detail_only_exposes_private_asset_urls_to_owner() {
     let outsider = build_sample_detail(record, Some("https://kamples.test"), Some(99));
     assert_eq!(outsider.ruta_original, None);
     assert_eq!(outsider.ruta_optimizada, None);
+}
+
+#[test]
+fn normalizes_patch_request_and_clears_price_when_disabling_premium() {
+    let patch = normalize_update_request(UpdateSampleRequest {
+        titulo: Some("  Mi sample editado  ".into()),
+        descripcion: Some("  Nuevo texto  ".into()),
+        tags: Some(vec![" Trap ".into(), "drill".into(), "trap".into()]),
+        sample_type: Some("one-shot".into()),
+        es_premium: Some(false),
+        precio: None,
+        permitir_descarga: Some(true),
+        licencia_libre: Some(false),
+        mostrar_en_comunidad: Some(true),
+        imagen_url: Some("   ".into()),
+    })
+    .unwrap_or_default();
+
+    assert_eq!(patch.titulo.as_deref(), Some("Mi sample editado"));
+    assert_eq!(patch.descripcion.as_deref(), Some("Nuevo texto"));
+    assert_eq!(patch.tags, Some(vec!["trap".into(), "drill".into()]));
+    assert_eq!(patch.sample_type.as_deref(), Some("oneshot"));
+    assert_eq!(patch.es_premium, Some(false));
+    assert_eq!(patch.precio, Some(None));
+    assert_eq!(patch.imagen_url, Some(None));
+}
+
+#[test]
+fn rejects_patch_without_changes() {
+    assert!(normalize_update_request(UpdateSampleRequest::default()).is_err());
+}
+
+#[test]
+fn rejects_price_when_premium_is_disabled_in_same_patch() {
+    assert!(normalize_update_request(UpdateSampleRequest {
+        es_premium: Some(false),
+        precio: Some(19.99),
+        ..UpdateSampleRequest::default()
+    })
+    .is_err());
 }

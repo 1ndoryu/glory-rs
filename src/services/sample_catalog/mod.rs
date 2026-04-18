@@ -2,12 +2,12 @@ use validator::Validate;
 
 use crate::errors::AppError;
 use crate::models::{
-    ListSamplesQuery, ListSamplesResponse, SampleCreatorSummary, SampleDetailResponse,
-    SampleSummary, SamplesPagination,
+    DeleteSampleResponse, ListSamplesQuery, ListSamplesResponse, SampleCreatorSummary,
+    SampleDetailResponse, SampleSummary, SamplesPagination, UpdateSampleRequest,
 };
 use crate::repositories::{
-    SampleCatalogDetailRecord, SampleCatalogSummaryRecord, SampleListFilters,
-    SampleRepository,
+    OwnedSampleRecord, SampleCatalogDetailRecord, SampleCatalogSummaryRecord,
+    SampleListFilters, SampleRepository, UpdateSamplePatch,
 };
 
 #[cfg(test)]
@@ -17,6 +17,8 @@ const DEFAULT_PAGE: i64 = 1;
 const DEFAULT_PER_PAGE: i64 = 20;
 const MAX_TAG_FILTERS: usize = 10;
 const MAX_CREATOR_LENGTH: usize = 50;
+const MIN_SAMPLE_TAGS: usize = 2;
+const MAX_SAMPLE_TAGS: usize = 20;
 
 /* [174A-44] Servicio de catálogo público de samples.
  * Centraliza la normalización de filtros para que el handler quede fino y el
@@ -92,6 +94,71 @@ impl SampleCatalogService {
             current_user_id,
         ))
     }
+
+    pub async fn update_owned_sample(
+        pool: &sqlx::PgPool,
+        public_base_url: Option<&str>,
+        current_user_id: i32,
+        slug_or_short_id: &str,
+        request: UpdateSampleRequest,
+    ) -> Result<SampleDetailResponse, AppError> {
+        request
+            .validate()
+            .map_err(|error| AppError::Validation(error.to_string()))?;
+
+        let sample = load_owned_sample(pool, slug_or_short_id, current_user_id).await?;
+        let patch = normalize_update_request(request)?;
+
+        SampleRepository::update_sample_metadata(pool, sample.id, &patch).await?;
+
+        let lookup_key = sample.id_corto.as_deref().unwrap_or(sample.slug.as_str());
+        let updated = SampleRepository::find_sample_by_slug_or_short_id(pool, lookup_key)
+            .await?
+            .ok_or_else(|| AppError::NotFound(format!("sample {slug_or_short_id}")))?;
+
+        Ok(build_sample_detail(
+            updated,
+            public_base_url,
+            Some(current_user_id),
+        ))
+    }
+
+    pub async fn delete_owned_sample(
+        pool: &sqlx::PgPool,
+        current_user_id: i32,
+        slug_or_short_id: &str,
+    ) -> Result<DeleteSampleResponse, AppError> {
+        let sample = load_owned_sample(pool, slug_or_short_id, current_user_id).await?;
+        let deleted = SampleRepository::soft_delete_owned_sample(pool, sample.id, current_user_id)
+            .await?;
+
+        if !deleted {
+            return Err(AppError::NotFound(format!("sample {slug_or_short_id}")));
+        }
+
+        Ok(DeleteSampleResponse {
+            ok: true,
+            eliminado: true,
+        })
+    }
+}
+
+async fn load_owned_sample(
+    pool: &sqlx::PgPool,
+    slug_or_short_id: &str,
+    current_user_id: i32,
+) -> Result<OwnedSampleRecord, AppError> {
+    let sample = SampleRepository::find_owned_sample_by_slug_or_short_id(pool, slug_or_short_id)
+        .await?
+        .ok_or_else(|| AppError::NotFound(format!("sample {slug_or_short_id}")))?;
+
+    if sample.creator_id != current_user_id {
+        return Err(AppError::Forbidden(
+            "No tienes permiso para modificar este sample".into(),
+        ));
+    }
+
+    Ok(sample)
 }
 
 fn build_sample_summary(
@@ -250,6 +317,62 @@ fn normalize_filters(query: ListSamplesQuery) -> Result<SampleListFilters, AppEr
     })
 }
 
+fn normalize_update_request(request: UpdateSampleRequest) -> Result<UpdateSamplePatch, AppError> {
+    let mut patch = UpdateSamplePatch::default();
+
+    if let Some(titulo) = request.titulo {
+        let titulo = titulo.trim();
+        if titulo.is_empty() {
+            return Err(AppError::Validation(
+                "titulo no puede quedar vacio".into(),
+            ));
+        }
+        patch.titulo = Some(titulo.to_string());
+    }
+
+    if let Some(descripcion) = request.descripcion {
+        patch.descripcion = Some(descripcion.trim().to_string());
+    }
+
+    if let Some(tags) = request.tags {
+        patch.tags = Some(normalize_sample_tags(tags)?);
+    }
+
+    patch.sample_type = normalize_sample_type(request.sample_type)?;
+
+    if let Some(es_premium) = request.es_premium {
+        patch.es_premium = Some(es_premium);
+        if !es_premium {
+            patch.precio = Some(None);
+        }
+    }
+
+    if let Some(precio) = request.precio {
+        if request.es_premium == Some(false) {
+            return Err(AppError::Validation(
+                "precio no puede enviarse cuando es_premium es false".into(),
+            ));
+        }
+        patch.precio = Some(Some(precio));
+    }
+
+    patch.permitir_descarga = request.permitir_descarga;
+    patch.licencia_libre = request.licencia_libre;
+    patch.mostrar_en_comunidad = request.mostrar_en_comunidad;
+
+    if let Some(imagen_url) = request.imagen_url {
+        patch.imagen_url = Some(normalize_image_url_update(&imagen_url));
+    }
+
+    if !patch.has_changes() {
+        return Err(AppError::Validation(
+            "No se recibieron campos para actualizar".into(),
+        ));
+    }
+
+    Ok(patch)
+}
+
 fn normalize_creator(raw: Option<String>) -> Result<Option<String>, AppError> {
     let Some(raw) = raw else {
         return Ok(None);
@@ -290,6 +413,41 @@ fn normalize_tags(raw: Option<String>) -> Result<Vec<String>, AppError> {
     }
 
     Ok(tags)
+}
+
+fn normalize_sample_tags(raw_tags: Vec<String>) -> Result<Vec<String>, AppError> {
+    let mut tags = Vec::new();
+
+    for tag in raw_tags {
+        let normalized = tag.trim().to_ascii_lowercase();
+        if normalized.is_empty() || tags.iter().any(|value| value == &normalized) {
+            continue;
+        }
+        tags.push(normalized);
+    }
+
+    if tags.len() < MIN_SAMPLE_TAGS {
+        return Err(AppError::Validation(format!(
+            "Se requieren al menos {MIN_SAMPLE_TAGS} tags para actualizar un sample"
+        )));
+    }
+
+    if tags.len() > MAX_SAMPLE_TAGS {
+        return Err(AppError::Validation(format!(
+            "tags soporta hasta {MAX_SAMPLE_TAGS} valores por sample"
+        )));
+    }
+
+    Ok(tags)
+}
+
+fn normalize_image_url_update(raw: &str) -> Option<String> {
+    let image = raw.trim();
+    if image.is_empty() {
+        None
+    } else {
+        Some(image.to_string())
+    }
 }
 
 fn normalize_music_key(raw: Option<String>) -> Result<Option<String>, AppError> {

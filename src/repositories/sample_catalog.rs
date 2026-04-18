@@ -109,6 +109,44 @@ pub struct SampleCatalogDetailRecord {
     pub creator_verificado: bool,
 }
 
+#[derive(Debug, Clone)]
+pub struct OwnedSampleRecord {
+    pub id: i32,
+    pub id_corto: Option<String>,
+    pub slug: String,
+    pub creator_id: i32,
+}
+
+#[derive(Debug, Clone, Default)]
+#[allow(clippy::struct_excessive_bools)]
+pub struct UpdateSamplePatch {
+    pub titulo: Option<String>,
+    pub descripcion: Option<String>,
+    pub tags: Option<Vec<String>>,
+    pub sample_type: Option<String>,
+    pub es_premium: Option<bool>,
+    pub precio: Option<Option<f64>>,
+    pub permitir_descarga: Option<bool>,
+    pub licencia_libre: Option<bool>,
+    pub mostrar_en_comunidad: Option<bool>,
+    pub imagen_url: Option<Option<String>>,
+}
+
+impl UpdateSamplePatch {
+    pub fn has_changes(&self) -> bool {
+        self.titulo.is_some()
+            || self.descripcion.is_some()
+            || self.tags.is_some()
+            || self.sample_type.is_some()
+            || self.es_premium.is_some()
+            || self.precio.is_some()
+            || self.permitir_descarga.is_some()
+            || self.licencia_libre.is_some()
+            || self.mostrar_en_comunidad.is_some()
+            || self.imagen_url.is_some()
+    }
+}
+
 #[derive(Debug, FromRow)]
 struct CountRow {
     total: i64,
@@ -365,6 +403,130 @@ impl SampleRepository {
         )
         .fetch_optional(pool)
         .await
+    }
+
+    pub async fn find_owned_sample_by_slug_or_short_id(
+        pool: &PgPool,
+        slug_or_short_id: &str,
+    ) -> Result<Option<OwnedSampleRecord>, sqlx::Error> {
+        sqlx::query_as!(
+            OwnedSampleRecord,
+            "SELECT
+                s.id,
+                s.id_corto,
+                s.slug AS \"slug!\",
+                s.creador_id AS \"creator_id!\"
+             FROM samples s
+             WHERE s.eliminado_en IS NULL
+               AND (LOWER(s.slug) = LOWER($1) OR s.id_corto = $1)
+             ORDER BY CASE WHEN LOWER(s.slug) = LOWER($1) THEN 0 ELSE 1 END, s.id DESC
+             LIMIT 1",
+            slug_or_short_id
+        )
+        .fetch_optional(pool)
+        .await
+    }
+
+    pub async fn update_sample_metadata(
+        pool: &PgPool,
+        sample_id: i32,
+        patch: &UpdateSamplePatch,
+    ) -> Result<(), sqlx::Error> {
+        let mut builder = QueryBuilder::<Postgres>::new("UPDATE samples SET ");
+        {
+            let mut separated = builder.separated(", ");
+
+            if let Some(titulo) = &patch.titulo {
+                separated.push("titulo = ");
+                separated.push_bind(titulo.clone());
+            }
+
+            if let Some(descripcion) = &patch.descripcion {
+                separated.push("descripcion = ");
+                separated.push_bind(descripcion.clone());
+            }
+
+            if let Some(tags) = &patch.tags {
+                separated.push("tags = ");
+                separated.push_bind(tags.clone());
+                separated.push("::text[]");
+            }
+
+            if let Some(sample_type) = &patch.sample_type {
+                separated.push("tipo = ");
+                separated.push_bind(sample_type.clone());
+            }
+
+            if let Some(es_premium) = patch.es_premium {
+                separated.push("es_premium = ");
+                separated.push_bind(es_premium);
+            }
+
+            if let Some(precio) = &patch.precio {
+                match precio {
+                    Some(value) => {
+                        separated.push("precio = ");
+                        separated.push_bind(*value);
+                    }
+                    None => {
+                        separated.push("precio = NULL");
+                    }
+                }
+            }
+
+            if let Some(permitir_descarga) = patch.permitir_descarga {
+                separated.push("permitir_descarga = ");
+                separated.push_bind(permitir_descarga);
+            }
+
+            if let Some(licencia_libre) = patch.licencia_libre {
+                separated.push("licencia_libre = ");
+                separated.push_bind(licencia_libre);
+            }
+
+            if let Some(mostrar_en_comunidad) = patch.mostrar_en_comunidad {
+                separated.push("mostrar_en_comunidad = ");
+                separated.push_bind(mostrar_en_comunidad);
+            }
+
+            if let Some(imagen_url) = &patch.imagen_url {
+                match imagen_url {
+                    Some(value) => {
+                        separated.push("imagen_url = ");
+                        separated.push_bind(value.clone());
+                    }
+                    None => {
+                        separated.push("imagen_url = NULL");
+                    }
+                }
+            }
+
+            separated.push("updated_at = NOW()");
+        }
+
+        builder.push(" WHERE id = ");
+        builder.push_bind(sample_id);
+
+        builder.build().execute(pool).await?;
+        Ok(())
+    }
+
+    pub async fn soft_delete_owned_sample(
+        pool: &PgPool,
+        sample_id: i32,
+        owner_id: i32,
+    ) -> Result<bool, sqlx::Error> {
+        let result = sqlx::query!(
+            "UPDATE samples
+             SET estado = 'eliminado', eliminado_en = NOW(), updated_at = NOW()
+             WHERE id = $1 AND creador_id = $2 AND eliminado_en IS NULL",
+            sample_id,
+            owner_id,
+        )
+        .execute(pool)
+        .await?;
+
+        Ok(result.rows_affected() > 0)
     }
 
     async fn count_public_samples(

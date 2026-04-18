@@ -22,7 +22,7 @@ pub use sample::{
     SaveAudioAssetsParams,
 };
 pub use sample_catalog::{
-    SampleCatalogDetailRecord, SampleCatalogSummaryRecord, SampleListFilters,
-    SampleListResult,
+    OwnedSampleRecord, SampleCatalogDetailRecord, SampleCatalogSummaryRecord,
+    SampleListFilters, SampleListResult, UpdateSamplePatch,
 };
 pub use user::{OAuthRepository, UserRepository};
