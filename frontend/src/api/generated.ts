@@ -819,6 +819,31 @@ export interface UploadSampleResponse {
   url: string;
 }
 
+export type WebSocketEnvelope = {
+  type: 'ping';
+} | {
+  type: 'pong';
+} | {
+  connection_id: string;
+  type: 'authenticated';
+  user_id: number;
+} | {
+  name: string;
+  payload: unknown;
+  type: 'event';
+} | {
+  code: string;
+  message: string;
+  type: 'error';
+};
+
+export interface WebSocketTicketResponse {
+  ok: boolean;
+  ticket: string;
+  ttl_secs: number;
+  ws_url: string;
+}
+
 export type AlgoTimingHistoryParams = {
 /**
  * Máximo de entradas a devolver. Default 50, máximo 100.
@@ -957,6 +982,21 @@ export type SimilarSamplesParams = {
  * @nullable
  */
 limit?: number | null;
+};
+
+export type UpgradeConnectionParams = {
+/**
+ * Ticket websocket HMAC emitido por `GET /api/ws/ticket`.
+ */
+ticket: string;
+};
+
+export type IssueTicketParams = {
+/**
+ * TTL pedido para el ticket, en segundos. Default: config, máximo: 300.
+ * @nullable
+ */
+ttl_secs?: number | null;
 };
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
@@ -7376,3 +7416,245 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getUnblockMutationOptions(options), queryClient);
     }
+
+export type upgradeConnectionResponse101 = {
+  data: void
+  status: 101
+}
+
+export type upgradeConnectionResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type upgradeConnectionResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type upgradeConnectionResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+;
+export type upgradeConnectionResponseError = (upgradeConnectionResponse101 | upgradeConnectionResponse401 | upgradeConnectionResponse403 | upgradeConnectionResponse429) & {
+  headers: Headers;
+};
+
+export type upgradeConnectionResponse = (upgradeConnectionResponseError)
+
+export const getUpgradeConnectionUrl = (params: UpgradeConnectionParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/ws?${stringifiedParams}` : `/api/ws`
+}
+
+export const upgradeConnection = async (params: UpgradeConnectionParams, options?: RequestInit): Promise<upgradeConnectionResponse> => {
+
+  return customInstance<upgradeConnectionResponse>(getUpgradeConnectionUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getUpgradeConnectionQueryKey = (params?: UpgradeConnectionParams,) => {
+    return [
+    `/api/ws`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getUpgradeConnectionQueryOptions = <TData = Awaited<ReturnType<typeof upgradeConnection>>, TError = void | ErrorResponse>(params: UpgradeConnectionParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof upgradeConnection>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getUpgradeConnectionQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof upgradeConnection>>> = ({ signal }) => upgradeConnection(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof upgradeConnection>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type UpgradeConnectionQueryResult = NonNullable<Awaited<ReturnType<typeof upgradeConnection>>>
+export type UpgradeConnectionQueryError = void | ErrorResponse
+
+
+export function useUpgradeConnection<TData = Awaited<ReturnType<typeof upgradeConnection>>, TError = void | ErrorResponse>(
+ params: UpgradeConnectionParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof upgradeConnection>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof upgradeConnection>>,
+          TError,
+          Awaited<ReturnType<typeof upgradeConnection>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useUpgradeConnection<TData = Awaited<ReturnType<typeof upgradeConnection>>, TError = void | ErrorResponse>(
+ params: UpgradeConnectionParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof upgradeConnection>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof upgradeConnection>>,
+          TError,
+          Awaited<ReturnType<typeof upgradeConnection>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useUpgradeConnection<TData = Awaited<ReturnType<typeof upgradeConnection>>, TError = void | ErrorResponse>(
+ params: UpgradeConnectionParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof upgradeConnection>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useUpgradeConnection<TData = Awaited<ReturnType<typeof upgradeConnection>>, TError = void | ErrorResponse>(
+ params: UpgradeConnectionParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof upgradeConnection>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getUpgradeConnectionQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+export type issueTicketResponse200 = {
+  data: WebSocketTicketResponse
+  status: 200
+}
+
+export type issueTicketResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type issueTicketResponseSuccess = (issueTicketResponse200) & {
+  headers: Headers;
+};
+export type issueTicketResponseError = (issueTicketResponse401) & {
+  headers: Headers;
+};
+
+export type issueTicketResponse = (issueTicketResponseSuccess | issueTicketResponseError)
+
+export const getIssueTicketUrl = (params?: IssueTicketParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/ws/ticket?${stringifiedParams}` : `/api/ws/ticket`
+}
+
+export const issueTicket = async (params?: IssueTicketParams, options?: RequestInit): Promise<issueTicketResponse> => {
+
+  return customInstance<issueTicketResponse>(getIssueTicketUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getIssueTicketQueryKey = (params?: IssueTicketParams,) => {
+    return [
+    `/api/ws/ticket`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getIssueTicketQueryOptions = <TData = Awaited<ReturnType<typeof issueTicket>>, TError = ErrorResponse>(params?: IssueTicketParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof issueTicket>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getIssueTicketQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof issueTicket>>> = ({ signal }) => issueTicket(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof issueTicket>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type IssueTicketQueryResult = NonNullable<Awaited<ReturnType<typeof issueTicket>>>
+export type IssueTicketQueryError = ErrorResponse
+
+
+export function useIssueTicket<TData = Awaited<ReturnType<typeof issueTicket>>, TError = ErrorResponse>(
+ params: undefined |  IssueTicketParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof issueTicket>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof issueTicket>>,
+          TError,
+          Awaited<ReturnType<typeof issueTicket>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useIssueTicket<TData = Awaited<ReturnType<typeof issueTicket>>, TError = ErrorResponse>(
+ params?: IssueTicketParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof issueTicket>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof issueTicket>>,
+          TError,
+          Awaited<ReturnType<typeof issueTicket>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useIssueTicket<TData = Awaited<ReturnType<typeof issueTicket>>, TError = ErrorResponse>(
+ params?: IssueTicketParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof issueTicket>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useIssueTicket<TData = Awaited<ReturnType<typeof issueTicket>>, TError = ErrorResponse>(
+ params?: IssueTicketParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof issueTicket>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getIssueTicketQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}

@@ -28,6 +28,7 @@ use std::sync::Arc;
  * - `redis`: pool opcional. Cuando es None, los servicios deben tener fallback
  *   en memoria (DashMap/parking_lot) o degradarse limpiamente.
  * - `jwt_secret`: clave HMAC para firmar/verificar tokens.
+ * - `ws_secret`: clave HMAC dedicada para tickets websocket.
  * - `google`: verificador OAuth Google ID-token (compartido).
  * - `storage`: backend de almacenamiento (LocalFs/S3) detrás de trait.
  * - `public_base_url`: prefijo opcional para construir URLs absolutas. */
@@ -36,9 +37,13 @@ pub struct AppState {
     pub pool: PgPool,
     pub redis: Option<deadpool_redis::Pool>,
     pub jwt_secret: String,
+    pub ws_secret: String,
     pub google: Arc<services::GoogleVerifier>,
     pub storage: Arc<dyn services::FileStorage>,
     pub public_base_url: Option<String>,
+    pub ws_public_url: Option<String>,
+    pub ws_ticket_ttl_secs: i64,
+    pub ws_hub: Arc<glory_rs::websocket::WebSocketHub>,
     /* [174A-58] Planificador del algoritmo (umbrales fast/precise + recálculos). */
     pub algo_planner: Arc<algorithm::AlgoPlanner>,
 }

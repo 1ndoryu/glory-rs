@@ -3151,6 +3151,108 @@
           }
         ]
       }
+    },
+    "/api/ws": {
+      "get": {
+        "tags": [
+          "ws"
+        ],
+        "operationId": "upgrade_connection",
+        "parameters": [
+          {
+            "name": "ticket",
+            "in": "query",
+            "description": "Ticket websocket HMAC emitido por `GET /api/ws/ticket`.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "101": {
+            "description": "Upgrade websocket aceptado"
+          },
+          "401": {
+            "description": "Ticket websocket inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Ticket websocket expirado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Demasiadas conexiones websocket para el usuario",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ws/ticket": {
+      "get": {
+        "tags": [
+          "ws"
+        ],
+        "operationId": "issue_ticket",
+        "parameters": [
+          {
+            "name": "ttl_secs",
+            "in": "query",
+            "description": "TTL pedido para el ticket, en segundos. Default: config, máximo: 300.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ticket websocket emitido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebSocketTicketResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -5256,6 +5358,131 @@
             "type": "string"
           },
           "username": {
+            "type": "string"
+          }
+        }
+      },
+      "WebSocketEnvelope": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "ping"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "pong"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "user_id",
+              "connection_id",
+              "type"
+            ],
+            "properties": {
+              "connection_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "authenticated"
+                ]
+              },
+              "user_id": {
+                "type": "integer",
+                "format": "int32"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "name",
+              "payload",
+              "type"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "payload": {},
+              "type": {
+                "type": "string",
+                "enum": [
+                  "event"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "code",
+              "message",
+              "type"
+            ],
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "error"
+                ]
+              }
+            }
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type"
+        }
+      },
+      "WebSocketTicketResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "ticket",
+          "ttl_secs",
+          "ws_url"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "ticket": {
+            "type": "string"
+          },
+          "ttl_secs": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ws_url": {
             "type": "string"
           }
         }

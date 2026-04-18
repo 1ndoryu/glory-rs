@@ -4,8 +4,8 @@ use thiserror::Error;
 pub enum ConfigError {
     #[error("Variable de entorno requerida no encontrada: {0}")]
     MissingEnvVar(String),
-    #[error("Puerto inválido: {0}")]
-    InvalidPort(#[from] std::num::ParseIntError),
+    #[error("Número inválido en configuración: {0}")]
+    InvalidNumber(#[from] std::num::ParseIntError),
 }
 
 /* [174A-5] Configuración de la app cargada desde variables de entorno.
@@ -31,6 +31,12 @@ pub struct AppConfig {
     pub s3_endpoint_url: Option<String>,
     /// Base URL pública opcional para construir enlaces absolutos de uploads.
     pub public_base_url: Option<String>,
+    /// Secret HMAC para tickets websocket. Si no existe, cae a JWT_SECRET.
+    pub ws_secret: String,
+    /// URL websocket pública opcional. Si no existe, se deriva desde PUBLIC_BASE_URL.
+    pub ws_public_url: Option<String>,
+    /// TTL por defecto de tickets websocket, en segundos.
+    pub ws_ticket_ttl_secs: i64,
 }
 
 impl AppConfig {
@@ -38,12 +44,14 @@ impl AppConfig {
     /// Requiere `DATABASE_URL` y `JWT_SECRET`. `REDIS_URL`, `HOST`, `PORT`,
     /// `DB_MAX_CONNECTIONS` y `DB_MIN_CONNECTIONS` son opcionales.
     pub fn from_env() -> Result<Self, ConfigError> {
+        let jwt_secret = std::env::var("JWT_SECRET")
+            .map_err(|_| ConfigError::MissingEnvVar("JWT_SECRET".into()))?;
+
         Ok(Self {
             database_url: std::env::var("DATABASE_URL")
                 .map_err(|_| ConfigError::MissingEnvVar("DATABASE_URL".into()))?,
             redis_url: std::env::var("REDIS_URL").ok(),
-            jwt_secret: std::env::var("JWT_SECRET")
-                .map_err(|_| ConfigError::MissingEnvVar("JWT_SECRET".into()))?,
+            jwt_secret: jwt_secret.clone(),
             host: std::env::var("HOST").unwrap_or_else(|_| "127.0.0.1".to_string()),
             port: std::env::var("PORT")
                 .unwrap_or_else(|_| "3000".to_string())
@@ -68,6 +76,11 @@ impl AppConfig {
             s3_bucket: std::env::var("S3_BUCKET").ok(),
             s3_endpoint_url: std::env::var("S3_ENDPOINT_URL").ok(),
             public_base_url: std::env::var("PUBLIC_BASE_URL").ok(),
+            ws_secret: std::env::var("WS_SECRET").unwrap_or(jwt_secret),
+            ws_public_url: std::env::var("WS_PUBLIC_URL").ok(),
+            ws_ticket_ttl_secs: std::env::var("WS_TICKET_TTL_SECS")
+                .unwrap_or_else(|_| "60".to_string())
+                .parse()?,
         })
     }
 }

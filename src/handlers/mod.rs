@@ -14,6 +14,7 @@ mod social;
 mod sample_catalog;
 mod samples;
 mod users;
+mod ws;
 
 use axum::Router;
 use tower_http::cors::{Any, CorsLayer};
@@ -88,6 +89,8 @@ impl utoipa::Modify for SecurityAddon {
         downloads::register_download,
         downloads::download_limits,
         downloads::stream_download,
+        ws::issue_ticket,
+        ws::upgrade_connection,
         colecciones::create_coleccion,
         colecciones::list_my_colecciones,
         colecciones::get_coleccion,
@@ -156,6 +159,8 @@ impl utoipa::Modify for SecurityAddon {
         crate::repositories::BlockedUser,
         downloads::DownloadResponse,
         downloads::DownloadLimitsResponse,
+        ws::WebSocketTicketResponse,
+        glory_rs::websocket::WebSocketEnvelope,
         colecciones::CreateColeccionRequest,
         colecciones::UpdateColeccionRequest,
         colecciones::AddSampleRequest,
@@ -207,18 +212,24 @@ pub fn create_router(
     storage: std::sync::Arc<dyn crate::services::FileStorage>,
 ) -> Router {
     let public_base_url = config.public_base_url.clone();
+    let ws_public_url = config.ws_public_url.clone();
     let storage_root = config.storage_root.clone();
     let algo_planner =
         crate::algorithm::AlgoPlanner::new(crate::algorithm::AlgoPlannerConfig::legacy_defaults());
+    let ws_hub = glory_rs::websocket::WebSocketHub::new(glory_rs::websocket::HubConfig::default());
     let state = AppState {
         pool,
         redis,
         jwt_secret: config.jwt_secret,
+        ws_secret: config.ws_secret,
         google: std::sync::Arc::new(crate::services::GoogleVerifier::new(
             config.google_client_ids,
         )),
         storage,
         public_base_url,
+        ws_public_url,
+        ws_ticket_ttl_secs: config.ws_ticket_ttl_secs,
+        ws_hub: std::sync::Arc::new(ws_hub),
         algo_planner,
     };
 
@@ -258,6 +269,7 @@ fn api_routes() -> Router<AppState> {
         .merge(posts::routes())
         .merge(social::routes())
         .merge(downloads::routes())
+        .merge(ws::routes())
         .merge(colecciones::routes())
         .merge(users::routes())
         .merge(admin::routes())

@@ -37,6 +37,9 @@ utoipa-swagger-ui = { version = "7", features = ["axum"] }
 # Validation
 validator = { version = "0.18", features = ["derive"] }
 
+# Glory reusable framework
+glory-rs = { path = "glory-rs/backend" }
+
 # Environment / Config
 dotenvy = "0.15"
 
