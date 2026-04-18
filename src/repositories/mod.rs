@@ -21,5 +21,8 @@ pub use sample::{
     MarkAudioPipelineFailedParams, SampleRepository, SaveAudioAnalysisParams,
     SaveAudioAssetsParams,
 };
-pub use sample_catalog::{SampleListFilters, SampleListResult};
+pub use sample_catalog::{
+    SampleCatalogDetailRecord, SampleCatalogSummaryRecord, SampleListFilters,
+    SampleListResult,
+};
 pub use user::{OAuthRepository, UserRepository};

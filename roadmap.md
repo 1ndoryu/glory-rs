@@ -80,7 +80,6 @@
 ### Fase 5 â€” IA pipeline
 
 ### Fase 6 â€” Samples CRUD + bÃºsqueda
-- 174A-45 â€” `GET /samples/{slug}` + `GET /samples/random`
 - 174A-46 â€” `PATCH /samples/{slug}` + `DELETE /samples/{slug}` (owner check, soft-delete)
 - 174A-47 â€” BÃºsqueda fuzzy trigram
 - 174A-48 â€” BÃºsqueda similitud pgvector (`GET /samples/{id}/similar`)

@@ -1,8 +1,6 @@
 use chrono::{DateTime, Utc};
 use sqlx::{FromRow, PgPool, Postgres, QueryBuilder};
 
-use crate::models::{SampleCreatorSummary, SampleSummary};
-
 use super::sample::SampleRepository;
 
 /* [174A-44] Listado público de samples con filtros combinables.
@@ -30,8 +28,85 @@ impl SampleListFilters {
 
 #[derive(Debug, Clone)]
 pub struct SampleListResult {
-    pub items: Vec<SampleSummary>,
+    pub items: Vec<SampleCatalogSummaryRecord>,
     pub total: i64,
+}
+
+#[derive(Debug, Clone)]
+pub struct SampleCatalogSummaryRecord {
+    pub id: i32,
+    pub id_corto: Option<String>,
+    pub slug: String,
+    pub titulo: String,
+    pub descripcion: String,
+    pub bpm: Option<i32>,
+    pub music_key: Option<String>,
+    pub escala: Option<String>,
+    pub duracion: f32,
+    pub formato: String,
+    pub tags: Vec<String>,
+    pub tipo: String,
+    pub es_premium: bool,
+    pub precio: Option<f64>,
+    pub verificado: bool,
+    pub ruta_preview: Option<String>,
+    pub ruta_waveform: Option<String>,
+    pub imagen_url: Option<String>,
+    pub total_descargas: i32,
+    pub total_likes: i32,
+    pub total_reproducciones: i32,
+    pub total_comentarios: i32,
+    pub publicado_at: Option<DateTime<Utc>>,
+    pub creator_id: i32,
+    pub creator_username: String,
+    pub creator_nombre_visible: Option<String>,
+    pub creator_avatar_url: Option<String>,
+    pub creator_verificado: bool,
+}
+
+#[derive(Debug, Clone)]
+#[allow(clippy::struct_excessive_bools)]
+pub struct SampleCatalogDetailRecord {
+    pub id: i32,
+    pub id_corto: Option<String>,
+    pub slug: String,
+    pub titulo: String,
+    pub descripcion: String,
+    pub bpm: Option<i32>,
+    pub music_key: Option<String>,
+    pub escala: Option<String>,
+    pub duracion: f32,
+    pub formato: String,
+    pub tamano: i64,
+    pub tags: Vec<String>,
+    pub tipo: String,
+    pub estado: String,
+    pub es_premium: bool,
+    pub precio: Option<f64>,
+    pub metadata: serde_json::Value,
+    pub ruta_preview: Option<String>,
+    pub ruta_waveform: Option<String>,
+    pub ruta_original: Option<String>,
+    pub ruta_optimizada: Option<String>,
+    pub permitir_descarga: bool,
+    pub licencia_libre: bool,
+    pub imagen_url: Option<String>,
+    pub total_descargas: i32,
+    pub total_likes: i32,
+    pub total_reproducciones: i32,
+    pub total_comentarios: i32,
+    pub audio_hash: Option<String>,
+    pub verificado: bool,
+    pub mostrar_en_comunidad: bool,
+    pub publicado_at: Option<DateTime<Utc>>,
+    pub created_at: Option<DateTime<Utc>>,
+    pub cancion_origen_id: Option<i32>,
+    pub relacion_sampleo_id: Option<i32>,
+    pub creator_id: i32,
+    pub creator_username: String,
+    pub creator_nombre_visible: Option<String>,
+    pub creator_avatar_url: Option<String>,
+    pub creator_verificado: bool,
 }
 
 #[derive(Debug, FromRow)]
@@ -71,7 +146,7 @@ struct SampleSummaryRow {
     creator_verificado: bool,
 }
 
-impl From<SampleSummaryRow> for SampleSummary {
+impl From<SampleSummaryRow> for SampleCatalogSummaryRecord {
     fn from(row: SampleSummaryRow) -> Self {
         Self {
             id: row.id,
@@ -97,13 +172,11 @@ impl From<SampleSummaryRow> for SampleSummary {
             total_reproducciones: row.total_reproducciones,
             total_comentarios: row.total_comentarios,
             publicado_at: row.publicado_at,
-            creador: SampleCreatorSummary {
-                id: row.creator_id,
-                username: row.creator_username,
-                nombre_visible: row.creator_nombre_visible,
-                avatar_url: row.creator_avatar_url,
-                verificado: row.creator_verificado,
-            },
+            creator_id: row.creator_id,
+            creator_username: row.creator_username,
+            creator_nombre_visible: row.creator_nombre_visible,
+            creator_avatar_url: row.creator_avatar_url,
+            creator_verificado: row.creator_verificado,
         }
     }
 }
@@ -166,9 +239,132 @@ impl SampleRepository {
             .await?;
 
         Ok(SampleListResult {
-            items: rows.into_iter().map(SampleSummary::from).collect(),
+            items: rows.into_iter().map(SampleCatalogSummaryRecord::from).collect(),
             total,
         })
+    }
+
+    pub async fn find_sample_by_slug_or_short_id(
+        pool: &PgPool,
+        slug_or_short_id: &str,
+    ) -> Result<Option<SampleCatalogDetailRecord>, sqlx::Error> {
+        sqlx::query_as!(
+            SampleCatalogDetailRecord,
+            "SELECT
+                s.id,
+                s.id_corto,
+                s.slug AS \"slug!\",
+                s.titulo AS \"titulo!\",
+                s.descripcion AS \"descripcion!\",
+                s.bpm,
+                s.key AS \"music_key?\",
+                s.escala,
+                s.duracion,
+                s.formato AS \"formato!\",
+                s.tamano,
+                COALESCE(s.tags, ARRAY[]::text[]) AS \"tags!: Vec<String>\",
+                s.tipo AS \"tipo!\",
+                s.estado AS \"estado!\",
+                COALESCE(s.es_premium, FALSE) AS \"es_premium!\",
+                CAST(s.precio AS double precision) AS \"precio?\",
+                COALESCE(s.metadata, '{}'::jsonb) AS \"metadata!: serde_json::Value\",
+                s.ruta_preview,
+                s.ruta_waveform,
+                s.ruta_original,
+                s.ruta_optimizada,
+                COALESCE(s.permitir_descarga, TRUE) AS \"permitir_descarga!\",
+                COALESCE(s.licencia_libre, FALSE) AS \"licencia_libre!\",
+                s.imagen_url,
+                COALESCE(s.total_descargas, 0) AS \"total_descargas!\",
+                COALESCE(s.total_likes, 0) AS \"total_likes!\",
+                COALESCE(s.total_reproducciones, 0) AS \"total_reproducciones!\",
+                COALESCE(s.total_comentarios, 0) AS \"total_comentarios!\",
+                s.audio_hash,
+                COALESCE(s.verificado, FALSE) AS \"verificado!\",
+                COALESCE(s.mostrar_en_comunidad, TRUE) AS \"mostrar_en_comunidad!\",
+                s.publicado_at,
+                s.created_at,
+                s.cancion_origen_id,
+                s.relacion_sampleo_id,
+                u.id AS \"creator_id!\",
+                u.username AS \"creator_username!\",
+                u.nombre_visible AS \"creator_nombre_visible?\",
+                u.avatar_url AS \"creator_avatar_url?\",
+                COALESCE(u.verificado, FALSE) AS \"creator_verificado!\"
+             FROM samples s
+             INNER JOIN usuarios_ext u ON u.id = s.creador_id
+             WHERE s.eliminado_en IS NULL
+               AND (LOWER(s.slug) = LOWER($1) OR s.id_corto = $1)
+             ORDER BY CASE WHEN LOWER(s.slug) = LOWER($1) THEN 0 ELSE 1 END, s.id DESC
+             LIMIT 1",
+            slug_or_short_id
+        )
+        .fetch_optional(pool)
+        .await
+    }
+
+    pub async fn find_random_public_sample(
+        pool: &PgPool,
+    ) -> Result<Option<SampleCatalogDetailRecord>, sqlx::Error> {
+        sqlx::query_as!(
+            SampleCatalogDetailRecord,
+            "SELECT
+                s.id,
+                s.id_corto,
+                s.slug AS \"slug!\",
+                s.titulo AS \"titulo!\",
+                s.descripcion AS \"descripcion!\",
+                s.bpm,
+                s.key AS \"music_key?\",
+                s.escala,
+                s.duracion,
+                s.formato AS \"formato!\",
+                s.tamano,
+                COALESCE(s.tags, ARRAY[]::text[]) AS \"tags!: Vec<String>\",
+                s.tipo AS \"tipo!\",
+                s.estado AS \"estado!\",
+                COALESCE(s.es_premium, FALSE) AS \"es_premium!\",
+                CAST(s.precio AS double precision) AS \"precio?\",
+                COALESCE(s.metadata, '{}'::jsonb) AS \"metadata!: serde_json::Value\",
+                s.ruta_preview,
+                s.ruta_waveform,
+                s.ruta_original,
+                s.ruta_optimizada,
+                COALESCE(s.permitir_descarga, TRUE) AS \"permitir_descarga!\",
+                COALESCE(s.licencia_libre, FALSE) AS \"licencia_libre!\",
+                s.imagen_url,
+                COALESCE(s.total_descargas, 0) AS \"total_descargas!\",
+                COALESCE(s.total_likes, 0) AS \"total_likes!\",
+                COALESCE(s.total_reproducciones, 0) AS \"total_reproducciones!\",
+                COALESCE(s.total_comentarios, 0) AS \"total_comentarios!\",
+                s.audio_hash,
+                COALESCE(s.verificado, FALSE) AS \"verificado!\",
+                COALESCE(s.mostrar_en_comunidad, TRUE) AS \"mostrar_en_comunidad!\",
+                s.publicado_at,
+                s.created_at,
+                s.cancion_origen_id,
+                s.relacion_sampleo_id,
+                u.id AS \"creator_id!\",
+                u.username AS \"creator_username!\",
+                u.nombre_visible AS \"creator_nombre_visible?\",
+                u.avatar_url AS \"creator_avatar_url?\",
+                COALESCE(u.verificado, FALSE) AS \"creator_verificado!\"
+             FROM samples s
+             INNER JOIN usuarios_ext u ON u.id = s.creador_id
+             WHERE s.id IN (
+                 SELECT id
+                 FROM samples
+                 WHERE eliminado_en IS NULL
+                   AND estado = 'activo'
+                   AND mostrar_en_comunidad = TRUE
+                 ORDER BY publicado_at DESC NULLS LAST, created_at DESC, id DESC
+                 LIMIT 1000
+             )
+             ORDER BY RANDOM()
+             LIMIT 1"
+        )
+        .fetch_optional(pool)
+        .await
     }
 
     async fn count_public_samples(

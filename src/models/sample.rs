@@ -142,3 +142,49 @@ pub struct ListSamplesResponse {
     pub data: Vec<SampleSummary>,
     pub pagination: SamplesPagination,
 }
+
+/// Respuesta de `GET /api/samples/{slug}` y `GET /api/samples/random`.
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[allow(clippy::struct_excessive_bools)]
+pub struct SampleDetailResponse {
+    pub id: i32,
+    pub id_corto: Option<String>,
+    pub slug: String,
+    pub titulo: String,
+    pub descripcion: String,
+    pub bpm: Option<i32>,
+    #[serde(rename = "key")]
+    pub music_key: Option<String>,
+    pub escala: Option<String>,
+    pub duracion: f32,
+    pub formato: String,
+    pub tamano: i64,
+    pub tags: Vec<String>,
+    pub tipo: String,
+    pub estado: String,
+    pub es_premium: bool,
+    pub precio: Option<f64>,
+    #[schema(value_type = Object)]
+    pub metadata: serde_json::Value,
+    pub ruta_preview: Option<String>,
+    pub ruta_waveform: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ruta_original: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ruta_optimizada: Option<String>,
+    pub permitir_descarga: bool,
+    pub licencia_libre: bool,
+    pub imagen_url: Option<String>,
+    pub total_descargas: i32,
+    pub total_likes: i32,
+    pub total_reproducciones: i32,
+    pub total_comentarios: i32,
+    pub audio_hash: Option<String>,
+    pub verificado: bool,
+    pub mostrar_en_comunidad: bool,
+    pub publicado_at: Option<chrono::DateTime<chrono::Utc>>,
+    pub created_at: Option<chrono::DateTime<chrono::Utc>>,
+    pub cancion_origen_id: Option<i32>,
+    pub relacion_sampleo_id: Option<i32>,
+    pub creador: SampleCreatorSummary,
+}

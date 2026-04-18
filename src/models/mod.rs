@@ -9,7 +9,7 @@ pub use profile::{
 };
 pub use sample::{
     CheckDuplicateRequest, CheckDuplicateResponse, ListSamplesQuery, ListSamplesResponse,
-    SampleCreatorSummary, SampleSummary, SamplesPagination, UploadSampleRequestDoc,
+    SampleCreatorSummary, SampleDetailResponse, SampleSummary, SamplesPagination, UploadSampleRequestDoc,
     UploadSampleResponse,
 };
 pub use user::{
