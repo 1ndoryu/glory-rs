@@ -89,7 +89,6 @@
 - 174A-62 â€” `POST /downloads/{sample_id}/zip`
 
 ### Fase 9 â€” Colecciones y sociales
-- 174A-66 â€” Saved collections
 - 174A-67 â€” Posts + reposts + likes
 - 174A-68 â€” Comments polimÃ³rficos + likes + multimedia
 

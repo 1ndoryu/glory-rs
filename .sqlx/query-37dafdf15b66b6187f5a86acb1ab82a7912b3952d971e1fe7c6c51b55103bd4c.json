@@ -1,0 +1,66 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT c.id AS \"id!\",\n                      c.usuario_id AS \"usuario_id!\",\n                      c.nombre AS \"nombre!\",\n                      c.descripcion,\n                      c.publica AS \"publica!\",\n                      c.imagen_url,\n                      c.total_samples AS \"total_samples!\",\n                      g.created_at AS \"guardada_at!\"\n               FROM colecciones_guardadas g\n               JOIN colecciones c ON c.id = g.coleccion_id\n               WHERE g.usuario_id = $1 AND c.eliminado_en IS NULL\n               ORDER BY g.created_at DESC\n               LIMIT $2 OFFSET $3",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "usuario_id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "nombre!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "descripcion",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "publica!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 5,
+        "name": "imagen_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "total_samples!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 7,
+        "name": "guardada_at!",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int8",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "37dafdf15b66b6187f5a86acb1ab82a7912b3952d971e1fe7c6c51b55103bd4c"
+}

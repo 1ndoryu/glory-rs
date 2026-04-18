@@ -10,6 +10,7 @@ mod processing_queue;
 mod profile;
 mod sample;
 mod sample_catalog;
+mod saved_collection;
 mod user;
 
 pub use block::{BlockRepository, BlockedUser};
@@ -27,6 +28,7 @@ pub use processing_queue::{
     QueuedAudioProcessingJob,
 };
 pub use profile::ProfileRepository;
+pub use saved_collection::{SavedColeccion, SavedCollectionsRepository};
 pub use sample::{
     ApplyAudioIaMetadataParams, AudioIaSample, AudioPipelineSample, CompleteAudioPipelineParams,
     CreateUploadSampleParams, CreatedUploadSample, DuplicateSampleCandidate,

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM colecciones_guardadas WHERE usuario_id = $1 AND coleccion_id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "fd6ce52f4f960376f8c1966c801e77d1c05a60f002ab0e477e86aff95a67a6ad"
+}

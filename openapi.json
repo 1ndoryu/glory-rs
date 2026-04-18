@@ -970,6 +970,84 @@
         ]
       }
     },
+    "/api/colecciones/{id}/save": {
+      "post": {
+        "tags": [
+          "colecciones"
+        ],
+        "operationId": "save_coleccion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID de la coleccion a guardar",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "No se puede guardar una coleccion privada ajena"
+          },
+          "404": {
+            "description": "Coleccion no encontrada"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "colecciones"
+        ],
+        "operationId": "unsave_coleccion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID de la coleccion a quitar de guardadas",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
     "/api/descargas/limites": {
       "get": {
         "tags": [
@@ -1306,6 +1384,55 @@
           },
           "401": {
             "description": "No autenticado"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/me/colecciones-guardadas": {
+      "get": {
+        "tags": [
+          "colecciones"
+        ],
+        "operationId": "list_saved_colecciones",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Tamaño de página (default 30, max 100)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Offset",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SavedListResponse"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -3541,6 +3668,63 @@
           "total": {
             "type": "integer",
             "format": "int64"
+          }
+        }
+      },
+      "SavedColeccion": {
+        "type": "object",
+        "required": [
+          "id",
+          "usuario_id",
+          "nombre",
+          "publica",
+          "total_samples",
+          "guardada_at"
+        ],
+        "properties": {
+          "descripcion": {
+            "type": "string",
+            "nullable": true
+          },
+          "guardada_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "imagen_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "publica": {
+            "type": "boolean"
+          },
+          "total_samples": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "usuario_id": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "SavedListResponse": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SavedColeccion"
+            }
           }
         }
       },

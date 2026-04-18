@@ -513,6 +513,23 @@ export interface SampleDetailResponse {
   verificado: boolean;
 }
 
+export interface SavedColeccion {
+  /** @nullable */
+  descripcion?: string | null;
+  guardada_at: string;
+  id: number;
+  /** @nullable */
+  imagen_url?: string | null;
+  nombre: string;
+  publica: boolean;
+  total_samples: number;
+  usuario_id: number;
+}
+
+export interface SavedListResponse {
+  items: SavedColeccion[];
+}
+
 /**
  * Query params de `GET /api/samples/{id}/similar`.
  */
@@ -686,6 +703,19 @@ offset?: number | null;
 export type DeleteLikeParams = {
 tipo: string;
 target_id: number;
+};
+
+export type ListSavedColeccionesParams = {
+/**
+ * Tamaño de página (default 30, max 100)
+ * @nullable
+ */
+limit?: number | null;
+/**
+ * Offset
+ * @nullable
+ */
+offset?: number | null;
 };
 
 export type GetMeFeedParams = {
@@ -2758,6 +2788,170 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getRemoveSampleMutationOptions(options), queryClient);
     }
 
+export type saveColeccionResponse200 = {
+  data: OkResponse
+  status: 200
+}
+
+export type saveColeccionResponse403 = {
+  data: void
+  status: 403
+}
+
+export type saveColeccionResponse404 = {
+  data: void
+  status: 404
+}
+
+export type saveColeccionResponseSuccess = (saveColeccionResponse200) & {
+  headers: Headers;
+};
+export type saveColeccionResponseError = (saveColeccionResponse403 | saveColeccionResponse404) & {
+  headers: Headers;
+};
+
+export type saveColeccionResponse = (saveColeccionResponseSuccess | saveColeccionResponseError)
+
+export const getSaveColeccionUrl = (id: number,) => {
+
+
+
+
+  return `/api/colecciones/${id}/save`
+}
+
+export const saveColeccion = async (id: number, options?: RequestInit): Promise<saveColeccionResponse> => {
+
+  return customInstance<saveColeccionResponse>(getSaveColeccionUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getSaveColeccionMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof saveColeccion>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof saveColeccion>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['saveColeccion'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof saveColeccion>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  saveColeccion(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SaveColeccionMutationResult = NonNullable<Awaited<ReturnType<typeof saveColeccion>>>
+
+    export type SaveColeccionMutationError = void
+
+    export const useSaveColeccion = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof saveColeccion>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof saveColeccion>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getSaveColeccionMutationOptions(options), queryClient);
+    }
+
+export type unsaveColeccionResponse200 = {
+  data: OkResponse
+  status: 200
+}
+
+export type unsaveColeccionResponseSuccess = (unsaveColeccionResponse200) & {
+  headers: Headers;
+};
+;
+
+export type unsaveColeccionResponse = (unsaveColeccionResponseSuccess)
+
+export const getUnsaveColeccionUrl = (id: number,) => {
+
+
+
+
+  return `/api/colecciones/${id}/save`
+}
+
+export const unsaveColeccion = async (id: number, options?: RequestInit): Promise<unsaveColeccionResponse> => {
+
+  return customInstance<unsaveColeccionResponse>(getUnsaveColeccionUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getUnsaveColeccionMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unsaveColeccion>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof unsaveColeccion>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['unsaveColeccion'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof unsaveColeccion>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  unsaveColeccion(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UnsaveColeccionMutationResult = NonNullable<Awaited<ReturnType<typeof unsaveColeccion>>>
+
+    export type UnsaveColeccionMutationError = unknown
+
+    export const useUnsaveColeccion = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unsaveColeccion>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof unsaveColeccion>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getUnsaveColeccionMutationOptions(options), queryClient);
+    }
+
 export type downloadLimitsResponse200 = {
   data: DownloadLimitsResponse
   status: 200
@@ -3696,6 +3890,118 @@ export function useMyBlocks<TData = Awaited<ReturnType<typeof myBlocks>>, TError
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getMyBlocksQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+export type listSavedColeccionesResponse200 = {
+  data: SavedListResponse
+  status: 200
+}
+
+export type listSavedColeccionesResponseSuccess = (listSavedColeccionesResponse200) & {
+  headers: Headers;
+};
+;
+
+export type listSavedColeccionesResponse = (listSavedColeccionesResponseSuccess)
+
+export const getListSavedColeccionesUrl = (params?: ListSavedColeccionesParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/me/colecciones-guardadas?${stringifiedParams}` : `/api/me/colecciones-guardadas`
+}
+
+export const listSavedColecciones = async (params?: ListSavedColeccionesParams, options?: RequestInit): Promise<listSavedColeccionesResponse> => {
+
+  return customInstance<listSavedColeccionesResponse>(getListSavedColeccionesUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListSavedColeccionesQueryKey = (params?: ListSavedColeccionesParams,) => {
+    return [
+    `/api/me/colecciones-guardadas`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListSavedColeccionesQueryOptions = <TData = Awaited<ReturnType<typeof listSavedColecciones>>, TError = unknown>(params?: ListSavedColeccionesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSavedColecciones>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListSavedColeccionesQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listSavedColecciones>>> = ({ signal }) => listSavedColecciones(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listSavedColecciones>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListSavedColeccionesQueryResult = NonNullable<Awaited<ReturnType<typeof listSavedColecciones>>>
+export type ListSavedColeccionesQueryError = unknown
+
+
+export function useListSavedColecciones<TData = Awaited<ReturnType<typeof listSavedColecciones>>, TError = unknown>(
+ params: undefined |  ListSavedColeccionesParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSavedColecciones>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listSavedColecciones>>,
+          TError,
+          Awaited<ReturnType<typeof listSavedColecciones>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListSavedColecciones<TData = Awaited<ReturnType<typeof listSavedColecciones>>, TError = unknown>(
+ params?: ListSavedColeccionesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSavedColecciones>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listSavedColecciones>>,
+          TError,
+          Awaited<ReturnType<typeof listSavedColecciones>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListSavedColecciones<TData = Awaited<ReturnType<typeof listSavedColecciones>>, TError = unknown>(
+ params?: ListSavedColeccionesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSavedColecciones>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useListSavedColecciones<TData = Awaited<ReturnType<typeof listSavedColecciones>>, TError = unknown>(
+ params?: ListSavedColeccionesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSavedColecciones>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListSavedColeccionesQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

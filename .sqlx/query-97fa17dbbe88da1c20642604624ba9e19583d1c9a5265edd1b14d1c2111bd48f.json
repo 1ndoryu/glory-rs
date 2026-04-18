@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO coleccion_samples (coleccion_id, sample_id, orden)\n               SELECT $1, s.sample_id,\n                      $2 + (ROW_NUMBER() OVER (ORDER BY s.orden, s.added_at) - 1)::int\n               FROM coleccion_samples s\n               WHERE s.coleccion_id = $3\n                 AND NOT EXISTS (\n                     SELECT 1 FROM coleccion_samples t\n                     WHERE t.coleccion_id = $1 AND t.sample_id = s.sample_id\n                 )",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Int4",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "97fa17dbbe88da1c20642604624ba9e19583d1c9a5265edd1b14d1c2111bd48f"
+}
