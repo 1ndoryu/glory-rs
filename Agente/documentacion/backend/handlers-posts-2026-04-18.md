@@ -31,9 +31,8 @@
 ## Gotchas
 - El repost se modela como fila nueva en `publicaciones` con `repost_id`, no como toggle sobre la publicación original.
 - `LikeRepository` ya soportaba `tipo=publicacion`; en 174A-67 solo se endureció el target para excluir posts soft-deleted.
-- Comentarios, likes sobre comentarios y multimedia conversacional quedan para 174A-68.
+- Desde 174A-68, `total_comentarios` ya se recalcula desde el dominio `comentarios` para `tipo=publicacion`.
 
 ## Pendiente / TODO
 - Notificaciones al autor original cuando exista Fase 11.
 - Rate limit específico de publicaciones/reposts si reaparece abuso.
-- Integrar conteo real de comentarios cuando se porte el dominio de comentarios.

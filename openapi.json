@@ -1090,6 +1090,388 @@
         ]
       }
     },
+    "/api/comentarios/{commentId}": {
+      "put": {
+        "tags": [
+          "social"
+        ],
+        "operationId": "update_comment",
+        "parameters": [
+          {
+            "name": "commentId",
+            "in": "path",
+            "description": "ID del comentario a editar",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCommentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Comentario actualizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommentMutationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "No eres autor"
+          },
+          "404": {
+            "description": "Comentario no encontrado"
+          },
+          "422": {
+            "description": "Contenido inválido"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "social"
+        ],
+        "operationId": "delete_comment",
+        "parameters": [
+          {
+            "name": "commentId",
+            "in": "path",
+            "description": "ID del comentario a borrar",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Comentario eliminado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "No eres autor"
+          },
+          "404": {
+            "description": "Comentario no encontrado"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/comentarios/{commentId}/like": {
+      "post": {
+        "tags": [
+          "social"
+        ],
+        "operationId": "like_comment",
+        "parameters": [
+          {
+            "name": "commentId",
+            "in": "path",
+            "description": "ID del comentario a reaccionar",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CommentLikeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Reacción registrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LikeResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "404": {
+            "description": "Comentario no encontrado"
+          },
+          "422": {
+            "description": "Reacción inválida"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "social"
+        ],
+        "operationId": "unlike_comment",
+        "parameters": [
+          {
+            "name": "commentId",
+            "in": "path",
+            "description": "ID del comentario",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reacción eliminada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LikeResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/comentarios/{commentId}/respuestas": {
+      "get": {
+        "tags": [
+          "social"
+        ],
+        "operationId": "list_replies",
+        "parameters": [
+          {
+            "name": "commentId",
+            "in": "path",
+            "description": "ID del comentario padre",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de respuestas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommentRepliesResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Comentario no encontrado"
+          }
+        }
+      }
+    },
+    "/api/comentarios/{tipo}/{targetId}": {
+      "get": {
+        "tags": [
+          "social"
+        ],
+        "operationId": "list_comments",
+        "parameters": [
+          {
+            "name": "tipo",
+            "in": "path",
+            "description": "Tipo de target: sample, publicacion, cancion, relacion, articulo",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "targetId",
+            "in": "path",
+            "description": "ID del target comentado",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de comentarios raíz",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommentListResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Target no encontrado"
+          },
+          "422": {
+            "description": "Tipo inválido"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "social"
+        ],
+        "operationId": "create_comment",
+        "parameters": [
+          {
+            "name": "tipo",
+            "in": "path",
+            "description": "Tipo de target: sample, publicacion, cancion, relacion, articulo",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "targetId",
+            "in": "path",
+            "description": "ID del target comentado",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Acepta multipart con media opcional o JSON equivalente con { contenido, parent_id }",
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCommentMultipartRequestDoc"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Comentario creado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommentMutationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Payload inválido"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "Cuenta no activa"
+          },
+          "404": {
+            "description": "Target o comentario padre no encontrado"
+          },
+          "413": {
+            "description": "Media demasiado grande"
+          },
+          "415": {
+            "description": "Tipo de media no soportado"
+          },
+          "422": {
+            "description": "Validación de comentario"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
     "/api/descargas/limites": {
       "get": {
         "tags": [
@@ -3033,6 +3415,180 @@
           }
         }
       },
+      "CommentAuthorSummary": {
+        "type": "object",
+        "required": [
+          "id",
+          "username",
+          "verificado"
+        ],
+        "properties": {
+          "avatar_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nombre_visible": {
+            "type": "string",
+            "nullable": true
+          },
+          "username": {
+            "type": "string"
+          },
+          "verificado": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CommentDetail": {
+        "type": "object",
+        "required": [
+          "id",
+          "autor_id",
+          "tipo",
+          "target_id",
+          "contenido",
+          "tipo_contenido",
+          "media_metadata",
+          "total_likes",
+          "total_respuestas",
+          "created_at",
+          "updated_at",
+          "liked",
+          "autor"
+        ],
+        "properties": {
+          "autor": {
+            "$ref": "#/components/schemas/CommentAuthorSummary"
+          },
+          "autor_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "contenido": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "liked": {
+            "type": "boolean"
+          },
+          "media_metadata": {
+            "type": "object"
+          },
+          "media_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "mi_reaccion": {
+            "type": "string",
+            "nullable": true
+          },
+          "parent_id": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "target_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tipo": {
+            "type": "string"
+          },
+          "tipo_contenido": {
+            "type": "string"
+          },
+          "total_likes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total_respuestas": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CommentLikeRequest": {
+        "type": "object",
+        "properties": {
+          "reaccion": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "CommentListResponse": {
+        "type": "object",
+        "required": [
+          "items",
+          "page",
+          "per_page"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CommentDetail"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "per_page": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "CommentMutationResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "comment"
+        ],
+        "properties": {
+          "comment": {
+            "$ref": "#/components/schemas/CommentDetail"
+          },
+          "ok": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CommentRepliesResponse": {
+        "type": "object",
+        "required": [
+          "items",
+          "limit"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CommentDetail"
+            }
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
       "CreateColeccionRequest": {
         "type": "object",
         "required": [
@@ -3053,6 +3609,44 @@
           },
           "publica": {
             "type": "boolean"
+          }
+        }
+      },
+      "CreateCommentJsonRequest": {
+        "type": "object",
+        "properties": {
+          "contenido": {
+            "type": "string"
+          },
+          "parent_id": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        }
+      },
+      "CreateCommentMultipartRequestDoc": {
+        "type": "object",
+        "required": [
+          "media"
+        ],
+        "properties": {
+          "contenido": {
+            "type": "string",
+            "nullable": true
+          },
+          "media": {
+            "type": "string",
+            "format": "binary"
+          },
+          "parent_id": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "tipo_contenido": {
+            "type": "string",
+            "nullable": true
           }
         }
       },
@@ -3272,7 +3866,7 @@
           },
           "tipo": {
             "type": "string",
-            "description": "Tipo de target. Valores: `sample`, `publicacion`, `cancion`, `relacion`."
+            "description": "Tipo de target. Valores: `sample`, `publicacion`, `comentario`, `cancion`, `relacion`."
           }
         }
       },
@@ -4435,6 +5029,14 @@
           "publica": {
             "type": "boolean",
             "nullable": true
+          }
+        }
+      },
+      "UpdateCommentRequest": {
+        "type": "object",
+        "properties": {
+          "contenido": {
+            "type": "string"
           }
         }
       },

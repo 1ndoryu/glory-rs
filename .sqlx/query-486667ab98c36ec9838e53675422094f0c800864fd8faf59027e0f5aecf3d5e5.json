@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE comentarios SET total_likes = ( SELECT COUNT(*) FROM likes WHERE tipo = 'comentario' AND target_id = $1 AND reaccion IN ('like', 'encanta') ) WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "486667ab98c36ec9838e53675422094f0c800864fd8faf59027e0f5aecf3d5e5"
+}

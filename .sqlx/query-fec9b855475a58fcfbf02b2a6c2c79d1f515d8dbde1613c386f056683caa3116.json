@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE relaciones_sample SET total_comentarios = (SELECT COUNT(*) FROM comentarios WHERE tipo = 'relacion' AND target_id = $1) WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "fec9b855475a58fcfbf02b2a6c2c79d1f515d8dbde1613c386f056683caa3116"
+}

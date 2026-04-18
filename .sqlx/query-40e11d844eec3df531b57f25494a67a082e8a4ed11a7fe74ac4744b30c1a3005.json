@@ -1,0 +1,135 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n                    c.id AS \"id!\",\n                    c.autor_id AS \"autor_id!\",\n                    c.tipo AS \"tipo!\",\n                    c.target_id AS \"target_id!\",\n                    COALESCE(c.contenido, '') AS \"contenido!\",\n                    COALESCE(c.tipo_contenido, 'texto') AS \"tipo_contenido!\",\n                    c.media_url,\n                    c.media_metadata AS \"media_metadata?: serde_json::Value\",\n                    c.parent_id,\n                    COALESCE(c.total_likes, 0) AS \"total_likes!\",\n                    COALESCE(c.total_respuestas, 0) AS \"total_respuestas!\",\n                    c.created_at AS \"created_at!: chrono::DateTime<chrono::Utc>\",\n                    c.updated_at AS \"updated_at?: chrono::DateTime<chrono::Utc>\",\n                    u.id AS \"author_id!\",\n                    u.username AS \"author_username!\",\n                    u.nombre_visible AS \"author_display_name\",\n                    u.avatar_url AS \"author_avatar_url\",\n                    COALESCE(u.verificado, FALSE) AS \"author_verified!\",\n                    (SELECT reaccion FROM likes WHERE usuario_id = $1 AND tipo = 'comentario' AND target_id = c.id LIMIT 1) AS \"mi_reaccion\"\n               FROM comentarios c\n               JOIN usuarios_ext u ON u.id = c.autor_id\n               WHERE c.tipo = $2\n                 AND c.target_id = $3\n                 AND c.parent_id IS NULL\n                 AND (c.moderacion_estado IS NULL OR c.moderacion_estado != 'rechazado')\n                 AND NOT (c.autor_id = ANY($4::int[]))\n               ORDER BY c.total_likes DESC, c.created_at DESC\n               LIMIT $5 OFFSET $6",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "autor_id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "tipo!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "target_id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "contenido!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "tipo_contenido!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "media_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 7,
+        "name": "media_metadata?: serde_json::Value",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 8,
+        "name": "parent_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 9,
+        "name": "total_likes!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 10,
+        "name": "total_respuestas!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 11,
+        "name": "created_at!: chrono::DateTime<chrono::Utc>",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 12,
+        "name": "updated_at?: chrono::DateTime<chrono::Utc>",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 13,
+        "name": "author_id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 14,
+        "name": "author_username!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 15,
+        "name": "author_display_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 16,
+        "name": "author_avatar_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 17,
+        "name": "author_verified!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 18,
+        "name": "mi_reaccion",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Text",
+        "Int4",
+        "Int4Array",
+        "Int8",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      null,
+      null,
+      true,
+      true,
+      true,
+      null,
+      null,
+      true,
+      true,
+      false,
+      false,
+      false,
+      true,
+      null,
+      null
+    ]
+  },
+  "hash": "40e11d844eec3df531b57f25494a67a082e8a4ed11a7fe74ac4744b30c1a3005"
+}

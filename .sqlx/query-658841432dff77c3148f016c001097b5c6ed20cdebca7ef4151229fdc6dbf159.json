@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE comentarios SET total_respuestas = GREATEST(total_respuestas - 1, 0) WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "658841432dff77c3148f016c001097b5c6ed20cdebca7ef4151229fdc6dbf159"
+}

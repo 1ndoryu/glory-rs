@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE samples SET total_comentarios = (SELECT COUNT(*) FROM comentarios WHERE tipo = 'sample' AND target_id = $1) WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e7b1481e4965f0296057841f70a852a6eb02c4d94a3b647b81b2c5c711afc6fa"
+}

@@ -15,6 +15,7 @@ use crate::errors::AppError;
 pub enum LikeKind {
     Sample,
     Publicacion,
+    Comentario,
     Cancion,
     Relacion,
 }
@@ -24,6 +25,7 @@ impl LikeKind {
         match self {
             Self::Sample => "sample",
             Self::Publicacion => "publicacion",
+            Self::Comentario => "comentario",
             Self::Cancion => "cancion",
             Self::Relacion => "relacion",
         }
@@ -37,6 +39,7 @@ impl FromStr for LikeKind {
         match s {
             "sample" => Ok(Self::Sample),
             "publicacion" => Ok(Self::Publicacion),
+            "comentario" => Ok(Self::Comentario),
             "cancion" => Ok(Self::Cancion),
             "relacion" => Ok(Self::Relacion),
             other => Err(AppError::Validation(format!("tipo de like inválido: {other}"))),
@@ -95,6 +98,12 @@ impl LikeRepository {
             .await?,
             LikeKind::Publicacion => sqlx::query_scalar!(
                 "SELECT EXISTS(SELECT 1 FROM publicaciones WHERE id = $1 AND eliminado_en IS NULL) AS \"e!\"",
+                target_id
+            )
+            .fetch_one(pool)
+            .await?,
+            LikeKind::Comentario => sqlx::query_scalar!(
+                "SELECT EXISTS(SELECT 1 FROM comentarios WHERE id = $1 AND (moderacion_estado IS NULL OR moderacion_estado != 'rechazado')) AS \"e!\"",
                 target_id
             )
             .fetch_one(pool)
@@ -189,6 +198,18 @@ impl LikeRepository {
                 .execute(pool)
                 .await?;
             }
+            LikeKind::Comentario => {
+                sqlx::query!(
+                    "UPDATE comentarios SET total_likes = ( \
+                        SELECT COUNT(*) FROM likes \
+                        WHERE tipo = 'comentario' AND target_id = $1 \
+                          AND reaccion IN ('like', 'encanta') \
+                    ) WHERE id = $1",
+                    target_id,
+                )
+                .execute(pool)
+                .await?;
+            }
             LikeKind::Cancion => {
                 sqlx::query!(
                     "UPDATE canciones SET total_likes = ( \
@@ -226,6 +247,7 @@ mod tests {
     fn parses_kinds() {
         assert_eq!(LikeKind::from_str("sample").unwrap(), LikeKind::Sample);
         assert_eq!(LikeKind::from_str("publicacion").unwrap(), LikeKind::Publicacion);
+        assert_eq!(LikeKind::from_str("comentario").unwrap(), LikeKind::Comentario);
         assert!(LikeKind::from_str("desconocido").is_err());
     }
 

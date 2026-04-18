@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS(SELECT 1 FROM comentarios WHERE id = $1 AND (moderacion_estado IS NULL OR moderacion_estado != 'rechazado')) AS \"e!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "e!",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "8a158f76c95540cf091a3cd53af92ca0b6485588373aea73317a738f12aa21ed"
+}

@@ -73,7 +73,7 @@
 ### Fase 2 â€” Auth y usuarios
 
 ### Fase 3 â€” Storage + uploads
-- nota: me di cuenta que hay lugares en donde no se esta usando query! y en vez se usa sin !, necesitamos comprobaciones reales en tiempo real para ir chqueando que todo va quedando bien, corrige todo los query posibles.
+- nota: me di cuenta que hay lugares en donde no se esta usando query y en vez se usa sin as!, necesitamos comprobaciones reales en tiempo real para ir chqueando que todo va quedando bien, corrige todo los query posibles.
 
 ### Fase 4 â€” Audio pipeline (lo mÃ¡s difÃ­cil)
 
@@ -87,7 +87,6 @@
 ### Fase 8 â€” Reproducciones, likes, follows, downloads
 
 ### Fase 9 â€” Colecciones y sociales
-- 174A-68 â€” Comments polimÃ³rficos + likes + multimedia
 
 ### Fase 10 â€” MensajerÃ­a + WebSocket
 - 174A-69 â€” `glory-rs/backend/websocket` hub + ticket HMAC

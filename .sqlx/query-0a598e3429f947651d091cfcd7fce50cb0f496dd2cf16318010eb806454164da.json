@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE canciones SET total_comentarios = (SELECT COUNT(*) FROM comentarios WHERE tipo = 'cancion' AND target_id = $1) WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "0a598e3429f947651d091cfcd7fce50cb0f496dd2cf16318010eb806454164da"
+}

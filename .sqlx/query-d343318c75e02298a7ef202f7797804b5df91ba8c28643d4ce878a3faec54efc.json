@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE comentarios SET total_respuestas = total_respuestas + 1 WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d343318c75e02298a7ef202f7797804b5df91ba8c28643d4ce878a3faec54efc"
+}

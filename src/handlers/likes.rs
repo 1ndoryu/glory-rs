@@ -27,7 +27,7 @@ use crate::AppState;
 
 #[derive(Debug, Clone, Deserialize, ToSchema)]
 pub struct LikeRequest {
-    /// Tipo de target. Valores: `sample`, `publicacion`, `cancion`, `relacion`.
+    /// Tipo de target. Valores: `sample`, `publicacion`, `comentario`, `cancion`, `relacion`.
     pub tipo: String,
     pub target_id: i32,
     /// Reacción opcional. Valores: `like`, `dislike`, `encanta`. Default `like`.

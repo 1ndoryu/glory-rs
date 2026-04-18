@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE comentarios\n               SET contenido = $3,\n                   updated_at = NOW()\n               WHERE id = $1 AND autor_id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "1f924632f533254f3f252422491f59803670ea11f8ae9032a4ca5136c8c47374"
+}

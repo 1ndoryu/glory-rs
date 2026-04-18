@@ -12,7 +12,7 @@ Crea o actualiza la reacción del usuario autenticado al target.
 { "tipo": "sample", "target_id": 123, "reaccion": "like" }
 ```
 
-- `tipo`: `sample` | `publicacion` | `cancion` | `relacion`.
+- `tipo`: `sample` | `publicacion` | `comentario` | `cancion` | `relacion`.
 - `reaccion` (opcional, default `like`): `like` | `dislike` | `encanta`.
 
 **Respuestas:**
@@ -37,6 +37,12 @@ Elimina la reacción del usuario al target. Idempotente.
 ## Ajuste posterior — 174A-67
 - El branch `tipo=publicacion` ahora exige `eliminado_en IS NULL` en `LikeRepository::target_exists`. Un post soft-deleted deja de ser target válido para likes aunque el ID siga existiendo.
 
+## Ajuste posterior — 174A-68
+- `LikeKind` ahora soporta `comentario` como target real, no solo en el CHECK de la tabla.
+- `LikeRepository::target_exists` valida comentario visible (`moderacion_estado != 'rechazado'`).
+- `LikeRepository::recount_target` recalcula `comentarios.total_likes` con macros compile-time.
+- Además del endpoint genérico `/api/like`, el dominio comentarios expone alias REST `POST/DELETE /api/comentarios/{id}/like`.
+
 ## Decisiones vs legado PHP (`SocialController::darLike/quitarLike`)
 - **Dislike:** El legado llamaba `PlanificadorAlgoritmo::registrarInteraccion(user, 'dislike')`, pero `algoritmo_estado` solo tiene contador `cnt_likes`. En Rust se usa `InteractionKind::Like` para todas las reacciones (mismo bucket).
 - **Rate limit (30/min):** NO portado. Pendiente cuando exista `RateLimiter` global.
@@ -51,4 +57,4 @@ Tabla `likes` (creada en migración `20260417000005_social_engagement.up.sql`):
 - Índices: `idx_likes_target`, `idx_likes_reaccion`, `idx_likes_usuario_created`, `idx_likes_trending_24h`.
 
 ## Tablas con `total_likes` recalculado
-- `samples`, `publicaciones`, `canciones`, `relaciones_sample` — todas tienen columna `total_likes INT DEFAULT 0`.
+- `samples`, `publicaciones`, `comentarios`, `canciones`, `relaciones_sample` — todas tienen columna `total_likes INT DEFAULT 0`.

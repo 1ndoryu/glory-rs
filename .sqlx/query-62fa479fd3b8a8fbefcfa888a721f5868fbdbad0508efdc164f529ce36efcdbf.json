@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH RECURSIVE comment_tree AS (\n                    SELECT id, media_url\n                    FROM comentarios\n                    WHERE id = $1\n                    UNION ALL\n                    SELECT c.id, c.media_url\n                    FROM comentarios c\n                    JOIN comment_tree ct ON c.parent_id = ct.id\n                )\n                SELECT media_url AS \"media_url!\"\n                FROM comment_tree\n                WHERE media_url IS NOT NULL",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "media_url!",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "62fa479fd3b8a8fbefcfa888a721f5868fbdbad0508efdc164f529ce36efcdbf"
+}

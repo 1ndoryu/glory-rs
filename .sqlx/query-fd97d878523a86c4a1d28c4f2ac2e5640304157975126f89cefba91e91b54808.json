@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE articulos SET total_comentarios = (SELECT COUNT(*) FROM comentarios WHERE tipo = 'articulo' AND target_id = $1) WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "fd97d878523a86c4a1d28c4f2ac2e5640304157975126f89cefba91e91b54808"
+}

@@ -1,5 +1,6 @@
 mod block;
 mod coleccion;
+mod comment;
 mod download;
 mod follow;
 mod ia_queue;
@@ -16,6 +17,10 @@ mod user;
 
 pub use block::{BlockRepository, BlockedUser};
 pub use coleccion::{Coleccion, ColeccionSample, ColeccionSampleFile, ColeccionesRepository};
+pub use comment::{
+    CommentAuthorSummary, CommentContentKind, CommentContext, CommentDetail, CommentRepository,
+    CommentTargetKind, CreateCommentParams,
+};
 pub use download::{DownloadRepository, SampleDownloadInfo, SampleFileInfo};
 pub use follow::FollowRepository;
 pub use ia_queue::{
