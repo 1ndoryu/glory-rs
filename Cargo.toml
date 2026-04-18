@@ -56,6 +56,7 @@ reqwest = { version = "0.12", default-features = false, features = ["json", "rus
 
 # Crypto / hashes / IDs
 sha2 = "0.10"
+crc32fast = "1.4"
 hmac = "0.12"
 hex = "0.4"
 base64 = "0.22"
