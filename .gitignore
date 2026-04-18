@@ -25,7 +25,9 @@ desktop.ini
 # Logs
 *.log
 
-/scripts/
+/scripts/*
+!/scripts/check-roadmap.mjs
+!/scripts/self-check.ps1
 /prerendered/
 /node_modules/
 /cliente/
