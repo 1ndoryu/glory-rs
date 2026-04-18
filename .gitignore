@@ -24,3 +24,14 @@ desktop.ini
 
 # Logs
 *.log
+
+/scripts/
+/prerendered/
+/node_modules/
+/cliente/
+/uploads/
+.tsbuildinfo
+frontend/tsconfig.tsbuildinfo
+glory-rust-template.code-workspace
+.sentinel-report.md
+.cargo/config.toml
