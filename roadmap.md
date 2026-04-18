@@ -89,7 +89,6 @@
 ### Fase 9 â€” Colecciones y sociales
 
 ### Fase 10 â€” MensajerÃ­a + WebSocket
-- 174A-69 â€” `glory-rs/backend/websocket` hub + ticket HMAC
 - 174A-70 â€” `GET /ws` upgrade + `GET /ws/ticket`
 - 174A-71 â€” Conversations + messages
 - 174A-72 â€” WS events emitidos
