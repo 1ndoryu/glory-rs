@@ -73,6 +73,10 @@ pub struct ListSamplesQuery {
     pub page: Option<i64>,
     #[validate(range(min = 1, max = 100))]
     pub per_page: Option<i64>,
+    #[serde(alias = "q", alias = "busqueda")]
+    pub search: Option<String>,
+    #[serde(alias = "busqueda_norm")]
+    pub search_normalized: Option<String>,
     #[validate(range(min = 1, max = 400))]
     pub bpm: Option<i32>,
     pub key: Option<String>,

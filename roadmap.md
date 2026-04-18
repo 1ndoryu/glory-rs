@@ -80,7 +80,6 @@
 ### Fase 5 â€” IA pipeline
 
 ### Fase 6 â€” Samples CRUD + bÃºsqueda
-- 174A-47 â€” BÃºsqueda fuzzy trigram
 - 174A-48 â€” BÃºsqueda similitud pgvector (`GET /samples/{id}/similar`)
 
 ### Fase 7 â€” Algoritmo de descubrimiento (lo mÃ¡s difÃ­cil #2)

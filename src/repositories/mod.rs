@@ -23,6 +23,6 @@ pub use sample::{
 };
 pub use sample_catalog::{
     OwnedSampleRecord, SampleCatalogDetailRecord, SampleCatalogSummaryRecord,
-    SampleListFilters, SampleListResult, UpdateSamplePatch,
+    SampleListFilters, SampleListResult, SampleTextSearch, UpdateSamplePatch,
 };
 pub use user::{OAuthRepository, UserRepository};

@@ -24,6 +24,8 @@ use crate::AppState;
     params(
         ("page" = Option<i64>, Query, description = "Página 1-based. Default: 1"),
         ("per_page" = Option<i64>, Query, description = "Tamaño de página. Default: 20, máximo: 100"),
+        ("search" = Option<String>, Query, description = "Búsqueda textual. También acepta alias legacy `busqueda` y alias corto `q`"),
+        ("search_normalized" = Option<String>, Query, description = "Forma normalizada del término. También acepta alias legacy `busqueda_norm`"),
         ("bpm" = Option<i32>, Query, description = "Filtro exacto por BPM"),
         ("key" = Option<String>, Query, description = "Tónica musical. Acepta C, F#, Bb, Eb, etc."),
         ("type" = Option<String>, Query, description = "Tipo de sample. También acepta alias legado `tipo`"),

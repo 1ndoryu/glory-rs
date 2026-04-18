@@ -7,7 +7,7 @@ use crate::models::{
 };
 use crate::repositories::{
     OwnedSampleRecord, SampleCatalogDetailRecord, SampleCatalogSummaryRecord,
-    SampleListFilters, SampleRepository, UpdateSamplePatch,
+    SampleListFilters, SampleRepository, SampleTextSearch, UpdateSamplePatch,
 };
 
 #[cfg(test)]
@@ -19,6 +19,7 @@ const MAX_TAG_FILTERS: usize = 10;
 const MAX_CREATOR_LENGTH: usize = 50;
 const MIN_SAMPLE_TAGS: usize = 2;
 const MAX_SAMPLE_TAGS: usize = 20;
+const MAX_SEARCH_LENGTH: usize = 120;
 
 /* [174A-44] Servicio de catálogo público de samples.
  * Centraliza la normalización de filtros para que el handler quede fino y el
@@ -302,12 +303,14 @@ fn asset_to_public_url(public_base_url: Option<&str>, raw: Option<String>) -> Op
 }
 
 fn normalize_filters(query: ListSamplesQuery) -> Result<SampleListFilters, AppError> {
+    let search = normalize_search(query.search, query.search_normalized)?;
     let creator = normalize_creator(query.creator)?;
     let tags = normalize_tags(query.tags)?;
 
     Ok(SampleListFilters {
         page: query.page.unwrap_or(DEFAULT_PAGE),
         per_page: query.per_page.unwrap_or(DEFAULT_PER_PAGE),
+        search,
         bpm: query.bpm,
         music_key: normalize_music_key(query.key)?,
         sample_type: normalize_sample_type(query.sample_type)?,
@@ -315,6 +318,41 @@ fn normalize_filters(query: ListSamplesQuery) -> Result<SampleListFilters, AppEr
         premium: query.premium,
         creator,
     })
+}
+
+fn normalize_search(
+    raw: Option<String>,
+    raw_normalized: Option<String>,
+) -> Result<Option<SampleTextSearch>, AppError> {
+    let Some(raw) = raw else {
+        return Ok(None);
+    };
+
+    let query = raw.trim();
+    if query.is_empty() {
+        return Ok(None);
+    }
+
+    if query.chars().count() < 2 {
+        return Err(AppError::Validation(
+            "search debe tener al menos 2 caracteres".into(),
+        ));
+    }
+
+    if query.len() > MAX_SEARCH_LENGTH {
+        return Err(AppError::Validation(format!(
+            "search no puede superar {MAX_SEARCH_LENGTH} caracteres"
+        )));
+    }
+
+    let normalized = raw_normalized
+        .map(|value| value.trim().to_ascii_lowercase())
+        .filter(|value| !value.is_empty() && value != &query.to_ascii_lowercase());
+
+    Ok(Some(SampleTextSearch::new(
+        query.to_string(),
+        normalized,
+    )))
 }
 
 fn normalize_update_request(request: UpdateSampleRequest) -> Result<UpdateSamplePatch, AppError> {

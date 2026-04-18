@@ -12,12 +12,38 @@ use super::sample::SampleRepository;
 pub struct SampleListFilters {
     pub page: i64,
     pub per_page: i64,
+    pub search: Option<SampleTextSearch>,
     pub bpm: Option<i32>,
     pub music_key: Option<String>,
     pub sample_type: Option<String>,
     pub tags: Vec<String>,
     pub premium: Option<bool>,
     pub creator: Option<String>,
+}
+
+#[derive(Debug, Clone)]
+pub struct SampleTextSearch {
+    pub query: String,
+    pub title_like: String,
+    pub title_prefix: String,
+    pub lower_query: String,
+    pub lower_like: String,
+    pub normalized_like: Option<String>,
+}
+
+impl SampleTextSearch {
+    pub fn new(query: String, normalized: Option<String>) -> Self {
+        let lower_query = query.to_ascii_lowercase();
+
+        Self {
+            title_like: format!("%{query}%"),
+            title_prefix: format!("{query}%"),
+            lower_like: format!("%{lower_query}%"),
+            normalized_like: normalized.map(|value| format!("%{value}%")),
+            lower_query,
+            query,
+        }
+    }
 }
 
 impl SampleListFilters {
@@ -265,8 +291,8 @@ impl SampleRepository {
         );
 
         push_public_filters(&mut builder, filters);
-        builder
-            .push(" ORDER BY s.publicado_at DESC NULLS LAST, s.created_at DESC, s.id DESC LIMIT ");
+        push_public_order(&mut builder, filters);
+        builder.push(" LIMIT ");
         builder.push_bind(filters.per_page);
         builder.push(" OFFSET ");
         builder.push_bind(filters.offset());
@@ -580,5 +606,141 @@ fn push_public_filters(builder: &mut QueryBuilder<'_, Postgres>, filters: &Sampl
         builder.push(" AND LOWER(u.username) = LOWER(");
         builder.push_bind(creator.clone());
         builder.push(")");
+    }
+
+    if let Some(search) = &filters.search {
+        push_public_search_filters(builder, search);
+    }
+}
+
+fn push_public_search_filters(
+    builder: &mut QueryBuilder<'_, Postgres>,
+    search: &SampleTextSearch,
+) {
+    builder.push(
+        " AND (
+            to_tsvector('spanish', COALESCE(s.titulo, '') || ' ' || COALESCE(s.descripcion, ''))
+                @@ plainto_tsquery('spanish', ",
+    );
+    builder.push_bind(search.query.clone());
+    builder.push(")");
+
+    builder.push(" OR s.titulo ILIKE ");
+    builder.push_bind(search.title_like.clone());
+
+    builder.push(
+        " OR EXISTS (
+            SELECT 1
+            FROM UNNEST(COALESCE(s.tags, ARRAY[]::text[])) tag
+            WHERE tag ILIKE ",
+    );
+    builder.push_bind(search.lower_like.clone());
+    builder.push(")");
+
+    builder.push(
+        " OR EXISTS (
+            SELECT 1
+            FROM UNNEST(COALESCE(s.tags_enriquecidos, ARRAY[]::text[])) tag
+            WHERE tag ILIKE ",
+    );
+    builder.push_bind(search.lower_like.clone());
+    builder.push(")");
+
+    builder.push(" OR word_similarity(");
+    builder.push_bind(search.query.clone());
+    builder.push(", s.titulo) > 0.3");
+
+    builder.push(
+        " OR EXISTS (
+            SELECT 1
+            FROM UNNEST(COALESCE(s.tags, ARRAY[]::text[])) tag
+            WHERE similarity(tag, ",
+    );
+    builder.push_bind(search.lower_query.clone());
+    builder.push(") > 0.4)");
+
+    builder.push(
+        " OR EXISTS (
+            SELECT 1
+            FROM UNNEST(COALESCE(s.tags_enriquecidos, ARRAY[]::text[])) tag
+            WHERE similarity(tag, ",
+    );
+    builder.push_bind(search.lower_query.clone());
+    builder.push(") > 0.4)");
+
+    if let Some(normalized_like) = &search.normalized_like {
+        builder.push(
+            " OR EXISTS (
+                SELECT 1
+                FROM UNNEST(COALESCE(s.tags, ARRAY[]::text[])) tag
+                WHERE tag ILIKE ",
+        );
+        builder.push_bind(normalized_like.clone());
+        builder.push(")");
+
+        builder.push(
+            " OR EXISTS (
+                SELECT 1
+                FROM UNNEST(COALESCE(s.tags_enriquecidos, ARRAY[]::text[])) tag
+                WHERE tag ILIKE ",
+        );
+        builder.push_bind(normalized_like.clone());
+        builder.push(")");
+
+        builder.push(" OR s.titulo ILIKE ");
+        builder.push_bind(normalized_like.clone());
+    }
+
+    builder.push(")");
+}
+
+fn push_public_order(builder: &mut QueryBuilder<'_, Postgres>, filters: &SampleListFilters) {
+    if let Some(search) = &filters.search {
+        builder.push(
+            " ORDER BY (
+                1.0 * ts_rank(
+                    to_tsvector('spanish', COALESCE(s.titulo, '') || ' ' || COALESCE(s.descripcion, '')),
+                    plainto_tsquery('spanish', ",
+        );
+        builder.push_bind(search.query.clone());
+        builder.push(")
+                )
+                + 0.8 * CASE WHEN EXISTS (
+                    SELECT 1
+                    FROM UNNEST(COALESCE(s.tags, ARRAY[]::text[])) tag
+                    WHERE tag ILIKE ");
+        builder.push_bind(search.lower_like.clone());
+        builder.push(
+            "
+                ) OR EXISTS (
+                    SELECT 1
+                    FROM UNNEST(COALESCE(s.tags_enriquecidos, ARRAY[]::text[])) tag
+                    WHERE tag ILIKE ",
+        );
+        builder.push_bind(search.lower_like.clone());
+        builder.push(
+            "
+                ) THEN 1.0 ELSE 0.0 END
+                + 1.5 * ts_rank(
+                    to_tsvector('spanish', COALESCE(s.titulo, '')),
+                    plainto_tsquery('spanish', ",
+        );
+        builder.push_bind(search.query.clone());
+        builder.push(")
+                )
+                + 0.6 * word_similarity(");
+        builder.push_bind(search.query.clone());
+        builder.push(", s.titulo)
+                + 2.0 * CASE WHEN s.titulo ILIKE ");
+        builder.push_bind(search.title_prefix.clone());
+        builder.push(
+            " THEN 1.0 ELSE 0.0 END
+            ) DESC,
+            s.publicado_at DESC NULLS LAST,
+            s.created_at DESC,
+            s.id DESC",
+        );
+    } else {
+        builder.push(" ORDER BY s.publicado_at DESC NULLS LAST, s.created_at DESC, s.id DESC");
     }
 }

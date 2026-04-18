@@ -1,6 +1,6 @@
 use super::{
     asset_to_public_url, build_sample_detail, normalize_creator, normalize_music_key,
-    normalize_sample_type, normalize_tags, normalize_update_request,
+    normalize_sample_type, normalize_search, normalize_tags, normalize_update_request,
 };
 use crate::models::UpdateSampleRequest;
 use crate::repositories::SampleCatalogDetailRecord;
@@ -51,6 +51,21 @@ fn trims_creator_and_rejects_too_long_values() {
         Ok(Some(value)) if value == "indoryu"
     ));
     assert!(normalize_creator(Some("x".repeat(51))).is_err());
+}
+
+#[test]
+fn normalizes_search_and_optional_normalized_variant() {
+    let search = normalize_search(Some("  hihatt  ".into()), Some("hihat".into()))
+        .unwrap_or_default();
+
+    assert!(matches!(search.as_ref().map(|value| value.query.as_str()), Some("hihatt")));
+    assert!(matches!(search.as_ref().map(|value| value.title_like.as_str()), Some("%hihatt%")));
+    assert!(matches!(search.as_ref().and_then(|value| value.normalized_like.as_deref()), Some("%hihat%")));
+}
+
+#[test]
+fn rejects_too_short_search_terms() {
+    assert!(normalize_search(Some("x".into()), None).is_err());
 }
 
 #[test]
