@@ -595,6 +595,7 @@ mod tests {
                 })
                 .to_string(),
             ),
+            smtp: None,
         };
 
         let runtime = FcmDeliveryRuntime::from_config(&config)
@@ -627,6 +628,7 @@ mod tests {
             vapid_private_key: None,
             vapid_subject: None,
             fcm_service_account_json: Some("{".into()),
+            smtp: None,
         };
 
         let error = FcmDeliveryRuntime::from_config(&config)

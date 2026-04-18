@@ -1,4 +1,5 @@
 mod audio_pipeline;
+mod email;
 mod fcm;
 mod auth;
 pub mod algo_timing;
@@ -19,6 +20,10 @@ mod token_store;
 pub use audio_pipeline::{
     AudioPipelineError, AudioPipelineRequest, AudioPipelineResult, AudioPipelineService,
     AudioPipelineStage, AudioTechnicalAnalysis, GeneratedAudioAssets,
+};
+pub use email::{
+    EmailDeliveryRuntime, EmailDeliveryRuntimeError, EmailNotificationService,
+    NotificationOptInEmailInput, PurchaseConfirmationEmailInput,
 };
 pub use fcm::{
     FcmDeliveryRuntime, FcmDeliveryRuntimeError, FcmNotificationPayload,

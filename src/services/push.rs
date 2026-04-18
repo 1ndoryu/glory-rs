@@ -369,6 +369,7 @@ mod tests {
             vapid_private_key: Some("IQ9Ur0ykXoHS9gzfYX0aBjy9lvdrjx_PFUXmie9YRcY".into()),
             vapid_subject: None,
             fcm_service_account_json: None,
+            smtp: None,
         };
 
         let runtime = PushDeliveryRuntime::from_config(&config)

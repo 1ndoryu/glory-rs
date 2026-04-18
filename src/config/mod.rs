@@ -8,6 +8,17 @@ pub enum ConfigError {
     InvalidNumber(#[from] std::num::ParseIntError),
 }
 
+#[derive(Debug, Clone)]
+pub struct SmtpConfig {
+    pub host: String,
+    pub port: u16,
+    pub user: String,
+    pub password: String,
+    pub from_email: String,
+    pub from_name: String,
+    pub secure: String,
+}
+
 /* [174A-5] Configuración de la app cargada desde variables de entorno.
  * REDIS_URL es opcional para permitir desarrollo sin Redis (cache en memoria fallback). */
 #[derive(Debug, Clone)]
@@ -45,6 +56,8 @@ pub struct AppConfig {
     pub vapid_subject: Option<String>,
     /// JSON completo de service-account para FCM HTTP v1.
     pub fcm_service_account_json: Option<String>,
+    /// Configuración SMTP opcional para emails transaccionales.
+    pub smtp: Option<SmtpConfig>,
 }
 
 impl AppConfig {
@@ -96,6 +109,7 @@ impl AppConfig {
                 "FCM_SERVICE_ACCOUNT_JSON",
                 "KAMPLES_FCM_SERVICE_ACCOUNT_JSON",
             ]),
+            smtp: load_optional_smtp()?,
         })
     }
 }
@@ -107,4 +121,50 @@ fn first_env(names: &[&str]) -> Option<String> {
             .map(|value| value.trim().to_string())
             .filter(|value| !value.is_empty())
     })
+}
+
+fn has_any_env(names: &[&str]) -> bool {
+    names.iter().any(|name| std::env::var_os(name).is_some())
+}
+
+fn load_optional_smtp() -> Result<Option<SmtpConfig>, ConfigError> {
+    let smtp_keys = [
+        "SMTP_HOST",
+        "SMTP_PORT",
+        "SMTP_USER",
+        "SMTP_PASS",
+        "SMTP_PASSWORD",
+        "SMTP_FROM",
+        "SMTP_FROM_EMAIL",
+        "SMTP_FROM_NAME",
+        "SMTP_SECURE",
+    ];
+
+    if !has_any_env(&smtp_keys) {
+        return Ok(None);
+    }
+
+    let host = first_env(&["SMTP_HOST"])
+        .ok_or_else(|| ConfigError::MissingEnvVar("SMTP_HOST".into()))?;
+    let user = first_env(&["SMTP_USER"])
+        .ok_or_else(|| ConfigError::MissingEnvVar("SMTP_USER".into()))?;
+    let password = first_env(&["SMTP_PASSWORD", "SMTP_PASS"])
+        .ok_or_else(|| ConfigError::MissingEnvVar("SMTP_PASSWORD / SMTP_PASS".into()))?;
+    let port = first_env(&["SMTP_PORT"])
+        .unwrap_or_else(|| "587".to_string())
+        .parse()?;
+    let from_email = first_env(&["SMTP_FROM_EMAIL", "SMTP_FROM"])
+        .unwrap_or_else(|| user.clone());
+    let from_name = first_env(&["SMTP_FROM_NAME"]).unwrap_or_else(|| "Kamples".to_string());
+    let secure = first_env(&["SMTP_SECURE"]).unwrap_or_else(|| "tls".to_string());
+
+    Ok(Some(SmtpConfig {
+        host,
+        port,
+        user,
+        password,
+        from_email,
+        from_name,
+        secure,
+    }))
 }

@@ -254,6 +254,7 @@ pub fn create_router(
     storage: std::sync::Arc<dyn crate::services::FileStorage>,
     push_runtime: Option<crate::services::PushDeliveryRuntime>,
     fcm_runtime: Option<crate::services::FcmDeliveryRuntime>,
+    email_runtime: Option<crate::services::EmailDeliveryRuntime>,
 ) -> Router {
     let public_base_url = config.public_base_url.clone();
     let ws_public_url = config.ws_public_url.clone();
@@ -282,6 +283,7 @@ pub fn create_router(
         public_base_url,
         push_runtime: push_runtime.map(std::sync::Arc::new),
         fcm_runtime: fcm_runtime.map(std::sync::Arc::new),
+        email_runtime: email_runtime.map(std::sync::Arc::new),
         ws_public_url,
         ws_ticket_ttl_secs: config.ws_ticket_ttl_secs,
         ws_hub,

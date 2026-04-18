@@ -4,6 +4,12 @@ use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 use utoipa::OpenApi;
 
+type DeliveryRuntimes = (
+    Option<glory_backend::services::PushDeliveryRuntime>,
+    Option<glory_backend::services::FcmDeliveryRuntime>,
+    Option<glory_backend::services::EmailDeliveryRuntime>,
+);
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenvy::dotenv().ok();
@@ -89,7 +95,27 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let _audio_pipeline_workers = glory_backend::workers::spawn_audio_pipeline_workers(&pool, &storage);
     let _ia_queue_workers = glory_backend::workers::spawn_ia_queue_workers(&pool);
 
-    let push_runtime = glory_backend::services::PushDeliveryRuntime::from_config(&config)?;
+    let (push_runtime, fcm_runtime, email_runtime) = init_delivery_runtimes(&config)?;
+
+    let app = handlers::create_router(
+        pool,
+        redis,
+        config,
+        storage,
+        push_runtime,
+        fcm_runtime,
+        email_runtime,
+    );
+    let listener = tokio::net::TcpListener::bind(&addr).await?;
+    axum::serve(listener, app).await?;
+
+    Ok(())
+}
+
+fn init_delivery_runtimes(
+    config: &AppConfig,
+) -> Result<DeliveryRuntimes, Box<dyn std::error::Error>> {
+    let push_runtime = glory_backend::services::PushDeliveryRuntime::from_config(config)?;
     if let Some(runtime) = push_runtime.as_ref() {
         tracing::info!(
             vapid_subject = %runtime.subject(),
@@ -99,7 +125,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         tracing::warn!("VAPID no configurado — Web Push deshabilitado");
     }
 
-    let fcm_runtime = glory_backend::services::FcmDeliveryRuntime::from_config(&config)?;
+    let fcm_runtime = glory_backend::services::FcmDeliveryRuntime::from_config(config)?;
     if let Some(runtime) = fcm_runtime.as_ref() {
         tracing::info!(
             project_id = %runtime.project_id(),
@@ -109,9 +135,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         tracing::warn!("FCM no configurado — Android push deshabilitado");
     }
 
-    let app = handlers::create_router(pool, redis, config, storage, push_runtime, fcm_runtime);
-    let listener = tokio::net::TcpListener::bind(&addr).await?;
-    axum::serve(listener, app).await?;
+    let email_runtime = glory_backend::services::EmailDeliveryRuntime::from_config(config)?;
+    if let Some(runtime) = email_runtime.as_ref() {
+        tracing::info!(
+            from_email = %runtime.from_email(),
+            secure = %runtime.secure_mode(),
+            "SMTP habilitado"
+        );
+    } else {
+        tracing::warn!("SMTP no configurado — emails deshabilitados");
+    }
 
-    Ok(())
+    Ok((push_runtime, fcm_runtime, email_runtime))
 }

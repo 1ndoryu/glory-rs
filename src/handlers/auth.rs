@@ -9,7 +9,7 @@ use crate::errors::AppError;
 use crate::errors::ErrorResponse;
 use crate::middleware::CurrentUser;
 use crate::models::{AuthResponse, GoogleAuthRequest, GooglePkceRequest, LoginRequest, LogoutRequest, RefreshRequest, RegisterRequest};
-use crate::services::AuthService;
+use crate::services::{AuthService, EmailNotificationService};
 use crate::AppState;
 
 #[utoipa::path(post, path = "/api/auth/register", request_body = RegisterRequest,
@@ -21,7 +21,17 @@ use crate::AppState;
 pub async fn register(State(state): State<AppState>, Json(req): Json<RegisterRequest>)
     -> Result<(StatusCode, Json<AuthResponse>), AppError> {
     req.validate().map_err(|e| AppError::Validation(e.to_string()))?;
+    let welcome_email = req.email.clone();
+    let welcome_name = req
+        .nombre_visible
+        .clone()
+        .unwrap_or_else(|| req.username.clone());
+    let email_runtime = state.email_runtime.clone();
+    let site_url = state.public_base_url.clone();
     let resp = AuthService::register(&state.pool, &state.redis, req, &state.jwt_secret).await?;
+    if let Some(runtime) = email_runtime {
+        EmailNotificationService::spawn_welcome(runtime, welcome_email, welcome_name, site_url);
+    }
     Ok((StatusCode::CREATED, Json(resp)))
 }
 
