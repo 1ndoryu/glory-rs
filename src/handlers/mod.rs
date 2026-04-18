@@ -2,6 +2,7 @@
 
 mod admin;
 mod auth;
+mod colecciones;
 mod downloads;
 mod feed;
 mod health;
@@ -71,6 +72,14 @@ impl utoipa::Modify for SecurityAddon {
         downloads::register_download,
         downloads::download_limits,
         downloads::stream_download,
+        colecciones::create_coleccion,
+        colecciones::list_my_colecciones,
+        colecciones::get_coleccion,
+        colecciones::update_coleccion,
+        colecciones::delete_coleccion,
+        colecciones::add_sample,
+        colecciones::remove_sample,
+        colecciones::list_samples,
         users::me,
         users::update_me,
         users::public_profile,
@@ -108,6 +117,14 @@ impl utoipa::Modify for SecurityAddon {
         crate::repositories::BlockedUser,
         downloads::DownloadResponse,
         downloads::DownloadLimitsResponse,
+        colecciones::CreateColeccionRequest,
+        colecciones::UpdateColeccionRequest,
+        colecciones::AddSampleRequest,
+        colecciones::OkResponse,
+        colecciones::ColeccionListResponse,
+        colecciones::ColeccionSamplesResponse,
+        crate::repositories::Coleccion,
+        crate::repositories::ColeccionSample,
         crate::models::DeleteSampleResponse,
         crate::models::ListSamplesQuery,
         crate::models::ListSamplesResponse,
@@ -196,6 +213,7 @@ fn api_routes() -> Router<AppState> {
         .merge(likes::routes())
         .merge(social::routes())
         .merge(downloads::routes())
+        .merge(colecciones::routes())
         .merge(users::routes())
         .merge(admin::routes())
 }

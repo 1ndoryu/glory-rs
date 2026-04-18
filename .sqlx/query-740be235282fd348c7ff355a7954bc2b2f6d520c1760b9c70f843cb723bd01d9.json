@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE colecciones SET total_samples = GREATEST(total_samples - 1, 0), updated_at = NOW() WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "740be235282fd348c7ff355a7954bc2b2f6d520c1760b9c70f843cb723bd01d9"
+}

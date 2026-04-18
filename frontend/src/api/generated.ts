@@ -25,6 +25,10 @@ import type {
 } from '@tanstack/react-query';
 
 import { customInstance } from './axios-instance';
+export interface AddSampleRequest {
+  sample_id: number;
+}
+
 export interface UserResponse {
   /** @nullable */
   email?: string | null;
@@ -105,6 +109,46 @@ export interface CheckDuplicateResponse {
      * @nullable
      */
   title?: string | null;
+}
+
+export interface Coleccion {
+  created_at: string;
+  /** @nullable */
+  descripcion?: string | null;
+  id: number;
+  /** @nullable */
+  imagen_url?: string | null;
+  nombre: string;
+  /** @nullable */
+  parent_id?: number | null;
+  publica: boolean;
+  total_samples: number;
+  updated_at: string;
+  usuario_id: number;
+  version: number;
+}
+
+export interface ColeccionListResponse {
+  items: Coleccion[];
+}
+
+export interface ColeccionSample {
+  added_at: string;
+  orden: number;
+  sample_id: number;
+}
+
+export interface ColeccionSamplesResponse {
+  items: ColeccionSample[];
+}
+
+export interface CreateColeccionRequest {
+  /** @nullable */
+  descripcion?: string | null;
+  nombre: string;
+  /** @nullable */
+  parent_id?: number | null;
+  publica?: boolean;
 }
 
 /**
@@ -498,6 +542,19 @@ export interface TimingEntry {
   meta: unknown;
   total_ms: number;
   ts: string;
+}
+
+export interface UpdateColeccionRequest {
+  /** @nullable */
+  descripcion?: string | null;
+  /** @nullable */
+  imagen_url?: string | null;
+  /** @nullable */
+  nombre?: string | null;
+  /** @nullable */
+  parent_id?: number | null;
+  /** @nullable */
+  publica?: boolean | null;
 }
 
 /**
@@ -1809,6 +1866,794 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getUnblockUserMutationOptions(options), queryClient);
     }
 
+export type listMyColeccionesResponse200 = {
+  data: ColeccionListResponse
+  status: 200
+}
+
+export type listMyColeccionesResponseSuccess = (listMyColeccionesResponse200) & {
+  headers: Headers;
+};
+;
+
+export type listMyColeccionesResponse = (listMyColeccionesResponseSuccess)
+
+export const getListMyColeccionesUrl = () => {
+
+
+
+
+  return `/api/colecciones`
+}
+
+export const listMyColecciones = async ( options?: RequestInit): Promise<listMyColeccionesResponse> => {
+
+  return customInstance<listMyColeccionesResponse>(getListMyColeccionesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListMyColeccionesQueryKey = () => {
+    return [
+    `/api/colecciones`
+    ] as const;
+    }
+
+
+export const getListMyColeccionesQueryOptions = <TData = Awaited<ReturnType<typeof listMyColecciones>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listMyColecciones>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListMyColeccionesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listMyColecciones>>> = ({ signal }) => listMyColecciones({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listMyColecciones>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListMyColeccionesQueryResult = NonNullable<Awaited<ReturnType<typeof listMyColecciones>>>
+export type ListMyColeccionesQueryError = unknown
+
+
+export function useListMyColecciones<TData = Awaited<ReturnType<typeof listMyColecciones>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listMyColecciones>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listMyColecciones>>,
+          TError,
+          Awaited<ReturnType<typeof listMyColecciones>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListMyColecciones<TData = Awaited<ReturnType<typeof listMyColecciones>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listMyColecciones>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listMyColecciones>>,
+          TError,
+          Awaited<ReturnType<typeof listMyColecciones>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListMyColecciones<TData = Awaited<ReturnType<typeof listMyColecciones>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listMyColecciones>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useListMyColecciones<TData = Awaited<ReturnType<typeof listMyColecciones>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listMyColecciones>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListMyColeccionesQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+export type createColeccionResponse201 = {
+  data: Coleccion
+  status: 201
+}
+
+export type createColeccionResponse400 = {
+  data: void
+  status: 400
+}
+
+export type createColeccionResponse409 = {
+  data: void
+  status: 409
+}
+
+export type createColeccionResponseSuccess = (createColeccionResponse201) & {
+  headers: Headers;
+};
+export type createColeccionResponseError = (createColeccionResponse400 | createColeccionResponse409) & {
+  headers: Headers;
+};
+
+export type createColeccionResponse = (createColeccionResponseSuccess | createColeccionResponseError)
+
+export const getCreateColeccionUrl = () => {
+
+
+
+
+  return `/api/colecciones`
+}
+
+export const createColeccion = async (createColeccionRequest: CreateColeccionRequest, options?: RequestInit): Promise<createColeccionResponse> => {
+
+  return customInstance<createColeccionResponse>(getCreateColeccionUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      createColeccionRequest,)
+  }
+);}
+
+
+
+
+export const getCreateColeccionMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createColeccion>>, TError,{data: CreateColeccionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof createColeccion>>, TError,{data: CreateColeccionRequest}, TContext> => {
+
+const mutationKey = ['createColeccion'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createColeccion>>, {data: CreateColeccionRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createColeccion(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateColeccionMutationResult = NonNullable<Awaited<ReturnType<typeof createColeccion>>>
+    export type CreateColeccionMutationBody = CreateColeccionRequest
+    export type CreateColeccionMutationError = void
+
+    export const useCreateColeccion = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createColeccion>>, TError,{data: CreateColeccionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createColeccion>>,
+        TError,
+        {data: CreateColeccionRequest},
+        TContext
+      > => {
+      return useMutation(getCreateColeccionMutationOptions(options), queryClient);
+    }
+
+export type getColeccionResponse200 = {
+  data: Coleccion
+  status: 200
+}
+
+export type getColeccionResponse403 = {
+  data: void
+  status: 403
+}
+
+export type getColeccionResponse404 = {
+  data: void
+  status: 404
+}
+
+export type getColeccionResponseSuccess = (getColeccionResponse200) & {
+  headers: Headers;
+};
+export type getColeccionResponseError = (getColeccionResponse403 | getColeccionResponse404) & {
+  headers: Headers;
+};
+
+export type getColeccionResponse = (getColeccionResponseSuccess | getColeccionResponseError)
+
+export const getGetColeccionUrl = (id: number,) => {
+
+
+
+
+  return `/api/colecciones/${id}`
+}
+
+export const getColeccion = async (id: number, options?: RequestInit): Promise<getColeccionResponse> => {
+
+  return customInstance<getColeccionResponse>(getGetColeccionUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetColeccionQueryKey = (id: number,) => {
+    return [
+    `/api/colecciones/${id}`
+    ] as const;
+    }
+
+
+export const getGetColeccionQueryOptions = <TData = Awaited<ReturnType<typeof getColeccion>>, TError = void>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getColeccion>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetColeccionQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getColeccion>>> = ({ signal }) => getColeccion(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getColeccion>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetColeccionQueryResult = NonNullable<Awaited<ReturnType<typeof getColeccion>>>
+export type GetColeccionQueryError = void
+
+
+export function useGetColeccion<TData = Awaited<ReturnType<typeof getColeccion>>, TError = void>(
+ id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getColeccion>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getColeccion>>,
+          TError,
+          Awaited<ReturnType<typeof getColeccion>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetColeccion<TData = Awaited<ReturnType<typeof getColeccion>>, TError = void>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getColeccion>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getColeccion>>,
+          TError,
+          Awaited<ReturnType<typeof getColeccion>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetColeccion<TData = Awaited<ReturnType<typeof getColeccion>>, TError = void>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getColeccion>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetColeccion<TData = Awaited<ReturnType<typeof getColeccion>>, TError = void>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getColeccion>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetColeccionQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+export type updateColeccionResponse200 = {
+  data: OkResponse
+  status: 200
+}
+
+export type updateColeccionResponse403 = {
+  data: void
+  status: 403
+}
+
+export type updateColeccionResponse404 = {
+  data: void
+  status: 404
+}
+
+export type updateColeccionResponse409 = {
+  data: void
+  status: 409
+}
+
+export type updateColeccionResponseSuccess = (updateColeccionResponse200) & {
+  headers: Headers;
+};
+export type updateColeccionResponseError = (updateColeccionResponse403 | updateColeccionResponse404 | updateColeccionResponse409) & {
+  headers: Headers;
+};
+
+export type updateColeccionResponse = (updateColeccionResponseSuccess | updateColeccionResponseError)
+
+export const getUpdateColeccionUrl = (id: number,) => {
+
+
+
+
+  return `/api/colecciones/${id}`
+}
+
+export const updateColeccion = async (id: number,
+    updateColeccionRequest: UpdateColeccionRequest, options?: RequestInit): Promise<updateColeccionResponse> => {
+
+  return customInstance<updateColeccionResponse>(getUpdateColeccionUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      updateColeccionRequest,)
+  }
+);}
+
+
+
+
+export const getUpdateColeccionMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateColeccion>>, TError,{id: number;data: UpdateColeccionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateColeccion>>, TError,{id: number;data: UpdateColeccionRequest}, TContext> => {
+
+const mutationKey = ['updateColeccion'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateColeccion>>, {id: number;data: UpdateColeccionRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateColeccion(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateColeccionMutationResult = NonNullable<Awaited<ReturnType<typeof updateColeccion>>>
+    export type UpdateColeccionMutationBody = UpdateColeccionRequest
+    export type UpdateColeccionMutationError = void
+
+    export const useUpdateColeccion = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateColeccion>>, TError,{id: number;data: UpdateColeccionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateColeccion>>,
+        TError,
+        {id: number;data: UpdateColeccionRequest},
+        TContext
+      > => {
+      return useMutation(getUpdateColeccionMutationOptions(options), queryClient);
+    }
+
+export type deleteColeccionResponse200 = {
+  data: OkResponse
+  status: 200
+}
+
+export type deleteColeccionResponse403 = {
+  data: void
+  status: 403
+}
+
+export type deleteColeccionResponse404 = {
+  data: void
+  status: 404
+}
+
+export type deleteColeccionResponseSuccess = (deleteColeccionResponse200) & {
+  headers: Headers;
+};
+export type deleteColeccionResponseError = (deleteColeccionResponse403 | deleteColeccionResponse404) & {
+  headers: Headers;
+};
+
+export type deleteColeccionResponse = (deleteColeccionResponseSuccess | deleteColeccionResponseError)
+
+export const getDeleteColeccionUrl = (id: number,) => {
+
+
+
+
+  return `/api/colecciones/${id}`
+}
+
+export const deleteColeccion = async (id: number, options?: RequestInit): Promise<deleteColeccionResponse> => {
+
+  return customInstance<deleteColeccionResponse>(getDeleteColeccionUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteColeccionMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteColeccion>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteColeccion>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['deleteColeccion'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteColeccion>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteColeccion(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteColeccionMutationResult = NonNullable<Awaited<ReturnType<typeof deleteColeccion>>>
+
+    export type DeleteColeccionMutationError = void
+
+    export const useDeleteColeccion = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteColeccion>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteColeccion>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteColeccionMutationOptions(options), queryClient);
+    }
+
+export type listSamplesResponse200 = {
+  data: ListSamplesResponse
+  status: 200
+}
+
+export type listSamplesResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type listSamplesResponseSuccess = (listSamplesResponse200) & {
+  headers: Headers;
+};
+export type listSamplesResponseError = (listSamplesResponse422) & {
+  headers: Headers;
+};
+
+export type listSamplesResponse = (listSamplesResponseSuccess | listSamplesResponseError)
+
+export const getListSamplesUrl = (params?: ListSamplesParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/samples?${stringifiedParams}` : `/api/samples`
+}
+
+export const listSamples = async (params?: ListSamplesParams, options?: RequestInit): Promise<listSamplesResponse> => {
+
+  return customInstance<listSamplesResponse>(getListSamplesUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListSamplesQueryKey = (params?: ListSamplesParams,) => {
+    return [
+    `/api/samples`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListSamplesQueryOptions = <TData = Awaited<ReturnType<typeof listSamples>>, TError = ErrorResponse>(params?: ListSamplesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSamples>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListSamplesQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listSamples>>> = ({ signal }) => listSamples(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listSamples>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListSamplesQueryResult = NonNullable<Awaited<ReturnType<typeof listSamples>>>
+export type ListSamplesQueryError = ErrorResponse
+
+
+export function useListSamples<TData = Awaited<ReturnType<typeof listSamples>>, TError = ErrorResponse>(
+ params: undefined |  ListSamplesParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSamples>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listSamples>>,
+          TError,
+          Awaited<ReturnType<typeof listSamples>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListSamples<TData = Awaited<ReturnType<typeof listSamples>>, TError = ErrorResponse>(
+ params?: ListSamplesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSamples>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listSamples>>,
+          TError,
+          Awaited<ReturnType<typeof listSamples>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListSamples<TData = Awaited<ReturnType<typeof listSamples>>, TError = ErrorResponse>(
+ params?: ListSamplesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSamples>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useListSamples<TData = Awaited<ReturnType<typeof listSamples>>, TError = ErrorResponse>(
+ params?: ListSamplesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSamples>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListSamplesQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+export type addSampleResponse200 = {
+  data: OkResponse
+  status: 200
+}
+
+export type addSampleResponse403 = {
+  data: void
+  status: 403
+}
+
+export type addSampleResponse404 = {
+  data: void
+  status: 404
+}
+
+export type addSampleResponseSuccess = (addSampleResponse200) & {
+  headers: Headers;
+};
+export type addSampleResponseError = (addSampleResponse403 | addSampleResponse404) & {
+  headers: Headers;
+};
+
+export type addSampleResponse = (addSampleResponseSuccess | addSampleResponseError)
+
+export const getAddSampleUrl = (id: number,) => {
+
+
+
+
+  return `/api/colecciones/${id}/samples`
+}
+
+export const addSample = async (id: number,
+    addSampleRequest: AddSampleRequest, options?: RequestInit): Promise<addSampleResponse> => {
+
+  return customInstance<addSampleResponse>(getAddSampleUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      addSampleRequest,)
+  }
+);}
+
+
+
+
+export const getAddSampleMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addSample>>, TError,{id: number;data: AddSampleRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof addSample>>, TError,{id: number;data: AddSampleRequest}, TContext> => {
+
+const mutationKey = ['addSample'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addSample>>, {id: number;data: AddSampleRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  addSample(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AddSampleMutationResult = NonNullable<Awaited<ReturnType<typeof addSample>>>
+    export type AddSampleMutationBody = AddSampleRequest
+    export type AddSampleMutationError = void
+
+    export const useAddSample = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addSample>>, TError,{id: number;data: AddSampleRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof addSample>>,
+        TError,
+        {id: number;data: AddSampleRequest},
+        TContext
+      > => {
+      return useMutation(getAddSampleMutationOptions(options), queryClient);
+    }
+
+export type removeSampleResponse200 = {
+  data: OkResponse
+  status: 200
+}
+
+export type removeSampleResponse403 = {
+  data: void
+  status: 403
+}
+
+export type removeSampleResponseSuccess = (removeSampleResponse200) & {
+  headers: Headers;
+};
+export type removeSampleResponseError = (removeSampleResponse403) & {
+  headers: Headers;
+};
+
+export type removeSampleResponse = (removeSampleResponseSuccess | removeSampleResponseError)
+
+export const getRemoveSampleUrl = (id: number,
+    sampleId: number,) => {
+
+
+
+
+  return `/api/colecciones/${id}/samples/${sampleId}`
+}
+
+export const removeSample = async (id: number,
+    sampleId: number, options?: RequestInit): Promise<removeSampleResponse> => {
+
+  return customInstance<removeSampleResponse>(getRemoveSampleUrl(id,sampleId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getRemoveSampleMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeSample>>, TError,{id: number;sampleId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof removeSample>>, TError,{id: number;sampleId: number}, TContext> => {
+
+const mutationKey = ['removeSample'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof removeSample>>, {id: number;sampleId: number}> = (props) => {
+          const {id,sampleId} = props ?? {};
+
+          return  removeSample(id,sampleId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RemoveSampleMutationResult = NonNullable<Awaited<ReturnType<typeof removeSample>>>
+
+    export type RemoveSampleMutationError = void
+
+    export const useRemoveSample = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeSample>>, TError,{id: number;sampleId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof removeSample>>,
+        TError,
+        {id: number;sampleId: number},
+        TContext
+      > => {
+      return useMutation(getRemoveSampleMutationOptions(options), queryClient);
+    }
+
 export type downloadLimitsResponse200 = {
   data: DownloadLimitsResponse
   status: 200
@@ -2866,125 +3711,6 @@ export function useGetMeFeed<TData = Awaited<ReturnType<typeof getMeFeed>>, TErr
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetMeFeedQueryOptions(params,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-
-
-export type listSamplesResponse200 = {
-  data: ListSamplesResponse
-  status: 200
-}
-
-export type listSamplesResponse422 = {
-  data: ErrorResponse
-  status: 422
-}
-
-export type listSamplesResponseSuccess = (listSamplesResponse200) & {
-  headers: Headers;
-};
-export type listSamplesResponseError = (listSamplesResponse422) & {
-  headers: Headers;
-};
-
-export type listSamplesResponse = (listSamplesResponseSuccess | listSamplesResponseError)
-
-export const getListSamplesUrl = (params?: ListSamplesParams,) => {
-  const normalizedParams = new URLSearchParams();
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : value.toString())
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0 ? `/api/samples?${stringifiedParams}` : `/api/samples`
-}
-
-export const listSamples = async (params?: ListSamplesParams, options?: RequestInit): Promise<listSamplesResponse> => {
-
-  return customInstance<listSamplesResponse>(getListSamplesUrl(params),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getListSamplesQueryKey = (params?: ListSamplesParams,) => {
-    return [
-    `/api/samples`, ...(params ? [params] : [])
-    ] as const;
-    }
-
-
-export const getListSamplesQueryOptions = <TData = Awaited<ReturnType<typeof listSamples>>, TError = ErrorResponse>(params?: ListSamplesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSamples>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getListSamplesQueryKey(params);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listSamples>>> = ({ signal }) => listSamples(params, { signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listSamples>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type ListSamplesQueryResult = NonNullable<Awaited<ReturnType<typeof listSamples>>>
-export type ListSamplesQueryError = ErrorResponse
-
-
-export function useListSamples<TData = Awaited<ReturnType<typeof listSamples>>, TError = ErrorResponse>(
- params: undefined |  ListSamplesParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSamples>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof listSamples>>,
-          TError,
-          Awaited<ReturnType<typeof listSamples>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListSamples<TData = Awaited<ReturnType<typeof listSamples>>, TError = ErrorResponse>(
- params?: ListSamplesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSamples>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof listSamples>>,
-          TError,
-          Awaited<ReturnType<typeof listSamples>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListSamples<TData = Awaited<ReturnType<typeof listSamples>>, TError = ErrorResponse>(
- params?: ListSamplesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSamples>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-
-export function useListSamples<TData = Awaited<ReturnType<typeof listSamples>>, TError = ErrorResponse>(
- params?: ListSamplesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSamples>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getListSamplesQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

@@ -568,6 +568,352 @@
         ]
       }
     },
+    "/api/colecciones": {
+      "get": {
+        "tags": [
+          "colecciones"
+        ],
+        "operationId": "list_my_colecciones",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColeccionListResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "colecciones"
+        ],
+        "operationId": "create_coleccion",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateColeccionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Coleccion"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos"
+          },
+          "409": {
+            "description": "Nombre duplicado en la misma ubicación"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/colecciones/{id}": {
+      "get": {
+        "tags": [
+          "colecciones"
+        ],
+        "operationId": "get_coleccion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID de la coleccion",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Coleccion"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Privada y no es del usuario"
+          },
+          "404": {
+            "description": "No encontrada"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "colecciones"
+        ],
+        "operationId": "update_coleccion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID de la coleccion",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateColeccionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "No autorizado"
+          },
+          "404": {
+            "description": "No encontrada"
+          },
+          "409": {
+            "description": "Nombre duplicado"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "colecciones"
+        ],
+        "operationId": "delete_coleccion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID de la coleccion",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "No autorizado"
+          },
+          "404": {
+            "description": "No encontrada"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/colecciones/{id}/samples": {
+      "get": {
+        "tags": [
+          "colecciones"
+        ],
+        "operationId": "list_samples",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID de la coleccion",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColeccionSamplesResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Privada y no es del usuario"
+          },
+          "404": {
+            "description": "No encontrada"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "colecciones"
+        ],
+        "operationId": "add_sample",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID de la coleccion",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddSampleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "No autorizado"
+          },
+          "404": {
+            "description": "Coleccion no encontrada"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/colecciones/{id}/samples/{sample_id}": {
+      "delete": {
+        "tags": [
+          "colecciones"
+        ],
+        "operationId": "remove_sample",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID de la coleccion",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "sample_id",
+            "in": "path",
+            "description": "ID del sample",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "No autorizado"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
     "/api/descargas/limites": {
       "get": {
         "tags": [
@@ -1902,6 +2248,18 @@
   },
   "components": {
     "schemas": {
+      "AddSampleRequest": {
+        "type": "object",
+        "required": [
+          "sample_id"
+        ],
+        "properties": {
+          "sample_id": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "AuthResponse": {
         "type": "object",
         "required": [
@@ -2039,6 +2397,137 @@
             "type": "string",
             "description": "Título del sample existente, útil para UI/desktop.",
             "nullable": true
+          }
+        }
+      },
+      "Coleccion": {
+        "type": "object",
+        "required": [
+          "id",
+          "usuario_id",
+          "nombre",
+          "publica",
+          "version",
+          "total_samples",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "descripcion": {
+            "type": "string",
+            "nullable": true
+          },
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "imagen_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "parent_id": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "publica": {
+            "type": "boolean"
+          },
+          "total_samples": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "usuario_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ColeccionListResponse": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Coleccion"
+            }
+          }
+        }
+      },
+      "ColeccionSample": {
+        "type": "object",
+        "required": [
+          "sample_id",
+          "orden",
+          "added_at"
+        ],
+        "properties": {
+          "added_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "orden": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sample_id": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ColeccionSamplesResponse": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ColeccionSample"
+            }
+          }
+        }
+      },
+      "CreateColeccionRequest": {
+        "type": "object",
+        "required": [
+          "nombre"
+        ],
+        "properties": {
+          "descripcion": {
+            "type": "string",
+            "nullable": true
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "parent_id": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "publica": {
+            "type": "boolean"
           }
         }
       },
@@ -3055,6 +3544,32 @@
           },
           "name": {
             "type": "string"
+          }
+        }
+      },
+      "UpdateColeccionRequest": {
+        "type": "object",
+        "properties": {
+          "descripcion": {
+            "type": "string",
+            "nullable": true
+          },
+          "imagen_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "nombre": {
+            "type": "string",
+            "nullable": true
+          },
+          "parent_id": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "publica": {
+            "type": "boolean",
+            "nullable": true
           }
         }
       },

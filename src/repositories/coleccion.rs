@@ -1,0 +1,292 @@
+/* [174A-64] ColeccionesRepository — port mínimo del legado.
+ *
+ * Tabla `colecciones` (BIGSERIAL id) + `coleccion_samples` (M2M con orden).
+ *
+ * Funcionalidad:
+ * - create / update / soft_delete / fetch / list_by_user
+ * - add_sample (con orden auto-incremental)
+ * - remove_sample
+ * - list_samples (en orden)
+ * - is_owner / is_public
+ * - check_parent_valid (mismo dueño + profundidad <= 2)
+ *
+ * NO portado:
+ * - Optimistic locking via `version` (campo existe pero no se valida en update todavía).
+ * - Sync changelog.
+ * - Subir imagen multipart.
+ * - Manejo avanzado de hijas en delete (cascade DB se encarga).
+ */
+
+use sqlx::PgPool;
+
+use crate::errors::AppError;
+
+pub struct ColeccionesRepository;
+
+#[derive(Debug, Clone, sqlx::FromRow, serde::Serialize, utoipa::ToSchema)]
+pub struct Coleccion {
+    pub id: i64,
+    pub usuario_id: i32,
+    pub nombre: String,
+    pub descripcion: Option<String>,
+    pub publica: bool,
+    pub parent_id: Option<i64>,
+    pub imagen_url: Option<String>,
+    pub version: i32,
+    pub total_samples: i32,
+    #[schema(value_type = String, format = DateTime)]
+    pub created_at: chrono::DateTime<chrono::Utc>,
+    #[schema(value_type = String, format = DateTime)]
+    pub updated_at: chrono::DateTime<chrono::Utc>,
+}
+
+#[derive(Debug, Clone, serde::Serialize, utoipa::ToSchema)]
+pub struct ColeccionSample {
+    pub sample_id: i32,
+    pub orden: i32,
+    #[schema(value_type = String, format = DateTime)]
+    pub added_at: chrono::DateTime<chrono::Utc>,
+}
+
+impl ColeccionesRepository {
+    pub async fn create(
+        pool: &PgPool,
+        usuario_id: i32,
+        nombre: &str,
+        descripcion: Option<&str>,
+        publica: bool,
+        parent_id: Option<i64>,
+    ) -> Result<Coleccion, AppError> {
+        if let Some(pid) = parent_id {
+            Self::check_parent_valid(pool, usuario_id, pid).await?;
+        }
+        let row = sqlx::query_as!(
+            Coleccion,
+            r#"INSERT INTO colecciones (usuario_id, nombre, descripcion, publica, parent_id)
+               VALUES ($1, $2, $3, $4, $5)
+               RETURNING id, usuario_id, nombre, descripcion, publica AS "publica!",
+                         parent_id, imagen_url, version AS "version!",
+                         total_samples AS "total_samples!",
+                         created_at AS "created_at!", updated_at AS "updated_at!""#,
+            usuario_id,
+            nombre,
+            descripcion,
+            publica,
+            parent_id,
+        )
+        .fetch_one(pool)
+        .await
+        .map_err(|e| match e {
+            sqlx::Error::Database(db) if db.constraint() == Some("idx_colecciones_nombre_unico") => {
+                AppError::Conflict("ya existe una coleccion con ese nombre en la misma ubicacion".into())
+            }
+            other => other.into(),
+        })?;
+        Ok(row)
+    }
+
+    pub async fn fetch(pool: &PgPool, id: i64) -> Result<Option<Coleccion>, AppError> {
+        let row = sqlx::query_as!(
+            Coleccion,
+            r#"SELECT id, usuario_id, nombre, descripcion, publica AS "publica!",
+                     parent_id, imagen_url, version AS "version!",
+                     total_samples AS "total_samples!",
+                     created_at AS "created_at!", updated_at AS "updated_at!"
+               FROM colecciones WHERE id = $1 AND eliminado_en IS NULL"#,
+            id
+        )
+        .fetch_optional(pool)
+        .await?;
+        Ok(row)
+    }
+
+    pub async fn list_by_user(pool: &PgPool, usuario_id: i32) -> Result<Vec<Coleccion>, AppError> {
+        let rows = sqlx::query_as!(
+            Coleccion,
+            r#"SELECT id, usuario_id, nombre, descripcion, publica AS "publica!",
+                     parent_id, imagen_url, version AS "version!",
+                     total_samples AS "total_samples!",
+                     created_at AS "created_at!", updated_at AS "updated_at!"
+               FROM colecciones
+               WHERE usuario_id = $1 AND eliminado_en IS NULL
+               ORDER BY created_at DESC"#,
+            usuario_id
+        )
+        .fetch_all(pool)
+        .await?;
+        Ok(rows)
+    }
+
+    pub async fn update(
+        pool: &PgPool,
+        id: i64,
+        nombre: Option<&str>,
+        #[allow(clippy::option_option)] descripcion: Option<Option<&str>>,
+        publica: Option<bool>,
+        #[allow(clippy::option_option)] imagen_url: Option<Option<&str>>,
+        #[allow(clippy::option_option)] parent_id: Option<Option<i64>>,
+    ) -> Result<bool, AppError> {
+        /* COALESCE para campos opcionales: si se pasa None, conserva valor actual. */
+        let res = sqlx::query!(
+            r#"UPDATE colecciones SET
+                 nombre        = COALESCE($2, nombre),
+                 descripcion   = CASE WHEN $3::bool THEN $4 ELSE descripcion END,
+                 publica       = COALESCE($5, publica),
+                 imagen_url    = CASE WHEN $6::bool THEN $7 ELSE imagen_url END,
+                 parent_id     = CASE WHEN $8::bool THEN $9 ELSE parent_id END,
+                 version       = version + 1,
+                 updated_at    = NOW()
+               WHERE id = $1 AND eliminado_en IS NULL"#,
+            id,
+            nombre,
+            descripcion.is_some(),
+            descripcion.flatten(),
+            publica,
+            imagen_url.is_some(),
+            imagen_url.flatten(),
+            parent_id.is_some(),
+            parent_id.flatten(),
+        )
+        .execute(pool)
+        .await
+        .map_err(|e| match e {
+            sqlx::Error::Database(db) if db.constraint() == Some("idx_colecciones_nombre_unico") => {
+                AppError::Conflict("ya existe una coleccion con ese nombre en la misma ubicacion".into())
+            }
+            other => other.into(),
+        })?;
+        Ok(res.rows_affected() > 0)
+    }
+
+    pub async fn soft_delete(pool: &PgPool, id: i64) -> Result<bool, AppError> {
+        let res = sqlx::query!(
+            "UPDATE colecciones SET eliminado_en = NOW() WHERE id = $1 AND eliminado_en IS NULL",
+            id
+        )
+        .execute(pool)
+        .await?;
+        Ok(res.rows_affected() > 0)
+    }
+
+    pub async fn add_sample(
+        pool: &PgPool,
+        coleccion_id: i64,
+        sample_id: i32,
+    ) -> Result<bool, AppError> {
+        /* Orden auto = max+1 dentro de la colección. */
+        let mut tx = pool.begin().await?;
+        let next_orden: i32 = sqlx::query_scalar!(
+            r#"SELECT COALESCE(MAX(orden), -1) + 1 AS "n!" FROM coleccion_samples WHERE coleccion_id = $1"#,
+            coleccion_id
+        )
+        .fetch_one(&mut *tx)
+        .await?;
+        let res = sqlx::query!(
+            "INSERT INTO coleccion_samples (coleccion_id, sample_id, orden) \
+             VALUES ($1, $2, $3) ON CONFLICT (coleccion_id, sample_id) DO NOTHING",
+            coleccion_id,
+            sample_id,
+            next_orden,
+        )
+        .execute(&mut *tx)
+        .await?;
+        let inserted = res.rows_affected() > 0;
+        if inserted {
+            sqlx::query!(
+                "UPDATE colecciones SET total_samples = total_samples + 1, updated_at = NOW() WHERE id = $1",
+                coleccion_id
+            )
+            .execute(&mut *tx)
+            .await?;
+        }
+        tx.commit().await?;
+        Ok(inserted)
+    }
+
+    pub async fn remove_sample(
+        pool: &PgPool,
+        coleccion_id: i64,
+        sample_id: i32,
+    ) -> Result<bool, AppError> {
+        let mut tx = pool.begin().await?;
+        let res = sqlx::query!(
+            "DELETE FROM coleccion_samples WHERE coleccion_id = $1 AND sample_id = $2",
+            coleccion_id,
+            sample_id,
+        )
+        .execute(&mut *tx)
+        .await?;
+        let deleted = res.rows_affected() > 0;
+        if deleted {
+            sqlx::query!(
+                "UPDATE colecciones SET total_samples = GREATEST(total_samples - 1, 0), \
+                 updated_at = NOW() WHERE id = $1",
+                coleccion_id
+            )
+            .execute(&mut *tx)
+            .await?;
+        }
+        tx.commit().await?;
+        Ok(deleted)
+    }
+
+    pub async fn list_samples(
+        pool: &PgPool,
+        coleccion_id: i64,
+    ) -> Result<Vec<ColeccionSample>, AppError> {
+        let rows = sqlx::query_as!(
+            ColeccionSample,
+            r#"SELECT sample_id, orden, added_at AS "added_at!"
+               FROM coleccion_samples
+               WHERE coleccion_id = $1
+               ORDER BY orden ASC, added_at ASC"#,
+            coleccion_id
+        )
+        .fetch_all(pool)
+        .await?;
+        Ok(rows)
+    }
+
+    /* Verifica que el usuario sea dueño y la coleccion exista (no soft-deleted). */
+    pub async fn is_owner(
+        pool: &PgPool,
+        coleccion_id: i64,
+        usuario_id: i32,
+    ) -> Result<bool, AppError> {
+        let r = sqlx::query_scalar!(
+            r#"SELECT EXISTS(SELECT 1 FROM colecciones
+                             WHERE id = $1 AND usuario_id = $2 AND eliminado_en IS NULL) AS "e!""#,
+            coleccion_id,
+            usuario_id,
+        )
+        .fetch_one(pool)
+        .await?;
+        Ok(r)
+    }
+
+    /* Valida que `parent_id` exista, pertenezca al mismo usuario, y que su propio
+     * parent sea NULL (profundidad máxima 2 niveles). */
+    pub async fn check_parent_valid(
+        pool: &PgPool,
+        usuario_id: i32,
+        parent_id: i64,
+    ) -> Result<(), AppError> {
+        let row = sqlx::query!(
+            "SELECT usuario_id, parent_id FROM colecciones \
+             WHERE id = $1 AND eliminado_en IS NULL",
+            parent_id
+        )
+        .fetch_optional(pool)
+        .await?;
+        match row {
+            None => Err(AppError::BadRequest("parent_id no existe".into())),
+            Some(r) if r.usuario_id != usuario_id => {
+                Err(AppError::Forbidden("parent_id pertenece a otro usuario".into()))
+            }
+            Some(r) if r.parent_id.is_some() => {
+                Err(AppError::BadRequest("profundidad máxima de carpetas excedida (2 niveles)".into()))
+            }
+            Some(_) => Ok(()),
+        }
+    }
+}

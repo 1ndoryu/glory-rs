@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM coleccion_samples WHERE coleccion_id = $1 AND sample_id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c6bcf40a7e1b2be905a663160670f8649806c844c513deeb0c2d4fa8f1d9fd0e"
+}

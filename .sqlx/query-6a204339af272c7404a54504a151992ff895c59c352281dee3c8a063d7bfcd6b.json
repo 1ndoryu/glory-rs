@@ -1,0 +1,82 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, usuario_id, nombre, descripcion, publica AS \"publica!\",\n                     parent_id, imagen_url, version AS \"version!\",\n                     total_samples AS \"total_samples!\",\n                     created_at AS \"created_at!\", updated_at AS \"updated_at!\"\n               FROM colecciones WHERE id = $1 AND eliminado_en IS NULL",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "usuario_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "nombre",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "descripcion",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "publica!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 5,
+        "name": "parent_id",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 6,
+        "name": "imagen_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 7,
+        "name": "version!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 8,
+        "name": "total_samples!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 9,
+        "name": "created_at!",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 10,
+        "name": "updated_at!",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "6a204339af272c7404a54504a151992ff895c59c352281dee3c8a063d7bfcd6b"
+}

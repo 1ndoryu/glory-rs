@@ -1,4 +1,5 @@
 mod block;
+mod coleccion;
 mod download;
 mod follow;
 mod ia_queue;
@@ -12,6 +13,7 @@ mod sample_catalog;
 mod user;
 
 pub use block::{BlockRepository, BlockedUser};
+pub use coleccion::{Coleccion, ColeccionSample, ColeccionesRepository};
 pub use download::{DownloadRepository, SampleDownloadInfo, SampleFileInfo};
 pub use follow::FollowRepository;
 pub use ia_queue::{

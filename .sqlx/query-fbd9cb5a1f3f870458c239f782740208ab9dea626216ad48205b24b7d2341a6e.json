@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE colecciones SET eliminado_en = NOW() WHERE id = $1 AND eliminado_en IS NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "fbd9cb5a1f3f870458c239f782740208ab9dea626216ad48205b24b7d2341a6e"
+}
