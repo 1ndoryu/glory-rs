@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT CASE WHEN participante_1 = $2 THEN participante_2 ELSE participante_1 END AS \"other_id!\"\n               FROM conversaciones\n               WHERE id = $1\n                 AND (participante_1 = $2 OR participante_2 = $2)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "other_id!",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "de6582d035603e843a911a33f014168e8d0a5949a9348697906d5069b607c759"
+}

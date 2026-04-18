@@ -1,0 +1,58 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id,\n                      titulo AS \"titulo!\",\n                      id_corto,\n                      slug AS \"slug!\",\n                      tipo AS \"tipo!\",\n                      bpm,\n                      key AS \"music_key?\"\n               FROM samples\n               WHERE id = $1\n                 AND eliminado_en IS NULL\n                 AND estado = 'activo'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "titulo!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "id_corto",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "slug!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "tipo!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "bpm",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 6,
+        "name": "music_key?",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "26c74d23b0242e1f67b45b044b5e1ed6ad91c3af917e61cee1ec31b834920d3f"
+}

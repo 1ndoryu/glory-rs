@@ -1925,6 +1925,430 @@
         ]
       }
     },
+    "/api/mensajes/conversaciones": {
+      "get": {
+        "tags": [
+          "messages"
+        ],
+        "operationId": "list_conversations",
+        "responses": {
+          "200": {
+            "description": "Lista de conversaciones del usuario",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/mensajes/leer-todas": {
+      "post": {
+        "tags": [
+          "messages"
+        ],
+        "operationId": "mark_all_read",
+        "responses": {
+          "200": {
+            "description": "Todas las conversaciones marcadas como leídas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/mensajes/nueva": {
+      "post": {
+        "tags": [
+          "messages"
+        ],
+        "operationId": "start_conversation",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartConversationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "La conversación ya existía",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationMutationResponse"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Conversación creada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationMutationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "usuario_id inválido o self-chat",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "No puedes iniciar conversación con este usuario",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuario no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/mensajes/{conversacionId}": {
+      "get": {
+        "tags": [
+          "messages"
+        ],
+        "operationId": "list_messages",
+        "parameters": [
+          {
+            "name": "conversacionId",
+            "in": "path",
+            "description": "ID de la conversación",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "before_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "nullable": true
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Mensajes de la conversación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Conversación no disponible",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Conversación no encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "messages"
+        ],
+        "operationId": "send_message",
+        "parameters": [
+          {
+            "name": "conversacionId",
+            "in": "path",
+            "description": "ID de la conversación",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Acepta multipart con media o JSON equivalente con { contenido, tipo, sample_id }",
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMessageMultipartRequestDoc"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Mensaje creado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageMutationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Payload inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "No puedes enviar mensajes a este usuario",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Conversación o sample no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Media demasiado grande",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Tipo de media no soportado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validación del mensaje",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/mensajes/{conversacionId}/leer": {
+      "post": {
+        "tags": [
+          "messages"
+        ],
+        "operationId": "mark_read",
+        "parameters": [
+          {
+            "name": "conversacionId",
+            "in": "path",
+            "description": "ID de la conversación",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Mensajes marcados como leídos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Conversación no disponible",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Conversación no encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
     "/api/publicaciones": {
       "get": {
         "tags": [
@@ -3691,6 +4115,152 @@
           }
         }
       },
+      "ConversationListResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConversationSummary"
+            }
+          }
+        }
+      },
+      "ConversationMessage": {
+        "type": "object",
+        "required": [
+          "id",
+          "conversacion_id",
+          "remitente_id",
+          "contenido",
+          "tipo",
+          "leido",
+          "created_at"
+        ],
+        "properties": {
+          "contenido": {
+            "type": "string"
+          },
+          "conversacion_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "leido": {
+            "type": "boolean"
+          },
+          "media_metadata": {
+            "type": "object",
+            "nullable": true
+          },
+          "media_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "remitente_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tipo": {
+            "$ref": "#/components/schemas/DirectMessageKind"
+          }
+        }
+      },
+      "ConversationMutationResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/ConversationSummary"
+          }
+        }
+      },
+      "ConversationParticipantSummary": {
+        "type": "object",
+        "required": [
+          "id",
+          "username",
+          "nombre_visible",
+          "verificado"
+        ],
+        "properties": {
+          "avatar_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nombre_visible": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "verificado": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ConversationSummary": {
+        "type": "object",
+        "required": [
+          "id",
+          "participante",
+          "ultimo_mensaje",
+          "ultimo_mensaje_tipo",
+          "ultimo_mensaje_at",
+          "no_leidos",
+          "es_mutuo",
+          "aceptada",
+          "en_linea"
+        ],
+        "properties": {
+          "aceptada": {
+            "type": "boolean"
+          },
+          "en_linea": {
+            "type": "boolean"
+          },
+          "es_mutuo": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "no_leidos": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "participante": {
+            "$ref": "#/components/schemas/ConversationParticipantSummary"
+          },
+          "ultimo_mensaje": {
+            "type": "string"
+          },
+          "ultimo_mensaje_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ultimo_mensaje_tipo": {
+            "$ref": "#/components/schemas/DirectMessageKind"
+          }
+        }
+      },
       "CreateColeccionRequest": {
         "type": "object",
         "required": [
@@ -3752,6 +4322,45 @@
           }
         }
       },
+      "CreateMessageJsonRequest": {
+        "type": "object",
+        "properties": {
+          "contenido": {
+            "type": "string"
+          },
+          "sample_id": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "tipo": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "CreateMessageMultipartRequestDoc": {
+        "type": "object",
+        "properties": {
+          "contenido": {
+            "type": "string",
+            "nullable": true
+          },
+          "media": {
+            "type": "string",
+            "format": "binary"
+          },
+          "sample_id": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "tipo": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
       "CreatePostRequest": {
         "type": "object",
         "properties": {
@@ -3799,6 +4408,15 @@
             "nullable": true
           }
         }
+      },
+      "DirectMessageKind": {
+        "type": "string",
+        "enum": [
+          "texto",
+          "imagen",
+          "audio",
+          "sample"
+        ]
       },
       "DownloadLimitsResponse": {
         "type": "object",
@@ -4109,6 +4727,40 @@
           },
           "ok": {
             "type": "boolean"
+          }
+        }
+      },
+      "MessageListResponse": {
+        "type": "object",
+        "required": [
+          "data",
+          "total",
+          "hay_mas"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConversationMessage"
+            }
+          },
+          "hay_mas": {
+            "type": "boolean"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "MessageMutationResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/ConversationMessage"
           }
         }
       },
@@ -5044,6 +5696,18 @@
             "items": {
               "$ref": "#/components/schemas/SampleSummary"
             }
+          }
+        }
+      },
+      "StartConversationRequest": {
+        "type": "object",
+        "required": [
+          "usuario_id"
+        ],
+        "properties": {
+          "usuario_id": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },

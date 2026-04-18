@@ -1,0 +1,72 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT ordered.id AS \"id!\",\n                      ordered.conversacion_id AS \"conversacion_id!\",\n                      ordered.autor_id AS \"remitente_id!\",\n                      COALESCE(ordered.contenido, '') AS \"contenido!\",\n                      COALESCE(ordered.tipo, 'texto') AS \"tipo!\",\n                      ordered.media_url AS \"media_url\",\n                      ordered.media_metadata AS \"media_metadata?: serde_json::Value\",\n                      COALESCE(ordered.leido, FALSE) AS \"leido!\",\n                      ordered.created_at AS \"created_at!: chrono::DateTime<chrono::Utc>\"\n               FROM (\n                    SELECT m.id,\n                           m.conversacion_id,\n                           m.autor_id,\n                           m.contenido,\n                           m.tipo,\n                           m.media_url,\n                           m.media_metadata,\n                           m.leido,\n                           m.created_at\n                    FROM mensajes m\n                    WHERE m.conversacion_id = $1\n                      AND ($2::int4 IS NULL OR m.id < $2)\n                    ORDER BY m.id DESC\n                    LIMIT $3\n               ) ordered\n               ORDER BY ordered.id ASC",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "conversacion_id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "remitente_id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "contenido!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "tipo!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "media_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "media_metadata?: serde_json::Value",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 7,
+        "name": "leido!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 8,
+        "name": "created_at!: chrono::DateTime<chrono::Utc>",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      null,
+      null,
+      true,
+      true,
+      null,
+      true
+    ]
+  },
+  "hash": "b2f6d1960d9761172d7752de1701e0e5b665d8791b4b340145edaa83cb7a0a2e"
+}

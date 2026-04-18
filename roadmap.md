@@ -89,7 +89,6 @@
 ### Fase 9 â€” Colecciones y sociales
 
 ### Fase 10 â€” MensajerÃ­a + WebSocket
-- 174A-71 â€” Conversations + messages
 - 174A-72 â€” WS events emitidos
 - 174A-73 â€” Multi-instancia: Redis pub/sub
 

@@ -1,0 +1,70 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT m.id AS \"id!\",\n                      m.conversacion_id AS \"conversacion_id!\",\n                      m.autor_id AS \"remitente_id!\",\n                      COALESCE(m.contenido, '') AS \"contenido!\",\n                      COALESCE(m.tipo, 'texto') AS \"tipo!\",\n                      m.media_url AS \"media_url\",\n                      m.media_metadata AS \"media_metadata?: serde_json::Value\",\n                      COALESCE(m.leido, FALSE) AS \"leido!\",\n                      m.created_at AS \"created_at!: chrono::DateTime<chrono::Utc>\"\n               FROM mensajes m\n               WHERE m.id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "conversacion_id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "remitente_id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "contenido!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "tipo!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "media_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "media_metadata?: serde_json::Value",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 7,
+        "name": "leido!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 8,
+        "name": "created_at!: chrono::DateTime<chrono::Utc>",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      null,
+      null,
+      true,
+      true,
+      null,
+      true
+    ]
+  },
+  "hash": "bdd8982893fa2909bacc153275bda93be9f01c291f5680f164877984e4248ab7"
+}

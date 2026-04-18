@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE mensajes m\n               SET leido = TRUE\n               FROM conversaciones c\n               WHERE m.conversacion_id = c.id\n                 AND (c.participante_1 = $1 OR c.participante_2 = $1)\n                 AND m.autor_id != $1\n                 AND m.leido = FALSE",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "6e79e3fb054c39c66f6b91fb4ece751bef0519157e03f612db81717597b22f26"
+}

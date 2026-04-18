@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE conversaciones\n               SET aceptada = TRUE\n               WHERE id = $1\n                 AND aceptada = FALSE",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "22de629b04d6d05b18eb96fae318b6d5f46e7ce7dfeabafe10c923326647e1ea"
+}

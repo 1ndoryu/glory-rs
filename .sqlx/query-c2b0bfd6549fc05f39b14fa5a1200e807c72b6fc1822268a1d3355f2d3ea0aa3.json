@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE mensajes\n               SET leido = TRUE\n               WHERE conversacion_id = $1\n                 AND autor_id != $2\n                 AND leido = FALSE",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c2b0bfd6549fc05f39b14fa5a1200e807c72b6fc1822268a1d3355f2d3ea0aa3"
+}

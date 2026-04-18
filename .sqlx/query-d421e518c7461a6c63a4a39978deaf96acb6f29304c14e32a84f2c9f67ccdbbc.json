@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO conversaciones (participante_1, participante_2)\n               VALUES ($1, $2)\n               ON CONFLICT (participante_1, participante_2)\n               DO UPDATE SET participante_1 = EXCLUDED.participante_1\n               RETURNING id AS \"id!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "d421e518c7461a6c63a4a39978deaf96acb6f29304c14e32a84f2c9f67ccdbbc"
+}

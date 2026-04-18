@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE conversaciones\n               SET ultimo_mensaje_at = NOW()\n               WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f299029e79c1bcd39fd00c1ea618b54ed474c919d6d14f4e44dfcabc2fa6e169"
+}

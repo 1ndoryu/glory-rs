@@ -197,6 +197,64 @@ export interface CommentRepliesResponse {
   limit: number;
 }
 
+export interface ConversationParticipantSummary {
+  /** @nullable */
+  avatar_url?: string | null;
+  id: number;
+  nombre_visible: string;
+  username: string;
+  verificado: boolean;
+}
+
+export type DirectMessageKind = typeof DirectMessageKind[keyof typeof DirectMessageKind];
+
+
+export const DirectMessageKind = {
+  texto: 'texto',
+  imagen: 'imagen',
+  audio: 'audio',
+  sample: 'sample',
+} as const;
+
+export interface ConversationSummary {
+  aceptada: boolean;
+  en_linea: boolean;
+  es_mutuo: boolean;
+  id: number;
+  no_leidos: number;
+  participante: ConversationParticipantSummary;
+  ultimo_mensaje: string;
+  ultimo_mensaje_at: string;
+  ultimo_mensaje_tipo: DirectMessageKind;
+}
+
+export interface ConversationListResponse {
+  data: ConversationSummary[];
+}
+
+/**
+ * @nullable
+ */
+export type ConversationMessageMediaMetadata = { [key: string]: unknown } | null;
+
+export interface ConversationMessage {
+  contenido: string;
+  conversacion_id: number;
+  created_at: string;
+  id: number;
+  leido: boolean;
+  /** @nullable */
+  media_metadata?: ConversationMessageMediaMetadata;
+  /** @nullable */
+  media_url?: string | null;
+  remitente_id: number;
+  tipo: DirectMessageKind;
+}
+
+export interface ConversationMutationResponse {
+  data: ConversationSummary;
+}
+
 export interface CreateColeccionRequest {
   /** @nullable */
   descripcion?: string | null;
@@ -220,6 +278,24 @@ export interface CreateCommentMultipartRequestDoc {
   parent_id?: number | null;
   /** @nullable */
   tipo_contenido?: string | null;
+}
+
+export interface CreateMessageJsonRequest {
+  contenido?: string;
+  /** @nullable */
+  sample_id?: number | null;
+  /** @nullable */
+  tipo?: string | null;
+}
+
+export interface CreateMessageMultipartRequestDoc {
+  /** @nullable */
+  contenido?: string | null;
+  media?: Blob;
+  /** @nullable */
+  sample_id?: number | null;
+  /** @nullable */
+  tipo?: string | null;
 }
 
 export interface CreatePostRequest {
@@ -458,6 +534,16 @@ export interface MergeColeccionResponse {
   ok: boolean;
 }
 
+export interface MessageListResponse {
+  data: ConversationMessage[];
+  hay_mas: boolean;
+  total: number;
+}
+
+export interface MessageMutationResponse {
+  data: ConversationMessage;
+}
+
 export interface OkResponse {
   ok: boolean;
 }
@@ -681,6 +767,10 @@ export interface SimilarSamplesQuery {
  */
 export interface SimilarSamplesResponse {
   data: SampleSummary[];
+}
+
+export interface StartConversationRequest {
+  usuario_id: number;
 }
 
 export interface SuspendUserRequest {
@@ -911,6 +1001,14 @@ limit?: number | null;
  * @nullable
  */
 offset?: number | null;
+};
+
+export type ListMessagesParams = {
+/**
+ * @nullable
+ */
+before_id?: number | null;
+limit?: number;
 };
 
 export type ListPostsParams = {
@@ -5201,6 +5299,663 @@ export function useGetMeFeed<TData = Awaited<ReturnType<typeof getMeFeed>>, TErr
 
 
 
+
+export type listConversationsResponse200 = {
+  data: ConversationListResponse
+  status: 200
+}
+
+export type listConversationsResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type listConversationsResponseSuccess = (listConversationsResponse200) & {
+  headers: Headers;
+};
+export type listConversationsResponseError = (listConversationsResponse401) & {
+  headers: Headers;
+};
+
+export type listConversationsResponse = (listConversationsResponseSuccess | listConversationsResponseError)
+
+export const getListConversationsUrl = () => {
+
+
+
+
+  return `/api/mensajes/conversaciones`
+}
+
+export const listConversations = async ( options?: RequestInit): Promise<listConversationsResponse> => {
+
+  return customInstance<listConversationsResponse>(getListConversationsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListConversationsQueryKey = () => {
+    return [
+    `/api/mensajes/conversaciones`
+    ] as const;
+    }
+
+
+export const getListConversationsQueryOptions = <TData = Awaited<ReturnType<typeof listConversations>>, TError = ErrorResponse>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listConversations>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListConversationsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listConversations>>> = ({ signal }) => listConversations({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listConversations>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListConversationsQueryResult = NonNullable<Awaited<ReturnType<typeof listConversations>>>
+export type ListConversationsQueryError = ErrorResponse
+
+
+export function useListConversations<TData = Awaited<ReturnType<typeof listConversations>>, TError = ErrorResponse>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listConversations>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listConversations>>,
+          TError,
+          Awaited<ReturnType<typeof listConversations>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListConversations<TData = Awaited<ReturnType<typeof listConversations>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listConversations>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listConversations>>,
+          TError,
+          Awaited<ReturnType<typeof listConversations>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListConversations<TData = Awaited<ReturnType<typeof listConversations>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listConversations>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useListConversations<TData = Awaited<ReturnType<typeof listConversations>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listConversations>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListConversationsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+export type markAllReadResponse200 = {
+  data: OkResponse
+  status: 200
+}
+
+export type markAllReadResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type markAllReadResponseSuccess = (markAllReadResponse200) & {
+  headers: Headers;
+};
+export type markAllReadResponseError = (markAllReadResponse401) & {
+  headers: Headers;
+};
+
+export type markAllReadResponse = (markAllReadResponseSuccess | markAllReadResponseError)
+
+export const getMarkAllReadUrl = () => {
+
+
+
+
+  return `/api/mensajes/leer-todas`
+}
+
+export const markAllRead = async ( options?: RequestInit): Promise<markAllReadResponse> => {
+
+  return customInstance<markAllReadResponse>(getMarkAllReadUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getMarkAllReadMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markAllRead>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof markAllRead>>, TError,void, TContext> => {
+
+const mutationKey = ['markAllRead'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof markAllRead>>, void> = () => {
+
+
+          return  markAllRead(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type MarkAllReadMutationResult = NonNullable<Awaited<ReturnType<typeof markAllRead>>>
+
+    export type MarkAllReadMutationError = ErrorResponse
+
+    export const useMarkAllRead = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markAllRead>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof markAllRead>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getMarkAllReadMutationOptions(options), queryClient);
+    }
+
+export type startConversationResponse200 = {
+  data: ConversationMutationResponse
+  status: 200
+}
+
+export type startConversationResponse201 = {
+  data: ConversationMutationResponse
+  status: 201
+}
+
+export type startConversationResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type startConversationResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type startConversationResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type startConversationResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type startConversationResponseSuccess = (startConversationResponse200 | startConversationResponse201) & {
+  headers: Headers;
+};
+export type startConversationResponseError = (startConversationResponse400 | startConversationResponse401 | startConversationResponse403 | startConversationResponse404) & {
+  headers: Headers;
+};
+
+export type startConversationResponse = (startConversationResponseSuccess | startConversationResponseError)
+
+export const getStartConversationUrl = () => {
+
+
+
+
+  return `/api/mensajes/nueva`
+}
+
+export const startConversation = async (startConversationRequest: StartConversationRequest, options?: RequestInit): Promise<startConversationResponse> => {
+
+  return customInstance<startConversationResponse>(getStartConversationUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      startConversationRequest,)
+  }
+);}
+
+
+
+
+export const getStartConversationMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof startConversation>>, TError,{data: StartConversationRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof startConversation>>, TError,{data: StartConversationRequest}, TContext> => {
+
+const mutationKey = ['startConversation'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof startConversation>>, {data: StartConversationRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  startConversation(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type StartConversationMutationResult = NonNullable<Awaited<ReturnType<typeof startConversation>>>
+    export type StartConversationMutationBody = StartConversationRequest
+    export type StartConversationMutationError = ErrorResponse
+
+    export const useStartConversation = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof startConversation>>, TError,{data: StartConversationRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof startConversation>>,
+        TError,
+        {data: StartConversationRequest},
+        TContext
+      > => {
+      return useMutation(getStartConversationMutationOptions(options), queryClient);
+    }
+
+export type listMessagesResponse200 = {
+  data: MessageListResponse
+  status: 200
+}
+
+export type listMessagesResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type listMessagesResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type listMessagesResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type listMessagesResponseSuccess = (listMessagesResponse200) & {
+  headers: Headers;
+};
+export type listMessagesResponseError = (listMessagesResponse401 | listMessagesResponse403 | listMessagesResponse404) & {
+  headers: Headers;
+};
+
+export type listMessagesResponse = (listMessagesResponseSuccess | listMessagesResponseError)
+
+export const getListMessagesUrl = (conversacionId: number,
+    params?: ListMessagesParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/mensajes/${conversacionId}?${stringifiedParams}` : `/api/mensajes/${conversacionId}`
+}
+
+export const listMessages = async (conversacionId: number,
+    params?: ListMessagesParams, options?: RequestInit): Promise<listMessagesResponse> => {
+
+  return customInstance<listMessagesResponse>(getListMessagesUrl(conversacionId,params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListMessagesQueryKey = (conversacionId: number,
+    params?: ListMessagesParams,) => {
+    return [
+    `/api/mensajes/${conversacionId}`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListMessagesQueryOptions = <TData = Awaited<ReturnType<typeof listMessages>>, TError = ErrorResponse>(conversacionId: number,
+    params?: ListMessagesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listMessages>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListMessagesQueryKey(conversacionId,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listMessages>>> = ({ signal }) => listMessages(conversacionId,params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(conversacionId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listMessages>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListMessagesQueryResult = NonNullable<Awaited<ReturnType<typeof listMessages>>>
+export type ListMessagesQueryError = ErrorResponse
+
+
+export function useListMessages<TData = Awaited<ReturnType<typeof listMessages>>, TError = ErrorResponse>(
+ conversacionId: number,
+    params: undefined |  ListMessagesParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listMessages>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listMessages>>,
+          TError,
+          Awaited<ReturnType<typeof listMessages>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListMessages<TData = Awaited<ReturnType<typeof listMessages>>, TError = ErrorResponse>(
+ conversacionId: number,
+    params?: ListMessagesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listMessages>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listMessages>>,
+          TError,
+          Awaited<ReturnType<typeof listMessages>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListMessages<TData = Awaited<ReturnType<typeof listMessages>>, TError = ErrorResponse>(
+ conversacionId: number,
+    params?: ListMessagesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listMessages>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useListMessages<TData = Awaited<ReturnType<typeof listMessages>>, TError = ErrorResponse>(
+ conversacionId: number,
+    params?: ListMessagesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listMessages>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListMessagesQueryOptions(conversacionId,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+export type sendMessageResponse201 = {
+  data: MessageMutationResponse
+  status: 201
+}
+
+export type sendMessageResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type sendMessageResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type sendMessageResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type sendMessageResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type sendMessageResponse413 = {
+  data: ErrorResponse
+  status: 413
+}
+
+export type sendMessageResponse415 = {
+  data: ErrorResponse
+  status: 415
+}
+
+export type sendMessageResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type sendMessageResponseSuccess = (sendMessageResponse201) & {
+  headers: Headers;
+};
+export type sendMessageResponseError = (sendMessageResponse400 | sendMessageResponse401 | sendMessageResponse403 | sendMessageResponse404 | sendMessageResponse413 | sendMessageResponse415 | sendMessageResponse422) & {
+  headers: Headers;
+};
+
+export type sendMessageResponse = (sendMessageResponseSuccess | sendMessageResponseError)
+
+export const getSendMessageUrl = (conversacionId: number,) => {
+
+
+
+
+  return `/api/mensajes/${conversacionId}`
+}
+
+export const sendMessage = async (conversacionId: number,
+    createMessageMultipartRequestDoc: CreateMessageMultipartRequestDoc, options?: RequestInit): Promise<sendMessageResponse> => {
+    const formData = new FormData();
+if(createMessageMultipartRequestDoc.contenido !== undefined && createMessageMultipartRequestDoc.contenido !== null) {
+ formData.append(`contenido`, createMessageMultipartRequestDoc.contenido);
+ }
+if(createMessageMultipartRequestDoc.media !== undefined) {
+ formData.append(`media`, createMessageMultipartRequestDoc.media);
+ }
+if(createMessageMultipartRequestDoc.sample_id !== undefined && createMessageMultipartRequestDoc.sample_id !== null) {
+ formData.append(`sample_id`, createMessageMultipartRequestDoc.sample_id.toString())
+ }
+if(createMessageMultipartRequestDoc.tipo !== undefined && createMessageMultipartRequestDoc.tipo !== null) {
+ formData.append(`tipo`, createMessageMultipartRequestDoc.tipo);
+ }
+
+  return customInstance<sendMessageResponse>(getSendMessageUrl(conversacionId),
+  {
+    ...options,
+    method: 'POST'
+    ,
+    body:
+      formData,
+  }
+);}
+
+
+
+
+export const getSendMessageMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendMessage>>, TError,{conversacionId: number;data: CreateMessageMultipartRequestDoc}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof sendMessage>>, TError,{conversacionId: number;data: CreateMessageMultipartRequestDoc}, TContext> => {
+
+const mutationKey = ['sendMessage'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof sendMessage>>, {conversacionId: number;data: CreateMessageMultipartRequestDoc}> = (props) => {
+          const {conversacionId,data} = props ?? {};
+
+          return  sendMessage(conversacionId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SendMessageMutationResult = NonNullable<Awaited<ReturnType<typeof sendMessage>>>
+    export type SendMessageMutationBody = CreateMessageMultipartRequestDoc
+    export type SendMessageMutationError = ErrorResponse
+
+    export const useSendMessage = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendMessage>>, TError,{conversacionId: number;data: CreateMessageMultipartRequestDoc}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof sendMessage>>,
+        TError,
+        {conversacionId: number;data: CreateMessageMultipartRequestDoc},
+        TContext
+      > => {
+      return useMutation(getSendMessageMutationOptions(options), queryClient);
+    }
+
+export type markReadResponse200 = {
+  data: OkResponse
+  status: 200
+}
+
+export type markReadResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type markReadResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type markReadResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type markReadResponseSuccess = (markReadResponse200) & {
+  headers: Headers;
+};
+export type markReadResponseError = (markReadResponse401 | markReadResponse403 | markReadResponse404) & {
+  headers: Headers;
+};
+
+export type markReadResponse = (markReadResponseSuccess | markReadResponseError)
+
+export const getMarkReadUrl = (conversacionId: number,) => {
+
+
+
+
+  return `/api/mensajes/${conversacionId}/leer`
+}
+
+export const markRead = async (conversacionId: number, options?: RequestInit): Promise<markReadResponse> => {
+
+  return customInstance<markReadResponse>(getMarkReadUrl(conversacionId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getMarkReadMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markRead>>, TError,{conversacionId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof markRead>>, TError,{conversacionId: number}, TContext> => {
+
+const mutationKey = ['markRead'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof markRead>>, {conversacionId: number}> = (props) => {
+          const {conversacionId} = props ?? {};
+
+          return  markRead(conversacionId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type MarkReadMutationResult = NonNullable<Awaited<ReturnType<typeof markRead>>>
+
+    export type MarkReadMutationError = ErrorResponse
+
+    export const useMarkRead = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markRead>>, TError,{conversacionId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof markRead>>,
+        TError,
+        {conversacionId: number},
+        TContext
+      > => {
+      return useMutation(getMarkReadMutationOptions(options), queryClient);
+    }
 
 export type listPostsResponse200 = {
   data: PostListResponse

@@ -1,0 +1,90 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n                    c.id AS \"id!\",\n                    COALESCE(c.aceptada, FALSE) AS \"aceptada!\",\n                    u.id AS \"other_id!\",\n                    u.username AS \"other_username!\",\n                    COALESCE(u.nombre_visible, u.username) AS \"other_display_name!\",\n                    u.avatar_url AS \"other_avatar_url\",\n                    COALESCE(u.verificado, FALSE) AS \"other_verified!\",\n                    COALESCE(lm.contenido, '') AS \"last_content!\",\n                    COALESCE(lm.tipo, 'texto') AS \"last_type!\",\n                    COALESCE(lm.created_at, c.created_at) AS \"last_at!: chrono::DateTime<chrono::Utc>\",\n                    COALESCE(nl.total, 0)::int4 AS \"unread_count!\",\n                    (\n                        EXISTS(\n                            SELECT 1 FROM follows f1\n                            WHERE f1.seguidor_id = $1 AND f1.seguido_id = u.id\n                        )\n                        AND EXISTS(\n                            SELECT 1 FROM follows f2\n                            WHERE f2.seguidor_id = u.id AND f2.seguido_id = $1\n                        )\n                    ) AS \"es_mutuo!\"\n               FROM conversaciones c\n               JOIN usuarios_ext u\n                 ON u.id = CASE WHEN c.participante_1 = $1 THEN c.participante_2 ELSE c.participante_1 END\n                AND u.estado = 'activo'\n               LEFT JOIN LATERAL (\n                    SELECT m.contenido, m.tipo, m.created_at\n                    FROM mensajes m\n                    WHERE m.conversacion_id = c.id\n                    ORDER BY m.id DESC\n                    LIMIT 1\n               ) lm ON TRUE\n               LEFT JOIN LATERAL (\n                    SELECT COUNT(*)::int4 AS total\n                    FROM mensajes m2\n                    WHERE m2.conversacion_id = c.id\n                      AND m2.autor_id != $1\n                      AND m2.leido = FALSE\n               ) nl ON TRUE\n               WHERE c.id = $2\n                 AND (c.participante_1 = $1 OR c.participante_2 = $1)\n                 AND NOT (u.id = ANY($3::int[]))",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "aceptada!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 2,
+        "name": "other_id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "other_username!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "other_display_name!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "other_avatar_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "other_verified!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 7,
+        "name": "last_content!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 8,
+        "name": "last_type!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 9,
+        "name": "last_at!: chrono::DateTime<chrono::Utc>",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 10,
+        "name": "unread_count!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 11,
+        "name": "es_mutuo!",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4",
+        "Int4Array"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      false,
+      false,
+      null,
+      true,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "9ee2bea2b326d2737275547d7badc43900a665aaf19351cf3797bfecf6162079"
+}

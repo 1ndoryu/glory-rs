@@ -1,0 +1,27 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO mensajes (\n                    conversacion_id,\n                    autor_id,\n                    contenido,\n                    tipo,\n                    media_url,\n                    media_metadata\n               )\n               VALUES ($1, $2, $3, $4, $5, $6)\n               RETURNING id AS \"id!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4",
+        "Text",
+        "Varchar",
+        "Text",
+        "Jsonb"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "d07baf9b02f3262a98ec3c99aff310dc8d0eb458ab6d3d2bf947c11f295743b7"
+}

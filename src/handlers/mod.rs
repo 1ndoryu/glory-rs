@@ -8,6 +8,7 @@ mod downloads;
 mod feed;
 mod health;
 mod likes;
+mod messages;
 mod posts;
 mod plays;
 mod social;
@@ -67,6 +68,12 @@ impl utoipa::Modify for SecurityAddon {
         plays::register_play,
         likes::create_like,
         likes::delete_like,
+        messages::list_conversations,
+        messages::list_messages,
+        messages::send_message,
+        messages::mark_read,
+        messages::mark_all_read,
+        messages::start_conversation,
         comments::list_comments,
         comments::list_replies,
         comments::create_comment,
@@ -135,6 +142,17 @@ impl utoipa::Modify for SecurityAddon {
         plays::PlayTriggered,
         likes::LikeRequest,
         likes::LikeResponse,
+        messages::CreateMessageJsonRequest,
+        messages::CreateMessageMultipartRequestDoc,
+        messages::StartConversationRequest,
+        messages::ConversationListResponse,
+        messages::MessageListResponse,
+        messages::ConversationMutationResponse,
+        messages::MessageMutationResponse,
+        crate::repositories::ConversationParticipantSummary,
+        crate::repositories::ConversationSummary,
+        crate::repositories::ConversationMessage,
+        crate::repositories::DirectMessageKind,
         comments::CreateCommentJsonRequest,
         comments::CreateCommentMultipartRequestDoc,
         comments::UpdateCommentRequest,
@@ -265,6 +283,7 @@ fn api_routes() -> Router<AppState> {
         .merge(samples::routes())
         .merge(plays::routes())
         .merge(likes::routes())
+        .merge(messages::routes())
         .merge(comments::routes())
         .merge(posts::routes())
         .merge(social::routes())

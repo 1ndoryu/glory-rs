@@ -1,10 +1,12 @@
 mod block;
 mod coleccion;
 mod comment;
+mod conversation;
 mod download;
 mod follow;
 mod ia_queue;
 mod like;
+mod message;
 mod moderation;
 mod post;
 mod play;
@@ -21,6 +23,9 @@ pub use comment::{
     CommentAuthorSummary, CommentContentKind, CommentContext, CommentDetail, CommentRepository,
     CommentTargetKind, CreateCommentParams,
 };
+pub use conversation::{
+    ConversationParticipantSummary, ConversationRepository, ConversationSummary,
+};
 pub use download::{DownloadRepository, SampleDownloadInfo, SampleFileInfo};
 pub use follow::FollowRepository;
 pub use ia_queue::{
@@ -28,6 +33,10 @@ pub use ia_queue::{
 };
 pub use moderation::ModerationRepository;
 pub use like::{LikeKind, LikeRepository, Reaction};
+pub use message::{
+    ConversationMessage, CreateMessageParams, DirectMessageKind, MessageRepository,
+    SharedSampleMessage,
+};
 pub use post::{PostAuthorSummary, PostDetail, PostListParams, PostRepository, RepostedPostSummary};
 pub use play::{PlayRepository, RegisterPlayOutcome};
 pub use processing_queue::{
