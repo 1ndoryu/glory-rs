@@ -76,7 +76,6 @@
 - nota: me di cuenta que hay lugares en donde no se esta usando query! y en vez se usa sin !, necesitamos comprobaciones reales en tiempo real para ir chqueando que todo va quedando bien, corrige todo los query posibles.
 
 ### Fase 4 â€” Audio pipeline (lo mÃ¡s difÃ­cil)
-- 174A-30 â€” `audio/ffmpeg.rs` (detect, duration, convert MP3/FLAC, waveform peaks)
 - 174A-31 â€” `audio/bpm.rs` (symphonia + onset + autocorrelaciÃ³n)
 - 174A-32 â€” `audio/key.rs` (cromagramas + scale)
 - 174A-33 â€” `audio/embeddings.rs` (vector 128d determinista)
