@@ -71,7 +71,6 @@
 ### Fase 1 â€” Schema base PostgreSQL
 
 ### Fase 2 â€” Auth y usuarios
-- 174A-22 â€” OAuth Google PKCE (desktop)
 - 174A-23 â€” OAuth Google mobile callback
 - 174A-24 â€” Endpoints perfil (`GET /me`, `PATCH /me`, `GET /users/{username}`)
 - 174A-25 â€” SuspensiÃ³n / bloqueo / eliminaciÃ³n (admin)

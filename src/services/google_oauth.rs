@@ -61,6 +61,41 @@ impl GoogleVerifier {
 
     pub fn is_configured(&self) -> bool { !self.client_ids.is_empty() }
 
+    pub fn client_ids(&self) -> &[String] { &self.client_ids }
+
+    /// [174A-22] Intercambia (code, code_verifier) por tokens via PKCE en
+    /// https://oauth2.googleapis.com/token. Devuelve el id_token (string).
+    pub async fn exchange_pkce(
+        &self,
+        code: &str,
+        code_verifier: &str,
+        redirect_uri: &str,
+        client_id_hint: Option<&str>,
+    ) -> Result<String, AppError> {
+        #[derive(Deserialize)]
+        struct TokenResp { id_token: Option<String>, error: Option<String> }
+        let client_id = match client_id_hint {
+            Some(id) if self.client_ids.iter().any(|c| c == id) => id.to_string(),
+            Some(_) => return Err(AppError::Unauthorized),
+            None => self.client_ids.first().cloned()
+                .ok_or_else(|| AppError::Internal("GOOGLE_CLIENT_IDS no configurados".into()))?,
+        };
+        let form = [
+            ("grant_type", "authorization_code"),
+            ("client_id", client_id.as_str()),
+            ("code", code),
+            ("code_verifier", code_verifier),
+            ("redirect_uri", redirect_uri),
+        ];
+        let resp = self.http.post("https://oauth2.googleapis.com/token")
+            .form(&form).send().await
+            .map_err(|e| AppError::Internal(format!("Google token exchange: {e}")))?;
+        let parsed: TokenResp = resp.json().await
+            .map_err(|e| AppError::Internal(format!("Google token parse: {e}")))?;
+        if let Some(err) = parsed.error { return Err(AppError::Forbidden(format!("Google PKCE: {err}"))); }
+        parsed.id_token.ok_or(AppError::Unauthorized)
+    }
+
     async fn keys(&self) -> Result<Vec<Jwk>, AppError> {
         {
             let g = self.cache.read().await;

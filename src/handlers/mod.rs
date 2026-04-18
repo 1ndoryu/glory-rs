@@ -39,6 +39,7 @@ impl utoipa::Modify for SecurityAddon {
         auth::refresh,
         auth::logout,
         auth::google_login,
+        auth::google_pkce,
     ),
     components(schemas(
         health::HealthResponse,
@@ -47,6 +48,7 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::RefreshRequest,
         crate::models::LogoutRequest,
         crate::models::GoogleAuthRequest,
+        crate::models::GooglePkceRequest,
         crate::models::AuthResponse,
         crate::models::UserResponse,
         crate::errors::ErrorResponse,

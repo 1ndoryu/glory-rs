@@ -69,6 +69,18 @@ pub struct GoogleAuthRequest {
     pub id_token: String,
 }
 
+#[derive(Debug, Deserialize, Validate, ToSchema)]
+pub struct GooglePkceRequest {
+    #[validate(length(min = 5))]
+    pub code: String,
+    #[validate(length(min = 32))]
+    pub code_verifier: String,
+    #[validate(length(min = 5))]
+    pub redirect_uri: String,
+    /// Opcional: usar uno especifico de los configurados; si se omite, se usa el primero.
+    pub client_id: Option<String>,
+}
+
 #[derive(Debug, Serialize, ToSchema)]
 pub struct AuthResponse {
     pub token: String,
