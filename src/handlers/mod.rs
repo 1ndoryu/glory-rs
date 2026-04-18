@@ -1,5 +1,6 @@
 #![allow(clippy::needless_for_each)] // Generado por utoipa OpenApi derive
 
+mod admin;
 mod auth;
 mod health;
 mod users;
@@ -44,6 +45,12 @@ impl utoipa::Modify for SecurityAddon {
         users::me,
         users::update_me,
         users::public_profile,
+        users::block,
+        users::unblock,
+        users::list_blocked,
+        admin::suspend,
+        admin::activate,
+        admin::mark_delete,
     ),
     components(schemas(
         health::HealthResponse,
@@ -58,6 +65,9 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::UpdateProfileRequest,
         crate::models::PublicProfileResponse,
         crate::models::PrivateProfileResponse,
+        crate::models::BlockUserRequest,
+        crate::models::SuspendUserRequest,
+        crate::models::DeleteUserRequest,
         crate::errors::ErrorResponse,
     )),
     modifiers(&SecurityAddon),
@@ -105,4 +115,5 @@ fn api_routes() -> Router<AppState> {
         .merge(health::routes())
         .merge(auth::routes())
         .merge(users::routes())
+        .merge(admin::routes())
 }

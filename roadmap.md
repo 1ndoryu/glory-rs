@@ -71,7 +71,6 @@
 ### Fase 1 â€” Schema base PostgreSQL
 
 ### Fase 2 â€” Auth y usuarios
-- 174A-25 â€” SuspensiÃ³n / bloqueo / eliminaciÃ³n (admin)
 
 ### Fase 3 â€” Storage + uploads
 - 174A-26 â€” Trait `FileStorage` + `LocalFs`

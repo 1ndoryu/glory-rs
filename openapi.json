@@ -12,6 +12,243 @@
     "version": "0.1.0"
   },
   "paths": {
+    "/api/admin/users/{id}/activate": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "operationId": "activate",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "User id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Reactivado"
+          },
+          "401": {
+            "description": "no auth"
+          },
+          "403": {
+            "description": "no admin"
+          },
+          "404": {
+            "description": "no encontrado"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/users/{id}/delete": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "operationId": "mark_delete",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "User id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteUserRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Marcado para eliminacion"
+          },
+          "401": {
+            "description": "no auth"
+          },
+          "403": {
+            "description": "no admin"
+          },
+          "404": {
+            "description": "no encontrado"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/users/{id}/suspend": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "operationId": "suspend",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "User id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SuspendUserRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Suspendido"
+          },
+          "401": {
+            "description": "no auth"
+          },
+          "403": {
+            "description": "no admin"
+          },
+          "404": {
+            "description": "no encontrado"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/auth/google": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "operationId": "google_login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoogleAuthRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Login Google OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "ID token invalido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/crate.errors.ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Email no verificado o cuenta bloqueada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/crate.errors.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/google/pkce": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "operationId": "google_pkce",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GooglePkceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Login Google PKCE OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "code/verifier invalido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/crate.errors.ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Email no verificado o cuenta bloqueada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/crate.errors.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/auth/login": {
       "post": {
         "tags": [
@@ -51,6 +288,84 @@
           },
           "403": {
             "description": "Cuenta no activa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/crate.errors.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "operationId": "logout",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LogoutRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Logout OK"
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/crate.errors.ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/auth/refresh": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "operationId": "refresh",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Tokens rotados",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Refresh token invalido o expirado",
             "content": {
               "application/json": {
                 "schema": {
@@ -132,6 +447,248 @@
           }
         }
       }
+    },
+    "/api/users/me": {
+      "get": {
+        "tags": [
+          "users"
+        ],
+        "operationId": "me",
+        "responses": {
+          "200": {
+            "description": "Perfil propio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrivateProfileResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/crate.errors.ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "users"
+        ],
+        "operationId": "update_me",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProfileRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Perfil actualizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrivateProfileResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/crate.errors.ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/crate.errors.ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/users/me/blocked": {
+      "get": {
+        "tags": [
+          "users"
+        ],
+        "operationId": "list_blocked",
+        "responses": {
+          "200": {
+            "description": "Lista de IDs bloqueados",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "format": "int32"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "no auth"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/users/{username}": {
+      "get": {
+        "tags": [
+          "users"
+        ],
+        "operationId": "public_profile",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "description": "Username publico",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Perfil publico",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicProfileResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/crate.errors.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/{username}/block": {
+      "post": {
+        "tags": [
+          "users"
+        ],
+        "operationId": "block",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "description": "Username",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlockUserRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Bloqueado"
+          },
+          "400": {
+            "description": "auto-bloqueo"
+          },
+          "401": {
+            "description": "no auth"
+          },
+          "404": {
+            "description": "no encontrado"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "users"
+        ],
+        "operationId": "unblock",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "description": "Username",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Desbloqueado"
+          },
+          "401": {
+            "description": "no auth"
+          },
+          "404": {
+            "description": "no encontrado"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -140,14 +697,38 @@
         "type": "object",
         "required": [
           "token",
+          "refresh_token",
           "user"
         ],
         "properties": {
+          "refresh_token": {
+            "type": "string"
+          },
           "token": {
             "type": "string"
           },
           "user": {
             "$ref": "#/components/schemas/UserResponse"
+          }
+        }
+      },
+      "BlockUserRequest": {
+        "type": "object",
+        "properties": {
+          "razon": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "DeleteUserRequest": {
+        "type": "object",
+        "properties": {
+          "dias_gracia": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Dias hasta eliminacion definitiva (default 30).",
+            "nullable": true
           }
         }
       },
@@ -166,6 +747,41 @@
           "message": {
             "type": "string",
             "description": "Mensaje legible para el usuario"
+          }
+        }
+      },
+      "GoogleAuthRequest": {
+        "type": "object",
+        "required": [
+          "id_token"
+        ],
+        "properties": {
+          "id_token": {
+            "type": "string"
+          }
+        }
+      },
+      "GooglePkceRequest": {
+        "type": "object",
+        "required": [
+          "code",
+          "code_verifier",
+          "redirect_uri"
+        ],
+        "properties": {
+          "client_id": {
+            "type": "string",
+            "description": "Opcional: usar uno especifico de los configurados; si se omite, se usa el primero.",
+            "nullable": true
+          },
+          "code": {
+            "type": "string"
+          },
+          "code_verifier": {
+            "type": "string"
+          },
+          "redirect_uri": {
+            "type": "string"
           }
         }
       },
@@ -199,6 +815,129 @@
           }
         }
       },
+      "LogoutRequest": {
+        "type": "object",
+        "properties": {
+          "refresh_token": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PrivateProfileResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PublicProfileResponse"
+          },
+          {
+            "type": "object",
+            "required": [
+              "estado"
+            ],
+            "properties": {
+              "email": {
+                "type": "string",
+                "nullable": true
+              },
+              "estado": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "PublicProfileResponse": {
+        "type": "object",
+        "required": [
+          "id",
+          "username",
+          "nombre_visible",
+          "plan",
+          "rol",
+          "verificado",
+          "total_seguidores",
+          "total_seguidos",
+          "total_samples",
+          "total_descargas"
+        ],
+        "properties": {
+          "avatar_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "bio": {
+            "type": "string",
+            "nullable": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "generos_favoritos": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/JsonValue"
+              }
+            ],
+            "nullable": true
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nombre_visible": {
+            "type": "string"
+          },
+          "plan": {
+            "type": "string"
+          },
+          "portada_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "rol": {
+            "type": "string"
+          },
+          "sitio_web": {
+            "type": "string",
+            "nullable": true
+          },
+          "total_descargas": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total_samples": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total_seguidores": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total_seguidos": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "username": {
+            "type": "string"
+          },
+          "verificado": {
+            "type": "boolean"
+          }
+        }
+      },
+      "RefreshRequest": {
+        "type": "object",
+        "required": [
+          "refresh_token"
+        ],
+        "properties": {
+          "refresh_token": {
+            "type": "string"
+          }
+        }
+      },
       "RegisterRequest": {
         "type": "object",
         "required": [
@@ -219,6 +958,56 @@
           },
           "username": {
             "type": "string"
+          }
+        }
+      },
+      "SuspendUserRequest": {
+        "type": "object",
+        "required": [
+          "razon"
+        ],
+        "properties": {
+          "hasta": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Si se omite, suspension indefinida.",
+            "nullable": true
+          },
+          "razon": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateProfileRequest": {
+        "type": "object",
+        "properties": {
+          "avatar_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "bio": {
+            "type": "string",
+            "nullable": true
+          },
+          "generos_favoritos": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/JsonValue"
+              }
+            ],
+            "nullable": true
+          },
+          "nombre_visible": {
+            "type": "string",
+            "nullable": true
+          },
+          "portada_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "sitio_web": {
+            "type": "string",
+            "nullable": true
           }
         }
       },
