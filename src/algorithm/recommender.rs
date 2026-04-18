@@ -51,6 +51,7 @@ use redis::AsyncCommands;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use tracing::{debug, warn};
+use utoipa::ToSchema;
 
 use crate::errors::AppError;
 
@@ -119,7 +120,7 @@ impl Default for RecommenderConfig {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, ToSchema)]
 pub struct RankedSample {
     pub id: i32,
     pub creador_id: i32,

@@ -2,6 +2,7 @@
 
 mod admin;
 mod auth;
+mod feed;
 mod health;
 mod sample_catalog;
 mod samples;
@@ -45,6 +46,8 @@ impl utoipa::Modify for SecurityAddon {
         auth::logout,
         auth::google_login,
         auth::google_pkce,
+        feed::get_feed,
+        feed::get_me_feed,
         sample_catalog::delete_sample,
         sample_catalog::get_sample,
         sample_catalog::list_samples,
@@ -73,6 +76,8 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::GooglePkceRequest,
         crate::models::AuthResponse,
         crate::models::UserResponse,
+        crate::algorithm::recommender::RankedSample,
+        feed::FeedResponse,
         crate::models::SampleCreatorSummary,
         crate::models::CheckDuplicateRequest,
         crate::models::CheckDuplicateResponse,
@@ -152,6 +157,7 @@ fn api_routes() -> Router<AppState> {
     Router::new()
         .merge(health::routes())
         .merge(auth::routes())
+        .merge(feed::routes())
         .merge(sample_catalog::routes())
         .merge(samples::routes())
         .merge(users::routes())

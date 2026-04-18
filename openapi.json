@@ -427,6 +427,65 @@
         }
       }
     },
+    "/api/feed": {
+      "get": {
+        "tags": [
+          "feed"
+        ],
+        "operationId": "get_feed",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Tamaño de página. Default: 20, máximo: 100.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Offset desde 0. Default: 0.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Feed personalizado del usuario autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Autenticación requerida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
     "/api/health": {
       "get": {
         "tags": [
@@ -441,6 +500,200 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/me/feed": {
+      "get": {
+        "tags": [
+          "feed"
+        ],
+        "operationId": "get_me_feed",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Tamaño de página. Default: 20, máximo: 100.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Offset desde 0. Default: 0.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Alias de /api/feed (compatibilidad con cliente legado)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Autenticación requerida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/samples": {
+      "get": {
+        "tags": [
+          "sample_catalog"
+        ],
+        "operationId": "list_samples",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Página 1-based. Default: 1",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "Tamaño de página. Default: 20, máximo: 100",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Búsqueda textual. También acepta alias legacy `busqueda` y alias corto `q`",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          {
+            "name": "search_normalized",
+            "in": "query",
+            "description": "Forma normalizada del término. También acepta alias legacy `busqueda_norm`",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          {
+            "name": "bpm",
+            "in": "query",
+            "description": "Filtro exacto por BPM",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "nullable": true
+            }
+          },
+          {
+            "name": "key",
+            "in": "query",
+            "description": "Tónica musical. Acepta C, F#, Bb, Eb, etc.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Tipo de sample. También acepta alias legado `tipo`",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          {
+            "name": "tags",
+            "in": "query",
+            "description": "CSV de tags enriquecidos: trap,drill,vocal",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          {
+            "name": "premium",
+            "in": "query",
+            "description": "Filtra por premium true/false",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "nullable": true
+            }
+          },
+          {
+            "name": "creator",
+            "in": "query",
+            "description": "Username del creador. También acepta alias legado `creador`",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Listado público paginado de samples",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListSamplesResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Filtros inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -512,6 +765,36 @@
             "bearer_auth": []
           }
         ]
+      }
+    },
+    "/api/samples/random": {
+      "get": {
+        "tags": [
+          "sample_catalog"
+        ],
+        "operationId": "random_sample",
+        "responses": {
+          "200": {
+            "description": "Sample aleatorio del catálogo público",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SampleDetailResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No hay samples públicos disponibles",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/samples/upload": {
@@ -598,6 +881,248 @@
             "bearer_auth": []
           }
         ]
+      }
+    },
+    "/api/samples/{id}/similar": {
+      "get": {
+        "tags": [
+          "sample_catalog"
+        ],
+        "operationId": "similar_samples",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID numérico del sample base",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Cantidad máxima de resultados. También acepta alias legacy `limite`. Default: 5, máximo: 50",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Samples similares usando pgvector con fallback contextual",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimilarSamplesResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Sample no encontrado o no visible públicamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Query inválida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/samples/{slug}": {
+      "get": {
+        "tags": [
+          "sample_catalog"
+        ],
+        "operationId": "get_sample",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "description": "Slug público o id_corto del sample",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detalle público del sample",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SampleDetailResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Sample no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "sample_catalog"
+        ],
+        "operationId": "delete_sample",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "description": "Slug público o id_corto del sample",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sample enviado a papelera",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteSampleResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Autenticación requerida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El sample no pertenece al usuario autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Sample no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "sample_catalog"
+        ],
+        "operationId": "update_sample",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "description": "Slug público o id_corto del sample",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSampleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Sample actualizado por su creador",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SampleDetailResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Autenticación requerida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El sample no pertenece al usuario autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Sample no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Payload inválido o sin cambios",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/users/me": {
@@ -932,6 +1457,22 @@
           }
         }
       },
+      "DeleteSampleResponse": {
+        "type": "object",
+        "description": "Respuesta de `DELETE /api/samples/{slug}`.",
+        "required": [
+          "ok",
+          "eliminado"
+        ],
+        "properties": {
+          "eliminado": {
+            "type": "boolean"
+          },
+          "ok": {
+            "type": "boolean"
+          }
+        }
+      },
       "DeleteUserRequest": {
         "type": "object",
         "properties": {
@@ -958,6 +1499,30 @@
           "message": {
             "type": "string",
             "description": "Mensaje legible para el usuario"
+          }
+        }
+      },
+      "FeedResponse": {
+        "type": "object",
+        "required": [
+          "items",
+          "limit",
+          "offset"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RankedSample"
+            }
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
@@ -1008,6 +1573,75 @@
           },
           "version": {
             "type": "string"
+          }
+        }
+      },
+      "ListSamplesQuery": {
+        "type": "object",
+        "description": "Query params de `GET /api/samples`.",
+        "properties": {
+          "bpm": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "creator": {
+            "type": "string",
+            "nullable": true
+          },
+          "key": {
+            "type": "string",
+            "nullable": true
+          },
+          "page": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "per_page": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "premium": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "search": {
+            "type": "string",
+            "nullable": true
+          },
+          "search_normalized": {
+            "type": "string",
+            "nullable": true
+          },
+          "tags": {
+            "type": "string",
+            "description": "CSV (`trap,drill`) o valor único. También acepta alias legado `tag`.",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ListSamplesResponse": {
+        "type": "object",
+        "description": "Respuesta de `GET /api/samples`.",
+        "required": [
+          "data",
+          "pagination"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SampleSummary"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/SamplesPagination"
           }
         }
       },
@@ -1134,6 +1768,88 @@
           }
         }
       },
+      "RankedSample": {
+        "type": "object",
+        "required": [
+          "id",
+          "creador_id",
+          "titulo",
+          "slug",
+          "tipo",
+          "tags",
+          "total_likes",
+          "total_reproducciones",
+          "total_descargas",
+          "verificado",
+          "es_nuevo",
+          "score"
+        ],
+        "properties": {
+          "bpm": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "creador_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "es_nuevo": {
+            "type": "boolean"
+          },
+          "escala": {
+            "type": "string",
+            "nullable": true
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "key": {
+            "type": "string",
+            "nullable": true
+          },
+          "publicado_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "score": {
+            "type": "number",
+            "format": "double"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tipo": {
+            "type": "string"
+          },
+          "titulo": {
+            "type": "string"
+          },
+          "total_descargas": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total_likes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total_reproducciones": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "verificado": {
+            "type": "boolean"
+          }
+        }
+      },
       "RefreshRequest": {
         "type": "object",
         "required": [
@@ -1165,6 +1881,373 @@
           },
           "username": {
             "type": "string"
+          }
+        }
+      },
+      "SampleCreatorSummary": {
+        "type": "object",
+        "description": "Resumen público del creador incluido en `GET /api/samples`.",
+        "required": [
+          "id",
+          "username",
+          "verificado"
+        ],
+        "properties": {
+          "avatar_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nombre_visible": {
+            "type": "string",
+            "nullable": true
+          },
+          "username": {
+            "type": "string"
+          },
+          "verificado": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SampleDetailResponse": {
+        "type": "object",
+        "description": "Respuesta de `GET /api/samples/{slug}` y `GET /api/samples/random`.",
+        "required": [
+          "id",
+          "slug",
+          "titulo",
+          "descripcion",
+          "duracion",
+          "formato",
+          "tamano",
+          "tags",
+          "tipo",
+          "estado",
+          "es_premium",
+          "metadata",
+          "permitir_descarga",
+          "licencia_libre",
+          "total_descargas",
+          "total_likes",
+          "total_reproducciones",
+          "total_comentarios",
+          "verificado",
+          "mostrar_en_comunidad",
+          "creador"
+        ],
+        "properties": {
+          "audio_hash": {
+            "type": "string",
+            "nullable": true
+          },
+          "bpm": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "cancion_origen_id": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "creador": {
+            "$ref": "#/components/schemas/SampleCreatorSummary"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "descripcion": {
+            "type": "string"
+          },
+          "duracion": {
+            "type": "number",
+            "format": "float"
+          },
+          "es_premium": {
+            "type": "boolean"
+          },
+          "escala": {
+            "type": "string",
+            "nullable": true
+          },
+          "estado": {
+            "type": "string"
+          },
+          "formato": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "id_corto": {
+            "type": "string",
+            "nullable": true
+          },
+          "imagen_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "key": {
+            "type": "string",
+            "nullable": true
+          },
+          "licencia_libre": {
+            "type": "boolean"
+          },
+          "metadata": {
+            "type": "object"
+          },
+          "mostrar_en_comunidad": {
+            "type": "boolean"
+          },
+          "permitir_descarga": {
+            "type": "boolean"
+          },
+          "precio": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "publicado_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "relacion_sampleo_id": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "ruta_optimizada": {
+            "type": "string",
+            "nullable": true
+          },
+          "ruta_original": {
+            "type": "string",
+            "nullable": true
+          },
+          "ruta_preview": {
+            "type": "string",
+            "nullable": true
+          },
+          "ruta_waveform": {
+            "type": "string",
+            "nullable": true
+          },
+          "slug": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tamano": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "tipo": {
+            "type": "string"
+          },
+          "titulo": {
+            "type": "string"
+          },
+          "total_comentarios": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total_descargas": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total_likes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total_reproducciones": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "verificado": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SampleSummary": {
+        "type": "object",
+        "description": "Item resumido del catálogo público de samples.",
+        "required": [
+          "id",
+          "slug",
+          "titulo",
+          "descripcion",
+          "duracion",
+          "formato",
+          "tags",
+          "tipo",
+          "es_premium",
+          "verificado",
+          "total_descargas",
+          "total_likes",
+          "total_reproducciones",
+          "total_comentarios",
+          "creador"
+        ],
+        "properties": {
+          "bpm": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "creador": {
+            "$ref": "#/components/schemas/SampleCreatorSummary"
+          },
+          "descripcion": {
+            "type": "string"
+          },
+          "duracion": {
+            "type": "number",
+            "format": "float"
+          },
+          "es_premium": {
+            "type": "boolean"
+          },
+          "escala": {
+            "type": "string",
+            "nullable": true
+          },
+          "formato": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "id_corto": {
+            "type": "string",
+            "nullable": true
+          },
+          "imagen_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "key": {
+            "type": "string",
+            "nullable": true
+          },
+          "precio": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "publicado_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "ruta_preview": {
+            "type": "string",
+            "nullable": true
+          },
+          "ruta_waveform": {
+            "type": "string",
+            "nullable": true
+          },
+          "slug": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tipo": {
+            "type": "string"
+          },
+          "titulo": {
+            "type": "string"
+          },
+          "total_comentarios": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total_descargas": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total_likes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total_reproducciones": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "verificado": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SamplesPagination": {
+        "type": "object",
+        "description": "Metadatos de paginación para listados de samples.",
+        "required": [
+          "page",
+          "per_page",
+          "total",
+          "pages"
+        ],
+        "properties": {
+          "page": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pages": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "per_page": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "SimilarSamplesQuery": {
+        "type": "object",
+        "description": "Query params de `GET /api/samples/{id}/similar`.",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          }
+        }
+      },
+      "SimilarSamplesResponse": {
+        "type": "object",
+        "description": "Respuesta de `GET /api/samples/{id}/similar`.",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SampleSummary"
+            }
           }
         }
       },
@@ -1209,6 +2292,56 @@
             "nullable": true
           },
           "sitio_web": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "UpdateSampleRequest": {
+        "type": "object",
+        "description": "Payload parcial para `PATCH /api/samples/{slug}`.",
+        "properties": {
+          "descripcion": {
+            "type": "string",
+            "nullable": true
+          },
+          "es_premium": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "imagen_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "licencia_libre": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "mostrar_en_comunidad": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "permitir_descarga": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "precio": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "titulo": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
             "type": "string",
             "nullable": true
           }

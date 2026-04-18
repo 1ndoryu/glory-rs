@@ -89,6 +89,14 @@ export interface CheckDuplicateResponse {
   title?: string | null;
 }
 
+/**
+ * Respuesta de `DELETE /api/samples/{slug}`.
+ */
+export interface DeleteSampleResponse {
+  eliminado: boolean;
+  ok: boolean;
+}
+
 export interface DeleteUserRequest {
   /**
      * Dias hasta eliminacion definitiva (default 30).
@@ -105,6 +113,35 @@ export interface ErrorResponse {
   error: string;
   /** Mensaje legible para el usuario */
   message: string;
+}
+
+export interface RankedSample {
+  /** @nullable */
+  bpm?: number | null;
+  creador_id: number;
+  es_nuevo: boolean;
+  /** @nullable */
+  escala?: string | null;
+  id: number;
+  /** @nullable */
+  key?: string | null;
+  /** @nullable */
+  publicado_at?: string | null;
+  score: number;
+  slug: string;
+  tags: string[];
+  tipo: string;
+  titulo: string;
+  total_descargas: number;
+  total_likes: number;
+  total_reproducciones: number;
+  verificado: boolean;
+}
+
+export interface FeedResponse {
+  items: RankedSample[];
+  limit: number;
+  offset: number;
 }
 
 export interface GoogleAuthRequest {
@@ -125,6 +162,105 @@ export interface GooglePkceRequest {
 export interface HealthResponse {
   status: string;
   version: string;
+}
+
+/**
+ * Query params de `GET /api/samples`.
+ */
+export interface ListSamplesQuery {
+  /** @nullable */
+  bpm?: number | null;
+  /** @nullable */
+  creator?: string | null;
+  /** @nullable */
+  key?: string | null;
+  /** @nullable */
+  page?: number | null;
+  /** @nullable */
+  per_page?: number | null;
+  /** @nullable */
+  premium?: boolean | null;
+  /** @nullable */
+  search?: string | null;
+  /** @nullable */
+  search_normalized?: string | null;
+  /**
+     * CSV (`trap,drill`) o valor único. También acepta alias legado `tag`.
+     * @nullable
+     */
+  tags?: string | null;
+  /** @nullable */
+  type?: string | null;
+}
+
+/**
+ * Resumen público del creador incluido en `GET /api/samples`.
+ */
+export interface SampleCreatorSummary {
+  /** @nullable */
+  avatar_url?: string | null;
+  id: number;
+  /** @nullable */
+  nombre_visible?: string | null;
+  username: string;
+  verificado: boolean;
+}
+
+/**
+ * Item resumido del catálogo público de samples.
+ */
+export interface SampleSummary {
+  /** @nullable */
+  bpm?: number | null;
+  creador: SampleCreatorSummary;
+  descripcion: string;
+  duracion: number;
+  es_premium: boolean;
+  /** @nullable */
+  escala?: string | null;
+  formato: string;
+  id: number;
+  /** @nullable */
+  id_corto?: string | null;
+  /** @nullable */
+  imagen_url?: string | null;
+  /** @nullable */
+  key?: string | null;
+  /** @nullable */
+  precio?: number | null;
+  /** @nullable */
+  publicado_at?: string | null;
+  /** @nullable */
+  ruta_preview?: string | null;
+  /** @nullable */
+  ruta_waveform?: string | null;
+  slug: string;
+  tags: string[];
+  tipo: string;
+  titulo: string;
+  total_comentarios: number;
+  total_descargas: number;
+  total_likes: number;
+  total_reproducciones: number;
+  verificado: boolean;
+}
+
+/**
+ * Metadatos de paginación para listados de samples.
+ */
+export interface SamplesPagination {
+  page: number;
+  pages: number;
+  per_page: number;
+  total: number;
+}
+
+/**
+ * Respuesta de `GET /api/samples`.
+ */
+export interface ListSamplesResponse {
+  data: SampleSummary[];
+  pagination: SamplesPagination;
 }
 
 export interface LoginRequest {
@@ -185,6 +321,80 @@ export interface RegisterRequest {
   username: string;
 }
 
+export type SampleDetailResponseMetadata = { [key: string]: unknown };
+
+/**
+ * Respuesta de `GET /api/samples/{slug}` y `GET /api/samples/random`.
+ */
+export interface SampleDetailResponse {
+  /** @nullable */
+  audio_hash?: string | null;
+  /** @nullable */
+  bpm?: number | null;
+  /** @nullable */
+  cancion_origen_id?: number | null;
+  creador: SampleCreatorSummary;
+  /** @nullable */
+  created_at?: string | null;
+  descripcion: string;
+  duracion: number;
+  es_premium: boolean;
+  /** @nullable */
+  escala?: string | null;
+  estado: string;
+  formato: string;
+  id: number;
+  /** @nullable */
+  id_corto?: string | null;
+  /** @nullable */
+  imagen_url?: string | null;
+  /** @nullable */
+  key?: string | null;
+  licencia_libre: boolean;
+  metadata: SampleDetailResponseMetadata;
+  mostrar_en_comunidad: boolean;
+  permitir_descarga: boolean;
+  /** @nullable */
+  precio?: number | null;
+  /** @nullable */
+  publicado_at?: string | null;
+  /** @nullable */
+  relacion_sampleo_id?: number | null;
+  /** @nullable */
+  ruta_optimizada?: string | null;
+  /** @nullable */
+  ruta_original?: string | null;
+  /** @nullable */
+  ruta_preview?: string | null;
+  /** @nullable */
+  ruta_waveform?: string | null;
+  slug: string;
+  tags: string[];
+  tamano: number;
+  tipo: string;
+  titulo: string;
+  total_comentarios: number;
+  total_descargas: number;
+  total_likes: number;
+  total_reproducciones: number;
+  verificado: boolean;
+}
+
+/**
+ * Query params de `GET /api/samples/{id}/similar`.
+ */
+export interface SimilarSamplesQuery {
+  /** @nullable */
+  limit?: number | null;
+}
+
+/**
+ * Respuesta de `GET /api/samples/{id}/similar`.
+ */
+export interface SimilarSamplesResponse {
+  data: SampleSummary[];
+}
+
 export interface SuspendUserRequest {
   /**
      * Si se omite, suspension indefinida.
@@ -212,6 +422,32 @@ export interface UpdateProfileRequest {
   portada_url?: string | null;
   /** @nullable */
   sitio_web?: string | null;
+}
+
+/**
+ * Payload parcial para `PATCH /api/samples/{slug}`.
+ */
+export interface UpdateSampleRequest {
+  /** @nullable */
+  descripcion?: string | null;
+  /** @nullable */
+  es_premium?: boolean | null;
+  /** @nullable */
+  imagen_url?: string | null;
+  /** @nullable */
+  licencia_libre?: boolean | null;
+  /** @nullable */
+  mostrar_en_comunidad?: boolean | null;
+  /** @nullable */
+  permitir_descarga?: boolean | null;
+  /** @nullable */
+  precio?: number | null;
+  /** @nullable */
+  tags?: string[] | null;
+  /** @nullable */
+  titulo?: string | null;
+  /** @nullable */
+  type?: string | null;
 }
 
 /**
@@ -255,6 +491,93 @@ export interface UploadSampleResponse {
   slug: string;
   url: string;
 }
+
+export type GetFeedParams = {
+/**
+ * Tamaño de página. Default: 20, máximo: 100.
+ * @nullable
+ */
+limit?: number | null;
+/**
+ * Offset desde 0. Default: 0.
+ * @nullable
+ */
+offset?: number | null;
+};
+
+export type GetMeFeedParams = {
+/**
+ * Tamaño de página. Default: 20, máximo: 100.
+ * @nullable
+ */
+limit?: number | null;
+/**
+ * Offset desde 0. Default: 0.
+ * @nullable
+ */
+offset?: number | null;
+};
+
+export type ListSamplesParams = {
+/**
+ * Página 1-based. Default: 1
+ * @nullable
+ */
+page?: number | null;
+/**
+ * Tamaño de página. Default: 20, máximo: 100
+ * @nullable
+ */
+per_page?: number | null;
+/**
+ * Búsqueda textual. También acepta alias legacy `busqueda` y alias corto `q`
+ * @nullable
+ */
+search?: string | null;
+/**
+ * Forma normalizada del término. También acepta alias legacy `busqueda_norm`
+ * @nullable
+ */
+search_normalized?: string | null;
+/**
+ * Filtro exacto por BPM
+ * @nullable
+ */
+bpm?: number | null;
+/**
+ * Tónica musical. Acepta C, F#, Bb, Eb, etc.
+ * @nullable
+ */
+key?: string | null;
+/**
+ * Tipo de sample. También acepta alias legado `tipo`
+ * @nullable
+ */
+type?: string | null;
+/**
+ * CSV de tags enriquecidos: trap,drill,vocal
+ * @nullable
+ */
+tags?: string | null;
+/**
+ * Filtra por premium true/false
+ * @nullable
+ */
+premium?: boolean | null;
+/**
+ * Username del creador. También acepta alias legado `creador`
+ * @nullable
+ */
+creator?: string | null;
+};
+
+export type SimilarSamplesParams = {
+/**
+ * Cantidad máxima de resultados. También acepta alias legacy `limite`. Default: 5, máximo: 50
+ * @nullable
+ */
+limit?: number | null;
+};
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
@@ -1067,6 +1390,125 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getRegisterMutationOptions(options), queryClient);
     }
 
+export type getFeedResponse200 = {
+  data: FeedResponse
+  status: 200
+}
+
+export type getFeedResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type getFeedResponseSuccess = (getFeedResponse200) & {
+  headers: Headers;
+};
+export type getFeedResponseError = (getFeedResponse401) & {
+  headers: Headers;
+};
+
+export type getFeedResponse = (getFeedResponseSuccess | getFeedResponseError)
+
+export const getGetFeedUrl = (params?: GetFeedParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/feed?${stringifiedParams}` : `/api/feed`
+}
+
+export const getFeed = async (params?: GetFeedParams, options?: RequestInit): Promise<getFeedResponse> => {
+
+  return customInstance<getFeedResponse>(getGetFeedUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetFeedQueryKey = (params?: GetFeedParams,) => {
+    return [
+    `/api/feed`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetFeedQueryOptions = <TData = Awaited<ReturnType<typeof getFeed>>, TError = ErrorResponse>(params?: GetFeedParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFeed>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetFeedQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getFeed>>> = ({ signal }) => getFeed(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getFeed>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetFeedQueryResult = NonNullable<Awaited<ReturnType<typeof getFeed>>>
+export type GetFeedQueryError = ErrorResponse
+
+
+export function useGetFeed<TData = Awaited<ReturnType<typeof getFeed>>, TError = ErrorResponse>(
+ params: undefined |  GetFeedParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFeed>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getFeed>>,
+          TError,
+          Awaited<ReturnType<typeof getFeed>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetFeed<TData = Awaited<ReturnType<typeof getFeed>>, TError = ErrorResponse>(
+ params?: GetFeedParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFeed>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getFeed>>,
+          TError,
+          Awaited<ReturnType<typeof getFeed>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetFeed<TData = Awaited<ReturnType<typeof getFeed>>, TError = ErrorResponse>(
+ params?: GetFeedParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFeed>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetFeed<TData = Awaited<ReturnType<typeof getFeed>>, TError = ErrorResponse>(
+ params?: GetFeedParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFeed>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetFeedQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
 /**
  * @summary Endpoint de health check — siempre público
  */
@@ -1178,6 +1620,244 @@ export function useHealthCheck<TData = Awaited<ReturnType<typeof healthCheck>>, 
 
 
 
+export type getMeFeedResponse200 = {
+  data: FeedResponse
+  status: 200
+}
+
+export type getMeFeedResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type getMeFeedResponseSuccess = (getMeFeedResponse200) & {
+  headers: Headers;
+};
+export type getMeFeedResponseError = (getMeFeedResponse401) & {
+  headers: Headers;
+};
+
+export type getMeFeedResponse = (getMeFeedResponseSuccess | getMeFeedResponseError)
+
+export const getGetMeFeedUrl = (params?: GetMeFeedParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/me/feed?${stringifiedParams}` : `/api/me/feed`
+}
+
+export const getMeFeed = async (params?: GetMeFeedParams, options?: RequestInit): Promise<getMeFeedResponse> => {
+
+  return customInstance<getMeFeedResponse>(getGetMeFeedUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetMeFeedQueryKey = (params?: GetMeFeedParams,) => {
+    return [
+    `/api/me/feed`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetMeFeedQueryOptions = <TData = Awaited<ReturnType<typeof getMeFeed>>, TError = ErrorResponse>(params?: GetMeFeedParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMeFeed>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMeFeedQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMeFeed>>> = ({ signal }) => getMeFeed(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMeFeed>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetMeFeedQueryResult = NonNullable<Awaited<ReturnType<typeof getMeFeed>>>
+export type GetMeFeedQueryError = ErrorResponse
+
+
+export function useGetMeFeed<TData = Awaited<ReturnType<typeof getMeFeed>>, TError = ErrorResponse>(
+ params: undefined |  GetMeFeedParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMeFeed>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMeFeed>>,
+          TError,
+          Awaited<ReturnType<typeof getMeFeed>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMeFeed<TData = Awaited<ReturnType<typeof getMeFeed>>, TError = ErrorResponse>(
+ params?: GetMeFeedParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMeFeed>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMeFeed>>,
+          TError,
+          Awaited<ReturnType<typeof getMeFeed>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMeFeed<TData = Awaited<ReturnType<typeof getMeFeed>>, TError = ErrorResponse>(
+ params?: GetMeFeedParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMeFeed>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetMeFeed<TData = Awaited<ReturnType<typeof getMeFeed>>, TError = ErrorResponse>(
+ params?: GetMeFeedParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMeFeed>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetMeFeedQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+export type listSamplesResponse200 = {
+  data: ListSamplesResponse
+  status: 200
+}
+
+export type listSamplesResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type listSamplesResponseSuccess = (listSamplesResponse200) & {
+  headers: Headers;
+};
+export type listSamplesResponseError = (listSamplesResponse422) & {
+  headers: Headers;
+};
+
+export type listSamplesResponse = (listSamplesResponseSuccess | listSamplesResponseError)
+
+export const getListSamplesUrl = (params?: ListSamplesParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/samples?${stringifiedParams}` : `/api/samples`
+}
+
+export const listSamples = async (params?: ListSamplesParams, options?: RequestInit): Promise<listSamplesResponse> => {
+
+  return customInstance<listSamplesResponse>(getListSamplesUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListSamplesQueryKey = (params?: ListSamplesParams,) => {
+    return [
+    `/api/samples`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListSamplesQueryOptions = <TData = Awaited<ReturnType<typeof listSamples>>, TError = ErrorResponse>(params?: ListSamplesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSamples>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListSamplesQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listSamples>>> = ({ signal }) => listSamples(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listSamples>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListSamplesQueryResult = NonNullable<Awaited<ReturnType<typeof listSamples>>>
+export type ListSamplesQueryError = ErrorResponse
+
+
+export function useListSamples<TData = Awaited<ReturnType<typeof listSamples>>, TError = ErrorResponse>(
+ params: undefined |  ListSamplesParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSamples>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listSamples>>,
+          TError,
+          Awaited<ReturnType<typeof listSamples>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListSamples<TData = Awaited<ReturnType<typeof listSamples>>, TError = ErrorResponse>(
+ params?: ListSamplesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSamples>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listSamples>>,
+          TError,
+          Awaited<ReturnType<typeof listSamples>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListSamples<TData = Awaited<ReturnType<typeof listSamples>>, TError = ErrorResponse>(
+ params?: ListSamplesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSamples>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useListSamples<TData = Awaited<ReturnType<typeof listSamples>>, TError = ErrorResponse>(
+ params?: ListSamplesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSamples>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListSamplesQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
 export type checkDuplicateResponse200 = {
   data: CheckDuplicateResponse
   status: 200
@@ -1271,6 +1951,118 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getCheckDuplicateMutationOptions(options), queryClient);
     }
+
+export type randomSampleResponse200 = {
+  data: SampleDetailResponse
+  status: 200
+}
+
+export type randomSampleResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type randomSampleResponseSuccess = (randomSampleResponse200) & {
+  headers: Headers;
+};
+export type randomSampleResponseError = (randomSampleResponse404) & {
+  headers: Headers;
+};
+
+export type randomSampleResponse = (randomSampleResponseSuccess | randomSampleResponseError)
+
+export const getRandomSampleUrl = () => {
+
+
+
+
+  return `/api/samples/random`
+}
+
+export const randomSample = async ( options?: RequestInit): Promise<randomSampleResponse> => {
+
+  return customInstance<randomSampleResponse>(getRandomSampleUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getRandomSampleQueryKey = () => {
+    return [
+    `/api/samples/random`
+    ] as const;
+    }
+
+
+export const getRandomSampleQueryOptions = <TData = Awaited<ReturnType<typeof randomSample>>, TError = ErrorResponse>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof randomSample>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getRandomSampleQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof randomSample>>> = ({ signal }) => randomSample({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof randomSample>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type RandomSampleQueryResult = NonNullable<Awaited<ReturnType<typeof randomSample>>>
+export type RandomSampleQueryError = ErrorResponse
+
+
+export function useRandomSample<TData = Awaited<ReturnType<typeof randomSample>>, TError = ErrorResponse>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof randomSample>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof randomSample>>,
+          TError,
+          Awaited<ReturnType<typeof randomSample>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useRandomSample<TData = Awaited<ReturnType<typeof randomSample>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof randomSample>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof randomSample>>,
+          TError,
+          Awaited<ReturnType<typeof randomSample>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useRandomSample<TData = Awaited<ReturnType<typeof randomSample>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof randomSample>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useRandomSample<TData = Awaited<ReturnType<typeof randomSample>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof randomSample>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getRandomSampleQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
 
 export type uploadResponse200 = {
   data: UploadSampleResponse
@@ -1406,6 +2198,443 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getUploadMutationOptions(options), queryClient);
+    }
+
+export type similarSamplesResponse200 = {
+  data: SimilarSamplesResponse
+  status: 200
+}
+
+export type similarSamplesResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type similarSamplesResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type similarSamplesResponseSuccess = (similarSamplesResponse200) & {
+  headers: Headers;
+};
+export type similarSamplesResponseError = (similarSamplesResponse404 | similarSamplesResponse422) & {
+  headers: Headers;
+};
+
+export type similarSamplesResponse = (similarSamplesResponseSuccess | similarSamplesResponseError)
+
+export const getSimilarSamplesUrl = (id: number,
+    params?: SimilarSamplesParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/samples/${id}/similar?${stringifiedParams}` : `/api/samples/${id}/similar`
+}
+
+export const similarSamples = async (id: number,
+    params?: SimilarSamplesParams, options?: RequestInit): Promise<similarSamplesResponse> => {
+
+  return customInstance<similarSamplesResponse>(getSimilarSamplesUrl(id,params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getSimilarSamplesQueryKey = (id: number,
+    params?: SimilarSamplesParams,) => {
+    return [
+    `/api/samples/${id}/similar`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getSimilarSamplesQueryOptions = <TData = Awaited<ReturnType<typeof similarSamples>>, TError = ErrorResponse>(id: number,
+    params?: SimilarSamplesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof similarSamples>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getSimilarSamplesQueryKey(id,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof similarSamples>>> = ({ signal }) => similarSamples(id,params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof similarSamples>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type SimilarSamplesQueryResult = NonNullable<Awaited<ReturnType<typeof similarSamples>>>
+export type SimilarSamplesQueryError = ErrorResponse
+
+
+export function useSimilarSamples<TData = Awaited<ReturnType<typeof similarSamples>>, TError = ErrorResponse>(
+ id: number,
+    params: undefined |  SimilarSamplesParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof similarSamples>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof similarSamples>>,
+          TError,
+          Awaited<ReturnType<typeof similarSamples>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useSimilarSamples<TData = Awaited<ReturnType<typeof similarSamples>>, TError = ErrorResponse>(
+ id: number,
+    params?: SimilarSamplesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof similarSamples>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof similarSamples>>,
+          TError,
+          Awaited<ReturnType<typeof similarSamples>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useSimilarSamples<TData = Awaited<ReturnType<typeof similarSamples>>, TError = ErrorResponse>(
+ id: number,
+    params?: SimilarSamplesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof similarSamples>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useSimilarSamples<TData = Awaited<ReturnType<typeof similarSamples>>, TError = ErrorResponse>(
+ id: number,
+    params?: SimilarSamplesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof similarSamples>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getSimilarSamplesQueryOptions(id,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+export type getSampleResponse200 = {
+  data: SampleDetailResponse
+  status: 200
+}
+
+export type getSampleResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type getSampleResponseSuccess = (getSampleResponse200) & {
+  headers: Headers;
+};
+export type getSampleResponseError = (getSampleResponse404) & {
+  headers: Headers;
+};
+
+export type getSampleResponse = (getSampleResponseSuccess | getSampleResponseError)
+
+export const getGetSampleUrl = (slug: string,) => {
+
+
+
+
+  return `/api/samples/${slug}`
+}
+
+export const getSample = async (slug: string, options?: RequestInit): Promise<getSampleResponse> => {
+
+  return customInstance<getSampleResponse>(getGetSampleUrl(slug),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetSampleQueryKey = (slug: string,) => {
+    return [
+    `/api/samples/${slug}`
+    ] as const;
+    }
+
+
+export const getGetSampleQueryOptions = <TData = Awaited<ReturnType<typeof getSample>>, TError = ErrorResponse>(slug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSample>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetSampleQueryKey(slug);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSample>>> = ({ signal }) => getSample(slug, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(slug), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSample>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetSampleQueryResult = NonNullable<Awaited<ReturnType<typeof getSample>>>
+export type GetSampleQueryError = ErrorResponse
+
+
+export function useGetSample<TData = Awaited<ReturnType<typeof getSample>>, TError = ErrorResponse>(
+ slug: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSample>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSample>>,
+          TError,
+          Awaited<ReturnType<typeof getSample>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetSample<TData = Awaited<ReturnType<typeof getSample>>, TError = ErrorResponse>(
+ slug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSample>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSample>>,
+          TError,
+          Awaited<ReturnType<typeof getSample>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetSample<TData = Awaited<ReturnType<typeof getSample>>, TError = ErrorResponse>(
+ slug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSample>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetSample<TData = Awaited<ReturnType<typeof getSample>>, TError = ErrorResponse>(
+ slug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSample>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetSampleQueryOptions(slug,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+export type deleteSampleResponse200 = {
+  data: DeleteSampleResponse
+  status: 200
+}
+
+export type deleteSampleResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type deleteSampleResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type deleteSampleResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type deleteSampleResponseSuccess = (deleteSampleResponse200) & {
+  headers: Headers;
+};
+export type deleteSampleResponseError = (deleteSampleResponse401 | deleteSampleResponse403 | deleteSampleResponse404) & {
+  headers: Headers;
+};
+
+export type deleteSampleResponse = (deleteSampleResponseSuccess | deleteSampleResponseError)
+
+export const getDeleteSampleUrl = (slug: string,) => {
+
+
+
+
+  return `/api/samples/${slug}`
+}
+
+export const deleteSample = async (slug: string, options?: RequestInit): Promise<deleteSampleResponse> => {
+
+  return customInstance<deleteSampleResponse>(getDeleteSampleUrl(slug),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteSampleMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteSample>>, TError,{slug: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteSample>>, TError,{slug: string}, TContext> => {
+
+const mutationKey = ['deleteSample'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteSample>>, {slug: string}> = (props) => {
+          const {slug} = props ?? {};
+
+          return  deleteSample(slug,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteSampleMutationResult = NonNullable<Awaited<ReturnType<typeof deleteSample>>>
+
+    export type DeleteSampleMutationError = ErrorResponse
+
+    export const useDeleteSample = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteSample>>, TError,{slug: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteSample>>,
+        TError,
+        {slug: string},
+        TContext
+      > => {
+      return useMutation(getDeleteSampleMutationOptions(options), queryClient);
+    }
+
+export type updateSampleResponse200 = {
+  data: SampleDetailResponse
+  status: 200
+}
+
+export type updateSampleResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type updateSampleResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type updateSampleResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type updateSampleResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type updateSampleResponseSuccess = (updateSampleResponse200) & {
+  headers: Headers;
+};
+export type updateSampleResponseError = (updateSampleResponse401 | updateSampleResponse403 | updateSampleResponse404 | updateSampleResponse422) & {
+  headers: Headers;
+};
+
+export type updateSampleResponse = (updateSampleResponseSuccess | updateSampleResponseError)
+
+export const getUpdateSampleUrl = (slug: string,) => {
+
+
+
+
+  return `/api/samples/${slug}`
+}
+
+export const updateSample = async (slug: string,
+    updateSampleRequest: UpdateSampleRequest, options?: RequestInit): Promise<updateSampleResponse> => {
+
+  return customInstance<updateSampleResponse>(getUpdateSampleUrl(slug),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      updateSampleRequest,)
+  }
+);}
+
+
+
+
+export const getUpdateSampleMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateSample>>, TError,{slug: string;data: UpdateSampleRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateSample>>, TError,{slug: string;data: UpdateSampleRequest}, TContext> => {
+
+const mutationKey = ['updateSample'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateSample>>, {slug: string;data: UpdateSampleRequest}> = (props) => {
+          const {slug,data} = props ?? {};
+
+          return  updateSample(slug,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateSampleMutationResult = NonNullable<Awaited<ReturnType<typeof updateSample>>>
+    export type UpdateSampleMutationBody = UpdateSampleRequest
+    export type UpdateSampleMutationError = ErrorResponse
+
+    export const useUpdateSample = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateSample>>, TError,{slug: string;data: UpdateSampleRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateSample>>,
+        TError,
+        {slug: string;data: UpdateSampleRequest},
+        TContext
+      > => {
+      return useMutation(getUpdateSampleMutationOptions(options), queryClient);
     }
 
 export type meResponse200 = {
