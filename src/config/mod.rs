@@ -21,6 +21,8 @@ pub struct AppConfig {
     pub db_min_connections: u32,
     /// Lista CSV de Google OAuth client_ids aceptados (web/android/ios).
     pub google_client_ids: Vec<String>,
+    /// Directorio raiz para storage local (LocalFs). Default: "./uploads"
+    pub storage_root: String,
 }
 
 impl AppConfig {
@@ -51,6 +53,8 @@ impl AppConfig {
                 .filter(|s| !s.is_empty())
                 .map(String::from)
                 .collect(),
+            storage_root: std::env::var("STORAGE_ROOT")
+                .unwrap_or_else(|_| "./uploads".to_string()),
         })
     }
 }

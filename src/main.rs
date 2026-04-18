@@ -66,7 +66,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing::info!("Servidor iniciando en {addr}");
     tracing::info!("Swagger UI disponible en http://{addr}/swagger-ui/");
 
-    let app = handlers::create_router(pool, redis, config);
+    /* [174A-26] Storage backend. Por ahora siempre LocalFs apuntando a `STORAGE_ROOT`
+     * (default ./uploads). En 174A-27 se añadirá selector S3 feature-gated. */
+    let storage: std::sync::Arc<dyn glory_backend::services::FileStorage> = std::sync::Arc::new(
+        glory_backend::services::LocalFs::new(&config.storage_root).await?,
+    );
+    tracing::info!("Storage LocalFs en {}", config.storage_root);
+
+    let app = handlers::create_router(pool, redis, config, storage);
     let listener = tokio::net::TcpListener::bind(&addr).await?;
     axum::serve(listener, app).await?;
 

@@ -79,16 +79,19 @@ impl utoipa::Modify for SecurityAddon {
 )]
 #[allow(clippy::needless_for_each)]
 pub struct ApiDoc;/// Crea el router principal con CORS, tracing, Swagger UI y todas las rutas
+/// Crea el router principal con CORS, tracing, Swagger UI y todas las rutas
 pub fn create_router(
     pool: sqlx::PgPool,
     redis: Option<deadpool_redis::Pool>,
     config: crate::config::AppConfig,
+    storage: std::sync::Arc<dyn crate::services::FileStorage>,
 ) -> Router {
     let state = AppState {
         pool,
         redis,
         jwt_secret: config.jwt_secret,
         google: std::sync::Arc::new(crate::services::GoogleVerifier::new(config.google_client_ids)),
+        storage,
     };
 
     /* CORS: en desarrollo se permite todo. En producción, restringir orígenes */
