@@ -568,6 +568,34 @@
         ]
       }
     },
+    "/api/descargas/limites": {
+      "get": {
+        "tags": [
+          "downloads"
+        ],
+        "operationId": "download_limits",
+        "responses": {
+          "200": {
+            "description": "Límites del plan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DownloadLimitsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
     "/api/feed": {
       "get": {
         "tags": [
@@ -1219,6 +1247,55 @@
                 }
               }
             }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/samples/{id}/descargar": {
+      "post": {
+        "tags": [
+          "downloads"
+        ],
+        "operationId": "register_download",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID del sample a descargar",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Descarga registrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DownloadResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "Sample bloqueado para el usuario"
+          },
+          "404": {
+            "description": "Sample no encontrado"
+          },
+          "429": {
+            "description": "Límite diario excedido"
           }
         },
         "security": [
@@ -1956,6 +2033,64 @@
             "format": "int32",
             "description": "Dias hasta eliminacion definitiva (default 30).",
             "nullable": true
+          }
+        }
+      },
+      "DownloadLimitsResponse": {
+        "type": "object",
+        "required": [
+          "plan",
+          "usadas",
+          "calidad"
+        ],
+        "properties": {
+          "calidad": {
+            "type": "string"
+          },
+          "limite": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "plan": {
+            "type": "string"
+          },
+          "restantes": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "usadas": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "DownloadResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "url",
+          "calidad",
+          "consume_credito"
+        ],
+        "properties": {
+          "calidad": {
+            "type": "string"
+          },
+          "consume_credito": {
+            "type": "boolean"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "restantes": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "url": {
+            "type": "string"
           }
         }
       },

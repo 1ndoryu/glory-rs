@@ -123,6 +123,25 @@ export interface DeleteUserRequest {
   dias_gracia?: number | null;
 }
 
+export interface DownloadLimitsResponse {
+  calidad: string;
+  /** @nullable */
+  limite?: number | null;
+  plan: string;
+  /** @nullable */
+  restantes?: number | null;
+  usadas: number;
+}
+
+export interface DownloadResponse {
+  calidad: string;
+  consume_credito: boolean;
+  ok: boolean;
+  /** @nullable */
+  restantes?: number | null;
+  url: string;
+}
+
 /**
  * Estructura de respuesta de error expuesta en la API
  */
@@ -1783,6 +1802,118 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getUnblockUserMutationOptions(options), queryClient);
     }
 
+export type downloadLimitsResponse200 = {
+  data: DownloadLimitsResponse
+  status: 200
+}
+
+export type downloadLimitsResponse401 = {
+  data: void
+  status: 401
+}
+
+export type downloadLimitsResponseSuccess = (downloadLimitsResponse200) & {
+  headers: Headers;
+};
+export type downloadLimitsResponseError = (downloadLimitsResponse401) & {
+  headers: Headers;
+};
+
+export type downloadLimitsResponse = (downloadLimitsResponseSuccess | downloadLimitsResponseError)
+
+export const getDownloadLimitsUrl = () => {
+
+
+
+
+  return `/api/descargas/limites`
+}
+
+export const downloadLimits = async ( options?: RequestInit): Promise<downloadLimitsResponse> => {
+
+  return customInstance<downloadLimitsResponse>(getDownloadLimitsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getDownloadLimitsQueryKey = () => {
+    return [
+    `/api/descargas/limites`
+    ] as const;
+    }
+
+
+export const getDownloadLimitsQueryOptions = <TData = Awaited<ReturnType<typeof downloadLimits>>, TError = void>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof downloadLimits>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getDownloadLimitsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof downloadLimits>>> = ({ signal }) => downloadLimits({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof downloadLimits>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type DownloadLimitsQueryResult = NonNullable<Awaited<ReturnType<typeof downloadLimits>>>
+export type DownloadLimitsQueryError = void
+
+
+export function useDownloadLimits<TData = Awaited<ReturnType<typeof downloadLimits>>, TError = void>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof downloadLimits>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof downloadLimits>>,
+          TError,
+          Awaited<ReturnType<typeof downloadLimits>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useDownloadLimits<TData = Awaited<ReturnType<typeof downloadLimits>>, TError = void>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof downloadLimits>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof downloadLimits>>,
+          TError,
+          Awaited<ReturnType<typeof downloadLimits>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useDownloadLimits<TData = Awaited<ReturnType<typeof downloadLimits>>, TError = void>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof downloadLimits>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useDownloadLimits<TData = Awaited<ReturnType<typeof downloadLimits>>, TError = void>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof downloadLimits>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getDownloadLimitsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
 export type getFeedResponse200 = {
   data: FeedResponse
   status: 200
@@ -3068,6 +3199,104 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getUploadMutationOptions(options), queryClient);
+    }
+
+export type registerDownloadResponse200 = {
+  data: DownloadResponse
+  status: 200
+}
+
+export type registerDownloadResponse401 = {
+  data: void
+  status: 401
+}
+
+export type registerDownloadResponse403 = {
+  data: void
+  status: 403
+}
+
+export type registerDownloadResponse404 = {
+  data: void
+  status: 404
+}
+
+export type registerDownloadResponse429 = {
+  data: void
+  status: 429
+}
+
+export type registerDownloadResponseSuccess = (registerDownloadResponse200) & {
+  headers: Headers;
+};
+export type registerDownloadResponseError = (registerDownloadResponse401 | registerDownloadResponse403 | registerDownloadResponse404 | registerDownloadResponse429) & {
+  headers: Headers;
+};
+
+export type registerDownloadResponse = (registerDownloadResponseSuccess | registerDownloadResponseError)
+
+export const getRegisterDownloadUrl = (id: number,) => {
+
+
+
+
+  return `/api/samples/${id}/descargar`
+}
+
+export const registerDownload = async (id: number, options?: RequestInit): Promise<registerDownloadResponse> => {
+
+  return customInstance<registerDownloadResponse>(getRegisterDownloadUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getRegisterDownloadMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof registerDownload>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof registerDownload>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['registerDownload'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof registerDownload>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  registerDownload(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RegisterDownloadMutationResult = NonNullable<Awaited<ReturnType<typeof registerDownload>>>
+
+    export type RegisterDownloadMutationError = void
+
+    export const useRegisterDownload = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof registerDownload>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof registerDownload>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getRegisterDownloadMutationOptions(options), queryClient);
     }
 
 export type registerPlayResponse200 = {

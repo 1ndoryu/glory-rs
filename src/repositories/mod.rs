@@ -1,4 +1,5 @@
 mod block;
+mod download;
 mod follow;
 mod ia_queue;
 mod like;
@@ -11,6 +12,7 @@ mod sample_catalog;
 mod user;
 
 pub use block::{BlockRepository, BlockedUser};
+pub use download::{DownloadRepository, SampleDownloadInfo};
 pub use follow::FollowRepository;
 pub use ia_queue::{
     retry_backoff_duration, IaQueueFailureDisposition, IaQueueRepository, QueuedIaJob,

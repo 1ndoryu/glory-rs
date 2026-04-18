@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE usuarios_ext SET total_descargas = total_descargas + 1 WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "8ce3a2c9b0a70468803db67e6345f5f43de96f4d23f34d2b8016f35b1cac2515"
+}

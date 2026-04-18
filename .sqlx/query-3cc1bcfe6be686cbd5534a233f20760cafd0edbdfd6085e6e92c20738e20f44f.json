@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE samples SET total_descargas = total_descargas + 1 WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "3cc1bcfe6be686cbd5534a233f20760cafd0edbdfd6085e6e92c20738e20f44f"
+}

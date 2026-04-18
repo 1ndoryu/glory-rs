@@ -2,6 +2,7 @@
 
 mod admin;
 mod auth;
+mod downloads;
 mod feed;
 mod health;
 mod likes;
@@ -67,6 +68,8 @@ impl utoipa::Modify for SecurityAddon {
         social::block_user,
         social::unblock_user,
         social::my_blocks,
+        downloads::register_download,
+        downloads::download_limits,
         users::me,
         users::update_me,
         users::public_profile,
@@ -102,6 +105,8 @@ impl utoipa::Modify for SecurityAddon {
         social::BlockRequest,
         social::BlockedListResponse,
         crate::repositories::BlockedUser,
+        downloads::DownloadResponse,
+        downloads::DownloadLimitsResponse,
         crate::models::DeleteSampleResponse,
         crate::models::ListSamplesQuery,
         crate::models::ListSamplesResponse,
@@ -189,6 +194,7 @@ fn api_routes() -> Router<AppState> {
         .merge(plays::routes())
         .merge(likes::routes())
         .merge(social::routes())
+        .merge(downloads::routes())
         .merge(users::routes())
         .merge(admin::routes())
 }
