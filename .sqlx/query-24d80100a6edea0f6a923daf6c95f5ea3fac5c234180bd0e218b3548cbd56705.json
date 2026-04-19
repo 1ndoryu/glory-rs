@@ -1,0 +1,83 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH RECURSIVE cadena AS (\n                    SELECT r.id,\n                           r.cancion_fuente_id,\n                           r.cancion_destino_id,\n                           r.tipo_relacion,\n                           1::int4 AS nivel\n                    FROM relaciones_sample r\n                    WHERE r.cancion_fuente_id = $1\n                      AND r.tipo_relacion = 'sample'\n                    UNION ALL\n                    SELECT r.id,\n                           r.cancion_fuente_id,\n                           r.cancion_destino_id,\n                           r.tipo_relacion,\n                           (c.nivel + 1)::int4 AS nivel\n                    FROM relaciones_sample r\n                    INNER JOIN cadena c ON r.cancion_fuente_id = c.cancion_destino_id\n                    WHERE c.nivel < $2\n                      AND r.tipo_relacion = 'sample'\n               )\n               SELECT DISTINCT ON (ca.cancion_destino_id)\n                 ca.id AS \"id!\",\n                 ca.cancion_fuente_id AS \"cancion_fuente_id!\",\n                 ca.cancion_destino_id AS \"cancion_destino_id!\",\n                      ca.tipo_relacion AS \"tipo_relacion!\",\n                      ca.nivel AS \"nivel!\",\n                      cf.titulo AS \"fuente_titulo!\",\n                      cf.slug AS \"fuente_slug!\",\n                      af.nombre AS \"fuente_artista!\",\n                      cd.titulo AS \"destino_titulo!\",\n                      cd.slug AS \"destino_slug!\",\n                      ad.nombre AS \"destino_artista!\"\n               FROM cadena ca\n               INNER JOIN canciones cf ON cf.id = ca.cancion_fuente_id\n               INNER JOIN artistas_musicales af ON af.id = cf.artista_id\n               INNER JOIN canciones cd ON cd.id = ca.cancion_destino_id\n               INNER JOIN artistas_musicales ad ON ad.id = cd.artista_id\n               ORDER BY ca.cancion_destino_id, ca.nivel ASC",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "cancion_fuente_id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "cancion_destino_id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "tipo_relacion!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "nivel!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 5,
+        "name": "fuente_titulo!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "fuente_slug!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 7,
+        "name": "fuente_artista!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 8,
+        "name": "destino_titulo!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 9,
+        "name": "destino_slug!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 10,
+        "name": "destino_artista!",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "24d80100a6edea0f6a923daf6c95f5ea3fac5c234180bd0e218b3548cbd56705"
+}

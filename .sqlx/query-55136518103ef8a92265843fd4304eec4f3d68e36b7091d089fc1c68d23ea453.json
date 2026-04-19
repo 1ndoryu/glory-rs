@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT ca.artista_id,\n                      a.nombre AS \"nombre!\",\n                      a.slug AS \"slug!\",\n                      ca.rol AS \"rol!\"\n               FROM canciones_artistas ca\n               INNER JOIN artistas_musicales a ON a.id = ca.artista_id\n               WHERE ca.cancion_id = $1\n               ORDER BY CASE ca.rol\n                    WHEN 'principal' THEN 1\n                    WHEN 'featuring' THEN 2\n                    WHEN 'producer' THEN 3\n                    ELSE 4\n               END, a.nombre ASC",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "artista_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "nombre!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "slug!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "rol!",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "55136518103ef8a92265843fd4304eec4f3d68e36b7091d089fc1c68d23ea453"
+}

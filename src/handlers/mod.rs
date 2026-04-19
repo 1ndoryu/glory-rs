@@ -1,4 +1,5 @@
 #![allow(clippy::needless_for_each)] // Generado por utoipa OpenApi derive
+/* sentinel-disable-file limite-lineas — registro central de rutas y schemas OpenAPI */
 
 mod admin;
 mod articles;
@@ -13,6 +14,7 @@ mod free_codes;
 mod health;
 mod likes;
 mod messages;
+mod music;
 mod notifications;
 mod payments;
 mod plays;
@@ -117,6 +119,28 @@ impl utoipa::Modify for SecurityAddon {
         reports::report_post,
         search::global_search,
         search::legacy_quick_search,
+        music::public::list_songs,
+        music::public::search_songs,
+        music::public::top_songs,
+        music::public::get_song,
+        music::public::get_song_chain,
+        music::public::top_artists,
+        music::public::get_artist,
+        music::public::get_relation,
+        music::public::get_relation_by_sample,
+        music::public::relation_stats,
+        music::mutations::link_sample_to_relation,
+        music::mutations::unlink_sample_from_relation,
+        music::mutations::verify_relation,
+        music::admin::create_artist,
+        music::admin::update_artist,
+        music::admin::delete_artist,
+        music::admin::create_song,
+        music::admin::update_song,
+        music::admin::delete_song,
+        music::admin::create_relation,
+        music::admin::update_relation,
+        music::admin::delete_relation,
         fcm::register_fcm_token,
         fcm::delete_fcm_token,
         push::get_vapid_key,
@@ -165,6 +189,16 @@ impl utoipa::Modify for SecurityAddon {
         users::block,
         users::unblock,
         users::list_blocked,
+        admin::summary,
+        admin::activity,
+        admin::list_users,
+        admin::update_user_legacy,
+        admin::suspend_user_legacy,
+        admin::unsuspend_user_legacy,
+        admin::mark_delete_legacy,
+        admin::cancel_delete_legacy,
+        admin::list_scrapers,
+        admin::list_extraction_queue,
         admin::suspend,
         admin::activate,
         admin::mark_delete,
@@ -327,6 +361,60 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::BlockUserRequest,
         crate::models::SuspendUserRequest,
         crate::models::DeleteUserRequest,
+        crate::models::AdminSummaryStats,
+        crate::models::AdminActivityPoint,
+        crate::models::AdminActivityResponse,
+        crate::models::AdminUsersQuery,
+        crate::models::AdminUsersResponse,
+        crate::models::AdminUserListItem,
+        crate::models::AdminUserUpdateRequest,
+        crate::models::AdminUserSuspendRequest,
+        crate::models::AdminUserDeleteRequest,
+        crate::models::AdminOkResponse,
+        crate::models::AdminActivityQuery,
+        crate::models::AdminScrapersQuery,
+        crate::models::AdminScrapersResponse,
+        crate::models::AdminScraperItem,
+        crate::models::AdminExtractionQueueQuery,
+        crate::models::AdminExtractionQueueResponse,
+        crate::models::AdminExtractionQueueItem,
+        crate::models::MusicArtistRole,
+        crate::models::SampleRelationType,
+        crate::models::SampleRelationElementType,
+        crate::models::SampleRelationSource,
+        crate::models::RelationSampleSide,
+        crate::models::MusicArtist,
+        crate::models::MusicSong,
+        crate::models::SongArtistLink,
+        crate::models::SampleRelationSummary,
+        crate::models::SampleRelationDetail,
+        crate::models::MusicPagination,
+        crate::models::MusicSongsResponse,
+        crate::models::SongListResponse,
+        crate::models::MusicArtistsResponse,
+        crate::models::SongDetailResponse,
+        crate::models::ArtistStats,
+        crate::models::ArtistDetailResponse,
+        crate::models::RelationTypeCount,
+        crate::models::RelationStatsResponse,
+        crate::models::SampleRelationLookupResponse,
+        crate::models::RelationChainNode,
+        crate::models::RelationChainResponse,
+        crate::models::MusicMutationResponse,
+        crate::models::RelationVerificationResponse,
+        crate::models::ListSongsQuery,
+        crate::models::SearchSongsQuery,
+        crate::models::LimitQuery,
+        crate::models::RelationChainQuery,
+        crate::models::CreateArtistRequest,
+        crate::models::UpdateArtistRequest,
+        crate::models::SongArtistInput,
+        crate::models::CreateSongRequest,
+        crate::models::UpdateSongRequest,
+        crate::models::CreateRelationRequest,
+        crate::models::UpdateRelationRequest,
+        crate::models::SampleLinkRequest,
+        crate::models::VerifyRelationRequest,
         crate::models::SearchCollectionOwnerSummary,
         crate::models::SearchCollectionResult,
         crate::models::SearchSampleResult,
@@ -439,6 +527,7 @@ fn api_routes() -> Router<AppState> {
         .merge(payments::routes())
         .merge(reports::routes())
         .merge(search::routes())
+        .merge(music::routes())
         .merge(fcm::routes())
         .merge(push::routes())
         .merge(comments::routes())

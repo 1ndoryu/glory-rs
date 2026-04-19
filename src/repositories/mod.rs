@@ -1,3 +1,4 @@
+mod admin_panel;
 mod article;
 mod billing;
 mod block;
@@ -11,6 +12,7 @@ mod free_code;
 mod ia_queue;
 mod like;
 mod message;
+mod music;
 mod moderation;
 mod notification;
 mod notification_target;
@@ -26,6 +28,7 @@ mod sample_catalog;
 mod saved_collection;
 mod user;
 
+pub use admin_panel::AdminPanelRepository;
 pub use billing::{
     BillingRepository, CompletedDownloadRevenueShareInsert, CompletedSamplePurchaseInsert,
     SampleCheckoutCandidate, StripeUserProfile, SubscriptionRecord, UpsertStripeSubscriptionRecord,
@@ -55,6 +58,7 @@ pub use message::{
     ConversationMessage, CreateMessageParams, DirectMessageKind, MessageRepository,
     SharedSampleMessage,
 };
+pub use music::MusicRepository;
 pub use moderation::ModerationRepository;
 pub use notification::{
     CreateNotificationRecord, NotificationActor, NotificationRepository, UserNotification,

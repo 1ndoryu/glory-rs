@@ -1,0 +1,37 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE canciones\n               SET titulo = COALESCE($2, titulo),\n                   slug = COALESCE($3, slug),\n                   artista_id = COALESCE($4, artista_id),\n                   album = COALESCE($5, album),\n                   sello = COALESCE($6, sello),\n                   anio = COALESCE($7, anio),\n                   duracion_segundos = COALESCE($8, duracion_segundos),\n                   genero = COALESCE($9, genero),\n                   youtube_id = COALESCE($10, youtube_id),\n                   spotify_id = COALESCE($11, spotify_id),\n                   imagen_url = COALESCE($12, imagen_url),\n                   whosampled_url = COALESCE($13, whosampled_url),\n                   bpm = COALESCE($14, bpm),\n                   tonalidad = COALESCE($15, tonalidad),\n                   metadata = COALESCE($16::jsonb, metadata),\n                   updated_at = NOW()\n               WHERE id = $1\n               RETURNING id AS \"id!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Varchar",
+        "Varchar",
+        "Int4",
+        "Varchar",
+        "Varchar",
+        "Int2",
+        "Int2",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Text",
+        "Varchar",
+        "Int2",
+        "Varchar",
+        "Jsonb"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "60ad5455f9c0bd396890a2a1d4b335cff90b1b41cd116aeb0f47be1ad60e8c73"
+}

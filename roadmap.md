@@ -95,10 +95,8 @@
 ### Fase 12 â€” Pagos
 
 ### Fase 13 â€” Reportes, blog, bÃºsqueda global, catÃ¡logo
-- 174A-88 â€” CatÃ¡logo canciones/artistas + relaciones
 
 ### Fase 14 â€” ModeraciÃ³n, admin, dashboard
-- 174A-89 â€” Panel admin endpoints
 - 174A-90 â€” Dashboard creador
 - 174A-91 â€” Sync changelog (`GET /sync/changelog?since=...`)
 

@@ -29,6 +29,75 @@ export interface AddSampleRequest {
   sample_id: number;
 }
 
+export interface AdminActivityPoint {
+  fecha: string;
+  total: number;
+}
+
+export interface AdminActivityQuery {
+  /** @nullable */
+  dias?: number | null;
+}
+
+export interface AdminActivityResponse {
+  descargas: AdminActivityPoint[];
+  registros: AdminActivityPoint[];
+  uploads: AdminActivityPoint[];
+}
+
+export interface AdminExtractionQueueItem {
+  /** @nullable */
+  bpm_detectado?: number | null;
+  /** @nullable */
+  compas_fin_seg?: number | null;
+  /** @nullable */
+  compas_inicio_seg?: number | null;
+  created_at: string;
+  /** @nullable */
+  error_mensaje?: string | null;
+  estado: string;
+  id: number;
+  intentos: number;
+  lado: string;
+  /** @nullable */
+  procesado_at?: string | null;
+  /** @nullable */
+  proximo_intento_at?: string | null;
+  relacion_id: number;
+  /** @nullable */
+  sample_id?: number | null;
+  /** @nullable */
+  spotify_id?: string | null;
+  /** @nullable */
+  timing_inicio_seg?: number | null;
+  /** @nullable */
+  youtube_id?: string | null;
+}
+
+export interface AdminExtractionQueueQuery {
+  /** @nullable */
+  busqueda?: string | null;
+  /** @nullable */
+  estado?: string | null;
+  /** @nullable */
+  lado?: string | null;
+  /** @nullable */
+  page?: number | null;
+  /** @nullable */
+  sort_col?: string | null;
+  /** @nullable */
+  sort_dir?: string | null;
+}
+
+export type AdminExtractionQueueResponseEstadosCuenta = {[key: string]: number};
+
+export interface AdminExtractionQueueResponse {
+  data: AdminExtractionQueueItem[];
+  estadosCuenta: AdminExtractionQueueResponseEstadosCuenta;
+  page: number;
+  total: number;
+}
+
 export type LegalRightType = typeof LegalRightType[keyof typeof LegalRightType];
 
 
@@ -72,6 +141,124 @@ export interface AdminLegalReportItem {
 export interface AdminLegalReportsResponse {
   ok: boolean;
   reportes: AdminLegalReportItem[];
+  total: number;
+}
+
+export interface AdminOkResponse {
+  ok: boolean;
+}
+
+export interface AdminScraperItem {
+  bytes_descargados: number;
+  created_at: string;
+  /** @nullable */
+  error_mensaje?: string | null;
+  estado: string;
+  id: number;
+  intentos: number;
+  /** @nullable */
+  procesado_at?: string | null;
+  re_scrapeable: boolean;
+  tipo_pagina: string;
+  url: string;
+  veces_rescrapeado: number;
+}
+
+export interface AdminScrapersQuery {
+  /** @nullable */
+  busqueda?: string | null;
+  /** @nullable */
+  estado?: string | null;
+  /** @nullable */
+  page?: number | null;
+  /** @nullable */
+  sort_col?: string | null;
+  /** @nullable */
+  sort_dir?: string | null;
+}
+
+export type AdminScrapersResponseEstadosCuenta = {[key: string]: number};
+
+export interface AdminScrapersResponse {
+  data: AdminScraperItem[];
+  estadosCuenta: AdminScrapersResponseEstadosCuenta;
+  page: number;
+  total: number;
+}
+
+export interface AdminSummaryStats {
+  pendientes_moderacion: number;
+  registros_semana: number;
+  reportes_pendientes: number;
+  samples_semana: number;
+  total_descargas: number;
+  total_publicaciones: number;
+  total_samples: number;
+  total_usuarios: number;
+  usuarios_premium: number;
+  usuarios_pro: number;
+}
+
+export interface AdminUserDeleteRequest {
+  /** @nullable */
+  razon?: string | null;
+}
+
+export interface AdminUserListItem {
+  /** @nullable */
+  avatar_url?: string | null;
+  /** @nullable */
+  ban_hasta?: string | null;
+  created_at: string;
+  email: string;
+  estado: string;
+  id: number;
+  nombre_visible: string;
+  plan: string;
+  rol: string;
+  /** @nullable */
+  sera_eliminado_en?: string | null;
+  /** @nullable */
+  suspendido_hasta?: string | null;
+  /** @nullable */
+  suspension_razon?: string | null;
+  total_descargas: number;
+  total_samples: number;
+  updated_at: string;
+  username: string;
+  verificado: boolean;
+}
+
+export interface AdminUserSuspendRequest {
+  horas: number;
+  razon: string;
+}
+
+export interface AdminUserUpdateRequest {
+  /** @nullable */
+  ban_hasta?: string | null;
+  /** @nullable */
+  plan?: string | null;
+  /** @nullable */
+  rol?: string | null;
+  /** @nullable */
+  verificado?: boolean | null;
+}
+
+export interface AdminUsersQuery {
+  /** @nullable */
+  busqueda?: string | null;
+  /** @nullable */
+  orden?: string | null;
+  /** @nullable */
+  page?: number | null;
+  /** @nullable */
+  plan?: string | null;
+}
+
+export interface AdminUsersResponse {
+  data: AdminUserListItem[];
+  page: number;
   total: number;
 }
 
@@ -160,6 +347,154 @@ export interface ArticleListResponse {
 export interface ArticleResponse {
   data: ArticleDetail;
   ok: boolean;
+}
+
+export type MusicArtistMetadata = { [key: string]: unknown };
+
+export interface MusicArtist {
+  created_at: string;
+  id: number;
+  /** @nullable */
+  imagen_url?: string | null;
+  metadata: MusicArtistMetadata;
+  /** @nullable */
+  musicbrainz_id?: string | null;
+  nombre: string;
+  prioridad: number;
+  slug: string;
+  total_canciones: number;
+  updated_at: string;
+  /** @nullable */
+  whosampled_slug?: string | null;
+}
+
+export type MusicSongMetadata = { [key: string]: unknown };
+
+export interface MusicSong {
+  /** @nullable */
+  album?: string | null;
+  /** @nullable */
+  anio?: number | null;
+  artista_id: number;
+  artista_nombre: string;
+  artista_slug: string;
+  /** @nullable */
+  bpm?: number | null;
+  created_at: string;
+  /** @nullable */
+  duracion_segundos?: number | null;
+  /** @nullable */
+  genero?: string | null;
+  id: number;
+  /** @nullable */
+  imagen_url?: string | null;
+  metadata: MusicSongMetadata;
+  /** @nullable */
+  sello?: string | null;
+  slug: string;
+  /** @nullable */
+  spotify_id?: string | null;
+  titulo: string;
+  /** @nullable */
+  tonalidad?: string | null;
+  total_comentarios: number;
+  total_likes: number;
+  total_samplea: number;
+  total_sampleada: number;
+  updated_at: string;
+  /** @nullable */
+  whosampled_url?: string | null;
+  /** @nullable */
+  youtube_id?: string | null;
+}
+
+export interface ArtistStats {
+  generos: string[];
+  /** @minimum 0 */
+  total_samplea_a: number;
+  /** @minimum 0 */
+  total_sampleado_por: number;
+}
+
+export type SampleRelationSource = typeof SampleRelationSource[keyof typeof SampleRelationSource];
+
+
+export const SampleRelationSource = {
+  scraping: 'scraping',
+  comunidad: 'comunidad',
+  musicbrainz: 'musicbrainz',
+  import: 'import',
+} as const;
+
+export type SampleRelationElementType = typeof SampleRelationElementType[keyof typeof SampleRelationElementType];
+
+
+export const SampleRelationElementType = {
+  hook_riff: 'hook_riff',
+  vocals_lyrics: 'vocals_lyrics',
+  drums: 'drums',
+  bass: 'bass',
+  keys_synth: 'keys_synth',
+  sound_effect: 'sound_effect',
+  multiple_elements: 'multiple_elements',
+  other: 'other',
+} as const;
+
+export type SampleRelationType = typeof SampleRelationType[keyof typeof SampleRelationType];
+
+
+export const SampleRelationType = {
+  sample: 'sample',
+  cover: 'cover',
+  remix: 'remix',
+  interpolation: 'interpolation',
+} as const;
+
+export interface SampleRelationSummary {
+  aparece_en_todo: boolean;
+  artista_nombre: string;
+  artista_slug: string;
+  /** @nullable */
+  cancion_anio?: number | null;
+  cancion_destino_id: number;
+  cancion_fuente_id: number;
+  /** @nullable */
+  cancion_imagen_url?: string | null;
+  cancion_slug: string;
+  cancion_titulo: string;
+  /** @nullable */
+  contribuidor_id?: number | null;
+  /** @nullable */
+  contribuidor_username?: string | null;
+  created_at: string;
+  fuente: SampleRelationSource;
+  id: number;
+  /** @nullable */
+  sample_destino_id?: number | null;
+  /** @nullable */
+  sample_fuente_id?: number | null;
+  /** @nullable */
+  sample_id?: number | null;
+  timings_destino: number[];
+  timings_fuente: number[];
+  tipo_elemento?: SampleRelationElementType | null;
+  tipo_relacion: SampleRelationType;
+  total_comentarios: number;
+  total_likes: number;
+  updated_at: string;
+  verificada: boolean;
+  votos_promedio: number;
+  votos_total: number;
+  /** @nullable */
+  whosampled_id?: number | null;
+}
+
+export interface ArtistDetailResponse {
+  artista: MusicArtist;
+  canciones: MusicSong[];
+  estadisticas: ArtistStats;
+  samplea_a: SampleRelationSummary[];
+  sampleado_por: SampleRelationSummary[];
 }
 
 export interface UserResponse {
@@ -427,6 +762,23 @@ export interface CreateArticleMultipartRequestDoc {
   titulo: string;
 }
 
+export type CreateArtistRequestMetadata = { [key: string]: unknown };
+
+export interface CreateArtistRequest {
+  /** @nullable */
+  imagen_url?: string | null;
+  metadata: CreateArtistRequestMetadata;
+  /** @nullable */
+  musicbrainz_id?: string | null;
+  nombre: string;
+  /** @nullable */
+  prioridad?: number | null;
+  /** @nullable */
+  slug?: string | null;
+  /** @nullable */
+  whosampled_slug?: string | null;
+}
+
 export interface CreateColeccionRequest {
   /** @nullable */
   descripcion?: string | null;
@@ -515,6 +867,34 @@ export interface CreatePostRequest {
   samples_adjuntos?: number[];
 }
 
+export interface CreateRelationRequest {
+  /** @nullable */
+  aparece_en_todo?: boolean | null;
+  cancion_destino_id: number;
+  cancion_fuente_id: number;
+  /** @nullable */
+  contribuidor_id?: number | null;
+  fuente?: SampleRelationSource | null;
+  /** @nullable */
+  sample_destino_id?: number | null;
+  /** @nullable */
+  sample_fuente_id?: number | null;
+  /** @nullable */
+  sample_id?: number | null;
+  timings_destino?: number[];
+  timings_fuente?: number[];
+  tipo_elemento?: SampleRelationElementType | null;
+  tipo_relacion: SampleRelationType;
+  /** @nullable */
+  verificada?: boolean | null;
+  /** @nullable */
+  votos_promedio?: number | null;
+  /** @nullable */
+  votos_total?: number | null;
+  /** @nullable */
+  whosampled_id?: number | null;
+}
+
 export interface CreateReportReasonRequest {
   /** @nullable */
   detalles?: string | null;
@@ -530,6 +910,53 @@ export interface CreateScopedReportRequest {
   detalles?: string | null;
   /** @nullable */
   razon?: string | null;
+}
+
+export type CreateSongRequestMetadata = { [key: string]: unknown };
+
+export type MusicArtistRole = typeof MusicArtistRole[keyof typeof MusicArtistRole];
+
+
+export const MusicArtistRole = {
+  principal: 'principal',
+  featuring: 'featuring',
+  producer: 'producer',
+} as const;
+
+export interface SongArtistInput {
+  artista_id: number;
+  rol: MusicArtistRole;
+}
+
+export interface CreateSongRequest {
+  /** @nullable */
+  album?: string | null;
+  /** @nullable */
+  anio?: number | null;
+  artista_id: number;
+  artistas?: SongArtistInput[];
+  /** @nullable */
+  bpm?: number | null;
+  /** @nullable */
+  duracion_segundos?: number | null;
+  /** @nullable */
+  genero?: string | null;
+  /** @nullable */
+  imagen_url?: string | null;
+  metadata: CreateSongRequestMetadata;
+  /** @nullable */
+  sello?: string | null;
+  /** @nullable */
+  slug?: string | null;
+  /** @nullable */
+  spotify_id?: string | null;
+  titulo: string;
+  /** @nullable */
+  tonalidad?: string | null;
+  /** @nullable */
+  whosampled_url?: string | null;
+  /** @nullable */
+  youtube_id?: string | null;
 }
 
 export type PaymentPlanPeriod = typeof PaymentPlanPeriod[keyof typeof PaymentPlanPeriod];
@@ -905,6 +1332,11 @@ export interface LikeResponse {
   reaccion?: string | null;
 }
 
+export interface LimitQuery {
+  /** @nullable */
+  limit?: number | null;
+}
+
 /**
  * Query params de `GET /api/samples`.
  */
@@ -991,6 +1423,13 @@ export interface ListSamplesResponse {
   pagination: SamplesPagination;
 }
 
+export interface ListSongsQuery {
+  /** @nullable */
+  page?: number | null;
+  /** @nullable */
+  per_page?: number | null;
+}
+
 export interface LoginRequest {
   identifier: string;
   password: string;
@@ -1018,6 +1457,25 @@ export interface MessageListResponse {
 
 export interface MessageMutationResponse {
   data: ConversationMessage;
+}
+
+export interface MusicArtistsResponse {
+  data: MusicArtist[];
+}
+
+export interface MusicMutationResponse {
+  ok: boolean;
+}
+
+export interface MusicPagination {
+  page: number;
+  pages: number;
+  per_page: number;
+  total: number;
+}
+
+export interface MusicSongsResponse {
+  data: MusicSong[];
 }
 
 export interface NotificationActor {
@@ -1251,6 +1709,52 @@ export interface RegisterRequest {
   username: string;
 }
 
+export interface RelationChainNode {
+  cancion_destino_id: number;
+  cancion_fuente_id: number;
+  destino_artista: string;
+  destino_slug: string;
+  destino_titulo: string;
+  fuente_artista: string;
+  fuente_slug: string;
+  fuente_titulo: string;
+  id: number;
+  nivel: number;
+  tipo_relacion: SampleRelationType;
+}
+
+export interface RelationChainQuery {
+  /** @nullable */
+  profundidad?: number | null;
+}
+
+export interface RelationChainResponse {
+  cadena: RelationChainNode[];
+  cancion_raiz: MusicSong;
+}
+
+export type RelationSampleSide = typeof RelationSampleSide[keyof typeof RelationSampleSide];
+
+
+export const RelationSampleSide = {
+  fuente: 'fuente',
+  destino: 'destino',
+} as const;
+
+export interface RelationTypeCount {
+  tipo_relacion: SampleRelationType;
+  total: number;
+}
+
+export interface RelationStatsResponse {
+  relaciones_por_tipo: RelationTypeCount[];
+}
+
+export interface RelationVerificationResponse {
+  ok: boolean;
+  verificada: boolean;
+}
+
 export interface ReportResponse {
   message: string;
   ok: boolean;
@@ -1321,6 +1825,88 @@ export interface SampleDetailResponse {
   verificado: boolean;
 }
 
+export interface SampleLinkRequest {
+  lado: RelationSampleSide;
+  sample_id: number;
+}
+
+export interface SampleRelationDetail {
+  aparece_en_todo: boolean;
+  cancion_destino_id: number;
+  cancion_fuente_id: number;
+  /** @nullable */
+  contribuidor_id?: number | null;
+  /** @nullable */
+  contribuidor_username?: string | null;
+  created_at: string;
+  /** @nullable */
+  destino_album?: string | null;
+  /** @nullable */
+  destino_anio?: number | null;
+  destino_artista: string;
+  destino_artista_slug: string;
+  /** @nullable */
+  destino_genero?: string | null;
+  /** @nullable */
+  destino_imagen_url?: string | null;
+  /** @nullable */
+  destino_sampleada_en?: SampleRelationSummary[] | null;
+  /** @nullable */
+  destino_samples_de?: SampleRelationSummary[] | null;
+  destino_slug: string;
+  /** @nullable */
+  destino_spotify_id?: string | null;
+  destino_titulo: string;
+  /** @nullable */
+  destino_youtube_id?: string | null;
+  fuente: SampleRelationSource;
+  /** @nullable */
+  fuente_album?: string | null;
+  /** @nullable */
+  fuente_anio?: number | null;
+  fuente_artista: string;
+  fuente_artista_slug: string;
+  /** @nullable */
+  fuente_genero?: string | null;
+  /** @nullable */
+  fuente_imagen_url?: string | null;
+  /** @nullable */
+  fuente_sampleada_en?: SampleRelationSummary[] | null;
+  /** @nullable */
+  fuente_samples_de?: SampleRelationSummary[] | null;
+  fuente_slug: string;
+  /** @nullable */
+  fuente_spotify_id?: string | null;
+  fuente_titulo: string;
+  /** @nullable */
+  fuente_youtube_id?: string | null;
+  id: number;
+  lado_extraccion?: RelationSampleSide | null;
+  /** @nullable */
+  sample_destino_id?: number | null;
+  /** @nullable */
+  sample_fuente_id?: number | null;
+  /** @nullable */
+  sample_id?: number | null;
+  timings_destino: number[];
+  timings_fuente: number[];
+  tipo_elemento?: SampleRelationElementType | null;
+  tipo_relacion: SampleRelationType;
+  total_comentarios: number;
+  total_likes: number;
+  total_samples: number;
+  updated_at: string;
+  verificada: boolean;
+  votos_promedio: number;
+  votos_total: number;
+  /** @nullable */
+  whosampled_id?: number | null;
+}
+
+export interface SampleRelationLookupResponse {
+  data?: SampleRelationDetail | null;
+}
+
 export interface SavedColeccion {
   /** @nullable */
   descripcion?: string | null;
@@ -1336,6 +1922,12 @@ export interface SavedColeccion {
 
 export interface SavedListResponse {
   items: SavedColeccion[];
+}
+
+export interface SearchSongsQuery {
+  /** @nullable */
+  per_page?: number | null;
+  q: string;
 }
 
 export type SearchType = typeof SearchType[keyof typeof SearchType];
@@ -1361,6 +1953,25 @@ export interface SimilarSamplesQuery {
  */
 export interface SimilarSamplesResponse {
   data: SampleSummary[];
+}
+
+export interface SongArtistLink {
+  artista_id: number;
+  nombre: string;
+  rol: MusicArtistRole;
+  slug: string;
+}
+
+export interface SongDetailResponse {
+  artistas: SongArtistLink[];
+  cancion: MusicSong;
+  sampleada_en: SampleRelationSummary[];
+  samples_de: SampleRelationSummary[];
+}
+
+export interface SongListResponse {
+  data: MusicSong[];
+  pagination: MusicPagination;
 }
 
 export interface StartConversationRequest {
@@ -1425,6 +2036,24 @@ export interface UpdateArticleRequest {
   titulo?: string | null;
 }
 
+export type UpdateArtistRequestMetadata = { [key: string]: unknown };
+
+export interface UpdateArtistRequest {
+  /** @nullable */
+  imagen_url?: string | null;
+  metadata: UpdateArtistRequestMetadata;
+  /** @nullable */
+  musicbrainz_id?: string | null;
+  /** @nullable */
+  nombre?: string | null;
+  /** @nullable */
+  prioridad?: number | null;
+  /** @nullable */
+  slug?: string | null;
+  /** @nullable */
+  whosampled_slug?: string | null;
+}
+
 export interface UpdateColeccionRequest {
   /** @nullable */
   descripcion?: string | null;
@@ -1468,6 +2097,38 @@ export interface UpdateProfileRequest {
   sitio_web?: string | null;
 }
 
+export interface UpdateRelationRequest {
+  /** @nullable */
+  aparece_en_todo?: boolean | null;
+  /** @nullable */
+  cancion_destino_id?: number | null;
+  /** @nullable */
+  cancion_fuente_id?: number | null;
+  /** @nullable */
+  contribuidor_id?: number | null;
+  fuente?: SampleRelationSource | null;
+  /** @nullable */
+  sample_destino_id?: number | null;
+  /** @nullable */
+  sample_fuente_id?: number | null;
+  /** @nullable */
+  sample_id?: number | null;
+  /** @nullable */
+  timings_destino?: number[] | null;
+  /** @nullable */
+  timings_fuente?: number[] | null;
+  tipo_elemento?: SampleRelationElementType | null;
+  tipo_relacion?: SampleRelationType | null;
+  /** @nullable */
+  verificada?: boolean | null;
+  /** @nullable */
+  votos_promedio?: number | null;
+  /** @nullable */
+  votos_total?: number | null;
+  /** @nullable */
+  whosampled_id?: number | null;
+}
+
 /**
  * Payload parcial para `PATCH /api/samples/{slug}`.
  */
@@ -1492,6 +2153,42 @@ export interface UpdateSampleRequest {
   titulo?: string | null;
   /** @nullable */
   type?: string | null;
+}
+
+export type UpdateSongRequestMetadata = { [key: string]: unknown };
+
+export interface UpdateSongRequest {
+  /** @nullable */
+  album?: string | null;
+  /** @nullable */
+  anio?: number | null;
+  /** @nullable */
+  artista_id?: number | null;
+  /** @nullable */
+  artistas?: SongArtistInput[] | null;
+  /** @nullable */
+  bpm?: number | null;
+  /** @nullable */
+  duracion_segundos?: number | null;
+  /** @nullable */
+  genero?: string | null;
+  /** @nullable */
+  imagen_url?: string | null;
+  metadata: UpdateSongRequestMetadata;
+  /** @nullable */
+  sello?: string | null;
+  /** @nullable */
+  slug?: string | null;
+  /** @nullable */
+  spotify_id?: string | null;
+  /** @nullable */
+  titulo?: string | null;
+  /** @nullable */
+  tonalidad?: string | null;
+  /** @nullable */
+  whosampled_url?: string | null;
+  /** @nullable */
+  youtube_id?: string | null;
 }
 
 /**
@@ -1547,6 +2244,10 @@ export interface VerifyFreeCodeResponse {
   tipo?: FreeCodeTargetType | null;
 }
 
+export interface VerifyRelationRequest {
+  verificada: boolean;
+}
+
 export type WebSocketEnvelope = {
   type: 'ping';
 } | {
@@ -1572,6 +2273,13 @@ export interface WebSocketTicketResponse {
   ws_url: string;
 }
 
+export type ActivityParams = {
+/**
+ * @nullable
+ */
+dias?: number | null;
+};
+
 export type AlgoTimingHistoryParams = {
 /**
  * Máximo de entradas a devolver. Default 50, máximo 100.
@@ -1579,6 +2287,33 @@ export type AlgoTimingHistoryParams = {
  * @nullable
  */
 limit?: number | null;
+};
+
+export type ListExtractionQueueParams = {
+/**
+ * @nullable
+ */
+page?: number | null;
+/**
+ * @nullable
+ */
+busqueda?: string | null;
+/**
+ * @nullable
+ */
+estado?: string | null;
+/**
+ * @nullable
+ */
+sort_col?: string | null;
+/**
+ * @nullable
+ */
+sort_dir?: string | null;
+/**
+ * @nullable
+ */
+lado?: string | null;
 };
 
 export type ListPendingLegalReportsParams = {
@@ -1590,6 +2325,48 @@ limit?: number | null;
  * @nullable
  */
 offset?: number | null;
+};
+
+export type ListScrapersParams = {
+/**
+ * @nullable
+ */
+page?: number | null;
+/**
+ * @nullable
+ */
+busqueda?: string | null;
+/**
+ * @nullable
+ */
+estado?: string | null;
+/**
+ * @nullable
+ */
+sort_col?: string | null;
+/**
+ * @nullable
+ */
+sort_dir?: string | null;
+};
+
+export type ListUsersParams = {
+/**
+ * @nullable
+ */
+page?: number | null;
+/**
+ * @nullable
+ */
+busqueda?: string | null;
+/**
+ * @nullable
+ */
+plan?: string | null;
+/**
+ * @nullable
+ */
+orden?: string | null;
 };
 
 export type ListArticlesParams = {
@@ -1610,11 +2387,51 @@ limite?: number;
 moderacion_estado?: string | null;
 };
 
+export type TopArtistsParams = {
+/**
+ * @nullable
+ */
+limit?: number | null;
+};
+
 export type LegacyQuickSearchParams = {
 /**
  * Texto a buscar. Mantiene el contrato legacy del dropdown rápido
  */
 q: string;
+};
+
+export type ListSongsParams = {
+/**
+ * @nullable
+ */
+page?: number | null;
+/**
+ * @nullable
+ */
+per_page?: number | null;
+};
+
+export type SearchSongsParams = {
+q: string;
+/**
+ * @nullable
+ */
+per_page?: number | null;
+};
+
+export type TopSongsParams = {
+/**
+ * @nullable
+ */
+limit?: number | null;
+};
+
+export type GetSongChainParams = {
+/**
+ * @nullable
+ */
+profundidad?: number | null;
 };
 
 export type VerifyFreeCodeParams = {
@@ -1795,6 +2612,130 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
+export type activityResponse200 = {
+  data: AdminActivityResponse
+  status: 200
+}
+
+export type activityResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type activityResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type activityResponseSuccess = (activityResponse200) & {
+  headers: Headers;
+};
+export type activityResponseError = (activityResponse401 | activityResponse403) & {
+  headers: Headers;
+};
+
+export type activityResponse = (activityResponseSuccess | activityResponseError)
+
+export const getActivityUrl = (params?: ActivityParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/admin/actividad?${stringifiedParams}` : `/api/admin/actividad`
+}
+
+export const activity = async (params?: ActivityParams, options?: RequestInit): Promise<activityResponse> => {
+
+  return customInstance<activityResponse>(getActivityUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getActivityQueryKey = (params?: ActivityParams,) => {
+    return [
+    `/api/admin/actividad`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getActivityQueryOptions = <TData = Awaited<ReturnType<typeof activity>>, TError = ErrorResponse>(params?: ActivityParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof activity>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getActivityQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof activity>>> = ({ signal }) => activity(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof activity>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ActivityQueryResult = NonNullable<Awaited<ReturnType<typeof activity>>>
+export type ActivityQueryError = ErrorResponse
+
+
+export function useActivity<TData = Awaited<ReturnType<typeof activity>>, TError = ErrorResponse>(
+ params: undefined |  ActivityParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof activity>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof activity>>,
+          TError,
+          Awaited<ReturnType<typeof activity>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useActivity<TData = Awaited<ReturnType<typeof activity>>, TError = ErrorResponse>(
+ params?: ActivityParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof activity>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof activity>>,
+          TError,
+          Awaited<ReturnType<typeof activity>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useActivity<TData = Awaited<ReturnType<typeof activity>>, TError = ErrorResponse>(
+ params?: ActivityParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof activity>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useActivity<TData = Awaited<ReturnType<typeof activity>>, TError = ErrorResponse>(
+ params?: ActivityParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof activity>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getActivityQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
 export type algoTimingHistoryResponse200 = {
   data: TimingEntry[]
   status: 200
@@ -1919,6 +2860,1006 @@ export function useAlgoTimingHistory<TData = Awaited<ReturnType<typeof algoTimin
 
 
 
+export type createArtistResponse201 = {
+  data: MusicArtist
+  status: 201
+}
+
+export type createArtistResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type createArtistResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type createArtistResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type createArtistResponseSuccess = (createArtistResponse201) & {
+  headers: Headers;
+};
+export type createArtistResponseError = (createArtistResponse401 | createArtistResponse403 | createArtistResponse422) & {
+  headers: Headers;
+};
+
+export type createArtistResponse = (createArtistResponseSuccess | createArtistResponseError)
+
+export const getCreateArtistUrl = () => {
+
+
+
+
+  return `/api/admin/artistas`
+}
+
+export const createArtist = async (createArtistRequest: CreateArtistRequest, options?: RequestInit): Promise<createArtistResponse> => {
+
+  return customInstance<createArtistResponse>(getCreateArtistUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      createArtistRequest,)
+  }
+);}
+
+
+
+
+export const getCreateArtistMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createArtist>>, TError,{data: CreateArtistRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof createArtist>>, TError,{data: CreateArtistRequest}, TContext> => {
+
+const mutationKey = ['createArtist'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createArtist>>, {data: CreateArtistRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createArtist(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateArtistMutationResult = NonNullable<Awaited<ReturnType<typeof createArtist>>>
+    export type CreateArtistMutationBody = CreateArtistRequest
+    export type CreateArtistMutationError = ErrorResponse
+
+    export const useCreateArtist = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createArtist>>, TError,{data: CreateArtistRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createArtist>>,
+        TError,
+        {data: CreateArtistRequest},
+        TContext
+      > => {
+      return useMutation(getCreateArtistMutationOptions(options), queryClient);
+    }
+
+export type updateArtistResponse200 = {
+  data: MusicArtist
+  status: 200
+}
+
+export type updateArtistResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type updateArtistResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type updateArtistResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type updateArtistResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type updateArtistResponseSuccess = (updateArtistResponse200) & {
+  headers: Headers;
+};
+export type updateArtistResponseError = (updateArtistResponse401 | updateArtistResponse403 | updateArtistResponse404 | updateArtistResponse422) & {
+  headers: Headers;
+};
+
+export type updateArtistResponse = (updateArtistResponseSuccess | updateArtistResponseError)
+
+export const getUpdateArtistUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/artistas/${id}`
+}
+
+export const updateArtist = async (id: number,
+    updateArtistRequest: UpdateArtistRequest, options?: RequestInit): Promise<updateArtistResponse> => {
+
+  return customInstance<updateArtistResponse>(getUpdateArtistUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      updateArtistRequest,)
+  }
+);}
+
+
+
+
+export const getUpdateArtistMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateArtist>>, TError,{id: number;data: UpdateArtistRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateArtist>>, TError,{id: number;data: UpdateArtistRequest}, TContext> => {
+
+const mutationKey = ['updateArtist'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateArtist>>, {id: number;data: UpdateArtistRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateArtist(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateArtistMutationResult = NonNullable<Awaited<ReturnType<typeof updateArtist>>>
+    export type UpdateArtistMutationBody = UpdateArtistRequest
+    export type UpdateArtistMutationError = ErrorResponse
+
+    export const useUpdateArtist = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateArtist>>, TError,{id: number;data: UpdateArtistRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateArtist>>,
+        TError,
+        {id: number;data: UpdateArtistRequest},
+        TContext
+      > => {
+      return useMutation(getUpdateArtistMutationOptions(options), queryClient);
+    }
+
+export type deleteArtistResponse200 = {
+  data: MusicMutationResponse
+  status: 200
+}
+
+export type deleteArtistResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type deleteArtistResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type deleteArtistResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type deleteArtistResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type deleteArtistResponseSuccess = (deleteArtistResponse200) & {
+  headers: Headers;
+};
+export type deleteArtistResponseError = (deleteArtistResponse401 | deleteArtistResponse403 | deleteArtistResponse404 | deleteArtistResponse409) & {
+  headers: Headers;
+};
+
+export type deleteArtistResponse = (deleteArtistResponseSuccess | deleteArtistResponseError)
+
+export const getDeleteArtistUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/artistas/${id}`
+}
+
+export const deleteArtist = async (id: number, options?: RequestInit): Promise<deleteArtistResponse> => {
+
+  return customInstance<deleteArtistResponse>(getDeleteArtistUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteArtistMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteArtist>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteArtist>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['deleteArtist'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteArtist>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteArtist(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteArtistMutationResult = NonNullable<Awaited<ReturnType<typeof deleteArtist>>>
+
+    export type DeleteArtistMutationError = ErrorResponse
+
+    export const useDeleteArtist = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteArtist>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteArtist>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteArtistMutationOptions(options), queryClient);
+    }
+
+export type createSongResponse201 = {
+  data: SongDetailResponse
+  status: 201
+}
+
+export type createSongResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type createSongResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type createSongResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type createSongResponseSuccess = (createSongResponse201) & {
+  headers: Headers;
+};
+export type createSongResponseError = (createSongResponse401 | createSongResponse403 | createSongResponse422) & {
+  headers: Headers;
+};
+
+export type createSongResponse = (createSongResponseSuccess | createSongResponseError)
+
+export const getCreateSongUrl = () => {
+
+
+
+
+  return `/api/admin/canciones`
+}
+
+export const createSong = async (createSongRequest: CreateSongRequest, options?: RequestInit): Promise<createSongResponse> => {
+
+  return customInstance<createSongResponse>(getCreateSongUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      createSongRequest,)
+  }
+);}
+
+
+
+
+export const getCreateSongMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createSong>>, TError,{data: CreateSongRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof createSong>>, TError,{data: CreateSongRequest}, TContext> => {
+
+const mutationKey = ['createSong'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createSong>>, {data: CreateSongRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createSong(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateSongMutationResult = NonNullable<Awaited<ReturnType<typeof createSong>>>
+    export type CreateSongMutationBody = CreateSongRequest
+    export type CreateSongMutationError = ErrorResponse
+
+    export const useCreateSong = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createSong>>, TError,{data: CreateSongRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createSong>>,
+        TError,
+        {data: CreateSongRequest},
+        TContext
+      > => {
+      return useMutation(getCreateSongMutationOptions(options), queryClient);
+    }
+
+export type updateSongResponse200 = {
+  data: SongDetailResponse
+  status: 200
+}
+
+export type updateSongResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type updateSongResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type updateSongResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type updateSongResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type updateSongResponseSuccess = (updateSongResponse200) & {
+  headers: Headers;
+};
+export type updateSongResponseError = (updateSongResponse401 | updateSongResponse403 | updateSongResponse404 | updateSongResponse422) & {
+  headers: Headers;
+};
+
+export type updateSongResponse = (updateSongResponseSuccess | updateSongResponseError)
+
+export const getUpdateSongUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/canciones/${id}`
+}
+
+export const updateSong = async (id: number,
+    updateSongRequest: UpdateSongRequest, options?: RequestInit): Promise<updateSongResponse> => {
+
+  return customInstance<updateSongResponse>(getUpdateSongUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      updateSongRequest,)
+  }
+);}
+
+
+
+
+export const getUpdateSongMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateSong>>, TError,{id: number;data: UpdateSongRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateSong>>, TError,{id: number;data: UpdateSongRequest}, TContext> => {
+
+const mutationKey = ['updateSong'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateSong>>, {id: number;data: UpdateSongRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateSong(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateSongMutationResult = NonNullable<Awaited<ReturnType<typeof updateSong>>>
+    export type UpdateSongMutationBody = UpdateSongRequest
+    export type UpdateSongMutationError = ErrorResponse
+
+    export const useUpdateSong = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateSong>>, TError,{id: number;data: UpdateSongRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateSong>>,
+        TError,
+        {id: number;data: UpdateSongRequest},
+        TContext
+      > => {
+      return useMutation(getUpdateSongMutationOptions(options), queryClient);
+    }
+
+export type deleteSongResponse200 = {
+  data: MusicMutationResponse
+  status: 200
+}
+
+export type deleteSongResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type deleteSongResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type deleteSongResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type deleteSongResponseSuccess = (deleteSongResponse200) & {
+  headers: Headers;
+};
+export type deleteSongResponseError = (deleteSongResponse401 | deleteSongResponse403 | deleteSongResponse404) & {
+  headers: Headers;
+};
+
+export type deleteSongResponse = (deleteSongResponseSuccess | deleteSongResponseError)
+
+export const getDeleteSongUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/canciones/${id}`
+}
+
+export const deleteSong = async (id: number, options?: RequestInit): Promise<deleteSongResponse> => {
+
+  return customInstance<deleteSongResponse>(getDeleteSongUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteSongMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteSong>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteSong>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['deleteSong'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteSong>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteSong(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteSongMutationResult = NonNullable<Awaited<ReturnType<typeof deleteSong>>>
+
+    export type DeleteSongMutationError = ErrorResponse
+
+    export const useDeleteSong = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteSong>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteSong>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteSongMutationOptions(options), queryClient);
+    }
+
+export type listExtractionQueueResponse200 = {
+  data: AdminExtractionQueueResponse
+  status: 200
+}
+
+export type listExtractionQueueResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type listExtractionQueueResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type listExtractionQueueResponseSuccess = (listExtractionQueueResponse200) & {
+  headers: Headers;
+};
+export type listExtractionQueueResponseError = (listExtractionQueueResponse401 | listExtractionQueueResponse403) & {
+  headers: Headers;
+};
+
+export type listExtractionQueueResponse = (listExtractionQueueResponseSuccess | listExtractionQueueResponseError)
+
+export const getListExtractionQueueUrl = (params?: ListExtractionQueueParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/admin/cola-extraccion?${stringifiedParams}` : `/api/admin/cola-extraccion`
+}
+
+export const listExtractionQueue = async (params?: ListExtractionQueueParams, options?: RequestInit): Promise<listExtractionQueueResponse> => {
+
+  return customInstance<listExtractionQueueResponse>(getListExtractionQueueUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListExtractionQueueQueryKey = (params?: ListExtractionQueueParams,) => {
+    return [
+    `/api/admin/cola-extraccion`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListExtractionQueueQueryOptions = <TData = Awaited<ReturnType<typeof listExtractionQueue>>, TError = ErrorResponse>(params?: ListExtractionQueueParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listExtractionQueue>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListExtractionQueueQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listExtractionQueue>>> = ({ signal }) => listExtractionQueue(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listExtractionQueue>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListExtractionQueueQueryResult = NonNullable<Awaited<ReturnType<typeof listExtractionQueue>>>
+export type ListExtractionQueueQueryError = ErrorResponse
+
+
+export function useListExtractionQueue<TData = Awaited<ReturnType<typeof listExtractionQueue>>, TError = ErrorResponse>(
+ params: undefined |  ListExtractionQueueParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listExtractionQueue>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listExtractionQueue>>,
+          TError,
+          Awaited<ReturnType<typeof listExtractionQueue>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListExtractionQueue<TData = Awaited<ReturnType<typeof listExtractionQueue>>, TError = ErrorResponse>(
+ params?: ListExtractionQueueParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listExtractionQueue>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listExtractionQueue>>,
+          TError,
+          Awaited<ReturnType<typeof listExtractionQueue>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListExtractionQueue<TData = Awaited<ReturnType<typeof listExtractionQueue>>, TError = ErrorResponse>(
+ params?: ListExtractionQueueParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listExtractionQueue>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useListExtractionQueue<TData = Awaited<ReturnType<typeof listExtractionQueue>>, TError = ErrorResponse>(
+ params?: ListExtractionQueueParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listExtractionQueue>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListExtractionQueueQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+export type createRelationResponse201 = {
+  data: SampleRelationDetail
+  status: 201
+}
+
+export type createRelationResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type createRelationResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type createRelationResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type createRelationResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type createRelationResponseSuccess = (createRelationResponse201) & {
+  headers: Headers;
+};
+export type createRelationResponseError = (createRelationResponse401 | createRelationResponse403 | createRelationResponse409 | createRelationResponse422) & {
+  headers: Headers;
+};
+
+export type createRelationResponse = (createRelationResponseSuccess | createRelationResponseError)
+
+export const getCreateRelationUrl = () => {
+
+
+
+
+  return `/api/admin/relaciones`
+}
+
+export const createRelation = async (createRelationRequest: CreateRelationRequest, options?: RequestInit): Promise<createRelationResponse> => {
+
+  return customInstance<createRelationResponse>(getCreateRelationUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      createRelationRequest,)
+  }
+);}
+
+
+
+
+export const getCreateRelationMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createRelation>>, TError,{data: CreateRelationRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof createRelation>>, TError,{data: CreateRelationRequest}, TContext> => {
+
+const mutationKey = ['createRelation'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createRelation>>, {data: CreateRelationRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createRelation(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateRelationMutationResult = NonNullable<Awaited<ReturnType<typeof createRelation>>>
+    export type CreateRelationMutationBody = CreateRelationRequest
+    export type CreateRelationMutationError = ErrorResponse
+
+    export const useCreateRelation = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createRelation>>, TError,{data: CreateRelationRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createRelation>>,
+        TError,
+        {data: CreateRelationRequest},
+        TContext
+      > => {
+      return useMutation(getCreateRelationMutationOptions(options), queryClient);
+    }
+
+export type updateRelationResponse200 = {
+  data: SampleRelationDetail
+  status: 200
+}
+
+export type updateRelationResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type updateRelationResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type updateRelationResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type updateRelationResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type updateRelationResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type updateRelationResponseSuccess = (updateRelationResponse200) & {
+  headers: Headers;
+};
+export type updateRelationResponseError = (updateRelationResponse401 | updateRelationResponse403 | updateRelationResponse404 | updateRelationResponse409 | updateRelationResponse422) & {
+  headers: Headers;
+};
+
+export type updateRelationResponse = (updateRelationResponseSuccess | updateRelationResponseError)
+
+export const getUpdateRelationUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/relaciones/${id}`
+}
+
+export const updateRelation = async (id: number,
+    updateRelationRequest: UpdateRelationRequest, options?: RequestInit): Promise<updateRelationResponse> => {
+
+  return customInstance<updateRelationResponse>(getUpdateRelationUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      updateRelationRequest,)
+  }
+);}
+
+
+
+
+export const getUpdateRelationMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateRelation>>, TError,{id: number;data: UpdateRelationRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateRelation>>, TError,{id: number;data: UpdateRelationRequest}, TContext> => {
+
+const mutationKey = ['updateRelation'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateRelation>>, {id: number;data: UpdateRelationRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateRelation(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateRelationMutationResult = NonNullable<Awaited<ReturnType<typeof updateRelation>>>
+    export type UpdateRelationMutationBody = UpdateRelationRequest
+    export type UpdateRelationMutationError = ErrorResponse
+
+    export const useUpdateRelation = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateRelation>>, TError,{id: number;data: UpdateRelationRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateRelation>>,
+        TError,
+        {id: number;data: UpdateRelationRequest},
+        TContext
+      > => {
+      return useMutation(getUpdateRelationMutationOptions(options), queryClient);
+    }
+
+export type deleteRelationResponse200 = {
+  data: MusicMutationResponse
+  status: 200
+}
+
+export type deleteRelationResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type deleteRelationResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type deleteRelationResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type deleteRelationResponseSuccess = (deleteRelationResponse200) & {
+  headers: Headers;
+};
+export type deleteRelationResponseError = (deleteRelationResponse401 | deleteRelationResponse403 | deleteRelationResponse404) & {
+  headers: Headers;
+};
+
+export type deleteRelationResponse = (deleteRelationResponseSuccess | deleteRelationResponseError)
+
+export const getDeleteRelationUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/relaciones/${id}`
+}
+
+export const deleteRelation = async (id: number, options?: RequestInit): Promise<deleteRelationResponse> => {
+
+  return customInstance<deleteRelationResponse>(getDeleteRelationUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteRelationMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteRelation>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteRelation>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['deleteRelation'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteRelation>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteRelation(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteRelationMutationResult = NonNullable<Awaited<ReturnType<typeof deleteRelation>>>
+
+    export type DeleteRelationMutationError = ErrorResponse
+
+    export const useDeleteRelation = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteRelation>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteRelation>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteRelationMutationOptions(options), queryClient);
+    }
+
 export type listPendingLegalReportsResponse200 = {
   data: AdminLegalReportsResponse
   status: 200
@@ -2033,6 +3974,247 @@ export function useListPendingLegalReports<TData = Awaited<ReturnType<typeof lis
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getListPendingLegalReportsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+export type summaryResponse200 = {
+  data: AdminSummaryStats
+  status: 200
+}
+
+export type summaryResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type summaryResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type summaryResponseSuccess = (summaryResponse200) & {
+  headers: Headers;
+};
+export type summaryResponseError = (summaryResponse401 | summaryResponse403) & {
+  headers: Headers;
+};
+
+export type summaryResponse = (summaryResponseSuccess | summaryResponseError)
+
+export const getSummaryUrl = () => {
+
+
+
+
+  return `/api/admin/resumen`
+}
+
+export const summary = async ( options?: RequestInit): Promise<summaryResponse> => {
+
+  return customInstance<summaryResponse>(getSummaryUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getSummaryQueryKey = () => {
+    return [
+    `/api/admin/resumen`
+    ] as const;
+    }
+
+
+export const getSummaryQueryOptions = <TData = Awaited<ReturnType<typeof summary>>, TError = ErrorResponse>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof summary>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getSummaryQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof summary>>> = ({ signal }) => summary({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof summary>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type SummaryQueryResult = NonNullable<Awaited<ReturnType<typeof summary>>>
+export type SummaryQueryError = ErrorResponse
+
+
+export function useSummary<TData = Awaited<ReturnType<typeof summary>>, TError = ErrorResponse>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof summary>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof summary>>,
+          TError,
+          Awaited<ReturnType<typeof summary>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useSummary<TData = Awaited<ReturnType<typeof summary>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof summary>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof summary>>,
+          TError,
+          Awaited<ReturnType<typeof summary>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useSummary<TData = Awaited<ReturnType<typeof summary>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof summary>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useSummary<TData = Awaited<ReturnType<typeof summary>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof summary>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getSummaryQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+export type listScrapersResponse200 = {
+  data: AdminScrapersResponse
+  status: 200
+}
+
+export type listScrapersResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type listScrapersResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type listScrapersResponseSuccess = (listScrapersResponse200) & {
+  headers: Headers;
+};
+export type listScrapersResponseError = (listScrapersResponse401 | listScrapersResponse403) & {
+  headers: Headers;
+};
+
+export type listScrapersResponse = (listScrapersResponseSuccess | listScrapersResponseError)
+
+export const getListScrapersUrl = (params?: ListScrapersParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/admin/scrapers?${stringifiedParams}` : `/api/admin/scrapers`
+}
+
+export const listScrapers = async (params?: ListScrapersParams, options?: RequestInit): Promise<listScrapersResponse> => {
+
+  return customInstance<listScrapersResponse>(getListScrapersUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListScrapersQueryKey = (params?: ListScrapersParams,) => {
+    return [
+    `/api/admin/scrapers`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListScrapersQueryOptions = <TData = Awaited<ReturnType<typeof listScrapers>>, TError = ErrorResponse>(params?: ListScrapersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listScrapers>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListScrapersQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listScrapers>>> = ({ signal }) => listScrapers(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listScrapers>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListScrapersQueryResult = NonNullable<Awaited<ReturnType<typeof listScrapers>>>
+export type ListScrapersQueryError = ErrorResponse
+
+
+export function useListScrapers<TData = Awaited<ReturnType<typeof listScrapers>>, TError = ErrorResponse>(
+ params: undefined |  ListScrapersParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listScrapers>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listScrapers>>,
+          TError,
+          Awaited<ReturnType<typeof listScrapers>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListScrapers<TData = Awaited<ReturnType<typeof listScrapers>>, TError = ErrorResponse>(
+ params?: ListScrapersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listScrapers>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listScrapers>>,
+          TError,
+          Awaited<ReturnType<typeof listScrapers>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListScrapers<TData = Awaited<ReturnType<typeof listScrapers>>, TError = ErrorResponse>(
+ params?: ListScrapersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listScrapers>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useListScrapers<TData = Awaited<ReturnType<typeof listScrapers>>, TError = ErrorResponse>(
+ params?: ListScrapersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listScrapers>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListScrapersQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -2324,6 +4506,616 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getSuspendMutationOptions(options), queryClient);
+    }
+
+export type listUsersResponse200 = {
+  data: AdminUsersResponse
+  status: 200
+}
+
+export type listUsersResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type listUsersResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type listUsersResponseSuccess = (listUsersResponse200) & {
+  headers: Headers;
+};
+export type listUsersResponseError = (listUsersResponse401 | listUsersResponse403) & {
+  headers: Headers;
+};
+
+export type listUsersResponse = (listUsersResponseSuccess | listUsersResponseError)
+
+export const getListUsersUrl = (params?: ListUsersParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/admin/usuarios?${stringifiedParams}` : `/api/admin/usuarios`
+}
+
+export const listUsers = async (params?: ListUsersParams, options?: RequestInit): Promise<listUsersResponse> => {
+
+  return customInstance<listUsersResponse>(getListUsersUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListUsersQueryKey = (params?: ListUsersParams,) => {
+    return [
+    `/api/admin/usuarios`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListUsersQueryOptions = <TData = Awaited<ReturnType<typeof listUsers>>, TError = ErrorResponse>(params?: ListUsersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listUsers>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListUsersQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listUsers>>> = ({ signal }) => listUsers(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listUsers>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListUsersQueryResult = NonNullable<Awaited<ReturnType<typeof listUsers>>>
+export type ListUsersQueryError = ErrorResponse
+
+
+export function useListUsers<TData = Awaited<ReturnType<typeof listUsers>>, TError = ErrorResponse>(
+ params: undefined |  ListUsersParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listUsers>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listUsers>>,
+          TError,
+          Awaited<ReturnType<typeof listUsers>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListUsers<TData = Awaited<ReturnType<typeof listUsers>>, TError = ErrorResponse>(
+ params?: ListUsersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listUsers>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listUsers>>,
+          TError,
+          Awaited<ReturnType<typeof listUsers>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListUsers<TData = Awaited<ReturnType<typeof listUsers>>, TError = ErrorResponse>(
+ params?: ListUsersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listUsers>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useListUsers<TData = Awaited<ReturnType<typeof listUsers>>, TError = ErrorResponse>(
+ params?: ListUsersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listUsers>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListUsersQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+export type updateUserLegacyResponse200 = {
+  data: AdminOkResponse
+  status: 200
+}
+
+export type updateUserLegacyResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type updateUserLegacyResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type updateUserLegacyResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type updateUserLegacyResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type updateUserLegacyResponseSuccess = (updateUserLegacyResponse200) & {
+  headers: Headers;
+};
+export type updateUserLegacyResponseError = (updateUserLegacyResponse401 | updateUserLegacyResponse403 | updateUserLegacyResponse404 | updateUserLegacyResponse422) & {
+  headers: Headers;
+};
+
+export type updateUserLegacyResponse = (updateUserLegacyResponseSuccess | updateUserLegacyResponseError)
+
+export const getUpdateUserLegacyUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/usuarios/${id}`
+}
+
+export const updateUserLegacy = async (id: number,
+    adminUserUpdateRequest: AdminUserUpdateRequest, options?: RequestInit): Promise<updateUserLegacyResponse> => {
+
+  return customInstance<updateUserLegacyResponse>(getUpdateUserLegacyUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      adminUserUpdateRequest,)
+  }
+);}
+
+
+
+
+export const getUpdateUserLegacyMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateUserLegacy>>, TError,{id: number;data: AdminUserUpdateRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateUserLegacy>>, TError,{id: number;data: AdminUserUpdateRequest}, TContext> => {
+
+const mutationKey = ['updateUserLegacy'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateUserLegacy>>, {id: number;data: AdminUserUpdateRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateUserLegacy(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateUserLegacyMutationResult = NonNullable<Awaited<ReturnType<typeof updateUserLegacy>>>
+    export type UpdateUserLegacyMutationBody = AdminUserUpdateRequest
+    export type UpdateUserLegacyMutationError = ErrorResponse
+
+    export const useUpdateUserLegacy = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateUserLegacy>>, TError,{id: number;data: AdminUserUpdateRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateUserLegacy>>,
+        TError,
+        {id: number;data: AdminUserUpdateRequest},
+        TContext
+      > => {
+      return useMutation(getUpdateUserLegacyMutationOptions(options), queryClient);
+    }
+
+export type cancelDeleteLegacyResponse200 = {
+  data: AdminOkResponse
+  status: 200
+}
+
+export type cancelDeleteLegacyResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type cancelDeleteLegacyResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type cancelDeleteLegacyResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type cancelDeleteLegacyResponseSuccess = (cancelDeleteLegacyResponse200) & {
+  headers: Headers;
+};
+export type cancelDeleteLegacyResponseError = (cancelDeleteLegacyResponse401 | cancelDeleteLegacyResponse403 | cancelDeleteLegacyResponse404) & {
+  headers: Headers;
+};
+
+export type cancelDeleteLegacyResponse = (cancelDeleteLegacyResponseSuccess | cancelDeleteLegacyResponseError)
+
+export const getCancelDeleteLegacyUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/usuarios/${id}/cancelar-eliminacion`
+}
+
+export const cancelDeleteLegacy = async (id: number, options?: RequestInit): Promise<cancelDeleteLegacyResponse> => {
+
+  return customInstance<cancelDeleteLegacyResponse>(getCancelDeleteLegacyUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getCancelDeleteLegacyMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cancelDeleteLegacy>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof cancelDeleteLegacy>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['cancelDeleteLegacy'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof cancelDeleteLegacy>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  cancelDeleteLegacy(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CancelDeleteLegacyMutationResult = NonNullable<Awaited<ReturnType<typeof cancelDeleteLegacy>>>
+
+    export type CancelDeleteLegacyMutationError = ErrorResponse
+
+    export const useCancelDeleteLegacy = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cancelDeleteLegacy>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof cancelDeleteLegacy>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getCancelDeleteLegacyMutationOptions(options), queryClient);
+    }
+
+export type unsuspendUserLegacyResponse200 = {
+  data: AdminOkResponse
+  status: 200
+}
+
+export type unsuspendUserLegacyResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type unsuspendUserLegacyResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type unsuspendUserLegacyResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type unsuspendUserLegacyResponseSuccess = (unsuspendUserLegacyResponse200) & {
+  headers: Headers;
+};
+export type unsuspendUserLegacyResponseError = (unsuspendUserLegacyResponse401 | unsuspendUserLegacyResponse403 | unsuspendUserLegacyResponse404) & {
+  headers: Headers;
+};
+
+export type unsuspendUserLegacyResponse = (unsuspendUserLegacyResponseSuccess | unsuspendUserLegacyResponseError)
+
+export const getUnsuspendUserLegacyUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/usuarios/${id}/desuspender`
+}
+
+export const unsuspendUserLegacy = async (id: number, options?: RequestInit): Promise<unsuspendUserLegacyResponse> => {
+
+  return customInstance<unsuspendUserLegacyResponse>(getUnsuspendUserLegacyUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getUnsuspendUserLegacyMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unsuspendUserLegacy>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof unsuspendUserLegacy>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['unsuspendUserLegacy'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof unsuspendUserLegacy>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  unsuspendUserLegacy(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UnsuspendUserLegacyMutationResult = NonNullable<Awaited<ReturnType<typeof unsuspendUserLegacy>>>
+
+    export type UnsuspendUserLegacyMutationError = ErrorResponse
+
+    export const useUnsuspendUserLegacy = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unsuspendUserLegacy>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof unsuspendUserLegacy>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getUnsuspendUserLegacyMutationOptions(options), queryClient);
+    }
+
+export type markDeleteLegacyResponse200 = {
+  data: AdminOkResponse
+  status: 200
+}
+
+export type markDeleteLegacyResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type markDeleteLegacyResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type markDeleteLegacyResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type markDeleteLegacyResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type markDeleteLegacyResponseSuccess = (markDeleteLegacyResponse200) & {
+  headers: Headers;
+};
+export type markDeleteLegacyResponseError = (markDeleteLegacyResponse401 | markDeleteLegacyResponse403 | markDeleteLegacyResponse404 | markDeleteLegacyResponse422) & {
+  headers: Headers;
+};
+
+export type markDeleteLegacyResponse = (markDeleteLegacyResponseSuccess | markDeleteLegacyResponseError)
+
+export const getMarkDeleteLegacyUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/usuarios/${id}/eliminar`
+}
+
+export const markDeleteLegacy = async (id: number,
+    adminUserDeleteRequest: AdminUserDeleteRequest, options?: RequestInit): Promise<markDeleteLegacyResponse> => {
+
+  return customInstance<markDeleteLegacyResponse>(getMarkDeleteLegacyUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      adminUserDeleteRequest,)
+  }
+);}
+
+
+
+
+export const getMarkDeleteLegacyMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markDeleteLegacy>>, TError,{id: number;data: AdminUserDeleteRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof markDeleteLegacy>>, TError,{id: number;data: AdminUserDeleteRequest}, TContext> => {
+
+const mutationKey = ['markDeleteLegacy'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof markDeleteLegacy>>, {id: number;data: AdminUserDeleteRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  markDeleteLegacy(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type MarkDeleteLegacyMutationResult = NonNullable<Awaited<ReturnType<typeof markDeleteLegacy>>>
+    export type MarkDeleteLegacyMutationBody = AdminUserDeleteRequest
+    export type MarkDeleteLegacyMutationError = ErrorResponse
+
+    export const useMarkDeleteLegacy = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markDeleteLegacy>>, TError,{id: number;data: AdminUserDeleteRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof markDeleteLegacy>>,
+        TError,
+        {id: number;data: AdminUserDeleteRequest},
+        TContext
+      > => {
+      return useMutation(getMarkDeleteLegacyMutationOptions(options), queryClient);
+    }
+
+export type suspendUserLegacyResponse200 = {
+  data: AdminOkResponse
+  status: 200
+}
+
+export type suspendUserLegacyResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type suspendUserLegacyResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type suspendUserLegacyResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type suspendUserLegacyResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type suspendUserLegacyResponseSuccess = (suspendUserLegacyResponse200) & {
+  headers: Headers;
+};
+export type suspendUserLegacyResponseError = (suspendUserLegacyResponse401 | suspendUserLegacyResponse403 | suspendUserLegacyResponse404 | suspendUserLegacyResponse422) & {
+  headers: Headers;
+};
+
+export type suspendUserLegacyResponse = (suspendUserLegacyResponseSuccess | suspendUserLegacyResponseError)
+
+export const getSuspendUserLegacyUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/usuarios/${id}/suspender`
+}
+
+export const suspendUserLegacy = async (id: number,
+    adminUserSuspendRequest: AdminUserSuspendRequest, options?: RequestInit): Promise<suspendUserLegacyResponse> => {
+
+  return customInstance<suspendUserLegacyResponse>(getSuspendUserLegacyUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      adminUserSuspendRequest,)
+  }
+);}
+
+
+
+
+export const getSuspendUserLegacyMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof suspendUserLegacy>>, TError,{id: number;data: AdminUserSuspendRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof suspendUserLegacy>>, TError,{id: number;data: AdminUserSuspendRequest}, TContext> => {
+
+const mutationKey = ['suspendUserLegacy'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof suspendUserLegacy>>, {id: number;data: AdminUserSuspendRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  suspendUserLegacy(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SuspendUserLegacyMutationResult = NonNullable<Awaited<ReturnType<typeof suspendUserLegacy>>>
+    export type SuspendUserLegacyMutationBody = AdminUserSuspendRequest
+    export type SuspendUserLegacyMutationError = ErrorResponse
+
+    export const useSuspendUserLegacy = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof suspendUserLegacy>>, TError,{id: number;data: AdminUserSuspendRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof suspendUserLegacy>>,
+        TError,
+        {id: number;data: AdminUserSuspendRequest},
+        TContext
+      > => {
+      return useMutation(getSuspendUserLegacyMutationOptions(options), queryClient);
     }
 
 export type listArticlesResponse200 = {
@@ -3181,6 +5973,230 @@ export function useGetArticle<TData = Awaited<ReturnType<typeof getArticle>>, TE
 
 
 
+export type topArtistsResponse200 = {
+  data: MusicArtistsResponse
+  status: 200
+}
+
+export type topArtistsResponseSuccess = (topArtistsResponse200) & {
+  headers: Headers;
+};
+;
+
+export type topArtistsResponse = (topArtistsResponseSuccess)
+
+export const getTopArtistsUrl = (params?: TopArtistsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/artistas/top?${stringifiedParams}` : `/api/artistas/top`
+}
+
+export const topArtists = async (params?: TopArtistsParams, options?: RequestInit): Promise<topArtistsResponse> => {
+
+  return customInstance<topArtistsResponse>(getTopArtistsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getTopArtistsQueryKey = (params?: TopArtistsParams,) => {
+    return [
+    `/api/artistas/top`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getTopArtistsQueryOptions = <TData = Awaited<ReturnType<typeof topArtists>>, TError = unknown>(params?: TopArtistsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof topArtists>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getTopArtistsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof topArtists>>> = ({ signal }) => topArtists(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof topArtists>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type TopArtistsQueryResult = NonNullable<Awaited<ReturnType<typeof topArtists>>>
+export type TopArtistsQueryError = unknown
+
+
+export function useTopArtists<TData = Awaited<ReturnType<typeof topArtists>>, TError = unknown>(
+ params: undefined |  TopArtistsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof topArtists>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof topArtists>>,
+          TError,
+          Awaited<ReturnType<typeof topArtists>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTopArtists<TData = Awaited<ReturnType<typeof topArtists>>, TError = unknown>(
+ params?: TopArtistsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof topArtists>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof topArtists>>,
+          TError,
+          Awaited<ReturnType<typeof topArtists>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTopArtists<TData = Awaited<ReturnType<typeof topArtists>>, TError = unknown>(
+ params?: TopArtistsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof topArtists>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useTopArtists<TData = Awaited<ReturnType<typeof topArtists>>, TError = unknown>(
+ params?: TopArtistsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof topArtists>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getTopArtistsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+export type getArtistResponse200 = {
+  data: ArtistDetailResponse
+  status: 200
+}
+
+export type getArtistResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type getArtistResponseSuccess = (getArtistResponse200) & {
+  headers: Headers;
+};
+export type getArtistResponseError = (getArtistResponse404) & {
+  headers: Headers;
+};
+
+export type getArtistResponse = (getArtistResponseSuccess | getArtistResponseError)
+
+export const getGetArtistUrl = (slug: string,) => {
+
+
+
+
+  return `/api/artistas/${slug}`
+}
+
+export const getArtist = async (slug: string, options?: RequestInit): Promise<getArtistResponse> => {
+
+  return customInstance<getArtistResponse>(getGetArtistUrl(slug),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetArtistQueryKey = (slug: string,) => {
+    return [
+    `/api/artistas/${slug}`
+    ] as const;
+    }
+
+
+export const getGetArtistQueryOptions = <TData = Awaited<ReturnType<typeof getArtist>>, TError = ErrorResponse>(slug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getArtist>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetArtistQueryKey(slug);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getArtist>>> = ({ signal }) => getArtist(slug, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(slug), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getArtist>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetArtistQueryResult = NonNullable<Awaited<ReturnType<typeof getArtist>>>
+export type GetArtistQueryError = ErrorResponse
+
+
+export function useGetArtist<TData = Awaited<ReturnType<typeof getArtist>>, TError = ErrorResponse>(
+ slug: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getArtist>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getArtist>>,
+          TError,
+          Awaited<ReturnType<typeof getArtist>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetArtist<TData = Awaited<ReturnType<typeof getArtist>>, TError = ErrorResponse>(
+ slug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getArtist>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getArtist>>,
+          TError,
+          Awaited<ReturnType<typeof getArtist>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetArtist<TData = Awaited<ReturnType<typeof getArtist>>, TError = ErrorResponse>(
+ slug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getArtist>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetArtist<TData = Awaited<ReturnType<typeof getArtist>>, TError = ErrorResponse>(
+ slug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getArtist>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetArtistQueryOptions(slug,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
 export type googleLoginResponse200 = {
   data: AuthResponse
   status: 200
@@ -3992,6 +7008,600 @@ export function useLegacyQuickSearch<TData = Awaited<ReturnType<typeof legacyQui
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getLegacyQuickSearchQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+export type listSongsResponse200 = {
+  data: SongListResponse
+  status: 200
+}
+
+export type listSongsResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type listSongsResponseSuccess = (listSongsResponse200) & {
+  headers: Headers;
+};
+export type listSongsResponseError = (listSongsResponse422) & {
+  headers: Headers;
+};
+
+export type listSongsResponse = (listSongsResponseSuccess | listSongsResponseError)
+
+export const getListSongsUrl = (params?: ListSongsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/canciones?${stringifiedParams}` : `/api/canciones`
+}
+
+export const listSongs = async (params?: ListSongsParams, options?: RequestInit): Promise<listSongsResponse> => {
+
+  return customInstance<listSongsResponse>(getListSongsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListSongsQueryKey = (params?: ListSongsParams,) => {
+    return [
+    `/api/canciones`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListSongsQueryOptions = <TData = Awaited<ReturnType<typeof listSongs>>, TError = ErrorResponse>(params?: ListSongsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSongs>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListSongsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listSongs>>> = ({ signal }) => listSongs(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listSongs>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListSongsQueryResult = NonNullable<Awaited<ReturnType<typeof listSongs>>>
+export type ListSongsQueryError = ErrorResponse
+
+
+export function useListSongs<TData = Awaited<ReturnType<typeof listSongs>>, TError = ErrorResponse>(
+ params: undefined |  ListSongsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSongs>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listSongs>>,
+          TError,
+          Awaited<ReturnType<typeof listSongs>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListSongs<TData = Awaited<ReturnType<typeof listSongs>>, TError = ErrorResponse>(
+ params?: ListSongsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSongs>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listSongs>>,
+          TError,
+          Awaited<ReturnType<typeof listSongs>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListSongs<TData = Awaited<ReturnType<typeof listSongs>>, TError = ErrorResponse>(
+ params?: ListSongsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSongs>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useListSongs<TData = Awaited<ReturnType<typeof listSongs>>, TError = ErrorResponse>(
+ params?: ListSongsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSongs>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListSongsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+export type searchSongsResponse200 = {
+  data: MusicSongsResponse
+  status: 200
+}
+
+export type searchSongsResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type searchSongsResponseSuccess = (searchSongsResponse200) & {
+  headers: Headers;
+};
+export type searchSongsResponseError = (searchSongsResponse422) & {
+  headers: Headers;
+};
+
+export type searchSongsResponse = (searchSongsResponseSuccess | searchSongsResponseError)
+
+export const getSearchSongsUrl = (params: SearchSongsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/canciones/buscar?${stringifiedParams}` : `/api/canciones/buscar`
+}
+
+export const searchSongs = async (params: SearchSongsParams, options?: RequestInit): Promise<searchSongsResponse> => {
+
+  return customInstance<searchSongsResponse>(getSearchSongsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getSearchSongsQueryKey = (params?: SearchSongsParams,) => {
+    return [
+    `/api/canciones/buscar`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getSearchSongsQueryOptions = <TData = Awaited<ReturnType<typeof searchSongs>>, TError = ErrorResponse>(params: SearchSongsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchSongs>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getSearchSongsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof searchSongs>>> = ({ signal }) => searchSongs(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof searchSongs>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type SearchSongsQueryResult = NonNullable<Awaited<ReturnType<typeof searchSongs>>>
+export type SearchSongsQueryError = ErrorResponse
+
+
+export function useSearchSongs<TData = Awaited<ReturnType<typeof searchSongs>>, TError = ErrorResponse>(
+ params: SearchSongsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchSongs>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof searchSongs>>,
+          TError,
+          Awaited<ReturnType<typeof searchSongs>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useSearchSongs<TData = Awaited<ReturnType<typeof searchSongs>>, TError = ErrorResponse>(
+ params: SearchSongsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchSongs>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof searchSongs>>,
+          TError,
+          Awaited<ReturnType<typeof searchSongs>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useSearchSongs<TData = Awaited<ReturnType<typeof searchSongs>>, TError = ErrorResponse>(
+ params: SearchSongsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchSongs>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useSearchSongs<TData = Awaited<ReturnType<typeof searchSongs>>, TError = ErrorResponse>(
+ params: SearchSongsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchSongs>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getSearchSongsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+export type topSongsResponse200 = {
+  data: MusicSongsResponse
+  status: 200
+}
+
+export type topSongsResponseSuccess = (topSongsResponse200) & {
+  headers: Headers;
+};
+;
+
+export type topSongsResponse = (topSongsResponseSuccess)
+
+export const getTopSongsUrl = (params?: TopSongsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/canciones/top?${stringifiedParams}` : `/api/canciones/top`
+}
+
+export const topSongs = async (params?: TopSongsParams, options?: RequestInit): Promise<topSongsResponse> => {
+
+  return customInstance<topSongsResponse>(getTopSongsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getTopSongsQueryKey = (params?: TopSongsParams,) => {
+    return [
+    `/api/canciones/top`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getTopSongsQueryOptions = <TData = Awaited<ReturnType<typeof topSongs>>, TError = unknown>(params?: TopSongsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof topSongs>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getTopSongsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof topSongs>>> = ({ signal }) => topSongs(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof topSongs>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type TopSongsQueryResult = NonNullable<Awaited<ReturnType<typeof topSongs>>>
+export type TopSongsQueryError = unknown
+
+
+export function useTopSongs<TData = Awaited<ReturnType<typeof topSongs>>, TError = unknown>(
+ params: undefined |  TopSongsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof topSongs>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof topSongs>>,
+          TError,
+          Awaited<ReturnType<typeof topSongs>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTopSongs<TData = Awaited<ReturnType<typeof topSongs>>, TError = unknown>(
+ params?: TopSongsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof topSongs>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof topSongs>>,
+          TError,
+          Awaited<ReturnType<typeof topSongs>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTopSongs<TData = Awaited<ReturnType<typeof topSongs>>, TError = unknown>(
+ params?: TopSongsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof topSongs>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useTopSongs<TData = Awaited<ReturnType<typeof topSongs>>, TError = unknown>(
+ params?: TopSongsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof topSongs>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getTopSongsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+export type getSongResponse200 = {
+  data: SongDetailResponse
+  status: 200
+}
+
+export type getSongResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type getSongResponseSuccess = (getSongResponse200) & {
+  headers: Headers;
+};
+export type getSongResponseError = (getSongResponse404) & {
+  headers: Headers;
+};
+
+export type getSongResponse = (getSongResponseSuccess | getSongResponseError)
+
+export const getGetSongUrl = (slug: string,) => {
+
+
+
+
+  return `/api/canciones/${slug}`
+}
+
+export const getSong = async (slug: string, options?: RequestInit): Promise<getSongResponse> => {
+
+  return customInstance<getSongResponse>(getGetSongUrl(slug),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetSongQueryKey = (slug: string,) => {
+    return [
+    `/api/canciones/${slug}`
+    ] as const;
+    }
+
+
+export const getGetSongQueryOptions = <TData = Awaited<ReturnType<typeof getSong>>, TError = ErrorResponse>(slug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSong>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetSongQueryKey(slug);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSong>>> = ({ signal }) => getSong(slug, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(slug), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSong>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetSongQueryResult = NonNullable<Awaited<ReturnType<typeof getSong>>>
+export type GetSongQueryError = ErrorResponse
+
+
+export function useGetSong<TData = Awaited<ReturnType<typeof getSong>>, TError = ErrorResponse>(
+ slug: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSong>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSong>>,
+          TError,
+          Awaited<ReturnType<typeof getSong>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetSong<TData = Awaited<ReturnType<typeof getSong>>, TError = ErrorResponse>(
+ slug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSong>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSong>>,
+          TError,
+          Awaited<ReturnType<typeof getSong>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetSong<TData = Awaited<ReturnType<typeof getSong>>, TError = ErrorResponse>(
+ slug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSong>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetSong<TData = Awaited<ReturnType<typeof getSong>>, TError = ErrorResponse>(
+ slug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSong>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetSongQueryOptions(slug,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+export type getSongChainResponse200 = {
+  data: RelationChainResponse
+  status: 200
+}
+
+export type getSongChainResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type getSongChainResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type getSongChainResponseSuccess = (getSongChainResponse200) & {
+  headers: Headers;
+};
+export type getSongChainResponseError = (getSongChainResponse404 | getSongChainResponse422) & {
+  headers: Headers;
+};
+
+export type getSongChainResponse = (getSongChainResponseSuccess | getSongChainResponseError)
+
+export const getGetSongChainUrl = (slug: string,
+    params?: GetSongChainParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/canciones/${slug}/cadena?${stringifiedParams}` : `/api/canciones/${slug}/cadena`
+}
+
+export const getSongChain = async (slug: string,
+    params?: GetSongChainParams, options?: RequestInit): Promise<getSongChainResponse> => {
+
+  return customInstance<getSongChainResponse>(getGetSongChainUrl(slug,params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetSongChainQueryKey = (slug: string,
+    params?: GetSongChainParams,) => {
+    return [
+    `/api/canciones/${slug}/cadena`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetSongChainQueryOptions = <TData = Awaited<ReturnType<typeof getSongChain>>, TError = ErrorResponse>(slug: string,
+    params?: GetSongChainParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSongChain>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetSongChainQueryKey(slug,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSongChain>>> = ({ signal }) => getSongChain(slug,params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(slug), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSongChain>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetSongChainQueryResult = NonNullable<Awaited<ReturnType<typeof getSongChain>>>
+export type GetSongChainQueryError = ErrorResponse
+
+
+export function useGetSongChain<TData = Awaited<ReturnType<typeof getSongChain>>, TError = ErrorResponse>(
+ slug: string,
+    params: undefined |  GetSongChainParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSongChain>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSongChain>>,
+          TError,
+          Awaited<ReturnType<typeof getSongChain>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetSongChain<TData = Awaited<ReturnType<typeof getSongChain>>, TError = ErrorResponse>(
+ slug: string,
+    params?: GetSongChainParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSongChain>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSongChain>>,
+          TError,
+          Awaited<ReturnType<typeof getSongChain>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetSongChain<TData = Awaited<ReturnType<typeof getSongChain>>, TError = ErrorResponse>(
+ slug: string,
+    params?: GetSongChainParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSongChain>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetSongChain<TData = Awaited<ReturnType<typeof getSongChain>>, TError = ErrorResponse>(
+ slug: string,
+    params?: GetSongChainParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSongChain>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetSongChainQueryOptions(slug,params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -10760,6 +14370,408 @@ export function useGetVapidKey<TData = Awaited<ReturnType<typeof getVapidKey>>, 
 
 
 
+export type getRelationResponse200 = {
+  data: SampleRelationDetail
+  status: 200
+}
+
+export type getRelationResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type getRelationResponseSuccess = (getRelationResponse200) & {
+  headers: Headers;
+};
+export type getRelationResponseError = (getRelationResponse404) & {
+  headers: Headers;
+};
+
+export type getRelationResponse = (getRelationResponseSuccess | getRelationResponseError)
+
+export const getGetRelationUrl = (id: number,) => {
+
+
+
+
+  return `/api/relaciones/${id}`
+}
+
+export const getRelation = async (id: number, options?: RequestInit): Promise<getRelationResponse> => {
+
+  return customInstance<getRelationResponse>(getGetRelationUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetRelationQueryKey = (id: number,) => {
+    return [
+    `/api/relaciones/${id}`
+    ] as const;
+    }
+
+
+export const getGetRelationQueryOptions = <TData = Awaited<ReturnType<typeof getRelation>>, TError = ErrorResponse>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRelation>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetRelationQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRelation>>> = ({ signal }) => getRelation(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getRelation>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetRelationQueryResult = NonNullable<Awaited<ReturnType<typeof getRelation>>>
+export type GetRelationQueryError = ErrorResponse
+
+
+export function useGetRelation<TData = Awaited<ReturnType<typeof getRelation>>, TError = ErrorResponse>(
+ id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRelation>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getRelation>>,
+          TError,
+          Awaited<ReturnType<typeof getRelation>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetRelation<TData = Awaited<ReturnType<typeof getRelation>>, TError = ErrorResponse>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRelation>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getRelation>>,
+          TError,
+          Awaited<ReturnType<typeof getRelation>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetRelation<TData = Awaited<ReturnType<typeof getRelation>>, TError = ErrorResponse>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRelation>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetRelation<TData = Awaited<ReturnType<typeof getRelation>>, TError = ErrorResponse>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRelation>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetRelationQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+export type unlinkSampleFromRelationResponse200 = {
+  data: MusicMutationResponse
+  status: 200
+}
+
+export type unlinkSampleFromRelationResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type unlinkSampleFromRelationResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type unlinkSampleFromRelationResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type unlinkSampleFromRelationResponseSuccess = (unlinkSampleFromRelationResponse200) & {
+  headers: Headers;
+};
+export type unlinkSampleFromRelationResponseError = (unlinkSampleFromRelationResponse401 | unlinkSampleFromRelationResponse403 | unlinkSampleFromRelationResponse404) & {
+  headers: Headers;
+};
+
+export type unlinkSampleFromRelationResponse = (unlinkSampleFromRelationResponseSuccess | unlinkSampleFromRelationResponseError)
+
+export const getUnlinkSampleFromRelationUrl = (id: number,
+    lado: RelationSampleSide,) => {
+
+
+
+
+  return `/api/relaciones/${id}/sample/${lado}`
+}
+
+export const unlinkSampleFromRelation = async (id: number,
+    lado: RelationSampleSide, options?: RequestInit): Promise<unlinkSampleFromRelationResponse> => {
+
+  return customInstance<unlinkSampleFromRelationResponse>(getUnlinkSampleFromRelationUrl(id,lado),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getUnlinkSampleFromRelationMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unlinkSampleFromRelation>>, TError,{id: number;lado: RelationSampleSide}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof unlinkSampleFromRelation>>, TError,{id: number;lado: RelationSampleSide}, TContext> => {
+
+const mutationKey = ['unlinkSampleFromRelation'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof unlinkSampleFromRelation>>, {id: number;lado: RelationSampleSide}> = (props) => {
+          const {id,lado} = props ?? {};
+
+          return  unlinkSampleFromRelation(id,lado,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UnlinkSampleFromRelationMutationResult = NonNullable<Awaited<ReturnType<typeof unlinkSampleFromRelation>>>
+
+    export type UnlinkSampleFromRelationMutationError = ErrorResponse
+
+    export const useUnlinkSampleFromRelation = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unlinkSampleFromRelation>>, TError,{id: number;lado: RelationSampleSide}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof unlinkSampleFromRelation>>,
+        TError,
+        {id: number;lado: RelationSampleSide},
+        TContext
+      > => {
+      return useMutation(getUnlinkSampleFromRelationMutationOptions(options), queryClient);
+    }
+
+export type verifyRelationResponse200 = {
+  data: RelationVerificationResponse
+  status: 200
+}
+
+export type verifyRelationResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type verifyRelationResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type verifyRelationResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type verifyRelationResponseSuccess = (verifyRelationResponse200) & {
+  headers: Headers;
+};
+export type verifyRelationResponseError = (verifyRelationResponse401 | verifyRelationResponse403 | verifyRelationResponse404) & {
+  headers: Headers;
+};
+
+export type verifyRelationResponse = (verifyRelationResponseSuccess | verifyRelationResponseError)
+
+export const getVerifyRelationUrl = (id: number,) => {
+
+
+
+
+  return `/api/relaciones/${id}/verificar`
+}
+
+export const verifyRelation = async (id: number,
+    verifyRelationRequest: VerifyRelationRequest, options?: RequestInit): Promise<verifyRelationResponse> => {
+
+  return customInstance<verifyRelationResponse>(getVerifyRelationUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      verifyRelationRequest,)
+  }
+);}
+
+
+
+
+export const getVerifyRelationMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof verifyRelation>>, TError,{id: number;data: VerifyRelationRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof verifyRelation>>, TError,{id: number;data: VerifyRelationRequest}, TContext> => {
+
+const mutationKey = ['verifyRelation'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof verifyRelation>>, {id: number;data: VerifyRelationRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  verifyRelation(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type VerifyRelationMutationResult = NonNullable<Awaited<ReturnType<typeof verifyRelation>>>
+    export type VerifyRelationMutationBody = VerifyRelationRequest
+    export type VerifyRelationMutationError = ErrorResponse
+
+    export const useVerifyRelation = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof verifyRelation>>, TError,{id: number;data: VerifyRelationRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof verifyRelation>>,
+        TError,
+        {id: number;data: VerifyRelationRequest},
+        TContext
+      > => {
+      return useMutation(getVerifyRelationMutationOptions(options), queryClient);
+    }
+
+export type linkSampleToRelationResponse200 = {
+  data: MusicMutationResponse
+  status: 200
+}
+
+export type linkSampleToRelationResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type linkSampleToRelationResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type linkSampleToRelationResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type linkSampleToRelationResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type linkSampleToRelationResponseSuccess = (linkSampleToRelationResponse200) & {
+  headers: Headers;
+};
+export type linkSampleToRelationResponseError = (linkSampleToRelationResponse401 | linkSampleToRelationResponse403 | linkSampleToRelationResponse404 | linkSampleToRelationResponse409) & {
+  headers: Headers;
+};
+
+export type linkSampleToRelationResponse = (linkSampleToRelationResponseSuccess | linkSampleToRelationResponseError)
+
+export const getLinkSampleToRelationUrl = (id: number,) => {
+
+
+
+
+  return `/api/relaciones/${id}/vincular-sample`
+}
+
+export const linkSampleToRelation = async (id: number,
+    sampleLinkRequest: SampleLinkRequest, options?: RequestInit): Promise<linkSampleToRelationResponse> => {
+
+  return customInstance<linkSampleToRelationResponse>(getLinkSampleToRelationUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      sampleLinkRequest,)
+  }
+);}
+
+
+
+
+export const getLinkSampleToRelationMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof linkSampleToRelation>>, TError,{id: number;data: SampleLinkRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof linkSampleToRelation>>, TError,{id: number;data: SampleLinkRequest}, TContext> => {
+
+const mutationKey = ['linkSampleToRelation'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof linkSampleToRelation>>, {id: number;data: SampleLinkRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  linkSampleToRelation(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type LinkSampleToRelationMutationResult = NonNullable<Awaited<ReturnType<typeof linkSampleToRelation>>>
+    export type LinkSampleToRelationMutationBody = SampleLinkRequest
+    export type LinkSampleToRelationMutationError = ErrorResponse
+
+    export const useLinkSampleToRelation = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof linkSampleToRelation>>, TError,{id: number;data: SampleLinkRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof linkSampleToRelation>>,
+        TError,
+        {id: number;data: SampleLinkRequest},
+        TContext
+      > => {
+      return useMutation(getLinkSampleToRelationMutationOptions(options), queryClient);
+    }
+
 export type reportGenericResponse200 = {
   data: ReportResponse
   status: 200
@@ -11146,6 +15158,216 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getReportUserLegacyMutationOptions(options), queryClient);
     }
+
+export type relationStatsResponse200 = {
+  data: RelationStatsResponse
+  status: 200
+}
+
+export type relationStatsResponseSuccess = (relationStatsResponse200) & {
+  headers: Headers;
+};
+;
+
+export type relationStatsResponse = (relationStatsResponseSuccess)
+
+export const getRelationStatsUrl = () => {
+
+
+
+
+  return `/api/sample-discovery/estadisticas`
+}
+
+export const relationStats = async ( options?: RequestInit): Promise<relationStatsResponse> => {
+
+  return customInstance<relationStatsResponse>(getRelationStatsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getRelationStatsQueryKey = () => {
+    return [
+    `/api/sample-discovery/estadisticas`
+    ] as const;
+    }
+
+
+export const getRelationStatsQueryOptions = <TData = Awaited<ReturnType<typeof relationStats>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof relationStats>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getRelationStatsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof relationStats>>> = ({ signal }) => relationStats({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof relationStats>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type RelationStatsQueryResult = NonNullable<Awaited<ReturnType<typeof relationStats>>>
+export type RelationStatsQueryError = unknown
+
+
+export function useRelationStats<TData = Awaited<ReturnType<typeof relationStats>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof relationStats>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof relationStats>>,
+          TError,
+          Awaited<ReturnType<typeof relationStats>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useRelationStats<TData = Awaited<ReturnType<typeof relationStats>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof relationStats>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof relationStats>>,
+          TError,
+          Awaited<ReturnType<typeof relationStats>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useRelationStats<TData = Awaited<ReturnType<typeof relationStats>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof relationStats>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useRelationStats<TData = Awaited<ReturnType<typeof relationStats>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof relationStats>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getRelationStatsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+export type getRelationBySampleResponse200 = {
+  data: SampleRelationLookupResponse
+  status: 200
+}
+
+export type getRelationBySampleResponseSuccess = (getRelationBySampleResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getRelationBySampleResponse = (getRelationBySampleResponseSuccess)
+
+export const getGetRelationBySampleUrl = (sampleId: number,) => {
+
+
+
+
+  return `/api/sample-discovery/relacion/${sampleId}`
+}
+
+export const getRelationBySample = async (sampleId: number, options?: RequestInit): Promise<getRelationBySampleResponse> => {
+
+  return customInstance<getRelationBySampleResponse>(getGetRelationBySampleUrl(sampleId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetRelationBySampleQueryKey = (sampleId: number,) => {
+    return [
+    `/api/sample-discovery/relacion/${sampleId}`
+    ] as const;
+    }
+
+
+export const getGetRelationBySampleQueryOptions = <TData = Awaited<ReturnType<typeof getRelationBySample>>, TError = unknown>(sampleId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRelationBySample>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetRelationBySampleQueryKey(sampleId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRelationBySample>>> = ({ signal }) => getRelationBySample(sampleId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(sampleId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getRelationBySample>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetRelationBySampleQueryResult = NonNullable<Awaited<ReturnType<typeof getRelationBySample>>>
+export type GetRelationBySampleQueryError = unknown
+
+
+export function useGetRelationBySample<TData = Awaited<ReturnType<typeof getRelationBySample>>, TError = unknown>(
+ sampleId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRelationBySample>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getRelationBySample>>,
+          TError,
+          Awaited<ReturnType<typeof getRelationBySample>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetRelationBySample<TData = Awaited<ReturnType<typeof getRelationBySample>>, TError = unknown>(
+ sampleId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRelationBySample>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getRelationBySample>>,
+          TError,
+          Awaited<ReturnType<typeof getRelationBySample>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetRelationBySample<TData = Awaited<ReturnType<typeof getRelationBySample>>, TError = unknown>(
+ sampleId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRelationBySample>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetRelationBySample<TData = Awaited<ReturnType<typeof getRelationBySample>>, TError = unknown>(
+ sampleId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRelationBySample>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetRelationBySampleQueryOptions(sampleId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
 
 export type checkDuplicateResponse200 = {
   data: CheckDuplicateResponse

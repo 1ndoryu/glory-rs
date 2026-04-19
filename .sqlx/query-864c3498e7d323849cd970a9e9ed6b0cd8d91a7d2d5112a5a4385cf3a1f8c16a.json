@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM likes WHERE tipo = 'cancion' AND target_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "864c3498e7d323849cd970a9e9ed6b0cd8d91a7d2d5112a5a4385cf3a1f8c16a"
+}

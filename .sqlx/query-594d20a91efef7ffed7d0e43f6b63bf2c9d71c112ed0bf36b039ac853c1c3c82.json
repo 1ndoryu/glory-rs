@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE artistas_musicales\n               SET nombre = COALESCE($2, nombre),\n                   slug = COALESCE($3, slug),\n                   imagen_url = COALESCE($4, imagen_url),\n                   whosampled_slug = COALESCE($5, whosampled_slug),\n                   musicbrainz_id = COALESCE($6, musicbrainz_id),\n                   metadata = COALESCE($7::jsonb, metadata),\n                   prioridad = COALESCE($8::smallint, prioridad),\n                   updated_at = NOW()\n               WHERE id = $1\n               RETURNING id AS \"id!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Varchar",
+        "Varchar",
+        "Text",
+        "Varchar",
+        "Varchar",
+        "Jsonb",
+        "Int2"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "594d20a91efef7ffed7d0e43f6b63bf2c9d71c112ed0bf36b039ac853c1c3c82"
+}

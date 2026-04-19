@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO artistas_musicales (\n                    nombre,\n                    slug,\n                    imagen_url,\n                    whosampled_slug,\n                    musicbrainz_id,\n                    metadata,\n                    prioridad\n               )\n                       VALUES ($1, $2, $3, $4, $5, COALESCE($6::jsonb, '{}'::jsonb), COALESCE($7::smallint, 0::smallint))\n               RETURNING id AS \"id!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Varchar",
+        "Text",
+        "Varchar",
+        "Varchar",
+        "Jsonb",
+        "Int2"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "6e5e9db313ee629368e7c0075aedea8b694ae4847fd4271acc71428830f2487a"
+}

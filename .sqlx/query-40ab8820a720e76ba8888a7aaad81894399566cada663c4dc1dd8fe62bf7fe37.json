@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE relaciones_sample SET sample_destino_id = NULL, updated_at = NOW() WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "40ab8820a720e76ba8888a7aaad81894399566cada663c4dc1dd8fe62bf7fe37"
+}

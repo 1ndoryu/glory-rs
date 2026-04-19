@@ -1,0 +1,25 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COUNT(*) AS \"count!\"\n               FROM relaciones_sample\n               WHERE cancion_destino_id = $1\n                 AND cancion_fuente_id = $2\n                 AND tipo_relacion = $3\n                 AND ($4::int IS NULL OR id <> $4)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "count!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4",
+        "Text",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "6fea1968c87096840f03b68b723c2ac819741cb184fc9708e66f9d3da6ac6f4b"
+}

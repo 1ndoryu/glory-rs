@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM relaciones_sample WHERE cancion_fuente_id = $1 OR cancion_destino_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f8165c47e48663b631e7dcc9037fba813be2a5c40af0a35e02693673e9526cd4"
+}

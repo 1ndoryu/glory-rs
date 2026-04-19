@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM comentarios WHERE tipo = 'cancion' AND target_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "3da9518b4e41bdf0a227218f2faa551e7eb2fe8640bf5c57ec1933af7cfeec6c"
+}

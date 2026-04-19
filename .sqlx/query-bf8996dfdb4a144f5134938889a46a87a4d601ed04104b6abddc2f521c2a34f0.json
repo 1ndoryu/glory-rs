@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COUNT(*) AS \"count!\"\n                   FROM artistas_musicales\n                   WHERE slug = $1\n                     AND ($2::int IS NULL OR id <> $2)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "count!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "bf8996dfdb4a144f5134938889a46a87a4d601ed04104b6abddc2f521c2a34f0"
+}

@@ -12,6 +12,63 @@
     "version": "0.1.0"
   },
   "paths": {
+    "/api/admin/actividad": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "operationId": "activity",
+        "parameters": [
+          {
+            "name": "dias",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Actividad diaria del panel admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminActivityResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Requiere admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
     "/api/admin/algo-timing": {
       "get": {
         "tags": [
@@ -50,6 +107,789 @@
           },
           "403": {
             "description": "no admin"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/artistas": {
+      "post": {
+        "tags": [
+          "music"
+        ],
+        "operationId": "create_artist",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateArtistRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Artista creado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MusicArtist"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Requiere admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Payload inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/artistas/{id}": {
+      "put": {
+        "tags": [
+          "music"
+        ],
+        "operationId": "update_artist",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID del artista",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateArtistRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Artista actualizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MusicArtist"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Requiere admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Artista no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Payload inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "music"
+        ],
+        "operationId": "delete_artist",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID del artista",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Artista eliminado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MusicMutationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Requiere admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Artista no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El artista sigue referenciado por canciones",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/canciones": {
+      "post": {
+        "tags": [
+          "music"
+        ],
+        "operationId": "create_song",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSongRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Canción creada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SongDetailResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Requiere admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Payload inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/canciones/{id}": {
+      "put": {
+        "tags": [
+          "music"
+        ],
+        "operationId": "update_song",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID de la canción",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSongRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Canción actualizada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SongDetailResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Requiere admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Canción no encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Payload inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "music"
+        ],
+        "operationId": "delete_song",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID de la canción",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Canción eliminada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MusicMutationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Requiere admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Canción no encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/cola-extraccion": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "operationId": "list_extraction_queue",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          },
+          {
+            "name": "busqueda",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          {
+            "name": "estado",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          {
+            "name": "sort_col",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          {
+            "name": "sort_dir",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          {
+            "name": "lado",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Listado admin de cola_extraccion_samples",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminExtractionQueueResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Requiere admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/relaciones": {
+      "post": {
+        "tags": [
+          "music"
+        ],
+        "operationId": "create_relation",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRelationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Relación creada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SampleRelationDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Requiere admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "La relación ya existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Payload inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/relaciones/{id}": {
+      "put": {
+        "tags": [
+          "music"
+        ],
+        "operationId": "update_relation",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID de la relación",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRelationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Relación actualizada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SampleRelationDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Requiere admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Relación no encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "La relación ya existe con esos datos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Payload inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "music"
+        ],
+        "operationId": "delete_relation",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID de la relación",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Relación eliminada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MusicMutationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Requiere admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Relación no encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -110,6 +950,144 @@
           },
           "403": {
             "description": "No admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/resumen": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "operationId": "summary",
+        "responses": {
+          "200": {
+            "description": "KPIs del panel admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminSummaryStats"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Requiere admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/scrapers": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "operationId": "list_scrapers",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          },
+          {
+            "name": "busqueda",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          {
+            "name": "estado",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          {
+            "name": "sort_col",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          {
+            "name": "sort_dir",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Listado admin de scraping_log",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminScrapersResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Requiere admin",
             "content": {
               "application/json": {
                 "schema": {
@@ -254,6 +1232,485 @@
           },
           "404": {
             "description": "no encontrado"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/usuarios": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "operationId": "list_users",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          },
+          {
+            "name": "busqueda",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          {
+            "name": "plan",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          {
+            "name": "orden",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Listado admin de usuarios",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminUsersResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Requiere admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/usuarios/{id}": {
+      "put": {
+        "tags": [
+          "admin"
+        ],
+        "operationId": "update_user_legacy",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "User id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminUserUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Usuario actualizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminOkResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Requiere admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuario no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Payload inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/usuarios/{id}/cancelar-eliminacion": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "operationId": "cancel_delete_legacy",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "User id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Eliminación cancelada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminOkResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Requiere admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuario no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/usuarios/{id}/desuspender": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "operationId": "unsuspend_user_legacy",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "User id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Usuario desuspendido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminOkResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Requiere admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuario no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/usuarios/{id}/eliminar": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "operationId": "mark_delete_legacy",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "User id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminUserDeleteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Usuario marcado para eliminación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminOkResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Requiere admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuario no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Payload inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/usuarios/{id}/suspender": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "operationId": "suspend_user_legacy",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "User id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminUserSuspendRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Usuario suspendido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminOkResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Requiere admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuario no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Payload inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -740,6 +2197,79 @@
         }
       }
     },
+    "/api/artistas/top": {
+      "get": {
+        "tags": [
+          "music"
+        ],
+        "operationId": "top_artists",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Top artistas por catálogo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MusicArtistsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/artistas/{slug}": {
+      "get": {
+        "tags": [
+          "music"
+        ],
+        "operationId": "get_artist",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "description": "Slug público del artista",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detalle de artista",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArtistDetailResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Artista no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/auth/google": {
       "post": {
         "tags": [
@@ -1142,6 +2672,242 @@
           },
           "422": {
             "description": "Parámetros inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/canciones": {
+      "get": {
+        "tags": [
+          "music"
+        ],
+        "operationId": "list_songs",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Listado paginado de canciones",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SongListResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Query inválida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/canciones/buscar": {
+      "get": {
+        "tags": [
+          "music"
+        ],
+        "operationId": "search_songs",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Búsqueda textual de canciones",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MusicSongsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Query inválida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/canciones/top": {
+      "get": {
+        "tags": [
+          "music"
+        ],
+        "operationId": "top_songs",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Canciones más sampleadas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MusicSongsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/canciones/{slug}": {
+      "get": {
+        "tags": [
+          "music"
+        ],
+        "operationId": "get_song",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "description": "Slug público de la canción",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detalle de canción",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SongDetailResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Canción no encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/canciones/{slug}/cadena": {
+      "get": {
+        "tags": [
+          "music"
+        ],
+        "operationId": "get_song_chain",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "description": "Slug público de la canción",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "profundidad",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cadena recursiva de sampleos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelationChainResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Canción no encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Query inválida",
             "content": {
               "application/json": {
                 "schema": {
@@ -4495,6 +6261,288 @@
         }
       }
     },
+    "/api/relaciones/{id}": {
+      "get": {
+        "tags": [
+          "music"
+        ],
+        "operationId": "get_relation",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID de la relación",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detalle de relación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SampleRelationDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Relación no encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/relaciones/{id}/sample/{lado}": {
+      "delete": {
+        "tags": [
+          "music"
+        ],
+        "operationId": "unlink_sample_from_relation",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID de la relación",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "lado",
+            "in": "path",
+            "description": "Lado a desvincular: fuente o destino",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/RelationSampleSide"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sample desvinculado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MusicMutationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sin permisos sobre el sample",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Relación no encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/relaciones/{id}/verificar": {
+      "put": {
+        "tags": [
+          "music"
+        ],
+        "operationId": "verify_relation",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID de la relación",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyRelationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Estado de verificación actualizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelationVerificationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Requiere admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Relación no encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/relaciones/{id}/vincular-sample": {
+      "post": {
+        "tags": [
+          "music"
+        ],
+        "operationId": "link_sample_to_relation",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID de la relación",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SampleLinkRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Sample vinculado a la relación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MusicMutationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sin permisos sobre el sample",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Relación o sample no encontrados",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "La relación ya tiene sample en ese lado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
     "/api/reportar": {
       "post": {
         "tags": [
@@ -4780,6 +6828,58 @@
             "bearer_auth": []
           }
         ]
+      }
+    },
+    "/api/sample-discovery/estadisticas": {
+      "get": {
+        "tags": [
+          "music"
+        ],
+        "operationId": "relation_stats",
+        "responses": {
+          "200": {
+            "description": "Conteo agregado por tipo de relación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelationStatsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sample-discovery/relacion/{sample_id}": {
+      "get": {
+        "tags": [
+          "music"
+        ],
+        "operationId": "get_relation_by_sample",
+        "parameters": [
+          {
+            "name": "sample_id",
+            "in": "path",
+            "description": "ID del sample vinculado",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Relación vinculada a un sample",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SampleRelationLookupResponse"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/samples": {
@@ -5892,6 +7992,204 @@
           }
         }
       },
+      "AdminActivityPoint": {
+        "type": "object",
+        "required": [
+          "fecha",
+          "total"
+        ],
+        "properties": {
+          "fecha": {
+            "type": "string"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "AdminActivityQuery": {
+        "type": "object",
+        "properties": {
+          "dias": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          }
+        }
+      },
+      "AdminActivityResponse": {
+        "type": "object",
+        "required": [
+          "registros",
+          "uploads",
+          "descargas"
+        ],
+        "properties": {
+          "descargas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminActivityPoint"
+            }
+          },
+          "registros": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminActivityPoint"
+            }
+          },
+          "uploads": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminActivityPoint"
+            }
+          }
+        }
+      },
+      "AdminExtractionQueueItem": {
+        "type": "object",
+        "required": [
+          "id",
+          "relacion_id",
+          "estado",
+          "intentos",
+          "lado",
+          "created_at"
+        ],
+        "properties": {
+          "bpm_detectado": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "compas_fin_seg": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "compas_inicio_seg": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "error_mensaje": {
+            "type": "string",
+            "nullable": true
+          },
+          "estado": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "intentos": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lado": {
+            "type": "string"
+          },
+          "procesado_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "proximo_intento_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "relacion_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sample_id": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "spotify_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "timing_inicio_seg": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "youtube_id": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AdminExtractionQueueQuery": {
+        "type": "object",
+        "properties": {
+          "busqueda": {
+            "type": "string",
+            "nullable": true
+          },
+          "estado": {
+            "type": "string",
+            "nullable": true
+          },
+          "lado": {
+            "type": "string",
+            "nullable": true
+          },
+          "page": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "sort_col": {
+            "type": "string",
+            "nullable": true
+          },
+          "sort_dir": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AdminExtractionQueueResponse": {
+        "type": "object",
+        "required": [
+          "data",
+          "total",
+          "page",
+          "estadosCuenta"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminExtractionQueueItem"
+            }
+          },
+          "estadosCuenta": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
       "AdminLegalReportItem": {
         "type": "object",
         "required": [
@@ -5954,6 +8252,365 @@
             "items": {
               "$ref": "#/components/schemas/AdminLegalReportItem"
             }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "AdminOkResponse": {
+        "type": "object",
+        "required": [
+          "ok"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          }
+        }
+      },
+      "AdminScraperItem": {
+        "type": "object",
+        "required": [
+          "id",
+          "url",
+          "tipo_pagina",
+          "estado",
+          "intentos",
+          "bytes_descargados",
+          "re_scrapeable",
+          "veces_rescrapeado",
+          "created_at"
+        ],
+        "properties": {
+          "bytes_descargados": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "error_mensaje": {
+            "type": "string",
+            "nullable": true
+          },
+          "estado": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "intentos": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "procesado_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "re_scrapeable": {
+            "type": "boolean"
+          },
+          "tipo_pagina": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "veces_rescrapeado": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "AdminScrapersQuery": {
+        "type": "object",
+        "properties": {
+          "busqueda": {
+            "type": "string",
+            "nullable": true
+          },
+          "estado": {
+            "type": "string",
+            "nullable": true
+          },
+          "page": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "sort_col": {
+            "type": "string",
+            "nullable": true
+          },
+          "sort_dir": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AdminScrapersResponse": {
+        "type": "object",
+        "required": [
+          "data",
+          "total",
+          "page",
+          "estadosCuenta"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminScraperItem"
+            }
+          },
+          "estadosCuenta": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "AdminSummaryStats": {
+        "type": "object",
+        "required": [
+          "total_usuarios",
+          "total_samples",
+          "total_descargas",
+          "total_publicaciones",
+          "pendientes_moderacion",
+          "reportes_pendientes",
+          "usuarios_pro",
+          "usuarios_premium",
+          "samples_semana",
+          "registros_semana"
+        ],
+        "properties": {
+          "pendientes_moderacion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "registros_semana": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reportes_pendientes": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "samples_semana": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "total_descargas": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "total_publicaciones": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "total_samples": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "total_usuarios": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "usuarios_premium": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "usuarios_pro": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "AdminUserDeleteRequest": {
+        "type": "object",
+        "properties": {
+          "razon": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AdminUserListItem": {
+        "type": "object",
+        "required": [
+          "id",
+          "username",
+          "nombre_visible",
+          "email",
+          "plan",
+          "rol",
+          "verificado",
+          "estado",
+          "created_at",
+          "updated_at",
+          "total_samples",
+          "total_descargas"
+        ],
+        "properties": {
+          "avatar_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "ban_hasta": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "email": {
+            "type": "string"
+          },
+          "estado": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nombre_visible": {
+            "type": "string"
+          },
+          "plan": {
+            "type": "string"
+          },
+          "rol": {
+            "type": "string"
+          },
+          "sera_eliminado_en": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "suspendido_hasta": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "suspension_razon": {
+            "type": "string",
+            "nullable": true
+          },
+          "total_descargas": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "total_samples": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "username": {
+            "type": "string"
+          },
+          "verificado": {
+            "type": "boolean"
+          }
+        }
+      },
+      "AdminUserSuspendRequest": {
+        "type": "object",
+        "required": [
+          "horas",
+          "razon"
+        ],
+        "properties": {
+          "horas": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "razon": {
+            "type": "string"
+          }
+        }
+      },
+      "AdminUserUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "ban_hasta": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "plan": {
+            "type": "string",
+            "nullable": true
+          },
+          "rol": {
+            "type": "string",
+            "nullable": true
+          },
+          "verificado": {
+            "type": "boolean",
+            "nullable": true
+          }
+        }
+      },
+      "AdminUsersQuery": {
+        "type": "object",
+        "properties": {
+          "busqueda": {
+            "type": "string",
+            "nullable": true
+          },
+          "orden": {
+            "type": "string",
+            "nullable": true
+          },
+          "page": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "plan": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AdminUsersResponse": {
+        "type": "object",
+        "required": [
+          "data",
+          "total",
+          "page"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminUserListItem"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int64"
           },
           "total": {
             "type": "integer",
@@ -6256,6 +8913,66 @@
           "updated_at": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "ArtistDetailResponse": {
+        "type": "object",
+        "required": [
+          "artista",
+          "canciones",
+          "sampleado_por",
+          "samplea_a",
+          "estadisticas"
+        ],
+        "properties": {
+          "artista": {
+            "$ref": "#/components/schemas/MusicArtist"
+          },
+          "canciones": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MusicSong"
+            }
+          },
+          "estadisticas": {
+            "$ref": "#/components/schemas/ArtistStats"
+          },
+          "samplea_a": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SampleRelationSummary"
+            }
+          },
+          "sampleado_por": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SampleRelationSummary"
+            }
+          }
+        }
+      },
+      "ArtistStats": {
+        "type": "object",
+        "required": [
+          "total_sampleado_por",
+          "total_samplea_a",
+          "generos"
+        ],
+        "properties": {
+          "generos": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "total_samplea_a": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "total_sampleado_por": {
+            "type": "integer",
+            "minimum": 0
           }
         }
       },
@@ -6914,6 +9631,42 @@
           }
         }
       },
+      "CreateArtistRequest": {
+        "type": "object",
+        "required": [
+          "nombre",
+          "metadata"
+        ],
+        "properties": {
+          "imagen_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "metadata": {
+            "type": "object"
+          },
+          "musicbrainz_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "prioridad": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "slug": {
+            "type": "string",
+            "nullable": true
+          },
+          "whosampled_slug": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
       "CreateColeccionRequest": {
         "type": "object",
         "required": [
@@ -7122,6 +9875,100 @@
           }
         }
       },
+      "CreateRelationRequest": {
+        "type": "object",
+        "required": [
+          "cancion_destino_id",
+          "cancion_fuente_id",
+          "tipo_relacion"
+        ],
+        "properties": {
+          "aparece_en_todo": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "cancion_destino_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cancion_fuente_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "contribuidor_id": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "fuente": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SampleRelationSource"
+              }
+            ],
+            "nullable": true
+          },
+          "sample_destino_id": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "sample_fuente_id": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "sample_id": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "timings_destino": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "timings_fuente": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "tipo_elemento": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SampleRelationElementType"
+              }
+            ],
+            "nullable": true
+          },
+          "tipo_relacion": {
+            "$ref": "#/components/schemas/SampleRelationType"
+          },
+          "verificada": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "votos_promedio": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "votos_total": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "whosampled_id": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        }
+      },
       "CreateReportReasonRequest": {
         "type": "object",
         "required": [
@@ -7157,6 +10004,83 @@
             "nullable": true
           },
           "razon": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "CreateSongRequest": {
+        "type": "object",
+        "required": [
+          "titulo",
+          "artista_id",
+          "metadata"
+        ],
+        "properties": {
+          "album": {
+            "type": "string",
+            "nullable": true
+          },
+          "anio": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "artista_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "artistas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SongArtistInput"
+            }
+          },
+          "bpm": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "duracion_segundos": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "genero": {
+            "type": "string",
+            "nullable": true
+          },
+          "imagen_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "metadata": {
+            "type": "object"
+          },
+          "sello": {
+            "type": "string",
+            "nullable": true
+          },
+          "slug": {
+            "type": "string",
+            "nullable": true
+          },
+          "spotify_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "titulo": {
+            "type": "string"
+          },
+          "tonalidad": {
+            "type": "string",
+            "nullable": true
+          },
+          "whosampled_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "youtube_id": {
             "type": "string",
             "nullable": true
           }
@@ -8020,6 +10944,16 @@
           }
         }
       },
+      "LimitQuery": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          }
+        }
+      },
       "ListSamplesQuery": {
         "type": "object",
         "description": "Query params de `GET /api/samples`.",
@@ -8086,6 +11020,21 @@
           },
           "pagination": {
             "$ref": "#/components/schemas/SamplesPagination"
+          }
+        }
+      },
+      "ListSongsQuery": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "per_page": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
           }
         }
       },
@@ -8172,6 +11121,250 @@
         "properties": {
           "data": {
             "$ref": "#/components/schemas/ConversationMessage"
+          }
+        }
+      },
+      "MusicArtist": {
+        "type": "object",
+        "required": [
+          "id",
+          "nombre",
+          "slug",
+          "metadata",
+          "prioridad",
+          "total_canciones",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "imagen_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "metadata": {
+            "type": "object"
+          },
+          "musicbrainz_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "prioridad": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "total_canciones": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "whosampled_slug": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "MusicArtistRole": {
+        "type": "string",
+        "enum": [
+          "principal",
+          "featuring",
+          "producer"
+        ]
+      },
+      "MusicArtistsResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MusicArtist"
+            }
+          }
+        }
+      },
+      "MusicMutationResponse": {
+        "type": "object",
+        "required": [
+          "ok"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          }
+        }
+      },
+      "MusicPagination": {
+        "type": "object",
+        "required": [
+          "page",
+          "per_page",
+          "total",
+          "pages"
+        ],
+        "properties": {
+          "page": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pages": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "per_page": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "MusicSong": {
+        "type": "object",
+        "required": [
+          "id",
+          "titulo",
+          "slug",
+          "artista_id",
+          "metadata",
+          "total_sampleada",
+          "total_samplea",
+          "total_likes",
+          "total_comentarios",
+          "created_at",
+          "updated_at",
+          "artista_nombre",
+          "artista_slug"
+        ],
+        "properties": {
+          "album": {
+            "type": "string",
+            "nullable": true
+          },
+          "anio": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "artista_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "artista_nombre": {
+            "type": "string"
+          },
+          "artista_slug": {
+            "type": "string"
+          },
+          "bpm": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "duracion_segundos": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "genero": {
+            "type": "string",
+            "nullable": true
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "imagen_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "metadata": {
+            "type": "object"
+          },
+          "sello": {
+            "type": "string",
+            "nullable": true
+          },
+          "slug": {
+            "type": "string"
+          },
+          "spotify_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "titulo": {
+            "type": "string"
+          },
+          "tonalidad": {
+            "type": "string",
+            "nullable": true
+          },
+          "total_comentarios": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total_likes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total_samplea": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total_sampleada": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "whosampled_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "youtube_id": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "MusicSongsResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MusicSong"
+            }
           }
         }
       },
@@ -8861,6 +12054,141 @@
           }
         }
       },
+      "RelationChainNode": {
+        "type": "object",
+        "required": [
+          "id",
+          "cancion_fuente_id",
+          "cancion_destino_id",
+          "tipo_relacion",
+          "nivel",
+          "fuente_titulo",
+          "fuente_slug",
+          "fuente_artista",
+          "destino_titulo",
+          "destino_slug",
+          "destino_artista"
+        ],
+        "properties": {
+          "cancion_destino_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cancion_fuente_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "destino_artista": {
+            "type": "string"
+          },
+          "destino_slug": {
+            "type": "string"
+          },
+          "destino_titulo": {
+            "type": "string"
+          },
+          "fuente_artista": {
+            "type": "string"
+          },
+          "fuente_slug": {
+            "type": "string"
+          },
+          "fuente_titulo": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nivel": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tipo_relacion": {
+            "$ref": "#/components/schemas/SampleRelationType"
+          }
+        }
+      },
+      "RelationChainQuery": {
+        "type": "object",
+        "properties": {
+          "profundidad": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        }
+      },
+      "RelationChainResponse": {
+        "type": "object",
+        "required": [
+          "cancion_raiz",
+          "cadena"
+        ],
+        "properties": {
+          "cadena": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RelationChainNode"
+            }
+          },
+          "cancion_raiz": {
+            "$ref": "#/components/schemas/MusicSong"
+          }
+        }
+      },
+      "RelationSampleSide": {
+        "type": "string",
+        "enum": [
+          "fuente",
+          "destino"
+        ]
+      },
+      "RelationStatsResponse": {
+        "type": "object",
+        "required": [
+          "relaciones_por_tipo"
+        ],
+        "properties": {
+          "relaciones_por_tipo": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RelationTypeCount"
+            }
+          }
+        }
+      },
+      "RelationTypeCount": {
+        "type": "object",
+        "required": [
+          "tipo_relacion",
+          "total"
+        ],
+        "properties": {
+          "tipo_relacion": {
+            "$ref": "#/components/schemas/SampleRelationType"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "RelationVerificationResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "verificada"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "verificada": {
+            "type": "boolean"
+          }
+        }
+      },
       "ReportResponse": {
         "type": "object",
         "required": [
@@ -9146,6 +12474,456 @@
             "type": "boolean"
           }
         }
+      },
+      "SampleLinkRequest": {
+        "type": "object",
+        "required": [
+          "sample_id",
+          "lado"
+        ],
+        "properties": {
+          "lado": {
+            "$ref": "#/components/schemas/RelationSampleSide"
+          },
+          "sample_id": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "SampleRelationDetail": {
+        "type": "object",
+        "required": [
+          "id",
+          "cancion_destino_id",
+          "cancion_fuente_id",
+          "tipo_relacion",
+          "timings_destino",
+          "timings_fuente",
+          "aparece_en_todo",
+          "votos_total",
+          "votos_promedio",
+          "fuente",
+          "verificada",
+          "total_likes",
+          "total_comentarios",
+          "total_samples",
+          "created_at",
+          "updated_at",
+          "fuente_titulo",
+          "fuente_slug",
+          "fuente_artista",
+          "fuente_artista_slug",
+          "destino_titulo",
+          "destino_slug",
+          "destino_artista",
+          "destino_artista_slug"
+        ],
+        "properties": {
+          "aparece_en_todo": {
+            "type": "boolean"
+          },
+          "cancion_destino_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cancion_fuente_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "contribuidor_id": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "contribuidor_username": {
+            "type": "string",
+            "nullable": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "destino_album": {
+            "type": "string",
+            "nullable": true
+          },
+          "destino_anio": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "destino_artista": {
+            "type": "string"
+          },
+          "destino_artista_slug": {
+            "type": "string"
+          },
+          "destino_genero": {
+            "type": "string",
+            "nullable": true
+          },
+          "destino_imagen_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "destino_sampleada_en": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SampleRelationSummary"
+            },
+            "nullable": true
+          },
+          "destino_samples_de": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SampleRelationSummary"
+            },
+            "nullable": true
+          },
+          "destino_slug": {
+            "type": "string"
+          },
+          "destino_spotify_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "destino_titulo": {
+            "type": "string"
+          },
+          "destino_youtube_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "fuente": {
+            "$ref": "#/components/schemas/SampleRelationSource"
+          },
+          "fuente_album": {
+            "type": "string",
+            "nullable": true
+          },
+          "fuente_anio": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "fuente_artista": {
+            "type": "string"
+          },
+          "fuente_artista_slug": {
+            "type": "string"
+          },
+          "fuente_genero": {
+            "type": "string",
+            "nullable": true
+          },
+          "fuente_imagen_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "fuente_sampleada_en": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SampleRelationSummary"
+            },
+            "nullable": true
+          },
+          "fuente_samples_de": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SampleRelationSummary"
+            },
+            "nullable": true
+          },
+          "fuente_slug": {
+            "type": "string"
+          },
+          "fuente_spotify_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "fuente_titulo": {
+            "type": "string"
+          },
+          "fuente_youtube_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lado_extraccion": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RelationSampleSide"
+              }
+            ],
+            "nullable": true
+          },
+          "sample_destino_id": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "sample_fuente_id": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "sample_id": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "timings_destino": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "timings_fuente": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "tipo_elemento": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SampleRelationElementType"
+              }
+            ],
+            "nullable": true
+          },
+          "tipo_relacion": {
+            "$ref": "#/components/schemas/SampleRelationType"
+          },
+          "total_comentarios": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total_likes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total_samples": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "verificada": {
+            "type": "boolean"
+          },
+          "votos_promedio": {
+            "type": "number",
+            "format": "double"
+          },
+          "votos_total": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "whosampled_id": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        }
+      },
+      "SampleRelationElementType": {
+        "type": "string",
+        "enum": [
+          "hook_riff",
+          "vocals_lyrics",
+          "drums",
+          "bass",
+          "keys_synth",
+          "sound_effect",
+          "multiple_elements",
+          "other"
+        ]
+      },
+      "SampleRelationLookupResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SampleRelationDetail"
+              }
+            ],
+            "nullable": true
+          }
+        }
+      },
+      "SampleRelationSource": {
+        "type": "string",
+        "enum": [
+          "scraping",
+          "comunidad",
+          "musicbrainz",
+          "import"
+        ]
+      },
+      "SampleRelationSummary": {
+        "type": "object",
+        "required": [
+          "id",
+          "cancion_destino_id",
+          "cancion_fuente_id",
+          "tipo_relacion",
+          "timings_destino",
+          "timings_fuente",
+          "aparece_en_todo",
+          "votos_total",
+          "votos_promedio",
+          "fuente",
+          "verificada",
+          "total_likes",
+          "total_comentarios",
+          "created_at",
+          "updated_at",
+          "cancion_titulo",
+          "cancion_slug",
+          "artista_nombre",
+          "artista_slug"
+        ],
+        "properties": {
+          "aparece_en_todo": {
+            "type": "boolean"
+          },
+          "artista_nombre": {
+            "type": "string"
+          },
+          "artista_slug": {
+            "type": "string"
+          },
+          "cancion_anio": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "cancion_destino_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cancion_fuente_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cancion_imagen_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "cancion_slug": {
+            "type": "string"
+          },
+          "cancion_titulo": {
+            "type": "string"
+          },
+          "contribuidor_id": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "contribuidor_username": {
+            "type": "string",
+            "nullable": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "fuente": {
+            "$ref": "#/components/schemas/SampleRelationSource"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sample_destino_id": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "sample_fuente_id": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "sample_id": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "timings_destino": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "timings_fuente": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "tipo_elemento": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SampleRelationElementType"
+              }
+            ],
+            "nullable": true
+          },
+          "tipo_relacion": {
+            "$ref": "#/components/schemas/SampleRelationType"
+          },
+          "total_comentarios": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total_likes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "verificada": {
+            "type": "boolean"
+          },
+          "votos_promedio": {
+            "type": "number",
+            "format": "double"
+          },
+          "votos_total": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "whosampled_id": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        }
+      },
+      "SampleRelationType": {
+        "type": "string",
+        "enum": [
+          "sample",
+          "cover",
+          "remix",
+          "interpolation"
+        ]
       },
       "SampleSummary": {
         "type": "object",
@@ -9457,6 +13235,22 @@
           }
         }
       },
+      "SearchSongsQuery": {
+        "type": "object",
+        "required": [
+          "q"
+        ],
+        "properties": {
+          "per_page": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "q": {
+            "type": "string"
+          }
+        }
+      },
       "SearchType": {
         "type": "string",
         "enum": [
@@ -9522,6 +13316,96 @@
             "items": {
               "$ref": "#/components/schemas/SampleSummary"
             }
+          }
+        }
+      },
+      "SongArtistInput": {
+        "type": "object",
+        "required": [
+          "artista_id",
+          "rol"
+        ],
+        "properties": {
+          "artista_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rol": {
+            "$ref": "#/components/schemas/MusicArtistRole"
+          }
+        }
+      },
+      "SongArtistLink": {
+        "type": "object",
+        "required": [
+          "artista_id",
+          "nombre",
+          "slug",
+          "rol"
+        ],
+        "properties": {
+          "artista_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "rol": {
+            "$ref": "#/components/schemas/MusicArtistRole"
+          },
+          "slug": {
+            "type": "string"
+          }
+        }
+      },
+      "SongDetailResponse": {
+        "type": "object",
+        "required": [
+          "cancion",
+          "artistas",
+          "samples_de",
+          "sampleada_en"
+        ],
+        "properties": {
+          "artistas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SongArtistLink"
+            }
+          },
+          "cancion": {
+            "$ref": "#/components/schemas/MusicSong"
+          },
+          "sampleada_en": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SampleRelationSummary"
+            }
+          },
+          "samples_de": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SampleRelationSummary"
+            }
+          }
+        }
+      },
+      "SongListResponse": {
+        "type": "object",
+        "required": [
+          "data",
+          "pagination"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MusicSong"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/MusicPagination"
           }
         }
       },
@@ -9680,6 +13564,42 @@
           }
         }
       },
+      "UpdateArtistRequest": {
+        "type": "object",
+        "required": [
+          "metadata"
+        ],
+        "properties": {
+          "imagen_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "metadata": {
+            "type": "object"
+          },
+          "musicbrainz_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "nombre": {
+            "type": "string",
+            "nullable": true
+          },
+          "prioridad": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "slug": {
+            "type": "string",
+            "nullable": true
+          },
+          "whosampled_slug": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
       "UpdateColeccionRequest": {
         "type": "object",
         "properties": {
@@ -9764,6 +13684,104 @@
           }
         }
       },
+      "UpdateRelationRequest": {
+        "type": "object",
+        "properties": {
+          "aparece_en_todo": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "cancion_destino_id": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "cancion_fuente_id": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "contribuidor_id": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "fuente": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SampleRelationSource"
+              }
+            ],
+            "nullable": true
+          },
+          "sample_destino_id": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "sample_fuente_id": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "sample_id": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "timings_destino": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "timings_fuente": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "tipo_elemento": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SampleRelationElementType"
+              }
+            ],
+            "nullable": true
+          },
+          "tipo_relacion": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SampleRelationType"
+              }
+            ],
+            "nullable": true
+          },
+          "verificada": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "votos_promedio": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "votos_total": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "whosampled_id": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        }
+      },
       "UpdateSampleRequest": {
         "type": "object",
         "description": "Payload parcial para `PATCH /api/samples/{slug}`.",
@@ -9809,6 +13827,84 @@
             "nullable": true
           },
           "type": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "UpdateSongRequest": {
+        "type": "object",
+        "required": [
+          "metadata"
+        ],
+        "properties": {
+          "album": {
+            "type": "string",
+            "nullable": true
+          },
+          "anio": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "artista_id": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "artistas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SongArtistInput"
+            },
+            "nullable": true
+          },
+          "bpm": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "duracion_segundos": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "genero": {
+            "type": "string",
+            "nullable": true
+          },
+          "imagen_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "metadata": {
+            "type": "object"
+          },
+          "sello": {
+            "type": "string",
+            "nullable": true
+          },
+          "slug": {
+            "type": "string",
+            "nullable": true
+          },
+          "spotify_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "titulo": {
+            "type": "string",
+            "nullable": true
+          },
+          "tonalidad": {
+            "type": "string",
+            "nullable": true
+          },
+          "whosampled_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "youtube_id": {
             "type": "string",
             "nullable": true
           }
@@ -10012,6 +14108,17 @@
               }
             ],
             "nullable": true
+          }
+        }
+      },
+      "VerifyRelationRequest": {
+        "type": "object",
+        "required": [
+          "verificada"
+        ],
+        "properties": {
+          "verificada": {
+            "type": "boolean"
           }
         }
       },

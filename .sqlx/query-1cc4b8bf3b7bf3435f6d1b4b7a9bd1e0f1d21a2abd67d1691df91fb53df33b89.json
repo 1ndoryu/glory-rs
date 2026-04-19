@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT artista_id, rol AS \"rol!\" FROM canciones_artistas WHERE cancion_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "artista_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "rol!",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "1cc4b8bf3b7bf3435f6d1b4b7a9bd1e0f1d21a2abd67d1691df91fb53df33b89"
+}

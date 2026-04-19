@@ -1,0 +1,274 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT r.id,\n                      r.cancion_destino_id,\n                      r.cancion_fuente_id,\n                      r.whosampled_id,\n                      r.tipo_relacion AS \"tipo_relacion!\",\n                      r.tipo_elemento,\n                      COALESCE(r.timings_destino, '[]'::jsonb) AS \"timings_destino!: Json<Vec<i32>>\",\n                      COALESCE(r.timings_fuente, '[]'::jsonb) AS \"timings_fuente!: Json<Vec<i32>>\",\n                      COALESCE(r.aparece_en_todo, FALSE) AS \"aparece_en_todo!\",\n                      r.sample_id,\n                      r.sample_fuente_id,\n                      r.sample_destino_id,\n                      COALESCE(r.votos_total, 0) AS \"votos_total!\",\n                      COALESCE(r.votos_promedio, 0)::double precision AS \"votos_promedio!\",\n                      r.fuente AS \"fuente!\",\n                      r.contribuidor_id,\n                      u.username AS contribuidor_username,\n                      COALESCE(r.verificada, FALSE) AS \"verificada!\",\n                      COALESCE(r.total_likes, 0) AS \"total_likes!\",\n                      COALESCE(r.total_comentarios, 0) AS \"total_comentarios!\",\n                      (\n                        SELECT COUNT(DISTINCT s.id)\n                        FROM samples s\n                        WHERE s.eliminado_en IS NULL\n                          AND s.estado = 'activo'\n                          AND (\n                                s.relacion_sampleo_id = r.id\n                             OR s.id = r.sample_id\n                             OR s.id = r.sample_fuente_id\n                             OR s.id = r.sample_destino_id\n                          )\n                      ) AS \"total_samples!\",\n                      r.created_at AS \"created_at!\",\n                      r.updated_at AS \"updated_at!\",\n                      cf.titulo AS \"fuente_titulo!\",\n                      cf.slug AS \"fuente_slug!\",\n                      cf.anio AS fuente_anio,\n                      cf.imagen_url AS fuente_imagen_url,\n                      cf.youtube_id AS fuente_youtube_id,\n                      cf.spotify_id AS fuente_spotify_id,\n                      cf.album AS fuente_album,\n                      cf.genero AS fuente_genero,\n                      af.nombre AS \"fuente_artista!\",\n                      af.slug AS \"fuente_artista_slug!\",\n                      cd.titulo AS \"destino_titulo!\",\n                      cd.slug AS \"destino_slug!\",\n                      cd.anio AS destino_anio,\n                      cd.imagen_url AS destino_imagen_url,\n                      cd.youtube_id AS destino_youtube_id,\n                      cd.spotify_id AS destino_spotify_id,\n                      cd.album AS destino_album,\n                      cd.genero AS destino_genero,\n                      ad.nombre AS \"destino_artista!\",\n                      ad.slug AS \"destino_artista_slug!\"\n               FROM relaciones_sample r\n               INNER JOIN canciones cf ON cf.id = r.cancion_fuente_id\n               INNER JOIN artistas_musicales af ON af.id = cf.artista_id\n               INNER JOIN canciones cd ON cd.id = r.cancion_destino_id\n               INNER JOIN artistas_musicales ad ON ad.id = cd.artista_id\n               LEFT JOIN usuarios_ext u ON u.id = r.contribuidor_id\n               WHERE r.id = $1\n               LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "cancion_destino_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "cancion_fuente_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "whosampled_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "tipo_relacion!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "tipo_elemento",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "timings_destino!: Json<Vec<i32>>",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 7,
+        "name": "timings_fuente!: Json<Vec<i32>>",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 8,
+        "name": "aparece_en_todo!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 9,
+        "name": "sample_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 10,
+        "name": "sample_fuente_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 11,
+        "name": "sample_destino_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 12,
+        "name": "votos_total!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 13,
+        "name": "votos_promedio!",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 14,
+        "name": "fuente!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 15,
+        "name": "contribuidor_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 16,
+        "name": "contribuidor_username",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 17,
+        "name": "verificada!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 18,
+        "name": "total_likes!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 19,
+        "name": "total_comentarios!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 20,
+        "name": "total_samples!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 21,
+        "name": "created_at!",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 22,
+        "name": "updated_at!",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 23,
+        "name": "fuente_titulo!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 24,
+        "name": "fuente_slug!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 25,
+        "name": "fuente_anio",
+        "type_info": "Int2"
+      },
+      {
+        "ordinal": 26,
+        "name": "fuente_imagen_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 27,
+        "name": "fuente_youtube_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 28,
+        "name": "fuente_spotify_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 29,
+        "name": "fuente_album",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 30,
+        "name": "fuente_genero",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 31,
+        "name": "fuente_artista!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 32,
+        "name": "fuente_artista_slug!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 33,
+        "name": "destino_titulo!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 34,
+        "name": "destino_slug!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 35,
+        "name": "destino_anio",
+        "type_info": "Int2"
+      },
+      {
+        "ordinal": 36,
+        "name": "destino_imagen_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 37,
+        "name": "destino_youtube_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 38,
+        "name": "destino_spotify_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 39,
+        "name": "destino_album",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 40,
+        "name": "destino_genero",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 41,
+        "name": "destino_artista!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 42,
+        "name": "destino_artista_slug!",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false,
+      true,
+      null,
+      null,
+      null,
+      true,
+      true,
+      true,
+      null,
+      null,
+      true,
+      true,
+      false,
+      null,
+      null,
+      null,
+      null,
+      true,
+      true,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "f865fd01facfe0c45b08b9d32ff2e3cd03dae4c49f74714cb5e3085ee114f4f2"
+}

@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM canciones_artistas WHERE cancion_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "9cf8d4946dc45a5fd72bb6491c78f1af1f2fbf66f04e0cf94d25832383d79868"
+}

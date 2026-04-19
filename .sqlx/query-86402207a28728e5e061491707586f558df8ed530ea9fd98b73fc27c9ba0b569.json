@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE samples\n                       SET relacion_sampleo_id = $2,\n                           cancion_origen_id = $3,\n                           updated_at = NOW()\n                       WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "86402207a28728e5e061491707586f558df8ed530ea9fd98b73fc27c9ba0b569"
+}

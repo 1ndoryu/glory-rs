@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE canciones c\n               SET total_samplea = (\n                        SELECT COUNT(*)::int\n                        FROM relaciones_sample r\n                        WHERE r.cancion_destino_id = c.id\n                          AND r.tipo_relacion = 'sample'\n                   ),\n                   total_sampleada = (\n                        SELECT COUNT(*)::int\n                        FROM relaciones_sample r\n                        WHERE r.cancion_fuente_id = c.id\n                          AND r.tipo_relacion = 'sample'\n                   ),\n                   updated_at = NOW()\n               WHERE c.id = ANY($1)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4Array"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ffa3b46cac567fea1a625ac95f9538f91a09b73ba95f488c5960635fb50045e6"
+}

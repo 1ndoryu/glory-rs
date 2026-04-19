@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT tipo_relacion AS \"tipo_relacion!\", COUNT(*)::bigint AS \"total!\"\n               FROM relaciones_sample\n               GROUP BY tipo_relacion\n             ORDER BY COUNT(*) DESC, tipo_relacion ASC",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "tipo_relacion!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 1,
+        "name": "total!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      null
+    ]
+  },
+  "hash": "dd42755470c301791bd5008614bea74ccf0651c0c44aad9ce3f98b300045bee6"
+}

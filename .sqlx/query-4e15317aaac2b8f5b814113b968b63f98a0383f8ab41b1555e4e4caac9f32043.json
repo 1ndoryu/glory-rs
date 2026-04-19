@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO canciones_artistas (cancion_id, artista_id, rol)\n                   VALUES ($1, $2, $3)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4",
+        "Varchar"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4e15317aaac2b8f5b814113b968b63f98a0383f8ab41b1555e4e4caac9f32043"
+}

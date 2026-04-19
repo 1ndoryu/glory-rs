@@ -1,0 +1,185 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT r.id,\n                      r.cancion_destino_id,\n                      r.cancion_fuente_id,\n                      r.whosampled_id,\n                      r.tipo_relacion AS \"tipo_relacion!\",\n                      r.tipo_elemento,\n                      COALESCE(r.timings_destino, '[]'::jsonb) AS \"timings_destino!: Json<Vec<i32>>\",\n                      COALESCE(r.timings_fuente, '[]'::jsonb) AS \"timings_fuente!: Json<Vec<i32>>\",\n                      COALESCE(r.aparece_en_todo, FALSE) AS \"aparece_en_todo!\",\n                      r.sample_id,\n                      r.sample_fuente_id,\n                      r.sample_destino_id,\n                      COALESCE(r.votos_total, 0) AS \"votos_total!\",\n                      COALESCE(r.votos_promedio, 0)::double precision AS \"votos_promedio!\",\n                      r.fuente AS \"fuente!\",\n                      r.contribuidor_id,\n                      u.username AS contribuidor_username,\n                      COALESCE(r.verificada, FALSE) AS \"verificada!\",\n                      COALESCE(r.total_likes, 0) AS \"total_likes!\",\n                      COALESCE(r.total_comentarios, 0) AS \"total_comentarios!\",\n                      r.created_at AS \"created_at!\",\n                      r.updated_at AS \"updated_at!\",\n                      c.titulo AS \"cancion_titulo!\",\n                      c.slug AS \"cancion_slug!\",\n                      a.nombre AS \"artista_nombre!\",\n                      a.slug AS \"artista_slug!\",\n                      c.anio AS cancion_anio,\n                      c.imagen_url AS cancion_imagen_url\n               FROM relaciones_sample r\n               INNER JOIN canciones c ON c.id = r.cancion_fuente_id\n               INNER JOIN artistas_musicales a ON a.id = c.artista_id\n               LEFT JOIN usuarios_ext u ON u.id = r.contribuidor_id\n               WHERE r.cancion_destino_id = $1\n               ORDER BY r.created_at DESC, r.id DESC\n               LIMIT $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "cancion_destino_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "cancion_fuente_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "whosampled_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "tipo_relacion!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "tipo_elemento",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "timings_destino!: Json<Vec<i32>>",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 7,
+        "name": "timings_fuente!: Json<Vec<i32>>",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 8,
+        "name": "aparece_en_todo!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 9,
+        "name": "sample_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 10,
+        "name": "sample_fuente_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 11,
+        "name": "sample_destino_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 12,
+        "name": "votos_total!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 13,
+        "name": "votos_promedio!",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 14,
+        "name": "fuente!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 15,
+        "name": "contribuidor_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 16,
+        "name": "contribuidor_username",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 17,
+        "name": "verificada!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 18,
+        "name": "total_likes!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 19,
+        "name": "total_comentarios!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 20,
+        "name": "created_at!",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 21,
+        "name": "updated_at!",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 22,
+        "name": "cancion_titulo!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 23,
+        "name": "cancion_slug!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 24,
+        "name": "artista_nombre!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 25,
+        "name": "artista_slug!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 26,
+        "name": "cancion_anio",
+        "type_info": "Int2"
+      },
+      {
+        "ordinal": 27,
+        "name": "cancion_imagen_url",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false,
+      true,
+      null,
+      null,
+      null,
+      true,
+      true,
+      true,
+      null,
+      null,
+      true,
+      true,
+      false,
+      null,
+      null,
+      null,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "145035d0d9bffc852050b6f362ce0ec3d92053034abb294baa93c5c53d7c2395"
+}

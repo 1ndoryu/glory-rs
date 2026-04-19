@@ -1,0 +1,82 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id,\n                      nombre,\n                      slug,\n                      imagen_url,\n                      whosampled_slug,\n                      musicbrainz_id,\n                      COALESCE(metadata, '{}'::jsonb) AS \"metadata!: serde_json::Value\",\n                      COALESCE(prioridad, 0)::smallint AS \"prioridad!\",\n                      COALESCE(total_canciones, 0) AS \"total_canciones!\",\n                      created_at AS \"created_at!\",\n                      updated_at AS \"updated_at!\"\n               FROM artistas_musicales\n               WHERE slug = $1\n               LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "nombre",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "slug",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "imagen_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "whosampled_slug",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "musicbrainz_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "metadata!: serde_json::Value",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 7,
+        "name": "prioridad!",
+        "type_info": "Int2"
+      },
+      {
+        "ordinal": 8,
+        "name": "total_canciones!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 9,
+        "name": "created_at!",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 10,
+        "name": "updated_at!",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      null,
+      null,
+      null,
+      true,
+      true
+    ]
+  },
+  "hash": "f98f0727d14b15ff20764d4ea24489f16143b978307fbfe4550c9e486549663d"
+}

@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE artistas_musicales a\n               SET total_canciones = (\n                    SELECT COUNT(*)::int\n                    FROM canciones c\n                    WHERE c.artista_id = a.id\n               ),\n                   updated_at = NOW()\n               WHERE a.id = ANY($1)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4Array"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7b04bed0695cff0673ea60f84456589ed79975bb52ec51f31d9c78e152993308"
+}

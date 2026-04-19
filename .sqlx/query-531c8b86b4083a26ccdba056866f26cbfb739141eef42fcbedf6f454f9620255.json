@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM comentarios WHERE tipo = 'relacion' AND target_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "531c8b86b4083a26ccdba056866f26cbfb739141eef42fcbedf6f454f9620255"
+}
