@@ -55,21 +55,22 @@ fn pipeline_metadata_carries_partial_progress() {
     let metadata = build_pipeline_metadata(&progress, "optimized_ready", Some("sin preview"));
 
     assert_eq!(metadata["audio_pipeline"]["status"], "optimized_ready");
-    assert_eq!(metadata["audio_pipeline"]["last_stage"], "persist_optimized_mp3");
+    assert_eq!(
+        metadata["audio_pipeline"]["last_stage"],
+        "persist_optimized_mp3"
+    );
     assert_eq!(metadata["audio_pipeline"]["music_key"], "C#");
-    assert_eq!(metadata["audio_pipeline"]["ruta_optimizada"], "samples/demo_optimizado.mp3");
+    assert_eq!(
+        metadata["audio_pipeline"]["ruta_optimizada"],
+        "samples/demo_optimizado.mp3"
+    );
     assert_eq!(metadata["audio_pipeline"]["last_error"], "sin preview");
 }
 
 #[tokio::test]
 async fn pipeline_fixture_major_loop_extracts_expected_analysis() {
     let path = temp_wav_path("major-loop");
-    let wav = build_pipeline_fixture_wav(
-        44_100,
-        120,
-        8,
-        &[262, 294, 330, 349, 392, 440, 494, 523],
-    );
+    let wav = build_pipeline_fixture_wav(44_100, 120, 8, &[262, 294, 330, 349, 392, 440, 494, 523]);
     std::fs::write(&path, wav).expect("should write major loop fixture");
 
     let inspected = inspect_audio_file(&path, Some("wav"), None)
@@ -102,7 +103,9 @@ async fn pipeline_fixture_major_loop_extracts_expected_analysis() {
     assert_eq!(analysis.sample_rate_hz, 44_100);
     assert_eq!(analysis.channels, 1);
     assert!(analysis.duration_seconds > 3.9 && analysis.duration_seconds < 4.1);
-    assert!(analysis.bpm.is_some_and(|value| (i64::from(value) - 120).abs() <= 2));
+    assert!(analysis
+        .bpm
+        .is_some_and(|value| (i64::from(value) - 120).abs() <= 2));
     assert_eq!(analysis.music_key.as_deref(), Some("C"));
     assert_eq!(analysis.scale.as_deref(), Some("major"));
     assert!(analysis.file_size_bytes > 1_000);
@@ -115,12 +118,7 @@ async fn pipeline_fixture_major_loop_extracts_expected_analysis() {
 #[tokio::test]
 async fn pipeline_fixture_minor_one_shot_updates_metadata_and_embedding() {
     let path = temp_wav_path("minor-one-shot");
-    let wav = build_pipeline_fixture_wav(
-        44_100,
-        90,
-        8,
-        &[262, 294, 311, 349, 392, 415, 466, 523],
-    );
+    let wav = build_pipeline_fixture_wav(44_100, 90, 8, &[262, 294, 311, 349, 392, 415, 466, 523]);
     std::fs::write(&path, wav).expect("should write minor fixture");
 
     let inspected = inspect_audio_file(&path, Some("wav"), None)
@@ -150,18 +148,28 @@ async fn pipeline_fixture_minor_one_shot_updates_metadata_and_embedding() {
 
     let _ = std::fs::remove_file(&path);
 
-    assert!(analysis.bpm.is_some_and(|value| (i64::from(value) - 90).abs() <= 2));
+    assert!(analysis
+        .bpm
+        .is_some_and(|value| (i64::from(value) - 90).abs() <= 2));
     assert_eq!(analysis.music_key.as_deref(), Some("C"));
     assert_eq!(analysis.scale.as_deref(), Some("minor"));
     assert_eq!(metadata["audio_pipeline"]["status"], "analyzed");
     assert_eq!(metadata["audio_pipeline"]["music_key"], "C");
     assert_eq!(metadata["audio_pipeline"]["scale"], "minor");
-    assert_eq!(metadata["audio_pipeline"]["ruta_optimizada"], "samples/tests/fixture-minor_optimizado.mp3");
+    assert_eq!(
+        metadata["audio_pipeline"]["ruta_optimizada"],
+        "samples/tests/fixture-minor_optimizado.mp3"
+    );
     assert!(embedding.as_slice()[16] > 0.99);
     assert!(embedding.as_slice()[21] > 0.99);
 }
 
-fn fixture_sample(id_corto: &str, tipo: &str, es_premium: bool, tags: &[&str]) -> AudioPipelineSample {
+fn fixture_sample(
+    id_corto: &str,
+    tipo: &str,
+    es_premium: bool,
+    tags: &[&str],
+) -> AudioPipelineSample {
     AudioPipelineSample {
         id: 99,
         id_corto: id_corto.to_owned(),
@@ -181,9 +189,11 @@ fn build_pipeline_fixture_wav(
     beats: u32,
     frequencies_hz: &[u32],
 ) -> Vec<u8> {
-    let samples_per_beat = usize::try_from((u64::from(sample_rate_hz) * 60) / u64::from(bpm.max(1)))
-        .expect("beat length should fit in usize");
-    let total_samples = samples_per_beat * usize::try_from(beats).expect("beats should fit in usize");
+    let samples_per_beat =
+        usize::try_from((u64::from(sample_rate_hz) * 60) / u64::from(bpm.max(1)))
+            .expect("beat length should fit in usize");
+    let total_samples =
+        samples_per_beat * usize::try_from(beats).expect("beats should fit in usize");
     let note_samples = (samples_per_beat / 3).max(1);
     let sample_rate_f32 = f32::from(u16::try_from(sample_rate_hz).unwrap_or(u16::MAX));
     let note_samples_f32 = f32::from(u16::try_from(note_samples).unwrap_or(u16::MAX));
@@ -192,7 +202,8 @@ fn build_pipeline_fixture_wav(
     for beat in 0..usize::try_from(beats).expect("beats should fit in usize") {
         let beat_start = beat * samples_per_beat;
         let frequency_hz = frequencies_hz[beat % frequencies_hz.len()];
-        let phase_step = 2.0 * PI * f32::from(u16::try_from(frequency_hz).unwrap_or(u16::MAX)) / sample_rate_f32;
+        let phase_step =
+            2.0 * PI * f32::from(u16::try_from(frequency_hz).unwrap_or(u16::MAX)) / sample_rate_f32;
         let mut phase = 0.0_f32;
 
         for offset in 0..note_samples {
@@ -211,7 +222,9 @@ fn build_pipeline_fixture_wav(
         }
     }
 
-    let peak = mix.iter().fold(0.0_f32, |current, sample| current.max(sample.abs()));
+    let peak = mix
+        .iter()
+        .fold(0.0_f32, |current, sample| current.max(sample.abs()));
     let scale = if peak > 0.95 { 0.95 / peak } else { 1.0 };
     let pcm: Vec<i16> = mix
         .iter()
@@ -246,7 +259,10 @@ fn write_wav_i16(sample_rate_hz: u32, pcm: &[i16]) -> Vec<u8> {
 
 fn temp_wav_path(prefix: &str) -> PathBuf {
     let mut path = std::env::temp_dir();
-    path.push(format!("kamples-audio-pipeline-{prefix}-{}.wav", Uuid::new_v4()));
+    path.push(format!(
+        "kamples-audio-pipeline-{prefix}-{}.wav",
+        Uuid::new_v4()
+    ));
     path
 }
 

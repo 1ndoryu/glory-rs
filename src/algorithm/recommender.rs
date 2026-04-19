@@ -267,8 +267,8 @@ impl RecommenderService {
             }
         }
 
-        let rows = fetch_similar_by_tags(pool, sample_id, &seed.tags, &seed.tipo, &blocked, limit)
-            .await?;
+        let rows =
+            fetch_similar_by_tags(pool, sample_id, &seed.tags, &seed.tipo, &blocked, limit).await?;
         Ok(rows
             .into_iter()
             .map(|row| {
@@ -358,8 +358,13 @@ async fn compute_and_cache(
         if page_offset == offset {
             response.clone_from(&page);
         }
-        cache_set(redis, &fresh_cache_key(user_id, limit, page_offset), &page, fresh_ttl(config, page_offset))
-            .await?;
+        cache_set(
+            redis,
+            &fresh_cache_key(user_id, limit, page_offset),
+            &page,
+            fresh_ttl(config, page_offset),
+        )
+        .await?;
         cache_set(
             redis,
             &stale_cache_key(user_id, limit, page_offset),
@@ -427,9 +432,7 @@ async fn score_pipeline(
     let usar_candidatos = total_active > config.umbral_candidatos;
 
     let candidate_ids: Option<Vec<i32>> = if usar_candidatos {
-        Some(
-            CandidatesService::select(pool, user_id, &profile, None, &config.candidates).await?,
-        )
+        Some(CandidatesService::select(pool, user_id, &profile, None, &config.candidates).await?)
     } else {
         None
     };
@@ -453,18 +456,16 @@ async fn score_pipeline(
 
     /* Orden primario: es_nuevo DESC (no reproducidos primero), luego score. */
     ranked.sort_by(|a, b| {
-        b.es_nuevo
-            .cmp(&a.es_nuevo)
-            .then(b.score.partial_cmp(&a.score).unwrap_or(std::cmp::Ordering::Equal))
+        b.es_nuevo.cmp(&a.es_nuevo).then(
+            b.score
+                .partial_cmp(&a.score)
+                .unwrap_or(std::cmp::Ordering::Equal),
+        )
     });
     Ok(ranked)
 }
 
-fn score_row(
-    row: SampleRow,
-    profile: &UserProfile,
-    config: AlgorithmSignalConfig,
-) -> RankedSample {
+fn score_row(row: SampleRow, profile: &UserProfile, config: AlgorithmSignalConfig) -> RankedSample {
     let dias_desde_pub = row.publicado_at.map(|ts| {
         let secs = (Utc::now() - ts).num_seconds().max(0) as f64;
         secs / 86_400.0
@@ -610,9 +611,11 @@ fn apply_diversity(mut ranked: Vec<RankedSample>, config: &RecommenderConfig) ->
     }
 
     ranked.sort_by(|a, b| {
-        b.es_nuevo
-            .cmp(&a.es_nuevo)
-            .then(b.score.partial_cmp(&a.score).unwrap_or(std::cmp::Ordering::Equal))
+        b.es_nuevo.cmp(&a.es_nuevo).then(
+            b.score
+                .partial_cmp(&a.score)
+                .unwrap_or(std::cmp::Ordering::Equal),
+        )
     });
     ranked
 }
@@ -839,9 +842,24 @@ async fn fallback_recientes(
         .fetch_all(pool)
         .await?
         .into_iter()
-        .map(|r| (r.id, r.creador_id, r.titulo, r.slug, r.tipo, r.bpm, r.key, r.escala, r.tags,
-                  r.publicado_at, r.total_likes.unwrap_or(0), r.total_reproducciones.unwrap_or(0),
-                  r.total_descargas.unwrap_or(0), r.verificado.unwrap_or(false)))
+        .map(|r| {
+            (
+                r.id,
+                r.creador_id,
+                r.titulo,
+                r.slug,
+                r.tipo,
+                r.bpm,
+                r.key,
+                r.escala,
+                r.tags,
+                r.publicado_at,
+                r.total_likes.unwrap_or(0),
+                r.total_reproducciones.unwrap_or(0),
+                r.total_descargas.unwrap_or(0),
+                r.verificado.unwrap_or(false),
+            )
+        })
         .collect::<Vec<_>>()
     } else {
         sqlx::query!(
@@ -862,19 +880,35 @@ async fn fallback_recientes(
         .fetch_all(pool)
         .await?
         .into_iter()
-        .map(|r| (r.id, r.creador_id, r.titulo, r.slug, r.tipo, r.bpm, r.key, r.escala, r.tags,
-                  r.publicado_at, r.total_likes.unwrap_or(0), r.total_reproducciones.unwrap_or(0),
-                  r.total_descargas.unwrap_or(0), r.verificado.unwrap_or(false)))
+        .map(|r| {
+            (
+                r.id,
+                r.creador_id,
+                r.titulo,
+                r.slug,
+                r.tipo,
+                r.bpm,
+                r.key,
+                r.escala,
+                r.tags,
+                r.publicado_at,
+                r.total_likes.unwrap_or(0),
+                r.total_reproducciones.unwrap_or(0),
+                r.total_descargas.unwrap_or(0),
+                r.verificado.unwrap_or(false),
+            )
+        })
         .collect::<Vec<_>>()
     };
 
-    let dias_boost = AlgorithmSignalConfig::legacy_current().parametros.novedad_dias_boost;
+    let dias_boost = AlgorithmSignalConfig::legacy_current()
+        .parametros
+        .novedad_dias_boost;
     Ok(rows
         .into_iter()
         .map(|r| {
-            let dias = r.9.map(|ts| {
-                ((Utc::now() - ts).num_seconds().max(0) as f64) / 86_400.0
-            });
+            let dias =
+                r.9.map(|ts| ((Utc::now() - ts).num_seconds().max(0) as f64) / 86_400.0);
             let novelty = novelty_signal_score(dias, dias_boost);
             RankedSample {
                 id: r.0,
@@ -1050,7 +1084,8 @@ async fn fetch_similar_by_tags(
 }
 
 async fn collect_blocked(pool: &PgPool, user_id: i32) -> Result<Vec<i32>, AppError> {
-    let mut blocked = crate::repositories::ModerationRepository::list_blocked(pool, user_id).await?;
+    let mut blocked =
+        crate::repositories::ModerationRepository::list_blocked(pool, user_id).await?;
     let blockers = crate::repositories::ModerationRepository::list_blockers(pool, user_id).await?;
     blocked.extend(blockers);
     blocked.sort_unstable();
@@ -1146,7 +1181,10 @@ async fn cache_set(
     } else {
         MEMORY_CACHE.insert(
             key.to_owned(),
-            (value.to_vec(), Instant::now() + Duration::from_secs(ttl_secs)),
+            (
+                value.to_vec(),
+                Instant::now() + Duration::from_secs(ttl_secs),
+            ),
         );
         cleanup_memory();
     }

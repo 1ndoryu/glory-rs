@@ -277,7 +277,9 @@ fn canonicalize_pair(user_a: i32, user_b: i32) -> (i32, i32) {
     }
 }
 
-fn map_conversation_summary_row(row: ConversationSummaryRow) -> Result<ConversationSummary, AppError> {
+fn map_conversation_summary_row(
+    row: ConversationSummaryRow,
+) -> Result<ConversationSummary, AppError> {
     let last_type = DirectMessageKind::from_str(&row.last_type)?;
     let ultimo_mensaje = match last_type {
         DirectMessageKind::Texto => row.last_content,

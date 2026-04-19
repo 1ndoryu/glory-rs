@@ -36,7 +36,9 @@ impl FromStr for CommentTargetKind {
             "cancion" => Ok(Self::Cancion),
             "relacion" => Ok(Self::Relacion),
             "articulo" => Ok(Self::Articulo),
-            other => Err(AppError::Validation(format!("tipo de comentario inválido: {other}"))),
+            other => Err(AppError::Validation(format!(
+                "tipo de comentario inválido: {other}"
+            ))),
         }
     }
 }
@@ -66,7 +68,9 @@ impl FromStr for CommentContentKind {
             "texto" => Ok(Self::Texto),
             "imagen" => Ok(Self::Imagen),
             "audio" => Ok(Self::Audio),
-            other => Err(AppError::Validation(format!("tipo_contenido inválido: {other}"))),
+            other => Err(AppError::Validation(format!(
+                "tipo_contenido inválido: {other}"
+            ))),
         }
     }
 }
@@ -301,7 +305,11 @@ impl CommentRepository {
         Ok(())
     }
 
-    pub async fn recount_target(pool: &PgPool, kind: CommentTargetKind, target_id: i32) -> Result<(), AppError> {
+    pub async fn recount_target(
+        pool: &PgPool,
+        kind: CommentTargetKind,
+        target_id: i32,
+    ) -> Result<(), AppError> {
         match kind {
             CommentTargetKind::Sample => {
                 sqlx::query!(
@@ -487,7 +495,10 @@ impl CommentRepository {
         Ok(rows.into_iter().map(map_comment_row).collect())
     }
 
-    pub async fn find_context(pool: &PgPool, comment_id: i32) -> Result<Option<CommentContext>, AppError> {
+    pub async fn find_context(
+        pool: &PgPool,
+        comment_id: i32,
+    ) -> Result<Option<CommentContext>, AppError> {
         let row = sqlx::query_as!(
             CommentContextRow,
             r#"SELECT
@@ -508,7 +519,10 @@ impl CommentRepository {
         row.map(TryInto::try_into).transpose()
     }
 
-    pub async fn list_media_urls_for_thread(pool: &PgPool, comment_id: i32) -> Result<Vec<String>, AppError> {
+    pub async fn list_media_urls_for_thread(
+        pool: &PgPool,
+        comment_id: i32,
+    ) -> Result<Vec<String>, AppError> {
         let urls = sqlx::query_scalar!(
             r#"WITH RECURSIVE comment_tree AS (
                     SELECT id, media_url
@@ -580,15 +594,27 @@ mod tests {
 
     #[test]
     fn parses_comment_target_kind() {
-        assert_eq!(CommentTargetKind::from_str("sample").expect("sample"), CommentTargetKind::Sample);
-        assert_eq!(CommentTargetKind::from_str("articulo").expect("articulo"), CommentTargetKind::Articulo);
+        assert_eq!(
+            CommentTargetKind::from_str("sample").expect("sample"),
+            CommentTargetKind::Sample
+        );
+        assert_eq!(
+            CommentTargetKind::from_str("articulo").expect("articulo"),
+            CommentTargetKind::Articulo
+        );
         assert!(CommentTargetKind::from_str("otro").is_err());
     }
 
     #[test]
     fn parses_comment_content_kind() {
-        assert_eq!(CommentContentKind::from_str("texto").expect("texto"), CommentContentKind::Texto);
-        assert_eq!(CommentContentKind::from_str("audio").expect("audio"), CommentContentKind::Audio);
+        assert_eq!(
+            CommentContentKind::from_str("texto").expect("texto"),
+            CommentContentKind::Texto
+        );
+        assert_eq!(
+            CommentContentKind::from_str("audio").expect("audio"),
+            CommentContentKind::Audio
+        );
         assert!(CommentContentKind::from_str("video").is_err());
     }
 }

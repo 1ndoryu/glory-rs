@@ -9,7 +9,10 @@ use crate::errors::AppError;
 use crate::repositories::CommentContentKind;
 use crate::AppState;
 
-use super::{CreateCommentJsonRequest, MAX_AUDIO_UPLOAD_BYTES, MAX_COMMENT_CHARS, MAX_IMAGE_UPLOAD_BYTES, MAX_JSON_BODY_BYTES};
+use super::{
+    CreateCommentJsonRequest, MAX_AUDIO_UPLOAD_BYTES, MAX_COMMENT_CHARS, MAX_IMAGE_UPLOAD_BYTES,
+    MAX_JSON_BODY_BYTES,
+};
 
 #[derive(Debug)]
 pub struct ParsedCreateComment {
@@ -61,7 +64,9 @@ pub async fn parse_json_comment(body: Body) -> Result<ParsedCreateComment, AppEr
     })
 }
 
-pub async fn parse_multipart_comment(mut multipart: Multipart) -> Result<ParsedCreateComment, AppError> {
+pub async fn parse_multipart_comment(
+    mut multipart: Multipart,
+) -> Result<ParsedCreateComment, AppError> {
     let mut contenido = String::new();
     let mut parent_id = None;
     let mut declared_content_kind = None;
@@ -75,43 +80,41 @@ pub async fn parse_multipart_comment(mut multipart: Multipart) -> Result<ParsedC
         let name = field.name().unwrap_or_default().to_string();
         match name.as_str() {
             "contenido" => {
-                contenido = field
-                    .text()
-                    .await
-                    .map_err(|error| AppError::BadRequest(format!("contenido inválido: {error}")))?;
+                contenido = field.text().await.map_err(|error| {
+                    AppError::BadRequest(format!("contenido inválido: {error}"))
+                })?;
             }
             "parent_id" | "parentId" => {
-                let raw = field
-                    .text()
-                    .await
-                    .map_err(|error| AppError::BadRequest(format!("parent_id inválido: {error}")))?;
+                let raw = field.text().await.map_err(|error| {
+                    AppError::BadRequest(format!("parent_id inválido: {error}"))
+                })?;
                 if !raw.trim().is_empty() {
-                    parent_id = Some(
-                        raw.trim()
-                            .parse::<i32>()
-                            .map_err(|_| AppError::BadRequest("parent_id debe ser entero".into()))?,
-                    );
+                    parent_id =
+                        Some(raw.trim().parse::<i32>().map_err(|_| {
+                            AppError::BadRequest("parent_id debe ser entero".into())
+                        })?);
                 }
             }
             "tipo_contenido" | "tipoContenido" => {
-                let raw = field
-                    .text()
-                    .await
-                    .map_err(|error| AppError::BadRequest(format!("tipo_contenido inválido: {error}")))?;
+                let raw = field.text().await.map_err(|error| {
+                    AppError::BadRequest(format!("tipo_contenido inválido: {error}"))
+                })?;
                 if !raw.trim().is_empty() {
                     declared_content_kind = Some(CommentContentKind::from_str(raw.trim())?);
                 }
             }
             "media" => {
                 if media.is_some() {
-                    return Err(AppError::BadRequest("solo se permite un archivo media por comentario".into()));
+                    return Err(AppError::BadRequest(
+                        "solo se permite un archivo media por comentario".into(),
+                    ));
                 }
-                let content_type = field.content_type().map_or_else(
-                    || "application/octet-stream".to_string(),
-                    str::to_owned,
-                );
+                let content_type = field
+                    .content_type()
+                    .map_or_else(|| "application/octet-stream".to_string(), str::to_owned);
                 let original_filename = field.file_name().map(str::to_owned);
-                let (detected_kind, extension) = detect_media_kind(&content_type, original_filename.as_deref())?;
+                let (detected_kind, extension) =
+                    detect_media_kind(&content_type, original_filename.as_deref())?;
                 let max_bytes = match detected_kind {
                     CommentContentKind::Imagen => MAX_IMAGE_UPLOAD_BYTES,
                     CommentContentKind::Audio => MAX_AUDIO_UPLOAD_BYTES,
@@ -163,7 +166,9 @@ pub async fn parse_multipart_comment(mut multipart: Multipart) -> Result<ParsedC
 pub fn normalize_content(raw: &str, allow_empty: bool) -> Result<String, AppError> {
     let contenido = raw.trim().to_string();
     if contenido.is_empty() && !allow_empty {
-        return Err(AppError::Validation("el comentario no puede estar vacío".into()));
+        return Err(AppError::Validation(
+            "el comentario no puede estar vacío".into(),
+        ));
     }
     if contenido.chars().count() > MAX_COMMENT_CHARS {
         return Err(AppError::Validation(format!(
@@ -178,8 +183,9 @@ pub fn detect_media_kind(
     original_filename: Option<&str>,
 ) -> Result<(CommentContentKind, String), AppError> {
     let normalized = content_type.trim().to_ascii_lowercase();
-    let extension = infer_extension(&normalized, original_filename)
-        .ok_or_else(|| AppError::UnsupportedMediaType(format!("No se pudo inferir extensión para {content_type}")))?;
+    let extension = infer_extension(&normalized, original_filename).ok_or_else(|| {
+        AppError::UnsupportedMediaType(format!("No se pudo inferir extensión para {content_type}"))
+    })?;
 
     if normalized.starts_with("image/") {
         return Ok((CommentContentKind::Imagen, extension));
@@ -195,7 +201,11 @@ pub fn detect_media_kind(
 
 fn infer_extension(content_type: &str, original_filename: Option<&str>) -> Option<String> {
     let from_name = original_filename
-        .and_then(|name| std::path::Path::new(name).extension().and_then(|ext| ext.to_str()))
+        .and_then(|name| {
+            std::path::Path::new(name)
+                .extension()
+                .and_then(|ext| ext.to_str())
+        })
         .map(|ext| ext.trim().to_ascii_lowercase())
         .filter(|ext| !ext.is_empty());
     if from_name.is_some() {
@@ -239,16 +249,21 @@ mod tests {
     #[test]
     fn normalize_rejects_empty_without_media() {
         assert!(normalize_content("   ", false).is_err());
-        assert_eq!(normalize_content("   ", true).expect("empty with media"), "");
+        assert_eq!(
+            normalize_content("   ", true).expect("empty with media"),
+            ""
+        );
     }
 
     #[test]
     fn detects_audio_and_image_media() {
-        let (image_kind, image_ext) = detect_media_kind("image/png", Some("cover.png")).expect("image");
+        let (image_kind, image_ext) =
+            detect_media_kind("image/png", Some("cover.png")).expect("image");
         assert_eq!(image_kind.as_db_str(), "imagen");
         assert_eq!(image_ext, "png");
 
-        let (audio_kind, audio_ext) = detect_media_kind("audio/mpeg", Some("take.mp3")).expect("audio");
+        let (audio_kind, audio_ext) =
+            detect_media_kind("audio/mpeg", Some("take.mp3")).expect("audio");
         assert_eq!(audio_kind.as_db_str(), "audio");
         assert_eq!(audio_ext, "mp3");
     }

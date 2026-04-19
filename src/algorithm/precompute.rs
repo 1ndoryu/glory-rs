@@ -46,9 +46,7 @@ impl PrecomputeService {
                 /* Postgres devuelve 55000 (object_not_in_prerequisite_state)
                  * cuando la MV no se ha populado nunca. En ese caso lo único
                  * válido es un refresh no-concurrente. */
-                if msg.contains("has not been populated")
-                    || msg.contains("must be populated")
-                {
+                if msg.contains("has not been populated") || msg.contains("must be populated") {
                     sqlx::query("REFRESH MATERIALIZED VIEW mv_trending_samples")
                         .execute(pool)
                         .await?;

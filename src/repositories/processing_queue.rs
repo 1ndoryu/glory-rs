@@ -91,7 +91,11 @@ impl ProcessingQueueRepository {
         } else {
             Some(Utc::now() + Duration::minutes(retry_backoff_minutes(next_attempt)))
         };
-        let next_state = if is_final { "error_final" } else { "error_reintento" };
+        let next_state = if is_final {
+            "error_final"
+        } else {
+            "error_reintento"
+        };
         let processed_at = if is_final { Some(Utc::now()) } else { None };
 
         sqlx::query!(

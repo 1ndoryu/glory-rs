@@ -1,7 +1,5 @@
 use crate::errors::AppError;
-use crate::repositories::{
-    CommentRepository, CommentTargetKind, NotificationTargetRepository,
-};
+use crate::repositories::{CommentRepository, CommentTargetKind, NotificationTargetRepository};
 use crate::services::NotificationFanoutService;
 use crate::AppState;
 
@@ -17,9 +15,11 @@ pub async fn maybe_notify_comment_creation(
             .await?
             .ok_or_else(|| AppError::NotFound(format!("comentario padre {parent_id} no existe")))?;
         let sample_slug = match target_kind {
-            CommentTargetKind::Sample => NotificationTargetRepository::find_sample_meta(&state.pool, target_id)
-                .await?
-                .and_then(|meta| meta.slug),
+            CommentTargetKind::Sample => {
+                NotificationTargetRepository::find_sample_meta(&state.pool, target_id)
+                    .await?
+                    .and_then(|meta| meta.slug)
+            }
             CommentTargetKind::Publicacion
             | CommentTargetKind::Cancion
             | CommentTargetKind::Relacion
@@ -40,7 +40,9 @@ pub async fn maybe_notify_comment_creation(
 
     match target_kind {
         CommentTargetKind::Sample => {
-            if let Some(meta) = NotificationTargetRepository::find_sample_meta(&state.pool, target_id).await? {
+            if let Some(meta) =
+                NotificationTargetRepository::find_sample_meta(&state.pool, target_id).await?
+            {
                 NotificationFanoutService::dispatch_sample_comment(
                     state,
                     meta.creator_id,
@@ -53,7 +55,9 @@ pub async fn maybe_notify_comment_creation(
             }
         }
         CommentTargetKind::Publicacion => {
-            if let Some(meta) = NotificationTargetRepository::find_post_meta(&state.pool, target_id).await? {
+            if let Some(meta) =
+                NotificationTargetRepository::find_post_meta(&state.pool, target_id).await?
+            {
                 NotificationFanoutService::dispatch_post_comment(
                     state,
                     meta.author_id,
@@ -79,6 +83,11 @@ pub async fn maybe_notify_comment_like(
         .await?
         .ok_or_else(|| AppError::NotFound(format!("comentario {comment_id} no existe")))?;
 
-    NotificationFanoutService::dispatch_comment_reaction(state, context.autor_id, actor_id, comment_id)
-        .await
+    NotificationFanoutService::dispatch_comment_reaction(
+        state,
+        context.autor_id,
+        actor_id,
+        comment_id,
+    )
+    .await
 }

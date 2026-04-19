@@ -195,7 +195,10 @@ impl NotificationFanoutService {
                 destinatario_id: recipient_id,
                 tipo: "comentario".into(),
                 titulo: String::new(),
-                mensaje: format!("@{} comento en tu sample \"{}\"", actor.username, sample_title),
+                mensaje: format!(
+                    "@{} comento en tu sample \"{}\"",
+                    actor.username, sample_title
+                ),
                 datos: serde_json::json!({
                     "commenter_id": actor_id,
                     "sample_id": sample_id,
@@ -222,7 +225,10 @@ impl NotificationFanoutService {
         let message = if snippet.is_empty() {
             format!("@{} comento en tu publicacion", actor.username)
         } else {
-            format!("@{} comento en tu publicacion \"{}\"", actor.username, snippet)
+            format!(
+                "@{} comento en tu publicacion \"{}\"",
+                actor.username, snippet
+            )
         };
 
         Self::dispatch_persistent(
@@ -413,11 +419,7 @@ async fn load_actor_profile(state: &AppState, user_id: i32) -> Result<ActorProfi
     })
 }
 
-fn maybe_send_email_opt_in(
-    state: &AppState,
-    recipient_id: i32,
-    input: &CreateNotificationInput,
-) {
+fn maybe_send_email_opt_in(state: &AppState, recipient_id: i32, input: &CreateNotificationInput) {
     let _ = (&state.email_runtime, recipient_id, input);
 }
 
@@ -435,7 +437,10 @@ async fn emit_message_event(state: &AppState, recipient_id: i32, message: &Conve
             contenido: message.contenido.clone(),
             tipo: message.tipo,
             media_url: message.media_url.clone(),
-            media_metadata: map_media_metadata_for_ws(message.tipo, message.media_metadata.as_ref()),
+            media_metadata: map_media_metadata_for_ws(
+                message.tipo,
+                message.media_metadata.as_ref(),
+            ),
             leido: message.leido,
             creado_at: message.created_at,
         },
@@ -451,13 +456,11 @@ fn map_media_metadata_for_ws(
     let media_metadata = media_metadata?;
     match kind {
         DirectMessageKind::Texto => None,
-        DirectMessageKind::Imagen | DirectMessageKind::Audio => {
-            Some(serde_json::json!({
-                "formato": media_metadata.get("extension")?.as_str()?,
-                "tamano": media_metadata.get("size_bytes")?.as_u64()?,
-                "mimeType": media_metadata.get("content_type")?.as_str()?,
-            }))
-        }
+        DirectMessageKind::Imagen | DirectMessageKind::Audio => Some(serde_json::json!({
+            "formato": media_metadata.get("extension")?.as_str()?,
+            "tamano": media_metadata.get("size_bytes")?.as_u64()?,
+            "mimeType": media_metadata.get("content_type")?.as_str()?,
+        })),
         DirectMessageKind::Sample => Some(serde_json::json!({
             "sampleId": media_metadata.get("sample_id")?.as_i64()?,
             "titulo": media_metadata.get("titulo")?.as_str()?,
@@ -498,8 +501,7 @@ fn merge_push_data(
         );
         object.insert(
             "actorAvatarUrl".into(),
-            actor_avatar_url
-                .map_or(serde_json::Value::Null, serde_json::Value::String),
+            actor_avatar_url.map_or(serde_json::Value::Null, serde_json::Value::String),
         );
     }
     data
@@ -526,7 +528,10 @@ fn compact_snippet(raw: &str, max_chars: usize) -> String {
     if normalized.chars().count() <= max_chars {
         normalized
     } else {
-        format!("{}…", normalized.chars().take(max_chars).collect::<String>())
+        format!(
+            "{}…",
+            normalized.chars().take(max_chars).collect::<String>()
+        )
     }
 }
 
@@ -539,7 +544,11 @@ fn asset_to_public_url(public_base_url: Option<&str>, raw: Option<String>) -> Op
         return Some(raw);
     }
 
-    let path = if raw.starts_with('/') { raw } else { format!("/uploads/{raw}") };
+    let path = if raw.starts_with('/') {
+        raw
+    } else {
+        format!("/uploads/{raw}")
+    };
     Some(match public_base_url {
         Some(base) => format!("{}{}", base.trim_end_matches('/'), path),
         None => path,

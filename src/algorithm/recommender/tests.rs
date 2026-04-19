@@ -77,10 +77,17 @@ fn apply_diversity_penalizes_repeated_creator() {
         sample_row_basic(1, 7.0, "loop"), // 4to del mismo creador → penalizado
     ];
     let out = apply_diversity(input, &cfg);
-    let cuarto = out.iter().find(|r| (r.score - 7.0).abs() < 1e-9 || r.score < 7.0).unwrap();
+    let cuarto = out
+        .iter()
+        .find(|r| (r.score - 7.0).abs() < 1e-9 || r.score < 7.0)
+        .unwrap();
     /* El 4to del mismo creador (rc=4 > max_por_creador=3) sufre factor
      * (1 - 1*0.15) = 0.85 → score base 7.0 * 0.85 = 5.95. */
-    assert!(cuarto.score < 7.0, "esperaba penalización, score={}", cuarto.score);
+    assert!(
+        cuarto.score < 7.0,
+        "esperaba penalización, score={}",
+        cuarto.score
+    );
 }
 
 #[test]

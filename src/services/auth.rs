@@ -34,10 +34,16 @@ impl AuthService {
         req: RegisterRequest,
         jwt_secret: &str,
     ) -> Result<AuthResponse, AppError> {
-        if UserRepository::find_by_email(pool, &req.email).await?.is_some() {
+        if UserRepository::find_by_email(pool, &req.email)
+            .await?
+            .is_some()
+        {
             return Err(AppError::Conflict("Email ya registrado".into()));
         }
-        if UserRepository::find_by_username(pool, &req.username).await?.is_some() {
+        if UserRepository::find_by_username(pool, &req.username)
+            .await?
+            .is_some()
+        {
             return Err(AppError::Conflict("Username ya registrado".into()));
         }
         let salt = SaltString::generate(&mut OsRng);
@@ -45,8 +51,13 @@ impl AuthService {
             .hash_password(req.password.as_bytes(), &salt)
             .map_err(|e| AppError::Internal(format!("Hash error: {e}")))?
             .to_string();
-        let nombre = req.nombre_visible.clone().unwrap_or_else(|| req.username.clone());
-        let user = UserRepository::create_native(pool, &req.username, &req.email, &password_hash, &nombre).await?;
+        let nombre = req
+            .nombre_visible
+            .clone()
+            .unwrap_or_else(|| req.username.clone());
+        let user =
+            UserRepository::create_native(pool, &req.username, &req.email, &password_hash, &nombre)
+                .await?;
         Self::issue_pair(redis, &user, jwt_secret).await
     }
 
@@ -56,13 +67,21 @@ impl AuthService {
         req: LoginRequest,
         jwt_secret: &str,
     ) -> Result<AuthResponse, AppError> {
-        let user = UserRepository::find_by_identifier(pool, &req.identifier).await?.ok_or(AppError::Unauthorized)?;
+        let user = UserRepository::find_by_identifier(pool, &req.identifier)
+            .await?
+            .ok_or(AppError::Unauthorized)?;
         if user.estado != "activo" {
             return Err(AppError::Forbidden(format!("Cuenta {}", user.estado)));
         }
-        let stored = user.password_hash.as_deref().ok_or(AppError::Unauthorized)?;
-        let parsed = PasswordHash::new(stored).map_err(|e| AppError::Internal(format!("Hash invalido: {e}")))?;
-        Argon2::default().verify_password(req.password.as_bytes(), &parsed).map_err(|_| AppError::Unauthorized)?;
+        let stored = user
+            .password_hash
+            .as_deref()
+            .ok_or(AppError::Unauthorized)?;
+        let parsed = PasswordHash::new(stored)
+            .map_err(|e| AppError::Internal(format!("Hash invalido: {e}")))?;
+        Argon2::default()
+            .verify_password(req.password.as_bytes(), &parsed)
+            .map_err(|_| AppError::Unauthorized)?;
         Self::issue_pair(redis, &user, jwt_secret).await
     }
 
@@ -74,7 +93,8 @@ impl AuthService {
         jwt_secret: &str,
     ) -> Result<AuthResponse, AppError> {
         let user_id = TokenStore::consume_refresh(redis, refresh_token).await?;
-        let user = UserRepository::find_by_id(pool, user_id).await?
+        let user = UserRepository::find_by_id(pool, user_id)
+            .await?
             .ok_or(AppError::Unauthorized)?;
         if user.estado != "activo" {
             return Err(AppError::Forbidden(format!("Cuenta {}", user.estado)));
@@ -110,11 +130,17 @@ impl AuthService {
             return Err(AppError::Forbidden("Email no verificado por Google".into()));
         }
         let provider = "google";
-        let user = if let Some(u) = OAuthRepository::find_user_by_provider(pool, provider, &claims.sub).await? {
+        let user = if let Some(u) =
+            OAuthRepository::find_user_by_provider(pool, provider, &claims.sub).await?
+        {
             u
         } else {
             let email = claims.email.as_deref();
-            let by_email = if let Some(e) = email { UserRepository::find_by_email(pool, e).await? } else { None };
+            let by_email = if let Some(e) = email {
+                UserRepository::find_by_email(pool, e).await?
+            } else {
+                None
+            };
             let user = if let Some(u) = by_email {
                 u
             } else {
@@ -147,7 +173,9 @@ impl AuthService {
         client_id_hint: Option<&str>,
         jwt_secret: &str,
     ) -> Result<AuthResponse, AppError> {
-        let id_token = google.exchange_pkce(code, code_verifier, redirect_uri, client_id_hint).await?;
+        let id_token = google
+            .exchange_pkce(code, code_verifier, redirect_uri, client_id_hint)
+            .await?;
         Self::google_login(pool, redis, google, &id_token, jwt_secret).await
     }
 
@@ -168,7 +196,8 @@ impl AuthService {
 
     pub fn generate_access(user: &crate::models::User, secret: &str) -> Result<String, AppError> {
         let now = chrono::Utc::now();
-        let exp = now.checked_add_signed(chrono::Duration::hours(24))
+        let exp = now
+            .checked_add_signed(chrono::Duration::hours(24))
             .ok_or_else(|| AppError::Internal("exp overflow".into()))?
             .timestamp();
         let claims = Claims {
@@ -179,12 +208,21 @@ impl AuthService {
             plan: user.plan.clone(),
             rol: user.rol.clone(),
         };
-        encode(&Header::default(), &claims, &EncodingKey::from_secret(secret.as_bytes()))
-            .map_err(|e| AppError::Internal(format!("Token gen: {e}")))
+        encode(
+            &Header::default(),
+            &claims,
+            &EncodingKey::from_secret(secret.as_bytes()),
+        )
+        .map_err(|e| AppError::Internal(format!("Token gen: {e}")))
     }
 
     pub fn verify_token(token: &str, secret: &str) -> Result<Claims, AppError> {
-        decode::<Claims>(token, &DecodingKey::from_secret(secret.as_bytes()), &Validation::default())
-            .map(|d| d.claims).map_err(|_| AppError::Unauthorized)
+        decode::<Claims>(
+            token,
+            &DecodingKey::from_secret(secret.as_bytes()),
+            &Validation::default(),
+        )
+        .map(|d| d.claims)
+        .map_err(|_| AppError::Unauthorized)
     }
 }

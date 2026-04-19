@@ -144,7 +144,9 @@ async fn preserves_retry_after_on_http_errors() {
 }
 
 async fn spawn_test_server(state: TestState) -> String {
-    let app = Router::new().route("/", post(chat_handler)).with_state(state);
+    let app = Router::new()
+        .route("/", post(chat_handler))
+        .with_state(state);
     let listener = tokio::net::TcpListener::bind("127.0.0.1:0")
         .await
         .expect("should bind test listener");
@@ -152,7 +154,9 @@ async fn spawn_test_server(state: TestState) -> String {
         .local_addr()
         .expect("listener should expose local addr");
     tokio::spawn(async move {
-        axum::serve(listener, app).await.expect("test server should serve");
+        axum::serve(listener, app)
+            .await
+            .expect("test server should serve");
     });
 
     format!("http://{address}/")
@@ -184,7 +188,9 @@ async fn chat_handler(
     if let Some(retry_after) = response.retry_after_header {
         response_headers.insert(
             reqwest::header::RETRY_AFTER,
-            retry_after.parse().expect("retry-after header should parse"),
+            retry_after
+                .parse()
+                .expect("retry-after header should parse"),
         );
     }
 

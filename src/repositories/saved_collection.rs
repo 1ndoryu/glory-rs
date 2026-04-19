@@ -35,7 +35,11 @@ impl SavedCollectionsRepository {
         Ok(res.rows_affected() > 0)
     }
 
-    pub async fn unsave(pool: &PgPool, usuario_id: i32, coleccion_id: i64) -> Result<bool, AppError> {
+    pub async fn unsave(
+        pool: &PgPool,
+        usuario_id: i32,
+        coleccion_id: i64,
+    ) -> Result<bool, AppError> {
         let res = sqlx::query!(
             "DELETE FROM colecciones_guardadas WHERE usuario_id = $1 AND coleccion_id = $2",
             usuario_id,
@@ -46,7 +50,11 @@ impl SavedCollectionsRepository {
         Ok(res.rows_affected() > 0)
     }
 
-    pub async fn is_saved(pool: &PgPool, usuario_id: i32, coleccion_id: i64) -> Result<bool, AppError> {
+    pub async fn is_saved(
+        pool: &PgPool,
+        usuario_id: i32,
+        coleccion_id: i64,
+    ) -> Result<bool, AppError> {
         let r = sqlx::query_scalar!(
             r#"SELECT EXISTS(SELECT 1 FROM colecciones_guardadas
                              WHERE usuario_id = $1 AND coleccion_id = $2) AS "e!""#,

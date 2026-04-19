@@ -7,7 +7,8 @@ fn detects_120_bpm_from_click_track() {
     let pcm = build_click_track_pcm(120, 8, TARGET_SAMPLE_RATE_HZ);
     let samples = pcm_to_f32(&pcm);
 
-    let analysis = detect_bpm(&samples, TARGET_SAMPLE_RATE_HZ).expect("should detect BPM from click track");
+    let analysis =
+        detect_bpm(&samples, TARGET_SAMPLE_RATE_HZ).expect("should detect BPM from click track");
 
     assert!((i64::from(analysis.bpm) - 120).abs() <= 2);
     assert!(analysis.confidence > 0.25);
@@ -36,9 +37,11 @@ fn detects_90_bpm_from_wav_file() {
 }
 
 fn build_click_track_pcm(bpm: u32, beats: u32, sample_rate_hz: u32) -> Vec<i16> {
-    let samples_per_beat = usize::try_from((u64::from(sample_rate_hz) * 60) / u64::from(bpm.max(1)))
-        .expect("beat length should fit in usize");
-    let total_samples = samples_per_beat * usize::try_from(beats).expect("beats should fit in usize");
+    let samples_per_beat =
+        usize::try_from((u64::from(sample_rate_hz) * 60) / u64::from(bpm.max(1)))
+            .expect("beat length should fit in usize");
+    let total_samples =
+        samples_per_beat * usize::try_from(beats).expect("beats should fit in usize");
     let click_samples = usize::try_from(sample_rate_hz / 50).unwrap_or(160).max(1);
     let mut pcm = vec![0_i16; total_samples];
 

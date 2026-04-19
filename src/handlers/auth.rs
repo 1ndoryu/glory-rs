@@ -8,7 +8,10 @@ use crate::errors::AppError;
 #[allow(unused_imports)]
 use crate::errors::ErrorResponse;
 use crate::middleware::CurrentUser;
-use crate::models::{AuthResponse, GoogleAuthRequest, GooglePkceRequest, LoginRequest, LogoutRequest, RefreshRequest, RegisterRequest};
+use crate::models::{
+    AuthResponse, GoogleAuthRequest, GooglePkceRequest, LoginRequest, LogoutRequest,
+    RefreshRequest, RegisterRequest,
+};
 use crate::services::{AuthService, EmailNotificationService};
 use crate::AppState;
 
@@ -18,9 +21,12 @@ use crate::AppState;
         (status = 409, description = "Email/username duplicado", body = ErrorResponse),
         (status = 422, description = "Validacion", body = ErrorResponse)
     ))]
-pub async fn register(State(state): State<AppState>, Json(req): Json<RegisterRequest>)
-    -> Result<(StatusCode, Json<AuthResponse>), AppError> {
-    req.validate().map_err(|e| AppError::Validation(e.to_string()))?;
+pub async fn register(
+    State(state): State<AppState>,
+    Json(req): Json<RegisterRequest>,
+) -> Result<(StatusCode, Json<AuthResponse>), AppError> {
+    req.validate()
+        .map_err(|e| AppError::Validation(e.to_string()))?;
     let welcome_email = req.email.clone();
     let welcome_name = req
         .nombre_visible
@@ -41,9 +47,12 @@ pub async fn register(State(state): State<AppState>, Json(req): Json<RegisterReq
         (status = 401, description = "Credenciales invalidas", body = ErrorResponse),
         (status = 403, description = "Cuenta no activa", body = ErrorResponse)
     ))]
-pub async fn login(State(state): State<AppState>, Json(req): Json<LoginRequest>)
-    -> Result<Json<AuthResponse>, AppError> {
-    req.validate().map_err(|e| AppError::Validation(e.to_string()))?;
+pub async fn login(
+    State(state): State<AppState>,
+    Json(req): Json<LoginRequest>,
+) -> Result<Json<AuthResponse>, AppError> {
+    req.validate()
+        .map_err(|e| AppError::Validation(e.to_string()))?;
     let resp = AuthService::login(&state.pool, &state.redis, req, &state.jwt_secret).await?;
     Ok(Json(resp))
 }
@@ -53,9 +62,17 @@ pub async fn login(State(state): State<AppState>, Json(req): Json<LoginRequest>)
         (status = 200, description = "Tokens rotados", body = AuthResponse),
         (status = 401, description = "Refresh token invalido o expirado", body = ErrorResponse)
     ))]
-pub async fn refresh(State(state): State<AppState>, Json(req): Json<RefreshRequest>)
-    -> Result<Json<AuthResponse>, AppError> {
-    let resp = AuthService::refresh(&state.pool, &state.redis, &req.refresh_token, &state.jwt_secret).await?;
+pub async fn refresh(
+    State(state): State<AppState>,
+    Json(req): Json<RefreshRequest>,
+) -> Result<Json<AuthResponse>, AppError> {
+    let resp = AuthService::refresh(
+        &state.pool,
+        &state.redis,
+        &req.refresh_token,
+        &state.jwt_secret,
+    )
+    .await?;
     Ok(Json(resp))
 }
 
@@ -91,10 +108,20 @@ pub fn routes() -> Router<AppState> {
         (status = 401, description = "ID token invalido", body = ErrorResponse),
         (status = 403, description = "Email no verificado o cuenta bloqueada", body = ErrorResponse)
     ))]
-pub async fn google_login(State(state): State<AppState>, Json(req): Json<GoogleAuthRequest>)
-    -> Result<Json<AuthResponse>, AppError> {
-    req.validate().map_err(|e| AppError::Validation(e.to_string()))?;
-    let resp = AuthService::google_login(&state.pool, &state.redis, &state.google, &req.id_token, &state.jwt_secret).await?;
+pub async fn google_login(
+    State(state): State<AppState>,
+    Json(req): Json<GoogleAuthRequest>,
+) -> Result<Json<AuthResponse>, AppError> {
+    req.validate()
+        .map_err(|e| AppError::Validation(e.to_string()))?;
+    let resp = AuthService::google_login(
+        &state.pool,
+        &state.redis,
+        &state.google,
+        &req.id_token,
+        &state.jwt_secret,
+    )
+    .await?;
     Ok(Json(resp))
 }
 
@@ -104,13 +131,22 @@ pub async fn google_login(State(state): State<AppState>, Json(req): Json<GoogleA
         (status = 401, description = "code/verifier invalido", body = ErrorResponse),
         (status = 403, description = "Email no verificado o cuenta bloqueada", body = ErrorResponse)
     ))]
-pub async fn google_pkce(State(state): State<AppState>, Json(req): Json<GooglePkceRequest>)
-    -> Result<Json<AuthResponse>, AppError> {
-    req.validate().map_err(|e| AppError::Validation(e.to_string()))?;
+pub async fn google_pkce(
+    State(state): State<AppState>,
+    Json(req): Json<GooglePkceRequest>,
+) -> Result<Json<AuthResponse>, AppError> {
+    req.validate()
+        .map_err(|e| AppError::Validation(e.to_string()))?;
     let resp = AuthService::google_pkce_login(
-        &state.pool, &state.redis, &state.google,
-        &req.code, &req.code_verifier, &req.redirect_uri, req.client_id.as_deref(),
+        &state.pool,
+        &state.redis,
+        &state.google,
+        &req.code,
+        &req.code_verifier,
+        &req.redirect_uri,
+        req.client_id.as_deref(),
         &state.jwt_secret,
-    ).await?;
+    )
+    .await?;
     Ok(Json(resp))
 }

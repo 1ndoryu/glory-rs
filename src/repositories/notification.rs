@@ -96,7 +96,11 @@ impl NotificationRepository {
         Ok(rows.into_iter().map(map_notification_row).collect())
     }
 
-    pub async fn mark_read(pool: &PgPool, notification_id: i32, user_id: i32) -> Result<(), AppError> {
+    pub async fn mark_read(
+        pool: &PgPool,
+        notification_id: i32,
+        user_id: i32,
+    ) -> Result<(), AppError> {
         sqlx::query!(
             r#"UPDATE notificaciones
                SET leida = TRUE
@@ -149,13 +153,13 @@ impl NotificationRepository {
                )
                VALUES ($1, $2, $3, $4, $5, $6, $7)
                RETURNING id AS "id!""#,
-                record.recipient_id,
-                record.notification_type,
-                record.title,
-                record.message,
-                record.data,
-                record.actor_id,
-                record.link,
+            record.recipient_id,
+            record.notification_type,
+            record.title,
+            record.message,
+            record.data,
+            record.actor_id,
+            record.link,
         )
         .fetch_one(pool)
         .await?;
@@ -196,9 +200,7 @@ impl NotificationRepository {
 
 fn map_notification_row(row: NotificationRow) -> UserNotification {
     let actor = row.actor_username.map(|username| NotificationActor {
-        nombre_visible: row
-            .actor_display_name
-            .unwrap_or_else(|| username.clone()),
+        nombre_visible: row.actor_display_name.unwrap_or_else(|| username.clone()),
         avatar_url: row.actor_avatar_url,
         username,
     });

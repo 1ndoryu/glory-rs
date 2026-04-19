@@ -97,6 +97,7 @@ fn pgvector_roundtrip_preserves_values() {
 
 #[test]
 fn from_slice_rejects_wrong_dimension() {
-    let error = AudioEmbedding::from_slice(&[0.0_f32; 127]).expect_err("dimension mismatch should fail");
+    let error =
+        AudioEmbedding::from_slice(&[0.0_f32; 127]).expect_err("dimension mismatch should fail");
     assert_eq!(error, EmbeddingError::InvalidDimension(127));
 }

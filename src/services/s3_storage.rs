@@ -29,7 +29,10 @@ pub struct S3Storage {
 impl S3Storage {
     /// Crea un cliente S3 leyendo credenciales del entorno (AWS SDK chain).
     /// `endpoint_url` opcional para S3-compatibles (R2/MinIO).
-    pub async fn new(bucket: impl Into<String>, endpoint_url: Option<String>) -> Result<Self, AppError> {
+    pub async fn new(
+        bucket: impl Into<String>,
+        endpoint_url: Option<String>,
+    ) -> Result<Self, AppError> {
         let mut loader = aws_config::defaults(aws_config::BehaviorVersion::latest());
         if let Some(ep) = endpoint_url {
             loader = loader.endpoint_url(ep);

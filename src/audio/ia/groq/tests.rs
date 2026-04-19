@@ -55,7 +55,11 @@ async fn rotates_keys_and_falls_back_across_models() {
 
     let server = spawn_test_server(state.clone()).await;
     let client = GroqClient::with_model_chain(
-        vec!["gsk_key_1".to_owned(), "gsk_key_2".to_owned(), "gsk_key_3".to_owned()],
+        vec![
+            "gsk_key_1".to_owned(),
+            "gsk_key_2".to_owned(),
+            "gsk_key_3".to_owned(),
+        ],
         vec!["m1".to_owned(), "m2".to_owned(), "m3".to_owned()],
     )
     .expect("client should build")
@@ -114,7 +118,11 @@ async fn retries_same_model_before_switching() {
 
     let server = spawn_test_server(state.clone()).await;
     let client = GroqClient::with_model_chain(
-        vec!["gsk_key_1".to_owned(), "gsk_key_2".to_owned(), "gsk_key_3".to_owned()],
+        vec![
+            "gsk_key_1".to_owned(),
+            "gsk_key_2".to_owned(),
+            "gsk_key_3".to_owned(),
+        ],
         vec!["m1".to_owned(), "m2".to_owned()],
     )
     .expect("client should build")
@@ -163,7 +171,9 @@ fn extracts_retry_after_from_groq_message() {
 }
 
 async fn spawn_test_server(state: TestState) -> String {
-    let app = Router::new().route("/", post(chat_handler)).with_state(state);
+    let app = Router::new()
+        .route("/", post(chat_handler))
+        .with_state(state);
     let listener = tokio::net::TcpListener::bind("127.0.0.1:0")
         .await
         .expect("should bind test listener");
@@ -171,7 +181,9 @@ async fn spawn_test_server(state: TestState) -> String {
         .local_addr()
         .expect("listener should expose local addr");
     tokio::spawn(async move {
-        axum::serve(listener, app).await.expect("test server should serve");
+        axum::serve(listener, app)
+            .await
+            .expect("test server should serve");
     });
 
     format!("http://{address}/")

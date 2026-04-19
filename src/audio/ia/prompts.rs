@@ -103,7 +103,9 @@ pub fn build_analysis_prompt(input: &AudioAnalysisPromptInput) -> String {
             .map(|tag| format!("#{tag}"))
             .collect::<Vec<_>>()
             .join(", ");
-        parts.push(format!("El usuario ha colocado los siguientes tags: {tags}."));
+        parts.push(format!(
+            "El usuario ha colocado los siguientes tags: {tags}."
+        ));
     }
 
     if let Some(bpm) = input.bpm.filter(|value| *value > 0.0) {
@@ -166,7 +168,10 @@ pub fn build_correction_prompt(input: &MetadataCorrectionPromptInput) -> String 
 }
 
 fn non_empty(value: &Option<String>) -> Option<&str> {
-    value.as_deref().map(str::trim).filter(|value| !value.is_empty())
+    value
+        .as_deref()
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
 }
 
 fn non_empty_str(value: &str) -> Option<&str> {

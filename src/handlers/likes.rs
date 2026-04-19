@@ -99,7 +99,9 @@ pub async fn create_like(
         .await?;
 
     if reaction.is_positive() {
-        if let Err(error) = maybe_notify_target_like(&state, user.user_id, kind, body.target_id, reaction).await {
+        if let Err(error) =
+            maybe_notify_target_like(&state, user.user_id, kind, body.target_id, reaction).await
+        {
             warn!(
                 actor_id = user.user_id,
                 target_kind = kind.as_db_str(),
@@ -163,7 +165,9 @@ async fn maybe_notify_target_like(
 ) -> Result<(), AppError> {
     match kind {
         LikeKind::Sample => {
-            if let Some(meta) = NotificationTargetRepository::find_sample_meta(&state.pool, target_id).await? {
+            if let Some(meta) =
+                NotificationTargetRepository::find_sample_meta(&state.pool, target_id).await?
+            {
                 NotificationFanoutService::dispatch_sample_reaction(
                     state,
                     meta.creator_id,
@@ -177,7 +181,9 @@ async fn maybe_notify_target_like(
             }
         }
         LikeKind::Publicacion => {
-            if let Some(meta) = NotificationTargetRepository::find_post_meta(&state.pool, target_id).await? {
+            if let Some(meta) =
+                NotificationTargetRepository::find_post_meta(&state.pool, target_id).await?
+            {
                 NotificationFanoutService::dispatch_post_reaction(
                     state,
                     meta.author_id,

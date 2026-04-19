@@ -35,7 +35,11 @@ fn sign(payload: &str, secret: &str) -> String {
 
 /// Genera un token firmado válido por `ttl_secs` segundos (5 min por defecto si <=0).
 pub fn generate(sample_id: i32, user_id: i32, ttl_secs: i64, secret: &str) -> String {
-    let ttl = if ttl_secs > 0 { ttl_secs } else { DEFAULT_TTL_SECS };
+    let ttl = if ttl_secs > 0 {
+        ttl_secs
+    } else {
+        DEFAULT_TTL_SECS
+    };
     let exp = now_unix().saturating_add(ttl);
     let payload = format!("{sample_id}:{user_id}:{exp}");
     let sig = sign(&payload, secret);
@@ -100,7 +104,7 @@ mod tests {
     #[test]
     fn verify_rejects_expired() {
         let token = generate(1, 2, -10, "k"); // ttl<=0 → fallback 300s, no se puede simular fácil
-        // Construyo manualmente uno expirado:
+                                              // Construyo manualmente uno expirado:
         let payload = format!("1:2:{}", now_unix() - 10);
         let sig = sign(&payload, "k");
         let raw = format!("{payload}:{sig}");

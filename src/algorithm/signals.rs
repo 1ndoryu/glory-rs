@@ -277,7 +277,8 @@ impl AlgorithmSignalConfig {
 
     pub fn score(self, input: AlgorithmSignalInput) -> SignalScoreBreakdown {
         let similitud_contenido = content_similarity_score(input.distancia_coseno_contenido);
-        let comportamiento = behavior_signal_score(self.comportamiento_detalle, input.comportamiento);
+        let comportamiento =
+            behavior_signal_score(self.comportamiento_detalle, input.comportamiento);
         let contexto = context_signal_score(self.contexto_detalle, self.parametros, input.contexto);
         let tendencias = trend_signal_score(
             self.tendencias_detalle,
@@ -290,7 +291,8 @@ impl AlgorithmSignalConfig {
             self.parametros.novedad_dias_boost,
         );
 
-        let similitud_contenido = weighted_score(self.senales.similitud_contenido, similitud_contenido);
+        let similitud_contenido =
+            weighted_score(self.senales.similitud_contenido, similitud_contenido);
         let comportamiento = weighted_score(self.senales.comportamiento, comportamiento);
         let contexto = weighted_score(self.senales.contexto, contexto);
         let tendencias = weighted_score(self.senales.tendencias, tendencias);
@@ -377,12 +379,9 @@ pub fn trend_signal_score(
     input: TrendSignalInput,
 ) -> f64 {
     let likes = clamp_unit(input.likes_24h.max(0.0) / normalizers.max_likes_ventana_corta);
-    let reproducciones =
-        clamp_unit(input.reproducciones_24h / normalizers.max_repro_ventana_corta);
-    let descargas =
-        clamp_unit(input.descargas_7d / normalizers.max_descargas_ventana_media);
-    let follows =
-        clamp_unit(input.follows_creador_7d / normalizers.max_follows_ventana_media);
+    let reproducciones = clamp_unit(input.reproducciones_24h / normalizers.max_repro_ventana_corta);
+    let descargas = clamp_unit(input.descargas_7d / normalizers.max_descargas_ventana_media);
+    let follows = clamp_unit(input.follows_creador_7d / normalizers.max_follows_ventana_media);
 
     clamp_unit(
         weights.likes_24h * likes

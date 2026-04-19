@@ -50,7 +50,10 @@ impl TokenStore {
         } else {
             MEMORY_REFRESH.insert(
                 token.to_string(),
-                (user_id, Instant::now() + Duration::from_secs(REFRESH_TTL_SECS)),
+                (
+                    user_id,
+                    Instant::now() + Duration::from_secs(REFRESH_TTL_SECS),
+                ),
             );
             cleanup_memory();
         }
@@ -58,10 +61,7 @@ impl TokenStore {
     }
 
     /// Consume un refresh token (lectura + borrado atomico). Retorna user_id si valido.
-    pub async fn consume_refresh(
-        redis: &Option<RedisPool>,
-        token: &str,
-    ) -> Result<i32, AppError> {
+    pub async fn consume_refresh(redis: &Option<RedisPool>, token: &str) -> Result<i32, AppError> {
         if let Some(pool) = redis {
             let mut conn = pool
                 .get()
@@ -86,10 +86,7 @@ impl TokenStore {
         }
     }
 
-    pub async fn revoke_refresh(
-        redis: &Option<RedisPool>,
-        token: &str,
-    ) -> Result<(), AppError> {
+    pub async fn revoke_refresh(redis: &Option<RedisPool>, token: &str) -> Result<(), AppError> {
         if let Some(pool) = redis {
             let mut conn = pool
                 .get()
@@ -106,10 +103,7 @@ impl TokenStore {
     }
 
     /// Marca un access JWT (por su jti) como revocado hasta su expiracion natural.
-    pub async fn revoke_access(
-        redis: &Option<RedisPool>,
-        jti: &str,
-    ) -> Result<(), AppError> {
+    pub async fn revoke_access(redis: &Option<RedisPool>, jti: &str) -> Result<(), AppError> {
         if let Some(pool) = redis {
             let mut conn = pool
                 .get()
@@ -128,10 +122,7 @@ impl TokenStore {
         Ok(())
     }
 
-    pub async fn is_access_revoked(
-        redis: &Option<RedisPool>,
-        jti: &str,
-    ) -> Result<bool, AppError> {
+    pub async fn is_access_revoked(redis: &Option<RedisPool>, jti: &str) -> Result<bool, AppError> {
         if let Some(pool) = redis {
             let mut conn = pool
                 .get()
@@ -144,9 +135,7 @@ impl TokenStore {
             Ok(exists)
         } else {
             cleanup_memory();
-            Ok(MEMORY_REVOKED
-                .get(jti)
-                .is_some_and(|e| Instant::now() < *e))
+            Ok(MEMORY_REVOKED.get(jti).is_some_and(|e| Instant::now() < *e))
         }
     }
 }

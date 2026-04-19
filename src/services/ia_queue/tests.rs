@@ -63,7 +63,10 @@ fn prepared_update_preserves_existing_manual_folders() {
     let update = build_prepared_update(&sample, &analysis_result);
 
     assert_eq!(update.titulo.as_deref(), Some("Deep House Kick 124bpm Am"));
-    assert_eq!(update.slug.as_deref(), Some("deep-house-kick-124bpm-am-abc1234"));
+    assert_eq!(
+        update.slug.as_deref(),
+        Some("deep-house-kick-124bpm-am-abc1234")
+    );
     assert_eq!(update.descripcion.as_deref(), Some("descripcion corta"));
     assert_eq!(update.metadata["carpeta_primaria"], json!("Drums"));
     assert_eq!(update.metadata["carpeta_secundaria"], json!("Kicks"));

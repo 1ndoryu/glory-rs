@@ -76,7 +76,12 @@ pub async fn follow_user(
 
     state
         .algo_planner
-        .register_interaction(&state.pool, &state.redis, user.user_id, InteractionKind::Follow)
+        .register_interaction(
+            &state.pool,
+            &state.redis,
+            user.user_id,
+            InteractionKind::Follow,
+        )
         .await?;
 
     if let Err(error) =
@@ -135,7 +140,9 @@ pub async fn block_user(
     Json(body): Json<BlockRequest>,
 ) -> Result<Json<OkResponse>, AppError> {
     if user.user_id == target_id {
-        return Err(AppError::Validation("No puedes bloquearte a ti mismo".into()));
+        return Err(AppError::Validation(
+            "No puedes bloquearte a ti mismo".into(),
+        ));
     }
     if !FollowRepository::user_exists(&state.pool, target_id).await? {
         return Err(AppError::NotFound(format!("usuario {target_id} no existe")));

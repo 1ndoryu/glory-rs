@@ -128,7 +128,10 @@ pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/notificaciones", get(list_notifications))
         .route("/notificaciones/conteo", get(unread_notifications_count))
-        .route("/notificaciones/leer-todas", post(mark_all_notifications_read))
+        .route(
+            "/notificaciones/leer-todas",
+            post(mark_all_notifications_read),
+        )
         .route("/notificaciones/:id/leer", post(mark_notification_read))
 }
 

@@ -37,7 +37,9 @@ impl FromStr for DirectMessageKind {
             "imagen" => Ok(Self::Imagen),
             "audio" => Ok(Self::Audio),
             "sample" => Ok(Self::Sample),
-            other => Err(AppError::Validation(format!("tipo de mensaje inválido: {other}"))),
+            other => Err(AppError::Validation(format!(
+                "tipo de mensaje inválido: {other}"
+            ))),
         }
     }
 }
@@ -135,7 +137,10 @@ impl MessageRepository {
         rows.into_iter().map(map_message_row).collect()
     }
 
-    pub async fn count_by_conversation(pool: &PgPool, conversacion_id: i32) -> Result<i64, AppError> {
+    pub async fn count_by_conversation(
+        pool: &PgPool,
+        conversacion_id: i32,
+    ) -> Result<i64, AppError> {
         let total = sqlx::query_scalar!(
             r#"SELECT COUNT(*) AS "count!"
                FROM mensajes
@@ -204,7 +209,10 @@ impl MessageRepository {
         Ok(message_id)
     }
 
-    pub async fn get(pool: &PgPool, message_id: i32) -> Result<Option<ConversationMessage>, AppError> {
+    pub async fn get(
+        pool: &PgPool,
+        message_id: i32,
+    ) -> Result<Option<ConversationMessage>, AppError> {
         let row: Option<ConversationMessageRow> = sqlx::query_as!(
             ConversationMessageRow,
             r#"SELECT m.id AS "id!",
@@ -310,10 +318,22 @@ mod tests {
 
     #[test]
     fn parses_direct_message_kind() {
-        assert_eq!(DirectMessageKind::from_str("texto").expect("texto"), DirectMessageKind::Texto);
-        assert_eq!(DirectMessageKind::from_str("IMAGEN").expect("imagen"), DirectMessageKind::Imagen);
-        assert_eq!(DirectMessageKind::from_str("audio").expect("audio"), DirectMessageKind::Audio);
-        assert_eq!(DirectMessageKind::from_str("sample").expect("sample"), DirectMessageKind::Sample);
+        assert_eq!(
+            DirectMessageKind::from_str("texto").expect("texto"),
+            DirectMessageKind::Texto
+        );
+        assert_eq!(
+            DirectMessageKind::from_str("IMAGEN").expect("imagen"),
+            DirectMessageKind::Imagen
+        );
+        assert_eq!(
+            DirectMessageKind::from_str("audio").expect("audio"),
+            DirectMessageKind::Audio
+        );
+        assert_eq!(
+            DirectMessageKind::from_str("sample").expect("sample"),
+            DirectMessageKind::Sample
+        );
         assert!(DirectMessageKind::from_str("video").is_err());
     }
 }

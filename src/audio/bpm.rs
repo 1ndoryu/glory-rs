@@ -85,7 +85,9 @@ pub fn detect_bpm(samples: &[f32], sample_rate_hz: u32) -> Option<BpmAnalysis> {
     }
 
     let lag_min = usize::try_from(60_000 / (BPM_MAX * HOP_MS)).ok()?;
-    let lag_max = usize::try_from(60_000 / (BPM_MIN * HOP_MS)).ok()?.min(onsets.len() / 2);
+    let lag_max = usize::try_from(60_000 / (BPM_MIN * HOP_MS))
+        .ok()?
+        .min(onsets.len() / 2);
 
     if lag_min >= lag_max {
         return None;
@@ -102,7 +104,12 @@ pub fn detect_bpm(samples: &[f32], sample_rate_hz: u32) -> Option<BpmAnalysis> {
         return None;
     }
 
-    let mean_correlation = mean(&correlations.iter().map(|(_, value)| *value).collect::<Vec<_>>());
+    let mean_correlation = mean(
+        &correlations
+            .iter()
+            .map(|(_, value)| *value)
+            .collect::<Vec<_>>(),
+    );
     let confidence = if mean_correlation > 0.0 {
         (best_correlation / (mean_correlation * 3.0)).min(1.0)
     } else {
@@ -112,7 +119,8 @@ pub fn detect_bpm(samples: &[f32], sample_rate_hz: u32) -> Option<BpmAnalysis> {
     Some(BpmAnalysis {
         bpm,
         confidence,
-        analyzed_seconds: duration_from_sample_count(mono.len(), TARGET_SAMPLE_RATE_HZ).as_secs_f32(),
+        analyzed_seconds: duration_from_sample_count(mono.len(), TARGET_SAMPLE_RATE_HZ)
+            .as_secs_f32(),
         frame_count: energy.len(),
     })
 }
@@ -255,9 +263,14 @@ fn duration_from_sample_count(sample_count: usize, sample_rate_hz: u32) -> Durat
     Duration::new(seconds, u32::try_from(nanos).unwrap_or(u32::MAX))
 }
 
-fn decode_mono_samples(input_path: &Path, format_hint: Option<&str>) -> Result<(Vec<f32>, u32), BpmError> {
+fn decode_mono_samples(
+    input_path: &Path,
+    format_hint: Option<&str>,
+) -> Result<(Vec<f32>, u32), BpmError> {
     let mut reader = open_audio_reader(input_path, format_hint)?;
-    let max_frames = usize::try_from(u64::from(reader.sample_rate_hz) * u64::from(MAX_ANALYSIS_SECONDS)).unwrap_or(usize::MAX);
+    let max_frames =
+        usize::try_from(u64::from(reader.sample_rate_hz) * u64::from(MAX_ANALYSIS_SECONDS))
+            .unwrap_or(usize::MAX);
     let channel_scale = 1.0_f32 / f32::from(u16::try_from(reader.channels).unwrap_or(u16::MAX));
     let mut mono_samples = Vec::new();
     let mut sample_buffer: Option<SampleBuffer<f32>> = None;
@@ -269,9 +282,13 @@ fn decode_mono_samples(input_path: &Path, format_hint: Option<&str>) -> Result<(
 
         let packet = match reader.format.next_packet() {
             Ok(packet) => packet,
-            Err(SymphoniaError::IoError(error)) if error.kind() == ErrorKind::UnexpectedEof => break,
+            Err(SymphoniaError::IoError(error)) if error.kind() == ErrorKind::UnexpectedEof => {
+                break
+            }
             Err(SymphoniaError::ResetRequired) => {
-                return Err(BpmError::Symphonia("Symphonia pidió reset del decoder".to_owned()));
+                return Err(BpmError::Symphonia(
+                    "Symphonia pidió reset del decoder".to_owned(),
+                ));
             }
             Err(error) => return Err(error.into()),
         };
@@ -302,7 +319,9 @@ fn decode_mono_samples(input_path: &Path, format_hint: Option<&str>) -> Result<(
             Err(SymphoniaError::DecodeError(error)) => {
                 tracing::warn!(path = %input_path.display(), error, "packet corrupto al decodificar para BPM");
             }
-            Err(SymphoniaError::IoError(error)) if error.kind() == ErrorKind::UnexpectedEof => break,
+            Err(SymphoniaError::IoError(error)) if error.kind() == ErrorKind::UnexpectedEof => {
+                break
+            }
             Err(error) => return Err(error.into()),
         }
     }
@@ -310,7 +329,10 @@ fn decode_mono_samples(input_path: &Path, format_hint: Option<&str>) -> Result<(
     Ok((mono_samples, reader.sample_rate_hz))
 }
 
-fn open_audio_reader(input_path: &Path, format_hint: Option<&str>) -> Result<AudioReader, BpmError> {
+fn open_audio_reader(
+    input_path: &Path,
+    format_hint: Option<&str>,
+) -> Result<AudioReader, BpmError> {
     let file = File::open(input_path)?;
     let source = MediaSourceStream::new(Box::new(file), MediaSourceStreamOptions::default());
     let mut hint = Hint::new();
@@ -341,7 +363,8 @@ fn open_audio_reader(input_path: &Path, format_hint: Option<&str>) -> Result<Aud
         .channels
         .map(symphonia::core::audio::Channels::count)
         .ok_or_else(|| BpmError::MissingChannels(input_path.to_path_buf()))?;
-    let decoder = symphonia::default::get_codecs().make(&codec_params, &DecoderOptions::default())?;
+    let decoder =
+        symphonia::default::get_codecs().make(&codec_params, &DecoderOptions::default())?;
 
     Ok(AudioReader {
         format,

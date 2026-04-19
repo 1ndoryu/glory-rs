@@ -42,9 +42,7 @@ impl IaQueueRepository {
         Ok(inserted.rows_affected() > 0)
     }
 
-    pub async fn claim_next_pending(
-        pool: &PgPool,
-    ) -> Result<Option<QueuedIaJob>, sqlx::Error> {
+    pub async fn claim_next_pending(pool: &PgPool) -> Result<Option<QueuedIaJob>, sqlx::Error> {
         sqlx::query_as!(
             QueuedIaJob,
             "WITH picked AS (
@@ -109,7 +107,11 @@ impl IaQueueRepository {
         } else {
             Some(Utc::now() + retry_backoff_duration(next_attempt, retry_after_seconds))
         };
-        let next_status = if is_final { "failed" } else { "retry_scheduled" };
+        let next_status = if is_final {
+            "failed"
+        } else {
+            "retry_scheduled"
+        };
         let processed_at = if is_final { Some(Utc::now()) } else { None };
 
         sqlx::query!(
@@ -151,11 +153,7 @@ pub fn retry_backoff_duration(attempt: i32, retry_after_seconds: Option<f32>) ->
 }
 
 fn ceil_f32_seconds_to_i64(value: f32) -> i64 {
-    value
-        .ceil()
-        .to_string()
-        .parse::<i64>()
-        .unwrap_or_default()
+    value.ceil().to_string().parse::<i64>().unwrap_or_default()
 }
 
 #[cfg(test)]
@@ -165,8 +163,17 @@ mod tests {
     #[test]
     fn backoff_respects_provider_retry_after_without_shortening_exponential() {
         assert_eq!(retry_backoff_duration(1, None), Duration::seconds(60));
-        assert_eq!(retry_backoff_duration(2, Some(12.0)), Duration::seconds(180));
-        assert_eq!(retry_backoff_duration(3, Some(900.0)), Duration::seconds(900));
-        assert_eq!(retry_backoff_duration(8, Some(5.0)), Duration::seconds(1_800));
+        assert_eq!(
+            retry_backoff_duration(2, Some(12.0)),
+            Duration::seconds(180)
+        );
+        assert_eq!(
+            retry_backoff_duration(3, Some(900.0)),
+            Duration::seconds(900)
+        );
+        assert_eq!(
+            retry_backoff_duration(8, Some(5.0)),
+            Duration::seconds(1_800)
+        );
     }
 }

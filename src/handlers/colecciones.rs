@@ -27,7 +27,9 @@ use utoipa::ToSchema;
 
 use crate::errors::AppError;
 use crate::middleware::CurrentUser;
-use crate::repositories::{Coleccion, ColeccionSample, ColeccionesRepository, SavedColeccion, SavedCollectionsRepository};
+use crate::repositories::{
+    Coleccion, ColeccionSample, ColeccionesRepository, SavedColeccion, SavedCollectionsRepository,
+};
 use crate::AppState;
 
 pub mod zip;
@@ -41,7 +43,9 @@ pub struct CreateColeccionRequest {
     pub publica: bool,
     pub parent_id: Option<i64>,
 }
-fn default_true() -> bool { true }
+fn default_true() -> bool {
+    true
+}
 
 #[derive(Debug, Deserialize, ToSchema)]
 #[allow(clippy::option_option)] // serde necesita Option<Option<T>> para distinguir ausente vs null
@@ -105,11 +109,15 @@ pub async fn create_coleccion(
 ) -> Result<(StatusCode, Json<Coleccion>), AppError> {
     let nombre = body.nombre.trim();
     if nombre.is_empty() || nombre.len() > 200 {
-        return Err(AppError::BadRequest("nombre requerido (1..200 chars)".into()));
+        return Err(AppError::BadRequest(
+            "nombre requerido (1..200 chars)".into(),
+        ));
     }
     if let Some(d) = &body.descripcion {
         if d.len() > 2000 {
-            return Err(AppError::BadRequest("descripcion demasiado larga (>2000)".into()));
+            return Err(AppError::BadRequest(
+                "descripcion demasiado larga (>2000)".into(),
+            ));
         }
     }
     let col = ColeccionesRepository::create(
@@ -180,7 +188,9 @@ pub async fn update_coleccion(
     Json(body): Json<UpdateColeccionRequest>,
 ) -> Result<Json<OkResponse>, AppError> {
     if !ColeccionesRepository::is_owner(&state.pool, id, user.user_id).await? {
-        return Err(AppError::Forbidden("no eres dueño de esta coleccion".into()));
+        return Err(AppError::Forbidden(
+            "no eres dueño de esta coleccion".into(),
+        ));
     }
     if let Some(n) = &body.nombre {
         let n = n.trim();
@@ -191,7 +201,9 @@ pub async fn update_coleccion(
     /* parent_id propio = circular */
     if let Some(Some(pid)) = body.parent_id {
         if pid == id {
-            return Err(AppError::BadRequest("una coleccion no puede ser su propio padre".into()));
+            return Err(AppError::BadRequest(
+                "una coleccion no puede ser su propio padre".into(),
+            ));
         }
         ColeccionesRepository::check_parent_valid(&state.pool, user.user_id, pid).await?;
     }
@@ -230,7 +242,9 @@ pub async fn delete_coleccion(
     Path(id): Path<i64>,
 ) -> Result<Json<OkResponse>, AppError> {
     if !ColeccionesRepository::is_owner(&state.pool, id, user.user_id).await? {
-        return Err(AppError::Forbidden("no eres dueño de esta coleccion".into()));
+        return Err(AppError::Forbidden(
+            "no eres dueño de esta coleccion".into(),
+        ));
     }
     let ok = ColeccionesRepository::soft_delete(&state.pool, id).await?;
     if !ok {
@@ -257,12 +271,15 @@ pub async fn add_sample(
     Json(body): Json<AddSampleRequest>,
 ) -> Result<Json<OkResponse>, AppError> {
     if !ColeccionesRepository::is_owner(&state.pool, coleccion_id, user.user_id).await? {
-        return Err(AppError::Forbidden("no eres dueño de esta coleccion".into()));
+        return Err(AppError::Forbidden(
+            "no eres dueño de esta coleccion".into(),
+        ));
     }
     if body.sample_id <= 0 {
         return Err(AppError::BadRequest("sample_id requerido".into()));
     }
-    let _inserted = ColeccionesRepository::add_sample(&state.pool, coleccion_id, body.sample_id).await?;
+    let _inserted =
+        ColeccionesRepository::add_sample(&state.pool, coleccion_id, body.sample_id).await?;
     /* Idempotente: insertar duplicado devuelve ok:true (UX legacy). */
     Ok(Json(OkResponse { ok: true }))
 }
@@ -282,9 +299,12 @@ pub async fn remove_sample(
     Path((coleccion_id, sample_id)): Path<(i64, i32)>,
 ) -> Result<Json<OkResponse>, AppError> {
     if !ColeccionesRepository::is_owner(&state.pool, coleccion_id, user.user_id).await? {
-        return Err(AppError::Forbidden("no eres dueño de esta coleccion".into()));
+        return Err(AppError::Forbidden(
+            "no eres dueño de esta coleccion".into(),
+        ));
     }
-    let _removed = ColeccionesRepository::remove_sample(&state.pool, coleccion_id, sample_id).await?;
+    let _removed =
+        ColeccionesRepository::remove_sample(&state.pool, coleccion_id, sample_id).await?;
     Ok(Json(OkResponse { ok: true }))
 }
 
@@ -315,26 +335,31 @@ pub async fn list_samples(
 
 pub fn routes() -> Router<AppState> {
     Router::new()
-        .route("/colecciones", post(create_coleccion).get(list_my_colecciones))
+        .route(
+            "/colecciones",
+            post(create_coleccion).get(list_my_colecciones),
+        )
         .route(
             "/colecciones/:id",
-            get(get_coleccion).put(update_coleccion).delete(delete_coleccion),
+            get(get_coleccion)
+                .put(update_coleccion)
+                .delete(delete_coleccion),
         )
         .route(
             "/colecciones/:id/samples",
             post(add_sample).get(list_samples),
         )
-        .route(
-            "/colecciones/:id/samples/:sample_id",
-            delete(remove_sample),
-        )
+        .route("/colecciones/:id/samples/:sample_id", delete(remove_sample))
         .route("/colecciones/:id/merge", post(merge_coleccion))
         .route(
             "/colecciones/:id/save",
             post(save_coleccion).delete(unsave_coleccion),
         )
         .route("/me/colecciones-guardadas", get(list_saved_colecciones))
-        .route("/colecciones/:id/descargar-zip", post(descargar_zip_coleccion))
+        .route(
+            "/colecciones/:id/descargar-zip",
+            post(descargar_zip_coleccion),
+        )
 }
 
 #[derive(Debug, Deserialize, ToSchema)]
@@ -369,10 +394,14 @@ pub async fn merge_coleccion(
     Json(body): Json<MergeColeccionRequest>,
 ) -> Result<Json<MergeColeccionResponse>, AppError> {
     if !ColeccionesRepository::is_owner(&state.pool, target_id, user.user_id).await? {
-        return Err(AppError::Forbidden("no eres dueño de la coleccion target".into()));
+        return Err(AppError::Forbidden(
+            "no eres dueño de la coleccion target".into(),
+        ));
     }
     if !ColeccionesRepository::is_owner(&state.pool, body.source_id, user.user_id).await? {
-        return Err(AppError::Forbidden("no eres dueño de la coleccion source".into()));
+        return Err(AppError::Forbidden(
+            "no eres dueño de la coleccion source".into(),
+        ));
     }
     let moved = ColeccionesRepository::merge(&state.pool, target_id, body.source_id).await?;
     Ok(Json(MergeColeccionResponse { ok: true, moved }))
@@ -392,7 +421,9 @@ pub struct SavedListQuery {
     #[serde(default)]
     pub offset: i64,
 }
-fn default_limit() -> i64 { 30 }
+fn default_limit() -> i64 {
+    30
+}
 
 #[utoipa::path(
     post, path = "/api/colecciones/{id}/save", tag = "colecciones",
@@ -451,6 +482,7 @@ pub async fn list_saved_colecciones(
 ) -> Result<Json<SavedListResponse>, AppError> {
     let limit = q.limit.clamp(1, 100);
     let offset = q.offset.max(0);
-    let items = SavedCollectionsRepository::list_by_user(&state.pool, user.user_id, limit, offset).await?;
+    let items =
+        SavedCollectionsRepository::list_by_user(&state.pool, user.user_id, limit, offset).await?;
     Ok(Json(SavedListResponse { items }))
 }

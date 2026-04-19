@@ -1,7 +1,5 @@
 use crate::audio::ia::json_repairer::AudioCreativeMetadata;
-use crate::repositories::{
-    ApplyAudioIaMetadataParams, AudioIaSample, SampleRepository,
-};
+use crate::repositories::{ApplyAudioIaMetadataParams, AudioIaSample, SampleRepository};
 use crate::services::{
     AudioIaAnalysisRequest, AudioIaAnalysisResult, AudioIaProvider, AudioIaService,
     AudioIaServiceError,
@@ -160,11 +158,13 @@ fn build_prepared_update(
     let metadata = &analysis_result.metadata;
     let current_primary = metadata_string(&sample.metadata, "carpeta_primaria");
     let current_secondary = metadata_string(&sample.metadata, "carpeta_secundaria");
-    let preserve_existing_folder = current_primary
-        .as_deref()
-        .is_some_and(|value| !value.trim().is_empty() && !value.eq_ignore_ascii_case(DEFAULT_FOLDER));
+    let preserve_existing_folder = current_primary.as_deref().is_some_and(|value| {
+        !value.trim().is_empty() && !value.eq_ignore_ascii_case(DEFAULT_FOLDER)
+    });
     let carpeta_primaria = if preserve_existing_folder {
-        current_primary.clone().unwrap_or_else(|| DEFAULT_FOLDER.to_owned())
+        current_primary
+            .clone()
+            .unwrap_or_else(|| DEFAULT_FOLDER.to_owned())
     } else {
         normalize_folder(&metadata.carpeta_primaria)
     };
@@ -213,7 +213,10 @@ fn build_prepared_update(
     }
 }
 
-fn build_generated_title(sample: &AudioIaSample, metadata: &AudioCreativeMetadata) -> Option<String> {
+fn build_generated_title(
+    sample: &AudioIaSample,
+    metadata: &AudioCreativeMetadata,
+) -> Option<String> {
     let base_name = non_empty_text(&metadata.nombre_archivo_base)?;
     let mut title = title_case(&base_name);
 
@@ -222,7 +225,11 @@ fn build_generated_title(sample: &AudioIaSample, metadata: &AudioCreativeMetadat
         write!(&mut title, "{bpm}bpm").expect("writing bpm into title should not fail");
     }
 
-    if let Some(music_key) = sample.music_key.as_deref().filter(|value| !value.trim().is_empty()) {
+    if let Some(music_key) = sample
+        .music_key
+        .as_deref()
+        .filter(|value| !value.trim().is_empty())
+    {
         title.push(' ');
         title.push_str(music_key.trim());
         if sample

@@ -69,9 +69,9 @@ impl LocalFs {
     /// Crea una instancia y asegura que el root existe (creando si hace falta).
     pub async fn new(root: impl Into<PathBuf>) -> Result<Self, AppError> {
         let root = root.into();
-        tokio::fs::create_dir_all(&root)
-            .await
-            .map_err(|e| AppError::Internal(format!("crear storage_root {}: {e}", root.display())))?;
+        tokio::fs::create_dir_all(&root).await.map_err(|e| {
+            AppError::Internal(format!("crear storage_root {}: {e}", root.display()))
+        })?;
         Ok(Self { root })
     }
 
@@ -133,12 +133,10 @@ impl FileStorage for LocalFs {
 
     async fn get_bytes(&self, key: &str) -> Result<Vec<u8>, AppError> {
         let path = self.resolve(key)?;
-        tokio::fs::read(&path)
-            .await
-            .map_err(|e| match e.kind() {
-                std::io::ErrorKind::NotFound => AppError::NotFound(format!("storage: {key}")),
-                _ => AppError::Internal(format!("leer {}: {e}", path.display())),
-            })
+        tokio::fs::read(&path).await.map_err(|e| match e.kind() {
+            std::io::ErrorKind::NotFound => AppError::NotFound(format!("storage: {key}")),
+            _ => AppError::Internal(format!("leer {}: {e}", path.display())),
+        })
     }
 
     async fn exists(&self, key: &str) -> Result<bool, AppError> {
@@ -146,7 +144,10 @@ impl FileStorage for LocalFs {
         match tokio::fs::metadata(&path).await {
             Ok(_) => Ok(true),
             Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(false),
-            Err(e) => Err(AppError::Internal(format!("metadata {}: {e}", path.display()))),
+            Err(e) => Err(AppError::Internal(format!(
+                "metadata {}: {e}",
+                path.display()
+            ))),
         }
     }
 
@@ -155,7 +156,10 @@ impl FileStorage for LocalFs {
         match tokio::fs::remove_file(&path).await {
             Ok(()) => Ok(()),
             Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(()),
-            Err(e) => Err(AppError::Internal(format!("borrar {}: {e}", path.display()))),
+            Err(e) => Err(AppError::Internal(format!(
+                "borrar {}: {e}",
+                path.display()
+            ))),
         }
     }
 

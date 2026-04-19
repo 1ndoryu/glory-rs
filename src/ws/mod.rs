@@ -38,11 +38,7 @@ pub async fn emit_event<T: Serialize>(
         name: name.to_owned(),
         payload,
     };
-    let delivered = broadcast_envelope(
-        &state.ws_hub,
-        user_id,
-        &envelope,
-    )?;
+    let delivered = broadcast_envelope(&state.ws_hub, user_id, &envelope)?;
     publish_bridge_message(&state.redis, state.ws_node_id, user_id, &envelope).await?;
     Ok(delivered)
 }
@@ -287,10 +283,9 @@ async fn publish_bridge_message(
     };
     let payload = serde_json::to_string(&message)
         .map_err(|error| AppError::Internal(format!("serializar bridge websocket: {error}")))?;
-    let mut connection = redis
-        .get()
-        .await
-        .map_err(|error| AppError::Internal(format!("obtener conexión redis websocket: {error}")))?;
+    let mut connection = redis.get().await.map_err(|error| {
+        AppError::Internal(format!("obtener conexión redis websocket: {error}"))
+    })?;
     let _: i64 = connection
         .publish(redis_ws_channel(user_id), payload)
         .await
@@ -316,7 +311,9 @@ fn parse_channel_user_id(channel: &str) -> Result<i32, AppError> {
         .strip_prefix(REDIS_WS_CHANNEL_PREFIX)
         .ok_or_else(|| AppError::Internal(format!("canal websocket inválido: {channel}")))?
         .parse::<i32>()
-        .map_err(|error| AppError::Internal(format!("user_id inválido en canal websocket: {error}")))
+        .map_err(|error| {
+            AppError::Internal(format!("user_id inválido en canal websocket: {error}"))
+        })
 }
 
 fn redis_ws_channel(user_id: i32) -> String {
@@ -325,7 +322,9 @@ fn redis_ws_channel(user_id: i32) -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::{broadcast_envelope, parse_bridge_message, parse_channel_user_id, RedisBridgeMessage};
+    use super::{
+        broadcast_envelope, parse_bridge_message, parse_channel_user_id, RedisBridgeMessage,
+    };
     use axum::extract::ws::Message;
     use glory_rs::websocket::{HubConfig, WebSocketEnvelope, WebSocketHub};
     use serde_json::json;

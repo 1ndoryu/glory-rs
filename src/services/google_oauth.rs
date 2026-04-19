@@ -24,7 +24,9 @@ struct Jwk {
 }
 
 #[derive(Debug, Deserialize)]
-struct Jwks { keys: Vec<Jwk> }
+struct Jwks {
+    keys: Vec<Jwk>,
+}
 
 #[derive(Debug, Deserialize)]
 pub struct GoogleIdClaims {
@@ -32,14 +34,22 @@ pub struct GoogleIdClaims {
     pub sub: String,
     pub aud: String,
     pub exp: i64,
-    #[serde(default)] pub email: Option<String>,
-    #[serde(default)] pub email_verified: Option<bool>,
-    #[serde(default)] pub name: Option<String>,
-    #[serde(default)] pub picture: Option<String>,
-    #[serde(default, alias = "given_name")] pub given_name: Option<String>,
+    #[serde(default)]
+    pub email: Option<String>,
+    #[serde(default)]
+    pub email_verified: Option<bool>,
+    #[serde(default)]
+    pub name: Option<String>,
+    #[serde(default)]
+    pub picture: Option<String>,
+    #[serde(default, alias = "given_name")]
+    pub given_name: Option<String>,
 }
 
-struct CacheEntry { keys: Vec<Jwk>, fetched: Instant }
+struct CacheEntry {
+    keys: Vec<Jwk>,
+    fetched: Instant,
+}
 
 pub struct GoogleVerifier {
     client_ids: Vec<String>,
@@ -59,9 +69,13 @@ impl GoogleVerifier {
         }
     }
 
-    pub fn is_configured(&self) -> bool { !self.client_ids.is_empty() }
+    pub fn is_configured(&self) -> bool {
+        !self.client_ids.is_empty()
+    }
 
-    pub fn client_ids(&self) -> &[String] { &self.client_ids }
+    pub fn client_ids(&self) -> &[String] {
+        &self.client_ids
+    }
 
     /// [174A-22] Intercambia (code, code_verifier) por tokens via PKCE en
     /// https://oauth2.googleapis.com/token. Devuelve el id_token (string).
@@ -73,13 +87,18 @@ impl GoogleVerifier {
         client_id_hint: Option<&str>,
     ) -> Result<String, AppError> {
         #[derive(Deserialize)]
-        struct TokenResp { id_token: Option<String>, error: Option<String> }
-        let client_id = match client_id_hint {
-            Some(id) if self.client_ids.iter().any(|c| c == id) => id.to_string(),
-            Some(_) => return Err(AppError::Unauthorized),
-            None => self.client_ids.first().cloned()
-                .ok_or_else(|| AppError::Internal("GOOGLE_CLIENT_IDS no configurados".into()))?,
-        };
+        struct TokenResp {
+            id_token: Option<String>,
+            error: Option<String>,
+        }
+        let client_id =
+            match client_id_hint {
+                Some(id) if self.client_ids.iter().any(|c| c == id) => id.to_string(),
+                Some(_) => return Err(AppError::Unauthorized),
+                None => self.client_ids.first().cloned().ok_or_else(|| {
+                    AppError::Internal("GOOGLE_CLIENT_IDS no configurados".into())
+                })?,
+            };
         let form = [
             ("grant_type", "authorization_code"),
             ("client_id", client_id.as_str()),
@@ -87,12 +106,20 @@ impl GoogleVerifier {
             ("code_verifier", code_verifier),
             ("redirect_uri", redirect_uri),
         ];
-        let resp = self.http.post("https://oauth2.googleapis.com/token")
-            .form(&form).send().await
+        let resp = self
+            .http
+            .post("https://oauth2.googleapis.com/token")
+            .form(&form)
+            .send()
+            .await
             .map_err(|e| AppError::Internal(format!("Google token exchange: {e}")))?;
-        let parsed: TokenResp = resp.json().await
+        let parsed: TokenResp = resp
+            .json()
+            .await
             .map_err(|e| AppError::Internal(format!("Google token parse: {e}")))?;
-        if let Some(err) = parsed.error { return Err(AppError::Forbidden(format!("Google PKCE: {err}"))); }
+        if let Some(err) = parsed.error {
+            return Err(AppError::Forbidden(format!("Google PKCE: {err}")));
+        }
         parsed.id_token.ok_or(AppError::Unauthorized)
     }
 
@@ -100,36 +127,57 @@ impl GoogleVerifier {
         {
             let g = self.cache.read().await;
             if let Some(e) = g.as_ref() {
-                if e.fetched.elapsed() < JWKS_TTL { return Ok(e.keys.clone()); }
+                if e.fetched.elapsed() < JWKS_TTL {
+                    return Ok(e.keys.clone());
+                }
             }
         }
-        let resp = self.http.get(GOOGLE_JWKS_URL).send().await
+        let resp = self
+            .http
+            .get(GOOGLE_JWKS_URL)
+            .send()
+            .await
             .map_err(|e| AppError::Internal(format!("JWKS fetch: {e}")))?;
-        let jwks: Jwks = resp.json().await
+        let jwks: Jwks = resp
+            .json()
+            .await
             .map_err(|e| AppError::Internal(format!("JWKS parse: {e}")))?;
         let mut w = self.cache.write().await;
-        *w = Some(CacheEntry { keys: jwks.keys.clone(), fetched: Instant::now() });
+        *w = Some(CacheEntry {
+            keys: jwks.keys.clone(),
+            fetched: Instant::now(),
+        });
         Ok(jwks.keys)
     }
 
     pub async fn verify(&self, id_token: &str) -> Result<GoogleIdClaims, AppError> {
         if self.client_ids.is_empty() {
-            return Err(AppError::Internal("GOOGLE_CLIENT_IDS no configurados".into()));
+            return Err(AppError::Internal(
+                "GOOGLE_CLIENT_IDS no configurados".into(),
+            ));
         }
         let header = decode_header(id_token).map_err(|_| AppError::Unauthorized)?;
         let kid = header.kid.ok_or(AppError::Unauthorized)?;
         let keys = self.keys().await?;
-        let jwk = keys.iter().find(|k| k.kid == kid).ok_or(AppError::Unauthorized)?;
-        let dk = DecodingKey::from_rsa_components(&jwk.n, &jwk.e)
-            .map_err(|_| AppError::Unauthorized)?;
-        let mut val = Validation::new(jwk.alg.as_deref().and_then(|a| match a {
-            "RS256" => Some(Algorithm::RS256),
-            _ => None,
-        }).unwrap_or(Algorithm::RS256));
+        let jwk = keys
+            .iter()
+            .find(|k| k.kid == kid)
+            .ok_or(AppError::Unauthorized)?;
+        let dk =
+            DecodingKey::from_rsa_components(&jwk.n, &jwk.e).map_err(|_| AppError::Unauthorized)?;
+        let mut val = Validation::new(
+            jwk.alg
+                .as_deref()
+                .and_then(|a| match a {
+                    "RS256" => Some(Algorithm::RS256),
+                    _ => None,
+                })
+                .unwrap_or(Algorithm::RS256),
+        );
         val.set_audience(&self.client_ids);
         val.set_issuer(GOOGLE_ISSUERS);
-        let data = decode::<GoogleIdClaims>(id_token, &dk, &val)
-            .map_err(|_| AppError::Unauthorized)?;
+        let data =
+            decode::<GoogleIdClaims>(id_token, &dk, &val).map_err(|_| AppError::Unauthorized)?;
         Ok(data.claims)
     }
 }

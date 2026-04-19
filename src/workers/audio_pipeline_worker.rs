@@ -80,7 +80,10 @@ impl AudioPipelineWorker {
             .await
         {
             Ok(result) => {
-                if let Err(error) = ProcessingQueueRepository::mark_audio_analysis_completed(&self.pool, job.id).await {
+                if let Err(error) =
+                    ProcessingQueueRepository::mark_audio_analysis_completed(&self.pool, job.id)
+                        .await
+                {
                     tracing::error!(
                         worker = self.worker_index,
                         job_id = job.id,

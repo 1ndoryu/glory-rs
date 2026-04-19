@@ -5,10 +5,16 @@ use uuid::Uuid;
 
 #[test]
 fn detects_c_major_scale() {
-    let pcm = build_note_cycle_pcm(&[262, 294, 330, 349, 392, 440, 494, 523], 180, 2, TARGET_SAMPLE_RATE_HZ);
+    let pcm = build_note_cycle_pcm(
+        &[262, 294, 330, 349, 392, 440, 494, 523],
+        180,
+        2,
+        TARGET_SAMPLE_RATE_HZ,
+    );
     let samples = pcm_to_f32(&pcm);
 
-    let analysis = detect_key(&samples, TARGET_SAMPLE_RATE_HZ).expect("should detect key from major scale");
+    let analysis =
+        detect_key(&samples, TARGET_SAMPLE_RATE_HZ).expect("should detect key from major scale");
 
     assert_eq!(analysis.music_key, 0);
     assert_eq!(analysis.scale, "major");
@@ -43,10 +49,12 @@ fn build_note_cycle_pcm(
     repetitions: u32,
     sample_rate_hz: u32,
 ) -> Vec<i16> {
-    let note_samples = usize::try_from((u64::from(sample_rate_hz) * u64::from(note_duration_ms)) / 1_000)
-        .expect("fixture should fit in usize");
-    let total_notes = usize::try_from(u64::from(repetitions) * u64::try_from(frequencies_hz.len()).unwrap_or(0))
-        .expect("total notes should fit in usize");
+    let note_samples =
+        usize::try_from((u64::from(sample_rate_hz) * u64::from(note_duration_ms)) / 1_000)
+            .expect("fixture should fit in usize");
+    let total_notes =
+        usize::try_from(u64::from(repetitions) * u64::try_from(frequencies_hz.len()).unwrap_or(0))
+            .expect("total notes should fit in usize");
     let total_samples = note_samples * total_notes;
     let sample_rate_f32 = f32::from(u16::try_from(sample_rate_hz).unwrap_or(u16::MAX));
     let note_samples_f32 = f32::from(u16::try_from(note_samples).unwrap_or(u16::MAX));
@@ -55,7 +63,8 @@ fn build_note_cycle_pcm(
     let mut cursor = 0_usize;
     for _ in 0..repetitions {
         for frequency_hz in frequencies_hz {
-            let phase_step = 2.0 * PI * f32::from(u16::try_from(*frequency_hz).unwrap_or(u16::MAX)) / sample_rate_f32;
+            let phase_step = 2.0 * PI * f32::from(u16::try_from(*frequency_hz).unwrap_or(u16::MAX))
+                / sample_rate_f32;
             let mut phase = 0.0_f32;
             for offset in 0..note_samples {
                 let sample = &mut pcm[cursor + offset];

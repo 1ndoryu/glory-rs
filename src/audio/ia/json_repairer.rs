@@ -51,8 +51,8 @@ impl JsonRepairer {
     pub fn extract_metadata_from_provider_response(
         raw_response: &str,
     ) -> Result<AudioCreativeMetadata, JsonRepairError> {
-        let response: Value =
-            serde_json::from_str(raw_response).map_err(|_| JsonRepairError::InvalidProviderResponse)?;
+        let response: Value = serde_json::from_str(raw_response)
+            .map_err(|_| JsonRepairError::InvalidProviderResponse)?;
         let content = response
             .get("choices")
             .and_then(Value::as_array)
@@ -67,7 +67,9 @@ impl JsonRepairer {
         Self::extract_metadata_from_text(content)
     }
 
-    pub fn extract_metadata_from_text(text: &str) -> Result<AudioCreativeMetadata, JsonRepairError> {
+    pub fn extract_metadata_from_text(
+        text: &str,
+    ) -> Result<AudioCreativeMetadata, JsonRepairError> {
         let object = Self::extract_json_object(text)?;
         Ok(AudioCreativeMetadata::from_object(&object))
     }
@@ -94,7 +96,10 @@ impl AudioCreativeMetadata {
     #[must_use]
     pub fn from_object(object: &Map<String, Value>) -> Self {
         Self {
-            nombre_archivo_base: sanitize_scalar_text(get_string(object, "nombre_archivo_base"), 80),
+            nombre_archivo_base: sanitize_scalar_text(
+                get_string(object, "nombre_archivo_base"),
+                80,
+            ),
             tags: sanitize_string_list(object.get("tags"), 15),
             tags_es: sanitize_string_list(object.get("tags_es"), 15),
             tipo: normalize_tipo(get_string(object, "tipo")),
@@ -104,11 +109,17 @@ impl AudioCreativeMetadata {
             instrumentos: sanitize_string_list(object.get("instrumentos"), 10),
             artista_vibes: sanitize_string_list(object.get("artista_vibes"), 5),
             descripcion_corta: sanitize_scalar_text(get_string(object, "descripcion_corta"), 150),
-            descripcion_corta_es: sanitize_scalar_text(get_string(object, "descripcion_corta_es"), 150),
+            descripcion_corta_es: sanitize_scalar_text(
+                get_string(object, "descripcion_corta_es"),
+                150,
+            ),
             descripcion: sanitize_scalar_text(get_string(object, "descripcion"), 500),
             descripcion_es: sanitize_scalar_text(get_string(object, "descripcion_es"), 500),
             carpeta_primaria: normalize_primary_folder(get_string(object, "carpeta_primaria")),
-            carpeta_secundaria: normalize_secondary_folder(get_string(object, "carpeta_secundaria")),
+            carpeta_secundaria: normalize_secondary_folder(get_string(
+                object,
+                "carpeta_secundaria",
+            )),
         }
     }
 
@@ -170,7 +181,10 @@ fn strip_fence_language(block: &str) -> &str {
 
     if let Some(newline_index) = trimmed.find(['\n', '\r']) {
         let (first_line, rest) = trimmed.split_at(newline_index);
-        if first_line.chars().all(|character| character.is_ascii_alphabetic()) {
+        if first_line
+            .chars()
+            .all(|character| character.is_ascii_alphabetic())
+        {
             return rest.trim_start_matches(['\r', '\n']);
         }
     }

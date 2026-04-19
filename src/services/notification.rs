@@ -42,7 +42,11 @@ impl NotificationService {
         .await
     }
 
-    pub async fn mark_read(pool: &PgPool, user_id: i32, notification_id: i32) -> Result<(), AppError> {
+    pub async fn mark_read(
+        pool: &PgPool,
+        user_id: i32,
+        notification_id: i32,
+    ) -> Result<(), AppError> {
         NotificationRepository::mark_read(pool, notification_id, user_id).await
     }
 
@@ -63,7 +67,8 @@ impl NotificationService {
         }
 
         let payload = normalize_payload(input.datos);
-        if let (Some(actor_id), Some(window)) = (input.actor_id, dedup_window_seconds(&input.tipo)) {
+        if let (Some(actor_id), Some(window)) = (input.actor_id, dedup_window_seconds(&input.tipo))
+        {
             let exists = NotificationRepository::exists_recent(
                 pool,
                 input.destinatario_id,

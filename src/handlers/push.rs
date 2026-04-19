@@ -53,9 +53,7 @@ pub struct PushVapidKeyResponse {
         (status = 200, description = "Clave pública VAPID o estado deshabilitado", body = PushVapidKeyResponse)
     )
 )]
-pub async fn get_vapid_key(
-    State(state): State<AppState>,
-) -> Json<PushVapidKeyResponse> {
+pub async fn get_vapid_key(State(state): State<AppState>) -> Json<PushVapidKeyResponse> {
     let response = match state.push_runtime.as_ref() {
         Some(runtime) => PushVapidKeyResponse {
             habilitado: true,
@@ -124,7 +122,8 @@ pub async fn unsubscribe_push(
     user: CurrentUser,
     Json(body): Json<UnsubscribePushRequest>,
 ) -> Result<(StatusCode, Json<OkResponse>), AppError> {
-    let deleted = PushNotificationService::unsubscribe(&state.pool, user.user_id, &body.endpoint).await?;
+    let deleted =
+        PushNotificationService::unsubscribe(&state.pool, user.user_id, &body.endpoint).await?;
 
     tracing::info!(
         user_id = user.user_id,

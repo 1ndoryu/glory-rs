@@ -50,12 +50,11 @@ impl TagAffinityService {
     /// Devuelve true si el usuario tiene al menos un score reciente.
     /// Usado por `recommender` para elegir path optimizado vs cold-start.
     pub async fn has_recent_scores(pool: &PgPool, user_id: i32) -> Result<bool, AppError> {
-        let exists: Option<i32> = sqlx::query_scalar(
-            "SELECT 1 FROM user_tag_scores WHERE user_id = $1 LIMIT 1",
-        )
-        .bind(user_id)
-        .fetch_optional(pool)
-        .await?;
+        let exists: Option<i32> =
+            sqlx::query_scalar("SELECT 1 FROM user_tag_scores WHERE user_id = $1 LIMIT 1")
+                .bind(user_id)
+                .fetch_optional(pool)
+                .await?;
         Ok(exists.is_some())
     }
 
@@ -236,7 +235,10 @@ impl TagAffinityService {
 
         let mut count = 0u32;
         for row in usuarios {
-            if Self::recalculate_for_user(pool, row.usuario_id).await.is_ok() {
+            if Self::recalculate_for_user(pool, row.usuario_id)
+                .await
+                .is_ok()
+            {
                 count += 1;
             }
         }
@@ -249,11 +251,7 @@ impl TagAffinityService {
     /// `locks` es un `InflightLocks` compartido (típicamente vive en
     /// `AppState`). Devuelve `Some(handle)` si se lanzó, `None` si ya
     /// había uno en vuelo para este usuario.
-    pub fn schedule_recalc(
-        pool: PgPool,
-        user_id: i32,
-        locks: &InflightLocks,
-    ) -> JoinHandle<()> {
+    pub fn schedule_recalc(pool: PgPool, user_id: i32, locks: &InflightLocks) -> JoinHandle<()> {
         let locks_clone = Arc::clone(locks);
         tokio::spawn(async move {
             {

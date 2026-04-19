@@ -1,6 +1,4 @@
-use crate::repositories::{
-    IaQueueFailureDisposition, IaQueueRepository, QueuedIaJob,
-};
+use crate::repositories::{IaQueueFailureDisposition, IaQueueRepository, QueuedIaJob};
 use crate::services::{AudioIaServiceError, IaQueueProcessRequest, IaQueueService};
 use sqlx::PgPool;
 use tokio::task::JoinHandle;

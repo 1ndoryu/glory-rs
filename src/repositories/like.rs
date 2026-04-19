@@ -30,7 +30,6 @@ impl LikeKind {
             Self::Relacion => "relacion",
         }
     }
-
 }
 
 impl FromStr for LikeKind {
@@ -42,7 +41,9 @@ impl FromStr for LikeKind {
             "comentario" => Ok(Self::Comentario),
             "cancion" => Ok(Self::Cancion),
             "relacion" => Ok(Self::Relacion),
-            other => Err(AppError::Validation(format!("tipo de like inválido: {other}"))),
+            other => Err(AppError::Validation(format!(
+                "tipo de like inválido: {other}"
+            ))),
         }
     }
 }
@@ -246,8 +247,14 @@ mod tests {
     #[test]
     fn parses_kinds() {
         assert_eq!(LikeKind::from_str("sample").unwrap(), LikeKind::Sample);
-        assert_eq!(LikeKind::from_str("publicacion").unwrap(), LikeKind::Publicacion);
-        assert_eq!(LikeKind::from_str("comentario").unwrap(), LikeKind::Comentario);
+        assert_eq!(
+            LikeKind::from_str("publicacion").unwrap(),
+            LikeKind::Publicacion
+        );
+        assert_eq!(
+            LikeKind::from_str("comentario").unwrap(),
+            LikeKind::Comentario
+        );
         assert!(LikeKind::from_str("desconocido").is_err());
     }
 

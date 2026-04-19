@@ -100,11 +100,10 @@ impl CandidatesService {
         if let Some(value) = count_cache_get(redis).await? {
             return Ok(value);
         }
-        let row = sqlx::query!(
-            r#"SELECT COUNT(*) AS "total!" FROM samples WHERE estado = 'activo'"#
-        )
-        .fetch_one(pool)
-        .await?;
+        let row =
+            sqlx::query!(r#"SELECT COUNT(*) AS "total!" FROM samples WHERE estado = 'activo'"#)
+                .fetch_one(pool)
+                .await?;
         count_cache_set(redis, row.total).await?;
         Ok(row.total)
     }
@@ -139,7 +138,10 @@ impl CandidatesService {
         let blocked = collect_blocked_user_ids(pool, user_id).await?;
         let mut candidates: HashSet<i32> = HashSet::new();
 
-        merge(&mut candidates, fuente_trending(pool, config, &blocked).await?);
+        merge(
+            &mut candidates,
+            fuente_trending(pool, config, &blocked).await?,
+        );
         if let Some(vector) = profile_vector {
             merge(
                 &mut candidates,
@@ -159,7 +161,10 @@ impl CandidatesService {
             );
         }
 
-        merge(&mut candidates, fuente_populares(pool, config, &blocked).await?);
+        merge(
+            &mut candidates,
+            fuente_populares(pool, config, &blocked).await?,
+        );
         merge(
             &mut candidates,
             fuente_no_reproducidos(pool, user_id, config, &blocked).await?,

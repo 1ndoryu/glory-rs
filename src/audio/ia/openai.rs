@@ -165,23 +165,27 @@ impl OpenAiClient {
             .get(reqwest::header::RETRY_AFTER)
             .and_then(|value| value.to_str().ok())
             .and_then(|value| value.parse::<f32>().ok());
-        let body = response.text().await.map_err(|error| OpenAiClientError::Request {
-            status_code: Some(status.as_u16()),
-            retry_after_seconds: retry_after,
-            retryable: status.is_server_error(),
-            message: error.to_string(),
-        })?;
+        let body = response
+            .text()
+            .await
+            .map_err(|error| OpenAiClientError::Request {
+                status_code: Some(status.as_u16()),
+                retry_after_seconds: retry_after,
+                retryable: status.is_server_error(),
+                message: error.to_string(),
+            })?;
 
         if !status.is_success() {
             return Err(build_openai_error(status, retry_after, &body));
         }
 
-        let parsed: OpenAiChatApiResponse = serde_json::from_str(&body).map_err(|error| OpenAiClientError::Request {
-            status_code: Some(status.as_u16()),
-            retry_after_seconds: retry_after,
-            retryable: false,
-            message: error.to_string(),
-        })?;
+        let parsed: OpenAiChatApiResponse =
+            serde_json::from_str(&body).map_err(|error| OpenAiClientError::Request {
+                status_code: Some(status.as_u16()),
+                retry_after_seconds: retry_after,
+                retryable: false,
+                message: error.to_string(),
+            })?;
         parsed
             .choices
             .into_iter()

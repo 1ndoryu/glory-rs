@@ -1,6 +1,4 @@
-use crate::audio::ia::groq::{
-    GroqAttemptFailure, GroqChatRequest, GroqClient, GroqClientError,
-};
+use crate::audio::ia::groq::{GroqAttemptFailure, GroqChatRequest, GroqClient, GroqClientError};
 use crate::audio::ia::json_repairer::{AudioCreativeMetadata, JsonRepairer};
 use crate::audio::ia::openai::{OpenAiChatRequest, OpenAiClient, OpenAiClientError};
 use crate::audio::ia::prompts::{
@@ -74,7 +72,10 @@ pub enum AudioIaServiceError {
     #[error("No hay proveedores IA configurados")]
     MissingProviders,
     #[error("No se pudo inicializar {provider}: {message}")]
-    ProviderInitialization { provider: &'static str, message: String },
+    ProviderInitialization {
+        provider: &'static str,
+        message: String,
+    },
     #[error("Todos los proveedores IA fallaron")]
     Exhausted { failures: Vec<AudioIaFailure> },
 }
@@ -125,7 +126,10 @@ impl AudioIaService {
         let mut failures = Vec::new();
 
         if let Some(groq) = &self.groq {
-            match groq.chat_completion(&GroqChatRequest::new(prompt.clone())).await {
+            match groq
+                .chat_completion(&GroqChatRequest::new(prompt.clone()))
+                .await
+            {
                 Ok(success) => match JsonRepairer::extract_metadata_from_text(&success.content) {
                     Ok(metadata) => {
                         return Ok(AudioIaAnalysisResult {

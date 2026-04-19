@@ -27,7 +27,8 @@ pub async fn suspend(
     Json(req): Json<SuspendUserRequest>,
 ) -> Result<StatusCode, AppError> {
     user.require_admin()?;
-    req.validate().map_err(|e| AppError::Validation(e.to_string()))?;
+    req.validate()
+        .map_err(|e| AppError::Validation(e.to_string()))?;
     ModerationRepository::suspend(&state.pool, id, &req.razon, req.hasta).await?;
     Ok(StatusCode::NO_CONTENT)
 }

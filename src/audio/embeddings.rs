@@ -60,16 +60,13 @@ impl AudioEmbedding {
             }
         }
 
-        let sample_type_index = input
-            .sample_type
-            .as_deref()
-            .map_or(0, sample_type_index);
+        let sample_type_index = input.sample_type.as_deref().map_or(0, sample_type_index);
         values[TYPE_OFFSET + sample_type_index] = 1.0;
 
         if let Some(duration_seconds) = input.duration_seconds.filter(|duration| *duration > 0.0) {
             values[20] = ((1.0 + duration_seconds.min(DURATION_MAX_SECONDS)).ln()
                 / (1.0 + DURATION_MAX_SECONDS).ln())
-                .min(1.0);
+            .min(1.0);
         }
 
         if input.is_premium {
@@ -84,7 +81,8 @@ impl AudioEmbedding {
                     continue;
                 }
 
-                let slot = usize::try_from(crc32fast::hash(normalized.as_bytes())).unwrap_or(0) % TAGS_SLOTS;
+                let slot = usize::try_from(crc32fast::hash(normalized.as_bytes())).unwrap_or(0)
+                    % TAGS_SLOTS;
                 values[TAGS_OFFSET + slot] = (values[TAGS_OFFSET + slot] + weight).min(1.0);
             }
         }
@@ -123,7 +121,11 @@ impl AudioEmbedding {
 
     #[must_use]
     pub fn l2_norm(&self) -> f32 {
-        self.values.iter().map(|value| value * value).sum::<f32>().sqrt()
+        self.values
+            .iter()
+            .map(|value| value * value)
+            .sum::<f32>()
+            .sqrt()
     }
 
     pub fn build_weighted_profile(embeddings: &[Self], weights: &[f32]) -> Option<Self> {
@@ -153,14 +155,20 @@ impl AudioEmbedding {
             *slot /= total_weight;
         }
 
-        let norm = accumulated.iter().map(|value| value * value).sum::<f32>().sqrt();
+        let norm = accumulated
+            .iter()
+            .map(|value| value * value)
+            .sum::<f32>()
+            .sqrt();
         if norm > 0.0 {
             for slot in &mut accumulated {
                 *slot /= norm;
             }
         }
 
-        Some(Self { values: accumulated })
+        Some(Self {
+            values: accumulated,
+        })
     }
 }
 

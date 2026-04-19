@@ -273,7 +273,9 @@ async fn load_declared_genres(pool: &PgPool, user_id: i32) -> Result<Vec<String>
     .fetch_optional(pool)
     .await?;
 
-    let Some(row) = row else { return Ok(Vec::new()) };
+    let Some(row) = row else {
+        return Ok(Vec::new());
+    };
     let Some(array) = row.generos.as_array() else {
         return Ok(Vec::new());
     };
@@ -335,7 +337,10 @@ async fn cache_set(
     } else {
         MEMORY_CACHE.insert(
             key,
-            (payload, Instant::now() + Duration::from_secs(CACHE_TTL_SECS)),
+            (
+                payload,
+                Instant::now() + Duration::from_secs(CACHE_TTL_SECS),
+            ),
         );
         cleanup_memory();
     }

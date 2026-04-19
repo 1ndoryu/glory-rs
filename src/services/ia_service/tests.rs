@@ -44,10 +44,11 @@ async fn returns_metadata_from_groq_when_primary_provider_succeeds() {
         }),
     });
 
-    let groq = GroqClient::with_model_chain(vec!["gsk_test".to_owned()], vec!["groq-main".to_owned()])
-        .expect("groq client should build")
-        .with_endpoint(spawn_test_server(groq_state.clone()).await)
-        .with_max_attempts_per_model(1);
+    let groq =
+        GroqClient::with_model_chain(vec!["gsk_test".to_owned()], vec!["groq-main".to_owned()])
+            .expect("groq client should build")
+            .with_endpoint(spawn_test_server(groq_state.clone()).await)
+            .with_max_attempts_per_model(1);
 
     let service = AudioIaService::new(Some(groq), None).expect("service should build");
     let result = service
@@ -86,10 +87,11 @@ async fn falls_back_to_openai_after_groq_exhaustion() {
         }),
     });
 
-    let groq = GroqClient::with_model_chain(vec!["gsk_test".to_owned()], vec!["groq-main".to_owned()])
-        .expect("groq client should build")
-        .with_endpoint(spawn_test_server(groq_state).await)
-        .with_max_attempts_per_model(1);
+    let groq =
+        GroqClient::with_model_chain(vec!["gsk_test".to_owned()], vec!["groq-main".to_owned()])
+            .expect("groq client should build")
+            .with_endpoint(spawn_test_server(groq_state).await)
+            .with_max_attempts_per_model(1);
     let openai = OpenAiClient::new("sk-openai".to_owned())
         .expect("openai client should build")
         .with_endpoint(spawn_test_server(openai_state).await);
@@ -135,10 +137,11 @@ async fn falls_back_to_openai_when_groq_response_cannot_be_repaired() {
         }),
     });
 
-    let groq = GroqClient::with_model_chain(vec!["gsk_test".to_owned()], vec!["groq-main".to_owned()])
-        .expect("groq client should build")
-        .with_endpoint(spawn_test_server(groq_state).await)
-        .with_max_attempts_per_model(1);
+    let groq =
+        GroqClient::with_model_chain(vec!["gsk_test".to_owned()], vec!["groq-main".to_owned()])
+            .expect("groq client should build")
+            .with_endpoint(spawn_test_server(groq_state).await)
+            .with_max_attempts_per_model(1);
     let openai = OpenAiClient::new("sk-openai".to_owned())
         .expect("openai client should build")
         .with_endpoint(spawn_test_server(openai_state).await);
@@ -170,10 +173,11 @@ async fn reports_retryability_and_retry_after_when_all_providers_fail() {
         body: json!({ "error": { "message": "upstream unavailable" } }),
     });
 
-    let groq = GroqClient::with_model_chain(vec!["gsk_test".to_owned()], vec!["groq-main".to_owned()])
-        .expect("groq client should build")
-        .with_endpoint(spawn_test_server(groq_state).await)
-        .with_max_attempts_per_model(1);
+    let groq =
+        GroqClient::with_model_chain(vec!["gsk_test".to_owned()], vec!["groq-main".to_owned()])
+            .expect("groq client should build")
+            .with_endpoint(spawn_test_server(groq_state).await)
+            .with_max_attempts_per_model(1);
     let openai = OpenAiClient::new("sk-openai".to_owned())
         .expect("openai client should build")
         .with_endpoint(spawn_test_server(openai_state).await);
@@ -204,13 +208,19 @@ fn build_request() -> AudioIaAnalysisRequest {
 }
 
 async fn spawn_test_server(state: MockState) -> String {
-    let app = Router::new().route("/", post(chat_handler)).with_state(state);
+    let app = Router::new()
+        .route("/", post(chat_handler))
+        .with_state(state);
     let listener = tokio::net::TcpListener::bind("127.0.0.1:0")
         .await
         .expect("should bind test listener");
-    let address = listener.local_addr().expect("listener should expose local addr");
+    let address = listener
+        .local_addr()
+        .expect("listener should expose local addr");
     tokio::spawn(async move {
-        axum::serve(listener, app).await.expect("test server should serve");
+        axum::serve(listener, app)
+            .await
+            .expect("test server should serve");
     });
 
     format!("http://{address}/")
@@ -248,7 +258,9 @@ async fn chat_handler(
     if let Some(retry_after) = response.retry_after_header {
         response_headers.insert(
             reqwest::header::RETRY_AFTER,
-            retry_after.parse().expect("retry-after header should parse"),
+            retry_after
+                .parse()
+                .expect("retry-after header should parse"),
         );
     }
 

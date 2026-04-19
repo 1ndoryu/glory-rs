@@ -24,7 +24,8 @@ use tracing::warn;
 use self::{
     notifications::{maybe_notify_comment_creation, maybe_notify_comment_like},
     payload::{
-    build_comment_storage_key, extract_storage_key, normalize_content, parse_create_comment_request,
+        build_comment_storage_key, extract_storage_key, normalize_content,
+        parse_create_comment_request,
     },
 };
 
@@ -126,7 +127,11 @@ pub async fn list_comments(
 ) -> Result<Json<CommentListResponse>, AppError> {
     let target_kind = CommentTargetKind::from_str(&tipo)?;
     if !CommentRepository::target_exists(&state.pool, target_kind, target_id).await? {
-        return Err(AppError::NotFound(format!("{} {} no existe", target_kind.as_db_str(), target_id)));
+        return Err(AppError::NotFound(format!(
+            "{} {} no existe",
+            target_kind.as_db_str(),
+            target_id
+        )));
     }
 
     let page = query.page.max(1);
@@ -147,7 +152,11 @@ pub async fn list_comments(
     .map(|comment| normalize_comment_detail(comment, state.public_base_url.as_deref()))
     .collect();
 
-    Ok(Json(CommentListResponse { items, page, per_page }))
+    Ok(Json(CommentListResponse {
+        items,
+        page,
+        per_page,
+    }))
 }
 
 #[utoipa::path(
@@ -218,15 +227,28 @@ pub async fn create_comment(
 ) -> Result<(StatusCode, Json<CommentMutationResponse>), AppError> {
     let target_kind = CommentTargetKind::from_str(&tipo)?;
     if !CommentRepository::target_exists(&state.pool, target_kind, target_id).await? {
-        return Err(AppError::NotFound(format!("{} {} no existe", target_kind.as_db_str(), target_id)));
+        return Err(AppError::NotFound(format!(
+            "{} {} no existe",
+            target_kind.as_db_str(),
+            target_id
+        )));
     }
 
     ensure_active_profile(&state, user.user_id).await?;
 
     let parsed = parse_create_comment_request(request, &state).await?;
     if let Some(parent_id) = parsed.parent_id {
-        if !CommentRepository::validate_parent_context(&state.pool, parent_id, target_kind, target_id).await? {
-            return Err(AppError::NotFound(format!("comentario padre {parent_id} no existe en este contexto")));
+        if !CommentRepository::validate_parent_context(
+            &state.pool,
+            parent_id,
+            target_kind,
+            target_id,
+        )
+        .await?
+        {
+            return Err(AppError::NotFound(format!(
+                "comentario padre {parent_id} no existe en este contexto"
+            )));
         }
     }
 
@@ -280,7 +302,12 @@ pub async fn create_comment(
     CommentRepository::recount_target(&state.pool, target_kind, target_id).await?;
     state
         .algo_planner
-        .register_interaction(&state.pool, &state.redis, user.user_id, InteractionKind::Comentario)
+        .register_interaction(
+            &state.pool,
+            &state.redis,
+            user.user_id,
+            InteractionKind::Comentario,
+        )
         .await?;
 
     let hidden = collect_hidden_author_ids(&state, Some(user.user_id)).await?;
@@ -345,8 +372,11 @@ pub async fn update_comment(
     }
 
     let contenido = normalize_content(&body.contenido, context.media_url.is_some())?;
-    if !CommentRepository::update_content(&state.pool, comment_id, user.user_id, &contenido).await? {
-        return Err(AppError::NotFound(format!("comentario {comment_id} no existe")));
+    if !CommentRepository::update_content(&state.pool, comment_id, user.user_id, &contenido).await?
+    {
+        return Err(AppError::NotFound(format!(
+            "comentario {comment_id} no existe"
+        )));
     }
 
     let hidden = collect_hidden_author_ids(&state, Some(user.user_id)).await?;
@@ -387,7 +417,9 @@ pub async fn delete_comment(
 
     let media_urls = CommentRepository::list_media_urls_for_thread(&state.pool, comment_id).await?;
     if !CommentRepository::delete(&state.pool, comment_id).await? {
-        return Err(AppError::NotFound(format!("comentario {comment_id} no existe")));
+        return Err(AppError::NotFound(format!(
+            "comentario {comment_id} no existe"
+        )));
     }
     if let Some(parent_id) = context.parent_id {
         CommentRepository::decrement_replies(&state.pool, parent_id).await?;
@@ -424,19 +456,32 @@ pub async fn like_comment(
     Json(body): Json<CommentLikeRequest>,
 ) -> Result<Json<LikeResponse>, AppError> {
     if !LikeRepository::target_exists(&state.pool, LikeKind::Comentario, comment_id).await? {
-        return Err(AppError::NotFound(format!("comentario {comment_id} no existe")));
+        return Err(AppError::NotFound(format!(
+            "comentario {comment_id} no existe"
+        )));
     }
 
     let reaction = match body.reaccion.as_deref() {
         Some(value) => Reaction::from_str(value)?,
         None => Reaction::Like,
     };
-    LikeRepository::upsert_reaction(&state.pool, user.user_id, LikeKind::Comentario, comment_id, reaction)
-        .await?;
+    LikeRepository::upsert_reaction(
+        &state.pool,
+        user.user_id,
+        LikeKind::Comentario,
+        comment_id,
+        reaction,
+    )
+    .await?;
     LikeRepository::recount_target(&state.pool, LikeKind::Comentario, comment_id).await?;
     state
         .algo_planner
-        .register_interaction(&state.pool, &state.redis, user.user_id, InteractionKind::Like)
+        .register_interaction(
+            &state.pool,
+            &state.redis,
+            user.user_id,
+            InteractionKind::Like,
+        )
         .await?;
 
     if reaction.is_positive() {
@@ -473,7 +518,8 @@ pub async fn unlike_comment(
     user: CurrentUser,
     Path(comment_id): Path<i32>,
 ) -> Result<Json<LikeResponse>, AppError> {
-    LikeRepository::delete_reaction(&state.pool, user.user_id, LikeKind::Comentario, comment_id).await?;
+    LikeRepository::delete_reaction(&state.pool, user.user_id, LikeKind::Comentario, comment_id)
+        .await?;
     LikeRepository::recount_target(&state.pool, LikeKind::Comentario, comment_id).await?;
 
     Ok(Json(LikeResponse {
@@ -485,10 +531,19 @@ pub async fn unlike_comment(
 
 pub fn routes() -> Router<AppState> {
     Router::new()
-        .route("/comentarios/:tipo/:target_id", get(list_comments).post(create_comment))
-        .route("/comentarios/:comment_id", axum::routing::put(update_comment).delete(delete_comment))
+        .route(
+            "/comentarios/:tipo/:target_id",
+            get(list_comments).post(create_comment),
+        )
+        .route(
+            "/comentarios/:comment_id",
+            axum::routing::put(update_comment).delete(delete_comment),
+        )
         .route("/comentarios/:comment_id/respuestas", get(list_replies))
-        .route("/comentarios/:comment_id/like", post(like_comment).delete(unlike_comment))
+        .route(
+            "/comentarios/:comment_id/like",
+            post(like_comment).delete(unlike_comment),
+        )
 }
 
 async fn collect_hidden_author_ids(
@@ -511,12 +566,17 @@ async fn ensure_active_profile(state: &AppState, user_id: i32) -> Result<(), App
         .await?
         .ok_or(AppError::NotFound(format!("usuario {user_id} no existe")))?;
     if profile.estado != "activo" {
-        return Err(AppError::Forbidden("La cuenta no está activa para comentar".into()));
+        return Err(AppError::Forbidden(
+            "La cuenta no está activa para comentar".into(),
+        ));
     }
     Ok(())
 }
 
-fn normalize_comment_detail(mut detail: CommentDetail, public_base_url: Option<&str>) -> CommentDetail {
+fn normalize_comment_detail(
+    mut detail: CommentDetail,
+    public_base_url: Option<&str>,
+) -> CommentDetail {
     detail.media_url = asset_to_public_url(public_base_url, detail.media_url);
     detail.autor.avatar_url = asset_to_public_url(public_base_url, detail.autor.avatar_url);
     detail
@@ -554,4 +614,3 @@ const fn default_per_page() -> i64 {
 const fn default_replies_limit() -> i64 {
     DEFAULT_REPLIES_LIMIT
 }
-

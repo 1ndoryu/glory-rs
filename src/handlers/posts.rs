@@ -82,9 +82,15 @@ struct NormalizedPostPayload {
     samples_adjuntos: Vec<i32>,
 }
 
-fn default_page() -> i64 { 1 }
-fn default_per_page() -> i64 { 20 }
-fn default_filter() -> String { "todos".to_string() }
+fn default_page() -> i64 {
+    1
+}
+fn default_per_page() -> i64 {
+    20
+}
+fn default_filter() -> String {
+    "todos".to_string()
+}
 
 #[utoipa::path(
     post, path = "/api/publicaciones", tag = "posts",
@@ -114,7 +120,10 @@ pub async fn create_post(
     let post = PostRepository::get(&state.pool, user.user_id, id, &hidden)
         .await?
         .ok_or_else(|| AppError::Internal(format!("post {id} recién creado no visible")))?;
-    Ok((StatusCode::CREATED, Json(PostMutationResponse { ok: true, post })))
+    Ok((
+        StatusCode::CREATED,
+        Json(PostMutationResponse { ok: true, post }),
+    ))
 }
 
 #[utoipa::path(
@@ -146,7 +155,11 @@ pub async fn list_posts(
         },
     )
     .await?;
-    Ok(Json(PostListResponse { items, page, per_page }))
+    Ok(Json(PostListResponse {
+        items,
+        page,
+        per_page,
+    }))
 }
 
 #[utoipa::path(
@@ -193,7 +206,9 @@ pub async fn update_post(
     )
     .await?;
     if !updated {
-        return Err(AppError::Conflict(format!("no se pudo actualizar la publicacion {id}")));
+        return Err(AppError::Conflict(format!(
+            "no se pudo actualizar la publicacion {id}"
+        )));
     }
     let hidden = collect_hidden_author_ids(&state, user.user_id).await?;
     let post = PostRepository::get(&state.pool, user.user_id, id, &hidden)
@@ -216,7 +231,9 @@ pub async fn delete_post(
     ensure_owner_original_post(&state, id, user.user_id).await?;
     let deleted = PostRepository::soft_delete(&state.pool, id, user.user_id).await?;
     if !deleted {
-        return Err(AppError::Conflict(format!("no se pudo eliminar la publicacion {id}")));
+        return Err(AppError::Conflict(format!(
+            "no se pudo eliminar la publicacion {id}"
+        )));
     }
     Ok(Json(OkResponse { ok: true }))
 }
@@ -236,17 +253,26 @@ pub async fn repost_post(
         .await?
         .ok_or_else(|| AppError::NotFound(format!("publicacion {id} no existe")))?;
     if owner_id == user.user_id {
-        return Err(AppError::BadRequest("no puedes repostear tu propia publicacion".into()));
+        return Err(AppError::BadRequest(
+            "no puedes repostear tu propia publicacion".into(),
+        ));
     }
     if repost_id.is_some() {
-        return Err(AppError::BadRequest("no se puede repostear un repost".into()));
+        return Err(AppError::BadRequest(
+            "no se puede repostear un repost".into(),
+        ));
     }
-    let (repost_id, already_exists) = PostRepository::create_repost(&state.pool, user.user_id, id).await?;
+    let (repost_id, already_exists) =
+        PostRepository::create_repost(&state.pool, user.user_id, id).await?;
     let hidden = collect_hidden_author_ids(&state, user.user_id).await?;
     let post = PostRepository::get(&state.pool, user.user_id, repost_id, &hidden)
         .await?
         .ok_or_else(|| AppError::Internal(format!("repost {repost_id} no visible")))?;
-    Ok(Json(RepostResponse { ok: true, already_exists, post }))
+    Ok(Json(RepostResponse {
+        ok: true,
+        already_exists,
+        post,
+    }))
 }
 
 #[utoipa::path(
@@ -262,7 +288,9 @@ pub async fn unrepost_post(
 ) -> Result<Json<OkResponse>, AppError> {
     let removed = PostRepository::delete_repost(&state.pool, user.user_id, id).await?;
     if !removed {
-        return Err(AppError::NotFound(format!("no existe repost propio para la publicacion {id}")));
+        return Err(AppError::NotFound(format!(
+            "no existe repost propio para la publicacion {id}"
+        )));
     }
     Ok(Json(OkResponse { ok: true }))
 }
@@ -270,8 +298,14 @@ pub async fn unrepost_post(
 pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/publicaciones", post(create_post).get(list_posts))
-        .route("/publicaciones/:id", get(get_post).put(update_post).delete(delete_post))
-        .route("/publicaciones/:id/repost", post(repost_post).delete(unrepost_post))
+        .route(
+            "/publicaciones/:id",
+            get(get_post).put(update_post).delete(delete_post),
+        )
+        .route(
+            "/publicaciones/:id/repost",
+            post(repost_post).delete(unrepost_post),
+        )
 }
 
 async fn collect_hidden_author_ids(state: &AppState, user_id: i32) -> Result<Vec<i32>, AppError> {
@@ -282,12 +316,18 @@ async fn collect_hidden_author_ids(state: &AppState, user_id: i32) -> Result<Vec
     Ok(ids)
 }
 
-async fn ensure_owner_original_post(state: &AppState, post_id: i32, user_id: i32) -> Result<(), AppError> {
+async fn ensure_owner_original_post(
+    state: &AppState,
+    post_id: i32,
+    user_id: i32,
+) -> Result<(), AppError> {
     let (owner_id, repost_id) = PostRepository::fetch_meta(&state.pool, post_id)
         .await?
         .ok_or_else(|| AppError::NotFound(format!("publicacion {post_id} no existe")))?;
     if owner_id != user_id {
-        return Err(AppError::Forbidden("no eres autor de la publicacion".into()));
+        return Err(AppError::Forbidden(
+            "no eres autor de la publicacion".into(),
+        ));
     }
     if repost_id.is_some() {
         return Err(AppError::BadRequest(
@@ -322,7 +362,9 @@ fn normalize_post_payload(
 ) -> Result<NormalizedPostPayload, AppError> {
     let contenido = contenido.trim().to_string();
     if contenido.len() > MAX_POST_CONTENT {
-        return Err(AppError::Validation(format!("contenido demasiado largo (max {MAX_POST_CONTENT} chars)")));
+        return Err(AppError::Validation(format!(
+            "contenido demasiado largo (max {MAX_POST_CONTENT} chars)"
+        )));
     }
 
     let imagenes: Vec<String> = imagenes
@@ -332,14 +374,18 @@ fn normalize_post_payload(
         .take(MAX_POST_IMAGES + 1)
         .collect();
     if imagenes.len() > MAX_POST_IMAGES {
-        return Err(AppError::Validation(format!("demasiadas imagenes (max {MAX_POST_IMAGES})")));
+        return Err(AppError::Validation(format!(
+            "demasiadas imagenes (max {MAX_POST_IMAGES})"
+        )));
     }
 
     let mut samples_adjuntos = samples_adjuntos;
     samples_adjuntos.sort_unstable();
     samples_adjuntos.dedup();
     if samples_adjuntos.len() > MAX_ATTACHED_SAMPLES {
-        return Err(AppError::Validation(format!("demasiados samples adjuntos (max {MAX_ATTACHED_SAMPLES})")));
+        return Err(AppError::Validation(format!(
+            "demasiados samples adjuntos (max {MAX_ATTACHED_SAMPLES})"
+        )));
     }
     if contenido.is_empty() && imagenes.is_empty() && samples_adjuntos.is_empty() {
         return Err(AppError::Validation(
@@ -347,7 +393,11 @@ fn normalize_post_payload(
         ));
     }
 
-    Ok(NormalizedPostPayload { contenido, imagenes, samples_adjuntos })
+    Ok(NormalizedPostPayload {
+        contenido,
+        imagenes,
+        samples_adjuntos,
+    })
 }
 
 #[cfg(test)]

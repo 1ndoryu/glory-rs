@@ -87,8 +87,12 @@ impl ColeccionesRepository {
         .fetch_one(pool)
         .await
         .map_err(|e| match e {
-            sqlx::Error::Database(db) if db.constraint() == Some("idx_colecciones_nombre_unico") => {
-                AppError::Conflict("ya existe una coleccion con ese nombre en la misma ubicacion".into())
+            sqlx::Error::Database(db)
+                if db.constraint() == Some("idx_colecciones_nombre_unico") =>
+            {
+                AppError::Conflict(
+                    "ya existe una coleccion con ese nombre en la misma ubicacion".into(),
+                )
             }
             other => other.into(),
         })?;
@@ -160,8 +164,12 @@ impl ColeccionesRepository {
         .execute(pool)
         .await
         .map_err(|e| match e {
-            sqlx::Error::Database(db) if db.constraint() == Some("idx_colecciones_nombre_unico") => {
-                AppError::Conflict("ya existe una coleccion con ese nombre en la misma ubicacion".into())
+            sqlx::Error::Database(db)
+                if db.constraint() == Some("idx_colecciones_nombre_unico") =>
+            {
+                AppError::Conflict(
+                    "ya existe una coleccion con ese nombre en la misma ubicacion".into(),
+                )
             }
             other => other.into(),
         })?;
@@ -245,13 +253,11 @@ impl ColeccionesRepository {
      * de target) y soft-deletea source. Ambas colecciones deben pertenecer al
      * mismo usuario, lo cual se valida en el handler antes de llamar.
      * Devuelve el número de samples efectivamente movidos. */
-    pub async fn merge(
-        pool: &PgPool,
-        target_id: i64,
-        source_id: i64,
-    ) -> Result<i64, AppError> {
+    pub async fn merge(pool: &PgPool, target_id: i64, source_id: i64) -> Result<i64, AppError> {
         if target_id == source_id {
-            return Err(AppError::BadRequest("source y target no pueden ser iguales".into()));
+            return Err(AppError::BadRequest(
+                "source y target no pueden ser iguales".into(),
+            ));
         }
         let mut tx = pool.begin().await?;
         let next_orden: i32 = sqlx::query_scalar!(
@@ -279,9 +285,12 @@ impl ColeccionesRepository {
         .await?;
         let moved = i64::try_from(inserted.rows_affected()).unwrap_or(i64::MAX);
         /* Borra todos los samples de source y soft-deletea la colección. */
-        sqlx::query!("DELETE FROM coleccion_samples WHERE coleccion_id = $1", source_id)
-            .execute(&mut *tx)
-            .await?;
+        sqlx::query!(
+            "DELETE FROM coleccion_samples WHERE coleccion_id = $1",
+            source_id
+        )
+        .execute(&mut *tx)
+        .await?;
         sqlx::query!(
             "UPDATE colecciones SET eliminado_en = NOW() WHERE id = $1 AND eliminado_en IS NULL",
             source_id
@@ -388,12 +397,12 @@ impl ColeccionesRepository {
         .await?;
         match row {
             None => Err(AppError::BadRequest("parent_id no existe".into())),
-            Some(r) if r.usuario_id != usuario_id => {
-                Err(AppError::Forbidden("parent_id pertenece a otro usuario".into()))
-            }
-            Some(r) if r.parent_id.is_some() => {
-                Err(AppError::BadRequest("profundidad máxima de carpetas excedida (2 niveles)".into()))
-            }
+            Some(r) if r.usuario_id != usuario_id => Err(AppError::Forbidden(
+                "parent_id pertenece a otro usuario".into(),
+            )),
+            Some(r) if r.parent_id.is_some() => Err(AppError::BadRequest(
+                "profundidad máxima de carpetas excedida (2 niveles)".into(),
+            )),
             Some(_) => Ok(()),
         }
     }

@@ -1,8 +1,7 @@
 use super::{
-    behavior_signal_score, content_similarity_score, context_signal_score,
-    novelty_signal_score, social_signal_score, trend_signal_score,
-    AlgorithmSignalConfig, AlgorithmSignalInput, BehaviorSignalInput,
-    ContextSignalInput, SignalParameters, SocialSignalInput, TrendNormalizers,
+    behavior_signal_score, content_similarity_score, context_signal_score, novelty_signal_score,
+    social_signal_score, trend_signal_score, AlgorithmSignalConfig, AlgorithmSignalInput,
+    BehaviorSignalInput, ContextSignalInput, SignalParameters, SocialSignalInput, TrendNormalizers,
     TrendSignalInput,
 };
 

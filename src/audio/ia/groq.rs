@@ -95,9 +95,7 @@ impl GroqClient {
         Self::new(load_groq_api_keys())
     }
 
-    pub fn from_env_with_model_chain(
-        model_chain: Vec<String>,
-    ) -> Result<Self, GroqClientError> {
+    pub fn from_env_with_model_chain(model_chain: Vec<String>) -> Result<Self, GroqClientError> {
         Self::with_model_chain(load_groq_api_keys(), model_chain)
     }
 
@@ -106,7 +104,13 @@ impl GroqClient {
             return Err(GroqClientError::MissingApiKeys);
         }
 
-        Self::with_model_chain(api_keys, DEFAULT_GROQ_MODEL_CHAIN.iter().map(ToString::to_string).collect())
+        Self::with_model_chain(
+            api_keys,
+            DEFAULT_GROQ_MODEL_CHAIN
+                .iter()
+                .map(ToString::to_string)
+                .collect(),
+        )
     }
 
     pub fn with_model_chain(
@@ -260,14 +264,15 @@ impl GroqClient {
             return Err(build_attempt_failure(model, key_index, status, &body));
         }
 
-        let parsed: GroqChatApiResponse = serde_json::from_str(&body).map_err(|error| GroqAttemptFailure {
-            model: model.to_owned(),
-            key_index,
-            status_code: Some(status.as_u16()),
-            retry_after_seconds: None,
-            retryable: false,
-            message: error.to_string(),
-        })?;
+        let parsed: GroqChatApiResponse =
+            serde_json::from_str(&body).map_err(|error| GroqAttemptFailure {
+                model: model.to_owned(),
+                key_index,
+                status_code: Some(status.as_u16()),
+                retry_after_seconds: None,
+                retryable: false,
+                message: error.to_string(),
+            })?;
         let content = parsed
             .choices
             .into_iter()
@@ -348,7 +353,9 @@ fn truncate(value: &str, max_chars: usize) -> String {
 }
 
 fn read_env_var(name: &str) -> Option<String> {
-    std::env::var(name).ok().filter(|value| !value.trim().is_empty())
+    std::env::var(name)
+        .ok()
+        .filter(|value| !value.trim().is_empty())
 }
 
 fn push_unique_key(keys: &mut Vec<String>, value: String) {

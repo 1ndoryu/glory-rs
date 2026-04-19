@@ -8,7 +8,9 @@ use crate::errors::AppError;
 #[allow(unused_imports)]
 use crate::errors::ErrorResponse;
 use crate::middleware::CurrentUser;
-use crate::models::{BlockUserRequest, PrivateProfileResponse, PublicProfileResponse, UpdateProfileRequest};
+use crate::models::{
+    BlockUserRequest, PrivateProfileResponse, PublicProfileResponse, UpdateProfileRequest,
+};
 use crate::repositories::{ModerationRepository, ProfileRepository};
 use crate::AppState;
 
@@ -20,9 +22,12 @@ use crate::AppState;
         (status = 200, description = "Perfil propio", body = PrivateProfileResponse),
         (status = 401, body = ErrorResponse)
     ))]
-pub async fn me(State(state): State<AppState>, user: CurrentUser)
-    -> Result<Json<PrivateProfileResponse>, AppError> {
-    let p = ProfileRepository::find_by_id(&state.pool, user.user_id).await?
+pub async fn me(
+    State(state): State<AppState>,
+    user: CurrentUser,
+) -> Result<Json<PrivateProfileResponse>, AppError> {
+    let p = ProfileRepository::find_by_id(&state.pool, user.user_id)
+        .await?
         .ok_or(AppError::NotFound("Usuario".into()))?;
     Ok(Json(PrivateProfileResponse::from(p)))
 }
@@ -40,7 +45,8 @@ pub async fn update_me(
     user: CurrentUser,
     Json(req): Json<UpdateProfileRequest>,
 ) -> Result<Json<PrivateProfileResponse>, AppError> {
-    req.validate().map_err(|e| AppError::Validation(e.to_string()))?;
+    req.validate()
+        .map_err(|e| AppError::Validation(e.to_string()))?;
     let p = ProfileRepository::update(&state.pool, user.user_id, &req).await?;
     Ok(Json(PrivateProfileResponse::from(p)))
 }
@@ -51,9 +57,12 @@ pub async fn update_me(
         (status = 200, description = "Perfil publico", body = PublicProfileResponse),
         (status = 404, body = ErrorResponse)
     ))]
-pub async fn public_profile(State(state): State<AppState>, Path(username): Path<String>)
-    -> Result<Json<PublicProfileResponse>, AppError> {
-    let p = ProfileRepository::find_by_username(&state.pool, &username).await?
+pub async fn public_profile(
+    State(state): State<AppState>,
+    Path(username): Path<String>,
+) -> Result<Json<PublicProfileResponse>, AppError> {
+    let p = ProfileRepository::find_by_username(&state.pool, &username)
+        .await?
         .ok_or(AppError::NotFound(format!("usuario {username}")))?;
     if p.estado != "activo" {
         return Err(AppError::NotFound(format!("usuario {username}")));
@@ -80,8 +89,10 @@ pub async fn block(
     Path(username): Path<String>,
     Json(req): Json<BlockUserRequest>,
 ) -> Result<StatusCode, AppError> {
-    req.validate().map_err(|e| AppError::Validation(e.to_string()))?;
-    let target = ProfileRepository::find_by_username(&state.pool, &username).await?
+    req.validate()
+        .map_err(|e| AppError::Validation(e.to_string()))?;
+    let target = ProfileRepository::find_by_username(&state.pool, &username)
+        .await?
         .ok_or(AppError::NotFound(format!("usuario {username}")))?;
     let razon = req.razon.unwrap_or_default();
     ModerationRepository::block(&state.pool, user.user_id, target.id, &razon).await?;
@@ -97,7 +108,8 @@ pub async fn unblock(
     user: CurrentUser,
     Path(username): Path<String>,
 ) -> Result<StatusCode, AppError> {
-    let target = ProfileRepository::find_by_username(&state.pool, &username).await?
+    let target = ProfileRepository::find_by_username(&state.pool, &username)
+        .await?
         .ok_or(AppError::NotFound(format!("usuario {username}")))?;
     ModerationRepository::unblock(&state.pool, user.user_id, target.id).await?;
     Ok(StatusCode::NO_CONTENT)

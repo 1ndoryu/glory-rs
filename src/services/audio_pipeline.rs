@@ -25,7 +25,9 @@ const BPM_TIMEOUT: Duration = Duration::from_secs(20);
 const KEY_TIMEOUT: Duration = Duration::from_secs(20);
 const MP3_TIMEOUT: Duration = Duration::from_secs(60);
 static AUDIO_PIPELINE_SEMAPHORE: Semaphore = Semaphore::const_new(MAX_PIPELINE_CONCURRENCY);
-const MUSIC_KEY_LABELS: [&str; 12] = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+const MUSIC_KEY_LABELS: [&str; 12] = [
+    "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B",
+];
 
 /* [174A-34] Orquestador técnico del pipeline de audio.
  * Ejecuta inspección, BPM, key, derivados y embedding sin asumir LocalFs: el
@@ -135,7 +137,9 @@ impl AudioPipelineError {
         match self {
             Self::Stage { retryable, .. } => *retryable,
             Self::Timeout { .. } => true,
-            Self::SampleNotFound(_) | Self::InvalidSampleState { .. } | Self::MissingOriginalAsset(_) => false,
+            Self::SampleNotFound(_)
+            | Self::InvalidSampleState { .. }
+            | Self::MissingOriginalAsset(_) => false,
         }
     }
 
@@ -169,7 +173,10 @@ impl AudioPipelineService {
         Self { pool, storage }
     }
 
-    pub async fn run(&self, request: AudioPipelineRequest) -> Result<AudioPipelineResult, AudioPipelineError> {
+    pub async fn run(
+        &self,
+        request: AudioPipelineRequest,
+    ) -> Result<AudioPipelineResult, AudioPipelineError> {
         let sample = SampleRepository::find_pipeline_sample(&self.pool, request.sample_id)
             .await
             .map_err(|error| map_sqlx_error(AudioPipelineStage::LoadSample, &error))?
@@ -185,10 +192,9 @@ impl AudioPipelineService {
             return Err(AudioPipelineError::MissingOriginalAsset(sample.id));
         }
 
-        let _permit = AUDIO_PIPELINE_SEMAPHORE
-            .acquire()
-            .await
-            .map_err(|error| AudioPipelineError::stage(AudioPipelineStage::LoadSample, error.to_string(), true))?;
+        let _permit = AUDIO_PIPELINE_SEMAPHORE.acquire().await.map_err(|error| {
+            AudioPipelineError::stage(AudioPipelineStage::LoadSample, error.to_string(), true)
+        })?;
 
         let mut progress = PipelineProgress {
             stage: AudioPipelineStage::LoadSample,
@@ -206,7 +212,11 @@ impl AudioPipelineService {
 
         if let Err(error) = &result {
             if let Err(persist_error) = self.persist_failure(sample.id, &progress, error).await {
-                tracing::error!(sample_id = sample.id, ?persist_error, "no se pudo persistir fallo del audio pipeline");
+                tracing::error!(
+                    sample_id = sample.id,
+                    ?persist_error,
+                    "no se pudo persistir fallo del audio pipeline"
+                );
             }
         }
 
@@ -224,13 +234,19 @@ impl AudioPipelineService {
         workspace: &Path,
         progress: &mut PipelineProgress,
     ) -> Result<AudioPipelineResult, AudioPipelineError> {
-        let input_path = self.materialize_original(sample, workspace, progress).await?;
-        let (inspected, bpm_analysis, key_analysis) = self.analyze_original(sample, &input_path, progress).await?;
-        let analysis = build_technical_analysis(&inspected, bpm_analysis.as_ref(), key_analysis.as_ref());
+        let input_path = self
+            .materialize_original(sample, workspace, progress)
+            .await?;
+        let (inspected, bpm_analysis, key_analysis) =
+            self.analyze_original(sample, &input_path, progress).await?;
+        let analysis =
+            build_technical_analysis(&inspected, bpm_analysis.as_ref(), key_analysis.as_ref());
         progress.analysis = Some(analysis.clone());
         self.persist_analysis(sample, progress, &analysis).await?;
-        self.generate_and_store_waveform(sample, progress, &inspected).await?;
-        self.generate_and_store_optimized_mp3(sample, &input_path, workspace, progress).await?;
+        self.generate_and_store_waveform(sample, progress, &inspected)
+            .await?;
+        self.generate_and_store_optimized_mp3(sample, &input_path, workspace, progress)
+            .await?;
         let embedding = Self::build_embedding(sample, &analysis, progress);
         self.activate_sample(sample, progress, &embedding).await?;
 
@@ -271,12 +287,20 @@ impl AudioPipelineService {
             .storage
             .get_bytes(&sample.ruta_original)
             .await
-            .map_err(|error| map_storage_error(AudioPipelineStage::DownloadOriginal, sample.id, error))?;
+            .map_err(|error| {
+                map_storage_error(AudioPipelineStage::DownloadOriginal, sample.id, error)
+            })?;
 
         let input_path = workspace.join(format!("input.{}", infer_input_extension(sample)));
         tokio::fs::write(&input_path, &original_bytes)
             .await
-            .map_err(|error| AudioPipelineError::stage(AudioPipelineStage::DownloadOriginal, error.to_string(), true))?;
+            .map_err(|error| {
+                AudioPipelineError::stage(
+                    AudioPipelineStage::DownloadOriginal,
+                    error.to_string(),
+                    true,
+                )
+            })?;
 
         Ok(input_path)
     }
@@ -290,7 +314,12 @@ impl AudioPipelineService {
         let format_hint = Some(sample.formato.clone());
 
         progress.stage = AudioPipelineStage::Inspect;
-        let inspected = run_async_stage(AudioPipelineStage::Inspect, INSPECT_TIMEOUT, inspect_audio_file(input_path, format_hint.as_deref(), None)).await?;
+        let inspected = run_async_stage(
+            AudioPipelineStage::Inspect,
+            INSPECT_TIMEOUT,
+            inspect_audio_file(input_path, format_hint.as_deref(), None),
+        )
+        .await?;
 
         progress.stage = AudioPipelineStage::DetectBpm;
         let bpm_analysis = run_blocking_stage(AudioPipelineStage::DetectBpm, BPM_TIMEOUT, {
@@ -342,15 +371,23 @@ impl AudioPipelineService {
         inspected: &AudioMetadata,
     ) -> Result<(), AudioPipelineError> {
         progress.stage = AudioPipelineStage::GenerateWaveform;
-        let waveform_key = build_derivative_key(&sample.ruta_original, &sample.id_corto, "waveform", "json");
-        let waveform_bytes = serde_json::to_vec(&inspected.waveform_peaks)
-            .map_err(|error| AudioPipelineError::stage(AudioPipelineStage::GenerateWaveform, error.to_string(), false))?;
+        let waveform_key =
+            build_derivative_key(&sample.ruta_original, &sample.id_corto, "waveform", "json");
+        let waveform_bytes = serde_json::to_vec(&inspected.waveform_peaks).map_err(|error| {
+            AudioPipelineError::stage(
+                AudioPipelineStage::GenerateWaveform,
+                error.to_string(),
+                false,
+            )
+        })?;
 
         progress.stage = AudioPipelineStage::PersistWaveform;
         self.storage
             .put_bytes(&waveform_key, &waveform_bytes)
             .await
-            .map_err(|error| map_storage_error(AudioPipelineStage::PersistWaveform, sample.id, error))?;
+            .map_err(|error| {
+                map_storage_error(AudioPipelineStage::PersistWaveform, sample.id, error)
+            })?;
         progress.assets.waveform_key = Some(waveform_key.clone());
 
         SampleRepository::save_audio_assets(
@@ -374,7 +411,8 @@ impl AudioPipelineService {
         progress: &mut PipelineProgress,
     ) -> Result<(), AudioPipelineError> {
         progress.stage = AudioPipelineStage::GenerateOptimizedMp3;
-        let optimized_key = build_derivative_key(&sample.ruta_original, &sample.id_corto, "optimizado", "mp3");
+        let optimized_key =
+            build_derivative_key(&sample.ruta_original, &sample.id_corto, "optimizado", "mp3");
         let optimized_path = workspace.join("optimized.mp3");
         run_async_stage(
             AudioPipelineStage::GenerateOptimizedMp3,
@@ -383,15 +421,21 @@ impl AudioPipelineService {
         )
         .await?;
 
-        let optimized_bytes = tokio::fs::read(&optimized_path)
-            .await
-            .map_err(|error| AudioPipelineError::stage(AudioPipelineStage::GenerateOptimizedMp3, error.to_string(), true))?;
+        let optimized_bytes = tokio::fs::read(&optimized_path).await.map_err(|error| {
+            AudioPipelineError::stage(
+                AudioPipelineStage::GenerateOptimizedMp3,
+                error.to_string(),
+                true,
+            )
+        })?;
 
         progress.stage = AudioPipelineStage::PersistOptimizedMp3;
         self.storage
             .put_bytes(&optimized_key, &optimized_bytes)
             .await
-            .map_err(|error| map_storage_error(AudioPipelineStage::PersistOptimizedMp3, sample.id, error))?;
+            .map_err(|error| {
+                map_storage_error(AudioPipelineStage::PersistOptimizedMp3, sample.id, error)
+            })?;
         progress.assets.optimized_key = Some(optimized_key.clone());
 
         SampleRepository::save_audio_assets(
@@ -504,10 +548,19 @@ fn build_pipeline_metadata(
 }
 
 async fn create_temporary_workspace(sample_id: i32) -> Result<PathBuf, AudioPipelineError> {
-    let workspace = std::env::temp_dir().join(format!("glory-audio-pipeline-{sample_id}-{}", uuid::Uuid::new_v4()));
+    let workspace = std::env::temp_dir().join(format!(
+        "glory-audio-pipeline-{sample_id}-{}",
+        uuid::Uuid::new_v4()
+    ));
     tokio::fs::create_dir_all(&workspace)
         .await
-        .map_err(|error| AudioPipelineError::stage(AudioPipelineStage::DownloadOriginal, error.to_string(), true))?;
+        .map_err(|error| {
+            AudioPipelineError::stage(
+                AudioPipelineStage::DownloadOriginal,
+                error.to_string(),
+                true,
+            )
+        })?;
     Ok(workspace)
 }
 
@@ -559,7 +612,12 @@ fn infer_input_extension(sample: &AudioPipelineSample) -> String {
         .unwrap_or_else(|| "wav".to_owned())
 }
 
-fn build_derivative_key(original_key: &str, id_corto: &str, suffix: &str, extension: &str) -> String {
+fn build_derivative_key(
+    original_key: &str,
+    id_corto: &str,
+    suffix: &str,
+    extension: &str,
+) -> String {
     let parent = Path::new(original_key)
         .parent()
         .map(|path| path.to_string_lossy().replace('\\', "/"))
@@ -600,7 +658,11 @@ fn map_activation_error(error: &sqlx::Error) -> AudioPipelineError {
     map_sqlx_error(AudioPipelineStage::ActivateSample, error)
 }
 
-fn map_storage_error(stage: AudioPipelineStage, sample_id: i32, error: AppError) -> AudioPipelineError {
+fn map_storage_error(
+    stage: AudioPipelineStage,
+    sample_id: i32,
+    error: AppError,
+) -> AudioPipelineError {
     match error {
         AppError::NotFound(_) => AudioPipelineError::MissingOriginalAsset(sample_id),
         AppError::BadRequest(message)

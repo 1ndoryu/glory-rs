@@ -10,8 +10,8 @@ use crate::repositories::DirectMessageKind;
 use crate::AppState;
 
 use super::{
-    CreateMessageJsonRequest, MAX_AUDIO_UPLOAD_BYTES, MAX_JSON_BODY_BYTES, MAX_MESSAGE_CHARS,
-    MAX_IMAGE_UPLOAD_BYTES,
+    CreateMessageJsonRequest, MAX_AUDIO_UPLOAD_BYTES, MAX_IMAGE_UPLOAD_BYTES, MAX_JSON_BODY_BYTES,
+    MAX_MESSAGE_CHARS,
 };
 
 #[derive(Debug)]
@@ -91,10 +91,9 @@ pub async fn parse_multipart_message(
         let name = field.name().unwrap_or_default().to_string();
         match name.as_str() {
             "contenido" => {
-                contenido = field
-                    .text()
-                    .await
-                    .map_err(|error| AppError::BadRequest(format!("contenido inválido: {error}")))?;
+                contenido = field.text().await.map_err(|error| {
+                    AppError::BadRequest(format!("contenido inválido: {error}"))
+                })?;
             }
             "tipo" => {
                 let raw = field
@@ -141,7 +140,9 @@ pub async fn parse_multipart_message(
 pub fn normalize_content(raw: &str, allow_empty: bool) -> Result<String, AppError> {
     let contenido = raw.trim().to_string();
     if contenido.is_empty() && !allow_empty {
-        return Err(AppError::Validation("el mensaje no puede estar vacío".into()));
+        return Err(AppError::Validation(
+            "el mensaje no puede estar vacío".into(),
+        ));
     }
     if contenido.chars().count() > MAX_MESSAGE_CHARS {
         return Err(AppError::Validation(format!(
@@ -205,23 +206,21 @@ async fn parse_optional_i32_field(
         return Ok(None);
     }
 
-    Ok(Some(
-        raw.trim()
-            .parse::<i32>()
-            .map_err(|_| AppError::BadRequest(format!("{field_name} debe ser entero")))?,
-    ))
+    Ok(Some(raw.trim().parse::<i32>().map_err(|_| {
+        AppError::BadRequest(format!("{field_name} debe ser entero"))
+    })?))
 }
 
 async fn parse_uploaded_media(
     field: axum::extract::multipart::Field<'_>,
     declared_kind: Option<DirectMessageKind>,
 ) -> Result<UploadedMedia, AppError> {
-    let content_type = field.content_type().map_or_else(
-        || "application/octet-stream".to_string(),
-        str::to_owned,
-    );
+    let content_type = field
+        .content_type()
+        .map_or_else(|| "application/octet-stream".to_string(), str::to_owned);
     let original_filename = field.file_name().map(str::to_owned);
-    let (detected_kind, extension) = detect_media_kind(&content_type, original_filename.as_deref())?;
+    let (detected_kind, extension) =
+        detect_media_kind(&content_type, original_filename.as_deref())?;
     let max_bytes = match detected_kind {
         DirectMessageKind::Imagen => MAX_IMAGE_UPLOAD_BYTES,
         DirectMessageKind::Audio => MAX_AUDIO_UPLOAD_BYTES,
@@ -278,7 +277,11 @@ pub fn detect_media_kind(
 
 fn infer_extension(content_type: &str, original_filename: Option<&str>) -> Option<String> {
     let from_name = original_filename
-        .and_then(|name| std::path::Path::new(name).extension().and_then(|ext| ext.to_str()))
+        .and_then(|name| {
+            std::path::Path::new(name)
+                .extension()
+                .and_then(|ext| ext.to_str())
+        })
         .map(|ext| ext.trim().to_ascii_lowercase())
         .filter(|ext| !ext.is_empty());
     if from_name.is_some() {
@@ -313,11 +316,13 @@ mod tests {
 
     #[test]
     fn detects_audio_and_image_media() {
-        let (image_kind, image_ext) = detect_media_kind("image/png", Some("cover.png")).expect("image");
+        let (image_kind, image_ext) =
+            detect_media_kind("image/png", Some("cover.png")).expect("image");
         assert_eq!(image_kind.as_db_str(), "imagen");
         assert_eq!(image_ext, "png");
 
-        let (audio_kind, audio_ext) = detect_media_kind("audio/mpeg", Some("take.mp3")).expect("audio");
+        let (audio_kind, audio_ext) =
+            detect_media_kind("audio/mpeg", Some("take.mp3")).expect("audio");
         assert_eq!(audio_kind.as_db_str(), "audio");
         assert_eq!(audio_ext, "mp3");
     }

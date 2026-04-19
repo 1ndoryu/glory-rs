@@ -24,8 +24,12 @@ const CHROMA_FREQUENCIES_HZ: [f32; 12] = [
     261.62558, 277.18262, 293.66476, 311.12698, 329.62756, 349.22824, 369.99442, 391.99542,
     415.3047, 440.0, 466.16376, 493.8833,
 ];
-const MAJOR_PROFILE: [f32; 12] = [6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88];
-const MINOR_PROFILE: [f32; 12] = [6.33, 2.68, 3.52, 5.38, 2.6, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17];
+const MAJOR_PROFILE: [f32; 12] = [
+    6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88,
+];
+const MINOR_PROFILE: [f32; 12] = [
+    6.33, 2.68, 3.52, 5.38, 2.6, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17,
+];
 
 /* [174A-32] Detector de tonalidad con cromagramas + perfiles mayor/menor.
  * Decodifica a mono con Symphonia, remuestrea a 22.05 kHz y acumula energía
@@ -90,8 +94,16 @@ pub fn detect_key(samples: &[f32], sample_rate_hz: u32) -> Option<KeyAnalysis> {
     let normalized_chroma = normalize_l2(chroma);
     let mut candidates = Vec::with_capacity(24);
     for tonic in 0..12_u8 {
-        candidates.push((tonic, "major", cosine_similarity(&normalized_chroma, &rotate_profile(&MAJOR_PROFILE, tonic))));
-        candidates.push((tonic, "minor", cosine_similarity(&normalized_chroma, &rotate_profile(&MINOR_PROFILE, tonic))));
+        candidates.push((
+            tonic,
+            "major",
+            cosine_similarity(&normalized_chroma, &rotate_profile(&MAJOR_PROFILE, tonic)),
+        ));
+        candidates.push((
+            tonic,
+            "minor",
+            cosine_similarity(&normalized_chroma, &rotate_profile(&MINOR_PROFILE, tonic)),
+        ));
     }
 
     let mut ordered = candidates;
@@ -109,7 +121,8 @@ pub fn detect_key(samples: &[f32], sample_rate_hz: u32) -> Option<KeyAnalysis> {
         music_key: best.0,
         scale: best.1.to_owned(),
         confidence,
-        analyzed_seconds: duration_from_sample_count(mono.len(), TARGET_SAMPLE_RATE_HZ).as_secs_f32(),
+        analyzed_seconds: duration_from_sample_count(mono.len(), TARGET_SAMPLE_RATE_HZ)
+            .as_secs_f32(),
         chroma: normalized_chroma,
     })
 }
@@ -176,7 +189,12 @@ fn compute_chroma_vector(samples: &[f32], sample_rate_hz: u32) -> Vec<f32> {
         fft.process(&mut spectrum);
 
         let mut frame_chroma = [0.0_f32; 12];
-        for (bin_index, value) in spectrum.iter().take(FFT_WINDOW_SIZE / 2).enumerate().skip(1) {
+        for (bin_index, value) in spectrum
+            .iter()
+            .take(FFT_WINDOW_SIZE / 2)
+            .enumerate()
+            .skip(1)
+        {
             let frequency_hz = f32::from(u16::try_from(bin_index).unwrap_or(u16::MAX)) * bin_scale;
             let Some(chroma_index) = chroma_index_for_frequency(frequency_hz) else {
                 continue;
@@ -212,7 +230,9 @@ fn chroma_index_for_frequency(frequency_hz: f32) -> Option<usize> {
         .min_by(|(_, left), (_, right)| {
             let left_distance = octave_distance(frequency_hz, **left);
             let right_distance = octave_distance(frequency_hz, **right);
-            left_distance.partial_cmp(&right_distance).unwrap_or(Ordering::Equal)
+            left_distance
+                .partial_cmp(&right_distance)
+                .unwrap_or(Ordering::Equal)
         })
         .map(|(index, _)| index)
 }
@@ -220,7 +240,11 @@ fn chroma_index_for_frequency(frequency_hz: f32) -> Option<usize> {
 fn octave_distance(frequency_hz: f32, base_frequency_hz: f32) -> f32 {
     [0.25_f32, 0.5, 1.0, 2.0, 4.0]
         .into_iter()
-        .map(|multiplier| (frequency_hz / (base_frequency_hz * multiplier)).log2().abs())
+        .map(|multiplier| {
+            (frequency_hz / (base_frequency_hz * multiplier))
+                .log2()
+                .abs()
+        })
         .fold(f32::INFINITY, f32::min)
 }
 
@@ -242,7 +266,10 @@ fn rotate_profile(profile: &[f32; 12], tonic: u8) -> Vec<f32> {
 }
 
 fn cosine_similarity(left: &[f32], right: &[f32]) -> f32 {
-    left.iter().zip(right.iter()).map(|(a, b)| a * b).sum::<f32>()
+    left.iter()
+        .zip(right.iter())
+        .map(|(a, b)| a * b)
+        .sum::<f32>()
 }
 
 fn duration_from_sample_count(sample_count: usize, sample_rate_hz: u32) -> Duration {
@@ -255,9 +282,14 @@ fn duration_from_sample_count(sample_count: usize, sample_rate_hz: u32) -> Durat
     Duration::new(seconds, u32::try_from(nanos).unwrap_or(u32::MAX))
 }
 
-fn decode_mono_samples(input_path: &Path, format_hint: Option<&str>) -> Result<(Vec<f32>, u32), KeyError> {
+fn decode_mono_samples(
+    input_path: &Path,
+    format_hint: Option<&str>,
+) -> Result<(Vec<f32>, u32), KeyError> {
     let mut reader = open_audio_reader(input_path, format_hint)?;
-    let max_frames = usize::try_from(u64::from(reader.sample_rate_hz) * u64::from(MAX_ANALYSIS_SECONDS)).unwrap_or(usize::MAX);
+    let max_frames =
+        usize::try_from(u64::from(reader.sample_rate_hz) * u64::from(MAX_ANALYSIS_SECONDS))
+            .unwrap_or(usize::MAX);
     let channel_scale = 1.0_f32 / f32::from(u16::try_from(reader.channels).unwrap_or(u16::MAX));
     let mut mono_samples = Vec::new();
     let mut sample_buffer: Option<SampleBuffer<f32>> = None;
@@ -269,9 +301,13 @@ fn decode_mono_samples(input_path: &Path, format_hint: Option<&str>) -> Result<(
 
         let packet = match reader.format.next_packet() {
             Ok(packet) => packet,
-            Err(SymphoniaError::IoError(error)) if error.kind() == ErrorKind::UnexpectedEof => break,
+            Err(SymphoniaError::IoError(error)) if error.kind() == ErrorKind::UnexpectedEof => {
+                break
+            }
             Err(SymphoniaError::ResetRequired) => {
-                return Err(KeyError::Symphonia("Symphonia pidió reset del decoder".to_owned()));
+                return Err(KeyError::Symphonia(
+                    "Symphonia pidió reset del decoder".to_owned(),
+                ));
             }
             Err(error) => return Err(error.into()),
         };
@@ -301,7 +337,9 @@ fn decode_mono_samples(input_path: &Path, format_hint: Option<&str>) -> Result<(
             Err(SymphoniaError::DecodeError(error)) => {
                 tracing::warn!(path = %input_path.display(), error, "packet corrupto al decodificar para key detection");
             }
-            Err(SymphoniaError::IoError(error)) if error.kind() == ErrorKind::UnexpectedEof => break,
+            Err(SymphoniaError::IoError(error)) if error.kind() == ErrorKind::UnexpectedEof => {
+                break
+            }
             Err(error) => return Err(error.into()),
         }
     }
@@ -309,7 +347,10 @@ fn decode_mono_samples(input_path: &Path, format_hint: Option<&str>) -> Result<(
     Ok((mono_samples, reader.sample_rate_hz))
 }
 
-fn open_audio_reader(input_path: &Path, format_hint: Option<&str>) -> Result<AudioReader, KeyError> {
+fn open_audio_reader(
+    input_path: &Path,
+    format_hint: Option<&str>,
+) -> Result<AudioReader, KeyError> {
     let file = File::open(input_path)?;
     let source = MediaSourceStream::new(Box::new(file), MediaSourceStreamOptions::default());
     let mut hint = Hint::new();
@@ -340,7 +381,8 @@ fn open_audio_reader(input_path: &Path, format_hint: Option<&str>) -> Result<Aud
         .channels
         .map(symphonia::core::audio::Channels::count)
         .ok_or_else(|| KeyError::MissingChannels(input_path.to_path_buf()))?;
-    let decoder = symphonia::default::get_codecs().make(&codec_params, &DecoderOptions::default())?;
+    let decoder =
+        symphonia::default::get_codecs().make(&codec_params, &DecoderOptions::default())?;
 
     Ok(AudioReader {
         format,

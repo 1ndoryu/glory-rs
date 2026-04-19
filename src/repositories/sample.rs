@@ -1,5 +1,5 @@
-use sqlx::PgPool;
 use pgvector::Vector;
+use sqlx::PgPool;
 
 /* [174A-28] Repositorio mínimo para deduplicación previa de uploads.
  * Solo expone lo necesario para el precheck; el CRUD completo de samples llega
@@ -143,9 +143,9 @@ impl SampleRepository {
         pool: &PgPool,
         audio_hash: &str,
     ) -> Result<Option<DuplicateSampleCandidate>, sqlx::Error> {
-                sqlx::query_as!(
-                        DuplicateSampleCandidate,
-                        "SELECT id, creador_id, titulo
+        sqlx::query_as!(
+            DuplicateSampleCandidate,
+            "SELECT id, creador_id, titulo
                          FROM samples
                          WHERE audio_hash = $1
                              AND eliminado_en IS NULL
@@ -154,7 +154,7 @@ impl SampleRepository {
                                             publicado_at DESC NULLS LAST,
                                             created_at DESC
                          LIMIT 1",
-                        audio_hash
+            audio_hash
         )
         .fetch_optional(pool)
         .await

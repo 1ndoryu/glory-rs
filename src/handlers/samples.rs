@@ -12,9 +12,9 @@ use crate::errors::AppError;
 #[allow(unused_imports)]
 use crate::errors::ErrorResponse;
 use crate::middleware::CurrentUser;
-use crate::models::{CheckDuplicateRequest, CheckDuplicateResponse, UploadSampleResponse};
 #[allow(unused_imports)]
 use crate::models::UploadSampleRequestDoc;
+use crate::models::{CheckDuplicateRequest, CheckDuplicateResponse, UploadSampleResponse};
 use crate::repositories::{CreateUploadSampleParams, ProfileRepository, SampleRepository};
 use crate::services::IdempotencyStore;
 use crate::AppState;
@@ -65,7 +65,8 @@ pub async fn check_duplicate(
         hash_body_streaming(request.into_body()).await?
     };
 
-    let duplicate = SampleRepository::find_duplicate_by_audio_hash(&state.pool, &audio_hash).await?;
+    let duplicate =
+        SampleRepository::find_duplicate_by_audio_hash(&state.pool, &audio_hash).await?;
     let response = if let Some(existing) = duplicate {
         let same_owner = existing.creador_id == user.user_id;
         CheckDuplicateResponse {
@@ -152,7 +153,9 @@ pub async fn upload(
         .await?
         .ok_or(AppError::NotFound("Usuario".into()))?;
     if profile.estado != "activo" {
-        return Err(AppError::Forbidden("La cuenta no esta activa para subir samples".into()));
+        return Err(AppError::Forbidden(
+            "La cuenta no esta activa para subir samples".into(),
+        ));
     }
     let total_actual = profile.total_samples.unwrap_or(0);
     let limite_max = if matches!(profile.plan.as_str(), "pro" | "premium") {
@@ -171,7 +174,14 @@ pub async fn upload(
     let audio_hash = hex::encode(Sha256::digest(&parsed.audio_bytes));
     let id_corto = generate_short_id();
     let slug_base = slugify(&parsed.titulo);
-    let slug = format!("{}-{id_corto}", if slug_base.is_empty() { "sample" } else { &slug_base });
+    let slug = format!(
+        "{}-{id_corto}",
+        if slug_base.is_empty() {
+            "sample"
+        } else {
+            &slug_base
+        }
+    );
     let storage_key = build_storage_key(user.user_id, &slug, parsed.formato.extension());
 
     state
@@ -208,7 +218,8 @@ pub async fn upload(
             sync_upload: parsed.sync_upload,
         },
     )
-    .await {
+    .await
+    {
         Ok(created) => created,
         Err(error) => {
             let _ = state.storage.delete(&storage_key).await;
@@ -254,7 +265,8 @@ async fn hash_body_streaming(body: Body) -> Result<(String, u64), AppError> {
     let mut bytes_hashed = 0_u64;
 
     while let Some(chunk_result) = stream.next().await {
-        let chunk = chunk_result.map_err(|error| AppError::BadRequest(format!("body invalido: {error}")))?;
+        let chunk = chunk_result
+            .map_err(|error| AppError::BadRequest(format!("body invalido: {error}")))?;
         bytes_hashed = bytes_hashed
             .checked_add(u64::try_from(chunk.len()).unwrap_or(u64::MAX))
             .ok_or(AppError::PayloadTooLarge)?;
@@ -265,7 +277,9 @@ async fn hash_body_streaming(body: Body) -> Result<(String, u64), AppError> {
     }
 
     if bytes_hashed == 0 {
-        return Err(AppError::BadRequest("body vacio: envia audio binario o JSON con audio_hash".into()));
+        return Err(AppError::BadRequest(
+            "body vacio: envia audio binario o JSON con audio_hash".into(),
+        ));
     }
 
     Ok((hex::encode(hasher.finalize()), bytes_hashed))
@@ -274,7 +288,9 @@ async fn hash_body_streaming(body: Body) -> Result<(String, u64), AppError> {
 fn normalize_sha256_hex(input: &str) -> Result<String, AppError> {
     let normalized = input.trim().to_ascii_lowercase();
     if normalized.len() != 64 {
-        return Err(AppError::BadRequest("audio_hash debe tener 64 caracteres hex".into()));
+        return Err(AppError::BadRequest(
+            "audio_hash debe tener 64 caracteres hex".into(),
+        ));
     }
     hex::decode(&normalized)
         .map_err(|_| AppError::BadRequest("audio_hash no es SHA-256 hex valido".into()))?;
@@ -354,7 +370,9 @@ async fn parse_upload_multipart(mut multipart: Multipart) -> Result<ParsedUpload
         match name.as_str() {
             "audio" => {
                 if audio_bytes.is_some() {
-                    return Err(AppError::BadRequest("solo se permite un archivo audio".into()));
+                    return Err(AppError::BadRequest(
+                        "solo se permite un archivo audio".into(),
+                    ));
                 }
                 original_filename = field.file_name().map(ToString::to_string);
                 let bytes = collect_multipart_bytes(field, MAX_AUDIO_UPLOAD_BYTES).await?;
@@ -362,13 +380,26 @@ async fn parse_upload_multipart(mut multipart: Multipart) -> Result<ParsedUpload
                 audio_bytes = Some(bytes);
             }
             "titulo" => titulo = Some(field.text().await.unwrap_or_default().trim().to_string()),
-            "contenido" | "descripcion" => contenido = field.text().await.unwrap_or_default().trim().to_string(),
+            "contenido" | "descripcion" => {
+                contenido = field.text().await.unwrap_or_default().trim().to_string()
+            }
             "tags" => tags = normalize_tags(&field.text().await.unwrap_or_default()),
-            "permitir_descarga" => permitir_descarga = parse_bool_field(&field.text().await.unwrap_or_default(), true)?,
-            "licencia_libre" => licencia_libre = parse_bool_field(&field.text().await.unwrap_or_default(), false)?,
-            "es_premium" => es_premium = parse_bool_field(&field.text().await.unwrap_or_default(), false)?,
-            "mostrar_en_comunidad" => mostrar_en_comunidad = parse_bool_field(&field.text().await.unwrap_or_default(), true)?,
-            "sync_upload" => sync_upload = parse_bool_field(&field.text().await.unwrap_or_default(), false)?,
+            "permitir_descarga" => {
+                permitir_descarga = parse_bool_field(&field.text().await.unwrap_or_default(), true)?
+            }
+            "licencia_libre" => {
+                licencia_libre = parse_bool_field(&field.text().await.unwrap_or_default(), false)?
+            }
+            "es_premium" => {
+                es_premium = parse_bool_field(&field.text().await.unwrap_or_default(), false)?
+            }
+            "mostrar_en_comunidad" => {
+                mostrar_en_comunidad =
+                    parse_bool_field(&field.text().await.unwrap_or_default(), true)?
+            }
+            "sync_upload" => {
+                sync_upload = parse_bool_field(&field.text().await.unwrap_or_default(), false)?
+            }
             "origen_subida" => {
                 let value = field.text().await.unwrap_or_default().trim().to_string();
                 if !value.is_empty() {
@@ -382,7 +413,9 @@ async fn parse_upload_multipart(mut multipart: Multipart) -> Result<ParsedUpload
                         .parse::<f64>()
                         .map_err(|_| AppError::BadRequest("precio invalido".into()))?;
                     if !(0.0..=9999.0).contains(&parsed) {
-                        return Err(AppError::BadRequest("precio fuera de rango valido (0-9999)".into()));
+                        return Err(AppError::BadRequest(
+                            "precio fuera de rango valido (0-9999)".into(),
+                        ));
                     }
                     precio = Some(parsed);
                 }
@@ -391,8 +424,12 @@ async fn parse_upload_multipart(mut multipart: Multipart) -> Result<ParsedUpload
         }
     }
 
-    let audio_bytes = audio_bytes.ok_or(AppError::BadRequest("No se recibio archivo de audio".into()))?;
-    let formato = formato.ok_or(AppError::BadRequest("No se pudo detectar el formato de audio".into()))?;
+    let audio_bytes = audio_bytes.ok_or(AppError::BadRequest(
+        "No se recibio archivo de audio".into(),
+    ))?;
+    let formato = formato.ok_or(AppError::BadRequest(
+        "No se pudo detectar el formato de audio".into(),
+    ))?;
     if tags.len() < 2 {
         return Err(AppError::BadRequest(
             "Se requieren al menos 2 tags para subir un sample".into(),
@@ -405,10 +442,13 @@ async fn parse_upload_multipart(mut multipart: Multipart) -> Result<ParsedUpload
         .and_then(|stem| stem.to_str())
         .unwrap_or("sample")
         .to_string();
-    let titulo = titulo.filter(|value| !value.is_empty()).unwrap_or(fallback_title);
+    let titulo = titulo
+        .filter(|value| !value.is_empty())
+        .unwrap_or(fallback_title);
 
     Ok(ParsedUpload {
-        original_filename: original_filename.unwrap_or_else(|| format!("upload.{}", formato.extension())),
+        original_filename: original_filename
+            .unwrap_or_else(|| format!("upload.{}", formato.extension())),
         titulo,
         contenido,
         tags,
@@ -440,7 +480,9 @@ async fn collect_multipart_bytes(
         bytes.extend_from_slice(&chunk);
     }
     if bytes.is_empty() {
-        return Err(AppError::BadRequest("El archivo de audio esta vacio".into()));
+        return Err(AppError::BadRequest(
+            "El archivo de audio esta vacio".into(),
+        ));
     }
     Ok(bytes)
 }
@@ -476,14 +518,20 @@ fn normalize_tags(raw: &str) -> Vec<String> {
     normalized
 }
 
-fn detect_audio_format(bytes: &[u8], filename: Option<&str>) -> Result<AudioUploadFormat, AppError> {
+fn detect_audio_format(
+    bytes: &[u8],
+    filename: Option<&str>,
+) -> Result<AudioUploadFormat, AppError> {
     let extension = filename
         .and_then(|value| std::path::Path::new(value).extension())
         .and_then(|value| value.to_str())
         .map(str::to_ascii_lowercase)
         .unwrap_or_default();
 
-    let allowed_extension = matches!(extension.as_str(), "wav" | "mp3" | "flac" | "aiff" | "aif" | "ogg");
+    let allowed_extension = matches!(
+        extension.as_str(),
+        "wav" | "mp3" | "flac" | "aiff" | "aif" | "ogg"
+    );
     if !allowed_extension {
         return Err(AppError::UnsupportedMediaType(
             "Formato de audio no valido. Formatos aceptados: WAV, MP3, FLAC, AIFF, OGG".into(),
@@ -496,7 +544,10 @@ fn detect_audio_format(bytes: &[u8], filename: Option<&str>) -> Result<AudioUplo
     if bytes.len() >= 4 && &bytes[0..4] == b"fLaC" {
         return Ok(AudioUploadFormat::Flac);
     }
-    if bytes.len() >= 12 && &bytes[0..4] == b"FORM" && (&bytes[8..12] == b"AIFF" || &bytes[8..12] == b"AIFC") {
+    if bytes.len() >= 12
+        && &bytes[0..4] == b"FORM"
+        && (&bytes[8..12] == b"AIFF" || &bytes[8..12] == b"AIFC")
+    {
         return Ok(AudioUploadFormat::Aiff);
     }
     if bytes.len() >= 4 && &bytes[0..4] == b"OggS" {
@@ -516,9 +567,8 @@ fn detect_audio_format(bytes: &[u8], filename: Option<&str>) -> Result<AudioUplo
 
 fn generate_short_id() -> String {
     const ALPHABET: [char; 36] = [
-        'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-        'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+        'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r',
+        's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
     ];
     nanoid::nanoid!(8, &ALPHABET)
 }
@@ -575,7 +625,10 @@ mod tests {
     #[test]
     fn rejects_invalid_hash_hex() {
         assert!(normalize_sha256_hex("1234").is_err());
-        assert!(normalize_sha256_hex("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz").is_err());
+        assert!(normalize_sha256_hex(
+            "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
+        )
+        .is_err());
     }
 
     #[test]

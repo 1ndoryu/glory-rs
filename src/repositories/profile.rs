@@ -14,28 +14,78 @@ const PROFILE_COLS: &str = "id, username, email, nombre_visible, bio, avatar_url
 impl ProfileRepository {
     pub async fn find_by_id(pool: &PgPool, id: i32) -> Result<Option<UserProfile>, sqlx::Error> {
         let sql = format!("SELECT {PROFILE_COLS} FROM usuarios_ext WHERE id = $1");
-        sqlx::query_as::<_, UserProfile>(&sql).bind(id).fetch_optional(pool).await
+        sqlx::query_as::<_, UserProfile>(&sql)
+            .bind(id)
+            .fetch_optional(pool)
+            .await
     }
 
-    pub async fn find_by_username(pool: &PgPool, username: &str) -> Result<Option<UserProfile>, sqlx::Error> {
+    pub async fn find_by_username(
+        pool: &PgPool,
+        username: &str,
+    ) -> Result<Option<UserProfile>, sqlx::Error> {
         let sql = format!("SELECT {PROFILE_COLS} FROM usuarios_ext WHERE username = $1");
-        sqlx::query_as::<_, UserProfile>(&sql).bind(username).fetch_optional(pool).await
+        sqlx::query_as::<_, UserProfile>(&sql)
+            .bind(username)
+            .fetch_optional(pool)
+            .await
     }
 
     /// Aplica patch parcial. Solo actualiza columnas con `Some(_)`.
-    pub async fn update(pool: &PgPool, user_id: i32, patch: &UpdateProfileRequest) -> Result<UserProfile, AppError> {
+    pub async fn update(
+        pool: &PgPool,
+        user_id: i32,
+        patch: &UpdateProfileRequest,
+    ) -> Result<UserProfile, AppError> {
         let mut idx = 1usize;
         let mut clauses: Vec<String> = Vec::new();
         let mut binders: Vec<Binder> = Vec::new();
-        if let Some(v) = &patch.nombre_visible { clauses.push(format!("nombre_visible = ${}", { idx += 1; idx - 1 })); binders.push(Binder::Str(v.clone())); }
-        if let Some(v) = &patch.bio { clauses.push(format!("bio = ${}", { idx += 1; idx - 1 })); binders.push(Binder::Str(v.clone())); }
-        if let Some(v) = &patch.avatar_url { clauses.push(format!("avatar_url = ${}", { idx += 1; idx - 1 })); binders.push(Binder::Str(v.clone())); }
-        if let Some(v) = &patch.portada_url { clauses.push(format!("portada_url = ${}", { idx += 1; idx - 1 })); binders.push(Binder::Str(v.clone())); }
-        if let Some(v) = &patch.sitio_web { clauses.push(format!("sitio_web = ${}", { idx += 1; idx - 1 })); binders.push(Binder::Str(v.clone())); }
-        if let Some(v) = &patch.generos_favoritos { clauses.push(format!("generos_favoritos = ${}", { idx += 1; idx - 1 })); binders.push(Binder::Json(v.clone())); }
+        if let Some(v) = &patch.nombre_visible {
+            clauses.push(format!("nombre_visible = ${}", {
+                idx += 1;
+                idx - 1
+            }));
+            binders.push(Binder::Str(v.clone()));
+        }
+        if let Some(v) = &patch.bio {
+            clauses.push(format!("bio = ${}", {
+                idx += 1;
+                idx - 1
+            }));
+            binders.push(Binder::Str(v.clone()));
+        }
+        if let Some(v) = &patch.avatar_url {
+            clauses.push(format!("avatar_url = ${}", {
+                idx += 1;
+                idx - 1
+            }));
+            binders.push(Binder::Str(v.clone()));
+        }
+        if let Some(v) = &patch.portada_url {
+            clauses.push(format!("portada_url = ${}", {
+                idx += 1;
+                idx - 1
+            }));
+            binders.push(Binder::Str(v.clone()));
+        }
+        if let Some(v) = &patch.sitio_web {
+            clauses.push(format!("sitio_web = ${}", {
+                idx += 1;
+                idx - 1
+            }));
+            binders.push(Binder::Str(v.clone()));
+        }
+        if let Some(v) = &patch.generos_favoritos {
+            clauses.push(format!("generos_favoritos = ${}", {
+                idx += 1;
+                idx - 1
+            }));
+            binders.push(Binder::Json(v.clone()));
+        }
 
         if clauses.is_empty() {
-            return Self::find_by_id(pool, user_id).await?
+            return Self::find_by_id(pool, user_id)
+                .await?
                 .ok_or(AppError::NotFound("Usuario".into()));
         }
 

@@ -92,7 +92,8 @@ async fn converts_to_mp3_and_flac_when_ffmpeg_is_available() {
 fn build_test_wav(sample_rate: u32, duration_ms: u32) -> Vec<u8> {
     let frame_count = usize::try_from(u64::from(sample_rate) * u64::from(duration_ms) / 1_000)
         .expect("fixture should fit in usize");
-    let square_wave_period = usize::try_from((sample_rate / 440).max(2)).expect("period should fit in usize");
+    let square_wave_period =
+        usize::try_from((sample_rate / 440).max(2)).expect("period should fit in usize");
     let positive_peak = i16::MAX / 2;
     let negative_peak = i16::MIN / 2;
     let mut pcm = Vec::with_capacity(frame_count * 2);

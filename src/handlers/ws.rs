@@ -112,7 +112,10 @@ fn resolve_ws_url(state: &AppState) -> String {
     )
 }
 
-fn resolve_ws_url_from_values(ws_public_url: Option<&str>, public_base_url: Option<&str>) -> String {
+fn resolve_ws_url_from_values(
+    ws_public_url: Option<&str>,
+    public_base_url: Option<&str>,
+) -> String {
     if let Some(ws_public_url) = ws_public_url {
         return ws_public_url.to_string();
     }

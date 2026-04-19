@@ -87,7 +87,11 @@ impl From<UserProfile> for PrivateProfileResponse {
     fn from(u: UserProfile) -> Self {
         let email = u.email.clone();
         let estado = u.estado.clone();
-        Self { public: u.into(), email, estado }
+        Self {
+            public: u.into(),
+            email,
+            estado,
+        }
     }
 }
 

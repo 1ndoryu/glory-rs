@@ -235,8 +235,17 @@ fn ensure_input_exists(input_path: &Path) -> Result<(), AudioError> {
 fn detect_audio_format(input_path: &Path, format_hint: Option<&str>) -> Result<String, AudioError> {
     format_hint
         .and_then(normalize_audio_format)
-        .or_else(|| input_path.extension().and_then(|value| value.to_str()).and_then(normalize_audio_format))
-        .or_else(|| mime_guess::from_path(input_path).first_raw().and_then(normalize_audio_format))
+        .or_else(|| {
+            input_path
+                .extension()
+                .and_then(|value| value.to_str())
+                .and_then(normalize_audio_format)
+        })
+        .or_else(|| {
+            mime_guess::from_path(input_path)
+                .first_raw()
+                .and_then(normalize_audio_format)
+        })
         .ok_or_else(|| AudioError::MissingFormat(input_path.to_path_buf()))
 }
 
@@ -254,7 +263,10 @@ fn normalize_audio_format(value: &str) -> Option<String> {
     }
 }
 
-fn probe_with_symphonia(input_path: &Path, format_hint: Option<&str>) -> Result<SymphoniaProbe, AudioError> {
+fn probe_with_symphonia(
+    input_path: &Path,
+    format_hint: Option<&str>,
+) -> Result<SymphoniaProbe, AudioError> {
     let mut reader = open_audio_reader(input_path, format_hint)?;
     let total_frames = reader
         .estimated_frames
@@ -296,9 +308,13 @@ fn waveform_peaks_with_symphonia(
     loop {
         let packet = match reader.format.next_packet() {
             Ok(packet) => packet,
-            Err(SymphoniaError::IoError(error)) if error.kind() == ErrorKind::UnexpectedEof => break,
+            Err(SymphoniaError::IoError(error)) if error.kind() == ErrorKind::UnexpectedEof => {
+                break
+            }
             Err(SymphoniaError::ResetRequired) => {
-                return Err(AudioError::Symphonia("Symphonia pidió reset del decoder".to_owned()));
+                return Err(AudioError::Symphonia(
+                    "Symphonia pidió reset del decoder".to_owned(),
+                ));
             }
             Err(error) => return Err(error.into()),
         };
@@ -320,7 +336,9 @@ fn waveform_peaks_with_symphonia(
                 buffer.copy_interleaved_ref(decoded);
 
                 for frame in buffer.samples().chunks(reader.channels) {
-                    let amplitude = frame.iter().fold(0.0_f32, |max_value, sample| max_value.max(sample.abs()));
+                    let amplitude = frame
+                        .iter()
+                        .fold(0.0_f32, |max_value, sample| max_value.max(sample.abs()));
                     let bucket = usize::try_from(frame_index / frames_per_bar)
                         .unwrap_or(bars - 1)
                         .min(bars - 1);
@@ -331,7 +349,9 @@ fn waveform_peaks_with_symphonia(
             Err(SymphoniaError::DecodeError(error)) => {
                 tracing::warn!(path = %input_path.display(), error, "packet corrupto al generar waveform con Symphonia");
             }
-            Err(SymphoniaError::IoError(error)) if error.kind() == ErrorKind::UnexpectedEof => break,
+            Err(SymphoniaError::IoError(error)) if error.kind() == ErrorKind::UnexpectedEof => {
+                break
+            }
             Err(error) => return Err(error.into()),
         }
     }
@@ -339,7 +359,10 @@ fn waveform_peaks_with_symphonia(
     Ok(peaks)
 }
 
-async fn probe_duration_with_ffprobe(ffprobe_path: &Path, input_path: &Path) -> Result<f32, AudioError> {
+async fn probe_duration_with_ffprobe(
+    ffprobe_path: &Path,
+    input_path: &Path,
+) -> Result<f32, AudioError> {
     let output = Command::new(ffprobe_path)
         .args([
             "-v",
@@ -410,7 +433,8 @@ async fn waveform_peaks_with_ffmpeg(
     let samples_per_bar = usize::max(1, total_samples.div_ceil(bars));
 
     for (index, chunk) in bytes.chunks_exact(2).enumerate() {
-        let amplitude = f32::from(i16::from_le_bytes([chunk[0], chunk[1]]).abs()) / f32::from(i16::MAX);
+        let amplitude =
+            f32::from(i16::from_le_bytes([chunk[0], chunk[1]]).abs()) / f32::from(i16::MAX);
         let bucket = usize::min(index / samples_per_bar, bars - 1);
         peaks[bucket] = peaks[bucket].max(amplitude.min(1.0_f32));
     }
@@ -451,7 +475,11 @@ async fn run_ffmpeg(
 
 fn temp_file_path(extension: &str) -> PathBuf {
     let mut path = env::temp_dir();
-    path.push(format!("kamples-audio-{}.{}", Uuid::new_v4(), extension.trim_start_matches('.')));
+    path.push(format!(
+        "kamples-audio-{}.{}",
+        Uuid::new_v4(),
+        extension.trim_start_matches('.')
+    ));
     path
 }
 
@@ -464,7 +492,10 @@ fn duration_from_frames(total_frames: u64, sample_rate_hz: u32) -> Duration {
     Duration::new(seconds, u32::try_from(nanos).unwrap_or(u32::MAX))
 }
 
-fn open_audio_reader(input_path: &Path, format_hint: Option<&str>) -> Result<AudioReader, AudioError> {
+fn open_audio_reader(
+    input_path: &Path,
+    format_hint: Option<&str>,
+) -> Result<AudioReader, AudioError> {
     let file = File::open(input_path)?;
     let source = MediaSourceStream::new(Box::new(file), MediaSourceStreamOptions::default());
     let mut hint = Hint::new();
@@ -496,7 +527,8 @@ fn open_audio_reader(input_path: &Path, format_hint: Option<&str>) -> Result<Aud
         .map(symphonia::core::audio::Channels::count)
         .ok_or_else(|| AudioError::MissingChannels(input_path.to_path_buf()))?;
     let estimated_frames = codec_params.n_frames;
-    let decoder = symphonia::default::get_codecs().make(&codec_params, &DecoderOptions::default())?;
+    let decoder =
+        symphonia::default::get_codecs().make(&codec_params, &DecoderOptions::default())?;
 
     Ok(AudioReader {
         format,
@@ -514,9 +546,13 @@ fn count_frames(reader: &mut AudioReader) -> Result<u64, AudioError> {
     loop {
         let packet = match reader.format.next_packet() {
             Ok(packet) => packet,
-            Err(SymphoniaError::IoError(error)) if error.kind() == ErrorKind::UnexpectedEof => break,
+            Err(SymphoniaError::IoError(error)) if error.kind() == ErrorKind::UnexpectedEof => {
+                break
+            }
             Err(SymphoniaError::ResetRequired) => {
-                return Err(AudioError::Symphonia("Symphonia pidió reset del decoder".to_owned()));
+                return Err(AudioError::Symphonia(
+                    "Symphonia pidió reset del decoder".to_owned(),
+                ));
             }
             Err(error) => return Err(error.into()),
         };
@@ -532,7 +568,9 @@ fn count_frames(reader: &mut AudioReader) -> Result<u64, AudioError> {
             Err(SymphoniaError::DecodeError(error)) => {
                 tracing::warn!(error, "packet corrupto al contar frames con Symphonia");
             }
-            Err(SymphoniaError::IoError(error)) if error.kind() == ErrorKind::UnexpectedEof => break,
+            Err(SymphoniaError::IoError(error)) if error.kind() == ErrorKind::UnexpectedEof => {
+                break
+            }
             Err(error) => return Err(error.into()),
         }
     }

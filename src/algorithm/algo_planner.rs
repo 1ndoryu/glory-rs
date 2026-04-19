@@ -19,7 +19,7 @@ use std::time::Duration;
 use sqlx::PgPool;
 use tokio::sync::Mutex;
 use tokio::task::JoinHandle;
-use tokio::time::{Instant, interval, interval_at};
+use tokio::time::{interval, interval_at, Instant};
 use tokio_util::sync::CancellationToken;
 
 use deadpool_redis::Pool as RedisPool;
@@ -165,8 +165,7 @@ impl AlgoPlanner {
                        cnt_descargas_preciso, cnt_follows_preciso, cnt_comentarios_preciso"
         );
 
-        let row: CounterRow =
-            sqlx::query_as(&sql).bind(user_id).fetch_one(pool).await?;
+        let row: CounterRow = sqlx::query_as(&sql).bind(user_id).fetch_one(pool).await?;
 
         let mut triggered = Triggered::default();
         if self.fast_threshold_hit(&row) {
