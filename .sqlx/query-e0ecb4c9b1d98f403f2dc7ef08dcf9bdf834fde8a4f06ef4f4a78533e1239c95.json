@@ -1,0 +1,149 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n                    a.id AS \"id!\",\n                    a.autor_id AS \"autor_id!\",\n                    a.titulo AS \"titulo!\",\n                    a.slug AS \"slug!\",\n                    a.contenido AS \"contenido!\",\n                    a.extracto AS \"extracto!\",\n                    a.portada_url,\n                    a.categoria AS \"categoria!\",\n                    a.embeds AS \"embeds!: serde_json::Value\",\n                    a.descarga_publica AS \"descarga_publica!\",\n                    COALESCE(a.total_likes, 0) AS \"total_likes!\",\n                    COALESCE(a.total_comentarios, 0) AS \"total_comentarios!\",\n                    a.moderacion_estado AS \"moderacion_estado!\",\n                    a.created_at AS \"created_at!: chrono::DateTime<chrono::Utc>\",\n                    a.updated_at AS \"updated_at!: chrono::DateTime<chrono::Utc>\",\n                    a.publicado_en AS \"publicado_en?: chrono::DateTime<chrono::Utc>\",\n                    u.id AS \"author_id!\",\n                    u.username AS \"author_username!\",\n                    u.nombre_visible AS \"author_display_name\",\n                    u.avatar_url AS \"author_avatar_url\",\n                    COALESCE(u.verificado, FALSE) AS \"author_verified!\",\n                    COALESCE(al.usuario_id IS NOT NULL, FALSE) AS \"liked_por_mi!\"\n               FROM articulos a\n               JOIN usuarios_ext u ON u.id = a.autor_id\n               LEFT JOIN articulos_likes al ON al.articulo_id = a.id AND al.usuario_id = $2\n               WHERE a.slug = $1\n                 AND a.eliminado_en IS NULL\n               LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "autor_id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "titulo!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "slug!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "contenido!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "extracto!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "portada_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 7,
+        "name": "categoria!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 8,
+        "name": "embeds!: serde_json::Value",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 9,
+        "name": "descarga_publica!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 10,
+        "name": "total_likes!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 11,
+        "name": "total_comentarios!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 12,
+        "name": "moderacion_estado!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 13,
+        "name": "created_at!: chrono::DateTime<chrono::Utc>",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 14,
+        "name": "updated_at!: chrono::DateTime<chrono::Utc>",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 15,
+        "name": "publicado_en?: chrono::DateTime<chrono::Utc>",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 16,
+        "name": "author_id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 17,
+        "name": "author_username!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 18,
+        "name": "author_display_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 19,
+        "name": "author_avatar_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 20,
+        "name": "author_verified!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 21,
+        "name": "liked_por_mi!",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      null,
+      null,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      true,
+      null,
+      null
+    ]
+  },
+  "hash": "e0ecb4c9b1d98f403f2dc7ef08dcf9bdf834fde8a4f06ef4f4a78533e1239c95"
+}

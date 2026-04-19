@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n                                target_id AS \"target_id!\",\n                                COUNT(*)::bigint AS \"pending_count!\"\n             FROM reportes\n             WHERE tipo = $1\n               AND COALESCE(estado, 'pendiente') = 'pendiente'\n               AND target_id = ANY($2)\n                         GROUP BY target_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "target_id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "pending_count!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int4Array"
+      ]
+    },
+    "nullable": [
+      false,
+      null
+    ]
+  },
+  "hash": "dcd944ed0a71f3aa3c57fa3242031acceb32c65be1ff73767d6462ad6c27c810"
+}

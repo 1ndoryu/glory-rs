@@ -28,6 +28,12 @@ pub struct SampleDownloadInfo {
     pub precio: Option<f64>,
 }
 
+#[derive(Debug, Clone)]
+pub struct UserDownloadAllowance {
+    pub plan: String,
+    pub bonus_credits: i32,
+}
+
 impl DownloadRepository {
     pub async fn fetch_sample_info(
         pool: &PgPool,
@@ -106,14 +112,34 @@ impl DownloadRepository {
     }
 
     pub async fn user_plan(pool: &PgPool, user_id: i32) -> Result<String, AppError> {
-        let plan = sqlx::query_scalar!(
-            "SELECT plan FROM usuarios_ext WHERE id = $1",
+        let plan = sqlx::query_scalar!("SELECT plan FROM usuarios_ext WHERE id = $1", user_id)
+            .fetch_optional(pool)
+            .await?
+            .unwrap_or_else(|| "free".to_string());
+        Ok(plan)
+    }
+
+    pub async fn user_download_allowance(
+        pool: &PgPool,
+        user_id: i32,
+    ) -> Result<UserDownloadAllowance, AppError> {
+        let row = sqlx::query!(
+            "SELECT plan, creditos_bonus FROM usuarios_ext WHERE id = $1",
             user_id
         )
         .fetch_optional(pool)
-        .await?
-        .unwrap_or_else(|| "free".to_string());
-        Ok(plan)
+        .await?;
+
+        Ok(row.map_or_else(
+            || UserDownloadAllowance {
+                plan: "free".to_string(),
+                bonus_credits: 0,
+            },
+            |record| UserDownloadAllowance {
+                plan: record.plan,
+                bonus_credits: record.creditos_bonus,
+            },
+        ))
     }
 
     /* [174A-63] Devuelve datos de archivo para servir vía stream firmado HMAC.

@@ -7,8 +7,9 @@ use crate::models::{
     SimilarSamplesResponse, UpdateSampleRequest,
 };
 use crate::repositories::{
-    OwnedSampleRecord, SampleCatalogDetailRecord, SampleCatalogSummaryRecord,
-    SampleListFilters, SampleRepository, SampleTextSearch, UpdateSamplePatch,
+    OwnedSampleRecord, SampleCatalogDetailRecord, SampleCatalogSummaryRecord, SampleListFilters,
+    SampleRepository, SampleTextSearch, UpdateSamplePatch, ReportRepository,
+    AUTO_HIDE_SAMPLE_REPORT_THRESHOLD,
 };
 
 #[cfg(test)]
@@ -34,13 +35,14 @@ impl SampleCatalogService {
     pub async fn list_public_samples(
         pool: &sqlx::PgPool,
         public_base_url: Option<&str>,
+        current_user_id: Option<i32>,
         query: ListSamplesQuery,
     ) -> Result<ListSamplesResponse, AppError> {
         query
             .validate()
             .map_err(|error| AppError::Validation(error.to_string()))?;
 
-        let filters = normalize_filters(query)?;
+        let filters = normalize_filters(query, current_user_id)?;
         let result = SampleRepository::list_public_samples(pool, &filters).await?;
         let pages = if result.total == 0 {
             0
@@ -71,9 +73,20 @@ impl SampleCatalogService {
     ) -> Result<SampleDetailResponse, AppError> {
         let sample = SampleRepository::find_sample_by_slug_or_short_id(pool, slug_or_short_id)
             .await?
-            .ok_or_else(|| {
-                AppError::NotFound(format!("sample {slug_or_short_id}"))
-            })?;
+            .ok_or_else(|| AppError::NotFound(format!("sample {slug_or_short_id}")))?;
+
+        if ReportRepository::is_auto_hidden_for_viewer(
+            pool,
+            "sample",
+            sample.id,
+            sample.creator_id,
+            current_user_id,
+            AUTO_HIDE_SAMPLE_REPORT_THRESHOLD,
+        )
+        .await?
+        {
+            return Err(AppError::NotFound(format!("sample {slug_or_short_id}")));
+        }
 
         Ok(build_sample_detail(
             sample,
@@ -87,20 +100,37 @@ impl SampleCatalogService {
         public_base_url: Option<&str>,
         current_user_id: Option<i32>,
     ) -> Result<SampleDetailResponse, AppError> {
-        let sample = SampleRepository::find_random_public_sample(pool)
+        for _ in 0..3 {
+            let Some(sample) = SampleRepository::find_random_public_sample(pool).await? else {
+                break;
+            };
+            if ReportRepository::is_auto_hidden_for_viewer(
+                pool,
+                "sample",
+                sample.id,
+                sample.creator_id,
+                current_user_id,
+                AUTO_HIDE_SAMPLE_REPORT_THRESHOLD,
+            )
             .await?
-            .ok_or_else(|| AppError::NotFound("sample aleatorio".into()))?;
+            {
+                continue;
+            }
 
-        Ok(build_sample_detail(
-            sample,
-            public_base_url,
-            current_user_id,
-        ))
+            return Ok(build_sample_detail(
+                sample,
+                public_base_url,
+                current_user_id,
+            ));
+        }
+
+        Err(AppError::NotFound("sample aleatorio".into()))
     }
 
     pub async fn get_similar_samples(
         pool: &sqlx::PgPool,
         public_base_url: Option<&str>,
+        current_user_id: Option<i32>,
         sample_id: i32,
         query: SimilarSamplesQuery,
     ) -> Result<SimilarSamplesResponse, AppError> {
@@ -109,8 +139,13 @@ impl SampleCatalogService {
             .map_err(|error| AppError::Validation(error.to_string()))?;
 
         let limit = normalize_similar_limit(&query);
-        let records = SampleRepository::find_public_similar_samples(pool, sample_id, limit)
-            .await?
+        let records = SampleRepository::find_public_similar_samples(
+            pool,
+            sample_id,
+            limit,
+            current_user_id,
+        )
+        .await?
             .ok_or_else(|| AppError::NotFound(format!("sample {sample_id}")))?;
 
         Ok(SimilarSamplesResponse {
@@ -155,8 +190,8 @@ impl SampleCatalogService {
         slug_or_short_id: &str,
     ) -> Result<DeleteSampleResponse, AppError> {
         let sample = load_owned_sample(pool, slug_or_short_id, current_user_id).await?;
-        let deleted = SampleRepository::soft_delete_owned_sample(pool, sample.id, current_user_id)
-            .await?;
+        let deleted =
+            SampleRepository::soft_delete_owned_sample(pool, sample.id, current_user_id).await?;
 
         if !deleted {
             return Err(AppError::NotFound(format!("sample {slug_or_short_id}")));
@@ -327,7 +362,10 @@ fn asset_to_public_url(public_base_url: Option<&str>, raw: Option<String>) -> Op
     })
 }
 
-fn normalize_filters(query: ListSamplesQuery) -> Result<SampleListFilters, AppError> {
+fn normalize_filters(
+    query: ListSamplesQuery,
+    viewer_id: Option<i32>,
+) -> Result<SampleListFilters, AppError> {
     let search = normalize_search(query.search, query.search_normalized)?;
     let creator = normalize_creator(query.creator)?;
     let tags = normalize_tags(query.tags)?;
@@ -335,6 +373,7 @@ fn normalize_filters(query: ListSamplesQuery) -> Result<SampleListFilters, AppEr
     Ok(SampleListFilters {
         page: query.page.unwrap_or(DEFAULT_PAGE),
         per_page: query.per_page.unwrap_or(DEFAULT_PER_PAGE),
+        viewer_id,
         search,
         bpm: query.bpm,
         music_key: normalize_music_key(query.key)?,
@@ -378,10 +417,7 @@ fn normalize_search(
         .map(|value| value.trim().to_ascii_lowercase())
         .filter(|value| !value.is_empty() && value != &query.to_ascii_lowercase());
 
-    Ok(Some(SampleTextSearch::new(
-        query.to_string(),
-        normalized,
-    )))
+    Ok(Some(SampleTextSearch::new(query.to_string(), normalized)))
 }
 
 fn normalize_update_request(request: UpdateSampleRequest) -> Result<UpdateSamplePatch, AppError> {
@@ -390,9 +426,7 @@ fn normalize_update_request(request: UpdateSampleRequest) -> Result<UpdateSample
     if let Some(titulo) = request.titulo {
         let titulo = titulo.trim();
         if titulo.is_empty() {
-            return Err(AppError::Validation(
-                "titulo no puede quedar vacio".into(),
-            ));
+            return Err(AppError::Validation("titulo no puede quedar vacio".into()));
         }
         patch.titulo = Some(titulo.to_string());
     }

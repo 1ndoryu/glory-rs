@@ -2,6 +2,7 @@ use sqlx::{FromRow, PgPool, Postgres, QueryBuilder};
 
 use super::query::{SampleSummaryRow, SAMPLE_SUMMARY_SELECT};
 use super::{SampleCatalogSummaryRecord, SampleRepository};
+use crate::repositories::AUTO_HIDE_SAMPLE_REPORT_THRESHOLD;
 
 const MAX_SIMILARITY_TAGS: usize = 10;
 const SIMILAR_CONTENT_WEIGHT: f64 = 0.55;
@@ -29,22 +30,24 @@ impl SampleRepository {
         pool: &PgPool,
         sample_id: i32,
         limit: i64,
+        viewer_id: Option<i32>,
     ) -> Result<Option<Vec<SampleCatalogSummaryRecord>>, sqlx::Error> {
-        let Some(source) = Self::find_public_similarity_source(pool, sample_id).await? else {
+        let Some(source) = Self::find_public_similarity_source(pool, sample_id, viewer_id).await? else {
             return Ok(None);
         };
 
         if source.has_embedding {
-            let vector_matches = Self::find_public_similar_samples_by_embedding(pool, sample_id, limit)
-                .await?;
+            let vector_matches =
+                Self::find_public_similar_samples_by_embedding(pool, sample_id, limit, viewer_id)
+                    .await?;
 
             if !vector_matches.is_empty() {
                 return Ok(Some(vector_matches));
             }
         }
 
-        let fallback_matches = Self::find_public_similar_samples_by_fallback(pool, &source, limit)
-            .await?;
+        let fallback_matches =
+            Self::find_public_similar_samples_by_fallback(pool, &source, limit, viewer_id).await?;
 
         Ok(Some(fallback_matches))
     }
@@ -52,6 +55,7 @@ impl SampleRepository {
     async fn find_public_similarity_source(
         pool: &PgPool,
         sample_id: i32,
+        viewer_id: Option<i32>,
     ) -> Result<Option<SimilaritySourceRow>, sqlx::Error> {
         let mut builder = QueryBuilder::<Postgres>::new(
             "SELECT
@@ -69,7 +73,11 @@ impl SampleRepository {
             "
                AND s.eliminado_en IS NULL
                AND s.estado = 'activo'
-               AND s.mostrar_en_comunidad = TRUE
+               AND s.mostrar_en_comunidad = TRUE",
+        );
+        push_auto_hide_filter(&mut builder, "s.id", "s.creador_id", viewer_id);
+        builder.push(
+            "
              LIMIT 1",
         );
 
@@ -80,6 +88,7 @@ impl SampleRepository {
         pool: &PgPool,
         sample_id: i32,
         limit: i64,
+        viewer_id: Option<i32>,
     ) -> Result<Vec<SampleCatalogSummaryRecord>, sqlx::Error> {
         let mut builder = QueryBuilder::<Postgres>::new(SAMPLE_SUMMARY_SELECT);
         builder.push(
@@ -91,6 +100,7 @@ impl SampleRepository {
                 AND s.id != ",
         );
         builder.push_bind(sample_id);
+                push_auto_hide_filter(&mut builder, "s.id", "s.creador_id", viewer_id);
         builder.push(
             "
                 AND s.embedding IS NOT NULL
@@ -111,13 +121,17 @@ impl SampleRepository {
             .fetch_all(pool)
             .await?;
 
-        Ok(rows.into_iter().map(SampleCatalogSummaryRecord::from).collect())
+        Ok(rows
+            .into_iter()
+            .map(SampleCatalogSummaryRecord::from)
+            .collect())
     }
 
     async fn find_public_similar_samples_by_fallback(
         pool: &PgPool,
         source: &SimilaritySourceRow,
         limit: i64,
+        viewer_id: Option<i32>,
     ) -> Result<Vec<SampleCatalogSummaryRecord>, sqlx::Error> {
         let mut builder = QueryBuilder::<Postgres>::new(SAMPLE_SUMMARY_SELECT);
         builder.push(
@@ -129,6 +143,7 @@ impl SampleRepository {
                 AND s.id != ",
         );
         builder.push_bind(source.id);
+            push_auto_hide_filter(&mut builder, "s.id", "s.creador_id", viewer_id);
 
         builder.push(" ORDER BY (");
         builder.push(format!("{SIMILAR_CONTENT_WEIGHT} * "));
@@ -149,10 +164,12 @@ impl SampleRepository {
         builder.push(" + ");
         builder.push(format!("{SIMILAR_NOVELTY_WEIGHT} * "));
         builder.push(similarity_novelty_score_sql());
-        builder.push(") DESC,
+        builder.push(
+            ") DESC,
             s.publicado_at DESC NULLS LAST,
             s.created_at DESC,
-            s.id DESC");
+            s.id DESC",
+        );
         builder.push(" LIMIT ");
         builder.push_bind(limit);
 
@@ -161,8 +178,30 @@ impl SampleRepository {
             .fetch_all(pool)
             .await?;
 
-        Ok(rows.into_iter().map(SampleCatalogSummaryRecord::from).collect())
+        Ok(rows
+            .into_iter()
+            .map(SampleCatalogSummaryRecord::from)
+            .collect())
     }
+}
+
+fn push_auto_hide_filter(
+    builder: &mut QueryBuilder<'_, Postgres>,
+    target_expr: &str,
+    creator_expr: &str,
+    viewer_id: Option<i32>,
+) {
+    builder.push(" AND ((SELECT COUNT(*) FROM reportes r WHERE r.tipo = 'sample' AND COALESCE(r.estado, 'pendiente') = 'pendiente' AND r.target_id = ");
+    builder.push(target_expr);
+    builder.push(") < ");
+    builder.push(AUTO_HIDE_SAMPLE_REPORT_THRESHOLD.to_string());
+    if let Some(viewer_id) = viewer_id {
+        builder.push(" OR ");
+        builder.push(creator_expr);
+        builder.push(" = ");
+        builder.push_bind(viewer_id);
+    }
+    builder.push(")");
 }
 
 fn push_similarity_tag_score(

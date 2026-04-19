@@ -19,6 +19,22 @@ pub struct SmtpConfig {
     pub secure: String,
 }
 
+#[derive(Debug, Clone, Default)]
+pub struct StripePricesConfig {
+    pub free: Option<String>,
+    pub pro: Option<String>,
+    pub premium: Option<String>,
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct StripeConfig {
+    pub secret_key: Option<String>,
+    pub publishable_key: Option<String>,
+    pub webhook_secret: Option<String>,
+    pub connect_webhook_secret: Option<String>,
+    pub prices: StripePricesConfig,
+}
+
 /* [174A-5] Configuración de la app cargada desde variables de entorno.
  * REDIS_URL es opcional para permitir desarrollo sin Redis (cache en memoria fallback). */
 #[derive(Debug, Clone)]
@@ -58,6 +74,10 @@ pub struct AppConfig {
     pub fcm_service_account_json: Option<String>,
     /// Configuración SMTP opcional para emails transaccionales.
     pub smtp: Option<SmtpConfig>,
+    /* [174A-79] Stripe queda agrupado para no seguir inflando AppConfig con
+     * claves sueltas. El runtime decide si la integración queda habilitada
+     * según `secret_key`, pero publishable/webhook/precios pueden faltar en local. */
+    pub stripe: StripeConfig,
 }
 
 impl AppConfig {
@@ -90,8 +110,7 @@ impl AppConfig {
                 .filter(|s| !s.is_empty())
                 .map(String::from)
                 .collect(),
-            storage_root: std::env::var("STORAGE_ROOT")
-                .unwrap_or_else(|_| "./uploads".to_string()),
+            storage_root: std::env::var("STORAGE_ROOT").unwrap_or_else(|_| "./uploads".to_string()),
             storage_backend: std::env::var("STORAGE_BACKEND")
                 .unwrap_or_else(|_| "local".to_string()),
             s3_bucket: std::env::var("S3_BUCKET").ok(),
@@ -110,6 +129,7 @@ impl AppConfig {
                 "KAMPLES_FCM_SERVICE_ACCOUNT_JSON",
             ]),
             smtp: load_optional_smtp()?,
+            stripe: load_optional_stripe(),
         })
     }
 }
@@ -144,17 +164,16 @@ fn load_optional_smtp() -> Result<Option<SmtpConfig>, ConfigError> {
         return Ok(None);
     }
 
-    let host = first_env(&["SMTP_HOST"])
-        .ok_or_else(|| ConfigError::MissingEnvVar("SMTP_HOST".into()))?;
-    let user = first_env(&["SMTP_USER"])
-        .ok_or_else(|| ConfigError::MissingEnvVar("SMTP_USER".into()))?;
+    let host =
+        first_env(&["SMTP_HOST"]).ok_or_else(|| ConfigError::MissingEnvVar("SMTP_HOST".into()))?;
+    let user =
+        first_env(&["SMTP_USER"]).ok_or_else(|| ConfigError::MissingEnvVar("SMTP_USER".into()))?;
     let password = first_env(&["SMTP_PASSWORD", "SMTP_PASS"])
         .ok_or_else(|| ConfigError::MissingEnvVar("SMTP_PASSWORD / SMTP_PASS".into()))?;
     let port = first_env(&["SMTP_PORT"])
         .unwrap_or_else(|| "587".to_string())
         .parse()?;
-    let from_email = first_env(&["SMTP_FROM_EMAIL", "SMTP_FROM"])
-        .unwrap_or_else(|| user.clone());
+    let from_email = first_env(&["SMTP_FROM_EMAIL", "SMTP_FROM"]).unwrap_or_else(|| user.clone());
     let from_name = first_env(&["SMTP_FROM_NAME"]).unwrap_or_else(|| "Kamples".to_string());
     let secure = first_env(&["SMTP_SECURE"]).unwrap_or_else(|| "tls".to_string());
 
@@ -167,4 +186,21 @@ fn load_optional_smtp() -> Result<Option<SmtpConfig>, ConfigError> {
         from_name,
         secure,
     }))
+}
+
+fn load_optional_stripe() -> StripeConfig {
+    StripeConfig {
+        secret_key: first_env(&["GLORY_STRIPE_SECRET_KEY", "STRIPE_SECRET_KEY"]),
+        publishable_key: first_env(&["GLORY_STRIPE_PUBLISHABLE_KEY", "STRIPE_PUBLISHABLE_KEY"]),
+        webhook_secret: first_env(&["GLORY_STRIPE_WEBHOOK_SECRET", "STRIPE_WEBHOOK_SECRET"]),
+        connect_webhook_secret: first_env(&[
+            "GLORY_STRIPE_CONNECT_WEBHOOK_SECRET",
+            "STRIPE_CONNECT_WEBHOOK_SECRET",
+        ]),
+        prices: StripePricesConfig {
+            free: first_env(&["GLORY_STRIPE_PRICE_FREE", "STRIPE_PRICE_FREE"]),
+            pro: first_env(&["GLORY_STRIPE_PRICE_PRO", "STRIPE_PRICE_PRO"]),
+            premium: first_env(&["GLORY_STRIPE_PRICE_PREMIUM", "STRIPE_PRICE_PREMIUM"]),
+        },
+    }
 }

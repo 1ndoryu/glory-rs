@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            UPDATE usuarios_ext\n            SET stripe_customer_id = $2\n            WHERE id = $1\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Varchar"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "9d396d826cf116bed7297314300512dcf8932bc2aa95fbae9788be95d2fce2ad"
+}

@@ -109,7 +109,10 @@ fn normalize(value: &str) -> String {
 }
 
 fn first_match<'a>(haystack: &str, needles: &'a [&str]) -> Option<&'a str> {
-    needles.iter().copied().find(|needle| haystack.contains(needle))
+    needles
+        .iter()
+        .copied()
+        .find(|needle| haystack.contains(needle))
 }
 
 fn count_urls(value: &str) -> usize {

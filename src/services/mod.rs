@@ -1,9 +1,9 @@
+pub mod algo_timing;
 mod audio_pipeline;
+mod auth;
+pub mod download_token;
 mod email;
 mod fcm;
-mod auth;
-pub mod algo_timing;
-pub mod download_token;
 mod google_oauth;
 mod ia_queue;
 mod ia_service;
@@ -14,23 +14,25 @@ mod notification_fanout;
 mod push;
 #[cfg(feature = "s3")]
 pub mod s3_storage;
+mod search;
 mod sample_catalog;
 pub mod storage;
+mod stripe_service;
 mod token_store;
 
 pub use audio_pipeline::{
     AudioPipelineError, AudioPipelineRequest, AudioPipelineResult, AudioPipelineService,
     AudioPipelineStage, AudioTechnicalAnalysis, GeneratedAudioAssets,
 };
+pub use auth::{AuthService, Claims};
 pub use email::{
     EmailDeliveryRuntime, EmailDeliveryRuntimeError, EmailNotificationService,
     NotificationOptInEmailInput, PurchaseConfirmationEmailInput,
 };
 pub use fcm::{
-    FcmDeliveryRuntime, FcmDeliveryRuntimeError, FcmNotificationPayload,
-    FcmNotificationService, FcmSendSummary, FcmTokenPlatform,
+    FcmDeliveryRuntime, FcmDeliveryRuntimeError, FcmNotificationPayload, FcmNotificationService,
+    FcmSendSummary, FcmTokenPlatform,
 };
-pub use auth::{AuthService, Claims};
 pub use google_oauth::{GoogleIdClaims, GoogleVerifier};
 pub use ia_queue::{
     IaQueueProcessRequest, IaQueueProcessResult, IaQueueService, IaQueueServiceError,
@@ -46,7 +48,9 @@ pub use moderation::{
     ModerationProvider, ModerationProviderFailure, ModerationRequest, ModerationResult,
     ModerationService, ModerationServiceError, ModerationVerdict,
 };
-pub use notification::{CreateNotificationInput, NotificationService, DEFAULT_NOTIFICATION_PAGE_SIZE};
+pub use notification::{
+    CreateNotificationInput, NotificationService, DEFAULT_NOTIFICATION_PAGE_SIZE,
+};
 pub use notification_fanout::NotificationFanoutService;
 pub use push::{
     PushDeliveryRuntime, PushDeliveryRuntimeError, PushNotificationPayload,
@@ -54,6 +58,12 @@ pub use push::{
 };
 #[cfg(feature = "s3")]
 pub use s3_storage::S3Storage;
+pub use search::SearchService;
 pub use sample_catalog::SampleCatalogService;
 pub use storage::{FileStorage, LocalFs};
+pub use stripe_service::{
+    StripeCheckoutSessionSummary, StripeConnectAccountSummary, StripeConnectBalanceSummary,
+    StripeConnectLinkSummary, StripePortalSessionSummary, StripePriceCatalog, StripeRuntime,
+    StripeRuntimeError, StripeSampleCheckoutRequest, StripeService, StripeWebhookSecretKind,
+};
 pub use token_store::TokenStore;

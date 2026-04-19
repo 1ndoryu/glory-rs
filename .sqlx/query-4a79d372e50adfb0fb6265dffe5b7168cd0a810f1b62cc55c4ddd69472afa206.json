@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO articulos_likes (usuario_id, articulo_id)\n                   VALUES ($1, $2)\n                   ON CONFLICT (usuario_id, articulo_id) DO NOTHING",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4a79d372e50adfb0fb6265dffe5b7168cd0a810f1b62cc55c4ddd69472afa206"
+}

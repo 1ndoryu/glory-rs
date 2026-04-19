@@ -1,0 +1,69 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            INSERT INTO suscripciones (\n                usuario_id,\n                plan,\n                estado,\n                stripe_subscription_id,\n                inicio_at,\n                fin_at\n            )\n            VALUES ($1, $2, $3, $4, $5, $6)\n            RETURNING\n                id,\n                usuario_id AS user_id,\n                plan,\n                estado AS \"status!\",\n                stripe_subscription_id,\n                inicio_at AS start_at,\n                fin_at AS end_at,\n                created_at AS \"created_at!\"\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "plan",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "status!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "stripe_subscription_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "start_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 6,
+        "name": "end_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 7,
+        "name": "created_at!",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Timestamptz",
+        "Timestamptz"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "0d8a09f147b9295addf67b2a2193297ebcb15da6d3ccc6993b0631522fe3020c"
+}

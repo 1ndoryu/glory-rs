@@ -1,0 +1,53 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id,\n                      username,\n                      nombre_visible,\n                      avatar_url,\n                      COALESCE(verificado, FALSE) AS \"verificado!\",\n                      COALESCE(total_seguidores, 0) AS \"total_seguidores!\"\n               FROM usuarios_ext\n               WHERE estado = 'activo'\n                 AND es_seed = FALSE\n                 AND (username ILIKE $1 OR nombre_visible ILIKE $1)\n               ORDER BY COALESCE(total_seguidores, 0) DESC, id DESC\n               LIMIT $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "username",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "nombre_visible",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "avatar_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "verificado!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 5,
+        "name": "total_seguidores!",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      null,
+      null
+    ]
+  },
+  "hash": "de9ba57b95cc9c9200f21d3069aaed631f6bd93dc7c21e506917bd6a1e179a60"
+}

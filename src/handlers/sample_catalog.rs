@@ -40,11 +40,13 @@ use crate::AppState;
 )]
 pub async fn list_samples(
     State(state): State<AppState>,
+    OptionalUser(user): OptionalUser,
     Query(query): Query<ListSamplesQuery>,
 ) -> Result<Json<ListSamplesResponse>, AppError> {
     let response = SampleCatalogService::list_public_samples(
         &state.pool,
         state.public_base_url.as_deref(),
+        user.map(|current| current.user_id),
         query,
     )
     .await?;
@@ -87,12 +89,14 @@ pub async fn random_sample(
 )]
 pub async fn similar_samples(
     State(state): State<AppState>,
+    OptionalUser(user): OptionalUser,
     Path(id): Path<i32>,
     Query(query): Query<SimilarSamplesQuery>,
 ) -> Result<Json<SimilarSamplesResponse>, AppError> {
     let response = SampleCatalogService::get_similar_samples(
         &state.pool,
         state.public_base_url.as_deref(),
+        user.map(|current| current.user_id),
         id,
         query,
     )
@@ -172,8 +176,8 @@ pub async fn delete_sample(
     current_user: CurrentUser,
     Path(slug): Path<String>,
 ) -> Result<Json<DeleteSampleResponse>, AppError> {
-    let response = SampleCatalogService::delete_owned_sample(&state.pool, current_user.user_id, &slug)
-        .await?;
+    let response =
+        SampleCatalogService::delete_owned_sample(&state.pool, current_user.user_id, &slug).await?;
 
     Ok(Json(response))
 }

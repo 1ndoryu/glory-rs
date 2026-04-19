@@ -56,12 +56,23 @@ fn trims_creator_and_rejects_too_long_values() {
 
 #[test]
 fn normalizes_search_and_optional_normalized_variant() {
-    let search = normalize_search(Some("  hihatt  ".into()), Some("hihat".into()))
-        .unwrap_or_default();
+    let search =
+        normalize_search(Some("  hihatt  ".into()), Some("hihat".into())).unwrap_or_default();
 
-    assert!(matches!(search.as_ref().map(|value| value.query.as_str()), Some("hihatt")));
-    assert!(matches!(search.as_ref().map(|value| value.title_like.as_str()), Some("%hihatt%")));
-    assert!(matches!(search.as_ref().and_then(|value| value.normalized_like.as_deref()), Some("%hihat%")));
+    assert!(matches!(
+        search.as_ref().map(|value| value.query.as_str()),
+        Some("hihatt")
+    ));
+    assert!(matches!(
+        search.as_ref().map(|value| value.title_like.as_str()),
+        Some("%hihatt%")
+    ));
+    assert!(matches!(
+        search
+            .as_ref()
+            .and_then(|value| value.normalized_like.as_deref()),
+        Some("%hihat%")
+    ));
 }
 
 #[test]
@@ -76,8 +87,8 @@ fn uses_default_similar_limit_when_query_is_empty() {
 
 #[test]
 fn similar_query_accepts_legacy_limite_alias() {
-    let query: SimilarSamplesQuery =
-        serde_json::from_value(serde_json::json!({ "limite": 12 })).expect("alias should deserialize");
+    let query: SimilarSamplesQuery = serde_json::from_value(serde_json::json!({ "limite": 12 }))
+        .expect("alias should deserialize");
 
     assert_eq!(query.limit, Some(12));
 }
@@ -85,7 +96,10 @@ fn similar_query_accepts_legacy_limite_alias() {
 #[test]
 fn builds_public_urls_from_storage_keys() {
     assert_eq!(
-        asset_to_public_url(Some("https://kamples.test"), Some("samples/9/demo.mp3".into())),
+        asset_to_public_url(
+            Some("https://kamples.test"),
+            Some("samples/9/demo.mp3".into())
+        ),
         Some("https://kamples.test/uploads/samples/9/demo.mp3".into())
     );
     assert_eq!(
@@ -93,7 +107,10 @@ fn builds_public_urls_from_storage_keys() {
         Some("/uploads/samples/9/demo.mp3".into())
     );
     assert_eq!(
-        asset_to_public_url(Some("https://kamples.test"), Some("https://cdn.test/demo.mp3".into())),
+        asset_to_public_url(
+            Some("https://kamples.test"),
+            Some("https://cdn.test/demo.mp3".into())
+        ),
         Some("https://cdn.test/demo.mp3".into())
     );
 }

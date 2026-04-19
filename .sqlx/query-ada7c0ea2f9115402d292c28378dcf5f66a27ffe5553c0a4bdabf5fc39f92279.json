@@ -1,0 +1,71 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT r.id,\n                      cf.titulo AS fuente_titulo,\n                      cf.slug AS fuente_slug,\n                      cf.imagen_url AS fuente_imagen_url,\n                      af.nombre AS fuente_artista,\n                      cd.titulo AS destino_titulo,\n                      cd.slug AS destino_slug,\n                      cd.imagen_url AS destino_imagen_url,\n                      ad.nombre AS destino_artista\n               FROM relaciones_sample r\n               INNER JOIN canciones cf ON cf.id = r.cancion_fuente_id\n               INNER JOIN canciones cd ON cd.id = r.cancion_destino_id\n               INNER JOIN artistas_musicales af ON af.id = cf.artista_id\n               INNER JOIN artistas_musicales ad ON ad.id = cd.artista_id\n               WHERE cf.titulo ILIKE $1\n                  OR cd.titulo ILIKE $1\n                  OR af.nombre ILIKE $1\n                  OR ad.nombre ILIKE $1\n               ORDER BY COALESCE(r.votos_total, 0) DESC, r.id DESC\n               LIMIT $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "fuente_titulo",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "fuente_slug",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "fuente_imagen_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "fuente_artista",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "destino_titulo",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "destino_slug",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 7,
+        "name": "destino_imagen_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 8,
+        "name": "destino_artista",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "ada7c0ea2f9115402d292c28378dcf5f66a27ffe5553c0a4bdabf5fc39f92279"
+}

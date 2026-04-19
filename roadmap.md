@@ -93,17 +93,8 @@
 ### Fase 11 â€” Notificaciones (5 canales)
 
 ### Fase 12 â€” Pagos
-- 174A-79 â€” Wrapper Stripe + planes Kamples
-- 174A-80 â€” `GET /pagos/planes`
-- 174A-81 â€” Checkout suscripciÃ³n + sample + portal
-- 174A-82 â€” Webhook con HMAC + idempotencia
-- 174A-83 â€” Connect onboarding + revenue share
-- 174A-84 â€” CÃ³digos gratis CRUD + uso
 
 ### Fase 13 â€” Reportes, blog, bÃºsqueda global, catÃ¡logo
-- 174A-85 â€” Reportes (legales, contenido, errores)
-- 174A-86 â€” Blog (artÃ­culos CRUD + comentarios + categorÃ­as)
-- 174A-87 â€” BÃºsqueda global (`GET /search?q=...`)
 - 174A-88 â€” CatÃ¡logo canciones/artistas + relaciones
 
 ### Fase 14 â€” ModeraciÃ³n, admin, dashboard

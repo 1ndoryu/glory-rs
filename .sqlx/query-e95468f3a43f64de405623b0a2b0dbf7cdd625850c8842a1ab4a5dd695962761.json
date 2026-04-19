@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n                    id AS \"id!\",\n                    autor_id AS \"autor_id!\",\n                    moderacion_estado AS \"moderacion_estado!\",\n                    eliminado_en AS \"eliminado_en?: chrono::DateTime<chrono::Utc>\"\n               FROM articulos\n               WHERE id = $1\n               LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "autor_id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "moderacion_estado!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "eliminado_en?: chrono::DateTime<chrono::Utc>",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "e95468f3a43f64de405623b0a2b0dbf7cdd625850c8842a1ab4a5dd695962761"
+}

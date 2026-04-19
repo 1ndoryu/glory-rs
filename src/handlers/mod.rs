@@ -1,22 +1,28 @@
 #![allow(clippy::needless_for_each)] // Generado por utoipa OpenApi derive
 
 mod admin;
+mod articles;
 mod auth;
 mod colecciones;
 mod comments;
+mod connect;
 mod downloads;
 mod fcm;
 mod feed;
+mod free_codes;
 mod health;
 mod likes;
 mod messages;
 mod notifications;
-mod posts;
+mod payments;
 mod plays;
-mod social;
+mod posts;
+mod push;
+mod reports;
+mod search;
 mod sample_catalog;
 mod samples;
-mod push;
+mod social;
 mod users;
 mod ws;
 
@@ -58,6 +64,14 @@ impl utoipa::Modify for SecurityAddon {
         auth::logout,
         auth::google_login,
         auth::google_pkce,
+        articles::list_articles,
+        articles::list_categories,
+        articles::get_article,
+        articles::list_my_articles,
+        articles::create_article,
+        articles::update_article,
+        articles::delete_article,
+        articles::toggle_like_article,
         feed::get_feed,
         feed::get_me_feed,
         sample_catalog::delete_sample,
@@ -81,6 +95,28 @@ impl utoipa::Modify for SecurityAddon {
         notifications::mark_notification_read,
         notifications::mark_all_notifications_read,
         notifications::unread_notifications_count,
+        free_codes::generate_free_code,
+        free_codes::verify_free_code,
+        free_codes::claim_free_code,
+        free_codes::invalidate_free_code,
+        connect::create_connect_onboarding,
+        connect::get_connect_status,
+        connect::create_connect_dashboard_link,
+        connect::get_connect_balance,
+        payments::list_plans,
+        payments::create_subscription_checkout,
+        payments::create_sample_checkout,
+        payments::webhook::payment_webhook,
+        payments::create_billing_portal,
+        reports::report_generic,
+        reports::report_user_legacy,
+        reports::report_platform_error,
+        reports::report_legal,
+        reports::list_pending_legal_reports,
+        reports::report_comment,
+        reports::report_post,
+        search::global_search,
+        search::legacy_quick_search,
         fcm::register_fcm_token,
         fcm::delete_fcm_token,
         push::get_vapid_key,
@@ -144,8 +180,22 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::GooglePkceRequest,
         crate::models::AuthResponse,
         crate::models::UserResponse,
+        crate::models::CreateArticleMultipartRequestDoc,
+        crate::models::UpdateArticleRequest,
+        crate::models::ArticleListData,
+        crate::models::ArticleListResponse,
+        crate::models::ArticleResponse,
+        crate::models::ArticleCategoriesResponse,
+        crate::models::DeleteArticleData,
+        crate::models::DeleteArticleResponse,
+        crate::models::ToggleArticleLikeResponse,
         crate::algorithm::recommender::RankedSample,
         feed::FeedResponse,
+        crate::repositories::ArticleAuthorSummary,
+        crate::repositories::ArticleCategoryCount,
+        crate::repositories::ArticleDetail,
+        crate::repositories::ArticleEmbed,
+        crate::repositories::ArticleSummary,
         crate::models::SampleCreatorSummary,
         crate::models::CheckDuplicateRequest,
         crate::models::CheckDuplicateResponse,
@@ -163,6 +213,51 @@ impl utoipa::Modify for SecurityAddon {
         messages::MessageMutationResponse,
         notifications::NotificationListResponse,
         notifications::NotificationCountResponse,
+        crate::models::ClaimFreeCodeRequest,
+        crate::models::ClaimFreeCodeResponse,
+        crate::models::CreateSubscriptionCheckoutRequest,
+        crate::models::CreateSampleCheckoutRequest,
+        crate::models::DownloadGrantRequest,
+        crate::models::CreatorConnectBalance,
+        crate::models::CreatorConnectState,
+        crate::models::CreatorConnectStatus,
+        crate::models::FreeCodeTargetType,
+        crate::models::GenerateFreeCodeRequest,
+        crate::models::GenerateFreeCodeResponse,
+        crate::models::InvalidateFreeCodeResponse,
+        crate::domain::KamplesPlanId,
+        crate::models::PaymentPlanPeriod,
+        crate::models::PaymentPlanPublic,
+        crate::models::PaymentPlansResponse,
+        crate::models::PaymentRedirectResponse,
+        crate::models::PaymentWebhookResponse,
+        crate::models::VerifyFreeCodeResponse,
+        crate::models::AdminLegalReportItem,
+        crate::models::AdminLegalReportsResponse,
+        crate::models::CreateGenericReportRequest,
+        crate::models::CreateLegalReportRequest,
+        crate::models::CreatePlatformErrorReportRequest,
+        crate::models::CreateReportReasonRequest,
+        crate::models::CreateScopedReportRequest,
+        crate::models::ErrorReportResponse,
+        crate::models::GenericReportType,
+        crate::models::LegalReportDetails,
+        crate::models::LegalReportResponse,
+        crate::models::LegalReportType,
+        crate::models::LegalRightType,
+        crate::models::ReportResponse,
+        crate::models::GlobalSearchQuery,
+        crate::models::GlobalSearchResponse,
+        crate::models::LegacyQuickSearchCollectionResult,
+        crate::models::LegacyQuickSearchQuery,
+        crate::models::LegacyQuickSearchRelationResult,
+        crate::models::LegacyQuickSearchRelationSide,
+        crate::models::LegacyQuickSearchResponse,
+        crate::models::LegacyQuickSearchSampleCreator,
+        crate::models::LegacyQuickSearchSampleResult,
+        crate::models::LegacyQuickSearchSongResult,
+        crate::models::LegacyQuickSearchTodoItem,
+        crate::models::LegacyQuickSearchUserResult,
         fcm::RegisterFcmTokenRequest,
         fcm::DeleteFcmTokenRequest,
         push::PushSubscriptionKeysRequest,
@@ -232,6 +327,12 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::BlockUserRequest,
         crate::models::SuspendUserRequest,
         crate::models::DeleteUserRequest,
+        crate::models::SearchCollectionOwnerSummary,
+        crate::models::SearchCollectionResult,
+        crate::models::SearchSampleResult,
+        crate::models::SearchSongResult,
+        crate::models::SearchType,
+        crate::models::SearchUserResult,
         crate::services::algo_timing::TimingEntry,
         crate::services::algo_timing::TimingStage,
         crate::errors::ErrorResponse,
@@ -246,15 +347,21 @@ impl utoipa::Modify for SecurityAddon {
 #[allow(clippy::needless_for_each)]
 pub struct ApiDoc;
 
+#[derive(Clone)]
+pub struct AppRuntimes {
+    pub push: Option<crate::services::PushDeliveryRuntime>,
+    pub fcm: Option<crate::services::FcmDeliveryRuntime>,
+    pub email: Option<crate::services::EmailDeliveryRuntime>,
+    pub stripe: Option<crate::services::StripeRuntime>,
+}
+
 /// Crea el router principal con CORS, tracing, Swagger UI y todas las rutas.
 pub fn create_router(
     pool: sqlx::PgPool,
     redis: Option<deadpool_redis::Pool>,
     config: crate::config::AppConfig,
     storage: std::sync::Arc<dyn crate::services::FileStorage>,
-    push_runtime: Option<crate::services::PushDeliveryRuntime>,
-    fcm_runtime: Option<crate::services::FcmDeliveryRuntime>,
-    email_runtime: Option<crate::services::EmailDeliveryRuntime>,
+    runtimes: AppRuntimes,
 ) -> Router {
     let public_base_url = config.public_base_url.clone();
     let ws_public_url = config.ws_public_url.clone();
@@ -281,9 +388,10 @@ pub fn create_router(
         )),
         storage,
         public_base_url,
-        push_runtime: push_runtime.map(std::sync::Arc::new),
-        fcm_runtime: fcm_runtime.map(std::sync::Arc::new),
-        email_runtime: email_runtime.map(std::sync::Arc::new),
+        push_runtime: runtimes.push.map(std::sync::Arc::new),
+        fcm_runtime: runtimes.fcm.map(std::sync::Arc::new),
+        email_runtime: runtimes.email.map(std::sync::Arc::new),
+        stripe_runtime: runtimes.stripe.map(std::sync::Arc::new),
         ws_public_url,
         ws_ticket_ttl_secs: config.ws_ticket_ttl_secs,
         ws_hub,
@@ -318,6 +426,7 @@ fn api_routes() -> Router<AppState> {
     Router::new()
         .merge(health::routes())
         .merge(auth::routes())
+        .merge(articles::routes())
         .merge(feed::routes())
         .merge(sample_catalog::routes())
         .merge(samples::routes())
@@ -325,6 +434,11 @@ fn api_routes() -> Router<AppState> {
         .merge(likes::routes())
         .merge(messages::routes())
         .merge(notifications::routes())
+        .merge(free_codes::routes())
+        .merge(connect::routes())
+        .merge(payments::routes())
+        .merge(reports::routes())
+        .merge(search::routes())
         .merge(fcm::routes())
         .merge(push::routes())
         .merge(comments::routes())

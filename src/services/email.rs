@@ -37,7 +37,9 @@ impl EmailSecureMode {
         match value.trim().to_ascii_lowercase().as_str() {
             "" | "tls" | "starttls" => Ok(Self::Tls),
             "ssl" | "smtps" => Ok(Self::Ssl),
-            other => Err(EmailDeliveryRuntimeError::InvalidSecureMode(other.to_string())),
+            other => Err(EmailDeliveryRuntimeError::InvalidSecureMode(
+                other.to_string(),
+            )),
         }
     }
 
@@ -136,10 +138,9 @@ impl EmailDeliveryRuntime {
             .body(html)
             .map_err(|error| format!("No se pudo construir el email '{subject}': {error}"))?;
 
-        self.transport
-            .send(email)
-            .await
-            .map_err(|error| format!("No se pudo enviar el email '{subject}' a {to_email}: {error}"))?;
+        self.transport.send(email).await.map_err(|error| {
+            format!("No se pudo enviar el email '{subject}' a {to_email}: {error}")
+        })?;
 
         Ok(())
     }
@@ -155,7 +156,9 @@ impl EmailNotificationService {
         tokio::spawn(async move {
             match Self::send_welcome(&runtime, &to_email, &user_name, site_url.as_deref()).await {
                 Ok(()) => tracing::info!(email = %to_email, "email de bienvenida enviado"),
-                Err(error) => tracing::warn!(email = %to_email, error = %error, "falló el email de bienvenida"),
+                Err(error) => {
+                    tracing::warn!(email = %to_email, error = %error, "falló el email de bienvenida")
+                }
             }
         });
     }
@@ -167,7 +170,9 @@ impl EmailNotificationService {
         site_url: Option<&str>,
     ) -> Result<(), String> {
         let content = render_welcome_content(user_name, &resolve_site_url(site_url));
-        runtime.send_html(to_email, &content.subject, content.html).await
+        runtime
+            .send_html(to_email, &content.subject, content.html)
+            .await
     }
 
     pub async fn send_purchase_confirmation(
@@ -415,7 +420,10 @@ mod tests {
         let error = EmailDeliveryRuntime::from_config(&config)
             .err()
             .expect("debe fallar");
-        assert!(matches!(error, EmailDeliveryRuntimeError::InvalidSecureMode(_)));
+        assert!(matches!(
+            error,
+            EmailDeliveryRuntimeError::InvalidSecureMode(_)
+        ));
     }
 
     fn test_config(smtp: Option<SmtpConfig>) -> AppConfig {
@@ -441,6 +449,7 @@ mod tests {
             vapid_subject: None,
             fcm_service_account_json: None,
             smtp,
+            stripe: crate::config::StripeConfig::default(),
         }
     }
 }

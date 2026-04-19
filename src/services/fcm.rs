@@ -174,7 +174,9 @@ impl FcmDeliveryRuntime {
         {
             let cache = self.token_cache.lock().await;
             if let Some(entry) = cache.as_ref() {
-                if entry.expires_at.saturating_duration_since(Instant::now()) > ACCESS_TOKEN_REFRESH_MARGIN {
+                if entry.expires_at.saturating_duration_since(Instant::now())
+                    > ACCESS_TOKEN_REFRESH_MARGIN
+                {
                     return Ok(entry.token.clone());
                 }
             }
@@ -204,12 +206,9 @@ impl FcmDeliveryRuntime {
             scope: FIREBASE_MESSAGING_SCOPE.to_string(),
         };
 
-        let assertion = jsonwebtoken::encode(
-            &Header::new(Algorithm::RS256),
-            &claims,
-            &self.encoding_key,
-        )
-        .map_err(|error| format!("No se pudo firmar el JWT OAuth de Google: {error}"))?;
+        let assertion =
+            jsonwebtoken::encode(&Header::new(Algorithm::RS256), &claims, &self.encoding_key)
+                .map_err(|error| format!("No se pudo firmar el JWT OAuth de Google: {error}"))?;
 
         let response = self
             .client
@@ -244,10 +243,11 @@ impl FcmDeliveryRuntime {
             return Err(format!("Google OAuth respondió {error}: {description}"));
         }
 
-        let token = parsed.access_token.ok_or_else(|| {
-            "La respuesta OAuth de Google no incluye access_token".to_string()
-        })?;
-        let lifetime = Duration::from_secs(parsed.expires_in.unwrap_or(DEFAULT_ACCESS_TOKEN_TTL_SECS));
+        let token = parsed
+            .access_token
+            .ok_or_else(|| "La respuesta OAuth de Google no incluye access_token".to_string())?;
+        let lifetime =
+            Duration::from_secs(parsed.expires_in.unwrap_or(DEFAULT_ACCESS_TOKEN_TTL_SECS));
 
         Ok(FreshAccessToken { token, lifetime })
     }
@@ -293,10 +293,14 @@ impl FcmNotificationService {
             return Ok(FcmSendSummary::default());
         }
 
-        let access_token = runtime.access_token().await.map_err(|message| AppError::ExternalService {
-            service: "fcm_auth".into(),
-            message,
-        })?;
+        let access_token =
+            runtime
+                .access_token()
+                .await
+                .map_err(|message| AppError::ExternalService {
+                    service: "fcm_auth".into(),
+                    message,
+                })?;
 
         let mut summary = FcmSendSummary::default();
         for device in tokens {
@@ -398,9 +402,15 @@ fn android_notification_payload(
         "channel_id".into(),
         serde_json::Value::String(channel_id_for_payload(data).to_string()),
     );
-    notification.insert("icon".into(), serde_json::Value::String("ic_notification".into()));
+    notification.insert(
+        "icon".into(),
+        serde_json::Value::String("ic_notification".into()),
+    );
     notification.insert("default_sound".into(), serde_json::Value::Bool(true));
-    notification.insert("notification_count".into(), serde_json::Value::Number(1.into()));
+    notification.insert(
+        "notification_count".into(),
+        serde_json::Value::Number(1.into()),
+    );
 
     if let Some(image) = image {
         notification.insert("image".into(), serde_json::Value::String(image));
@@ -462,7 +472,9 @@ fn is_invalid_token_response(status: StatusCode, body: &str) -> bool {
     body.to_ascii_uppercase().contains("UNREGISTERED")
 }
 
-fn validate_service_account(credentials: &FcmServiceAccount) -> Result<(), FcmDeliveryRuntimeError> {
+fn validate_service_account(
+    credentials: &FcmServiceAccount,
+) -> Result<(), FcmDeliveryRuntimeError> {
     if credentials.project_id.trim().is_empty() {
         return Err(FcmDeliveryRuntimeError::MissingFields("project_id"));
     }
@@ -499,8 +511,7 @@ fn default_google_token_url() -> String {
 #[cfg(test)]
 mod tests {
     use super::{
-        channel_id_for_payload, stringify_data_payload, FcmDeliveryRuntime,
-        FcmDeliveryRuntimeError,
+        channel_id_for_payload, stringify_data_payload, FcmDeliveryRuntime, FcmDeliveryRuntimeError,
     };
     use crate::config::AppConfig;
 
@@ -596,6 +607,7 @@ mod tests {
                 .to_string(),
             ),
             smtp: None,
+            stripe: crate::config::StripeConfig::default(),
         };
 
         let runtime = FcmDeliveryRuntime::from_config(&config)
@@ -629,6 +641,7 @@ mod tests {
             vapid_subject: None,
             fcm_service_account_json: Some("{".into()),
             smtp: None,
+            stripe: crate::config::StripeConfig::default(),
         };
 
         let error = FcmDeliveryRuntime::from_config(&config)

@@ -24,6 +24,7 @@ use crate::errors::AppError;
 #[allow(unused_imports)]
 use crate::errors::ErrorResponse;
 use crate::middleware::CurrentUser;
+use crate::repositories::{ReportRepository, AUTO_HIDE_SAMPLE_REPORT_THRESHOLD};
 use crate::AppState;
 
 #[derive(Debug, Clone, Deserialize, IntoParams)]
@@ -80,6 +81,7 @@ pub async fn get_feed(
         &config,
     )
     .await?;
+    let items = filter_hidden_samples(&state, current_user.user_id, items).await?;
 
     Ok(Json(FeedResponse {
         items,
@@ -110,4 +112,27 @@ pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/feed", get(get_feed))
         .route("/me/feed", get(get_me_feed))
+}
+
+async fn filter_hidden_samples(
+    state: &AppState,
+    viewer_id: i32,
+    items: Vec<RankedSample>,
+) -> Result<Vec<RankedSample>, AppError> {
+    let sample_ids = items.iter().map(|item| item.id).collect::<Vec<_>>();
+    let pending_counts = ReportRepository::pending_counts_for_targets(
+        &state.pool,
+        "sample",
+        &sample_ids,
+    )
+    .await?;
+
+    Ok(items
+        .into_iter()
+        .filter(|item| {
+            item.creador_id == viewer_id
+                || pending_counts.get(&item.id).copied().unwrap_or(0)
+                    < AUTO_HIDE_SAMPLE_REPORT_THRESHOLD
+        })
+        .collect())
 }

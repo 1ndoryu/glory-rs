@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT categoria AS \"categoria!\", COUNT(*)::bigint AS \"total!\"\n               FROM articulos\n               WHERE eliminado_en IS NULL\n                 AND moderacion_estado = 'aprobado'\n               GROUP BY categoria\n                             ORDER BY COUNT(*) DESC, categoria ASC",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "categoria!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 1,
+        "name": "total!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      null
+    ]
+  },
+  "hash": "67b775ac1112a725f824f0e642c91981b7bfc74aea5089a5230e08796ddbba23"
+}

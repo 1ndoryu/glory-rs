@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            UPDATE usuarios_ext\n            SET rol = 'creador'\n            WHERE id = $1\n              AND rol = 'usuario'\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "6a6f3eddd0537ca9c0c0ff5d3599282829ac626571ca8959cc48e8691174d351"
+}

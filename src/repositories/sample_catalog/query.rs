@@ -2,9 +2,9 @@ use chrono::{DateTime, Utc};
 use sqlx::{FromRow, Postgres, QueryBuilder};
 
 use super::{SampleCatalogSummaryRecord, SampleListFilters, SampleTextSearch};
+use crate::repositories::AUTO_HIDE_SAMPLE_REPORT_THRESHOLD;
 
-pub(super) const SAMPLE_SUMMARY_SELECT: &str =
-    "SELECT
+pub(super) const SAMPLE_SUMMARY_SELECT: &str = "SELECT
         s.id,
         s.id_corto,
         s.slug,
@@ -117,6 +117,7 @@ pub(super) fn push_public_filters(
             AND s.estado = 'activo'
             AND s.mostrar_en_comunidad = TRUE",
     );
+        push_auto_hide_filter(builder, "s.id", "s.creador_id", filters.viewer_id);
 
     if let Some(bpm) = filters.bpm {
         builder.push(" AND s.bpm = ");
@@ -155,10 +156,26 @@ pub(super) fn push_public_filters(
     }
 }
 
-fn push_public_search_filters(
+fn push_auto_hide_filter(
     builder: &mut QueryBuilder<'_, Postgres>,
-    search: &SampleTextSearch,
+    target_expr: &str,
+    creator_expr: &str,
+    viewer_id: Option<i32>,
 ) {
+    builder.push(" AND ((SELECT COUNT(*) FROM reportes r WHERE r.tipo = 'sample' AND COALESCE(r.estado, 'pendiente') = 'pendiente' AND r.target_id = ");
+    builder.push(target_expr);
+    builder.push(") < ");
+    builder.push(AUTO_HIDE_SAMPLE_REPORT_THRESHOLD.to_string());
+    if let Some(viewer_id) = viewer_id {
+        builder.push(" OR ");
+        builder.push(creator_expr);
+        builder.push(" = ");
+        builder.push_bind(viewer_id);
+    }
+    builder.push(")");
+}
+
+fn push_public_search_filters(builder: &mut QueryBuilder<'_, Postgres>, search: &SampleTextSearch) {
     builder.push(
         " AND (
             to_tsvector('spanish', COALESCE(s.titulo, '') || ' ' || COALESCE(s.descripcion, ''))
@@ -248,12 +265,14 @@ pub(super) fn push_public_order(
                     plainto_tsquery('spanish', ",
         );
         builder.push_bind(search.query.clone());
-        builder.push(")
+        builder.push(
+            ")
                 )
                 + 0.8 * CASE WHEN EXISTS (
                     SELECT 1
                     FROM UNNEST(COALESCE(s.tags, ARRAY[]::text[])) tag
-                    WHERE tag ILIKE ");
+                    WHERE tag ILIKE ",
+        );
         builder.push_bind(search.lower_like.clone());
         builder.push(
             "
@@ -271,12 +290,16 @@ pub(super) fn push_public_order(
                     plainto_tsquery('spanish', ",
         );
         builder.push_bind(search.query.clone());
-        builder.push(")
+        builder.push(
+            ")
                 )
-                + 0.6 * word_similarity(");
+                + 0.6 * word_similarity(",
+        );
         builder.push_bind(search.query.clone());
-        builder.push(", s.titulo)
-                + 2.0 * CASE WHEN s.titulo ILIKE ");
+        builder.push(
+            ", s.titulo)
+                + 2.0 * CASE WHEN s.titulo ILIKE ",
+        );
         builder.push_bind(search.title_prefix.clone());
         builder.push(
             " THEN 1.0 ELSE 0.0 END

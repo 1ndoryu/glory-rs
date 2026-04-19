@@ -1,0 +1,59 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT c.id::bigint AS id,\n                      c.nombre,\n                      NULL::text AS slug,\n                      c.imagen_url AS portada_url,\n                      COALESCE(c.total_samples, 0) AS \"total_samples!\",\n                      u.username AS creator_username,\n                      u.nombre_visible AS creator_nombre_visible\n               FROM colecciones c\n               INNER JOIN usuarios_ext u ON u.id = c.usuario_id\n               WHERE c.publica = TRUE\n                 AND COALESCE(c.total_samples, 0) > 0\n                 AND c.eliminado_en IS NULL\n                 AND (c.nombre ILIKE $1 OR COALESCE(c.descripcion, '') ILIKE $1)\n               ORDER BY COALESCE(c.total_samples, 0) DESC, c.id DESC\n               LIMIT $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "nombre",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "slug",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "portada_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "total_samples!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 5,
+        "name": "creator_username",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "creator_nombre_visible",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      null,
+      true,
+      null,
+      false,
+      false
+    ]
+  },
+  "hash": "dec12aec39480a080b289cc049a01b2a3e3ebaf87f242eae7488a37e2cbcabe2"
+}

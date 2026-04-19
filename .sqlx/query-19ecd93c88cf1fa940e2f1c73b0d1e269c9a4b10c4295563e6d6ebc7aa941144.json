@@ -1,0 +1,32 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO articulos (\n                    autor_id,\n                    titulo,\n                    slug,\n                    contenido,\n                    extracto,\n                    portada_url,\n                    categoria,\n                    embeds,\n                    descarga_publica,\n                    moderacion_estado,\n                    publicado_en\n               )\n               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)\n               RETURNING id AS \"id!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Varchar",
+        "Varchar",
+        "Text",
+        "Varchar",
+        "Text",
+        "Varchar",
+        "Jsonb",
+        "Bool",
+        "Varchar",
+        "Timestamptz"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "19ecd93c88cf1fa940e2f1c73b0d1e269c9a4b10c4295563e6d6ebc7aa941144"
+}

@@ -4,11 +4,18 @@ use std::sync::Arc;
 use axum::extract::{Path, State};
 use axum::http::{header, HeaderValue, StatusCode};
 use axum::response::IntoResponse;
+use axum::Json;
 
 use crate::algorithm::InteractionKind;
+use crate::domain::{calculate_subscription_download_revenue_share, KamplesPlanId};
 use crate::errors::AppError;
+use crate::handlers::free_codes::normalize_optional_free_code;
 use crate::middleware::CurrentUser;
-use crate::repositories::{ColeccionSampleFile, ColeccionesRepository, DownloadRepository};
+use crate::models::DownloadGrantRequest;
+use crate::repositories::{
+    BillingRepository, ColeccionSampleFile, ColeccionesRepository,
+    CompletedDownloadRevenueShareInsert, DownloadRepository, FreeCodeRepository,
+};
 use crate::services::FileStorage;
 use crate::AppState;
 
@@ -21,9 +28,11 @@ use crate::AppState;
  * - Owner o colección pública.
  * - Máximo MAX_SAMPLES_ZIP samples por descarga (anti-DoS).
  * - Máximo MAX_ZIP_BYTES total (corta el ZIP cuando supera, no falla).
- * - Plan free: límite diario aplica solo a samples NUEVOS (los ya descargados
- *   no consumen). Si requiere más créditos de los disponibles → 429.
- * - Plan free: si la colección contiene samples premium (nuevos) → 403.
+ * - Plan free: límite base 5/día + `creditos_bonus` aplica solo a samples
+ *   NUEVOS (los ya descargados no consumen). Si requiere más créditos de los
+ *   disponibles → 429.
+ * - Plan free: si la colección contiene samples premium (nuevos) → 403, salvo
+ *   que `codigoGratis` válido habilite la colección.
  * - Cada sample nuevo: registra DESCARGA + incrementa total_descargas.
  * - Trigger AlgoPlanner Descarga al final.
  * - Nombres de archivo en el ZIP saneados + des-duplicados.
@@ -32,8 +41,6 @@ use crate::AppState;
  * - Cache a disco / lock por colección. Generamos en memoria cada vez (la
  *   abstracción FileStorage solo expone get_bytes total → ya implica cargar
  *   todo a memoria; cachear redundante por ahora).
- * - Códigos gratis.
- * - Revenue share por sample (TransaccionesRepository aún no existe en Rust).
  * - Calidad por plan: siempre "wav" como en el resto del port (ver downloads.rs).
  *
  * Respuesta: streaming `application/zip` con filename derivado del nombre.
@@ -46,6 +53,7 @@ const PLAN_FREE_LIMIT_PER_DAY: i64 = 5;
 #[utoipa::path(
     post, path = "/api/colecciones/{id}/descargar-zip", tag = "colecciones",
     params(("id" = i64, Path, description = "ID de la coleccion a descargar como ZIP")),
+    request_body = Option<DownloadGrantRequest>,
     security(("bearer_auth" = [])),
     responses(
         (status = 200, description = "Stream binario application/zip"),
@@ -55,11 +63,14 @@ const PLAN_FREE_LIMIT_PER_DAY: i64 = 5;
         (status = 429, description = "Creditos insuficientes para los samples nuevos"),
     )
 )]
+#[allow(clippy::too_many_lines)]
 pub async fn descargar_zip_coleccion(
     State(state): State<AppState>,
     user: CurrentUser,
     Path(id): Path<i64>,
+    payload: Option<Json<DownloadGrantRequest>>,
 ) -> Result<axum::response::Response, AppError> {
+    let access_request = payload.map(|Json(value)| value).unwrap_or_default();
     let col = ColeccionesRepository::fetch(&state.pool, id)
         .await?
         .ok_or_else(|| AppError::NotFound(format!("coleccion {id} no existe")))?;
@@ -91,10 +102,27 @@ pub async fn descargar_zip_coleccion(
     }
     let creditos_necesarios = i64::try_from(nuevos.len()).unwrap_or(i64::MAX);
 
-    let plan = DownloadRepository::user_plan(&state.pool, user.user_id).await?;
-    if plan == "free" && creditos_necesarios > 0 {
+    let allowance = DownloadRepository::user_download_allowance(&state.pool, user.user_id).await?;
+    let bonus_credits = allowance.bonus_credits;
+    let plan = allowance.plan;
+    let codigo_gratis = normalize_optional_free_code(access_request.codigo_gratis)?;
+    let es_codigo_gratis = if let Some(code) = codigo_gratis.as_deref() {
+        !es_propietario
+            && FreeCodeRepository::can_user_download(
+                &state.pool,
+                code,
+                "coleccion",
+                id,
+                user.user_id,
+            )
+            .await?
+    } else {
+        false
+    };
+
+    if plan == "free" && !es_codigo_gratis && creditos_necesarios > 0 {
         let usadas = DownloadRepository::count_today(&state.pool, user.user_id).await?;
-        let disponibles = (PLAN_FREE_LIMIT_PER_DAY - usadas).max(0);
+        let disponibles = (effective_free_daily_limit(bonus_credits) - usadas).max(0);
         if creditos_necesarios > disponibles {
             return Err(AppError::TooManyRequests(format!(
                 "creditos insuficientes: necesitas {creditos_necesarios} pero solo tienes {disponibles} disponibles hoy"
@@ -110,7 +138,36 @@ pub async fn descargar_zip_coleccion(
     let zip_bytes = build_zip_in_memory(samples.clone(), state.storage.clone()).await?;
 
     for sample in &nuevos {
-        let _ = DownloadRepository::register(&state.pool, user.user_id, sample.sample_id, "wav").await;
+        let _ =
+            DownloadRepository::register(&state.pool, user.user_id, sample.sample_id, "wav").await;
+        if plan != "free" && sample.creador_id != user.user_id {
+            let revenue = calculate_subscription_download_revenue_share(
+                plan.parse::<KamplesPlanId>().unwrap_or(KamplesPlanId::Free),
+            );
+            if revenue.price_cents > 0 {
+                let insert = CompletedDownloadRevenueShareInsert {
+                    buyer_id: user.user_id,
+                    creator_id: sample.creador_id,
+                    sample_id: sample.sample_id,
+                    amount_cents: revenue.price_cents,
+                    creator_amount_cents: revenue.creator_payout_cents,
+                    platform_fee_cents: revenue.platform_fee_cents,
+                };
+                if let Err(error) =
+                    BillingRepository::insert_completed_download_revenue_share(&state.pool, &insert)
+                        .await
+                {
+                    tracing::error!(
+                        buyer_id = user.user_id,
+                        creator_id = sample.creador_id,
+                        sample_id = sample.sample_id,
+                        plan = %plan,
+                        error = %error,
+                        "revenue share fallido para ZIP de coleccion"
+                    );
+                }
+            }
+        }
     }
 
     let _ = state
@@ -157,7 +214,8 @@ async fn build_zip_in_memory(
             break;
         }
         acumulado += tam;
-        let nombre = unique_zip_entry_name(&sample.titulo, &sample.storage_key, &mut nombres_usados);
+        let nombre =
+            unique_zip_entry_name(&sample.titulo, &sample.storage_key, &mut nombres_usados);
         payloads.push((nombre, bytes));
     }
 
@@ -229,6 +287,10 @@ fn unique_zip_entry_name(titulo: &str, storage_key: &str, used: &mut HashSet<Str
     candidato
 }
 
+fn effective_free_daily_limit(bonus_credits: i32) -> i64 {
+    PLAN_FREE_LIMIT_PER_DAY.saturating_add(i64::from(bonus_credits.max(0)))
+}
+
 #[cfg(test)]
 mod tests {
     use super::{build_zip_in_memory, sanitize_filename};
@@ -239,10 +301,8 @@ mod tests {
 
     #[tokio::test]
     async fn build_zip_dedupes_names_and_preserves_payloads() {
-        let root = std::env::temp_dir().join(format!(
-            "glory-kamples-zip-test-{}",
-            uuid::Uuid::new_v4()
-        ));
+        let root =
+            std::env::temp_dir().join(format!("glory-kamples-zip-test-{}", uuid::Uuid::new_v4()));
         let storage = LocalFs::new(&root).await.expect("storage");
         storage
             .put_bytes("samples/a.wav", b"uno")

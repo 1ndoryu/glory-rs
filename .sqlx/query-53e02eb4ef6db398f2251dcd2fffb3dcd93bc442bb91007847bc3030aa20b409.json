@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COUNT(*) AS \"count!\"\n               FROM articulos\n               WHERE autor_id = $1\n                 AND eliminado_en IS NULL\n                 AND ($2::text IS NULL OR moderacion_estado = $2)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "count!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "53e02eb4ef6db398f2251dcd2fffb3dcd93bc442bb91007847bc3030aa20b409"
+}

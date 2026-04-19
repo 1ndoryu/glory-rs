@@ -1,3 +1,5 @@
+mod article;
+mod billing;
 mod block;
 mod coleccion;
 mod comment;
@@ -5,22 +7,33 @@ mod conversation;
 mod download;
 mod fcm;
 mod follow;
+mod free_code;
 mod ia_queue;
 mod like;
 mod message;
 mod moderation;
 mod notification;
 mod notification_target;
-mod post;
 mod play;
+mod post;
 mod processing_queue;
 mod profile;
 mod push;
+mod report;
+mod search;
 mod sample;
 mod sample_catalog;
 mod saved_collection;
 mod user;
 
+pub use billing::{
+    BillingRepository, CompletedDownloadRevenueShareInsert, CompletedSamplePurchaseInsert,
+    SampleCheckoutCandidate, StripeUserProfile, SubscriptionRecord, UpsertStripeSubscriptionRecord,
+};
+pub use article::{
+    ArticleAuthorSummary, ArticleCategoryCount, ArticleDetail, ArticleEmbed, ArticleMeta,
+    ArticleRepository, ArticleSummary, CreateArticleParams, UpdateArticleParams,
+};
 pub use block::{BlockRepository, BlockedUser};
 pub use coleccion::{Coleccion, ColeccionSample, ColeccionSampleFile, ColeccionesRepository};
 pub use comment::{
@@ -30,11 +43,17 @@ pub use comment::{
 pub use conversation::{
     ConversationParticipantSummary, ConversationRepository, ConversationSummary,
 };
-pub use download::{DownloadRepository, SampleDownloadInfo, SampleFileInfo};
+pub use download::{DownloadRepository, SampleDownloadInfo, SampleFileInfo, UserDownloadAllowance};
 pub use fcm::{FcmTokenRecord, FcmTokenRepository, RegisterFcmTokenRecord};
 pub use follow::FollowRepository;
+pub use free_code::{CreateFreeCodeInput, FreeCodeRecord, FreeCodeRepository};
 pub use ia_queue::{
     retry_backoff_duration, IaQueueFailureDisposition, IaQueueRepository, QueuedIaJob,
+};
+pub use like::{LikeKind, LikeRepository, Reaction};
+pub use message::{
+    ConversationMessage, CreateMessageParams, DirectMessageKind, MessageRepository,
+    SharedSampleMessage,
 };
 pub use moderation::ModerationRepository;
 pub use notification::{
@@ -43,13 +62,10 @@ pub use notification::{
 pub use notification_target::{
     NotificationTargetRepository, PostNotificationMeta, SampleNotificationMeta,
 };
-pub use like::{LikeKind, LikeRepository, Reaction};
-pub use message::{
-    ConversationMessage, CreateMessageParams, DirectMessageKind, MessageRepository,
-    SharedSampleMessage,
-};
-pub use post::{PostAuthorSummary, PostDetail, PostListParams, PostRepository, RepostedPostSummary};
 pub use play::{PlayRepository, RegisterPlayOutcome};
+pub use post::{
+    PostAuthorSummary, PostDetail, PostListParams, PostRepository, RepostedPostSummary,
+};
 pub use processing_queue::{
     retry_backoff_minutes, ProcessingQueueRepository, QueueFailureDisposition,
     QueuedAudioProcessingJob,
@@ -58,7 +74,14 @@ pub use profile::ProfileRepository;
 pub use push::{
     PushSubscriptionRecord, PushSubscriptionRepository, RegisterPushSubscriptionRecord,
 };
-pub use saved_collection::{SavedColeccion, SavedCollectionsRepository};
+pub use report::{
+    CreateReportRecord, LegalReportRow, ReportRepository, AUTO_HIDE_POST_REPORT_THRESHOLD,
+    AUTO_HIDE_SAMPLE_REPORT_THRESHOLD,
+};
+pub use search::{
+    SearchCollectionRecord, SearchRepository, SearchSampleRecord, SearchSampleRelationRecord,
+    SearchSongRecord, SearchUserRecord,
+};
 pub use sample::{
     ApplyAudioIaMetadataParams, AudioIaSample, AudioPipelineSample, CompleteAudioPipelineParams,
     CreateUploadSampleParams, CreatedUploadSample, DuplicateSampleCandidate,
@@ -66,7 +89,8 @@ pub use sample::{
     SaveAudioAssetsParams,
 };
 pub use sample_catalog::{
-    OwnedSampleRecord, SampleCatalogDetailRecord, SampleCatalogSummaryRecord,
-    SampleListFilters, SampleListResult, SampleTextSearch, UpdateSamplePatch,
+    OwnedSampleRecord, SampleCatalogDetailRecord, SampleCatalogSummaryRecord, SampleListFilters,
+    SampleListResult, SampleTextSearch, UpdateSamplePatch,
 };
+pub use saved_collection::{SavedColeccion, SavedCollectionsRepository};
 pub use user::{OAuthRepository, UserRepository};

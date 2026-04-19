@@ -1,9 +1,9 @@
-use base64::Engine as _;
 use atomic_web_push::engine::general_purpose::URL_SAFE_NO_PAD as ATOMIC_URL_SAFE_NO_PAD;
 use atomic_web_push::{
-    ContentEncoding, PartialVapidSignatureBuilder, ReqwestWebPushClient, SubscriptionInfo,
-    Urgency, VapidSignatureBuilder, WebPushClient, WebPushError, WebPushMessageBuilder,
+    ContentEncoding, PartialVapidSignatureBuilder, ReqwestWebPushClient, SubscriptionInfo, Urgency,
+    VapidSignatureBuilder, WebPushClient, WebPushError, WebPushMessageBuilder,
 };
+use base64::Engine as _;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use std::time::Duration;
@@ -65,9 +65,7 @@ pub struct PushDeliveryRuntime {
 
 #[derive(Debug, thiserror::Error)]
 pub enum PushDeliveryRuntimeError {
-    #[error(
-        "Configuración VAPID incompleta: define ambas variables o ninguna ({0})"
-    )]
+    #[error("Configuración VAPID incompleta: define ambas variables o ninguna ({0})")]
     PartialConfig(&'static str),
     #[error("La clave privada VAPID es inválida: {0}")]
     InvalidPrivateKey(String),
@@ -104,13 +102,11 @@ impl PushDeliveryRuntime {
             return Ok(None);
         };
 
-        let vapid_builder = VapidSignatureBuilder::from_base64_no_sub(
-            private_key,
-            ATOMIC_URL_SAFE_NO_PAD,
-        )
-            .map_err(|error| PushDeliveryRuntimeError::InvalidPrivateKey(error.to_string()))?;
-        let derived_public_key = base64::engine::general_purpose::URL_SAFE_NO_PAD
-            .encode(vapid_builder.get_public_key());
+        let vapid_builder =
+            VapidSignatureBuilder::from_base64_no_sub(private_key, ATOMIC_URL_SAFE_NO_PAD)
+                .map_err(|error| PushDeliveryRuntimeError::InvalidPrivateKey(error.to_string()))?;
+        let derived_public_key =
+            base64::engine::general_purpose::URL_SAFE_NO_PAD.encode(vapid_builder.get_public_key());
 
         if let Some(configured_public_key) = config.vapid_public_key.as_ref() {
             if configured_public_key.trim() != derived_public_key {
@@ -175,7 +171,8 @@ impl PushNotificationService {
         endpoint: &str,
     ) -> Result<bool, AppError> {
         validate_endpoint(endpoint)?;
-        PushSubscriptionRepository::delete_for_user_by_endpoint(pool, user_id, endpoint.trim()).await
+        PushSubscriptionRepository::delete_for_user_by_endpoint(pool, user_id, endpoint.trim())
+            .await
     }
 
     pub async fn send_to_user(
@@ -188,13 +185,16 @@ impl PushNotificationService {
             return Ok(PushSendSummary::default());
         };
 
-        let subscriptions = PushSubscriptionRepository::list_active_by_user(&state.pool, user_id).await?;
+        let subscriptions =
+            PushSubscriptionRepository::list_active_by_user(&state.pool, user_id).await?;
         if subscriptions.is_empty() {
             return Ok(PushSendSummary::default());
         }
 
-        let payload_bytes = serde_json::to_vec(&build_delivery_payload(payload))
-            .map_err(|error| AppError::Internal(format!("No se pudo serializar el payload push: {error}")))?;
+        let payload_bytes =
+            serde_json::to_vec(&build_delivery_payload(payload)).map_err(|error| {
+                AppError::Internal(format!("No se pudo serializar el payload push: {error}"))
+            })?;
 
         let mut summary = PushSendSummary::default();
         for subscription in subscriptions {
@@ -248,7 +248,10 @@ async fn send_to_subscription(
     message_builder.set_ttl(DEFAULT_PUSH_TTL_SECONDS);
     message_builder.set_urgency(Urgency::Normal);
 
-    let mut signature_builder = runtime.vapid_builder.clone().add_sub_info(&subscription_info);
+    let mut signature_builder = runtime
+        .vapid_builder
+        .clone()
+        .add_sub_info(&subscription_info);
     signature_builder.add_claim("sub", runtime.subject().to_string());
     let signature = signature_builder
         .build()
@@ -259,7 +262,11 @@ async fn send_to_subscription(
         .build()
         .map_err(|error| PushSendFailure::Other(error.to_string()))?;
 
-    runtime.client.send(message).await.map_err(map_web_push_error)
+    runtime
+        .client
+        .send(message)
+        .await
+        .map_err(map_web_push_error)
 }
 
 fn build_delivery_payload(payload: PushNotificationPayload) -> serde_json::Value {
@@ -268,13 +275,25 @@ fn build_delivery_payload(payload: PushNotificationPayload) -> serde_json::Value
     body.insert("body".into(), serde_json::Value::String(payload.body));
     body.insert("data".into(), normalize_payload_data(payload.data));
 
-    if let Some(tag) = payload.tag.map(|value| value.trim().to_string()).filter(|value| !value.is_empty()) {
+    if let Some(tag) = payload
+        .tag
+        .map(|value| value.trim().to_string())
+        .filter(|value| !value.is_empty())
+    {
         body.insert("tag".into(), serde_json::Value::String(tag));
     }
-    if let Some(icon_url) = payload.icon_url.map(|value| value.trim().to_string()).filter(|value| !value.is_empty()) {
+    if let Some(icon_url) = payload
+        .icon_url
+        .map(|value| value.trim().to_string())
+        .filter(|value| !value.is_empty())
+    {
         body.insert("icon".into(), serde_json::Value::String(icon_url));
     }
-    if let Some(badge_url) = payload.badge_url.map(|value| value.trim().to_string()).filter(|value| !value.is_empty()) {
+    if let Some(badge_url) = payload
+        .badge_url
+        .map(|value| value.trim().to_string())
+        .filter(|value| !value.is_empty())
+    {
         body.insert("badge".into(), serde_json::Value::String(badge_url));
     }
 
@@ -336,7 +355,10 @@ mod tests {
 
     #[test]
     fn null_payload_becomes_object() {
-        assert_eq!(normalize_payload_data(serde_json::Value::Null), serde_json::json!({}));
+        assert_eq!(
+            normalize_payload_data(serde_json::Value::Null),
+            serde_json::json!({})
+        );
     }
 
     #[test]
@@ -370,6 +392,7 @@ mod tests {
             vapid_subject: None,
             fcm_service_account_json: None,
             smtp: None,
+            stripe: crate::config::StripeConfig::default(),
         };
 
         let runtime = PushDeliveryRuntime::from_config(&config)

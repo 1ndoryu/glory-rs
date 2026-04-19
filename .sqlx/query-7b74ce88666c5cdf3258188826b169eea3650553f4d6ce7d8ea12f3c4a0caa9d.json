@@ -1,0 +1,25 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT EXISTS(\n                SELECT 1\n                FROM codigos_descarga_gratis cdg\n                INNER JOIN codigos_gratis_usos cgu ON cgu.codigo_id = cdg.id\n                WHERE cdg.codigo = $1\n                  AND cdg.tipo = $2\n                  AND cdg.target_id = $3\n                  AND cgu.usuario_id = $4\n                  AND cgu.expirado = FALSE\n                  AND cdg.activo = TRUE\n                  AND cdg.expires_at > NOW()\n            ) AS \"allowed!\"\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "allowed!",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Int8",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "7b74ce88666c5cdf3258188826b169eea3650553f4d6ce7d8ea12f3c4a0caa9d"
+}

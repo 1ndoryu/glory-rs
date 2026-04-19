@@ -1,9 +1,7 @@
 mod local_rules;
 mod types;
 
-use crate::audio::ia::groq::{
-    GroqChatRequest, GroqClient, GroqClientError,
-};
+use crate::audio::ia::groq::{GroqChatRequest, GroqClient, GroqClientError};
 use crate::audio::ia::json_repairer::JsonRepairer;
 use crate::audio::ia::openai::{OpenAiChatRequest, OpenAiClient, OpenAiClientError};
 use serde::Deserialize;
@@ -11,10 +9,9 @@ use serde_json::Value;
 use thiserror::Error;
 
 pub use types::{
-    ModerationAdminPanel, ModerationAiAssessment, ModerationCategory,
-    ModerationDecision, ModerationEntityKind, ModerationLocalFinding,
-    ModerationOpenAiFailure, ModerationParseFailure, ModerationProvider,
-    ModerationProviderFailure, ModerationRequest, ModerationResult,
+    ModerationAdminPanel, ModerationAiAssessment, ModerationCategory, ModerationDecision,
+    ModerationEntityKind, ModerationLocalFinding, ModerationOpenAiFailure, ModerationParseFailure,
+    ModerationProvider, ModerationProviderFailure, ModerationRequest, ModerationResult,
     ModerationVerdict,
 };
 
@@ -42,7 +39,10 @@ pub struct ModerationService {
 #[derive(Debug, Error)]
 pub enum ModerationServiceError {
     #[error("No se pudo inicializar {provider}: {message}")]
-    ProviderInitialization { provider: &'static str, message: String },
+    ProviderInitialization {
+        provider: &'static str,
+        message: String,
+    },
 }
 
 #[derive(Debug, Default)]
@@ -228,7 +228,9 @@ impl ModerationAiPayload {
             verdict,
             confidence,
             reason_code,
-            summary: self.summary.unwrap_or_else(|| default_summary(verdict, category)),
+            summary: self
+                .summary
+                .unwrap_or_else(|| default_summary(verdict, category)),
             attempt_count,
             provider_key_index,
         }
@@ -259,7 +261,9 @@ fn build_decision(
 
     if let Some(assessment) = &ai.assessment {
         let verdict = match assessment.verdict {
-            ModerationVerdict::Rejected if assessment.confidence >= 0.85 => ModerationVerdict::Rejected,
+            ModerationVerdict::Rejected if assessment.confidence >= 0.85 => {
+                ModerationVerdict::Rejected
+            }
             ModerationVerdict::Rejected | ModerationVerdict::Review => ModerationVerdict::Review,
             ModerationVerdict::Approved if strongest_local_finding(local_findings).is_some() => {
                 ModerationVerdict::Review
@@ -281,7 +285,10 @@ fn build_decision(
             verdict: ModerationVerdict::Review,
             category: local.category,
             reason_code: local.reason_code.clone(),
-            summary: format!("Prefiltro local marco '{}' para revision", local.matched_text),
+            summary: format!(
+                "Prefiltro local marco '{}' para revision",
+                local.matched_text
+            ),
             manual_review: true,
         };
     }
@@ -299,7 +306,12 @@ fn build_decision(
     ModerationDecision {
         verdict: ModerationVerdict::Approved,
         category: ModerationCategory::Safe,
-        reason_code: if ai.providers_configured { "sin_hallazgos" } else { "local_only_fallback" }.to_owned(),
+        reason_code: if ai.providers_configured {
+            "sin_hallazgos"
+        } else {
+            "local_only_fallback"
+        }
+        .to_owned(),
         summary: default_summary(ModerationVerdict::Approved, ModerationCategory::Safe),
         manual_review: false,
     }
@@ -311,21 +323,36 @@ fn build_admin_panel(
     local_findings: &[ModerationLocalFinding],
     ai: &AiExecutionOutcome,
 ) -> ModerationAdminPanel {
-    let mut badges = vec![request.entity_kind.as_str().to_owned(), decision.verdict.as_str().to_owned(), decision.category.as_str().to_owned()];
+    let mut badges = vec![
+        request.entity_kind.as_str().to_owned(),
+        decision.verdict.as_str().to_owned(),
+        decision.category.as_str().to_owned(),
+    ];
     if let Some(assessment) = &ai.assessment {
         badges.push(assessment.provider.as_str().to_owned());
     } else if !ai.providers_configured {
         badges.push("local_only".to_owned());
     }
 
-    let mut evidence = local_findings.iter().map(|finding| finding.matched_text.clone()).collect::<Vec<_>>();
+    let mut evidence = local_findings
+        .iter()
+        .map(|finding| finding.matched_text.clone())
+        .collect::<Vec<_>>();
     if let Some(assessment) = &ai.assessment {
-        evidence.push(format!("ia:{} ({:.0}%)", assessment.reason_code, assessment.confidence * 100.0));
+        evidence.push(format!(
+            "ia:{} ({:.0}%)",
+            assessment.reason_code,
+            assessment.confidence * 100.0
+        ));
     }
     evidence.extend(ai.failures.iter().take(2).map(summarize_failure));
 
     ModerationAdminPanel {
-        headline: format!("{} {}", request.entity_kind.as_str(), decision.verdict.as_str()),
+        headline: format!(
+            "{} {}",
+            request.entity_kind.as_str(),
+            decision.verdict.as_str()
+        ),
         summary: decision.summary.clone(),
         badges,
         evidence,
@@ -352,8 +379,17 @@ fn build_moderation_prompt(request: &ModerationRequest) -> String {
     )
 }
 
-fn normalize_verdict(level: Option<&str>, safe: Option<bool>, confidence: f32) -> ModerationVerdict {
-    match level.unwrap_or_default().trim().to_ascii_lowercase().as_str() {
+fn normalize_verdict(
+    level: Option<&str>,
+    safe: Option<bool>,
+    confidence: f32,
+) -> ModerationVerdict {
+    match level
+        .unwrap_or_default()
+        .trim()
+        .to_ascii_lowercase()
+        .as_str()
+    {
         "rechazado" | "rejected" => ModerationVerdict::Rejected,
         "revision" | "review" => ModerationVerdict::Review,
         "aprobado" | "approved" => ModerationVerdict::Approved,
@@ -368,7 +404,13 @@ fn normalize_verdict(level: Option<&str>, safe: Option<bool>, confidence: f32) -
 fn sanitize_reason_code(value: &str) -> String {
     let mut sanitized = value
         .chars()
-        .map(|character| if character.is_ascii_alphanumeric() { character.to_ascii_lowercase() } else { '_' })
+        .map(|character| {
+            if character.is_ascii_alphanumeric() {
+                character.to_ascii_lowercase()
+            } else {
+                '_'
+            }
+        })
         .collect::<String>();
     while sanitized.contains("__") {
         sanitized = sanitized.replace("__", "_");
@@ -379,7 +421,9 @@ fn sanitize_reason_code(value: &str) -> String {
 fn default_summary(verdict: ModerationVerdict, category: ModerationCategory) -> String {
     match verdict {
         ModerationVerdict::Approved => "Sin hallazgos relevantes de moderacion".to_owned(),
-        ModerationVerdict::Review => format!("Contenido marcado para revision por {}", category.as_str()),
+        ModerationVerdict::Review => {
+            format!("Contenido marcado para revision por {}", category.as_str())
+        }
         ModerationVerdict::Rejected => format!("Contenido bloqueado por {}", category.as_str()),
     }
 }
@@ -400,7 +444,10 @@ fn map_openai_error(error: OpenAiClientError) -> ModerationOpenAiFailure {
             retryable: false,
             message: "missing_api_key".to_owned(),
         },
-        OpenAiClientError::JsonSchemaRejected { status_code, message } => ModerationOpenAiFailure {
+        OpenAiClientError::JsonSchemaRejected {
+            status_code,
+            message,
+        } => ModerationOpenAiFailure {
             status_code: Some(status_code),
             retry_after_seconds: None,
             retryable: false,

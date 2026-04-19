@@ -1,0 +1,133 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n                    a.id AS \"id!\",\n                    a.autor_id AS \"autor_id!\",\n                    a.titulo AS \"titulo!\",\n                    a.slug AS \"slug!\",\n                    a.extracto AS \"extracto!\",\n                    a.portada_url,\n                    a.categoria AS \"categoria!\",\n                    COALESCE(a.total_likes, 0) AS \"total_likes!\",\n                    COALESCE(a.total_comentarios, 0) AS \"total_comentarios!\",\n                    a.moderacion_estado AS \"moderacion_estado!\",\n                    a.created_at AS \"created_at!: chrono::DateTime<chrono::Utc>\",\n                    a.updated_at AS \"updated_at!: chrono::DateTime<chrono::Utc>\",\n                    a.publicado_en AS \"publicado_en?: chrono::DateTime<chrono::Utc>\",\n                    u.id AS \"author_id!\",\n                    u.username AS \"author_username!\",\n                    u.nombre_visible AS \"author_display_name\",\n                    u.avatar_url AS \"author_avatar_url\",\n                    COALESCE(u.verificado, FALSE) AS \"author_verified!\",\n                    COALESCE(al.usuario_id IS NOT NULL, FALSE) AS \"liked_por_mi!\"\n               FROM articulos a\n               JOIN usuarios_ext u ON u.id = a.autor_id\n               LEFT JOIN articulos_likes al ON al.articulo_id = a.id AND al.usuario_id = $3\n               WHERE a.eliminado_en IS NULL\n                 AND a.moderacion_estado = 'aprobado'\n                 AND ($1::text IS NULL OR a.categoria = $1)\n               ORDER BY a.publicado_en DESC NULLS LAST, a.created_at DESC, a.id DESC\n               LIMIT $2 OFFSET $4",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "autor_id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "titulo!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "slug!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "extracto!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "portada_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "categoria!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 7,
+        "name": "total_likes!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 8,
+        "name": "total_comentarios!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 9,
+        "name": "moderacion_estado!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 10,
+        "name": "created_at!: chrono::DateTime<chrono::Utc>",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 11,
+        "name": "updated_at!: chrono::DateTime<chrono::Utc>",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 12,
+        "name": "publicado_en?: chrono::DateTime<chrono::Utc>",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 13,
+        "name": "author_id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 14,
+        "name": "author_username!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 15,
+        "name": "author_display_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 16,
+        "name": "author_avatar_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 17,
+        "name": "author_verified!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 18,
+        "name": "liked_por_mi!",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int8",
+        "Int4",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      null,
+      null,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      true,
+      null,
+      null
+    ]
+  },
+  "hash": "6dcbf0472765544a5567105f5f7ea107dac3b64c00babf359b08451dea5d0824"
+}

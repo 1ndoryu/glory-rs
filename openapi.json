@@ -59,6 +59,73 @@
         ]
       }
     },
+    "/api/admin/reportes/legales": {
+      "get": {
+        "tags": [
+          "reports"
+        ],
+        "operationId": "list_pending_legal_reports",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Listado admin de reclamaciones legales pendientes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminLegalReportsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "No admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
     "/api/admin/users/{id}/activate": {
       "post": {
         "tags": [
@@ -194,6 +261,483 @@
             "bearer_auth": []
           }
         ]
+      }
+    },
+    "/api/articulos": {
+      "get": {
+        "tags": [
+          "articles"
+        ],
+        "operationId": "list_articles",
+        "parameters": [
+          {
+            "name": "pagina",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "limite",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "categoria",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Listado público de artículos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArticleListResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Query inválida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "articles"
+        ],
+        "operationId": "create_article",
+        "requestBody": {
+          "description": "Crea un artículo con portada opcional en archivo",
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateArticleMultipartRequestDoc"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Artículo creado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArticleResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Payload inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Archivo demasiado grande",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Tipo de imagen no soportado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Límite de creación excedido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/articulos/categorias": {
+      "get": {
+        "tags": [
+          "articles"
+        ],
+        "operationId": "list_categories",
+        "responses": {
+          "200": {
+            "description": "Conteo por categorías",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArticleCategoriesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/articulos/mis-articulos": {
+      "get": {
+        "tags": [
+          "articles"
+        ],
+        "operationId": "list_my_articles",
+        "parameters": [
+          {
+            "name": "pagina",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "limite",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "moderacion_estado",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Artículos del usuario autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArticleListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/articulos/{id}": {
+      "put": {
+        "tags": [
+          "articles"
+        ],
+        "operationId": "update_article",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID del artículo a actualizar",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateArticleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Artículo actualizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArticleResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Payload inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sin permisos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Artículo no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "articles"
+        ],
+        "operationId": "delete_article",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID del artículo a eliminar",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Artículo eliminado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteArticleResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sin permisos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Artículo no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/articulos/{id}/like": {
+      "post": {
+        "tags": [
+          "articles"
+        ],
+        "operationId": "toggle_like_article",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID del artículo a likear",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Like alternado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToggleArticleLikeResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Artículo no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/articulos/{slug}": {
+      "get": {
+        "tags": [
+          "articles"
+        ],
+        "operationId": "get_article",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "description": "Slug del artículo",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detalle del artículo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArticleResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Artículo no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/auth/google": {
@@ -568,6 +1112,228 @@
         ]
       }
     },
+    "/api/busqueda/rapida": {
+      "get": {
+        "tags": [
+          "search"
+        ],
+        "operationId": "legacy_quick_search",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "description": "Texto a buscar. Mantiene el contrato legacy del dropdown rápido",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta compatible con el endpoint legacy /busqueda/rapida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LegacyQuickSearchResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Parámetros inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/codigos-gratis/generar": {
+      "post": {
+        "tags": [
+          "payments"
+        ],
+        "operationId": "generate_free_code",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateFreeCodeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Código generado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerateFreeCodeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Parámetros inválidos"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "No admin"
+          },
+          "404": {
+            "description": "Item no encontrado"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/codigos-gratis/invalidar": {
+      "post": {
+        "tags": [
+          "payments"
+        ],
+        "operationId": "invalidate_free_code",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateFreeCodeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Códigos invalidados",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidateFreeCodeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Parámetros inválidos"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "No admin"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/codigos-gratis/reclamar": {
+      "post": {
+        "tags": [
+          "payments"
+        ],
+        "operationId": "claim_free_code",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClaimFreeCodeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Código reclamado o expirado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimFreeCodeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Código requerido"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "404": {
+            "description": "Código no existe o fue invalidado"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/codigos-gratis/verificar": {
+      "get": {
+        "tags": [
+          "payments"
+        ],
+        "operationId": "verify_free_code",
+        "parameters": [
+          {
+            "name": "codigo",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Código válido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyFreeCodeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Código inválido"
+          },
+          "404": {
+            "description": "Código no existe o fue invalidado"
+          },
+          "410": {
+            "description": "Código expirado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyFreeCodeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/colecciones": {
       "get": {
         "tags": [
@@ -788,6 +1554,21 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/DownloadGrantRequest"
+                  }
+                ],
+                "nullable": true
+              }
+            }
+          },
+          "required": false
+        },
         "responses": {
           "200": {
             "description": "Stream binario application/zip"
@@ -1287,6 +2068,98 @@
         ]
       }
     },
+    "/api/comentarios/{commentId}/reportar": {
+      "post": {
+        "tags": [
+          "reports"
+        ],
+        "operationId": "report_comment",
+        "parameters": [
+          {
+            "name": "commentId",
+            "in": "path",
+            "description": "ID del comentario a reportar",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/CreateScopedReportRequest"
+                  }
+                ],
+                "nullable": true
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "description": "Reporte duplicado aceptado de forma idempotente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportResponse"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Reporte creado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Comentario no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Límite excedido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
     "/api/comentarios/{commentId}/respuestas": {
       "get": {
         "tags": [
@@ -1463,6 +2336,216 @@
           },
           "422": {
             "description": "Validación de comentario"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/connect/balance": {
+      "get": {
+        "tags": [
+          "payments"
+        ],
+        "operationId": "get_connect_balance",
+        "responses": {
+          "200": {
+            "description": "Balance disponible y pendiente del creador",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatorConnectBalance"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuario no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stripe no configurado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/connect/dashboard": {
+      "post": {
+        "tags": [
+          "payments"
+        ],
+        "operationId": "create_connect_dashboard_link",
+        "responses": {
+          "200": {
+            "description": "URL del dashboard Express de Stripe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentRedirectResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Cuenta Connect no configurada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stripe no configurado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/connect/estado": {
+      "get": {
+        "tags": [
+          "payments"
+        ],
+        "operationId": "get_connect_status",
+        "responses": {
+          "200": {
+            "description": "Estado semántico de la cuenta Connect",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatorConnectStatus"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuario no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/connect/onboarding": {
+      "post": {
+        "tags": [
+          "payments"
+        ],
+        "operationId": "create_connect_onboarding",
+        "responses": {
+          "200": {
+            "description": "URL de onboarding de Stripe Connect",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentRedirectResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Falta email o la cuenta no es apta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stripe no configurado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2622,6 +3705,274 @@
         ]
       }
     },
+    "/api/pagos/checkout": {
+      "post": {
+        "tags": [
+          "payments"
+        ],
+        "operationId": "create_subscription_checkout",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSubscriptionCheckoutRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "URL de Stripe Checkout para suscripción",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentRedirectResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Plan o periodo inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stripe no configurado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/pagos/checkout-sample": {
+      "post": {
+        "tags": [
+          "payments"
+        ],
+        "operationId": "create_sample_checkout",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSampleCheckoutRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "URL de Stripe Checkout para compra individual",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentRedirectResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Sample inválido o no comprable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Sample no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stripe no configurado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/pagos/planes": {
+      "get": {
+        "tags": [
+          "payments"
+        ],
+        "operationId": "list_plans",
+        "responses": {
+          "200": {
+            "description": "Catálogo público de planes Kamples",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentPlansResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/pagos/portal": {
+      "post": {
+        "tags": [
+          "payments"
+        ],
+        "operationId": "create_billing_portal",
+        "responses": {
+          "200": {
+            "description": "URL del Customer Portal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentRedirectResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stripe no configurado o customer ausente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/pagos/webhook": {
+      "post": {
+        "tags": [
+          "payments"
+        ],
+        "operationId": "payment_webhook",
+        "parameters": [
+          {
+            "name": "stripe-signature",
+            "in": "header",
+            "description": "Firma HMAC Stripe",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Webhook recibido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentWebhookResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Firma o payload inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stripe no configurado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/publicaciones": {
       "get": {
         "tags": [
@@ -2922,6 +4273,98 @@
         ]
       }
     },
+    "/api/publicaciones/{postId}/reportar": {
+      "post": {
+        "tags": [
+          "reports"
+        ],
+        "operationId": "report_post",
+        "parameters": [
+          {
+            "name": "postId",
+            "in": "path",
+            "description": "ID de la publicación a reportar",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/CreateScopedReportRequest"
+                  }
+                ],
+                "nullable": true
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "description": "Reporte duplicado aceptado de forma idempotente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportResponse"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Reporte creado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Publicación no encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Límite excedido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
     "/api/push/subscribe": {
       "post": {
         "tags": [
@@ -3050,6 +4493,293 @@
             }
           }
         }
+      }
+    },
+    "/api/reportar": {
+      "post": {
+        "tags": [
+          "reports"
+        ],
+        "operationId": "report_generic",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGenericReportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Reporte duplicado aceptado de forma idempotente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportResponse"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Reporte creado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Target no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Payload inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Límite de reportes excedido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/reportar-error": {
+      "post": {
+        "tags": [
+          "reports"
+        ],
+        "operationId": "report_platform_error",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePlatformErrorReportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Reporte de error creado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorReportResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Payload inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Límite excedido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/reportar-legal": {
+      "post": {
+        "tags": [
+          "reports"
+        ],
+        "operationId": "report_legal",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLegalReportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Reclamación legal registrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LegalReportResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Payload inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Límite excedido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reportar-usuario/{userId}": {
+      "post": {
+        "tags": [
+          "reports"
+        ],
+        "operationId": "report_user_legacy",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "ID del usuario reportado",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReportReasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Reporte de usuario creado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuario no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Payload inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Límite excedido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
       }
     },
     "/api/samples": {
@@ -3387,6 +5117,21 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/DownloadGrantRequest"
+                  }
+                ],
+                "nullable": true
+              }
+            }
+          },
+          "required": false
+        },
         "responses": {
           "200": {
             "description": "Descarga registrada",
@@ -3726,6 +5471,57 @@
           },
           "422": {
             "description": "Payload inválido o sin cambios",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/search": {
+      "get": {
+        "tags": [
+          "search"
+        ],
+        "operationId": "global_search",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "description": "Texto a buscar. Con menos de 2 caracteres devuelve listas vacías",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "types",
+            "in": "query",
+            "description": "CSV opcional para filtrar tipos: samples,users,collections,songs",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Búsqueda global agrupada por tipo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlobalSearchResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Parámetros inválidos",
             "content": {
               "application/json": {
                 "schema": {
@@ -4096,6 +5892,373 @@
           }
         }
       },
+      "AdminLegalReportItem": {
+        "type": "object",
+        "required": [
+          "id",
+          "tipo",
+          "target_id",
+          "razon",
+          "estado",
+          "created_at"
+        ],
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "detalles": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LegalReportDetails"
+              }
+            ],
+            "nullable": true
+          },
+          "estado": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ip_origen": {
+            "type": "string",
+            "nullable": true
+          },
+          "razon": {
+            "type": "string"
+          },
+          "target_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tipo": {
+            "$ref": "#/components/schemas/LegalReportType"
+          }
+        }
+      },
+      "AdminLegalReportsResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "reportes",
+          "total"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "reportes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminLegalReportItem"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ArticleAuthorSummary": {
+        "type": "object",
+        "required": [
+          "id",
+          "username",
+          "verificado"
+        ],
+        "properties": {
+          "avatar_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nombre_visible": {
+            "type": "string",
+            "nullable": true
+          },
+          "username": {
+            "type": "string"
+          },
+          "verificado": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ArticleCategoriesResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ArticleCategoryCount"
+            }
+          },
+          "ok": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ArticleCategoryCount": {
+        "type": "object",
+        "required": [
+          "categoria",
+          "total"
+        ],
+        "properties": {
+          "categoria": {
+            "type": "string"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ArticleDetail": {
+        "type": "object",
+        "required": [
+          "id",
+          "autor_id",
+          "titulo",
+          "slug",
+          "contenido",
+          "extracto",
+          "categoria",
+          "embeds",
+          "descarga_publica",
+          "total_likes",
+          "total_comentarios",
+          "moderacion_estado",
+          "created_at",
+          "updated_at",
+          "autor",
+          "liked_por_mi"
+        ],
+        "properties": {
+          "autor": {
+            "$ref": "#/components/schemas/ArticleAuthorSummary"
+          },
+          "autor_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "categoria": {
+            "type": "string"
+          },
+          "contenido": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "descarga_publica": {
+            "type": "boolean"
+          },
+          "embeds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ArticleEmbed"
+            }
+          },
+          "extracto": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "liked_por_mi": {
+            "type": "boolean"
+          },
+          "moderacion_estado": {
+            "type": "string"
+          },
+          "portada_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "publicado_en": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "slug": {
+            "type": "string"
+          },
+          "titulo": {
+            "type": "string"
+          },
+          "total_comentarios": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total_likes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ArticleEmbed": {
+        "type": "object",
+        "required": [
+          "tipo",
+          "id"
+        ],
+        "properties": {
+          "descarga_publica": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tipo": {
+            "type": "string"
+          }
+        }
+      },
+      "ArticleListData": {
+        "type": "object",
+        "required": [
+          "articulos",
+          "total",
+          "hay_mas"
+        ],
+        "properties": {
+          "articulos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ArticleSummary"
+            }
+          },
+          "hay_mas": {
+            "type": "boolean"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ArticleListResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/ArticleListData"
+          },
+          "ok": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ArticleResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/ArticleDetail"
+          },
+          "ok": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ArticleSummary": {
+        "type": "object",
+        "required": [
+          "id",
+          "autor_id",
+          "titulo",
+          "slug",
+          "extracto",
+          "categoria",
+          "total_likes",
+          "total_comentarios",
+          "created_at",
+          "updated_at",
+          "autor",
+          "liked_por_mi"
+        ],
+        "properties": {
+          "autor": {
+            "$ref": "#/components/schemas/ArticleAuthorSummary"
+          },
+          "autor_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "categoria": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "extracto": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "liked_por_mi": {
+            "type": "boolean"
+          },
+          "moderacion_estado": {
+            "type": "string",
+            "nullable": true
+          },
+          "portada_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "publicado_en": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "slug": {
+            "type": "string"
+          },
+          "titulo": {
+            "type": "string"
+          },
+          "total_comentarios": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total_likes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "AuthResponse": {
         "type": "object",
         "required": [
@@ -4232,6 +6395,53 @@
           "title": {
             "type": "string",
             "description": "Título del sample existente, útil para UI/desktop.",
+            "nullable": true
+          }
+        }
+      },
+      "ClaimFreeCodeRequest": {
+        "type": "object",
+        "required": [
+          "codigo"
+        ],
+        "properties": {
+          "codigo": {
+            "type": "string"
+          }
+        }
+      },
+      "ClaimFreeCodeResponse": {
+        "type": "object",
+        "required": [
+          "ok"
+        ],
+        "properties": {
+          "compensado": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "expired": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "nombreItem": {
+            "type": "string",
+            "nullable": true
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "targetId": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "tipo": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FreeCodeTargetType"
+              }
+            ],
             "nullable": true
           }
         }
@@ -4664,6 +6874,46 @@
           }
         }
       },
+      "CreateArticleMultipartRequestDoc": {
+        "type": "object",
+        "required": [
+          "titulo",
+          "contenido",
+          "extracto",
+          "categoria",
+          "portada"
+        ],
+        "properties": {
+          "categoria": {
+            "type": "string"
+          },
+          "contenido": {
+            "type": "string"
+          },
+          "descarga_publica": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "embeds": {
+            "type": "string",
+            "nullable": true
+          },
+          "extracto": {
+            "type": "string"
+          },
+          "portada": {
+            "type": "string",
+            "format": "binary"
+          },
+          "portada_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "titulo": {
+            "type": "string"
+          }
+        }
+      },
       "CreateColeccionRequest": {
         "type": "object",
         "required": [
@@ -4725,6 +6975,74 @@
           }
         }
       },
+      "CreateGenericReportRequest": {
+        "type": "object",
+        "required": [
+          "tipo",
+          "targetId",
+          "razon"
+        ],
+        "properties": {
+          "detalles": {
+            "type": "string",
+            "nullable": true
+          },
+          "razon": {
+            "type": "string"
+          },
+          "targetId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tipo": {
+            "$ref": "#/components/schemas/GenericReportType"
+          },
+          "url": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "CreateLegalReportRequest": {
+        "type": "object",
+        "required": [
+          "tipo",
+          "target_id",
+          "razon",
+          "nombre",
+          "email",
+          "tipo_derecho",
+          "obra_protegida",
+          "declaracion"
+        ],
+        "properties": {
+          "declaracion": {
+            "type": "boolean"
+          },
+          "email": {
+            "type": "string"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "obra_protegida": {
+            "type": "string"
+          },
+          "razon": {
+            "type": "string"
+          },
+          "target_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tipo": {
+            "$ref": "#/components/schemas/LegalReportType"
+          },
+          "tipo_derecho": {
+            "$ref": "#/components/schemas/LegalRightType"
+          }
+        }
+      },
       "CreateMessageJsonRequest": {
         "type": "object",
         "properties": {
@@ -4764,6 +7082,25 @@
           }
         }
       },
+      "CreatePlatformErrorReportRequest": {
+        "type": "object",
+        "required": [
+          "razon",
+          "detalles"
+        ],
+        "properties": {
+          "detalles": {
+            "type": "string"
+          },
+          "razon": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
       "CreatePostRequest": {
         "type": "object",
         "properties": {
@@ -4782,6 +7119,154 @@
               "type": "integer",
               "format": "int32"
             }
+          }
+        }
+      },
+      "CreateReportReasonRequest": {
+        "type": "object",
+        "required": [
+          "razon"
+        ],
+        "properties": {
+          "detalles": {
+            "type": "string",
+            "nullable": true
+          },
+          "razon": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateSampleCheckoutRequest": {
+        "type": "object",
+        "required": [
+          "sampleId"
+        ],
+        "properties": {
+          "sampleId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "CreateScopedReportRequest": {
+        "type": "object",
+        "properties": {
+          "detalles": {
+            "type": "string",
+            "nullable": true
+          },
+          "razon": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "CreateSubscriptionCheckoutRequest": {
+        "type": "object",
+        "required": [
+          "plan"
+        ],
+        "properties": {
+          "periodo": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PaymentPlanPeriod"
+              }
+            ],
+            "nullable": true
+          },
+          "plan": {
+            "$ref": "#/components/schemas/KamplesPlanId"
+          }
+        }
+      },
+      "CreatorConnectBalance": {
+        "type": "object",
+        "required": [
+          "disponible",
+          "pendiente",
+          "moneda"
+        ],
+        "properties": {
+          "disponible": {
+            "type": "number",
+            "format": "double"
+          },
+          "moneda": {
+            "type": "string"
+          },
+          "pendiente": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "CreatorConnectState": {
+        "type": "string",
+        "enum": [
+          "no_configurado",
+          "pendiente",
+          "activo",
+          "restringido",
+          "error"
+        ]
+      },
+      "CreatorConnectStatus": {
+        "type": "object",
+        "required": [
+          "estado",
+          "cargosActivos",
+          "payoutsActivos"
+        ],
+        "properties": {
+          "cargosActivos": {
+            "type": "boolean"
+          },
+          "connectId": {
+            "type": "string",
+            "nullable": true
+          },
+          "detalle": {
+            "type": "string",
+            "nullable": true
+          },
+          "estado": {
+            "$ref": "#/components/schemas/CreatorConnectState"
+          },
+          "payoutsActivos": {
+            "type": "boolean"
+          },
+          "requerimientosPendientes": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        }
+      },
+      "DeleteArticleData": {
+        "type": "object",
+        "required": [
+          "eliminado"
+        ],
+        "properties": {
+          "eliminado": {
+            "type": "boolean"
+          }
+        }
+      },
+      "DeleteArticleResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/DeleteArticleData"
+          },
+          "ok": {
+            "type": "boolean"
           }
         }
       },
@@ -4832,10 +7317,20 @@
           "sample"
         ]
       },
+      "DownloadGrantRequest": {
+        "type": "object",
+        "properties": {
+          "codigoGratis": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
       "DownloadLimitsResponse": {
         "type": "object",
         "required": [
           "plan",
+          "creditos_bonus",
           "usadas",
           "calidad"
         ],
@@ -4843,7 +7338,16 @@
           "calidad": {
             "type": "string"
           },
+          "creditos_bonus": {
+            "type": "integer",
+            "format": "int32"
+          },
           "limite": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "limite_base": {
             "type": "integer",
             "format": "int64",
             "nullable": true
@@ -4887,6 +7391,26 @@
           },
           "url": {
             "type": "string"
+          }
+        }
+      },
+      "ErrorReportResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "message",
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "ok": {
+            "type": "boolean"
           }
         }
       },
@@ -4940,6 +7464,108 @@
           }
         }
       },
+      "FreeCodeTargetType": {
+        "type": "string",
+        "enum": [
+          "sample",
+          "coleccion"
+        ]
+      },
+      "GenerateFreeCodeRequest": {
+        "type": "object",
+        "required": [
+          "tipo",
+          "targetId"
+        ],
+        "properties": {
+          "targetId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "tipo": {
+            "$ref": "#/components/schemas/FreeCodeTargetType"
+          }
+        }
+      },
+      "GenerateFreeCodeResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "codigo"
+        ],
+        "properties": {
+          "codigo": {
+            "type": "string"
+          },
+          "ok": {
+            "type": "boolean"
+          }
+        }
+      },
+      "GenericReportType": {
+        "type": "string",
+        "enum": [
+          "usuario",
+          "publicacion",
+          "comentario",
+          "sample",
+          "error_plataforma"
+        ]
+      },
+      "GlobalSearchQuery": {
+        "type": "object",
+        "required": [
+          "q"
+        ],
+        "properties": {
+          "q": {
+            "type": "string"
+          },
+          "types": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "GlobalSearchResponse": {
+        "type": "object",
+        "required": [
+          "q",
+          "samples",
+          "users",
+          "collections",
+          "songs"
+        ],
+        "properties": {
+          "collections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SearchCollectionResult"
+            }
+          },
+          "q": {
+            "type": "string"
+          },
+          "samples": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SearchSampleResult"
+            }
+          },
+          "songs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SearchSongResult"
+            }
+          },
+          "users": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SearchUserResult"
+            }
+          }
+        }
+      },
       "GoogleAuthRequest": {
         "type": "object",
         "required": [
@@ -4989,6 +7615,369 @@
             "type": "string"
           }
         }
+      },
+      "InvalidateFreeCodeResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "invalidados"
+        ],
+        "properties": {
+          "invalidados": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ok": {
+            "type": "boolean"
+          }
+        }
+      },
+      "KamplesPlanId": {
+        "type": "string",
+        "enum": [
+          "free",
+          "pro",
+          "premium"
+        ]
+      },
+      "LegacyQuickSearchCollectionResult": {
+        "type": "object",
+        "required": [
+          "id",
+          "nombre",
+          "slug",
+          "totalSamples",
+          "creador"
+        ],
+        "properties": {
+          "creador": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "portadaUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "slug": {
+            "type": "string"
+          },
+          "totalSamples": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "LegacyQuickSearchQuery": {
+        "type": "object",
+        "required": [
+          "q"
+        ],
+        "properties": {
+          "q": {
+            "type": "string"
+          }
+        }
+      },
+      "LegacyQuickSearchRelationResult": {
+        "type": "object",
+        "required": [
+          "id",
+          "fuente",
+          "destino"
+        ],
+        "properties": {
+          "destino": {
+            "$ref": "#/components/schemas/LegacyQuickSearchRelationSide"
+          },
+          "fuente": {
+            "$ref": "#/components/schemas/LegacyQuickSearchRelationSide"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "LegacyQuickSearchRelationSide": {
+        "type": "object",
+        "required": [
+          "titulo",
+          "slug",
+          "artista"
+        ],
+        "properties": {
+          "artista": {
+            "type": "string"
+          },
+          "imagenUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "slug": {
+            "type": "string"
+          },
+          "titulo": {
+            "type": "string"
+          }
+        }
+      },
+      "LegacyQuickSearchResponse": {
+        "type": "object",
+        "required": [
+          "canciones",
+          "samples",
+          "sampleos",
+          "usuarios",
+          "colecciones",
+          "todos"
+        ],
+        "properties": {
+          "canciones": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LegacyQuickSearchSongResult"
+            }
+          },
+          "colecciones": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LegacyQuickSearchCollectionResult"
+            }
+          },
+          "sampleos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LegacyQuickSearchRelationResult"
+            }
+          },
+          "samples": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LegacyQuickSearchSampleResult"
+            }
+          },
+          "todos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LegacyQuickSearchTodoItem"
+            }
+          },
+          "usuarios": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LegacyQuickSearchUserResult"
+            }
+          }
+        }
+      },
+      "LegacyQuickSearchSampleCreator": {
+        "type": "object",
+        "required": [
+          "username",
+          "nombreVisible"
+        ],
+        "properties": {
+          "avatarUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "nombreVisible": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          }
+        }
+      },
+      "LegacyQuickSearchSampleResult": {
+        "type": "object",
+        "required": [
+          "id",
+          "titulo",
+          "slug",
+          "creador"
+        ],
+        "properties": {
+          "creador": {
+            "$ref": "#/components/schemas/LegacyQuickSearchSampleCreator"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "imagenUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "slug": {
+            "type": "string"
+          },
+          "titulo": {
+            "type": "string"
+          }
+        }
+      },
+      "LegacyQuickSearchSongResult": {
+        "type": "object",
+        "required": [
+          "id",
+          "titulo",
+          "slug",
+          "artistaNombre",
+          "totalSampleada"
+        ],
+        "properties": {
+          "artistaNombre": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "imagenUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "slug": {
+            "type": "string"
+          },
+          "titulo": {
+            "type": "string"
+          },
+          "totalSampleada": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "LegacyQuickSearchTodoItem": {
+        "type": "object",
+        "required": [
+          "tipo",
+          "score",
+          "datos"
+        ],
+        "properties": {
+          "datos": {
+            "type": "object"
+          },
+          "score": {
+            "type": "number",
+            "format": "float"
+          },
+          "tipo": {
+            "type": "string"
+          }
+        }
+      },
+      "LegacyQuickSearchUserResult": {
+        "type": "object",
+        "required": [
+          "id",
+          "username",
+          "nombreVisible",
+          "verificado",
+          "totalSeguidores"
+        ],
+        "properties": {
+          "avatarUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nombreVisible": {
+            "type": "string"
+          },
+          "totalSeguidores": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "username": {
+            "type": "string"
+          },
+          "verificado": {
+            "type": "boolean"
+          }
+        }
+      },
+      "LegalReportDetails": {
+        "type": "object",
+        "required": [
+          "nombre",
+          "email",
+          "tipo_derecho",
+          "obra_protegida",
+          "declaracion_bf",
+          "fecha_envio"
+        ],
+        "properties": {
+          "declaracion_bf": {
+            "type": "boolean"
+          },
+          "email": {
+            "type": "string"
+          },
+          "fecha_envio": {
+            "type": "string"
+          },
+          "ip_origen": {
+            "type": "string",
+            "nullable": true
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "obra_protegida": {
+            "type": "string"
+          },
+          "tipo_derecho": {
+            "$ref": "#/components/schemas/LegalRightType"
+          }
+        }
+      },
+      "LegalReportResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "reporte_id",
+          "mensaje"
+        ],
+        "properties": {
+          "mensaje": {
+            "type": "string"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "reporte_id": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "LegalReportType": {
+        "type": "string",
+        "enum": [
+          "legal_sample",
+          "legal_relacion"
+        ]
+      },
+      "LegalRightType": {
+        "type": "string",
+        "enum": [
+          "copyright",
+          "trademark",
+          "otro"
+        ]
       },
       "LikeRequest": {
         "type": "object",
@@ -5238,6 +8227,157 @@
         ],
         "properties": {
           "ok": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PaymentPlanPeriod": {
+        "type": "string",
+        "enum": [
+          "mensual",
+          "anual"
+        ]
+      },
+      "PaymentPlanPublic": {
+        "type": "object",
+        "required": [
+          "id",
+          "nombre",
+          "precioMensualCents",
+          "precioMensual",
+          "precioAnualCents",
+          "precioAnual",
+          "ahorroAnualCents",
+          "ahorroAnual",
+          "descargasDia",
+          "subidasMes",
+          "maxSamples",
+          "transferenciaGb",
+          "revenueShareBps",
+          "revenueShareLabel",
+          "priceIdConfigurado"
+        ],
+        "properties": {
+          "ahorroAnual": {
+            "type": "string"
+          },
+          "ahorroAnualCents": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "descargasDia": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "descargasPrueba": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true,
+            "minimum": 0
+          },
+          "id": {
+            "$ref": "#/components/schemas/KamplesPlanId"
+          },
+          "maxSamples": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "precioAnual": {
+            "type": "string"
+          },
+          "precioAnualCents": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "precioMensual": {
+            "type": "string"
+          },
+          "precioMensualCents": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "priceIdConfigurado": {
+            "type": "boolean"
+          },
+          "pruebaGratuitaDias": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true,
+            "minimum": 0
+          },
+          "revenueShareBps": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "revenueShareLabel": {
+            "type": "string"
+          },
+          "subidasMes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "transferenciaGb": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PaymentPlansResponse": {
+        "type": "object",
+        "required": [
+          "stripeHabilitado",
+          "moneda",
+          "planes"
+        ],
+        "properties": {
+          "moneda": {
+            "type": "string"
+          },
+          "planes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PaymentPlanPublic"
+            }
+          },
+          "publishableKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "stripeHabilitado": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PaymentRedirectResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "url"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "PaymentWebhookResponse": {
+        "type": "object",
+        "required": [
+          "recibido",
+          "procesado"
+        ],
+        "properties": {
+          "procesado": {
+            "type": "boolean"
+          },
+          "recibido": {
             "type": "boolean"
           }
         }
@@ -5721,6 +8861,21 @@
           }
         }
       },
+      "ReportResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "ok": {
+            "type": "boolean"
+          }
+        }
+      },
       "RepostResponse": {
         "type": "object",
         "required": [
@@ -6193,6 +9348,157 @@
           }
         }
       },
+      "SearchCollectionOwnerSummary": {
+        "type": "object",
+        "required": [
+          "username",
+          "nombre_visible"
+        ],
+        "properties": {
+          "nombre_visible": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          }
+        }
+      },
+      "SearchCollectionResult": {
+        "type": "object",
+        "required": [
+          "id",
+          "nombre",
+          "total_samples",
+          "creador"
+        ],
+        "properties": {
+          "creador": {
+            "$ref": "#/components/schemas/SearchCollectionOwnerSummary"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "portada_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "slug": {
+            "type": "string",
+            "nullable": true
+          },
+          "total_samples": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "SearchSampleResult": {
+        "type": "object",
+        "required": [
+          "id",
+          "titulo",
+          "slug",
+          "creador"
+        ],
+        "properties": {
+          "creador": {
+            "$ref": "#/components/schemas/SampleCreatorSummary"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "imagen_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "slug": {
+            "type": "string"
+          },
+          "titulo": {
+            "type": "string"
+          }
+        }
+      },
+      "SearchSongResult": {
+        "type": "object",
+        "required": [
+          "id",
+          "titulo",
+          "slug",
+          "artista_nombre",
+          "total_sampleada"
+        ],
+        "properties": {
+          "artista_nombre": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "imagen_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "slug": {
+            "type": "string"
+          },
+          "titulo": {
+            "type": "string"
+          },
+          "total_sampleada": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "SearchType": {
+        "type": "string",
+        "enum": [
+          "samples",
+          "users",
+          "collections",
+          "songs"
+        ]
+      },
+      "SearchUserResult": {
+        "type": "object",
+        "required": [
+          "id",
+          "username",
+          "nombre_visible",
+          "verificado",
+          "total_seguidores"
+        ],
+        "properties": {
+          "avatar_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nombre_visible": {
+            "type": "string"
+          },
+          "total_seguidores": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "username": {
+            "type": "string"
+          },
+          "verificado": {
+            "type": "boolean"
+          }
+        }
+      },
       "SimilarSamplesQuery": {
         "type": "object",
         "description": "Query params de `GET /api/samples/{id}/similar`.",
@@ -6310,6 +9616,26 @@
           }
         }
       },
+      "ToggleArticleLikeResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "liked",
+          "total"
+        ],
+        "properties": {
+          "liked": {
+            "type": "boolean"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "UnsubscribePushRequest": {
         "type": "object",
         "required": [
@@ -6318,6 +9644,39 @@
         "properties": {
           "endpoint": {
             "type": "string"
+          }
+        }
+      },
+      "UpdateArticleRequest": {
+        "type": "object",
+        "properties": {
+          "categoria": {
+            "type": "string",
+            "nullable": true
+          },
+          "contenido": {
+            "type": "string",
+            "nullable": true
+          },
+          "descarga_publica": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "embeds": {
+            "type": "string",
+            "nullable": true
+          },
+          "extracto": {
+            "type": "string",
+            "nullable": true
+          },
+          "portada_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "titulo": {
+            "type": "string",
+            "nullable": true
           }
         }
       },
@@ -6621,6 +9980,38 @@
           },
           "username": {
             "type": "string"
+          }
+        }
+      },
+      "VerifyFreeCodeResponse": {
+        "type": "object",
+        "required": [
+          "ok"
+        ],
+        "properties": {
+          "expired": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "nombreItem": {
+            "type": "string",
+            "nullable": true
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "targetId": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "tipo": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FreeCodeTargetType"
+              }
+            ],
+            "nullable": true
           }
         }
       },

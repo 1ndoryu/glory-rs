@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT plan, creditos_bonus FROM usuarios_ext WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "plan",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 1,
+        "name": "creditos_bonus",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "c3ac2be92477503044c705f94adbf5a56e066ade8fbe7a3146c7d69be89a10fe"
+}

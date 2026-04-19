@@ -6,10 +6,15 @@ use axum::{Json, Router};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
+use super::free_codes::normalize_optional_free_code;
 use crate::algorithm::InteractionKind;
+use crate::domain::{calculate_subscription_download_revenue_share, KamplesPlanId};
 use crate::errors::AppError;
 use crate::middleware::CurrentUser;
-use crate::repositories::DownloadRepository;
+use crate::models::DownloadGrantRequest;
+use crate::repositories::{
+    BillingRepository, CompletedDownloadRevenueShareInsert, DownloadRepository, FreeCodeRepository,
+};
 use crate::services::download_token;
 use crate::AppState;
 
@@ -24,17 +29,17 @@ use crate::AppState;
  * - Sample debe existir y permitir descarga (a menos que el usuario sea
  *   creador) → 403 si no permite.
  * - Re-descargas y samples propios NO consumen crédito.
- * - Plan free: límite 5/día. Plan pro/premium: ilimitado.
+ * - Plan free: límite base 5/día + `creditos_bonus`. Plan pro/premium: ilimitado.
  * - Sample con `precio > 0` y usuario no comprador y no plan pro+ → 403
  *   `requiere_compra`.
  * - Sample `es_premium` sin precio → requiere plan pro+ (403 si free).
+ * - Compra individual completada en `transacciones` habilita descarga sin
+ *   consumir crédito aunque el usuario siga en plan free.
+ * - `codigoGratis` opcional salta checks de plan/crédito/precio si ya fue
+ *   reclamado y sigue activo para este sample.
  * - Trigger AlgoPlanner Descarga al registrar.
  *
  * NO portado:
- * - Códigos de descarga gratis (174A futuras).
- * - Compras individuales reales (TransaccionesRepository) — todavía no
- *   existe en Rust, así que el chequeo de comprado se omite (todos los
- *   samples con precio bloquean a free → coherente con UX legacy).
  * - Anti-abuso por IP.
  * - Calidad por plan (siempre se sirve `wav` legacy).
  *
@@ -55,6 +60,10 @@ fn plan_daily_limit(plan: &str) -> Option<i64> {
     }
 }
 
+fn effective_daily_limit(base_limit: Option<i64>, bonus_credits: i32) -> Option<i64> {
+    base_limit.map(|limit| limit.saturating_add(i64::from(bonus_credits.max(0))))
+}
+
 #[derive(Debug, Clone, Serialize, ToSchema)]
 pub struct DownloadResponse {
     pub ok: bool,
@@ -68,6 +77,8 @@ pub struct DownloadResponse {
 pub struct DownloadLimitsResponse {
     pub plan: String,
     pub limite: Option<i64>,
+    pub limite_base: Option<i64>,
+    pub creditos_bonus: i32,
     pub usadas: i64,
     pub restantes: Option<i64>,
     pub calidad: String,
@@ -78,6 +89,7 @@ pub struct DownloadLimitsResponse {
     path = "/api/samples/{id}/descargar",
     tag = "downloads",
     params(("id" = i32, Path, description = "ID del sample a descargar")),
+    request_body = Option<DownloadGrantRequest>,
     security(("bearer_auth" = [])),
     responses(
         (status = 200, description = "Descarga registrada", body = DownloadResponse),
@@ -91,7 +103,9 @@ pub async fn register_download(
     State(state): State<AppState>,
     user: CurrentUser,
     Path(sample_id): Path<i32>,
+    payload: Option<Json<DownloadGrantRequest>>,
 ) -> Result<Json<DownloadResponse>, AppError> {
+    let access_request = payload.map(|Json(value)| value).unwrap_or_default();
     let info = DownloadRepository::fetch_sample_info(&state.pool, sample_id)
         .await?
         .ok_or_else(|| AppError::NotFound(format!("sample {sample_id} no existe")))?;
@@ -103,17 +117,36 @@ pub async fn register_download(
         ));
     }
 
+    let allowance = DownloadRepository::user_download_allowance(&state.pool, user.user_id).await?;
+    let bonus_credits = allowance.bonus_credits;
+    let plan = allowance.plan;
+    let codigo_gratis = normalize_optional_free_code(access_request.codigo_gratis)?;
+    let es_codigo_gratis = if let Some(code) = codigo_gratis.as_deref() {
+        !es_propietario
+            && FreeCodeRepository::can_user_download(
+                &state.pool,
+                code,
+                "sample",
+                i64::from(sample_id),
+                user.user_id,
+            )
+            .await?
+    } else {
+        false
+    };
+    let ya_comprado = !es_propietario
+        && BillingRepository::has_completed_sample_purchase(&state.pool, user.user_id, sample_id)
+            .await?;
     let ya_descargado = !es_propietario
         && DownloadRepository::already_downloaded(&state.pool, user.user_id, sample_id).await?;
-    let mut consume_credito = !es_propietario && !ya_descargado;
+    let mut consume_credito = !es_propietario && !ya_descargado && !ya_comprado;
+    if es_codigo_gratis {
+        consume_credito = false;
+    }
 
-    let plan = DownloadRepository::user_plan(&state.pool, user.user_id).await?;
-
-    if !es_propietario {
+    if !es_propietario && !es_codigo_gratis {
         let precio = info.precio.unwrap_or(0.0);
-        if precio > 0.0 && !ya_descargado {
-            /* Sin TransaccionesRepository todavía: bloquear a free, permitir
-             * pro/premium descargar samples premium con precio (consume crédito 0). */
+        if precio > 0.0 && !ya_descargado && !ya_comprado {
             if info.es_premium && plan != "free" {
                 consume_credito = false;
             } else {
@@ -121,14 +154,15 @@ pub async fn register_download(
                     "Este sample requiere compra individual (precio {precio:.2})"
                 )));
             }
-        } else if info.es_premium && plan == "free" {
+        } else if info.es_premium && plan == "free" && !ya_comprado {
             return Err(AppError::Forbidden(
                 "Se requiere plan Pro o Premium para descargar este sample".into(),
             ));
         }
     }
 
-    let limite = plan_daily_limit(&plan);
+    let limite_base = plan_daily_limit(&plan);
+    let limite = effective_daily_limit(limite_base, bonus_credits);
     let usadas = DownloadRepository::count_today(&state.pool, user.user_id).await?;
     let restantes = limite.map(|l| (l - usadas).max(0));
 
@@ -151,6 +185,22 @@ pub async fn register_download(
             InteractionKind::Descarga,
         )
         .await?;
+
+    if plan != "free" && !es_propietario {
+        if let Err(error) =
+            register_download_revenue_share(&state, user.user_id, info.creador_id, sample_id, &plan)
+                .await
+        {
+            tracing::error!(
+                buyer_id = user.user_id,
+                creator_id = info.creador_id,
+                sample_id,
+                plan = %plan,
+                error = %error,
+                "revenue share fallido para descarga"
+            );
+        }
+    }
 
     let restantes_post = limite.map(|l| (l - usadas - i64::from(consume_credito)).max(0));
 
@@ -181,13 +231,18 @@ pub async fn download_limits(
     State(state): State<AppState>,
     user: CurrentUser,
 ) -> Result<Json<DownloadLimitsResponse>, AppError> {
-    let plan = DownloadRepository::user_plan(&state.pool, user.user_id).await?;
-    let limite = plan_daily_limit(&plan);
+    let allowance = DownloadRepository::user_download_allowance(&state.pool, user.user_id).await?;
+    let bonus_credits = allowance.bonus_credits;
+    let plan = allowance.plan;
+    let limite_base = plan_daily_limit(&plan);
+    let limite = effective_daily_limit(limite_base, bonus_credits);
     let usadas = DownloadRepository::count_today(&state.pool, user.user_id).await?;
     let restantes = limite.map(|l| (l - usadas).max(0));
     Ok(Json(DownloadLimitsResponse {
         plan,
         limite,
+        limite_base,
+        creditos_bonus: bonus_credits,
         usadas,
         restantes,
         calidad: "wav".into(),
@@ -199,6 +254,39 @@ pub fn routes() -> Router<AppState> {
         .route("/samples/:id/descargar", post(register_download))
         .route("/descargas/limites", get(download_limits))
         .route("/descargas/stream", get(stream_download))
+}
+
+async fn register_download_revenue_share(
+    state: &AppState,
+    buyer_id: i32,
+    creator_id: i32,
+    sample_id: i32,
+    plan: &str,
+) -> Result<(), AppError> {
+    let plan_id = plan.parse::<KamplesPlanId>().unwrap_or(KamplesPlanId::Free);
+    if plan_id == KamplesPlanId::Free {
+        return Ok(());
+    }
+
+    let revenue = calculate_subscription_download_revenue_share(plan_id);
+    if revenue.price_cents <= 0 {
+        return Ok(());
+    }
+
+    BillingRepository::insert_completed_download_revenue_share(
+        &state.pool,
+        &CompletedDownloadRevenueShareInsert {
+            buyer_id,
+            creator_id,
+            sample_id,
+            amount_cents: revenue.price_cents,
+            creator_amount_cents: revenue.creator_payout_cents,
+            platform_fee_cents: revenue.platform_fee_cents,
+        },
+    )
+    .await?;
+
+    Ok(())
 }
 
 #[derive(Debug, Deserialize)]
@@ -237,13 +325,22 @@ pub async fn stream_download(
     let safe_titulo: String = info
         .titulo
         .chars()
-        .map(|c| if c.is_ascii_alphanumeric() || c == '-' || c == '_' { c } else { '_' })
+        .map(|c| {
+            if c.is_ascii_alphanumeric() || c == '-' || c == '_' {
+                c
+            } else {
+                '_'
+            }
+        })
         .take(100)
         .collect();
     let nombre = format!("{safe_titulo}.{extension}");
 
     let mut headers = HeaderMap::new();
-    headers.insert(header::CONTENT_TYPE, HeaderValue::from_static("application/octet-stream"));
+    headers.insert(
+        header::CONTENT_TYPE,
+        HeaderValue::from_static("application/octet-stream"),
+    );
     if let Ok(v) = HeaderValue::from_str(&format!("attachment; filename=\"{nombre}\"")) {
         headers.insert(header::CONTENT_DISPOSITION, v);
     }

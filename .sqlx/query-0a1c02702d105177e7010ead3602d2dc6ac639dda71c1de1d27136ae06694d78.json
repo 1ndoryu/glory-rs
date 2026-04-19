@@ -1,0 +1,58 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT\n                id AS user_id,\n                username,\n                email,\n                nombre_visible AS \"display_name!\",\n                plan,\n                stripe_customer_id,\n                stripe_connect_id\n            FROM usuarios_ext\n            WHERE id = $1\n            LIMIT 1\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "user_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "username",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "email",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "display_name!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "plan",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "stripe_customer_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "stripe_connect_id",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "0a1c02702d105177e7010ead3602d2dc6ac639dda71c1de1d27136ae06694d78"
+}

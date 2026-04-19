@@ -6,7 +6,9 @@ use super::sample::SampleRepository;
 mod query;
 mod similar;
 
-use query::{push_public_filters, push_public_order, CountRow, SampleSummaryRow, SAMPLE_SUMMARY_SELECT};
+use query::{
+    push_public_filters, push_public_order, CountRow, SampleSummaryRow, SAMPLE_SUMMARY_SELECT,
+};
 
 /* [174A-44] Listado público de samples con filtros combinables.
  * Se mantiene en un módulo separado para no seguir inflando sample.rs, que ya
@@ -17,6 +19,7 @@ use query::{push_public_filters, push_public_order, CountRow, SampleSummaryRow, 
 pub struct SampleListFilters {
     pub page: i64,
     pub per_page: i64,
+    pub viewer_id: Option<i32>,
     pub search: Option<SampleTextSearch>,
     pub bpm: Option<i32>,
     pub music_key: Option<String>,
@@ -206,7 +209,10 @@ impl SampleRepository {
             .await?;
 
         Ok(SampleListResult {
-            items: rows.into_iter().map(SampleCatalogSummaryRecord::from).collect(),
+            items: rows
+                .into_iter()
+                .map(SampleCatalogSummaryRecord::from)
+                .collect(),
             total,
         })
     }

@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE articulos\n               SET titulo = COALESCE($2, titulo),\n                   slug = COALESCE($3, slug),\n                   contenido = COALESCE($4, contenido),\n                   extracto = COALESCE($5, extracto),\n                   categoria = COALESCE($6, categoria),\n                   portada_url = COALESCE($7, portada_url),\n                   embeds = COALESCE($8::jsonb, embeds),\n                   descarga_publica = COALESCE($9, descarga_publica),\n                   updated_at = NOW()\n               WHERE id = $1\n                 AND eliminado_en IS NULL\n               RETURNING id AS \"id!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Varchar",
+        "Varchar",
+        "Text",
+        "Varchar",
+        "Varchar",
+        "Text",
+        "Jsonb",
+        "Bool"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "f39950653deed566298f16b4f11576465c310743973dd1f48c572abc1d537a39"
+}

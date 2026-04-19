@@ -1,0 +1,54 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT c.id,\n                      c.titulo,\n                      c.slug,\n                      a.nombre AS artista_nombre,\n                      c.imagen_url,\n                      COALESCE(c.total_sampleada, 0) AS \"total_sampleada!\"\n               FROM canciones c\n               INNER JOIN artistas_musicales a ON a.id = c.artista_id\n               WHERE to_tsvector('simple',\n                       COALESCE(c.titulo, '') || ' ' || COALESCE(a.nombre, '') || ' ' || COALESCE(c.album, '')\n                     ) @@ plainto_tsquery('simple', $1)\n                  OR c.titulo ILIKE $2\n                  OR a.nombre ILIKE $2\n               ORDER BY COALESCE(c.total_sampleada, 0) DESC, c.id DESC\n               LIMIT $3",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "titulo",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "slug",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "artista_nombre",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "imagen_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "total_sampleada!",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      null
+    ]
+  },
+  "hash": "a7326c752e7fcc537834ab7c9ffe069c05f8eec8e39067c93db8e95e5fb53eea"
+}

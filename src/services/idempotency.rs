@@ -48,16 +48,22 @@ impl IdempotencyStore {
                 .await
                 .map_err(|error| AppError::Internal(format!("Redis GET: {error}")))?;
             payload
-                .map(|json| serde_json::from_str::<T>(&json)
-                    .map_err(|error| AppError::Internal(format!("deserializar idempotencia: {error}"))))
+                .map(|json| {
+                    serde_json::from_str::<T>(&json).map_err(|error| {
+                        AppError::Internal(format!("deserializar idempotencia: {error}"))
+                    })
+                })
                 .transpose()
         } else {
             cleanup_memory();
             MEMORY_IDEMPOTENCY
                 .get(&namespaced)
                 .filter(|entry| Instant::now() < entry.value().1)
-                .map(|entry| serde_json::from_str::<T>(&entry.value().0)
-                    .map_err(|error| AppError::Internal(format!("deserializar idempotencia: {error}"))))
+                .map(|entry| {
+                    serde_json::from_str::<T>(&entry.value().0).map_err(|error| {
+                        AppError::Internal(format!("deserializar idempotencia: {error}"))
+                    })
+                })
                 .transpose()
         }
     }

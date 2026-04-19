@@ -337,7 +337,7 @@ Cada controlador PHP se mapea a:
 | Embeddings | Cálculo determinista en Rust (mismo schema 128d que el PHP) → `pgvector` | Compatibilidad con datos existentes si se migran. |
 | pgvector | crate `pgvector 0.4` con feature `sqlx` | Soporta `Vector` con `query_as!` directamente. |
 | IA Groq/OpenAI | `reqwest` + cliente con rotación de 3 keys, retry exponencial, fallback chain | Mismos prompts y modelos. `JsonRepairer` se reescribe en Rust con `regex` o un parser tolerante. |
-| Stripe | `async-stripe 0.39` (alto nivel) + verificación HMAC manual de webhooks | Mantenimiento + tipado fuerte. |
+| Stripe | `async-stripe 1.0.0-rc.5` (alto nivel) + verificación HMAC manual de webhooks | Mantenimiento + tipado fuerte. |
 | OAuth Google | `oauth2 4.4` + verificación de ID token (web) con JWKS de Google (`jsonwebtoken` + `reqwest`) | Soporta los 3 flujos. |
 | FCM | `reqwest` + `gcp_auth` (OAuth service account) → HTTP v1 API | Sin SDK oficial Rust. |
 | Web Push | `web-push 0.10` | Maduro, soporta VAPID. |

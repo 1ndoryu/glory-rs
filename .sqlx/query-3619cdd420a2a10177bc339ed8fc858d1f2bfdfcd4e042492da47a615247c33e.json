@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            UPDATE codigos_descarga_gratis\n            SET activo = FALSE\n            WHERE tipo = $1\n              AND target_id = $2\n              AND activo = TRUE\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "3619cdd420a2a10177bc339ed8fc858d1f2bfdfcd4e042492da47a615247c33e"
+}

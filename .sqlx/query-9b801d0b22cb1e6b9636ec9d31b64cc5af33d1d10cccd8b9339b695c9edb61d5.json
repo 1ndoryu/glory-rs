@@ -1,0 +1,71 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT s.id,\n                      s.titulo,\n                      s.slug,\n                      s.imagen_url,\n                      u.id AS creator_id,\n                      u.username AS creator_username,\n                      NULLIF(u.nombre_visible, '') AS creator_nombre_visible,\n                      u.avatar_url AS creator_avatar_url,\n                      COALESCE(u.verificado, FALSE) AS \"creator_verificado!\"\n               FROM samples s\n               INNER JOIN usuarios_ext u ON u.id = s.creador_id\n               WHERE s.eliminado_en IS NULL\n                 AND s.estado = 'activo'\n                 AND s.mostrar_en_comunidad = TRUE\n                 AND s.titulo ILIKE $1\n               ORDER BY COALESCE(s.total_likes, 0) DESC, s.id DESC\n               LIMIT $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "titulo",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "slug",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "imagen_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "creator_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 5,
+        "name": "creator_username",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "creator_nombre_visible",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 7,
+        "name": "creator_avatar_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 8,
+        "name": "creator_verificado!",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      null,
+      true,
+      null
+    ]
+  },
+  "hash": "9b801d0b22cb1e6b9636ec9d31b64cc5af33d1d10cccd8b9339b695c9edb61d5"
+}

@@ -221,7 +221,11 @@ impl PostRepository {
         Ok((id, true))
     }
 
-    pub async fn delete_repost(pool: &PgPool, autor_id: i32, original_id: i32) -> Result<bool, AppError> {
+    pub async fn delete_repost(
+        pool: &PgPool,
+        autor_id: i32,
+        original_id: i32,
+    ) -> Result<bool, AppError> {
         let deleted = sqlx::query!(
             r#"DELETE FROM publicaciones
                WHERE autor_id = $1 AND repost_id = $2"#,
@@ -237,7 +241,10 @@ impl PostRepository {
         Ok(deleted > 0)
     }
 
-    pub async fn fetch_meta(pool: &PgPool, post_id: i32) -> Result<Option<(i32, Option<i32>)>, AppError> {
+    pub async fn fetch_meta(
+        pool: &PgPool,
+        post_id: i32,
+    ) -> Result<Option<(i32, Option<i32>)>, AppError> {
         let row = sqlx::query!(
             r#"SELECT autor_id AS "autor_id!", repost_id
                FROM publicaciones
@@ -264,7 +271,12 @@ impl PostRepository {
         Ok(count == i64::try_from(sample_ids.len()).unwrap_or(i64::MAX))
     }
 
-    pub async fn get(pool: &PgPool, viewer_id: i32, post_id: i32, blocked_ids: &[i32]) -> Result<Option<PostDetail>, AppError> {
+    pub async fn get(
+        pool: &PgPool,
+        viewer_id: i32,
+        post_id: i32,
+        blocked_ids: &[i32],
+    ) -> Result<Option<PostDetail>, AppError> {
         let row = sqlx::query_as!(
             PostRow,
             r#"SELECT
@@ -308,8 +320,29 @@ impl PostRepository {
                WHERE p.id = $2
                  AND p.eliminado_en IS NULL
                  AND COALESCE(p.moderacion_estado, 'aprobado') <> 'rechazado'
+                                 AND (
+                                         p.autor_id = $1
+                                         OR (
+                                                 SELECT COUNT(*)
+                                                 FROM reportes r
+                                                 WHERE r.tipo = 'publicacion'
+                                                     AND COALESCE(r.estado, 'pendiente') = 'pendiente'
+                                                     AND r.target_id = p.id
+                                         ) < 3
+                                 )
                  AND NOT (p.autor_id = ANY($3::int[]))
-                 AND (p.repost_id IS NULL OR op.id IS NOT NULL)"#,
+                                 AND (p.repost_id IS NULL OR op.id IS NOT NULL)
+                                 AND (
+                                         p.repost_id IS NULL
+                                         OR op.autor_id = $1
+                                         OR (
+                                                 SELECT COUNT(*)
+                                                 FROM reportes r
+                                                 WHERE r.tipo = 'publicacion'
+                                                     AND COALESCE(r.estado, 'pendiente') = 'pendiente'
+                                                     AND r.target_id = op.id
+                                         ) < 3
+                                 )"#,
             viewer_id,
             post_id,
             blocked_ids,
@@ -319,7 +352,10 @@ impl PostRepository {
         Ok(row.map(map_post_row))
     }
 
-    pub async fn list(pool: &PgPool, params: PostListParams<'_>) -> Result<Vec<PostDetail>, AppError> {
+    pub async fn list(
+        pool: &PgPool,
+        params: PostListParams<'_>,
+    ) -> Result<Vec<PostDetail>, AppError> {
         let rows = sqlx::query_as!(
             PostRow,
             r#"SELECT
@@ -362,10 +398,31 @@ impl PostRepository {
                LEFT JOIN usuarios_ext ou ON ou.id = op.autor_id
                WHERE p.eliminado_en IS NULL
                  AND COALESCE(p.moderacion_estado, 'aprobado') <> 'rechazado'
+                                 AND (
+                                         p.autor_id = $1
+                                         OR (
+                                                 SELECT COUNT(*)
+                                                 FROM reportes r
+                                                 WHERE r.tipo = 'publicacion'
+                                                     AND COALESCE(r.estado, 'pendiente') = 'pendiente'
+                                                     AND r.target_id = p.id
+                                         ) < 3
+                                 )
                  AND ($2::bool = FALSE OR EXISTS(SELECT 1 FROM follows ff WHERE ff.seguidor_id = $1 AND ff.seguido_id = p.autor_id))
                  AND ($3::int IS NULL OR p.autor_id = $3)
                  AND NOT (p.autor_id = ANY($4::int[]))
                  AND (p.repost_id IS NULL OR op.id IS NOT NULL)
+                                 AND (
+                                         p.repost_id IS NULL
+                                         OR op.autor_id = $1
+                                         OR (
+                                                 SELECT COUNT(*)
+                                                 FROM reportes r
+                                                 WHERE r.tipo = 'publicacion'
+                                                     AND COALESCE(r.estado, 'pendiente') = 'pendiente'
+                                                     AND r.target_id = op.id
+                                         ) < 3
+                                 )
                ORDER BY
                  CASE WHEN $7::bool THEN (COALESCE(p.total_likes, 0) + COALESCE(p.total_comentarios, 0) + COALESCE(p.total_reposts, 0)) ELSE 0 END DESC,
                  p.created_at DESC

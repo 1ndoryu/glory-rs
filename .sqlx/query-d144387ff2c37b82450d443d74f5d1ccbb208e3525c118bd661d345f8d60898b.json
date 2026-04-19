@@ -1,0 +1,64 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT\n                id,\n                usuario_id AS user_id,\n                plan,\n                estado AS \"status!\",\n                stripe_subscription_id,\n                inicio_at AS start_at,\n                fin_at AS end_at,\n                created_at AS \"created_at!\"\n            FROM suscripciones\n            WHERE usuario_id = $1\n              AND estado IN ('activa', 'periodo_prueba')\n            ORDER BY COALESCE(fin_at, NOW()) DESC, created_at DESC\n            LIMIT 1\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "plan",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "status!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "stripe_subscription_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "start_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 6,
+        "name": "end_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 7,
+        "name": "created_at!",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "d144387ff2c37b82450d443d74f5d1ccbb208e3525c118bd661d345f8d60898b"
+}

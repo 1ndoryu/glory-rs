@@ -30,8 +30,11 @@ impl ModerationRepository {
         let res = sqlx::query(
             "UPDATE usuarios_ext SET estado = 'activo', suspendido_hasta = NULL, \
              suspension_razon = NULL, marcado_eliminacion_en = NULL, sera_eliminado_en = NULL \
-             WHERE id = $1"
-        ).bind(user_id).execute(pool).await?;
+             WHERE id = $1",
+        )
+        .bind(user_id)
+        .execute(pool)
+        .await?;
         if res.rows_affected() == 0 {
             return Err(AppError::NotFound(format!("usuario {user_id}")));
         }
@@ -47,10 +50,13 @@ impl ModerationRepository {
         let sera = now + Duration::days(i64::from(dias_gracia));
         let res = sqlx::query(
             "UPDATE usuarios_ext SET estado = 'en_eliminacion', \
-             marcado_eliminacion_en = $2, sera_eliminado_en = $3 WHERE id = $1"
+             marcado_eliminacion_en = $2, sera_eliminado_en = $3 WHERE id = $1",
         )
-        .bind(user_id).bind(now).bind(sera)
-        .execute(pool).await?;
+        .bind(user_id)
+        .bind(now)
+        .bind(sera)
+        .execute(pool)
+        .await?;
         if res.rows_affected() == 0 {
             return Err(AppError::NotFound(format!("usuario {user_id}")));
         }
@@ -64,7 +70,9 @@ impl ModerationRepository {
         razon: &str,
     ) -> Result<(), AppError> {
         if bloqueador_id == target_id {
-            return Err(AppError::BadRequest("No puedes bloquearte a ti mismo".into()));
+            return Err(AppError::BadRequest(
+                "No puedes bloquearte a ti mismo".into(),
+            ));
         }
         sqlx::query(
             "INSERT INTO bloqueos (bloqueador_id, bloqueado_id, razon) \
@@ -80,20 +88,21 @@ impl ModerationRepository {
         bloqueador_id: i32,
         target_id: i32,
     ) -> Result<(), AppError> {
-        sqlx::query(
-            "DELETE FROM bloqueos WHERE bloqueador_id = $1 AND bloqueado_id = $2"
-        )
-        .bind(bloqueador_id).bind(target_id)
-        .execute(pool).await?;
+        sqlx::query("DELETE FROM bloqueos WHERE bloqueador_id = $1 AND bloqueado_id = $2")
+            .bind(bloqueador_id)
+            .bind(target_id)
+            .execute(pool)
+            .await?;
         Ok(())
     }
 
     pub async fn list_blocked(pool: &PgPool, bloqueador_id: i32) -> Result<Vec<i32>, AppError> {
         let rows: Vec<(i32,)> = sqlx::query_as(
-            "SELECT bloqueado_id FROM bloqueos WHERE bloqueador_id = $1 ORDER BY created_at DESC"
+            "SELECT bloqueado_id FROM bloqueos WHERE bloqueador_id = $1 ORDER BY created_at DESC",
         )
         .bind(bloqueador_id)
-        .fetch_all(pool).await?;
+        .fetch_all(pool)
+        .await?;
         Ok(rows.into_iter().map(|(id,)| id).collect())
     }
 
@@ -103,10 +112,11 @@ impl ModerationRepository {
      * por el usuario. Equivale a `BloqueosRepository::idsBloqueadores` legacy. */
     pub async fn list_blockers(pool: &PgPool, target_id: i32) -> Result<Vec<i32>, AppError> {
         let rows: Vec<(i32,)> = sqlx::query_as(
-            "SELECT bloqueador_id FROM bloqueos WHERE bloqueado_id = $1 ORDER BY created_at DESC"
+            "SELECT bloqueador_id FROM bloqueos WHERE bloqueado_id = $1 ORDER BY created_at DESC",
         )
         .bind(target_id)
-        .fetch_all(pool).await?;
+        .fetch_all(pool)
+        .await?;
         Ok(rows.into_iter().map(|(id,)| id).collect())
     }
 }

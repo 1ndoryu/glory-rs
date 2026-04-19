@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE articulos\n               SET eliminado_en = NOW(),\n                   updated_at = NOW()\n               WHERE id = $1\n                 AND eliminado_en IS NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "996cbb4c35b30dfb455db95e2adef6dd59906760da23143bb314892223a57ce8"
+}

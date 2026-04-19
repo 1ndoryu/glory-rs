@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                UPDATE usuarios_ext\n                SET creditos_bonus = creditos_bonus + $2\n                WHERE id = $1\n                ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4c3d53985060777d9f2829b3a5768ba56be6e9a496f5468cb692a1b53d589a3d"
+}

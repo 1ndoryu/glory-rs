@@ -1,0 +1,69 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            UPDATE suscripciones\n            SET usuario_id = $1,\n                plan = $2,\n                estado = $3,\n                inicio_at = $4,\n                fin_at = $5\n            WHERE stripe_subscription_id = $6\n            RETURNING\n                id,\n                usuario_id AS user_id,\n                plan,\n                estado AS \"status!\",\n                stripe_subscription_id,\n                inicio_at AS start_at,\n                fin_at AS end_at,\n                created_at AS \"created_at!\"\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "plan",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "status!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "stripe_subscription_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "start_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 6,
+        "name": "end_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 7,
+        "name": "created_at!",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Varchar",
+        "Varchar",
+        "Timestamptz",
+        "Timestamptz",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "b772b31fedf3dddfbab5b3faa457bf8d8d9496f6b20eb5f4c6fd3580e1ab1e49"
+}
