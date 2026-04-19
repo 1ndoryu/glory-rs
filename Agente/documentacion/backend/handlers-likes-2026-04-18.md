@@ -46,8 +46,15 @@ Elimina la reacción del usuario al target. Idempotente.
 ## Decisiones vs legado PHP (`SocialController::darLike/quitarLike`)
 - **Dislike:** El legado llamaba `PlanificadorAlgoritmo::registrarInteraccion(user, 'dislike')`, pero `algoritmo_estado` solo tiene contador `cnt_likes`. En Rust se usa `InteractionKind::Like` para todas las reacciones (mismo bucket).
 - **Rate limit (30/min):** NO portado. Pendiente cuando exista `RateLimiter` global.
-- **Notificaciones al creador:** NO portado. Llega en Fase 11.
+- **Notificaciones al creador:** portadas en `174A-78` para `sample` y `publicacion`.
 - **Verificación de ban:** NO portado. Depende de QQ71 (BanRepository por implementar).
+
+## Ajuste posterior — 174A-78
+- `POST /api/like` ahora resuelve metadata mínima del target y delega el fanout al servicio central.
+- Compatibilidad legacy preservada:
+	- `sample` usa `like` o `encanta` según la reacción.
+	- `publicacion` sigue notificando como `like`, aunque el mensaje distingue `le gusta` vs `le encanta`.
+- `dislike` sigue sin notificación.
 
 ## Estructura DB
 Tabla `likes` (creada en migración `20260417000005_social_engagement.up.sql`):

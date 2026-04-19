@@ -10,6 +10,7 @@ mod like;
 mod message;
 mod moderation;
 mod notification;
+mod notification_target;
 mod post;
 mod play;
 mod processing_queue;
@@ -38,6 +39,9 @@ pub use ia_queue::{
 pub use moderation::ModerationRepository;
 pub use notification::{
     CreateNotificationRecord, NotificationActor, NotificationRepository, UserNotification,
+};
+pub use notification_target::{
+    NotificationTargetRepository, PostNotificationMeta, SampleNotificationMeta,
 };
 pub use like::{LikeKind, LikeRepository, Reaction};
 pub use message::{

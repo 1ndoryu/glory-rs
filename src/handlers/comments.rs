@@ -1,3 +1,4 @@
+mod notifications;
 mod payload;
 
 use axum::extract::{Path, Query, Request, State};
@@ -18,9 +19,13 @@ use crate::repositories::{
     LikeKind, LikeRepository, ModerationRepository, ProfileRepository, Reaction,
 };
 use crate::AppState;
+use tracing::warn;
 
-use self::payload::{
+use self::{
+    notifications::{maybe_notify_comment_creation, maybe_notify_comment_like},
+    payload::{
     build_comment_storage_key, extract_storage_key, normalize_content, parse_create_comment_request,
+    },
 };
 
 const MAX_COMMENT_CHARS: usize = 2_000;
@@ -283,6 +288,25 @@ pub async fn create_comment(
         .await?
         .ok_or_else(|| AppError::NotFound(format!("comentario {created_id} no existe")))?;
 
+    if let Err(error) = maybe_notify_comment_creation(
+        &state,
+        user.user_id,
+        target_kind,
+        target_id,
+        parsed.parent_id,
+    )
+    .await
+    {
+        warn!(
+            actor_id = user.user_id,
+            comment_id = created_id,
+            target_kind = target_kind.as_db_str(),
+            target_id,
+            error = %error,
+            "falló fanout de comentario"
+        );
+    }
+
     Ok((
         StatusCode::CREATED,
         Json(CommentMutationResponse {
@@ -414,6 +438,17 @@ pub async fn like_comment(
         .algo_planner
         .register_interaction(&state.pool, &state.redis, user.user_id, InteractionKind::Like)
         .await?;
+
+    if reaction.is_positive() {
+        if let Err(error) = maybe_notify_comment_like(&state, user.user_id, comment_id).await {
+            warn!(
+                actor_id = user.user_id,
+                comment_id,
+                error = %error,
+                "falló fanout de like en comentario"
+            );
+        }
+    }
 
     Ok(Json(LikeResponse {
         ok: true,

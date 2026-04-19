@@ -1,4 +1,3 @@
-mod events;
 mod payload;
 
 use axum::extract::{Path, Query, Request, State};
@@ -17,12 +16,11 @@ use crate::repositories::{
     ConversationMessage, ConversationRepository, ConversationSummary, CreateMessageParams,
     DirectMessageKind, MessageRepository, ModerationRepository, ProfileRepository,
 };
+use crate::services::NotificationFanoutService;
 use crate::AppState;
+use tracing::warn;
 
-use self::{
-    events::emit_new_message_event,
-    payload::{build_message_storage_key, parse_create_message_request},
-};
+use self::payload::{build_message_storage_key, parse_create_message_request};
 
 const MAX_MESSAGE_CHARS: usize = 5_000;
 const MAX_JSON_BODY_BYTES: usize = 64 * 1024;
@@ -293,7 +291,18 @@ pub async fn send_message(
         .ok_or_else(|| AppError::NotFound(format!("mensaje {message_id} no existe")))?;
     let message = normalize_message(message, state.public_base_url.as_deref());
 
-    emit_new_message_event(&state, other_id, &message).await;
+    if let Err(error) =
+        NotificationFanoutService::dispatch_new_message(&state, other_id, user.user_id, &message)
+            .await
+    {
+        warn!(
+            sender_id = user.user_id,
+            recipient_id = other_id,
+            conversation_id = conversacion_id,
+            error = %error,
+            "falló fanout de mensaje directo"
+        );
+    }
 
     Ok((
         StatusCode::CREATED,

@@ -9,8 +9,10 @@ use utoipa::{IntoParams, ToSchema};
 use crate::algorithm::InteractionKind;
 use crate::errors::AppError;
 use crate::middleware::CurrentUser;
-use crate::repositories::{LikeKind, LikeRepository, Reaction};
+use crate::repositories::{LikeKind, LikeRepository, NotificationTargetRepository, Reaction};
+use crate::services::NotificationFanoutService;
 use crate::AppState;
+use tracing::warn;
 
 /* [174A-59] Likes polimórficos. Port directo de
  * `SocialController::darLike/quitarLike`. Endpoints:
@@ -96,6 +98,18 @@ pub async fn create_like(
         .register_interaction(&state.pool, &state.redis, user.user_id, interaction)
         .await?;
 
+    if reaction.is_positive() {
+        if let Err(error) = maybe_notify_target_like(&state, user.user_id, kind, body.target_id, reaction).await {
+            warn!(
+                actor_id = user.user_id,
+                target_kind = kind.as_db_str(),
+                target_id = body.target_id,
+                error = %error,
+                "falló fanout de like"
+            );
+        }
+    }
+
     Ok(Json(LikeResponse {
         ok: true,
         liked: true,
@@ -138,4 +152,44 @@ pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/like", post(create_like))
         .route("/like", delete(delete_like))
+}
+
+async fn maybe_notify_target_like(
+    state: &AppState,
+    actor_id: i32,
+    kind: LikeKind,
+    target_id: i32,
+    reaction: Reaction,
+) -> Result<(), AppError> {
+    match kind {
+        LikeKind::Sample => {
+            if let Some(meta) = NotificationTargetRepository::find_sample_meta(&state.pool, target_id).await? {
+                NotificationFanoutService::dispatch_sample_reaction(
+                    state,
+                    meta.creator_id,
+                    actor_id,
+                    target_id,
+                    &meta.title,
+                    meta.slug.as_deref(),
+                    reaction,
+                )
+                .await?;
+            }
+        }
+        LikeKind::Publicacion => {
+            if let Some(meta) = NotificationTargetRepository::find_post_meta(&state.pool, target_id).await? {
+                NotificationFanoutService::dispatch_post_reaction(
+                    state,
+                    meta.author_id,
+                    actor_id,
+                    target_id,
+                    reaction,
+                )
+                .await?;
+            }
+        }
+        LikeKind::Comentario | LikeKind::Cancion | LikeKind::Relacion => {}
+    }
+
+    Ok(())
 }

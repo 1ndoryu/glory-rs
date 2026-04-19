@@ -91,7 +91,6 @@
 ### Fase 10 â€” MensajerÃ­a + WebSocket
 
 ### Fase 11 â€” Notificaciones (5 canales)
-- 174A-78 â€” Pipeline `notify(user, event)` integrado
 
 ### Fase 12 â€” Pagos
 - 174A-79 â€” Wrapper Stripe + planes Kamples

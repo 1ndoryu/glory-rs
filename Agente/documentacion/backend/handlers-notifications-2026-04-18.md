@@ -36,9 +36,18 @@
 - `src/handlers/notifications.rs`
   - rutas HTTP + normalización de `avatarUrl` a URL pública
 
-## Diferido explícitamente
-- No se conectaron todavía productores concretos (`likes`, `comments`, `follow`, `messages`) a `NotificationService`; eso queda para el pipeline integrado de `174A-78`.
-- No hay fanout realtime/push/email en este corte; sólo persistencia y lectura. Los canales siguen en `174A-75`, `174A-76`, `174A-77` y la orquestación total en `174A-78`.
+## Ajuste posterior — 174A-78
+- `NotificationService` sigue siendo la puerta de persistencia/dedup, pero ya no vive aislado.
+- `NotificationFanoutService` lo usa como primera etapa y después dispara:
+  - websocket `notificacion`
+  - Web Push
+  - FCM
+- Productores ya conectados:
+  - follow
+  - likes de sample/publicación
+  - comentarios y replies
+  - like a comentario
+- Mensajes directos siguen fuera de `notificaciones` por compatibilidad legacy; sólo usan `mensaje_nuevo` + push/FCM.
 
 ## Validación ejecutada
 - `cargo sqlx prepare`

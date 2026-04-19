@@ -9,7 +9,9 @@ use crate::algorithm::InteractionKind;
 use crate::errors::AppError;
 use crate::middleware::CurrentUser;
 use crate::repositories::{BlockRepository, BlockedUser, FollowRepository};
+use crate::services::NotificationFanoutService;
 use crate::AppState;
+use tracing::warn;
 
 /* [174A-60] Follows + Blocks. Port de:
  * - SocialController::seguir/dejarDeSeguir → POST/DELETE /api/follow/:userId.
@@ -76,6 +78,17 @@ pub async fn follow_user(
         .algo_planner
         .register_interaction(&state.pool, &state.redis, user.user_id, InteractionKind::Follow)
         .await?;
+
+    if let Err(error) =
+        NotificationFanoutService::dispatch_follow(&state, target_id, user.user_id).await
+    {
+        warn!(
+            actor_id = user.user_id,
+            recipient_id = target_id,
+            error = %error,
+            "falló fanout de follow"
+        );
+    }
 
     Ok(Json(OkResponse { ok: true }))
 }

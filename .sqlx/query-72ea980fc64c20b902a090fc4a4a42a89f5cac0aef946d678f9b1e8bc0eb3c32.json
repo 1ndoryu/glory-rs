@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT autor_id AS \"author_id!\",\n                      contenido AS \"content!\"\n               FROM publicaciones\n               WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "author_id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "content!",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      true
+    ]
+  },
+  "hash": "72ea980fc64c20b902a090fc4a4a42a89f5cac0aef946d678f9b1e8bc0eb3c32"
+}

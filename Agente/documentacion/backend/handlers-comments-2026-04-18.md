@@ -51,6 +51,13 @@
 - El endpoint create documenta multipart para favorecer codegen, pero sigue aceptando JSON simple para paridad con el legado/desktop.
 
 ## Pendiente / TODO
-- Notificaciones por comentario/reply cuando exista Fase 11.
 - Moderación IA específica de comentarios cuando se porte la cola correspondiente.
 - Rate limit específico de comentarios cuando exista RateLimiter global.
+
+## Ajuste posterior — 174A-78
+- El create de comentarios ya conecta el fanout integrado:
+  - comentario raíz en `sample` → notifica al creador del sample
+  - comentario raíz en `publicacion` → notifica al autor de la publicación
+  - reply → notifica al autor del comentario padre
+- `POST /api/comentarios/{commentId}/like` también notifica al autor del comentario cuando la reacción es positiva.
+- Para no volver a inflar el controlador principal, la resolución de destinatario/metadata quedó en `src/handlers/comments/notifications.rs`.

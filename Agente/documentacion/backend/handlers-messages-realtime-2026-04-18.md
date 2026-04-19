@@ -44,17 +44,17 @@
 - `src/ws/mod.rs`
   - añade `emit_event<T: Serialize>(...)` como helper local del app para emitir eventos de dominio sobre `WebSocketHub`
   - adapta el error reusable del framework al `AppError` local
+- `src/services/notification_fanout.rs`
+  - desde `174A-78` concentra la proyección legacy-compatible de `mensaje_nuevo`
+  - dispara websocket + Web Push + FCM como side-effect unificado del envío de mensajes
 - `src/handlers/messages.rs`
-  - importa `emit_new_message_event`
-  - tras persistir y normalizar el mensaje, dispara el evento websocket antes de responder `201`
-- `src/handlers/messages/events.rs`
-  - concentra la proyección legacy-compatible y evita seguir inflando `messages.rs`
-  - deja la emisión en modo fire-and-forget: un fallo realtime no rompe el envío HTTP ya persistido
+  - tras persistir y normalizar el mensaje, delega en `NotificationFanoutService::dispatch_new_message(...)`
+  - mantiene el envío HTTP exitoso aunque falle algún canal secundario
 
 ## Gotchas
-- El repo penaliza controladores grandes; por eso la serialización websocket se movió a `messages/events.rs` en lugar de quedarse inline en `messages.rs`.
-- El helper reusable del framework y el backend principal usan tipos `AppError` distintos; la frontera correcta era mapear el error en `src/ws/mod.rs`, no propagar el tipo del framework hacia handlers.
-- No hubo cambios de OpenAPI ni de codegen frontend en este corte: sólo cambió el side-effect realtime del `POST /api/mensajes/{conversacionId}`.
+- El repo penaliza controladores grandes; por eso la serialización websocket terminó consolidada en `NotificationFanoutService` junto a push/FCM, en vez de volver a crecer `messages.rs`.
+- El helper reusable del framework y el backend principal usan tipos `AppError` distintos; la frontera correcta sigue siendo `src/ws/mod.rs`.
+- No hubo cambios de OpenAPI ni de codegen frontend: cambió sólo el side-effect del `POST /api/mensajes/{conversacionId}`.
 
 ## Validación
 - `cargo check`

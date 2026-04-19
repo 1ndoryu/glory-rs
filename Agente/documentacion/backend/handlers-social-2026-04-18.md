@@ -28,9 +28,16 @@
 
 ## Decisiones vs legado PHP
 - **Rate limit** (20 follows/min, 10 bloqueos/min): NO portado.
-- **Notificación al target** (`ServicioNotificaciones::follow`): NO portado (Fase 11).
+- **Notificación al target** (`ServicioNotificaciones::follow`): desde `174A-78` sí está portada vía `NotificationFanoutService`.
 - **Verificación de ban** (`AuthMiddleware::verificarCuentaActiva`): NO portado (depende de QQ71).
 - **Block trigger en AlgoPlanner**: NO portado (legado tampoco lo hace).
+
+## Ajuste posterior — 174A-78
+- `POST /api/follow/{userId}` ahora dispara fanout legacy-compatible después del follow persistido:
+	- inserción en `notificaciones`
+	- websocket `notificacion`
+	- Web Push / FCM si existen runtimes
+- El side-effect es best-effort: si falla un canal secundario, el follow HTTP sigue respondiendo `200` y el error queda logueado.
 
 ## Estructura DB
 - `follows(seguidor_id, seguido_id, created_at)` PK compuesta.
