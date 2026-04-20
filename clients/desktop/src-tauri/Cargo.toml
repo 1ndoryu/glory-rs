@@ -1,0 +1,34 @@
+[package]
+name = "kamples-desktop"
+version = "0.1.0"
+description = "Kamples Desktop — plataforma de samples de audio"
+authors = ["Kamples"]
+edition = "2021"
+rust-version = "1.77.2"
+
+[lib]
+name = "kamples_desktop_lib"
+crate-type = ["lib", "cdylib", "staticlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon", "devtools"] }
+tauri-plugin-dialog = "2"
+tauri-plugin-fs = { version = "2", features = ["watch"] }
+tauri-plugin-notification = "2"
+tauri-plugin-os = "2"
+tauri-plugin-process = "2"
+tauri-plugin-shell = "2"
+tauri-plugin-store = "2"
+tauri-plugin-deep-link = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Dependencias solo desktop (tray, drag-and-drop, window state, updater, fs2)
+[target.'cfg(not(target_os = "android"))'.dependencies]
+tauri-plugin-updater = "2"
+tauri-plugin-window-state = "2"
+tauri-plugin-drag = "2.1.0"
+fs2 = "0.4"

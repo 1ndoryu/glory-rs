@@ -1,0 +1,24 @@
+{
+    "name": "kamples-mobile",
+    "private": true,
+    "version": "0.1.0",
+    "description": "Shell móvil Capacitor para correr Kamples en Android Studio reutilizando Glory/assets/react.",
+    "scripts": {
+        "prepare:web": "node scripts/prepararWeb.cjs",
+        "android:copy": "npm run prepare:web && npx cap copy android",
+        "android:sync": "npm run prepare:web && npx cap sync android",
+        "android:open": "npx cap open android",
+        "android:open:sync": "npm run android:sync && npx cap open android",
+        "android:run": "npm run android:sync && npx cap run android"
+    },
+    "dependencies": {
+        "@capacitor/android": "^6.2.0",
+        "@capacitor/app": "^6.0.3",
+        "@capacitor/browser": "^6.0.6",
+        "@capacitor/cli": "^6.2.1",
+        "@capacitor/core": "^6.2.1",
+        "@capacitor/filesystem": "^6.0.4",
+        "@capacitor/push-notifications": "^6.0.5",
+        "@capacitor/share": "^6.0.4"
+    }
+}
