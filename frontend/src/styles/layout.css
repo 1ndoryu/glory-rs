@@ -1,0 +1,214 @@
+/* [204A-1] Layout, navegación y utilidades compartidas de la SPA real. */
+
+.aplicacion {
+  position: relative;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.cabecera {
+  position: sticky;
+  top: 18px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px 22px;
+  margin-bottom: 24px;
+  border: 1px solid var(--colorBorde);
+  border-radius: var(--radioGrande);
+  background: rgba(8, 22, 30, 0.78);
+  backdrop-filter: blur(18px);
+  box-shadow: var(--sombraGrande);
+}
+
+.logo {
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.navegacion,
+.accionesCabecera,
+.heroAcciones,
+.authAcciones {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.enlace,
+.accionPrimaria,
+.accionSecundaria,
+.accionFantasma {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background-color 180ms ease,
+    color 180ms ease;
+}
+
+.enlace {
+  color: var(--colorTextoSuave);
+}
+
+.enlaceActivo,
+.enlace:hover {
+  color: var(--colorTexto);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.accionPrimaria {
+  border-color: rgba(155, 242, 200, 0.3);
+  background: linear-gradient(135deg, rgba(155, 242, 200, 0.2), rgba(93, 216, 164, 0.34));
+  color: var(--colorTexto);
+}
+
+.accionSecundaria {
+  border-color: rgba(137, 198, 255, 0.24);
+  background: rgba(137, 198, 255, 0.08);
+  color: var(--colorTexto);
+}
+
+.accionFantasma {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: transparent;
+  color: var(--colorTextoSuave);
+}
+
+.accionPrimaria:hover,
+.accionSecundaria:hover,
+.accionFantasma:hover {
+  transform: translateY(-1px);
+}
+
+.accionPrimaria:disabled,
+.accionSecundaria:disabled,
+.accionFantasma:disabled {
+  opacity: 0.55;
+  cursor: wait;
+  transform: none;
+}
+
+.contenido {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.cargando,
+.panelEstado,
+.bloqueResumen,
+.authTarjeta,
+.authPanelSecundario,
+.dashboardHero,
+.statCard,
+.sampleCard,
+.feedSeccion {
+  border: 1px solid var(--colorBorde);
+  border-radius: var(--radioGrande);
+  background: var(--colorSuperficie);
+  box-shadow: var(--sombraGrande);
+}
+
+.cargando,
+.panelEstado {
+  padding: 22px;
+}
+
+.heroEyebrow {
+  margin: 0 0 8px;
+  color: var(--colorPrimario);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.listaSimple {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--colorTextoSuave);
+}
+
+.listaSimple li + li {
+  margin-top: 8px;
+}
+
+.estadoOk,
+.estadoError,
+.estadoNeutral,
+.mensajeError,
+.badgeDestacado,
+.sampleTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 0.92rem;
+}
+
+.estadoOk {
+  color: var(--colorExito);
+  background: rgba(155, 242, 200, 0.12);
+}
+
+.estadoError,
+.mensajeError {
+  color: var(--colorError);
+  background: rgba(255, 139, 139, 0.12);
+}
+
+.estadoNeutral {
+  color: var(--colorTextoSuave);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.mensajeError {
+  width: fit-content;
+}
+
+@media (max-width: 1024px) {
+  .cabecera {
+    flex-wrap: wrap;
+  }
+
+  .navegacion,
+  .accionesCabecera {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 768px) {
+  .aplicacion {
+    padding: 16px;
+  }
+
+  .cabecera,
+  .navegacion,
+  .accionesCabecera,
+  .heroAcciones,
+  .authAcciones {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .enlace,
+  .accionPrimaria,
+  .accionSecundaria,
+  .accionFantasma {
+    width: 100%;
+  }
+}

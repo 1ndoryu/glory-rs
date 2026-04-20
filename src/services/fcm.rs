@@ -607,6 +607,7 @@ mod tests {
                 .to_string(),
             ),
             smtp: None,
+            scraper_secret: None,
             stripe: crate::config::StripeConfig::default(),
         };
 
@@ -641,6 +642,7 @@ mod tests {
             vapid_subject: None,
             fcm_service_account_json: Some("{".into()),
             smtp: None,
+            scraper_secret: None,
             stripe: crate::config::StripeConfig::default(),
         };
 

@@ -23,6 +23,7 @@ import { getMeQueryKey, useMe } from '../api/generated/users/users';
 import type {
   AuthResponse,
   LoginRequest,
+  PrivateProfileResponse,
   RegisterRequest,
 } from '../api/generated/model';
 
@@ -87,9 +88,11 @@ export function useAuth() {
   }, [logoutMutation, queryClient]);
 
   return {
-    user: unwrap<{ id: number; username: string; email?: string }>(meQuery.data),
+    user: unwrap<PrivateProfileResponse>(meQuery.data),
     isAuthenticated: hasToken && meQuery.isSuccess,
     isLoading: meQuery.isLoading,
+    isSubmitting:
+      loginMutation.isPending || registerMutation.isPending || logoutMutation.isPending,
     login,
     register,
     logout,

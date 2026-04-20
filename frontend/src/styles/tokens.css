@@ -1,0 +1,70 @@
+/* [204A-1] Tokens visuales base para la SPA real de Kamples. */
+
+:root {
+  --colorFondo: #07141b;
+  --colorSuperficie: rgba(10, 28, 37, 0.88);
+  --colorSuperficieFuerte: #0e2430;
+  --colorBorde: rgba(163, 230, 203, 0.16);
+  --colorPrimario: #9bf2c8;
+  --colorPrimarioFuerte: #5dd8a4;
+  --colorSecundario: #89c6ff;
+  --colorTexto: #f3fbf7;
+  --colorTextoSuave: #9cb8b5;
+  --colorError: #ff8b8b;
+  --colorExito: #9bf2c8;
+  --sombraGrande: 0 24px 80px rgba(0, 0, 0, 0.34);
+  --radioGrande: 28px;
+  --radioMedio: 18px;
+  --radioPequeno: 12px;
+  --fuentePrincipal: 'Space Grotesk', 'Avenir Next', 'Segoe UI', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(137, 198, 255, 0.16), transparent 32%),
+    radial-gradient(circle at top right, rgba(155, 242, 200, 0.14), transparent 28%),
+    linear-gradient(180deg, #08151d 0%, #07141b 48%, #061017 100%);
+  color: var(--colorTexto);
+  font-family: var(--fuentePrincipal);
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 24px 24px;
+  mask-image: radial-gradient(circle at center, black 35%, transparent 82%);
+}
+
+button,
+input,
+a {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+#root {
+  min-height: 100vh;
+}

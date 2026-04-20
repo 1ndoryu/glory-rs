@@ -9,24 +9,55 @@
  * (/sample/{slug}, /perfil/{username}, /blog/{slug}) y `seo::metadata`. */
 
 import { lazy, Suspense } from 'react';
-import { createBrowserRouter, Outlet, RouterProvider, Link } from 'react-router-dom';
+import { NavLink, createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom';
+import Boton from './components/ui/Boton';
+import { useAuth } from './hooks/useAuth';
 
 const HomePage = lazy(() => import('./pages/HomePage'));
+const DashboardPage = lazy(() => import('./pages/DashboardPage'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const RegisterPage = lazy(() => import('./pages/RegisterPage'));
 const SamplePage = lazy(() => import('./pages/SamplePage'));
 const PerfilPage = lazy(() => import('./pages/PerfilPage'));
 const BlogPage = lazy(() => import('./pages/BlogPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 function Layout() {
+  const auth = useAuth();
+
+  const linkClassName = ({ isActive }: { isActive: boolean }) => (
+    isActive ? 'enlace enlaceActivo' : 'enlace'
+  );
+
   return (
     <div className="aplicacion">
       <header className="cabecera">
-        <Link to="/" className="logo">Kamples</Link>
+        <NavLink to="/" className="logo">Kamples</NavLink>
         <nav className="navegacion">
-          <Link to="/" className="enlace">Inicio</Link>
-          <Link to="/blog" className="enlace">Blog</Link>
+          <NavLink to="/" className={linkClassName}>Inicio</NavLink>
+          <NavLink to="/dashboard" className={linkClassName}>Dashboard</NavLink>
+          <NavLink to="/blog" className={linkClassName}>Blog</NavLink>
           <a className="enlace" href="/swagger-ui/" target="_blank" rel="noopener noreferrer">API</a>
         </nav>
+        <div className="accionesCabecera">
+          {auth.isLoading ? (
+            <span className="estadoNeutral">Sesión…</span>
+          ) : auth.isAuthenticated && auth.user ? (
+            <>
+              <NavLink to={`/perfil/${auth.user.username}`} className="accionSecundaria">
+                @{auth.user.username}
+              </NavLink>
+              <Boton className="accionFantasma" onClick={() => { void auth.logout(); }} type="button">
+                Salir
+              </Boton>
+            </>
+          ) : (
+            <>
+              <NavLink to="/auth/login" className="accionSecundaria">Entrar</NavLink>
+              <NavLink to="/auth/registro" className="accionPrimaria">Crear cuenta</NavLink>
+            </>
+          )}
+        </div>
       </header>
       <main className="contenido">
         <Suspense fallback={<div className="cargando">Cargando…</div>}>
@@ -43,6 +74,9 @@ const router = createBrowserRouter([
     element: <Layout />,
     children: [
       { index: true, element: <HomePage /> },
+      { path: 'auth/login', element: <LoginPage /> },
+      { path: 'auth/registro', element: <RegisterPage /> },
+      { path: 'dashboard', element: <DashboardPage /> },
       { path: 'sample/:slug', element: <SamplePage /> },
       { path: 'perfil/:username', element: <PerfilPage /> },
       { path: 'blog', element: <BlogPage /> },

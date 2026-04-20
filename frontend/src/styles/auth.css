@@ -1,0 +1,79 @@
+/* [204A-1] Estilos de login y registro para la SPA real. */
+
+.authPagina {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.85fr);
+  gap: 24px;
+}
+
+.authTarjeta,
+.authPanelSecundario {
+  padding: 28px;
+}
+
+.authTarjetaCentrada {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 240px;
+}
+
+.authCabecera {
+  margin-bottom: 24px;
+}
+
+.authTitulo {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+}
+
+.authDescripcion,
+.authAlternativa {
+  margin: 14px 0 0;
+  color: var(--colorTextoSuave);
+}
+
+.authFormulario {
+  display: grid;
+  gap: 16px;
+}
+
+.authCampo {
+  display: grid;
+  gap: 8px;
+}
+
+.authCampo span {
+  color: var(--colorTextoSuave);
+  font-size: 0.92rem;
+}
+
+.authCampo input {
+  width: 100%;
+  min-height: 52px;
+  padding: 0 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radioMedio);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--colorTexto);
+}
+
+.authCampo input:focus {
+  outline: 2px solid rgba(155, 242, 200, 0.24);
+  border-color: rgba(155, 242, 200, 0.3);
+}
+
+.authPanelSecundario h2 {
+  margin-top: 0;
+  font-size: 1.6rem;
+}
+
+.authPanelSecundario a {
+  color: var(--colorPrimario);
+}
+
+@media (max-width: 900px) {
+  .authPagina {
+    grid-template-columns: 1fr;
+  }
+}

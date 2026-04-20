@@ -392,6 +392,7 @@ mod tests {
             vapid_subject: None,
             fcm_service_account_json: None,
             smtp: None,
+            scraper_secret: None,
             stripe: crate::config::StripeConfig::default(),
         };
 
