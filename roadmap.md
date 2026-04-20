@@ -102,10 +102,7 @@
 
 ### Fase 16 â€” SEO (completada)
 
-### Fase 17 â€” Frontend SPA (reuso de `App/React/` legacy)
-- 174A-105 â€” Hook `useWebSocket()` actualizado para Axum WS
-- 174A-106 â€” `useAuth` contra nuevo backend
-- 174A-107 â€” Smoke test SPA full-flow
+### Fase 17 â€” Frontend SPA (completada)
 
 ### Fase 18 â€” Scraper / Mezclador / Mobile / Desktop
 - 174A-108 â€” Adaptar scraper Python a nueva API
