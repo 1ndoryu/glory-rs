@@ -97,7 +97,6 @@
 ### Fase 13 â€” Reportes, blog, bÃºsqueda global, catÃ¡logo
 
 ### Fase 14 â€” ModeraciÃ³n, admin, dashboard
-- 174A-90 â€” Dashboard creador
 - 174A-91 â€” Sync changelog (`GET /sync/changelog?since=...`)
 
 ### Fase 15 â€” Workers

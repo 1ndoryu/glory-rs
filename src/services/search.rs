@@ -144,7 +144,7 @@ impl SearchService {
             .into_iter()
             .map(|record| map_legacy_sample_result(record, public_base_url))
             .collect::<Vec<_>>();
-        let sampleos = relations
+        let relation_results = relations
             .into_iter()
             .map(|record| map_legacy_relation_result(record, public_base_url))
             .collect::<Vec<_>>();
@@ -160,7 +160,7 @@ impl SearchService {
             &text_query.lower,
             &canciones,
             &sample_results,
-            &sampleos,
+            &relation_results,
             &usuarios,
             &colecciones,
         );
@@ -168,7 +168,7 @@ impl SearchService {
         Ok(LegacyQuickSearchResponse {
             canciones,
             samples: sample_results,
-            sampleos,
+            sampleos: relation_results,
             usuarios,
             colecciones,
             todos,
@@ -387,7 +387,7 @@ fn build_legacy_todos(
     lower_query: &str,
     canciones: &[LegacyQuickSearchSongResult],
     samples: &[LegacyQuickSearchSampleResult],
-    sampleos: &[LegacyQuickSearchRelationResult],
+    relation_results: &[LegacyQuickSearchRelationResult],
     usuarios: &[LegacyQuickSearchUserResult],
     colecciones: &[LegacyQuickSearchCollectionResult],
 ) -> Vec<LegacyQuickSearchTodoItem> {
@@ -411,7 +411,7 @@ fn build_legacy_todos(
         });
     }
 
-    for (position, relation) in sampleos.iter().enumerate() {
+    for (position, relation) in relation_results.iter().enumerate() {
         let match_text = format!(
             "{} {} {} {}",
             relation.fuente.titulo,
@@ -461,7 +461,10 @@ fn calculate_score(query: &str, text: &str, position: usize) -> f32 {
         40.0
     };
 
-    base - (position as f32 * 2.0)
+    // posición esperada <= MAX_TODOS, no hay riesgo real de pérdida de precisión
+    #[allow(clippy::cast_precision_loss)]
+    let position_factor = position as f32 * 2.0;
+    base - position_factor
 }
 
 fn to_json_value<T: Serialize>(value: &T) -> JsonValue {

@@ -1010,6 +1010,63 @@ export interface CreatorConnectStatus {
   requerimientosPendientes?: number | null;
 }
 
+export type CreatorDashboardIncomePeriod = typeof CreatorDashboardIncomePeriod[keyof typeof CreatorDashboardIncomePeriod];
+
+
+export const CreatorDashboardIncomePeriod = {
+  semana: 'semana',
+  mes: 'mes',
+  anio: 'anio',
+} as const;
+
+export interface CreatorDashboardIncomePoint {
+  fecha: string;
+  monto: number;
+}
+
+export interface CreatorDashboardSampleStat {
+  descargas: number;
+  id: number;
+  ingresos: number;
+  likes: number;
+  reproducciones: number;
+  slug: string;
+  titulo: string;
+}
+
+export interface CreatorDashboardStats {
+  descargasMes: number;
+  descargasTotal: number;
+  ingresosAnterior: number;
+  ingresosMes: number;
+  ingresosTotal: number;
+  reproduccionesMes: number;
+  reproduccionesTotal: number;
+  samplesPublicados: number;
+  seguidoresNuevosMes: number;
+  seguidoresTotal: number;
+}
+
+export type CreatorDashboardTransactionType = typeof CreatorDashboardTransactionType[keyof typeof CreatorDashboardTransactionType];
+
+
+export const CreatorDashboardTransactionType = {
+  descarga: 'descarga',
+  venta: 'venta',
+  suscripcion: 'suscripcion',
+} as const;
+
+export interface CreatorDashboardTransaction {
+  comision: number;
+  comprador: string;
+  fecha: string;
+  id: number;
+  monto: number;
+  neto: number;
+  sample: string;
+  tipo: CreatorDashboardTransactionType;
+}
+
 export interface DeleteArticleData {
   eliminado: boolean;
 }
@@ -2445,6 +2502,17 @@ limit?: number;
 export type ListCommentsParams = {
 page?: number;
 per_page?: number;
+};
+
+export type IncomeSeriesParams = {
+periodo?: CreatorDashboardIncomePeriod | null;
+};
+
+export type TransactionsParams = {
+/**
+ * @nullable
+ */
+page?: number | null;
 };
 
 export type StreamDownloadParams = {
@@ -10465,6 +10533,488 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getCreateConnectOnboardingMutationOptions(options), queryClient);
     }
+
+export type incomeSeriesResponse200 = {
+  data: CreatorDashboardIncomePoint[]
+  status: 200
+}
+
+export type incomeSeriesResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type incomeSeriesResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type incomeSeriesResponseSuccess = (incomeSeriesResponse200) & {
+  headers: Headers;
+};
+export type incomeSeriesResponseError = (incomeSeriesResponse401 | incomeSeriesResponse404) & {
+  headers: Headers;
+};
+
+export type incomeSeriesResponse = (incomeSeriesResponseSuccess | incomeSeriesResponseError)
+
+export const getIncomeSeriesUrl = (params?: IncomeSeriesParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/dashboard/ingresos?${stringifiedParams}` : `/api/dashboard/ingresos`
+}
+
+export const incomeSeries = async (params?: IncomeSeriesParams, options?: RequestInit): Promise<incomeSeriesResponse> => {
+
+  return customInstance<incomeSeriesResponse>(getIncomeSeriesUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getIncomeSeriesQueryKey = (params?: IncomeSeriesParams,) => {
+    return [
+    `/api/dashboard/ingresos`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getIncomeSeriesQueryOptions = <TData = Awaited<ReturnType<typeof incomeSeries>>, TError = ErrorResponse>(params?: IncomeSeriesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof incomeSeries>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getIncomeSeriesQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof incomeSeries>>> = ({ signal }) => incomeSeries(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof incomeSeries>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type IncomeSeriesQueryResult = NonNullable<Awaited<ReturnType<typeof incomeSeries>>>
+export type IncomeSeriesQueryError = ErrorResponse
+
+
+export function useIncomeSeries<TData = Awaited<ReturnType<typeof incomeSeries>>, TError = ErrorResponse>(
+ params: undefined |  IncomeSeriesParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof incomeSeries>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof incomeSeries>>,
+          TError,
+          Awaited<ReturnType<typeof incomeSeries>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useIncomeSeries<TData = Awaited<ReturnType<typeof incomeSeries>>, TError = ErrorResponse>(
+ params?: IncomeSeriesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof incomeSeries>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof incomeSeries>>,
+          TError,
+          Awaited<ReturnType<typeof incomeSeries>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useIncomeSeries<TData = Awaited<ReturnType<typeof incomeSeries>>, TError = ErrorResponse>(
+ params?: IncomeSeriesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof incomeSeries>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useIncomeSeries<TData = Awaited<ReturnType<typeof incomeSeries>>, TError = ErrorResponse>(
+ params?: IncomeSeriesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof incomeSeries>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getIncomeSeriesQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+export type statsResponse200 = {
+  data: CreatorDashboardStats
+  status: 200
+}
+
+export type statsResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type statsResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type statsResponseSuccess = (statsResponse200) & {
+  headers: Headers;
+};
+export type statsResponseError = (statsResponse401 | statsResponse404) & {
+  headers: Headers;
+};
+
+export type statsResponse = (statsResponseSuccess | statsResponseError)
+
+export const getStatsUrl = () => {
+
+
+
+
+  return `/api/dashboard/stats`
+}
+
+export const stats = async ( options?: RequestInit): Promise<statsResponse> => {
+
+  return customInstance<statsResponse>(getStatsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getStatsQueryKey = () => {
+    return [
+    `/api/dashboard/stats`
+    ] as const;
+    }
+
+
+export const getStatsQueryOptions = <TData = Awaited<ReturnType<typeof stats>>, TError = ErrorResponse>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof stats>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getStatsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof stats>>> = ({ signal }) => stats({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof stats>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type StatsQueryResult = NonNullable<Awaited<ReturnType<typeof stats>>>
+export type StatsQueryError = ErrorResponse
+
+
+export function useStats<TData = Awaited<ReturnType<typeof stats>>, TError = ErrorResponse>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof stats>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof stats>>,
+          TError,
+          Awaited<ReturnType<typeof stats>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useStats<TData = Awaited<ReturnType<typeof stats>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof stats>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof stats>>,
+          TError,
+          Awaited<ReturnType<typeof stats>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useStats<TData = Awaited<ReturnType<typeof stats>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof stats>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useStats<TData = Awaited<ReturnType<typeof stats>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof stats>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getStatsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+export type topSamplesResponse200 = {
+  data: CreatorDashboardSampleStat[]
+  status: 200
+}
+
+export type topSamplesResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type topSamplesResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type topSamplesResponseSuccess = (topSamplesResponse200) & {
+  headers: Headers;
+};
+export type topSamplesResponseError = (topSamplesResponse401 | topSamplesResponse404) & {
+  headers: Headers;
+};
+
+export type topSamplesResponse = (topSamplesResponseSuccess | topSamplesResponseError)
+
+export const getTopSamplesUrl = () => {
+
+
+
+
+  return `/api/dashboard/top-samples`
+}
+
+export const topSamples = async ( options?: RequestInit): Promise<topSamplesResponse> => {
+
+  return customInstance<topSamplesResponse>(getTopSamplesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getTopSamplesQueryKey = () => {
+    return [
+    `/api/dashboard/top-samples`
+    ] as const;
+    }
+
+
+export const getTopSamplesQueryOptions = <TData = Awaited<ReturnType<typeof topSamples>>, TError = ErrorResponse>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof topSamples>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getTopSamplesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof topSamples>>> = ({ signal }) => topSamples({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof topSamples>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type TopSamplesQueryResult = NonNullable<Awaited<ReturnType<typeof topSamples>>>
+export type TopSamplesQueryError = ErrorResponse
+
+
+export function useTopSamples<TData = Awaited<ReturnType<typeof topSamples>>, TError = ErrorResponse>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof topSamples>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof topSamples>>,
+          TError,
+          Awaited<ReturnType<typeof topSamples>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTopSamples<TData = Awaited<ReturnType<typeof topSamples>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof topSamples>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof topSamples>>,
+          TError,
+          Awaited<ReturnType<typeof topSamples>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTopSamples<TData = Awaited<ReturnType<typeof topSamples>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof topSamples>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useTopSamples<TData = Awaited<ReturnType<typeof topSamples>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof topSamples>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getTopSamplesQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+export type transactionsResponse200 = {
+  data: CreatorDashboardTransaction[]
+  status: 200
+}
+
+export type transactionsResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type transactionsResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type transactionsResponseSuccess = (transactionsResponse200) & {
+  headers: Headers;
+};
+export type transactionsResponseError = (transactionsResponse401 | transactionsResponse404) & {
+  headers: Headers;
+};
+
+export type transactionsResponse = (transactionsResponseSuccess | transactionsResponseError)
+
+export const getTransactionsUrl = (params?: TransactionsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/dashboard/transacciones?${stringifiedParams}` : `/api/dashboard/transacciones`
+}
+
+export const transactions = async (params?: TransactionsParams, options?: RequestInit): Promise<transactionsResponse> => {
+
+  return customInstance<transactionsResponse>(getTransactionsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getTransactionsQueryKey = (params?: TransactionsParams,) => {
+    return [
+    `/api/dashboard/transacciones`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getTransactionsQueryOptions = <TData = Awaited<ReturnType<typeof transactions>>, TError = ErrorResponse>(params?: TransactionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof transactions>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getTransactionsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof transactions>>> = ({ signal }) => transactions(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof transactions>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type TransactionsQueryResult = NonNullable<Awaited<ReturnType<typeof transactions>>>
+export type TransactionsQueryError = ErrorResponse
+
+
+export function useTransactions<TData = Awaited<ReturnType<typeof transactions>>, TError = ErrorResponse>(
+ params: undefined |  TransactionsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof transactions>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof transactions>>,
+          TError,
+          Awaited<ReturnType<typeof transactions>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTransactions<TData = Awaited<ReturnType<typeof transactions>>, TError = ErrorResponse>(
+ params?: TransactionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof transactions>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof transactions>>,
+          TError,
+          Awaited<ReturnType<typeof transactions>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTransactions<TData = Awaited<ReturnType<typeof transactions>>, TError = ErrorResponse>(
+ params?: TransactionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof transactions>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useTransactions<TData = Awaited<ReturnType<typeof transactions>>, TError = ErrorResponse>(
+ params?: TransactionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof transactions>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getTransactionsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
 
 export type downloadLimitsResponse200 = {
   data: DownloadLimitsResponse

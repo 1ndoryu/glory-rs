@@ -7,6 +7,7 @@ mod auth;
 mod colecciones;
 mod comments;
 mod connect;
+mod dashboard;
 mod downloads;
 mod fcm;
 mod feed;
@@ -105,6 +106,10 @@ impl utoipa::Modify for SecurityAddon {
         connect::get_connect_status,
         connect::create_connect_dashboard_link,
         connect::get_connect_balance,
+        dashboard::stats,
+        dashboard::top_samples,
+        dashboard::transactions,
+        dashboard::income_series,
         payments::list_plans,
         payments::create_subscription_checkout,
         payments::create_sample_checkout,
@@ -251,6 +256,12 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::ClaimFreeCodeResponse,
         crate::models::CreateSubscriptionCheckoutRequest,
         crate::models::CreateSampleCheckoutRequest,
+        crate::models::CreatorDashboardIncomePeriod,
+        crate::models::CreatorDashboardIncomePoint,
+        crate::models::CreatorDashboardSampleStat,
+        crate::models::CreatorDashboardStats,
+        crate::models::CreatorDashboardTransaction,
+        crate::models::CreatorDashboardTransactionType,
         crate::models::DownloadGrantRequest,
         crate::models::CreatorConnectBalance,
         crate::models::CreatorConnectState,
@@ -524,6 +535,7 @@ fn api_routes() -> Router<AppState> {
         .merge(notifications::routes())
         .merge(free_codes::routes())
         .merge(connect::routes())
+        .merge(dashboard::routes())
         .merge(payments::routes())
         .merge(reports::routes())
         .merge(search::routes())

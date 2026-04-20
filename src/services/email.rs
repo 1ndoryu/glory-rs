@@ -157,7 +157,7 @@ impl EmailNotificationService {
             match Self::send_welcome(&runtime, &to_email, &user_name, site_url.as_deref()).await {
                 Ok(()) => tracing::info!(email = %to_email, "email de bienvenida enviado"),
                 Err(error) => {
-                    tracing::warn!(email = %to_email, error = %error, "falló el email de bienvenida")
+                    tracing::warn!(email = %to_email, error = %error, "falló el email de bienvenida");
                 }
             }
         });

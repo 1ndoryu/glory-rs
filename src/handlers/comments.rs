@@ -219,6 +219,7 @@ pub async fn list_replies(
         (status = 422, description = "Validación de comentario"),
     )
 )]
+#[allow(clippy::too_many_lines)] // handler con validaciones secuenciales (target, contenido, archivos, persistencia)
 pub async fn create_comment(
     State(state): State<AppState>,
     user: CurrentUser,

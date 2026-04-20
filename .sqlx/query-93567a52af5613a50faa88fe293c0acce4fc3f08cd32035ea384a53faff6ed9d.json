@@ -1,0 +1,76 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT\n                COALESCE((\n                    SELECT SUM(t.pago_creador)::double precision\n                    FROM transacciones t\n                    WHERE t.creador_id = $1\n                      AND t.estado IN ('completada', 'completed')\n                ), 0)::double precision AS \"ingresos_total!\",\n                COALESCE((\n                    SELECT SUM(t.pago_creador)::double precision\n                    FROM transacciones t\n                    WHERE t.creador_id = $1\n                      AND t.estado IN ('completada', 'completed')\n                      AND t.created_at >= date_trunc('month', NOW())\n                ), 0)::double precision AS \"ingresos_mes!\",\n                COALESCE((\n                    SELECT SUM(t.pago_creador)::double precision\n                    FROM transacciones t\n                    WHERE t.creador_id = $1\n                      AND t.estado IN ('completada', 'completed')\n                      AND t.created_at >= date_trunc('month', NOW()) - INTERVAL '1 month'\n                      AND t.created_at < date_trunc('month', NOW())\n                ), 0)::double precision AS \"ingresos_anterior!\",\n                COALESCE(u.total_descargas, 0)::bigint AS \"descargas_total!\",\n                (\n                    SELECT COUNT(*)\n                    FROM descargas d\n                    JOIN samples s ON s.id = d.sample_id\n                    WHERE s.creador_id = u.id\n                      AND d.created_at >= date_trunc('month', NOW())\n                ) AS \"descargas_mes!\",\n                COALESCE((\n                    SELECT SUM(s.total_reproducciones)::bigint\n                    FROM samples s\n                    WHERE s.creador_id = u.id\n                      AND s.eliminado_en IS NULL\n                ), 0)::bigint AS \"reproducciones_total!\",\n                (\n                    SELECT COUNT(*)\n                    FROM reproducciones r\n                    JOIN samples s ON s.id = r.sample_id\n                    WHERE s.creador_id = u.id\n                      AND r.created_at >= date_trunc('month', NOW())\n                ) AS \"reproducciones_mes!\",\n                COALESCE(u.total_seguidores, 0)::bigint AS \"seguidores_total!\",\n                (\n                    SELECT COUNT(*)\n                    FROM follows f\n                    WHERE f.seguido_id = u.id\n                      AND f.created_at >= date_trunc('month', NOW())\n                ) AS \"seguidores_nuevos_mes!\",\n                COALESCE(u.total_samples, 0)::bigint AS \"samples_publicados!\"\n            FROM usuarios_ext u\n            WHERE u.id = $1\n            LIMIT 1\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "ingresos_total!",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 1,
+        "name": "ingresos_mes!",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 2,
+        "name": "ingresos_anterior!",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 3,
+        "name": "descargas_total!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 4,
+        "name": "descargas_mes!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 5,
+        "name": "reproducciones_total!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 6,
+        "name": "reproducciones_mes!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 7,
+        "name": "seguidores_total!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 8,
+        "name": "seguidores_nuevos_mes!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 9,
+        "name": "samples_publicados!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "93567a52af5613a50faa88fe293c0acce4fc3f08cd32035ea384a53faff6ed9d"
+}

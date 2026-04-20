@@ -1,0 +1,58 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT\n                s.id,\n                s.titulo AS \"titulo!\",\n                s.slug AS \"slug!\",\n                COALESCE(s.total_descargas, 0)::bigint AS \"descargas!\",\n                COALESCE(s.total_reproducciones, 0)::bigint AS \"reproducciones!\",\n                COALESCE(s.total_likes, 0)::bigint AS \"likes!\",\n                COALESCE((\n                    SELECT SUM(t.pago_creador)::double precision\n                    FROM transacciones t\n                    WHERE t.sample_id = s.id\n                      AND t.estado IN ('completada', 'completed')\n                ), 0)::double precision AS \"ingresos!\"\n            FROM samples s\n            WHERE s.creador_id = $1\n              AND s.estado = 'activo'\n              AND s.eliminado_en IS NULL\n            ORDER BY s.total_descargas DESC, s.id DESC\n            LIMIT 10\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "titulo!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "slug!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "descargas!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 4,
+        "name": "reproducciones!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 5,
+        "name": "likes!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 6,
+        "name": "ingresos!",
+        "type_info": "Float8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "c177575187b1a469d4432fe5373d3b738daaf7ddd6fa872d58a10e042e9b1b59"
+}

@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT\n                DATE(t.created_at) AS \"fecha!\",\n                COALESCE(SUM(t.pago_creador), 0)::double precision AS \"monto!\"\n            FROM transacciones t\n            WHERE t.creador_id = $1\n              AND t.estado IN ('completada', 'completed')\n              AND t.created_at >= NOW() - make_interval(days => $2)\n            GROUP BY DATE(t.created_at)\n                        ORDER BY DATE(t.created_at) ASC\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "fecha!",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 1,
+        "name": "monto!",
+        "type_info": "Float8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "c1fc1aebf499db9fae7223a9f6b9a824a26b76d96b75a2f1e5760de83fbe1819"
+}

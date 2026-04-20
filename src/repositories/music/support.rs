@@ -127,6 +127,7 @@ pub(super) struct SampleOwnerRecord {
 }
 
 #[derive(Debug)]
+#[allow(clippy::struct_field_names)] // los sufijos describen el rol semántico (fuente/destino) en la relación
 pub(super) struct RelationLinkContextRecord {
     pub(super) cancion_fuente_id: i32,
     pub(super) cancion_destino_id: i32,

@@ -7,7 +7,7 @@ use crate::models::{AdminActivityPoint, AdminActivityQuery, AdminActivityRespons
 impl AdminPanelRepository {
     pub async fn summary(pool: &PgPool) -> Result<AdminSummaryStats, AppError> {
         let mut builder = QueryBuilder::<Postgres>::new(
-            r#"SELECT
+            r"SELECT
                     (SELECT COUNT(*)::bigint FROM usuarios_ext) AS total_usuarios,
                     (SELECT COUNT(*)::bigint FROM samples WHERE estado = 'activo') AS total_samples,
                     (SELECT COUNT(*)::bigint FROM descargas) AS total_descargas,
@@ -17,7 +17,7 @@ impl AdminPanelRepository {
                     (SELECT COUNT(*)::bigint FROM usuarios_ext WHERE plan = 'pro') AS usuarios_pro,
                     (SELECT COUNT(*)::bigint FROM usuarios_ext WHERE plan = 'premium') AS usuarios_premium,
                     (SELECT COUNT(*)::bigint FROM samples WHERE created_at > NOW() - INTERVAL '7 days') AS samples_semana,
-                    (SELECT COUNT(*)::bigint FROM usuarios_ext WHERE created_at > NOW() - INTERVAL '7 days') AS registros_semana"#,
+                    (SELECT COUNT(*)::bigint FROM usuarios_ext WHERE created_at > NOW() - INTERVAL '7 days') AS registros_semana",
         );
 
         let row = builder

@@ -1,0 +1,66 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT\n                t.id,\n                t.created_at AS \"fecha!\",\n                CASE\n                    WHEN t.tipo = 'compra_sample' THEN 'venta'\n                    WHEN t.tipo = 'descarga' THEN 'descarga'\n                    WHEN t.tipo = 'suscripcion' THEN 'suscripcion'\n                    ELSE 'venta'\n                END AS \"tipo!\",\n                COALESCE(s.titulo, '') AS \"sample!\",\n                COALESCE(u.username, '') AS \"comprador!\",\n                CAST(t.monto AS double precision) AS \"monto!\",\n                CAST(t.comision_plataforma AS double precision) AS \"comision!\",\n                CAST(t.pago_creador AS double precision) AS \"neto!\"\n            FROM transacciones t\n            LEFT JOIN samples s ON s.id = t.sample_id\n            LEFT JOIN usuarios_ext u ON u.id = t.comprador_id\n            WHERE t.creador_id = $1\n              AND t.tipo IN ('compra_sample', 'descarga', 'suscripcion')\n            ORDER BY t.created_at DESC\n            LIMIT $2 OFFSET $3\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "fecha!",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 2,
+        "name": "tipo!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "sample!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "comprador!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "monto!",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 6,
+        "name": "comision!",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 7,
+        "name": "neto!",
+        "type_info": "Float8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int8",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "b0e4d0ae742589891d09a90ee93cb91e4af7585f6c0684ba456f985c83b0b5ce"
+}

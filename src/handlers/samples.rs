@@ -125,6 +125,7 @@ pub fn routes() -> Router<AppState> {
  * Conserva las reglas críticas del flujo viejo: idempotencia por header,
  * límite de plan, mínimo 2 tags, validación por extensión + magic bytes y
  * persistencia inmediata del original para que la fase de pipeline continúe. */
+#[allow(clippy::too_many_lines)] // pipeline de upload con muchas validaciones lineales; dividir reduciría legibilidad
 pub async fn upload(
     State(state): State<AppState>,
     user: CurrentUser,
@@ -346,6 +347,7 @@ impl AudioUploadFormat {
     }
 }
 
+#[allow(clippy::too_many_lines)] // parser multipart con muchos campos opcionales; dividir oscurece el flujo
 async fn parse_upload_multipart(mut multipart: Multipart) -> Result<ParsedUpload, AppError> {
     let mut original_filename: Option<String> = None;
     let mut titulo: Option<String> = None;
@@ -381,24 +383,24 @@ async fn parse_upload_multipart(mut multipart: Multipart) -> Result<ParsedUpload
             }
             "titulo" => titulo = Some(field.text().await.unwrap_or_default().trim().to_string()),
             "contenido" | "descripcion" => {
-                contenido = field.text().await.unwrap_or_default().trim().to_string()
+                contenido = field.text().await.unwrap_or_default().trim().to_string();
             }
             "tags" => tags = normalize_tags(&field.text().await.unwrap_or_default()),
             "permitir_descarga" => {
-                permitir_descarga = parse_bool_field(&field.text().await.unwrap_or_default(), true)?
+                permitir_descarga = parse_bool_field(&field.text().await.unwrap_or_default(), true)?;
             }
             "licencia_libre" => {
-                licencia_libre = parse_bool_field(&field.text().await.unwrap_or_default(), false)?
+                licencia_libre = parse_bool_field(&field.text().await.unwrap_or_default(), false)?;
             }
             "es_premium" => {
-                es_premium = parse_bool_field(&field.text().await.unwrap_or_default(), false)?
+                es_premium = parse_bool_field(&field.text().await.unwrap_or_default(), false)?;
             }
             "mostrar_en_comunidad" => {
                 mostrar_en_comunidad =
-                    parse_bool_field(&field.text().await.unwrap_or_default(), true)?
+                    parse_bool_field(&field.text().await.unwrap_or_default(), true)?;
             }
             "sync_upload" => {
-                sync_upload = parse_bool_field(&field.text().await.unwrap_or_default(), false)?
+                sync_upload = parse_bool_field(&field.text().await.unwrap_or_default(), false)?;
             }
             "origen_subida" => {
                 let value = field.text().await.unwrap_or_default().trim().to_string();

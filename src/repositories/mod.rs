@@ -5,6 +5,7 @@ mod block;
 mod coleccion;
 mod comment;
 mod conversation;
+mod creator_dashboard;
 mod download;
 mod fcm;
 mod follow;
@@ -33,6 +34,7 @@ pub use billing::{
     BillingRepository, CompletedDownloadRevenueShareInsert, CompletedSamplePurchaseInsert,
     SampleCheckoutCandidate, StripeUserProfile, SubscriptionRecord, UpsertStripeSubscriptionRecord,
 };
+pub use creator_dashboard::CreatorDashboardRepository;
 pub use article::{
     ArticleAuthorSummary, ArticleCategoryCount, ArticleDetail, ArticleEmbed, ArticleMeta,
     ArticleRepository, ArticleSummary, CreateArticleParams, UpdateArticleParams,

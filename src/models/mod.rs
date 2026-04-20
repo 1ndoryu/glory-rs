@@ -1,5 +1,6 @@
 mod admin;
 mod article;
+mod dashboard;
 mod music;
 mod payment;
 mod profile;
@@ -20,6 +21,11 @@ pub use article::{
     ArticleCategoriesResponse, ArticleListData, ArticleListResponse, ArticleResponse,
     CreateArticleMultipartRequestDoc, DeleteArticleData, DeleteArticleResponse,
     ToggleArticleLikeResponse, UpdateArticleRequest,
+};
+pub use dashboard::{
+    CreatorDashboardIncomePoint, CreatorDashboardIncomePeriod, CreatorDashboardIncomeQuery,
+    CreatorDashboardSampleStat, CreatorDashboardStats, CreatorDashboardTransaction,
+    CreatorDashboardTransactionType, CreatorDashboardTransactionsQuery,
 };
 pub use music::{
     ArtistDetailResponse, ArtistStats, CreateArtistRequest, CreateRelationRequest,

@@ -78,15 +78,12 @@ impl AdminPanelRepository {
         }
 
         if let Some(ban_hasta) = request.ban_hasta {
-            match ban_hasta {
-                Some(value) => {
-                    separated.push("baneado_hasta = ");
-                    separated.push_bind(value);
-                }
-                None => {
-                    separated.push("baneado_hasta = NULL");
-                    separated.push("ban_razon = NULL");
-                }
+            if let Some(value) = ban_hasta {
+                separated.push("baneado_hasta = ");
+                separated.push_bind(value);
+            } else {
+                separated.push("baneado_hasta = NULL");
+                separated.push("ban_razon = NULL");
             }
             changed = true;
         }
@@ -203,7 +200,7 @@ async fn fetch_users(
     offset: i64,
 ) -> Result<Vec<AdminUserListItem>, AppError> {
     let mut builder = QueryBuilder::<Postgres>::new(
-        r#"SELECT
+        r"SELECT
                 u.id,
                 u.username,
                 COALESCE(NULLIF(u.nombre_visible, ''), u.username) AS nombre_visible,
@@ -231,7 +228,7 @@ async fn fetch_users(
                     FROM descargas d
                     WHERE d.usuario_id = u.id
                 ) AS total_descargas
-           FROM usuarios_ext u"#,
+           FROM usuarios_ext u",
     );
 
     push_user_filters(&mut builder, search_like, plan);

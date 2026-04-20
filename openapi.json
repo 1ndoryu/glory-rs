@@ -4321,6 +4321,222 @@
         ]
       }
     },
+    "/api/dashboard/ingresos": {
+      "get": {
+        "tags": [
+          "payments"
+        ],
+        "operationId": "income_series",
+        "parameters": [
+          {
+            "name": "periodo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/CreatorDashboardIncomePeriod"
+                }
+              ],
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Serie de ingresos del dashboard de creador",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CreatorDashboardIncomePoint"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuario no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/dashboard/stats": {
+      "get": {
+        "tags": [
+          "payments"
+        ],
+        "operationId": "stats",
+        "responses": {
+          "200": {
+            "description": "KPIs del dashboard de creador",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatorDashboardStats"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuario no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/dashboard/top-samples": {
+      "get": {
+        "tags": [
+          "payments"
+        ],
+        "operationId": "top_samples",
+        "responses": {
+          "200": {
+            "description": "Top samples del creador",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CreatorDashboardSampleStat"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuario no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/dashboard/transacciones": {
+      "get": {
+        "tags": [
+          "payments"
+        ],
+        "operationId": "transactions",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Historial de transacciones del creador",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CreatorDashboardTransaction"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuario no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
     "/api/descargas/limites": {
       "get": {
         "tags": [
@@ -10167,6 +10383,180 @@
             "nullable": true
           }
         }
+      },
+      "CreatorDashboardIncomePeriod": {
+        "type": "string",
+        "enum": [
+          "semana",
+          "mes",
+          "anio"
+        ]
+      },
+      "CreatorDashboardIncomePoint": {
+        "type": "object",
+        "required": [
+          "fecha",
+          "monto"
+        ],
+        "properties": {
+          "fecha": {
+            "type": "string",
+            "format": "date"
+          },
+          "monto": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "CreatorDashboardSampleStat": {
+        "type": "object",
+        "required": [
+          "id",
+          "titulo",
+          "slug",
+          "descargas",
+          "reproducciones",
+          "likes",
+          "ingresos"
+        ],
+        "properties": {
+          "descargas": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ingresos": {
+            "type": "number",
+            "format": "double"
+          },
+          "likes": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reproducciones": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "titulo": {
+            "type": "string"
+          }
+        }
+      },
+      "CreatorDashboardStats": {
+        "type": "object",
+        "required": [
+          "ingresosTotal",
+          "ingresosMes",
+          "ingresosAnterior",
+          "descargasTotal",
+          "descargasMes",
+          "reproduccionesTotal",
+          "reproduccionesMes",
+          "seguidoresTotal",
+          "seguidoresNuevosMes",
+          "samplesPublicados"
+        ],
+        "properties": {
+          "descargasMes": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "descargasTotal": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ingresosAnterior": {
+            "type": "number",
+            "format": "double"
+          },
+          "ingresosMes": {
+            "type": "number",
+            "format": "double"
+          },
+          "ingresosTotal": {
+            "type": "number",
+            "format": "double"
+          },
+          "reproduccionesMes": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reproduccionesTotal": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "samplesPublicados": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "seguidoresNuevosMes": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "seguidoresTotal": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "CreatorDashboardTransaction": {
+        "type": "object",
+        "required": [
+          "id",
+          "fecha",
+          "tipo",
+          "sample",
+          "comprador",
+          "monto",
+          "comision",
+          "neto"
+        ],
+        "properties": {
+          "comision": {
+            "type": "number",
+            "format": "double"
+          },
+          "comprador": {
+            "type": "string"
+          },
+          "fecha": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "monto": {
+            "type": "number",
+            "format": "double"
+          },
+          "neto": {
+            "type": "number",
+            "format": "double"
+          },
+          "sample": {
+            "type": "string"
+          },
+          "tipo": {
+            "$ref": "#/components/schemas/CreatorDashboardTransactionType"
+          }
+        }
+      },
+      "CreatorDashboardTransactionType": {
+        "type": "string",
+        "enum": [
+          "descarga",
+          "venta",
+          "suscripcion"
+        ]
       },
       "DeleteArticleData": {
         "type": "object",

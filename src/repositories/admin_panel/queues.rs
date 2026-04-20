@@ -97,7 +97,7 @@ async fn fetch_scrapers(
     offset: i64,
 ) -> Result<Vec<AdminScraperItem>, AppError> {
     let mut builder = QueryBuilder::<Postgres>::new(
-        r#"SELECT
+        r"SELECT
                 s.id,
                 s.url,
                 s.tipo_pagina,
@@ -114,7 +114,7 @@ async fn fetch_scrapers(
                 s.veces_rescrapeado::int4 AS veces_rescrapeado,
                 s.procesado_at,
                 s.created_at
-           FROM scraping_log s"#,
+           FROM scraping_log s",
     );
 
     push_scraper_filters(&mut builder, search_like, state_filter);
@@ -133,7 +133,7 @@ async fn fetch_scrapers(
 
 async fn scraper_state_counts(pool: &PgPool) -> Result<BTreeMap<String, i64>, AppError> {
     let mut builder = QueryBuilder::<Postgres>::new(
-        r#"SELECT
+        r"SELECT
                 CASE estado
                     WHEN 'pendiente' THEN 'pending'
                     WHEN 'procesado' THEN 'scraped'
@@ -143,7 +143,7 @@ async fn scraper_state_counts(pool: &PgPool) -> Result<BTreeMap<String, i64>, Ap
                 COUNT(*)::bigint AS total
            FROM scraping_log
            GROUP BY estado
-           ORDER BY total DESC, estado ASC"#,
+           ORDER BY total DESC, estado ASC",
     );
 
     let rows = builder
@@ -167,6 +167,7 @@ async fn count_extraction_queue(
     Ok(row.total)
 }
 
+#[allow(clippy::too_many_arguments)] // builder paginado con filtros + orden + paginación; refactor a struct excede esta tarea
 async fn fetch_extraction_queue(
     pool: &PgPool,
     search_like: Option<&str>,
@@ -178,7 +179,7 @@ async fn fetch_extraction_queue(
     offset: i64,
 ) -> Result<Vec<AdminExtractionQueueItem>, AppError> {
     let mut builder = QueryBuilder::<Postgres>::new(
-        r#"SELECT
+        r"SELECT
                 c.id,
                 c.relacion_id,
                 c.youtube_id,
@@ -195,7 +196,7 @@ async fn fetch_extraction_queue(
                 c.procesado_at,
                 c.created_at,
                 c.proximo_intento_at
-           FROM cola_extraccion_samples c"#,
+           FROM cola_extraccion_samples c",
     );
 
     push_extraction_filters(&mut builder, search_like, states, sides);
@@ -217,10 +218,10 @@ async fn fetch_extraction_queue(
 
 async fn extraction_queue_state_counts(pool: &PgPool) -> Result<BTreeMap<String, i64>, AppError> {
     let mut builder = QueryBuilder::<Postgres>::new(
-        r#"SELECT estado, COUNT(*)::bigint AS total
+        r"SELECT estado, COUNT(*)::bigint AS total
            FROM cola_extraccion_samples
            GROUP BY estado
-           ORDER BY total DESC, estado ASC"#,
+           ORDER BY total DESC, estado ASC",
     );
 
     let rows = builder

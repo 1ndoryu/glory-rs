@@ -11,6 +11,7 @@ type DeliveryRuntimes = (
 );
 
 #[tokio::main]
+#[allow(clippy::too_many_lines)] // bootstrap secuencial: env + pool + servicios + router
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenvy::dotenv().ok();
 

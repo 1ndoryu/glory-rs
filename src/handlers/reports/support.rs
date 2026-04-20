@@ -308,7 +308,7 @@ pub(super) fn map_admin_legal_report(
         .and_then(|raw| serde_json::from_str::<LegalReportDetails>(raw).ok());
     if let Some(parsed) = details.as_mut() {
         if parsed.ip_origen.is_none() {
-            parsed.ip_origen = row.ip_origen.clone();
+            parsed.ip_origen.clone_from(&row.ip_origen);
         }
     }
 
