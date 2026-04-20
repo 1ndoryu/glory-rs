@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE scraping_log\n        SET estado = 'pendiente',\n            veces_rescrapeado = veces_rescrapeado + 1,\n            proximo_rescrape = NULL\n        WHERE re_scrapeable = TRUE\n          AND proximo_rescrape IS NOT NULL\n          AND proximo_rescrape < NOW()\n          AND estado IN ('procesado', 'error')\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "d2ac5c8eae7bdeceb85f9e67565794be546a9d7dc49d014a8fc15eb2ab627e04"
+}
