@@ -114,10 +114,6 @@
 
 ### Fase 19 â€” Despliegue
 - Nota: un error pasado hizo que se borrara la base de datos, hay que reforzar para que no vuelva a suceder, el error problemente fue causado al desplegar directamente o alguna otra razón, se debe tomar todo los medios necesarios para evitar la perdida de datos, tanto de la base de datos tanto como los archivos fisicos que deben perdurar, esto debe tomarse muy en serio porque ya es un error que se cometio en el pasado.
-- 174A-112 â€” Dockerfile multi-stage Rust
-- 174A-113 â€” Dockerfile frontend (Vite â†’ nginx)
-- 174A-114 â€” `docker-compose.yml` Coolify
-- 174A-115 â€” Secrets management
-- 174A-116 â€” MigraciÃ³n inicial automÃ¡tica + healthcheck
-- 174A-117 â€” Deploy via `coolify-manager-rs`
-- 174A-118 â€” Smoke test producciÃ³n + rollback procedure
+- 174A-116 â€” MigraciÃ³n inicial automÃ¡tica + healthcheck (no hacerlo hasta mi confirmacion)
+- 174A-117 â€” Deploy via `coolify-manager-rs`(no hacerlo hasta mi confirmacion)
+- 174A-118 â€” Smoke test producciÃ³n + rollback procedure (no hacerlo hasta mi confirmacion)

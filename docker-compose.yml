@@ -1,0 +1,188 @@
+# [174A-114] docker-compose.yml para despliegue en Coolify (o cualquier
+# orquestador compatible).
+#
+# === REGLAS ABSOLUTAS DE PRESERVACIÓN DE DATOS ===
+# (ver Fase 19 nota del roadmap: "un error pasado hizo que se borrara la BD")
+#
+#   1. NUNCA usar `docker compose down -v` ni `docker volume rm` sobre los
+#      volúmenes nombrados de este stack en producción. La flag `-v` borra
+#      volúmenes anónimos Y nombrados. Para parar usar `docker compose down`
+#      sin flags.
+#   2. NUNCA cambiar el nombre de un volumen ya creado en producción
+#      (ej: `kamples_postgres_data` -> `postgres_data`). Renombrar genera
+#      un volumen nuevo VACÍO y deja el anterior huérfano (que Coolify o
+#      `docker volume prune` pueden borrar después).
+#   3. El bind-mount de `/data/kamples` en el host (uploads + db_dumps) es
+#      la SEGUNDA capa de defensa: aunque el volumen Docker se borrara, los
+#      archivos físicos en /data/kamples/uploads sobreviven. Hacer backup
+#      cron de /data/kamples a un bucket externo (S3/B2) ANTES de cualquier
+#      deploy.
+#   4. Antes de `redeploy` en Coolify, ejecutar `scripts/backup-postgres.sh`
+#      manualmente. Coolify NO hace backup automático de servicios.
+#   5. La política `restart: unless-stopped` previene que un crash silente
+#      degenere en pérdida de datos por reinicios fallidos.
+#
+# === Servicios ===
+#  - postgres: PostgreSQL 16 con extensión pgvector. Volumen NAMED.
+#  - redis:    Redis 7 para cache/locks. Volumen NAMED (para AOF persistente).
+#  - app:      backend Rust Axum (este repo).
+#  - web:      frontend Vite servido por nginx, proxy /api/ -> app.
+#
+# === Networking ===
+#  - postgres y redis NO están expuestos al host (sin `ports:`). Solo
+#    accesibles desde la red interna del stack. Reduce superficie de ataque.
+#  - app expone 3000 internamente; web expone 80. Coolify se encarga de
+#    Traefik/HTTPS al frontend público.
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB requerido}
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER requerido}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD requerido}
+      # PGDATA dentro del volumen named para que pg_basebackup y dumps
+      # encuentren un layout estable.
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      # Volumen NAMED: persiste entre `docker compose down` (sin -v).
+      - postgres_data:/var/lib/postgresql/data
+      # Bind-mount externo para dumps automáticos. El sidecar de backup
+      # (postgres-backup) escribe aquí; restore manual lee desde aquí.
+      - /data/kamples/db_dumps:/dumps
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    # Recursos: ajustar según VPS. Sin límite, postgres puede ahogar al app.
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    # AOF activado para persistencia (RDB-only puede perder hasta 5min).
+    command: ["redis-server", "--appendonly", "yes", "--appendfsync", "everysec"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ${APP_IMAGE:-glory-backend:latest}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      # Conexión interna (DNS de docker compose: nombre de servicio).
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      REDIS_URL: redis://redis:6379
+
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET requerido}
+      WS_SECRET: ${WS_SECRET:-${JWT_SECRET}}
+
+      HOST: 0.0.0.0
+      PORT: 3000
+      RUST_LOG: ${RUST_LOG:-glory_backend=info,tower_http=info,sqlx=warn}
+      LOG_FORMAT: ${LOG_FORMAT:-json}
+
+      DB_MAX_CONNECTIONS: ${DB_MAX_CONNECTIONS:-20}
+      DB_MIN_CONNECTIONS: ${DB_MIN_CONNECTIONS:-2}
+
+      STORAGE_BACKEND: ${STORAGE_BACKEND:-local}
+      STORAGE_ROOT: /data/uploads
+      S3_BUCKET: ${S3_BUCKET:-}
+      S3_ENDPOINT_URL: ${S3_ENDPOINT_URL:-}
+
+      PUBLIC_BASE_URL: "${PUBLIC_BASE_URL:?PUBLIC_BASE_URL requerido (formato https://dominio)}"
+      WS_PUBLIC_URL: ${WS_PUBLIC_URL:-}
+      WS_TICKET_TTL_SECS: ${WS_TICKET_TTL_SECS:-60}
+
+      GOOGLE_CLIENT_IDS: ${GOOGLE_CLIENT_IDS:-}
+
+      # Notificaciones — opcionales, si vacíos se deshabilita el canal
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+      VAPID_SUBJECT: ${VAPID_SUBJECT:-}
+      FCM_SERVICE_ACCOUNT_JSON: ${FCM_SERVICE_ACCOUNT_JSON:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_SECURE: ${SMTP_SECURE:-tls}
+      SMTP_FROM_EMAIL: ${SMTP_FROM_EMAIL:-}
+      SMTP_FROM_NAME: ${SMTP_FROM_NAME:-Kamples}
+
+      # Stripe — opcionales
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+
+      # Scraper Python externo
+      SCRAPER_SECRET: ${SCRAPER_SECRET:-}
+    volumes:
+      # CAPA 2 de protección: bind-mount al host. Si el contenedor o el
+      # volumen se borran, los uploads sobreviven en /data/kamples/uploads.
+      # NUNCA cambiar la ruta /data/kamples sin migrar los archivos primero.
+      - /data/kamples/uploads:/data/uploads
+      - /data/kamples/app_logs:/app/logs
+
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: ${WEB_IMAGE:-glory-frontend:latest}
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_healthy
+    # Coolify expone este servicio vía Traefik (FQDN configurable en la UI).
+    # Si despliegas fuera de Coolify, descomenta `ports:` para mapear al host.
+    # ports:
+    #   - "8080:80"
+
+  # Sidecar de backup automático: hace pg_dump cada 6h y rota dumps
+  # > 14 días. Lee/escribe desde /dumps (mismo bind-mount que postgres).
+  postgres-backup:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGHOST: postgres
+      PGUSER: ${POSTGRES_USER}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      PGDATABASE: ${POSTGRES_DB}
+      BACKUP_INTERVAL_SECONDS: ${BACKUP_INTERVAL_SECONDS:-21600}  # 6h
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-14}
+    volumes:
+      - /data/kamples/db_dumps:/dumps
+      - ./scripts/backup-postgres-loop.sh:/usr/local/bin/backup-loop.sh:ro
+    entrypoint: ["/bin/sh", "/usr/local/bin/backup-loop.sh"]
+
+volumes:
+  postgres_data:
+    name: kamples_postgres_data
+    # external: true   # Activar después del primer deploy si quieres
+                       # que el volumen sobreviva a un `docker compose down`
+                       # explícito incluso con -v. Antes de activar, asegurar
+                       # que el volumen YA existe.
+  redis_data:
+    name: kamples_redis_data

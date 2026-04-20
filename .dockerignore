@@ -1,0 +1,48 @@
+# [174A-112] Mantén el contexto de build mínimo y reproducible.
+# CRÍTICO: NO ignorar `.sqlx/` (lo necesitan las macros en SQLX_OFFLINE).
+
+# Build outputs
+/target/
+**/*.rs.bk
+*.pdb
+
+# Frontend (se construye con su propio Dockerfile)
+/frontend/node_modules/
+/frontend/dist/
+/frontend/src/api/generated/
+/node_modules/
+
+# Workspace local del usuario / agente
+.git/
+.github/
+.idea/
+.vscode/
+.cargo/config.toml
+.copilot/
+
+# Código que no es del backend Rust
+/Agente/
+/clients/
+/cliente/
+/desktop/
+/mobile/
+/prerendered/
+/uploads/
+/logs/
+/check.log
+/clippy.log
+/emit.log
+/mig.log
+/sqlxp.log
+/test.log
+/openapi.json
+/.sentinel-report.md
+
+# Secrets locales — DEBE quedar fuera del contexto
+.env
+**/.env
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini

@@ -28,6 +28,8 @@ desktop.ini
 /scripts/*
 !/scripts/check-roadmap.mjs
 !/scripts/self-check.ps1
+!/scripts/backup-postgres.sh
+!/scripts/backup-postgres-loop.sh
 /prerendered/
 /node_modules/
 /cliente/
