@@ -103,7 +103,6 @@
 ### Fase 16 â€” SEO (completada)
 
 ### Fase 17 â€” Frontend SPA (reuso de `App/React/` legacy)
-- 174A-103 â€” Integrar React Router para navegaciÃ³n SPA
 - 174A-104 â€” Reemplazar servicios manuales por hooks Orval/React Query
 - 174A-105 â€” Hook `useWebSocket()` actualizado para Axum WS
 - 174A-106 â€” `useAuth` contra nuevo backend
