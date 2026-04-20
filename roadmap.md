@@ -98,8 +98,7 @@
 
 ### Fase 14 â€” ModeraciÃ³n, admin, dashboard
 
-### Fase 15 â€” Workers
-- 174A-97 â€” MÃ©tricas opcionales
+### Fase 15 â€” Workers (completada)
 
 ### Fase 16 â€” SEO
 - 174A-98 â€” `/sitemap.xml` dinÃ¡mico

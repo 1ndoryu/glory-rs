@@ -15,6 +15,7 @@ mod free_codes;
 mod health;
 mod likes;
 mod messages;
+mod metrics;
 mod music;
 mod notifications;
 mod payments;
@@ -554,5 +555,6 @@ fn api_routes() -> Router<AppState> {
         .merge(ws::routes())
         .merge(colecciones::routes())
         .merge(users::routes())
+        .merge(metrics::routes())
         .merge(admin::routes())
 }
