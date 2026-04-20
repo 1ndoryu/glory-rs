@@ -103,8 +103,6 @@
 ### Fase 16 â€” SEO (completada)
 
 ### Fase 17 â€” Frontend SPA (reuso de `App/React/` legacy)
-- 174A-100 â€” Configurar `frontend/orval.config.ts` (`tags-split`)
-- 174A-101 â€” Generar primer cliente Orval + type-check verde
 - 174A-102 â€” Migrar islands desde `App/React/islands/` a `frontend/src/features/{dominio}/`
 - 174A-103 â€” Integrar React Router para navegaciÃ³n SPA
 - 174A-104 â€” Reemplazar servicios manuales por hooks Orval/React Query
