@@ -27,6 +27,7 @@ mod search;
 mod seo;
 mod sample_catalog;
 mod samples;
+mod scraper_admin;
 mod social;
 mod sync;
 mod users;
@@ -212,6 +213,8 @@ impl utoipa::Modify for SecurityAddon {
         admin::activate,
         admin::mark_delete,
         admin::algo_timing_history,
+        scraper_admin::publicar_auto,
+        scraper_admin::reporte_lote,
     ),
     components(schemas(
         health::HealthResponse,
@@ -442,6 +445,9 @@ impl utoipa::Modify for SecurityAddon {
         crate::services::algo_timing::TimingEntry,
         crate::services::algo_timing::TimingStage,
         crate::errors::ErrorResponse,
+        scraper_admin::PublicarAutoResponse,
+        scraper_admin::ReporteLoteRequest,
+        scraper_admin::ReporteLoteResponse,
     )),
     modifiers(&SecurityAddon),
     info(
@@ -502,6 +508,7 @@ pub fn create_router(
         ws_hub,
         ws_node_id,
         algo_planner,
+        scraper_secret: config.scraper_secret,
     };
 
     /* CORS: en desarrollo se permite todo. En producción, restringir orígenes */
@@ -559,5 +566,6 @@ fn api_routes() -> Router<AppState> {
         .merge(colecciones::routes())
         .merge(users::routes())
         .merge(metrics::routes())
+        .merge(scraper_admin::routes())
         .merge(admin::routes())
 }

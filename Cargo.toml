@@ -96,6 +96,9 @@ mime = "0.3"
 mime_guess = "2"
 url = "2"
 zip = { version = "2", default-features = false, features = ["deflate"] }
+# [174A-108b] rustls 0.23 requiere registrar un CryptoProvider explícito cuando hay
+# múltiples backends compilados. Lo expone como dep directa para llamarlo desde main.
+rustls = { version = "0.23", default-features = false, features = ["aws-lc-rs"] }
 
 # Storage S3 (feature-gated, 174A-27)
 aws-config = { version = "1", default-features = false, features = ["rustls", "rt-tokio", "behavior-version-latest"], optional = true }

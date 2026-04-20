@@ -8,6 +8,7 @@
     "check:front": "npm --prefix frontend run type-check",
     "fmt": "cargo fmt",
     "fmt:check": "cargo fmt --check",
+    "dev": "concurrently --kill-others-on-fail --names \"BACK,FRONT\" --prefix-colors \"blue.bold,magenta.bold\" \"npm:dev:back\" \"npm:dev:front\"",
     "dev:back": "cargo run",
     "dev:front": "npm --prefix frontend run dev",
     "codegen": "npm --prefix frontend run codegen",

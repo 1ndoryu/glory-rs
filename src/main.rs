@@ -15,6 +15,14 @@ type DeliveryRuntimes = (
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenvy::dotenv().ok();
 
+    /* [174A-108b] rustls 0.23 ya no auto-instala un CryptoProvider cuando hay
+     * múltiples backends compilados (aws-lc-rs vs ring) en el grafo de deps.
+     * Este proyecto usa aws-lc-rs vía async-stripe; lo registramos
+     * explícitamente como provider por defecto del proceso para que SQLx,
+     * Redis, reqwest, lettre y AWS SDK puedan negociar TLS. Si alguno de
+     * estos clientes ya inicializó otro provider, ignoramos el error. */
+    let _ = rustls::crypto::aws_lc_rs::default_provider().install_default();
+
     /* [174A-6] CLI mínima: --emit-openapi <ruta> escribe el schema a disco
      * y termina sin arrancar el servidor. Usado por el frontend (Orval)
      * para regenerar el cliente sin necesidad de un backend corriendo. */

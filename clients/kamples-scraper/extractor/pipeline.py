@@ -287,25 +287,31 @@ def procesar_elemento(item: dict, output_dir: str) -> bool:
 def notificar_publicacion(exitosos: int) -> None:
     """
     Llama al endpoint REST de publicacion automatica cuando Python termina la extraccion.
-    Usa X-Kamples-Secret para autenticarse sin sesion WordPress.
+    Usa X-Kamples-Secret para autenticarse sin sesion.
     Esto garantiza que la publicacion ocurre DESPUES de que los items esten en 'extraido'.
+
+    [174A-108b] Migrado de WordPress (`wp-json/kamples/v1/dev/extraccion/publicar-auto`)
+    a backend Rust (`/api/admin/scraper/publicar-auto`). Las env vars
+    KAMPLES_INTERNAL_URL/KAMPLES_SITE_URL/KAMPLES_CRON_SECRET se mantienen
+    como fallback para compatibilidad con despliegues existentes.
     """
     if exitosos == 0:
         return
 
-    # Preferir URL interna (http://localhost) para evitar SSL desde dentro del container
-    site_url = os.getenv("KAMPLES_INTERNAL_URL", "").rstrip("/") or os.getenv(
-        "KAMPLES_SITE_URL", ""
-    ).rstrip("/")
-    secret = os.getenv("KAMPLES_CRON_SECRET", "")
+    base_url = (
+        os.getenv("BACKEND_URL", "").rstrip("/")
+        or os.getenv("KAMPLES_INTERNAL_URL", "").rstrip("/")
+        or os.getenv("KAMPLES_SITE_URL", "").rstrip("/")
+    )
+    secret = os.getenv("SCRAPER_SECRET", "") or os.getenv("KAMPLES_CRON_SECRET", "")
 
-    if not site_url or not secret:
+    if not base_url or not secret:
         logger.warning(
-            "KAMPLES_INTERNAL_URL/KAMPLES_SITE_URL o KAMPLES_CRON_SECRET no configurados — publicacion manual requerida."
+            "BACKEND_URL/SCRAPER_SECRET no configurados — publicacion manual requerida."
         )
         return
 
-    endpoint = f"{site_url}/wp-json/kamples/v1/dev/extraccion/publicar-auto"
+    endpoint = f"{base_url}/api/admin/scraper/publicar-auto"
     try:
         req = urllib.request.Request(endpoint, method="POST", data=b"")
         req.add_header("Content-Type", "application/json")
@@ -322,21 +328,25 @@ def notificar_publicacion(exitosos: int) -> None:
 
 def reportar_lote(exitosos: int, fallidos: int, motivos_fallo: dict[str, int] | None = None) -> None:
     """
-    [223A-3] Reporta resultados del lote al endpoint de automatizacion PHP.
+    [223A-3] Reporta resultados del lote al endpoint de automatizacion.
     Usa KAMPLES_BATCH_ID (inyectado por ServicioAutomatizacion) para identificar el lote.
     Si no hay batch_id (ejecucion manual), no reporta.
+
+    [174A-108b] Migrado a backend Rust (`/api/admin/scraper/reporte-lote`).
     """
     batch_id = os.getenv("KAMPLES_BATCH_ID", "").strip()
     if not batch_id:
         return
 
-    site_url = os.getenv("KAMPLES_INTERNAL_URL", "").rstrip("/") or os.getenv(
-        "KAMPLES_SITE_URL", ""
-    ).rstrip("/")
-    secret = os.getenv("KAMPLES_CRON_SECRET", "")
+    base_url = (
+        os.getenv("BACKEND_URL", "").rstrip("/")
+        or os.getenv("KAMPLES_INTERNAL_URL", "").rstrip("/")
+        or os.getenv("KAMPLES_SITE_URL", "").rstrip("/")
+    )
+    secret = os.getenv("SCRAPER_SECRET", "") or os.getenv("KAMPLES_CRON_SECRET", "")
 
-    if not site_url or not secret:
-        logger.warning("No se puede reportar lote — URL/secret no configurados")
+    if not base_url or not secret:
+        logger.warning("No se puede reportar lote — BACKEND_URL/SCRAPER_SECRET no configurados")
         return
 
     payload = json.dumps({
@@ -347,7 +357,7 @@ def reportar_lote(exitosos: int, fallidos: int, motivos_fallo: dict[str, int] | 
         "metadata": {"motivos_fallo": motivos_fallo or {}},
     }).encode("utf-8")
 
-    endpoint = f"{site_url}/wp-json/kamples/v1/admin/automatizacion/reporte-lote"
+    endpoint = f"{base_url}/api/admin/scraper/reporte-lote"
     try:
         req = urllib.request.Request(endpoint, method="POST", data=payload)
         req.add_header("Content-Type", "application/json")

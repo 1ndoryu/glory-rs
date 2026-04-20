@@ -74,6 +74,11 @@ pub struct AppConfig {
     pub fcm_service_account_json: Option<String>,
     /// Configuración SMTP opcional para emails transaccionales.
     pub smtp: Option<SmtpConfig>,
+    /* [174A-108b] Secret HMAC compartido con el scraper Python. Si está
+     * presente, los endpoints /api/admin/scraper/{publicar-auto,reporte-lote}
+     * validan el header X-Kamples-Secret (constant-time). Si es None,
+     * los endpoints responden 403 — protege contra exposición accidental. */
+    pub scraper_secret: Option<String>,
     /* [174A-79] Stripe queda agrupado para no seguir inflando AppConfig con
      * claves sueltas. El runtime decide si la integración queda habilitada
      * según `secret_key`, pero publishable/webhook/precios pueden faltar en local. */
@@ -130,6 +135,7 @@ impl AppConfig {
             ]),
             smtp: load_optional_smtp()?,
             stripe: load_optional_stripe(),
+            scraper_secret: first_env(&["SCRAPER_SECRET", "KAMPLES_CRON_SECRET"]),
         })
     }
 }

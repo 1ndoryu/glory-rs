@@ -51,4 +51,8 @@ pub struct AppState {
     pub ws_node_id: uuid::Uuid,
     /* [174A-58] Planificador del algoritmo (umbrales fast/precise + recálculos). */
     pub algo_planner: Arc<algorithm::AlgoPlanner>,
+    /* [174A-108b] Secret compartido con el scraper Python para autenticar
+     * llamadas a /api/admin/scraper/{publicar-auto,reporte-lote}
+     * sin sesión de usuario. */
+    pub scraper_secret: Option<String>,
 }
