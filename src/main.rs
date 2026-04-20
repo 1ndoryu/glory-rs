@@ -117,6 +117,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let _billing_cleanup_worker = glory_backend::workers::spawn_billing_cleanup_worker(&pool);
     let _scraping_queue_worker = glory_backend::workers::spawn_scraping_queue_worker(&pool);
 
+    /* [174A-93+174A-96] AlgoPlanner periodic loop: refresca mv_trending_samples
+     * (precompute_feeds) y recalcula user_tag_scores activos
+     * (recompute_user_profiles). Compartido con el AppState para que el path
+     * caliente (handlers de like/play/etc.) reuse el mismo planner. */
+    let algo_planner = glory_backend::algorithm::AlgoPlanner::new(
+        glory_backend::algorithm::AlgoPlannerConfig::legacy_defaults(),
+    );
+    let _algo_planner_loop = std::sync::Arc::clone(&algo_planner).spawn_periodic_loop(
+        pool.clone(),
+        redis.clone(),
+        tokio_util::sync::CancellationToken::new(),
+    );
+
     let (push_runtime, fcm_runtime, email_runtime) = init_delivery_runtimes(&config)?;
     let stripe_runtime = glory_backend::services::StripeRuntime::from_config(&config)?;
     if let Some(runtime) = stripe_runtime.as_ref() {
@@ -145,6 +158,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             email: email_runtime,
             stripe: stripe_runtime,
         },
+        algo_planner,
     );
     let listener = tokio::net::TcpListener::bind(&addr).await?;
     axum::serve(listener, app).await?;

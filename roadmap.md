@@ -99,8 +99,6 @@
 ### Fase 14 â€” ModeraciÃ³n, admin, dashboard
 
 ### Fase 15 â€” Workers
-- 174A-93 â€” `precompute_feeds`
-- 174A-96 â€” `recompute_user_profiles`
 - 174A-97 â€” MÃ©tricas opcionales
 
 ### Fase 16 â€” SEO

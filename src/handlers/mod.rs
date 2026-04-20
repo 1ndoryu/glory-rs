@@ -466,13 +466,12 @@ pub fn create_router(
     config: crate::config::AppConfig,
     storage: std::sync::Arc<dyn crate::services::FileStorage>,
     runtimes: AppRuntimes,
+    algo_planner: std::sync::Arc<crate::algorithm::AlgoPlanner>,
 ) -> Router {
     let public_base_url = config.public_base_url.clone();
     let ws_public_url = config.ws_public_url.clone();
     let redis_url = config.redis_url.clone();
     let storage_root = config.storage_root.clone();
-    let algo_planner =
-        crate::algorithm::AlgoPlanner::new(crate::algorithm::AlgoPlannerConfig::legacy_defaults());
     let ws_hub = std::sync::Arc::new(glory_rs::websocket::WebSocketHub::new(
         glory_rs::websocket::HubConfig::default(),
     ));
