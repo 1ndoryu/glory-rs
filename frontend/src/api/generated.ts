@@ -2050,6 +2050,34 @@ export interface SuspendUserRequest {
   razon: string;
 }
 
+export type SyncChangelogTipo = typeof SyncChangelogTipo[keyof typeof SyncChangelogTipo];
+
+
+export const SyncChangelogTipo = {
+  sample_added: 'sample_added',
+  sample_removed: 'sample_removed',
+  sample_updated: 'sample_updated',
+  collection_created: 'collection_created',
+  collection_renamed: 'collection_renamed',
+  collection_deleted: 'collection_deleted',
+  collection_merged: 'collection_merged',
+} as const;
+
+export interface SyncChangelogEntry {
+  createdAt: string;
+  entidadId: number;
+  id: number;
+  metadata: unknown;
+  tipo: SyncChangelogTipo;
+}
+
+export interface SyncChangelogDelta {
+  cambios: SyncChangelogEntry[];
+  cursor: number;
+  fullSyncRequired: boolean;
+  hayMas: boolean;
+}
+
 export interface TimingStage {
   ms: number;
   name: string;
@@ -2659,6 +2687,21 @@ q: string;
  * @nullable
  */
 types?: string | null;
+};
+
+export type GetChangelogParams = {
+/**
+ * @nullable
+ */
+cursor?: number | null;
+/**
+ * @nullable
+ */
+since?: number | null;
+/**
+ * @nullable
+ */
+limite?: number | null;
 };
 
 export type UpgradeConnectionParams = {
@@ -17002,6 +17045,125 @@ export function useGlobalSearch<TData = Awaited<ReturnType<typeof globalSearch>>
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGlobalSearchQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+export type getChangelogResponse200 = {
+  data: SyncChangelogDelta
+  status: 200
+}
+
+export type getChangelogResponse401 = {
+  data: void
+  status: 401
+}
+
+export type getChangelogResponseSuccess = (getChangelogResponse200) & {
+  headers: Headers;
+};
+export type getChangelogResponseError = (getChangelogResponse401) & {
+  headers: Headers;
+};
+
+export type getChangelogResponse = (getChangelogResponseSuccess | getChangelogResponseError)
+
+export const getGetChangelogUrl = (params?: GetChangelogParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/sync/changelog?${stringifiedParams}` : `/api/sync/changelog`
+}
+
+export const getChangelog = async (params?: GetChangelogParams, options?: RequestInit): Promise<getChangelogResponse> => {
+
+  return customInstance<getChangelogResponse>(getGetChangelogUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetChangelogQueryKey = (params?: GetChangelogParams,) => {
+    return [
+    `/api/sync/changelog`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetChangelogQueryOptions = <TData = Awaited<ReturnType<typeof getChangelog>>, TError = void>(params?: GetChangelogParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getChangelog>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetChangelogQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getChangelog>>> = ({ signal }) => getChangelog(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getChangelog>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetChangelogQueryResult = NonNullable<Awaited<ReturnType<typeof getChangelog>>>
+export type GetChangelogQueryError = void
+
+
+export function useGetChangelog<TData = Awaited<ReturnType<typeof getChangelog>>, TError = void>(
+ params: undefined |  GetChangelogParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getChangelog>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getChangelog>>,
+          TError,
+          Awaited<ReturnType<typeof getChangelog>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetChangelog<TData = Awaited<ReturnType<typeof getChangelog>>, TError = void>(
+ params?: GetChangelogParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getChangelog>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getChangelog>>,
+          TError,
+          Awaited<ReturnType<typeof getChangelog>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetChangelog<TData = Awaited<ReturnType<typeof getChangelog>>, TError = void>(
+ params?: GetChangelogParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getChangelog>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetChangelog<TData = Awaited<ReturnType<typeof getChangelog>>, TError = void>(
+ params?: GetChangelogParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getChangelog>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetChangelogQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

@@ -26,6 +26,7 @@ mod search;
 mod sample_catalog;
 mod samples;
 mod social;
+mod sync;
 mod users;
 mod ws;
 
@@ -110,6 +111,7 @@ impl utoipa::Modify for SecurityAddon {
         dashboard::top_samples,
         dashboard::transactions,
         dashboard::income_series,
+        sync::get_changelog,
         payments::list_plans,
         payments::create_subscription_checkout,
         payments::create_sample_checkout,
@@ -262,6 +264,9 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::CreatorDashboardStats,
         crate::models::CreatorDashboardTransaction,
         crate::models::CreatorDashboardTransactionType,
+        crate::models::SyncChangelogDelta,
+        crate::models::SyncChangelogEntry,
+        crate::models::SyncChangelogTipo,
         crate::models::DownloadGrantRequest,
         crate::models::CreatorConnectBalance,
         crate::models::CreatorConnectState,
@@ -536,6 +541,7 @@ fn api_routes() -> Router<AppState> {
         .merge(free_codes::routes())
         .merge(connect::routes())
         .merge(dashboard::routes())
+        .merge(sync::routes())
         .merge(payments::routes())
         .merge(reports::routes())
         .merge(search::routes())

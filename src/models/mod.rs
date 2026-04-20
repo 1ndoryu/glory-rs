@@ -7,6 +7,7 @@ mod profile;
 mod report;
 mod search;
 mod sample;
+mod sync;
 mod user;
 
 pub use admin::{
@@ -26,6 +27,9 @@ pub use dashboard::{
     CreatorDashboardIncomePoint, CreatorDashboardIncomePeriod, CreatorDashboardIncomeQuery,
     CreatorDashboardSampleStat, CreatorDashboardStats, CreatorDashboardTransaction,
     CreatorDashboardTransactionType, CreatorDashboardTransactionsQuery,
+};
+pub use sync::{
+    SyncChangelogDelta, SyncChangelogEntry, SyncChangelogQuery, SyncChangelogTipo,
 };
 pub use music::{
     ArtistDetailResponse, ArtistStats, CreateArtistRequest, CreateRelationRequest,

@@ -27,6 +27,7 @@ mod search;
 mod sample;
 mod sample_catalog;
 mod saved_collection;
+mod sync_changelog;
 mod user;
 
 pub use admin_panel::AdminPanelRepository;
@@ -88,6 +89,7 @@ pub use search::{
     SearchCollectionRecord, SearchRepository, SearchSampleRecord, SearchSampleRelationRecord,
     SearchSongRecord, SearchUserRecord,
 };
+pub use sync_changelog::SyncChangelogRepository;
 pub use sample::{
     ApplyAudioIaMetadataParams, AudioIaSample, AudioPipelineSample, CompleteAudioPipelineParams,
     CreateUploadSampleParams, CreatedUploadSample, DuplicateSampleCandidate,

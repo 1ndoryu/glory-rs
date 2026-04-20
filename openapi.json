@@ -7849,6 +7849,66 @@
         }
       }
     },
+    "/api/sync/changelog": {
+      "get": {
+        "tags": [
+          "sync"
+        ],
+        "operationId": "get_changelog",
+        "parameters": [
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          },
+          {
+            "name": "limite",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Delta de cambios",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncChangelogDelta"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
     "/api/users/me": {
       "get": {
         "tags": [
@@ -13845,6 +13905,73 @@
             "type": "string"
           }
         }
+      },
+      "SyncChangelogDelta": {
+        "type": "object",
+        "required": [
+          "cambios",
+          "cursor",
+          "hayMas",
+          "fullSyncRequired"
+        ],
+        "properties": {
+          "cambios": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SyncChangelogEntry"
+            }
+          },
+          "cursor": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "fullSyncRequired": {
+            "type": "boolean"
+          },
+          "hayMas": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SyncChangelogEntry": {
+        "type": "object",
+        "required": [
+          "id",
+          "tipo",
+          "entidadId",
+          "metadata",
+          "createdAt"
+        ],
+        "properties": {
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "entidadId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "metadata": {},
+          "tipo": {
+            "$ref": "#/components/schemas/SyncChangelogTipo"
+          }
+        }
+      },
+      "SyncChangelogTipo": {
+        "type": "string",
+        "enum": [
+          "sample_added",
+          "sample_removed",
+          "sample_updated",
+          "collection_created",
+          "collection_renamed",
+          "collection_deleted",
+          "collection_merged"
+        ]
       },
       "TimingEntry": {
         "type": "object",
