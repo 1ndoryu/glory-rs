@@ -104,11 +104,11 @@
 
 ### Fase 17 â€” Frontend SPA (completada)
 
-### Fase 18 â€” Scraper / Mezclador / Mobile / Desktop
-- 174A-108 â€” Adaptar scraper Python a nueva API
-- 174A-109 â€” Adaptar Mezclador (Tauri DAW)
-- 174A-110 â€” Adaptar mobile (Capacitor) + FCM + deep links
-- 174A-111 â€” Adaptar desktop (Tauri) + auto-updates
+### Fase 18 â€” Scraper / Mezclador / Mobile / Desktop (importacion completada, adaptacion pendiente)
+- 174A-108b â€” scraper: implementar endpoints `/api/admin/scraper/{publicar-auto,reporte-lote}` y migrar URLs Python (ver `Agente/planes/plan-clients-adapters-2026-04-20.md`)
+- 174A-109b â€” Mezclador: mover a `frontend/src/features/mezclador/` y migrar a hooks Orval
+- 174A-110b â€” mobile: cambiar `webDir` a SPA Rust + FCM register-token + deep links
+- 174A-111b â€” desktop: cliente Orval compartido + Google PKCE + WebSocket sync + auto-updates Tauri 2
 
 ### Fase 19 â€” Despliegue
 - Nota: un error pasado hizo que se borrara la base de datos, hay que reforzar para que no vuelva a suceder, el error problemente fue causado al desplegar directamente o alguna otra razón, se debe tomar todo los medios necesarios para evitar la perdida de datos, tanto de la base de datos tanto como los archivos fisicos que deben perdurar, esto debe tomarse muy en serio porque ya es un error que se cometio en el pasado.
