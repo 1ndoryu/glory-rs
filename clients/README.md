@@ -4,12 +4,14 @@ Clientes externos del proyecto, importados 1:1 desde el legado WordPress
 (`glorytemplate/{kamples-scraper,Mezclador,mobile,desktop}`) en
 **174A-108..111**.
 
+[174A-109b] `Mezclador` se movió a `frontend/src/features/mezclador/`
+porque es una feature in-process del front, no un cliente externo.
+
 ## Estado
 
 | Cliente          | Stack                          | Estado                    |
 |------------------|--------------------------------|---------------------------|
-| `kamples-scraper`| Python + Scrapy                 | Importado, pendiente migrar endpoints `wp-json/...` → `/api/...` |
-| `Mezclador`      | React + TS (DAW embebible)      | Importado, depende de servicios legacy en `App/React/` |
+| `kamples-scraper`| Python + Scrapy                 | [174A-108b] Migrado a `/api/admin/scraper/{publicar-auto,reporte-lote}` |
 | `mobile`         | Capacitor (Android) + WebView   | Importado, apunta a la SPA en producción |
 | `desktop`        | Tauri 2 + React                 | Importado, usa `wpApiSettings` simulado |
 
