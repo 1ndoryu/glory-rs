@@ -114,6 +114,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let _audio_pipeline_workers =
         glory_backend::workers::spawn_audio_pipeline_workers(&pool, &storage);
     let _ia_queue_workers = glory_backend::workers::spawn_ia_queue_workers(&pool);
+    let _billing_cleanup_worker = glory_backend::workers::spawn_billing_cleanup_worker(&pool);
 
     let (push_runtime, fcm_runtime, email_runtime) = init_delivery_runtimes(&config)?;
     let stripe_runtime = glory_backend::services::StripeRuntime::from_config(&config)?;

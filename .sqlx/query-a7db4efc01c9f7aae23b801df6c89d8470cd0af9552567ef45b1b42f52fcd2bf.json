@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE suscripciones\n        SET estado = 'vencida'\n        WHERE estado = 'activa'\n          AND fin_at IS NOT NULL\n          AND fin_at < NOW()\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "a7db4efc01c9f7aae23b801df6c89d8470cd0af9552567ef45b1b42f52fcd2bf"
+}
