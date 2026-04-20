@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT titulo, extracto, slug\n               FROM articulos\n               WHERE slug = $1 AND moderacion_estado = 'aprobado'\n                 AND publicado_en IS NOT NULL AND eliminado_en IS NULL\n               LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "titulo",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 1,
+        "name": "extracto",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "slug",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "aa5f892ea742b5cea427050e340f52ec1cdba9b9eb0bb22fd8afffd949f8d052"
+}

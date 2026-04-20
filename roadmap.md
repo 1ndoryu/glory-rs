@@ -100,9 +100,7 @@
 
 ### Fase 15 â€” Workers (completada)
 
-### Fase 16 â€” SEO
-- 174A-98 â€” `/sitemap.xml` dinÃ¡mico
-- 174A-99 â€” Endpoint metadata SEO
+### Fase 16 â€” SEO (completada)
 
 ### Fase 17 â€” Frontend SPA (reuso de `App/React/` legacy)
 - 174A-100 â€” Configurar `frontend/orval.config.ts` (`tags-split`)

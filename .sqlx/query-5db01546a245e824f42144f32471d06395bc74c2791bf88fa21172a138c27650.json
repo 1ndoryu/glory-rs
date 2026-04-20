@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT titulo, descripcion, slug\n               FROM samples WHERE slug = $1 AND estado = 'activo' LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "titulo",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 1,
+        "name": "descripcion",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "slug",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "5db01546a245e824f42144f32471d06395bc74c2791bf88fa21172a138c27650"
+}

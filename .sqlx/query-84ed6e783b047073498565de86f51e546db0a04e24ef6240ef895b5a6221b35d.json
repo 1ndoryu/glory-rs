@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT slug, updated_at FROM articulos\n           WHERE moderacion_estado = 'aprobado' AND publicado_en IS NOT NULL\n             AND eliminado_en IS NULL\n           ORDER BY publicado_en DESC LIMIT $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "slug",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 1,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "84ed6e783b047073498565de86f51e546db0a04e24ef6240ef895b5a6221b35d"
+}

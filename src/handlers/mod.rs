@@ -24,6 +24,7 @@ mod posts;
 mod push;
 mod reports;
 mod search;
+mod seo;
 mod sample_catalog;
 mod samples;
 mod social;
@@ -517,6 +518,7 @@ pub fn create_router(
             axum::routing::get(|| async { axum::response::Redirect::permanent("/swagger-ui/") }),
         )
         .nest_service("/uploads", ServeDir::new(storage_root))
+        .merge(seo::routes())
         .nest("/api", api_routes())
         .layer(axum::middleware::from_fn(
             crate::middleware::request_id_middleware,
@@ -545,6 +547,7 @@ fn api_routes() -> Router<AppState> {
         .merge(payments::routes())
         .merge(reports::routes())
         .merge(search::routes())
+        .merge(seo::routes_api())
         .merge(music::routes())
         .merge(fcm::routes())
         .merge(push::routes())

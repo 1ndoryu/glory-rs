@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT slug, updated_at FROM samples\n           WHERE estado = 'activo' AND slug IS NOT NULL\n           ORDER BY updated_at DESC NULLS LAST LIMIT $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "slug",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 1,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      true
+    ]
+  },
+  "hash": "4b948176e1bb1eec30ebfcb0ccd7e10c38207e112c6866c4728a1b7a7ee9c3f5"
+}
