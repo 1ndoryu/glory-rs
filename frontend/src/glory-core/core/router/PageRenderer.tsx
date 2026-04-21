@@ -1,0 +1,166 @@
+/*
+ * PageRenderer — Renderiza la isla correcta segun la ruta SPA actual.
+ * Observa el navigationStore y mantiene islas visitadas montadas (keep-alive).
+ *
+ * C133: Las páginas visitadas se mantienen en DOM con display:none para
+ * preservar estado local (scroll, datos cargados, refs). Solo la isla
+ * activa tiene display:block. Máximo MAX_CACHE_PAGES islas en cache.
+ *
+ * C167: Refactorizado para cumplir con React Compiler — sin setState
+ * dentro de useEffect. Usa patrón "adjusting state when a prop changes"
+ * recomendado por React docs.
+ */
+
+import { useEffect, useState, Suspense, type ReactNode } from 'react';
+import { useNavigationStore } from './navigationStore';
+import { islandRegistry } from '../IslandRegistry';
+import { IslandErrorBoundary } from '../ErrorBoundary';
+
+interface PageRendererProps {
+    suspenseFallback?: ReactNode;
+}
+
+/*
+ * Máximo de páginas cacheadas en DOM simultáneamente.
+ * Debe cubrir todas las islas del proyecto (~18) para que el keep-alive
+ * preserve estado de scroll, datos cargados y refs sin remontaje.
+ * Un componente oculto (display:none) no impacta layout ni paint.
+ */
+const MAX_CACHE_PAGES = 20;
+
+interface PaginaCacheada {
+    islaId: string;
+    props: Record<string, unknown>;
+    orden: number;
+}
+
+/* Contador module-level para ordenar páginas por antigüedad (evicción LRU) */
+let contadorOrden = 0;
+
+const defaultFallback = (
+    <div style={{ /* sentinel-disable inline-style-prohibido — fallback cargando framework Glory */ padding: '12px', textAlign: 'center', color: '#9ca3af', fontSize: '14px' }}>
+        Cargando...
+    </div>
+);
+
+/*
+ * Renderiza TODAS las islas visitadas recientemente (keep-alive).
+ * Solo la isla activa es visible (display:block), el resto permanece
+ * oculto en DOM (display:none) preservando su estado React completo.
+ */
+export function PageRenderer({ suspenseFallback }: PageRendererProps): JSX.Element {
+    const islaActual = useNavigationStore(s => s.islaActual);
+    const propsActuales = useNavigationStore(s => s.propsActuales);
+    const navegando = useNavigationStore(s => s.navegando);
+    const finalizarNavegacion = useNavigationStore(s => s.finalizarNavegacion);
+    const [paginasCache, setPaginasCache] = useState<PaginaCacheada[]>([]);
+    const [islaAnterior, setIslaAnterior] = useState<string | null>(null);
+
+    /*
+     * Actualizar cache durante render (NO en effect).
+     * Patrón: https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
+     * Cuando islaActual cambia, React re-renderiza inmediatamente con el estado actualizado.
+     */
+    if (islaActual && islaActual !== islaAnterior) {
+        setIslaAnterior(islaActual);
+        contadorOrden++;
+
+        /*
+         * Functional updater para evitar closures stale en clics rápidos.
+         * Sin esto, 2 navegaciones en <100ms usan el mismo paginasCache
+         * del frame anterior, perdiendo la página intermedia.
+         */
+        setPaginasCache(prev => {
+            const existe = prev.find(p => p.islaId === islaActual);
+
+            if (existe) {
+                return prev.map(p =>
+                    p.islaId === islaActual
+                        ? { ...p, props: propsActuales ?? {}, orden: contadorOrden }
+                        : p
+                );
+            }
+
+            const nueva: PaginaCacheada = {
+                islaId: islaActual,
+                props: propsActuales ?? {},
+                orden: contadorOrden,
+            };
+
+            const nuevaLista = [...prev, nueva];
+
+            if (nuevaLista.length > MAX_CACHE_PAGES) {
+                const ordenadas = nuevaLista
+                    .filter(p => p.islaId !== islaActual)
+                    .sort((a, b) => a.orden - b.orden);
+                const aDescartar = ordenadas[0];
+                return nuevaLista.filter(p => p.islaId !== aDescartar.islaId);
+            }
+
+            return nuevaLista;
+        });
+    }
+
+    /* Notificar fin de la transicion despues de render */
+    useEffect(() => {
+        if (navegando) {
+            const timer = requestAnimationFrame(() => {
+                finalizarNavegacion();
+            });
+            return () => cancelAnimationFrame(timer);
+        }
+    }, [navegando, islaActual, finalizarNavegacion]);
+
+    if (!islaActual) {
+        return (
+            <div style={{ /* sentinel-disable inline-style-prohibido */ padding: '40px', textAlign: 'center' }}>
+                <h1>Pagina no encontrada</h1>
+            </div>
+        );
+    }
+
+    return (
+        <>
+            {paginasCache.map(pagina => {
+                const resolved = islandRegistry.resolve(pagina.islaId);
+                if (!resolved) return null;
+
+                const { component: Component, isLazy } = resolved;
+                const esActiva = pagina.islaId === islaActual;
+
+                /*
+                 * Fix: la isla activa siempre usa propsActuales del store (live).
+                 * Esto cubre navegación entre páginas que usan la MISMA isla
+                 * (ej: /sampleo/169 → /sampleo/168): el cache no actualiza props
+                 * porque islaActual no cambia, pero propsActuales sí.
+                 * Las islas ocultas (keep-alive) mantienen sus props cacheados.
+                 */
+                const propsEfectivos = esActiva
+                    ? (propsActuales ?? pagina.props)
+                    : pagina.props;
+
+                let contenido: JSX.Element = <Component {...propsEfectivos} />;
+
+                if (isLazy) {
+                    contenido = (
+                        <Suspense fallback={suspenseFallback ?? defaultFallback}>
+                            {contenido}
+                        </Suspense>
+                    );
+                }
+
+                return (
+                    <div
+                        key={pagina.islaId}
+                        data-glory-page={pagina.islaId}
+                        style={{ /* sentinel-disable inline-style-prohibido */ display: esActiva ? 'block' : 'none' }}
+                    >
+                        <IslandErrorBoundary islandName={pagina.islaId} resetKey={pagina.orden}>
+                            {contenido}
+                        </IslandErrorBoundary>
+                    </div>
+                );
+            })}
+        </>
+    );
+}

@@ -1,0 +1,416 @@
+/*
+ * Estilos: PlanesIsland — Kamples (Fase 6.2)
+ * Comparativa de planes con toggle mensual/anual
+ */
+
+.planesIsland {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 48px calc(var(--espacioXs) * 6);
+}
+
+.planesIsland.planesIslandModal {
+    max-width: 100%;
+    padding: 0;
+}
+
+.modalContenedor.modalGrande.modalPlanesEspecial {
+    max-width: 1180px;
+}
+
+.modalContenedor.modalGrande.modalPlanesEspecial .modalCuerpo {
+    padding: 0;
+    overflow: hidden;
+}
+
+.planesLayoutEspecial {
+    display: grid;
+    grid-template-columns: 65% 35%;
+    gap: 0;
+    height: 80dvh;
+    min-height: 600px;
+}
+
+.planesPanelImagen {
+    position: relative;
+    border-right: 1px solid var(--bordeSutil);
+    overflow: hidden;
+    background: var(--fondoElevado1);
+}
+
+.planesImagen {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.planesPanelImagenOverlay {
+    position: absolute;
+    inset: auto 0 0 0;
+    padding: var(--espacioLg);
+    background: linear-gradient(to top, var(--overlayOscuro), transparent);
+}
+
+.planesPanelImagenOverlay h3 {
+    font-size: var(--fuenteLg);
+    color: var(--textoPrimario);
+    margin: 0 0 calc(var(--espacioXs) * 1.5);
+}
+
+.planesPanelImagenOverlay p {
+    font-size: var(--fuenteMd);
+    color: var(--textoSecundario);
+    margin: 0;
+}
+
+.planesPanelContenido {
+    min-width: 0;
+    padding: var(--espacioLg);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin: auto;
+    gap: var(--espacioLg);
+    height: 100%;
+}
+
+.planesToggleWrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: calc(var(--espacioXs) * 2.5);
+}
+
+/* Header */
+.planesHeader {
+    text-align: center;
+    margin-bottom: calc(var(--espacioXs) * 3.5);
+}
+
+.planesHeader h1 {
+    font-size: var(--fuenteXl);
+    font-weight: var(--pesoBold);
+    color: var(--textoPrimario);
+    margin-bottom: var(--espacioSm);
+}
+
+.planesHeader p {
+    color: var(--textoSecundario);
+    font-size: var(--fuenteMd);
+    margin-bottom: calc(var(--espacioXs) * 3.5);
+}
+
+/* Toggle mensual/anual */
+.planesToggle {
+    display: inline-flex;
+    gap: calc(var(--espacioXs) / 2);
+    background: var(--fondoElevado1);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioMd);
+    padding: calc(var(--espacioXs) / 2);
+}
+
+.planesToggleBtn {
+    padding: calc(var(--espacioXs) * 1.5) 16px;
+    font-size: var(--fuenteMd);
+    color: var(--textoSecundario);
+    background: transparent;
+    border: none;
+    border-radius: var(--radioMd);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    gap: calc(var(--espacioXs) * 1.5);
+}
+
+.planesToggleBtnActivo {
+    background: var(--acento);
+    color: var(--textoPrimario);
+}
+
+/* Grid de planes */
+.planesGrid {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: calc(var(--espacioXs) * 2.5);
+    margin-bottom: calc(var(--espacioXs) * 3.5);
+}
+
+.planesIslandModal .planesGrid {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: calc(var(--espacioXs) * 2.5);
+    margin-bottom: calc(var(--espacioXs) * 3.5);
+}
+
+/* Tarjeta de plan */
+.planTarjeta {
+    background: var(--fondoElevado1);
+    /* border: 1px solid var(--bordeSutil); */
+    border-radius: var(--radioMd);
+    padding: calc(var(--espacioXs) * 3.5) 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    transition: border-color 0.15s ease;
+    min-width: 300px;
+}
+
+.planesIslandModal .planTarjeta {
+    padding: unset;
+}
+
+.planTarjetaDestacada {
+    border-color: var(--acento);
+}
+
+.planTarjetaActual {
+    border-color: var(--textoSecundario);
+}
+
+/* Badges */
+.planBadgePopular,
+.planBadgeActual {
+    position: absolute;
+    top: -10px;
+}
+
+/* Icono */
+.planIcono {
+    color: var(--textoSecundario);
+    margin-bottom: calc(var(--espacioXs) * 1.5);
+}
+
+.planTarjetaDestacada .planIcono {
+    color: var(--textoPrimario);
+}
+
+/* Nombre */
+.planNombre {
+    font-size: var(--fuenteMd);
+    font-weight: var(--pesoBold);
+    color: var(--textoPrimario);
+    margin-bottom: var(--espacioXs);
+}
+
+.planDescripcion {
+    font-size: var(--fuenteSm);
+    color: var(--textoSecundario);
+    margin-bottom: var(--espacioSm);
+}
+
+/* Precio */
+.planPrecio {
+    margin-bottom: var(--fuente2xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: calc(var(--espacioXs) / 2);
+}
+
+.planPrecioCantidad {
+    font-size: var(--fuente3xl);
+    font-weight: var(--pesoBold);
+    color: var(--textoPrimario);
+    line-height: 1;
+}
+
+.planPrecioPeriodo {
+    font-size: var(--fuenteSm);
+    color: var(--textoSecundario);
+}
+
+.planAhorro {
+    font-size: var(--fuenteSm);
+    color: var(--exito);
+    margin-top: var(--espacioXs);
+}
+
+/* Botón */
+.planBoton {
+    width: 100%;
+    margin-bottom: var(--espacioSm);
+}
+
+/* Características */
+.planCaracteristicas {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    text-align: left;
+}
+
+.planCaracteristica {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    padding: var(--espacioXs) 0;
+    font-size: var(--fuenteMd);
+    /* border-top: 1px solid var(--bordeSutil); */
+    text-align: center;
+    justify-content: center;
+}
+
+.planCaracteristicaIncluida {
+    color: var(--textoPrimario);
+}
+
+.planCaracteristicaIncluida svg {
+    color: var(--exito);
+    flex-shrink: 0;
+}
+
+.planCaracteristicaExcluida {
+    color: var(--textoSecundario);
+    opacity: 0.5;
+}
+
+.planCaracteristicaExcluida svg {
+    flex-shrink: 0;
+}
+
+/* FAQ */
+.planesFaq {
+    border-top: 1px solid var(--bordeSutil);
+    padding-top: var(--espacio3xl);
+}
+
+.planesIslandModal .planesFaq {
+    padding-top: var(--espacioXl);
+}
+
+.planesFaq h2 {
+    font-size: var(--fuenteLg);
+    font-weight: var(--pesoBold);
+    color: var(--textoPrimario);
+    margin-bottom: calc(var(--espacioXs) * 6);
+    text-align: center;
+}
+
+.planesFaqGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--espacioLg);
+}
+
+.planesFaqItem {
+    background: var(--fondoElevado1);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioMd);
+    padding: var(--espacioXl);
+}
+
+.planesFaqItem h3 {
+    font-size: var(--fuenteMd);
+    font-weight: var(--pesoBold);
+    color: var(--textoPrimario);
+    margin-bottom: var(--espacioSm);
+    display: flex;
+    align-items: center;
+    gap: calc(var(--espacioXs) * 1.5);
+}
+
+.planesFaqItem p {
+    font-size: var(--fuenteMd);
+    color: var(--textoSecundario);
+    line-height: 1.5;
+}
+
+/* Alertas post-checkout */
+.planesAlertaExito {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    padding: var(--espacioMd);
+    border-radius: var(--radioMd);
+    background-color: color-mix(in srgb, #22c55e 12%, transparent);
+    color: var(--exito);
+    border: 1px solid color-mix(in srgb, #22c55e 30%, transparent);
+    margin-bottom: var(--espacioLg);
+    font-size: var(--fuenteMd);
+    font-weight: var(--pesoMedium);
+}
+
+.planesAlertaError {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    padding: var(--espacioSm) var(--espacioMd);
+    border-radius: var(--radioMd);
+    background-color: color-mix(in srgb, #ef4444 12%, transparent);
+    color: var(--error);
+    border: 1px solid color-mix(in srgb, #ef4444 30%, transparent);
+    margin-bottom: var(--espacioLg);
+    font-size: var(--fuenteMd);
+}
+
+.planesAlertaCerrar {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: var(--fuenteLg);
+    cursor: pointer;
+    padding: 0 var(--espacioXs);
+}
+
+/* Portal de facturación */
+.planesPortal {
+    display: flex;
+    justify-content: center;
+    margin: var(--espacioLg) 0;
+}
+
+/* Spinner de carga en botón */
+.planBotonCargando {
+    animation: girarSpinner 1s linear infinite;
+}
+
+@keyframes girarSpinner {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .modalContenedor.modalGrande.modalPlanesEspecial {
+        max-width: 96vw;
+    }
+
+    .planesLayoutEspecial {
+        grid-template-columns: 1fr;
+        min-height: unset;
+    }
+
+    .planesPanelImagen {
+        min-height: 180px;
+    }
+
+    .planesGrid {
+        grid-template-columns: 1fr;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .planesFaqGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .planesIsland {
+        padding: calc(var(--espacioXs) * 6) 16px;
+    }
+
+    .planesIslandModal .planesGrid {
+        grid-template-columns: 1fr;
+    }
+}

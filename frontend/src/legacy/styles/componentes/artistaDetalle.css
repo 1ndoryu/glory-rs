@@ -1,0 +1,109 @@
+/*
+ * artistaDetalle.css — Kamples
+ * Estilos de la página de detalle de artista musical.
+ */
+
+.artistaDetalleContenedor {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioLg);
+    padding: var(--espacioMd);
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+/* Cabecera: imagen + info */
+.artistaDetalleCabecera {
+    display: flex;
+    gap: var(--espacioMd);
+    align-items: flex-start;
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioLg);
+    padding: var(--espacio2xl);
+}
+
+.artistaDetalleImagen {
+    width: 120px;
+    height: 120px;
+    border-radius: var(--radioMd);
+    overflow: hidden;
+    background: var(--fondoElevado2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.artistaDetalleImagen img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.artistaDetalleInfo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioSm);
+    flex: 1;
+    min-width: 0;
+}
+
+.artistaDetalleNombre {
+    font-size: var(--fuenteXl);
+    font-weight: 700;
+    color: var(--textoPrimario);
+    margin: 0;
+    line-height: 1.2;
+}
+
+.artistaDetalleStats {
+    display: flex;
+    gap: var(--espacioXs);
+    flex-wrap: wrap;
+}
+
+.artistaDetalleGeneros {
+    display: flex;
+    gap: var(--espacioXs);
+    flex-wrap: wrap;
+}
+
+/* Sin datos */
+.artistaDetalleSinDatos {
+    color: var(--textoTerciario);
+    text-align: center;
+    padding: var(--espacioXl) 0;
+}
+
+/* Error */
+.artistaDetalleError {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--espacioMd);
+    padding: var(--espacioXl) 0;
+    color: var(--textoSecundario);
+    text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .artistaDetalleCabecera {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .artistaDetalleStats {
+        justify-content: center;
+    }
+
+    .artistaDetalleGeneros {
+        justify-content: center;
+    }
+
+    .artistaDetalleImagen {
+        width: 96px;
+        height: 96px;
+    }
+}

@@ -1,0 +1,194 @@
+/*
+ * explorarCanciones.css — C812
+ * Feed vertical de canciones con tarjetas tipo TarjetaSample, infinite scroll.
+ * Ordering via TopBar tabs (no hay botones inline de orden).
+ */
+
+/* Contenedor principal del feed */
+.feedCancionesContenedor {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioMd);
+    padding: var(--espacioLg);
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+/* Lista vertical de tarjetas */
+.feedCancionesLista {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioSm);
+}
+
+/* Tarjeta horizontal — layout tipo TarjetaSample */
+.tarjetaCancionFeed {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioMd);
+    padding: var(--espacioMd) var(--espacioLg) var(--espacioMd) var(--espacioMd);
+    background: var(--fondoElevado1);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioMd);
+    transition: background var(--transicionNormal), border-color var(--transicionNormal);
+}
+
+.tarjetaCancionFeed:hover {
+    background: var(--fondoElevado2);
+    border-color: var(--bordeSutil);
+}
+
+.tarjetaCancionFeed:focus-visible {
+    outline: 2px solid var(--acento);
+    outline-offset: 2px;
+}
+
+/* Imagen cuadrada a la izquierda */
+.tarjetaCancionFeedImagen {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    border-radius: var(--radioSm);
+    overflow: hidden;
+    background: var(--fondoElevado2);
+    cursor: pointer;
+}
+
+.tarjetaCancionFeedImagen img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.tarjetaCancionFeedImagenPlaceholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+/* Contenido central (titulo, artista, sampleos) */
+.tarjetaCancionFeedContenido {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--espacioXs) / 2);
+    min-width: 0;
+    flex: 1;
+    cursor: pointer;
+}
+
+.tarjetaCancionFeedCabecera {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioXs);
+}
+
+.tarjetaCancionFeedTitulo {
+    margin: 0;
+    font-size: var(--fuenteMd);
+    font-weight: var(--pesoSemibold);
+    color: var(--textoPrimario);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tarjetaCancionFeedArtista {
+    margin: 0;
+    font-size: var(--fuenteSm);
+    color: var(--textoSecundario);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Sampleos count — zona donde iría la wave en TarjetaSample */
+.tarjetaCancionFeedSampleos {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--espacioXs);
+    color: var(--textoTerciario);
+    font-size: var(--fuenteXs);
+    flex-direction: column;
+}
+
+/* Acciones: like + menu + badges */
+.tarjetaCancionFeedAcciones {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioMd);
+    flex-shrink: 0;
+}
+
+/* Remover el padding del botonBase para acciones compactas */
+.tarjetaCancionFeedAcciones .botonBase.tarjetaAccionBtn {
+    padding: 0;
+    height: 28px;
+    min-width: unset;
+}
+
+/* Sentinela de infinite scroll */
+.feedCancionesSentinela {
+    min-height: 1px;
+    text-align: center;
+}
+
+.feedCancionesCargandoMas {
+    padding: var(--espacioMd);
+    color: var(--textoTerciario);
+    font-size: var(--fuenteSm);
+}
+
+.feedCancionesFin {
+    padding: var(--espacioMd);
+    color: var(--textoTerciario);
+    font-size: var(--fuenteSm);
+}
+
+/* Botón manual de "Cargar más" para throttle de paginación */
+.feedCancionesBotonManual {
+    display: flex;
+    justify-content: center;
+    padding: var(--espacioLg) 0;
+}
+
+.feedCancionesCargarMas {
+    background: var(--superficie2);
+    color: var(--textoSecundario);
+    border: 1px solid var(--borde);
+    border-radius: var(--radioMd);
+    padding: var(--espacioSm) var(--espacioXl);
+    font-size: var(--fuenteSm);
+    cursor: pointer;
+    transition: background var(--transicionRapida), color var(--transicionRapida);
+}
+
+.feedCancionesCargarMas:hover {
+    background: var(--superficie3);
+    color: var(--textoPrincipal);
+}
+
+/* Contador de resultados */
+.feedCancionesContador {
+    margin: 0;
+    font-size: var(--fuenteSm);
+    color: var(--textoTerciario);
+    font-weight: var(--pesoMedium);
+}
+
+/* Reemplazado por EstadoVacio centralizado (C359) */
+
+/* Responsive */
+@media (max-width: 480px) {
+    .feedCancionesContenedor {
+        padding: var(--espacioMd);
+    }
+
+    .tarjetaCancionFeedImagen {
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
+    }
+}

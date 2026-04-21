@@ -1,0 +1,106 @@
+/*
+ * Tipos del framework Glory.
+ * Define las interfaces para el puente PHP→React: contenido, islas, contexto.
+ */
+
+import type { WPPost } from './wordpress';
+
+/*
+ * Contenido inyectado por ReactContentProvider en window.__GLORY_CONTENT__
+ * Cada clave es un nombre registrado con register()/registerStatic()/registerFromDefaults()
+ * y el valor es un array de posts procesados.
+ */
+export type GloryContentMap = Record<string, WPPost[]>;
+
+/*
+ * Contexto global inyectado por ReactIslands en window.GLORY_CONTEXT
+ * Extendible via el filtro glory_react_context de WordPress.
+ */
+/*
+ * Contexto completo con propiedades obligatorias.
+ * PHP inyecta TODAS estas propiedades via glory_react_context.
+ * Usar Partial<GloryContext> solo en window.GLORY_CONTEXT (puede ser incompleto antes de mount).
+ */
+export interface GloryContext {
+    siteUrl: string;
+    themeUrl: string;
+    restUrl: string;
+    nonce: string;
+    isAdmin: boolean;
+    userId?: number;
+    locale: string;
+    options?: Record<string, unknown>;
+    /* Desktop: URL base del servidor API (en web coincide con restUrl) */
+    apiUrl?: string;
+    /* Desktop: flag de sesion activa para auth sin nonce */
+    isLoggedIn?: boolean;
+    /* Desktop: Google Client ID para GSI login */
+    googleClientId?: string;
+    /* Extensibilidad sin debilitar el tipado principal */
+    extra?: Record<string, unknown>;
+}
+
+/*
+ * Props base que toda isla recibe automaticamente.
+ * Las props custom se pasan via data-props en el HTML.
+ */
+export interface GloryIslandBaseProps {
+    [key: string]: unknown;
+}
+
+/*
+ * Configuracion de una pagina React registrada via PageManager::reactPage()
+ */
+export interface GloryPageConfig {
+    slug: string;
+    islandName: string;
+    title: string;
+    parentSlug?: string;
+    roles?: string[];
+    props?: Record<string, unknown>;
+}
+
+/*
+ * Estructura de una opcion del sistema de opciones Glory.
+ */
+export interface GloryOption<T = unknown> {
+    key: string;
+    value: T;
+    default: T;
+    label?: string;
+    type?: 'text' | 'number' | 'boolean' | 'select' | 'color' | 'image';
+    group?: string;
+}
+
+/*
+ * Registro de islas: mapea nombre de isla a su componente React.
+ */
+export type IslandRegistry = Record<string, React.ComponentType<Record<string, unknown>>>;
+
+/*
+ * Mapa de rutas SPA inyectado por PHP.
+ * Cada clave es un path (ej: '/servicios/') y el valor contiene la isla y props.
+ */
+export interface GloryRouteConfig {
+    island: string;
+    props: Record<string, unknown>;
+    title: string;
+    /* Patrón de params para rutas dinámicas (ej: ':id/:slug?').
+     * El router extrae params nombrados de la URL usando este patrón. */
+    params?: string;
+}
+
+export type GloryRoutesMap = Record<string, GloryRouteConfig>;
+
+/*
+ * Declaracion de variables globales inyectadas por PHP.
+ */
+declare global {
+    interface Window {
+        __GLORY_CONTENT__?: GloryContentMap;
+        /* Partial porque PHP puede no haber inyectado todos los campos aun */
+        GLORY_CONTEXT?: Partial<GloryContext>;
+        /* Mapa de rutas React para navegacion SPA */
+        __GLORY_ROUTES__?: GloryRoutesMap;
+    }
+}

@@ -1,0 +1,121 @@
+/*
+ * Modal — Kamples
+ * Base reutilizable con portal, trap focus, animaciones.
+ */
+
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background-color: var(--overlayOscuro);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: var(--zModal);
+    padding: var(--espacio2xl);
+    padding-top: max(var(--espacio2xl), var(--safeAreaTop));
+    animation: fadeInOverlay 150ms ease;
+}
+
+.modalContenedor {
+    background-color: var(--fondoElevado2);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioLg);
+    box-shadow: var(--sombraModal);
+    max-width: 600px;
+    width: 100%;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    animation: slideUpModal 150ms ease;
+    overflow: hidden;
+    will-change: transform, opacity;
+}
+
+/* [193A-8] Tamaño grande — para editores como ModalArticulo */
+.modalContenedor.modalGrande {
+    max-width: 980px;
+}
+
+/* Tamaño pequeño */
+.modalContenedor.modalPequeno {
+    max-width: 400px;
+}
+
+.modalCabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--espacioMd) var(--espacioXl);
+    /* border-bottom: 1px solid var(--bordeSutil); */
+    flex-shrink: 0;
+}
+
+.modalTitulo {
+    font-size: var(--fuenteMd);
+    font-weight: unset;
+    color: var(--textoPrimario);
+}
+
+.modalCerrar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radioMd);
+    color: var(--textoSecundario);
+    cursor: pointer;
+    transition: all var(--transicionRapida);
+    background: none;
+    border: none;
+    font-size: var(--fuenteLg);
+}
+
+.modalCerrar:hover {
+    background-color: var(--fondoElevado3);
+    color: var(--textoPrimario);
+}
+
+.modalCuerpo {
+    padding: var(--espacioXl);
+    overflow-y: auto;
+    flex: 1;
+}
+
+.modalPie {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--espacioSm);
+    padding: var(--espacioLg) var(--espacioXl);
+    /* border-top: 1px solid var(--bordeSutil); */
+    flex-shrink: 0;
+    width: 100%;
+    padding-top: 0;
+}
+
+.modalPie div {
+    width: 100% !important;
+    gap: var(--espacioMd) !important;
+}
+
+.modalPie button {
+    border: 1px solid var(--bordeSutil) !important;
+    width: 100% !important;
+}
+
+@keyframes fadeInOverlay {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUpModal {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

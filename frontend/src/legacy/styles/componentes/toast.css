@@ -1,0 +1,169 @@
+/*
+ * Estilos para el sistema de toasts/notificaciones.
+ * Esquina inferior derecha, animaciones de entrada/salida.
+ */
+
+.contenedorToasts {
+    position: fixed;
+    bottom: var(--espacioLg);
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioSm);
+    max-width: 380px;
+    pointer-events: none;
+}
+
+/* QL123: En mobile, subir toasts por encima del nav inferior + safe area Android */
+@media (max-width: 768px) {
+    .contenedorToasts {
+        bottom: calc(var(--altoNavMobile) + var(--espacioMd) + env(safe-area-inset-bottom, 0px));
+        right: var(--espacioMd);
+        left: var(--espacioMd);
+        max-width: none;
+    }
+}
+
+/* Subir toasts cuando el reproductor global está activo */
+.layoutPrincipal:has(.reproductorGlobal) .contenedorToasts {
+    bottom: 80px;
+}
+
+/* En mobile con reproductor, elevar por encima del nav + reproductor */
+@media (max-width: 768px) {
+    .layoutPrincipal:has(.reproductorGlobal) .contenedorToasts {
+        bottom: calc(var(--altoNavMobile) + 80px + env(safe-area-inset-bottom, 0px));
+    }
+}
+
+.toastItem {
+    pointer-events: auto;
+    background: var(--fondoElevado2);
+    border: 1px solid var(--bordeSutil);
+    border-radius: calc(var(--espacioXs) * 2.5);
+    padding: 12px calc(var(--espacioXs) * 3.5);
+    box-shadow: var(--sombraElevada);
+    animation: toastEntrar 0.3s ease-out;
+    transition:
+        opacity 0.3s,
+        transform 0.3s;
+    min-width: 300px;
+}
+
+.toastItem svg {
+    display: none;
+}
+.toastItemSaliendo {
+    opacity: 0;
+    transform: translateX(100%);
+}
+
+/* Tipos — colores aplicados solo al icono, sin border-left */
+
+.toastContenido {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--espacioXs) * 2.5);
+}
+
+.toastIcono {
+    flex-shrink: 0;
+}
+
+.toastItemExito .toastIcono {
+    color: var(--exito);
+}
+
+.toastItemError .toastIcono {
+    color: var(--error);
+}
+
+.toastItemInfo .toastIcono {
+    color: var(--info);
+}
+
+.toastItemConfirmacion .toastIcono {
+    color: var(--textoSecundario);
+}
+
+.toastMensaje {
+    flex: 1;
+    font-size: var(--fuenteMd);
+    color: var(--textoPrimario);
+    line-height: 1.4;
+}
+
+.toastCerrar {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    color: var(--textoSecundario);
+    cursor: pointer;
+    padding: calc(var(--espacioXs) / 2);
+    border-radius: var(--espacioXs);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.15s;
+}
+
+.toastCerrar:hover {
+    color: var(--textoPrimario);
+}
+
+.toastAcciones {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--espacioSm);
+    margin-top: calc(var(--espacioXs) * 2.5);
+    padding-top: var(--espacioSm);
+}
+
+.toastAccionBtn {
+    padding: 5px calc(var(--espacioXs) * 3.5);
+    border-radius: var(--radioSm);
+    border: 1px solid var(--bordeSutil);
+    background: transparent;
+    color: var(--textoPrimario);
+    font-size: var(--fuenteXs);
+    cursor: pointer;
+    transition:
+        background 0.15s,
+        color 0.15s;
+}
+
+.toastAccionBtn:hover {
+    background: var(--fondoElevado3);
+}
+
+.toastAccionBtnPeligro {
+    background: var(--error);
+    border-color: var(--error);
+    color: var(--blanco);
+}
+
+.toastAccionBtnPeligro:hover {
+    background: color-mix(in srgb, var(--error) 90%, var(--negro));
+}
+
+.toastAccionBtnPrimario {
+    background: var(--acento);
+    border-color: var(--acento);
+    color: var(--textoPrimario);
+}
+
+.toastAccionBtnPrimario:hover {
+    background: color-mix(in srgb, var(--acento) 85%, var(--negro));
+}
+
+@keyframes toastEntrar {
+    from {
+        opacity: 0;
+        transform: translateX(60px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}

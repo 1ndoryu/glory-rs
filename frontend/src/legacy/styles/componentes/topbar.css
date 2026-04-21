@@ -1,0 +1,222 @@
+/*
+ * TopBar — Kamples
+ * Barra superior con búsqueda y acciones.
+ */
+
+.topbar {
+    display: grid;
+    /*
+     * 3 columnas: tabs (izq), busqueda (centro), acciones (der).
+     * 1fr en cada extremo garantiza que la busqueda siempre queda centrada.
+     */
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    gap: var(--espacioLg);
+}
+
+/* D3: Logo Kamples */
+.topbarLogo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--textoPrimario);
+    flex-shrink: 0;
+    transition: color var(--transicionRapida);
+}
+
+.topbarLogo:hover {
+    color: var(--acento);
+}
+
+/* Tabs de navegación — columna izquierda, scroll horizontal si hay muchas */
+.topbarTabs {
+    display: flex;
+    align-items: center;
+    overflow-x: auto;
+    scrollbar-width: none;
+    min-width: 0;
+}
+
+.topbarTabs::-webkit-scrollbar {
+    display: none;
+}
+
+/* Zona de búsqueda — columna central, siempre centrada */
+.topbarBusqueda {
+    width: min(500px, 100%);
+    min-width: 220px;
+}
+
+/* Acciones derecha — columna derecha, alineadas a la derecha */
+.topbarAcciones {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    justify-self: end;
+}
+
+
+.inputBusqueda .campTextoInput {
+    padding: unset;
+    border: unset;
+}
+
+/* Wrapper para posicionar dropdown relativo al botón */
+.topbarIconoWrapper {
+    position: relative;
+}
+
+.topbarBotonNotificacionesPendientes {
+    color: var(--error) !important;
+}
+
+/* Tab individual */
+.topbarTab {
+    background: none;
+    border: none;
+    padding: var(--espacioXs) var(--espacioMd);
+    font-size: var(--fuenteMd);
+    font-weight: var(--pesoMedium);
+    color: var(--textoSecundario);
+    cursor: pointer;
+    border-radius: var(--radioMd);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transicionRapida);
+    white-space: nowrap;
+}
+
+/* Icono dentro de tab — reemplaza texto cuando está presente */
+.topbarTabIcono {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.topbarTab:hover {
+    color: var(--textoPrimario);
+    background-color: var(--fondoElevado2);
+}
+
+.topbarTabActiva {
+    color: var(--textoPrimario) !important;
+    background-color: var(--fondoElevado2);
+}
+
+/* Wrapper del avatar — clickeable */
+.topbarAvatarWrapper {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    border-radius: var(--radioFull);
+    transition: opacity var(--transicionRapida);
+    padding-left: var(--espacioMd)
+}
+
+.topbarAvatarWrapper:hover {
+    opacity: 0.85;
+}
+.topbarBusquedaMovil {
+    display: none;
+}
+
+/* Hamburguesa móvil — oculta en escritorio (ahora en topbarMovilIzquierda) */
+.topbarHamburguesa {
+    display: none;
+}
+
+/* QL10: Contenedores movil — ocultos en escritorio */
+.topbarMovilIzquierda,
+.topbarLogoMovil {
+    display: none;
+}
+
+.topbarBusquedaModalContenido {
+    padding-top: var(--espacioXs);
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioSm);
+}
+
+/* S4.6: Enlace rápido a búsqueda de canciones */
+.topbarEnlaceBusquedaCanciones {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    padding: var(--espacioSm) var(--espacioMd);
+    background: var(--fondoElevado2);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioSm);
+    color: var(--textoSecundario);
+    font-size: var(--fuenteSm);
+    cursor: pointer;
+    transition: background var(--transicionNormal), color var(--transicionNormal);
+}
+
+.topbarEnlaceBusquedaCanciones:hover {
+    background: var(--acento);
+    color: var(--acentoTexto);
+    border-color: var(--acento);
+}
+
+@media (max-width: 980px) {
+    .topbarBusqueda {
+        display: none;
+    }
+
+    .topbarBusquedaMovil {
+        display: flex;
+    }
+
+    .topbar {
+        grid-template-columns: minmax(0, 1fr) auto;
+    }
+}
+
+/* QL10: Mobile — hamburguesa izquierda, logo centro, acciones derecha */
+@media (max-width: 768px) {
+    .topbar {
+        grid-template-columns: auto 1fr auto;
+    }
+
+    /* Mostrar contenedores movil */
+    .topbarMovilIzquierda {
+        display: flex;
+        align-items: center;
+    }
+
+    .topbarLogoMovil {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--textoPrimario);
+    }
+
+    /* Ocultar tabs en movil — siempre se selecciona la primera automaticamente */
+    .topbarTabs {
+        display: none;
+    }
+
+    .topbarAccionesBadge,
+    .topbarBtnCrear,
+    .topbarBtnMezclador,
+    .topbarBtnAdmin {
+        display: none;
+    }
+
+    /* QL16: Ocultar notificaciones, mensajes y avatar — se mueven a la barra inferior (Sidebar) */
+    .topbarIconoWrapper,
+    .topbarIconoMensajes,
+    .topbarAvatarWrapper {
+        display: none !important;
+    }
+}
+
+/* C184: Botón activo (mezclador abierto) */
+.topbarBotonActivo {
+    color: var(--acento) !important;
+}

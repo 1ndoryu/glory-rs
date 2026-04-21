@@ -19,6 +19,18 @@ pub struct RegisterPlayOutcome {
 }
 
 impl PlayRepository {
+    /// Devuelve los IDs únicos de samples reproducidos por el usuario.
+    /// Se usa para pintar indicadores de "ya escuchado" en la UI legacy.
+    pub async fn list_played_ids(pool: &PgPool, user_id: i32) -> Result<Vec<i32>, AppError> {
+        let ids = sqlx::query_scalar::<_, i32>(
+            "SELECT DISTINCT sample_id FROM reproducciones WHERE usuario_id = $1 ORDER BY sample_id DESC",
+        )
+        .bind(user_id)
+        .fetch_all(pool)
+        .await?;
+        Ok(ids)
+    }
+
     /// Inserta una reproducción nueva o actualiza la existente si el mismo
     /// usuario reprodujo el mismo sample en los últimos `debounce_seconds`.
     /// Devuelve `debounced=true` cuando el insert se evitó.

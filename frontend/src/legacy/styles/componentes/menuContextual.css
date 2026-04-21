@@ -1,0 +1,153 @@
+/*
+ * MenuContextual — Kamples
+ * Desktop: menú desplegable posicionado en coordenadas absolutas.
+ * Móvil (QL25): bottom sheet como apps nativas.
+ */
+
+.menuContextualOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: var(--zMenuPortal);
+}
+
+.menuContextual {
+    position: fixed;
+    min-width: 160px;
+    max-width: 280px;
+    max-height: 400px;
+    overflow-y: auto;
+    background-color: var(--fondoElevado1);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioMd);
+    box-shadow: var(--sombraElevada);
+    padding: var(--espacioXs) 0;
+    z-index: var(--zMenuPortal);
+    animation: fadeInMenu var(--transicionRapida) ease;
+}
+
+.menuContextualItem {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    width: 100%;
+    padding: var(--espacioSm) var(--espacioMd);
+    font-size: var(--fuenteSm);
+    color: var(--textoSecundario);
+    cursor: pointer;
+    transition: all var(--transicionRapida);
+    background: none;
+    border: none;
+    font-family: var(--fuentePrincipal);
+    text-align: left;
+    text-decoration: none;
+    justify-content: flex-start;
+}
+
+/* Override BotonBase (0,2,0) — usar 3 clases para ganar en especificidad (0,3,0) */
+.menuContextual .botonBase.menuContextualItem {
+    justify-content: flex-start;
+    padding: var(--espacioSm) var(--espacioMd);
+    height: auto;
+    min-width: unset;
+    font-size: var(--fuenteSm);
+    line-height: normal;
+}
+
+.menuContextualBottomSheet .botonBase.menuContextualItem {
+    justify-content: flex-start;
+    padding: var(--espacioMd) var(--espacioLg);
+    height: auto;
+    min-width: unset;
+    min-height: 42px;
+    font-size: var(--fuenteMd);
+    line-height: normal;
+}
+
+.menuContextualItem:hover {
+    color: var(--textoPrimario);
+}
+
+.menuContextualItem.itemPeligro {
+    color: var(--error);
+}
+
+.menuContextualItemIcono {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+/* QL52: Separador visual entre grupos de opciones */
+.menuContextualSeparador {
+    height: 0.8px;
+    background-color: var(--bordeSutil);
+    margin: var(--espacioXs) 0;
+}
+
+@keyframes fadeInMenu {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* QL25: Bottom sheet para móvil */
+.menuContextualBottomSheet {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: var(--zMenuPortal);
+    background-color: var(--fondoElevado1);
+    border-radius: var(--radioLg) var(--radioLg) 0 0;
+    box-shadow: var(--sombraElevada);
+    padding-bottom: env(safe-area-inset-bottom, var(--espacioMd));
+    animation: bottomSheetEntrar 0.25s ease-out;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.menuContextualBottomSheetBarra {
+    width: 36px;
+    height: 4px;
+    background-color: var(--bordeSutil);
+    border-radius: var(--radioSm);
+    margin: var(--espacioSm) auto 0;
+}
+
+.menuContextualBottomSheetItems {
+    padding: var(--espacioLg);
+}
+
+.menuContextualBottomSheetItems .menuContextualItem {
+    padding: var(--espacioMd) var(--espacioLg);
+    font-size: var(--fuenteMd);
+    min-height: 42px;
+}
+
+/* QL28: Iconos a la derecha, texto a la izquierda en bottom sheet */
+.menuContextualBottomSheetItems .menuContextualItemIcono {
+    order: 1;
+    margin-left: auto;
+}
+
+@keyframes bottomSheetEntrar {
+    from {
+        opacity: 0;
+        transform: translateY(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .menuContextualOverlay {
+        background-color: var(--overlayOscuro);
+    }
+}

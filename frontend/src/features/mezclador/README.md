@@ -7,21 +7,22 @@ Origen: `glorytemplate/Mezclador/` (legado WordPress).
 ## Estado actual
 
 - ✅ Código importado y ubicado físicamente en su destino final.
-- ❌ NO compila aún: depende de `@app/*` (paths legacy del tema WP) y del backend `wp-json/...`.
+- ✅ Compila en validación dedicada con `frontend/tsconfig.mezclador.json`.
+- ✅ Las dependencias legacy `@app/*` ahora resuelven contra una capa mínima de compatibilidad en `frontend/src/app/`.
+- ✅ El browser del DAW ya no depende de `wp-json/...`: `@app/services/apiExplorador` adapta `GET /api/samples` vía Orval para recuperar carpetas y samples públicos.
 - ❌ NO está conectado a ninguna ruta de la SPA.
 
 ## Pendientes (sub-tareas reagendadas)
 
-1. **174A-109b-fase2 — sustituir imports `@app/*`:**
-   - `@app/stores/panelLateralStore`, `@app/stores/crearModalStore`, `@app/components/ui/BotonBase`, `@app/components/ui/Input`, etc.
-   - Decisión: o bien (a) migrar esas dependencias a `frontend/src/components/ui/` y `frontend/src/stores/`, o (b) re-implementarlas mínimamente solo para Mezclador.
-2. **174A-109b-fase3 — migrar `services/api*.ts` a hooks Orval:**
-   - Reemplazar fetchers que apuntan a `wp-json/...` por los hooks generados desde `src/api/` (Orval contra el OpenAPI Rust).
-   - Identificar qué endpoints faltan en el backend Rust y crearlos.
-3. **174A-109b-fase4 — montar ruta SPA:**
+1. **174A-109b-fase4 — montar ruta SPA:**
    - Añadir `<Route path="/mezclador" element={<MezcladorPanel />} />` al router.
    - Lazy-load la feature porque pesa ≥100 archivos + dependencias de audio (`soundtouchjs`, `lucide-react`).
-4. **174A-109b-fase5 — quitar `exclude: src/features/**/*` del `tsconfig.json` cuando todas las features compilen.**
+2. **174A-109b-fase5 — quitar `exclude: src/features/**/*` del `tsconfig.json` cuando todas las features compilen.**
+
+## Notas de adaptación
+
+- La compatibilidad `@app/*` es intencionalmente mínima: solo cubre stores, tipos y componentes que el Mezclador consume hoy.
+- `@app/services/apiExplorador` agrupa el catálogo público por `tipo` para reconstruir carpetas navegables sin reintroducir el backend WordPress. Si el backend Rust incorpora un explorador más rico, esa mejora debe hacerse dentro de este adaptador, no volviendo a `wp-json/...`.
 
 ## Estructura
 

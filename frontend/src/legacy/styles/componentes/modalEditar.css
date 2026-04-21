@@ -1,0 +1,133 @@
+/*
+ * modalEditar.css — Kamples (C126)
+ * Estilos para el modal de edición unificado de samples/publicaciones/colecciones.
+ * D7: editarAcciones/Izquierda/Derecha eliminados (ahora ModalAcciones).
+ * D8: editarMetadataChips eliminados, editarImagenPortada agregado.
+ */
+
+.editarFormulario {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioLg);
+}
+
+.editarGrupo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioXs);
+}
+
+.editarGrupoLabel {
+    font-size: var(--fuenteSm);
+    color: var(--textoSecundario);
+    font-weight: var(--pesoSemibold);
+}
+
+.editarFilaDoble {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--espacioMd);
+}
+
+.editarCheckbox {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    font-size: var(--fuenteSm);
+    color: var(--textoSecundario);
+    cursor: pointer;
+}
+
+.editarCheckbox input[type="checkbox"] {
+    accent-color: var(--acento);
+    width: 16px;
+    height: 16px;
+}
+
+/* D8: Preview de imagen de portada — F3: clickeable + X en esquina */
+.editarImagenPortada {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioSm);
+    width: 100%;
+}
+
+.editarImagenContenedor {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+}
+
+.editarImagenPreview {
+    width: 100%;
+    margin: auto;
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: var(--radioMd);
+    object-fit: cover;
+    border: 1px solid var(--bordeSutil);
+}
+
+/* F3: Imagen clickeable para seleccionar nueva */
+.editarImagenClickeable {
+    cursor: pointer;
+    transition: opacity var(--transicionRapida);
+}
+
+.editarImagenClickeable:hover {
+    opacity: 0.8;
+}
+
+/* F3: Botón X posicionado en esquina superior derecha de la imagen */
+.editarImagenQuitar {
+    position: absolute;
+    top: var(--espacioXs);
+    right: var(--espacioXs);
+    background: var(--overlayOscuro);
+    border-radius: var(--radioFull);
+    backdrop-filter: blur(4px);
+}
+
+.editarImagenAcciones {
+    display: flex;
+    gap: var(--espacioXs);
+    align-items: center;
+}
+
+.editarImagenVacia {
+    width: 100%;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--espacioXs);
+    border: 1px dashed var(--bordeSutil);
+    border-radius: var(--radioMd);
+    color: var(--textoTerciario);
+    cursor: pointer;
+    transition: border-color var(--transicionRapida);
+}
+
+.editarImagenVacia:hover {
+    border-color: var(--bordeActivo);
+}
+
+/* D7: Adjuntos audio/imagen separados de las acciones */
+.editarAdjuntos {
+    display: flex;
+    gap: var(--espacioXs);
+}
+
+.editarTagsHint {
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .editarFilaDoble {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,33 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT t.val AS \"tag!\", COUNT(*)::bigint AS \"conteo!\"\n           FROM samples s\n           CROSS JOIN LATERAL jsonb_array_elements_text(\n                COALESCE(\n                    CASE WHEN jsonb_typeof(s.metadata->'tags') = 'array' THEN s.metadata->'tags' END,\n                    '[]'::jsonb\n                )\n                ||\n                COALESCE(\n                    CASE WHEN jsonb_typeof(s.metadata->'artista_vibes') = 'array' THEN s.metadata->'artista_vibes' END,\n                    '[]'::jsonb\n                )\n           ) AS t(val)\n           WHERE s.eliminado_en IS NULL\n             AND s.estado = 'activo'\n             AND s.mostrar_en_comunidad = TRUE\n             AND ($1::text IS NULL OR (s.metadata->'genero') ? $1)\n             AND ($2::int IS NULL OR s.bpm >= $2)\n             AND ($3::int IS NULL OR s.bpm <= $3)\n             AND ($4::text IS NULL OR s.key = $4)\n             AND ($5::text IS NULL OR s.tipo = $5)\n             AND btrim(t.val) <> ''\n           GROUP BY t.val\n           ORDER BY COUNT(*) DESC, t.val ASC\n           LIMIT $6",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "tag!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "conteo!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int4",
+        "Int4",
+        "Text",
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "b5f751c9fbe7f893cb5df32d2037dd8e2dc93da32055adbb5a8b807b1088333e"
+}

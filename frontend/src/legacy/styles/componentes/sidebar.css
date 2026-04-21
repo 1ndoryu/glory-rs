@@ -1,0 +1,202 @@
+/*
+ * Sidebar — Kamples
+ * Navegación lateral con solo iconos.
+ */
+
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    gap: var(--espacioXs);
+}
+
+.sidebarLogo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+}
+
+.sidebarLogo svg {
+    width: 24px;
+    height: 24px;
+    color: var(--acento-blanco);
+}
+
+.sidebarNav {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* QK101: Centrar items de navegacion verticalmente */
+    justify-content: center;
+    gap: var(--espacioXs);
+    width: 100%;
+    flex: 1;
+}
+
+.sidebarItem {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radioMd);
+    color: var(--textoSecundario);
+    cursor: pointer;
+    transition: all var(--transicionRapida);
+    background: none;
+    border: none;
+    padding: 0 !important;
+}
+
+.sidebarItem svg {
+    height: 20px;
+}
+
+.sidebarItem:hover {
+    color: var(--textoPrimario);
+}
+
+.sidebarItem.sidebarItemActivo {
+    color: var(--blanco);
+}
+
+/* Tooltip al hacer hover */
+.sidebarItem::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: calc(100% + 8px);
+    top: 50%;
+    transform: translateY(-50%);
+    padding: var(--espacioXs) var(--espacioSm);
+    background-color: var(--fondoElevado3);
+    color: var(--textoPrimario);
+    font-size: var(--fuenteXs);
+    border-radius: var(--radioSm);
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transicionRapida);
+    z-index: var(--zMenu);
+}
+
+.sidebarItem:hover::after {
+    opacity: 1;
+}
+
+/* Separador */
+.sidebarSeparador {
+    width: 24px;
+    height: 1px;
+    background-color: var(--bordeSutil);
+    margin: var(--espacioSm) 0;
+}
+
+/* Badge de notificación */
+.sidebarBadge {
+    display: none !important;
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radioFull);
+    background-color: var(--error);
+    border: 2px solid var(--fondoElevado1);
+}
+
+/* Parte inferior (configuración, etc.) */
+.sidebarFooter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--espacioXs);
+    margin-top: auto;
+    padding: var(--espacioMd) 0;
+}
+
+/* Mobile: sidebar como barra de navegación inferior */
+@media (max-width: 768px) {
+    .sidebar {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-around;
+        width: 100%;
+        height: 100%;
+        gap: 0;
+        padding: 0;
+    }
+
+    .sidebarLogo,
+    .sidebarFooter,
+    .sidebarSeparador {
+        display: none;
+    }
+
+    .sidebarNav {
+        flex-direction: row;
+        justify-content: space-around;
+        align-items: center;
+        width: 100%;
+        flex: unset;
+        gap: 0;
+    }
+
+    .sidebarItem {
+        flex: 1;
+        width: auto;
+        height: 100%;
+        min-height: 48px;
+        border-radius: 0;
+        flex-direction: column;
+        gap: var(--espacio2xs);
+        font-size: var(--fuenteXs);
+        color: var(--textoSecundario);
+    }
+
+    /* QL16: Wrapper para items con dropdown (mensajes, notificaciones) */
+    .sidebarItemWrapper {
+        position: relative;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        min-height: 48px;
+    }
+
+    .sidebarItemWrapper .sidebarItem {
+        flex: unset;
+        width: 100%;
+    }
+
+    /* QL16: Indicador de notificaciones no leidas en barra inferior */
+    .sidebarItemConBadge {
+        color: var(--acento) !important;
+    }
+
+    /* QL16: Avatar en barra inferior — ajustar tamano */
+    .sidebarItem .avatarContenedor {
+        width: 24px;
+        height: 24px;
+    }
+
+    /* Ocultar tooltips en mobile */
+    .sidebarItem::after {
+        display: none;
+    }
+
+    /* Sin etiquetas de texto — solo iconos en nav inferior */
+    .sidebarItem::before {
+        display: none;
+    }
+
+    .sidebarItem.sidebarItemActivo {
+        color: var(--acento);
+    }
+}

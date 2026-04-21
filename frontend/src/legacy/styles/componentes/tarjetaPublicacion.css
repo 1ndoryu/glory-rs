@@ -1,0 +1,310 @@
+/*
+ * tarjetaPublicacion.css — Kamples
+ * Estilos para las tarjetas de publicación social en el feed.
+ */
+
+.tarjetaPublicacion {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioMd);
+    padding: var(--espacioLg);
+    background-color: var(--fondoElevado1);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioMd);
+    transition: border-color var(--transicionRapida);
+}
+
+.tarjetaPublicacion:hover {
+    border-color: var(--bordeActivo);
+}
+
+/* Cabecera */
+.tarjetaPubCabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--espacioSm);
+}
+
+/* Bloque autor: avatar + textos (igual que comunidadAutorBloque) */
+.tarjetaPubAutorBloque {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    flex: 1;
+    min-width: 0;
+}
+
+/* Contenedor de nombre + meta del autor */
+.tarjetaPubAutorTextos {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--espacioXs);
+    min-width: 0;
+    padding: 0;
+    margin-bottom: var(--espacioXs);
+}
+
+/* Solo subrayar el nombre al hacer hover encima del enlace del autor */
+.tarjetaPubNombreEnlace:hover .tarjetaPubNombre {
+    text-decoration: underline;
+}
+
+.tarjetaPubNombre {
+    font-size: calc(var(--fuenteSm) + 1px);
+    font-weight: var(--pesoMedio);
+    color: var(--textoPrimario);
+    display: flex;
+    align-items: center;
+    gap: var(--espacioXs);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* @username · tiempo en la misma línea */
+.tarjetaPubMeta {
+    font-size: calc(var(--fuenteXs) + 1px);
+    color: var(--textoTerciario);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Fecha clickeable -> navega a detalle de publicación */
+.tarjetaPubFechaEnlace {
+    all: unset;
+    cursor: pointer;
+    color: inherit;
+    transition: color 0.15s ease;
+}
+
+.tarjetaPubFechaEnlace:hover {
+    color: var(--textoPrimario);
+    text-decoration: underline;
+}
+
+/* Grupo derecho: badge + menú */
+.tarjetaPubAccionesHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioXs);
+    flex-shrink: 0;
+}
+
+.tarjetaPubAccionesHeader button {
+    padding: 0 !important;
+}
+
+/* Menú 3 puntos: oculto hasta hacer hover en la tarjeta (igual que comunidad) */
+.tarjetaPubMenuBtn {
+    color: var(--textoTerciario);
+    padding: var(--espacioXs);
+    opacity: 1;
+    transition: opacity 0.15s, color 0.15s;
+    background: none;
+}
+
+.tarjetaPublicacion:hover .tarjetaPubMenuBtn {
+    opacity: 1;
+}
+
+.tarjetaPubMenuBtn:hover {
+    color: var(--textoPrimario);
+    background: var(--fondoElevado2);
+}
+
+/* Contenido textual */
+.tarjetaPubContenido {
+    font-size: var(--fuenteMd);
+    color: var(--textoPrimario);
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* Grid de imágenes */
+.tarjetaPubImagenes {
+    display: grid;
+    gap: calc(var(--espacioXs) / 2);
+    border-radius: var(--radioMd);
+    overflow: hidden;
+}
+
+.tarjetaPubImagenes1 {
+    grid-template-columns: 1fr;
+}
+
+.tarjetaPubImagenes2 {
+    grid-template-columns: 1fr 1fr;
+}
+
+.tarjetaPubImagenes3 {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+}
+
+.tarjetaPubImagenes3 .tarjetaPubImagenItem:first-child {
+    grid-row: span 2;
+}
+
+.tarjetaPubImagenes4 {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+}
+
+.tarjetaPubImagenItem:hover img {
+    transform: scale(1.02);
+}
+
+/* Samples adjuntos */
+.tarjetaPubSamples {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioXs);
+}
+
+/* Acciones */
+.tarjetaPubAcciones {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioXl);
+    padding-top: var(--espacioSm);
+    border-top: 1px solid var(--bordeSutil);
+}
+
+.tarjetaPubAccionBtn {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioXs);
+    padding: var(--espacioXs) var(--espacioSm);
+    color: var(--textoTerciario);
+    background: none;
+    border: none;
+    border-radius: var(--radioSm);
+    cursor: pointer;
+    font-size: var(--fuenteSm);
+    transition: all var(--transicionRapida);
+}
+
+.tarjetaPubAccionBtn:hover {
+    color: var(--textoSecundario);
+    background-color: var(--fondoElevado2);
+}
+
+.tarjetaPubAccionLiked {
+    color: var(--error);
+}
+
+.tarjetaPubAccionLiked:hover {
+    color: var(--blanco);
+}
+
+.tarjetaPubAccionReposteado {
+    color: var(--exito);
+}
+
+.tarjetaPubAccionReposteado:hover {
+    color: var(--exito);
+}
+
+/* Bloque de repost: indicador superior y contenido embebido del original */
+.tarjetaPubRepostIndicador {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioXs);
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+}
+
+.tarjetaPubRepostIndicador svg {
+    flex-shrink: 0;
+}
+
+.tarjetaPubRepostOriginal {
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioMd);
+    padding: var(--espacioLg);
+    margin-top: var(--espacioXs);
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioXs);
+    background: var(--fondoElevado2);
+}
+
+.tarjetaPubRepostOriginalAutor {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioXs);
+}
+
+.tarjetaPubRepostOriginalNombre {
+    font-size: var(--fuenteSm);
+    font-weight: var(--pesoMedio);
+    color: var(--textoPrimario);
+}
+
+.tarjetaPubRepostOriginalUsername {
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+}
+
+.tarjetaPubSamples .tarjetaSample {
+    padding: 0;
+}
+
+/* Contenedor del avatar: permite superponer el botón extra (ej: seguir) */
+.tarjetaPubAvatarContenedor {
+    position: relative;
+    flex-shrink: 0;
+}
+
+/* Avatar sm en tarjeta de publicación: 34px para consistencia con feed */
+.tarjetaPubAvatarContenedor .avatar.avatarSm {
+    width: 34px;
+    height: 34px;
+}
+
+/* Resetear padding en enlace de autor (antes era button, ahora es a) */
+.tarjetaPubAutorBloque a {
+    padding: 0 !important;
+    height: unset !important;
+}
+
+/* Grid de imágenes: sin padding + altura máxima definida */
+.tarjetaPubImagenes .imagenClickable {
+    padding: unset !important;
+    max-height: 700px !important;
+    height: 100% !important;
+    display: block;
+}
+
+/* Imagen dentro del wrapper clickable */
+.imagenClickable .tarjetaPubImg {
+    width: 100%;
+    height: 100%;
+    max-height: 700px;
+    object-fit: cover;
+    border-radius: var(--radioSm);
+    display: block;
+    transition: transform var(--transicionNormal);
+}
+
+.imagenClickable:hover .tarjetaPubImg {
+    transform: scale(1.02);
+}
+
+/* Lightbox interno del componente (position: fixed cubre viewport) */
+.tarjetaPublicacion .imagenLightbox {
+    position: fixed;
+    inset: 0;
+    background: var(--overlayOscuro);
+    backdrop-filter: blur(6px);
+    z-index: var(--zModal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: zoom-out;
+    animation: lightboxFadeIn 0.18s ease;
+}

@@ -1,0 +1,273 @@
+/*
+ * dropdownPanel.css — Kamples
+ * Estilos compartidos para paneles dropdown (notificaciones, mensajes).
+ */
+
+.dropdownPanel {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    width: 360px;
+    max-height: 440px;
+    background-color: var(--fondoElevado1);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioLg);
+    box-shadow: var(--sombraElevada);
+    z-index: var(--zModal);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: dropdownEntrar 0.15s ease-out;
+}
+
+@keyframes dropdownEntrar {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dropdownPanelCabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--espacioMd) var(--espacioLg);
+    border-bottom: 1px solid var(--bordeSutil);
+}
+
+.dropdownPanelTitulo {
+    font-size: var(--fuenteMd);
+    font-weight: var(--pesoSemibold);
+    color: var(--textoPrimario);
+}
+
+.dropdownPanelEnlace {
+    font-size: var(--fuenteXs);
+    color: var(--acento);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.dropdownPanelEnlace:hover {
+    text-decoration: underline;
+}
+
+/* QL17: Botón cerrar para bottom-sheet móvil */
+.dropdownPanelCerrar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: none;
+    color: var(--textoSecundario);
+    cursor: pointer;
+    border-radius: var(--radioMd);
+    transition: background-color var(--transicionRapida);
+}
+
+.dropdownPanelCerrar:hover {
+    background-color: var(--fondoElevado2);
+}
+
+.dropdownPanelLista {
+    padding: var(--espacioMd);
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioMd);
+}
+
+/* Item genérico de dropdown */
+.dropdownItem {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--espacioSm);
+    cursor: pointer;
+    transition: background-color var(--transicionRapida);
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    text-decoration: none;
+    color: inherit;
+    padding: var(--espacioXs) var(--espacioSm);
+    border-radius: var(--radioMd);
+}
+
+.dropdownItem:hover {
+    background-color: var(--fondoElevado2);
+}
+
+.dropdownItemNoLeido {
+    background-color: var(--fondoElevado2);
+}
+
+.dropdownItemIcono {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radioFull);
+    background-color: var(--fondoElevado3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--textoSecundario);
+}
+
+/* Cuando el icono contiene un avatar, quitar fondo para que la imagen se vea limpia */
+.dropdownItemConAvatar {
+    background-color: transparent;
+}
+
+.dropdownItemAvatar {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radioFull);
+    object-fit: cover;
+}
+
+.dropdownItemContenido {
+    flex: 1;
+    min-width: 0;
+}
+
+.dropdownItemTexto {
+    font-size: var(--fuenteSm);
+    color: var(--textoPrimario);
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.dropdownItemTiempo {
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+    margin-top: calc(var(--espacioXs) / 2);
+}
+
+.dropdownItemPunto {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radioFull);
+    background-color: var(--acento);
+    flex-shrink: 0;
+    margin-top: calc(var(--espacioXs) * 1.5);
+}
+
+/* Estado vacío */
+.dropdownPanelVacio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--espacioSm);
+    padding: var(--espacio2xl);
+    color: var(--textoTerciario);
+}
+
+.dropdownPanelVacio p {
+    font-size: var(--fuenteSm);
+}
+
+/* Overlay para cerrar al hacer click fuera */
+.dropdownOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: calc(var(--zModal) - 1);
+}
+
+/* QL17: En móvil, dropdowns se convierten en bottom-sheet a pantalla completa */
+@media (max-width: 768px) {
+    .dropdownPanel {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        max-width: 100%;
+        max-height: 100%;
+        border-radius: 0;
+        border: none;
+        transform: none;
+        padding-top: var(--safeAreaTop);
+        animation: bottomSheetEntrar 0.25s ease-out;
+    }
+
+    @keyframes bottomSheetEntrar {
+        from {
+            opacity: 0;
+            transform: translateY(100%);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .dropdownPanelLista {
+        flex: 1;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* QQ52: Tabs principal/solicitudes para mensajes */
+.dropdownPanelTabs {
+    display: flex;
+    border-bottom: 1px solid var(--bordeSutil);
+    padding: 0 var(--espacioSm);
+}
+
+/* QK105: Estilos corregidos — solo flex + align + border-radius 0 */
+.dropdownPanelTab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    border-radius: 0;
+}
+
+.dropdownPanelTab:hover {
+    color: var(--textoSecundario);
+}
+
+.dropdownPanelTabActiva {
+    color: var(--acento);
+    border-bottom-color: var(--acento);
+}
+
+.dropdownPanelTabBadge {
+    font-size: var(--fuenteXs);
+    background-color: var(--acento);
+    color: var(--textoPrimario);
+    border-radius: var(--radioFull);
+    padding: 1px 6px;
+    min-width: 18px;
+    text-align: center;
+    line-height: 1.4;
+}
+
+/* [193A-55] Icono verificado en dropdown mensajes */
+/* [193A-73] Wrapper inline-flex para que el badge quede al lado del nombre.
+ * -webkit-box del padre rompe display:inline en SVGs, pero inline-flex crea
+ * un contexto propio que respeta el layout horizontal. */
+.dropdownNombreConBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--espaciadoMicro, 2px);
+}
+
+.dropdownVerificado {
+    color: var(--acento);
+    flex-shrink: 0;
+}

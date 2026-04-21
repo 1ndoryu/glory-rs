@@ -1,0 +1,248 @@
+/*
+ * PerfilIsland — Kamples
+ * Estilos para la isla de perfil público.
+ */
+
+.perfilContenedor {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: var(--espacioXl);
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioMd);
+}
+
+/* Cabecera con portada */
+.perfilPortada {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    background-color: var(--fondoElevado2);
+    border-radius: var(--radioLg);
+    margin-bottom: calc(var(--espacioXs) * 15);
+}
+
+.perfilPortada img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.perfilPortadaImg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.perfilAvatarWrapper {
+    position: absolute;
+    bottom: -50px;
+    left: var(--espacioXl);
+}
+
+/* Info principal */
+.perfilInfo {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.perfilInfoTexto {
+    flex: 1;
+}
+
+.perfilNombre {
+    font-size: var(--fuenteXl);
+    font-weight: var(--pesoBold);
+    color: var(--textoPrimario);
+    margin-bottom: calc(var(--espacioXs) / 2);
+    gap: var(--espacioMd);
+    display: flex;
+    align-items: center;
+}
+
+.perfilUsername {
+    font-size: var(--fuenteSm);
+    color: var(--textoSecundario);
+    margin-bottom: var(--espacioSm);
+}
+
+.perfilBio {
+    font-size: var(--fuenteMd);
+    color: var(--textoSecundario);
+    line-height: 1.5;
+    margin-bottom: var(--espacioMd);
+    max-width: 500px;
+}
+
+/* Stats */
+.perfilStats {
+    display: flex;
+    gap: var(--espacioXl);
+    margin-bottom: var(--espacioLg);
+}
+
+.perfilStat {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    cursor: pointer;
+    gap: var(--espacioSm);
+}
+
+/* Stat interactivo (ej: seguidores clickable) */
+.perfilStatClickable {
+    border-radius: var(--radioSm);
+    padding: var(--espacioXs) var(--espacioSm);
+    transition: background-color 0.15s ease;
+}
+
+.perfilStatClickable:hover {
+    background-color: var(--hoverSutil);
+}
+
+.perfilStatLabel {
+    /* font-size: var(--fuenteXs); */
+    color: var(--textoTerciario);
+    /* text-transform: uppercase; */
+    /* letter-spacing: 0.5px; */
+}
+
+/* Acciones */
+.perfilAcciones {
+    display: flex;
+    gap: var(--espacioSm);
+    flex-shrink: 0;
+    align-items: center;
+}
+
+/* [193A-78] Botón icono en acciones de perfil — sin borde ni padding extra */
+/* [2003A-32] Especificidad .botonBase.X para vencer a .botonBase.tamanoMd (0,2,0).
+ * Ambos botones (seguir y mensaje) usan esta clase → mismo tamaño 34x34. */
+.botonBase.perfilAccionIcono {
+    border: none;
+    padding: var(--espacioXs);
+    background: transparent;
+    width: 34px;
+}
+
+/* Tabs */
+.perfilTabs {
+    margin-bottom: var(--espacioXl);
+}
+
+/* Contenido tabs */
+.perfilContenidoTab {
+    min-height: 200px;
+}
+
+/* Lista de samples — usa clase centralizada .listaDeSamples de feedSamples.css */
+
+/* Reemplazado por EstadoVacio centralizado (C359) */
+
+/* Responsive */
+@media (max-width: 600px) {
+    .perfilStats {
+        gap: var(--espacioLg);
+    }
+
+    .perfilPortada {
+        height: 140px;
+    }
+
+    /* [183A-47] Ocultar boton editar perfil en movil — ya esta en menu 3 puntos */
+    .perfilBtnEditar {
+        display: none;
+    }
+}
+
+/* Metadata del perfil (ubicación, web) */
+.perfilMetadata {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioLg);
+    margin-bottom: var(--espacioMd);
+    flex-wrap: wrap;
+}
+
+.perfilMetaItem {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--espacioXs);
+    font-size: var(--fuenteSm);
+    color: var(--textoTerciario);
+}
+
+.perfilMetaLink {
+    color: var(--acento);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.perfilMetaLink:hover {
+    text-decoration: underline;
+}
+
+/* Publicaciones mockup */
+.perfilPublicaciones {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioMd);
+}
+
+.perfilPublicacion {
+    background-color: var(--fondoElevado1);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioMd);
+    padding: var(--espacioMd);
+}
+
+.perfilPublicacionHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    margin-bottom: var(--espacioSm);
+}
+
+.perfilPublicacionMeta {
+    display: flex;
+    flex-direction: column;
+}
+
+.perfilPublicacionAutor {
+    font-size: var(--fuenteSm);
+    font-weight: var(--pesoSemibold);
+    color: var(--textoPrimario);
+}
+
+.perfilPublicacionFecha {
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+}
+
+.perfilPublicacionTexto {
+    font-size: var(--fuenteMd);
+    color: var(--textoSecundario);
+    line-height: 1.5;
+}
+
+.perfilContenedorInterno {
+    background: var(--fondoElevado1);
+    padding: var(--espacioXl);
+    border-radius: var(--radioSm);
+    border: 1px solid var(--bordeSutil);
+}
+
+/* [193A-55] Icono verificado en perfil */
+.perfilVerificado {
+    color: var(--acento);
+    flex-shrink: 0;
+}
+
+/* Movil */
+
+@media (max-width: 768px) {
+    .perfilContenedor {
+        padding: var(--espacioMd);
+    }
+}

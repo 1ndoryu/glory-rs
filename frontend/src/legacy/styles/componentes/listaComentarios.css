@@ -1,0 +1,504 @@
+/*
+ * listaComentarios.css — Kamples
+ * Estilos para la lista de comentarios y el input de nuevo comentario.
+ */
+
+.listaComentarios {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioSm);
+}
+
+.comentariosLista {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioSm);
+}
+
+/* Cada comentario */
+.comentarioItem {
+    display: flex;
+    gap: var(--espacioMd);
+    align-items: flex-start;
+}
+
+.comentarioAutor {
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.comentarioCuerpo {
+    flex: 1;
+    min-width: 0;
+}
+
+.comentarioCabeceraLinea {
+    display: flex;
+    align-items: baseline;
+    gap: var(--espacioSm);
+    margin-bottom: calc(var(--espacioXs) / 2);
+}
+
+.comentarioNombre {
+    font-size: var(--fuenteSm);
+    font-weight: var(--pesoBold);
+    color: var(--textoPrimario);
+    cursor: pointer;
+}
+
+.comentarioNombre:hover {
+    text-decoration: underline;
+}
+
+.comentarioTiempo {
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+}
+
+.comentarioTexto {
+    font-size: var(--fuenteSm);
+    color: var(--textoSecundario);
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+/* Ver más */
+.comentariosVerMas {
+    background: none;
+    border: none;
+    color: var(--textoTerciario);
+    font-size: var(--fuenteXs);
+    cursor: pointer;
+    padding: var(--espacioXs) 0;
+    text-align: left;
+}
+
+.comentariosVerMas:hover {
+    color: var(--textoSecundario);
+    text-decoration: underline;
+}
+
+/* Input nuevo comentario */
+.comentarioNuevo {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+}
+
+.comentarioNuevoInput {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: var(--espacioXs);
+    background-color: var(--fondoElevado2);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioFull);
+    padding: var(--espacioXs) var(--espacioSm);
+    transition: border-color var(--transicionRapida);
+}
+
+.comentarioNuevoInput button {
+    padding: unset !important;
+}
+
+.comentarioEnviarBtn {
+    width: 60px;
+}
+
+.comentarioNuevoInput:focus-within {
+    border-color: var(--bordeActivo);
+}
+
+.comentarioNuevoInput input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--textoPrimario);
+    font-family: var(--fuentePrincipal);
+    font-size: var(--fuenteSm);
+    padding: unset;
+}
+
+.comentarioNuevoInput input::placeholder {
+    color: var(--textoTerciario);
+}
+
+.comentarioEnviarBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: none;
+    border: none;
+    color: var(--textoTerciario);
+    cursor: pointer;
+    border-radius: var(--radioFull);
+    transition: all var(--transicionRapida);
+}
+
+.comentarioEnviarBtn:hover:not(:disabled) {
+    color: var(--textoPrimario);
+}
+
+.comentarioEnviarBtn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* Vacío */
+.comentariosVacio {
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+    text-align: center;
+    padding: var(--espacioSm) 0;
+}
+
+/* C129: Sentinela para infinite scroll */
+.comentariosSentinela {
+    display: flex;
+    justify-content: center;
+    padding: var(--espacioXs) 0;
+    min-height: 1px;
+}
+
+.comentariosCargando {
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+}
+
+/* C130: Imagen en comentario */
+.comentarioImagen {
+    display: block;
+    max-width: 280px;
+    margin: var(--espacioXs) 0;
+    border-radius: var(--radioMd);
+    overflow: hidden;
+}
+
+.comentarioImagen img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+    max-height: 200px;
+    border-radius: var(--radioMd);
+}
+
+/* C130+C201: Mini reproductor de audio en comentarios con waveform */
+.comentarioAudio {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioXs);
+    border-radius: var(--radioFull);
+    padding: var(--espacioXs) var(--espacioSm);
+    margin: var(--espacioXs) 0;
+    max-width: 280px;
+    border: 1px solid var(--bordeSutil);
+}
+
+button.botonBase.varianteGhost.tamanoMd.comentarioEnviarBtn {
+    border: unset;
+    color: var(--blanco);
+}
+
+.comentarioAudioBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background-color: var(--acento);
+    color: var(--blanco);
+    border: none;
+    border-radius: var(--radioFull);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: opacity var(--transicionRapida);
+}
+
+.comentarioAudioBtn:hover {
+    opacity: 0.85;
+}
+
+/* C201: Contenedor del waveform en comentarios */
+.comentarioAudioWaveform {
+    flex: 1;
+    min-width: 0;
+    height: 28px;
+    display: flex;
+    align-items: center;
+}
+
+/* C130: Contenedor del input con preview */
+.comentarioNuevoContenedor {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioXs);
+    padding-top: var(--espacioSm);
+    border-top: 1px solid var(--bordeSutil);
+}
+
+/* C130: Preview de archivo adjunto */
+.comentarioPreview {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    padding: var(--espacioXs) var(--espacioSm);
+    background-color: var(--fondoElevado2);
+    border-radius: var(--radioMd);
+    position: relative;
+}
+
+.comentarioPreviewImagen {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: var(--radioSm);
+}
+
+.comentarioPreviewAudio {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioXs);
+    font-size: var(--fuenteXs);
+    color: var(--textoSecundario);
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.comentarioPreviewCerrar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    background: var(--fondoElevado3);
+    border: none;
+    border-radius: var(--radioFull);
+    color: var(--textoTerciario);
+    cursor: pointer;
+    margin-left: auto;
+}
+
+.comentarioPreviewCerrar:hover {
+    color: var(--textoPrimario);
+}
+
+/* C130: Botones adjuntar imagen/audio */
+.comentarioAdjuntarBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: none;
+    border: none;
+    color: var(--textoTerciario);
+    cursor: pointer;
+    border-radius: var(--radioFull);
+    transition: color var(--transicionRapida);
+    flex-shrink: 0;
+}
+
+.comentarioAdjuntarBtn:hover {
+    color: var(--textoPrimario);
+}
+
+/* Input de archivo oculto */
+.comentarioInputOculto {
+    display: none;
+}
+
+/* C264: Botón menú 3 puntos */
+.comentarioMenuBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    background: none;
+    border: none;
+    color: var(--textoTerciario);
+    cursor: pointer;
+    border-radius: var(--radioFull);
+    opacity: 0;
+    transition: all var(--transicionRapida);
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.comentarioItem:hover .comentarioMenuBtn {
+    opacity: 1;
+}
+
+.comentarioMenuBtn:hover {
+    color: var(--textoPrimario);
+    background-color: var(--fondoElevado2);
+}
+
+/* C264: Indicador de editado */
+.comentarioEditado {
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+    font-style: italic;
+}
+
+/* C264: Modo edición inline */
+.comentarioEdicion {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioXs);
+    margin-top: var(--espacioXs);
+}
+
+.comentarioEdicion input {
+    width: 100%;
+    background: var(--fondoElevado2);
+    border: 1px solid var(--bordeActivo);
+    border-radius: var(--radioSm);
+    padding: var(--espacioXs) var(--espacioSm);
+    color: var(--textoPrimario);
+    font-family: var(--fuentePrincipal);
+    font-size: var(--fuenteSm);
+    outline: none;
+}
+
+.comentarioEdicionBotones {
+    display: flex;
+    gap: var(--espacioXs);
+    justify-content: flex-end;
+}
+
+.comentarioEdicionBotones button {
+    background: none;
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioSm);
+    padding: var(--espacioXs) var(--espacioSm);
+    font-size: var(--fuenteXs);
+    color: var(--textoSecundario);
+    cursor: pointer;
+    transition: all var(--transicionRapida);
+}
+
+.comentarioEdicionBotones button:hover {
+    border-color: var(--bordeActivo);
+    color: var(--textoPrimario);
+}
+
+.comentarioEdicionGuardar {
+    background-color: var(--acento) !important;
+    color: var(--blanco) !important;
+    border-color: var(--acento) !important;
+}
+
+.comentarioEdicionGuardar:hover {
+    opacity: 0.9;
+}
+
+/* C265: Barra de acciones (like, responder) */
+.comentarioAcciones {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    margin-top: calc(var(--espacioXs) / 2);
+    padding: var(--espacioSm) 0;
+}
+
+.comentarioAccionBtn {
+    display: flex;
+    align-items: center;
+    background: none;
+    border: none;
+    color: var(--textoTerciario);
+    font-size: var(--fuenteXs);
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: var(--radioSm);
+    transition: all var(--transicionRapida);
+}
+
+.comentarioAccionBtn:hover {
+    color: var(--textoSecundario);
+    background-color: var(--fondoElevado2);
+}
+
+.comentarioAccionBtn.comentarioLiked {
+    color: var(--error);
+}
+
+.comentarioAccionConteo {
+    font-size: var(--fuenteXs);
+    font-weight: var(--pesoMedium);
+}
+
+/* C265: Input de respuesta inline */
+.comentarioRespuestaInput {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioXs);
+    margin-top: var(--espacioXs);
+    background-color: var(--fondoElevado2);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioFull);
+    padding: var(--espacioXs) var(--espacioSm);
+}
+
+.comentarioRespuestaInput:focus-within {
+    border-color: var(--bordeActivo);
+}
+
+.comentarioRespuestaInput input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--textoPrimario);
+    font-family: var(--fuentePrincipal);
+    font-size: var(--fuenteSm);
+    padding: 0;
+    padding-left: 10px !important;
+}
+
+.comentarioRespuestaInput input::placeholder {
+    color: var(--textoTerciario);
+}
+
+/* C265: Botón ver/ocultar respuestas */
+.comentarioVerRespuestas {
+    background: none;
+    border: none;
+    color: var(--acento);
+    font-size: var(--fuenteXs);
+    cursor: pointer;
+    padding: var(--espacioXs) 0 0;
+    text-align: left;
+}
+
+.comentarioVerRespuestas:hover {
+    text-decoration: underline;
+}
+
+/* C265: Lista de respuestas anidadas */
+.comentarioRespuestasLista {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioXs);
+    margin-top: var(--espacioXs);
+    padding-left: var(--espacioMd);
+    border-left: 2px solid var(--bordeSutil);
+}
+
+/* C265: Comentario respuesta (anidado) */
+.comentarioRespuesta {
+    padding-top: var(--espacioXs);
+}
+
+/* [193A-55] Icono verificado en comentarios */
+.comentarioVerificado {
+    color: var(--acento);
+    flex-shrink: 0;
+}

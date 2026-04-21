@@ -1,6 +1,8 @@
 use axum::extract::{Path, Query, State};
 use axum::routing::get;
 use axum::{Json, Router};
+use serde::Deserialize;
+use utoipa::ToSchema;
 
 use crate::errors::AppError;
 #[allow(unused_imports)]
@@ -11,12 +13,23 @@ use crate::models::{
     SimilarSamplesQuery, SimilarSamplesResponse, UpdateSampleRequest,
 };
 use crate::services::SampleCatalogService;
+use crate::repositories::{TagAggregateFilters, TagAggregatesResult, SampleRepository};
 use crate::AppState;
 
 /* [174A-44] Handler público de catálogo de samples.
  * Vive separado de handlers/samples.rs porque ese archivo ya concentra upload,
  * hashing y multipart. El listado requiere otra responsabilidad: query params,
  * documentación OpenAPI y respuesta paginada. */
+
+#[derive(Debug, Clone, Deserialize, ToSchema, Default)]
+pub struct TagAggregatesQuery {
+    pub genero: Option<String>,
+    pub bpm_min: Option<i32>,
+    pub bpm_max: Option<i32>,
+    pub key: Option<String>,
+    #[serde(alias = "type", alias = "sample_type")]
+    pub tipo: Option<String>,
+}
 
 #[utoipa::path(
     get,
@@ -50,6 +63,34 @@ pub async fn list_samples(
         query,
     )
     .await?;
+    Ok(Json(response))
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/tags/aggregates",
+    params(
+        ("genero" = Option<String>, Query, description = "Filtra por género declarado en metadata"),
+        ("bpm_min" = Option<i32>, Query, description = "BPM mínimo"),
+        ("bpm_max" = Option<i32>, Query, description = "BPM máximo"),
+        ("key" = Option<String>, Query, description = "Tonalidad"),
+        ("tipo" = Option<String>, Query, description = "Tipo de sample")
+    ),
+    responses((status = 200, description = "Agregados de tags del catálogo público", body = TagAggregatesResult))
+)]
+pub async fn aggregate_tags(
+    State(state): State<AppState>,
+    Query(query): Query<TagAggregatesQuery>,
+) -> Result<Json<TagAggregatesResult>, AppError> {
+    let filters = TagAggregateFilters {
+        genero: query.genero.filter(|value| !value.trim().is_empty()),
+        bpm_min: query.bpm_min,
+        bpm_max: query.bpm_max,
+        music_key: query.key.filter(|value| !value.trim().is_empty()),
+        sample_type: query.tipo.filter(|value| !value.trim().is_empty()),
+        limit: 30,
+    };
+    let response = SampleRepository::aggregate_public_tags(&state.pool, &filters).await?;
     Ok(Json(response))
 }
 
@@ -185,8 +226,11 @@ pub async fn delete_sample(
 pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/samples", get(list_samples))
+        .route("/tags/aggregates", get(aggregate_tags))
         .route("/samples/random", get(random_sample))
+        .route("/samples/aleatorio", get(random_sample))
         .route("/samples/:id/similar", get(similar_samples))
+        .route("/samples/:id/similares", get(similar_samples))
         .route(
             "/samples/:slug",
             get(get_sample).patch(update_sample).delete(delete_sample),

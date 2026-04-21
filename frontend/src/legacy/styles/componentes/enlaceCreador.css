@@ -1,0 +1,54 @@
+/*
+ * enlaceCreador.css — Estilos compartidos para el enlace clickeable al perfil del creador.
+ * Unifica detalleCabeceraPost, comunidadPostAutor, coleccionCreador, panelDetalleAutor.
+ */
+
+.enlaceCreador {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    background: none;
+    border: none;
+    padding: 0;
+    text-align: left;
+    cursor: pointer;
+    color: inherit;
+    text-decoration: none;
+}
+
+.enlaceCreador:hover .enlaceCreadorNombre {
+    color: var(--textoPrimario);
+}
+
+.enlaceCreadorInfo {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: var(--espacioXs);
+}
+
+.enlaceCreadorNombre {
+    font-weight: 600;
+    color: var(--textoSecundario);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color var(--transicionRapida);
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.enlaceCreadorMeta {
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* [193A-55] Icono verificado (BadgeCheck lucide-react) */
+.enlaceCreadorVerificado {
+    color: var(--acento);
+    flex-shrink: 0;
+}

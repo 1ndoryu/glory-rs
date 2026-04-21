@@ -1,0 +1,390 @@
+/*
+ * sampleDetalle.css — Kamples
+ * Página de detalle en una sola tarjeta grande, similar a tarjeta del home.
+ */
+
+.detalleContenedor {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioMd);
+    padding: var(--espacioLg);
+    max-width: var(--anchoMaximoContenido);
+    margin: 0 auto;
+    max-width: 800px;
+}
+
+.detalleCabeceraPost {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    background: none;
+    border: none;
+    padding: 0;
+    text-align: left;
+    cursor: pointer;
+}
+
+.detalleCabeceraInterna {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--espacioSm);
+    width: 100%;
+}
+
+.detalleTituloInterno {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    flex-wrap: wrap;
+    font-size: var(--fuenteLg);
+    font-weight: var(--pesoSemibold);
+    color: var(--textoPrimario);
+}
+
+.detalleVerificado {
+    color: var(--acento);
+    flex-shrink: 0;
+}
+
+.detalleDescripcionInterna {
+    margin: 0;
+    font-size: var(--fuenteSm);
+    color: var(--textoSecundario);
+    line-height: 1.55;
+    white-space: pre-wrap;
+}
+
+.detalleTituloExterno {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    flex-wrap: wrap;
+    font-size: var(--fuenteLg);
+    font-weight: var(--pesoSemibold);
+    color: var(--textoPrimario);
+}
+
+.detalleDescripcionExterna {
+    margin: 0;
+    font-size: var(--fuenteSm);
+    color: var(--textoSecundario);
+    line-height: 1.55;
+    white-space: pre-wrap;
+}
+
+.detalleTagsHome {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--espacioSm);
+}
+
+.detallePieFlex {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--espacioMd);
+    flex-wrap: wrap;
+}
+
+.detalleTarjetaUnica {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioMd);
+    background: var(--fondoElevado1);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioLg);
+    padding: var(--espacioLg);
+}
+
+.detalleTarjetaSuperior {
+    gap: var(--espacioLg);
+    align-items: center;
+    display: flex;
+}
+
+.detallePortadaLateral {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    min-height: 0;
+    border-radius: var(--radioMd);
+    overflow: hidden;
+    background: var(--fondoElevado2);
+    cursor: pointer;
+    max-width: 180px;
+}
+
+.detallePortadaImg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.detallePortadaEstado {
+    position: absolute;
+    inset: auto auto var(--espacioSm) var(--espacioSm);
+    display: flex;
+    align-items: center;
+    gap: calc(var(--espacioXs) / 2);
+    padding: calc(var(--espacioXs) / 2) var(--espacioSm);
+    border-radius: var(--radioFull);
+    background: var(--overlayOscuro);
+    color: var(--blanco);
+    font-size: var(--fuenteXs);
+}
+
+.detallePortadaEstadoActivo {
+    background: var(--acento);
+    color: var(--acentoTexto);
+}
+
+.detallePanelPrincipal {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioMd);
+    min-width: 0;
+    width: 100%;
+}
+
+.detalleInfo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioMd);
+    display: none;
+}
+
+.detalleCreador {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    cursor: pointer;
+    transition: opacity var(--transicionNormal);
+    background: none;
+    border: none;
+    padding: var(--espacioXs) 0;
+    text-align: left;
+}
+
+.detalleCreador:hover {
+    opacity: 0.86;
+}
+
+.detalleCreadorTexto {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--espacioXs) / 4);
+}
+
+.detalleCreadorTexto strong {
+    font-size: var(--fuenteMd);
+    color: var(--textoPrimario);
+    font-weight: var(--pesoSemibold);
+}
+
+.detalleCreadorTexto span {
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+}
+
+.detalleWaveformFila {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    flex: 1;
+    overflow: hidden;
+}
+
+.detalleWaveformFila .contenedorWaveform {
+    width: 100%;
+    max-width: 100%;
+}
+
+.detalleWaveformFila .waveformCanvas {
+    width: 100%;
+    max-width: 100%;
+}
+
+.detalleAcciones {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioMd);
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.detalleAccionPlano {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--textoSecundario);
+    cursor: pointer;
+    transition: color var(--transicionRapida), transform var(--transicionRapida);
+}
+
+.detalleAccionPlano:hover {
+    color: var(--textoPrimario);
+    transform: scale(1.1);
+}
+
+.detalleAccionPlanoActivo {
+    color: var(--acento);
+}
+
+.detalleAccionPlanoActivo:hover {
+    color: var(--blanco);
+}
+
+/* C157: Boton descarga con color acento cuando ya se descargo */
+.detalleAccionPlanoDescargado {
+    color: var(--acento);
+}
+
+.detalleEstadisticas {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioLg);
+    flex-wrap: wrap;
+}
+
+.detalleAccionEstadistica {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioXs);
+    font-size: var(--fuenteSm);
+    color: var(--textoSecundario);
+}
+
+.detalleMeta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--espacioSm);
+}
+
+.detalleMetaItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--espacioXs);
+    background: var(--fondoElevado2);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioMd);
+    padding: var(--espacioSm) var(--espacioMd);
+    min-width: 88px;
+}
+
+.detalleMetaLabel {
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.detalleMetaValor {
+    font-size: var(--fuenteMd);
+    font-weight: var(--pesoSemibold);
+    color: var(--textoPrimario);
+}
+
+.detalleDescripcion {
+    font-size: var(--fuenteMd);
+    color: var(--textoSecundario);
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+.detalleTags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--espacioXs);
+}
+
+.detalleSeccion {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioMd);
+    width: 100%;
+}
+
+.detalleSeccionTitulo {
+    margin: 0;
+    font-size: var(--fuenteMd);
+    font-weight: var(--pesoSemibold);
+    color: var(--textoPrimario);
+}
+
+.detalleSimilares {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioSm);
+}
+
+.detalleCargando {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 300px;
+    color: var(--textoSecundario);
+    font-size: var(--fuenteLg);
+}
+
+.detalleError {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--espacioMd);
+    min-height: 300px;
+    justify-content: center;
+    color: var(--textoSecundario);
+    text-align: center;
+}
+
+@media (max-width: 920px) {
+    .detalleTarjetaSuperior {
+        grid-template-columns: minmax(150px, 190px) 1fr;
+        gap: var(--espacioMd);
+    }
+
+    .detalleCabeceraInterna {
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 680px) {
+    .detalleContenedor {
+        padding: var(--espacioMd);
+    }
+
+    .detalleTarjetaUnica {
+        padding: var(--espacioMd);
+    }
+
+    /* QK101-B: Tarjeta superior en columna para móvil */
+    .detalleTarjetaSuperior {
+        flex-direction: column;
+        grid-template-columns: 1fr;
+    }
+
+    .detallePortadaLateral {
+        max-width: 100%;
+        margin: 0 auto;
+    }
+
+    .detalleCabeceraInterna {
+        flex-wrap: wrap;
+    }
+
+    .detalleEstadisticas {
+        gap: var(--espacioSm);
+    }
+}
+
+/* Indicador visual de discovery eliminado — se usa tablaRelacionesFilaOrigen + tablaRelacionesOrigenMarker en TablaRelaciones */

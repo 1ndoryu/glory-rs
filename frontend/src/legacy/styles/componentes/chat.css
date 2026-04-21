@@ -1,0 +1,236 @@
+/*
+ * Estilos: ChatIsland — Kamples (Fase 7.3)
+ * Conversación individual con burbujas, input y header.
+ */
+
+.chatIsland {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 120px);
+    max-width: 680px;
+    margin: 0 auto;
+}
+
+/* Header */
+.chatHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioMd);
+    padding: var(--espacioMd);
+    border-bottom: 1px solid var(--bordeSutil);
+    flex-shrink: 0;
+}
+
+/* C347: clase .chatVolver eliminada — ahora usa .botonVolver (botonBase.css) */
+
+.chatHeaderInfo {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+}
+
+.chatHeaderTexto {
+    display: flex;
+    flex-direction: column;
+}
+
+.chatHeaderNombre {
+    font-size: var(--fuenteMd);
+    font-weight: var(--pesoSemibold);
+    color: var(--textoPrimario);
+}
+
+.chatHeaderEstado {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioXs);
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+}
+
+/* Área de mensajes */
+.chatMensajes {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--espacioMd);
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioSm);
+}
+
+.chatMensajes::-webkit-scrollbar {
+    width: 4px;
+}
+
+.chatMensajes::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.chatMensajes::-webkit-scrollbar-thumb {
+    background: var(--bordeSutil);
+    border-radius: var(--radioFull);
+}
+
+/* [183A-62] Spinner al cargar mensajes más antiguos */
+.chatCargandoMas {
+    display: flex;
+    justify-content: center;
+    padding: var(--espacioSm);
+}
+
+.chatSpinner {
+    animation: spin 1s linear infinite;
+    color: var(--textoTerciario);
+}
+
+/* Separador de fecha */
+.chatGrupoFecha {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioSm);
+}
+
+.chatFechaSeparador {
+    display: flex;
+    justify-content: center;
+    padding: var(--espacioSm) 0;
+}
+
+.chatFechaSeparador span {
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+    background: var(--fondoElevado2);
+    padding: calc(var(--espacioXs) / 2) var(--espacioSm);
+    border-radius: var(--radioFull);
+}
+
+/* Burbujas de mensaje */
+.chatBurbuja {
+    display: flex;
+    max-width: 75%;
+}
+
+.chatBurbujaMia {
+    align-self: flex-end;
+}
+
+.chatBurbujaOtra {
+    align-self: flex-start;
+}
+
+.chatBurbujaContenido {
+    padding: var(--espacioSm) var(--espacioMd);
+    border-radius: var(--radioLg);
+    max-width: 100%;
+}
+
+.chatBurbujaMia .chatBurbujaContenido {
+    background: var(--fondoElevado3);
+    border-bottom-right-radius: var(--radioSm);
+}
+
+.chatBurbujaOtra .chatBurbujaContenido {
+    background: var(--fondoElevado1);
+    border-bottom-left-radius: var(--radioSm);
+}
+
+.chatBurbujaContenido p {
+    margin: 0;
+    font-size: var(--fuenteMd);
+    color: var(--textoPrimario);
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.chatBurbujaHora {
+    display: block;
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+    margin-top: calc(var(--espacioXs) / 2);
+    text-align: right;
+}
+
+/* Input de mensaje */
+.chatInputArea {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--espacioSm);
+    padding: var(--espacioMd);
+    border-top: 1px solid var(--bordeSutil);
+    flex-shrink: 0;
+}
+
+.chatInput {
+    flex: 1;
+    background: var(--fondoElevado1);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioMd);
+    padding: var(--espacioSm) var(--espacioMd);
+    color: var(--textoPrimario);
+    font-size: var(--fuenteMd);
+    font-family: var(--fuentePrincipal);
+    resize: none;
+    min-height: 36px;
+    max-height: 120px;
+    outline: none;
+    transition: border-color var(--transicionRapida);
+}
+
+.chatInput::placeholder {
+    color: var(--textoTerciario);
+}
+
+.chatInput:focus {
+    border-color: var(--bordeActivo);
+}
+
+.chatEnviarBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: var(--fondoElevado2);
+    border: none;
+    border-radius: var(--radioMd);
+    color: var(--textoTerciario);
+    cursor: pointer;
+    transition: all var(--transicionRapida);
+    flex-shrink: 0;
+}
+
+.chatEnviarBtn:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.chatEnviarBtnActivo {
+    background: var(--acento);
+    color: var(--acentoTexto);
+}
+
+.chatEnviarBtnActivo:hover:not(:disabled) {
+    opacity: 0.9;
+}
+
+/* Reemplazado por EstadoVacio centralizado (C359) */
+
+/* En móvil el chat cubre toda la pantalla (topbar y nav quedan tapados) */
+@media (max-width: 768px) {
+    .chatIsland {
+        position: fixed;
+        inset: 0;
+        height: 100dvh;
+        max-width: 100%;
+        margin: 0;
+        z-index: calc(var(--zModal) - 1);
+        background-color: var(--fondoBase);
+        padding-top: var(--safeAreaTop);
+    }
+}
+
+/* [193A-55] Icono verificado en chat header */
+.chatVerificado {
+    color: var(--acento);
+    flex-shrink: 0;
+}

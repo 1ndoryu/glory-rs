@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use utoipa::{IntoParams, ToSchema};
 
 use crate::errors::AppError;
-use crate::middleware::CurrentUser;
+use crate::middleware::{CurrentUser, OptionalUser};
 use crate::repositories::{ModerationRepository, PostDetail, PostRepository};
 use crate::AppState;
 
@@ -129,23 +129,32 @@ pub async fn create_post(
 #[utoipa::path(
     get, path = "/api/publicaciones", tag = "posts",
     params(PostListQuery),
-    security(("bearer_auth" = [])),
     responses((status = 200, body = PostListResponse))
 )]
 pub async fn list_posts(
     State(state): State<AppState>,
-    user: CurrentUser,
+    user: OptionalUser,
     Query(query): Query<PostListQuery>,
 ) -> Result<Json<PostListResponse>, AppError> {
+    /* [204A-1] Feed público: guests ven posts sin reacciones personalizadas.
+     * viewer_id=0 garantiza que los subqueries SQL (siguiendo, mi_reaccion, etc.)
+     * devuelvan false/null para guests — ningún user tiene id=0 en la BD. */
+    let viewer_id = user.0.as_ref().map_or(0, |u| u.user_id);
     let (only_following, sort_popular) = parse_filter(&query.filtro)?;
+    /* only_following requiere auth — si no hay usuario, ignorar el filtro */
+    let only_following = only_following && user.0.is_some();
     let page = query.page.max(1);
     let per_page = query.per_page.clamp(1, 100);
     let offset = (page - 1) * per_page;
-    let hidden = collect_hidden_author_ids(&state, user.user_id).await?;
+    let hidden = if let Some(ref u) = user.0 {
+        collect_hidden_author_ids(&state, u.user_id).await?
+    } else {
+        vec![]
+    };
     let items = PostRepository::list(
         &state.pool,
         crate::repositories::PostListParams {
-            viewer_id: user.user_id,
+            viewer_id,
             only_following,
             sort_popular,
             author_id: query.author_id,

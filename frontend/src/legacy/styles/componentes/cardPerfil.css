@@ -1,0 +1,137 @@
+/*
+ * cardPerfil.css — Mini card de perfil estilo Threads.
+ * Posicionamiento fixed, aparece al hacer clic en el icono de seguir del avatar.
+ */
+
+/* Capa oscura de fondo — cubre toda la pantalla */
+.cardPerfilOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    background: var(--overlaySuave);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: cardPerfilFadeIn 0.15s ease;
+}
+
+@keyframes cardPerfilFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.cardPerfil {
+    width: 340px;
+    background: var(--fondoElevado1);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioLg);
+    padding: var(--espacioMd);
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioSm);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+    animation: cardPerfilEntrar 0.18s ease;
+}
+
+@keyframes cardPerfilEntrar {
+    from { opacity: 0; transform: scale(0.96); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+.cardPerfilCargando {
+    font-size: var(--fuenteSm);
+    color: var(--textoTerciario);
+    text-align: center;
+    padding: var(--espacioSm) 0;
+}
+
+/* Fila superior: textos izquierda, avatar derecha */
+.cardPerfilCabecera {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--espacioSm);
+}
+
+.cardPerfilTextos {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacio2xs);
+    flex: 1;
+    min-width: 0;
+}
+
+.cardPerfilTextos button {
+    align-items: flex-start;
+    justify-content: start;
+}
+
+.cardPerfilNombreBtn.botonBase {
+    padding: 0;
+    background: none;
+    min-height: unset;
+    height: auto;
+}
+
+.cardPerfilNombre {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioXs);
+    font-size: var(--fuenteLg);
+    font-weight: 700;
+    color: var(--textoPrimario);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cardPerfilUsername {
+    font-size: var(--fuenteSm);
+    color: var(--textoTerciario);
+}
+
+.cardPerfilAvatarBtn.botonBase {
+    padding: 0;
+    background: none;
+    min-height: unset;
+    height: auto;
+    border-radius: var(--radioFull);
+    flex-shrink: 0;
+}
+
+.cardPerfilAvatarBtn.botonBase:hover {
+    background: none;
+}
+
+/* Bio */
+.cardPerfilBio {
+    font-size: var(--fuenteSm);
+    color: var(--textoSecundario);
+    margin: 0;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Seguidores */
+.cardPerfilSeguidores {
+    font-size: var(--fuenteSm);
+    color: var(--textoTerciario);
+}
+
+/* Botón seguir */
+.cardPerfilSeguirBtn.botonBase {
+    width: 100%;
+    justify-content: center;
+    margin-top: var(--espacioXs);
+}
+
+/* [193A-55] Icono verificado en card */
+.cardVerificado {
+    color: var(--acento);
+    flex-shrink: 0;
+}

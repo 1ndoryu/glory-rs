@@ -1,0 +1,165 @@
+/*
+ * libreria.css — Kamples
+ * Estilos de la isla LibreriaIsland.
+ * Estructura consistente con inicio.css (tabs en TopBar, mismo gap).
+ * C388: barraControl con ordenamiento + tags frecuentes.
+ */
+
+.libreriaContenedor {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioXl);
+    padding: var(--espacioLg);
+    margin: 0 auto;
+}
+
+/* C388: Barra de control — mismo patrón que inicioBarraControl */
+.libreriaBarraControl {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--espacioMd);
+}
+
+.libreriaControlesIzquierda {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioMd);
+}
+
+.libreriaContador {
+    font-size: var(--fuenteSm);
+    color: var(--textoTerciario);
+    white-space: nowrap;
+}
+
+.libreriaControlesDerecha {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+}
+
+/* Dropdown de ordenamiento */
+.libreriaOrdenWrapper {
+    position: relative;
+}
+
+.libreriaOrdenBtn {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioXs);
+    padding: var(--espacioXs) var(--espacioMd);
+    border-radius: var(--radioFull);
+    font-size: var(--fuenteSm);
+    white-space: nowrap;
+}
+
+.libreriaOrdenMenu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: var(--espacioXs);
+    background: var(--fondoElevado2);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioMd);
+    padding: var(--espacioXs);
+    display: flex;
+    flex-direction: column;
+    z-index: 50;
+    min-width: 140px;
+}
+
+.libreriaOrdenMenu button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: var(--espacioXs) var(--espacioSm);
+    background: none;
+    border: none;
+    border-radius: var(--radioSm);
+    color: var(--textoSecundario);
+    font-size: var(--fuenteSm);
+    cursor: pointer;
+    transition: all var(--transicionRapida);
+}
+
+.libreriaOrdenMenu button:hover {
+    background: var(--fondoElevado3);
+    color: var(--textoPrimario);
+}
+
+.libreriaOrdenActivo {
+    color: var(--acento) !important;
+}
+
+/* C388: Tags frecuentes — fila de badges filtrables */
+.libreriaTagsFrecuentes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--espacioXs);
+    align-items: center;
+}
+
+/* Grid de colecciones — tarjetas visuales en cuadrícula */
+.libreriaGridColecciones {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: var(--espacioMd);
+}
+
+/* QL118: Vista lista — columna vertical */
+.libreriaListaColecciones {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioSm);
+}
+
+/* QL118-EXTRA: Vista árbol — columna vertical con hijas indentadas */
+.libreriaArbolColecciones {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioSm);
+}
+
+.libreriaArbolColecciones .tarjetaColeccionSub {
+    margin-left: var(--espacioXl);
+}
+
+/* QL118: Toggle cuadrícula/lista */
+.libreriaVistaToggle {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    background: var(--fondoElevado2);
+    border-radius: var(--radioMd);
+    padding: 2px;
+}
+
+.libreriaVistaBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: var(--radioSm);
+    color: var(--textoTerciario);
+    transition: all var(--transicionRapida);
+}
+
+.libreriaVistaBtn:hover {
+    color: var(--textoPrimario);
+}
+
+.libreriaVistaBtnActivo {
+    background: var(--fondoElevado3);
+    color: var(--textoPrimario);
+}
+
+/* Reemplazado por EstadoVacio centralizado (C359) */
+
+/* QK101-B: Grid 2 columnas en movil */
+@media (max-width: 640px) {
+    .libreriaGridColecciones {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

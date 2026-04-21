@@ -1,7 +1,13 @@
-/* [204A-1] Wrapper de ruta para separar el registro dentro de la SPA real. */
-
-import AuthPage from './AuthPage';
+import { useEffect } from 'react';
+import { Navigate } from 'react-router-dom';
+import { useAuthModalStore } from '../app/stores/authModalStore';
 
 export default function RegisterPage() {
-  return <AuthPage mode="register" />;
+  const abrirAuth = useAuthModalStore((state) => state.abrir);
+
+  useEffect(() => {
+    abrirAuth('registro');
+  }, [abrirAuth]);
+
+  return <Navigate replace to="/" />;
 }

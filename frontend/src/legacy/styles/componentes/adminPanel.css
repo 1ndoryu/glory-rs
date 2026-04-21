@@ -1,0 +1,1170 @@
+﻿/*
+ * Estilos: Panel de Administración (FASE 13)
+ * Layout, tarjetas KPI, gráfica de actividad, tabla usuarios, moderación.
+ * D5: Eliminado adminPanelTitulo/Subtitulo, adminVacio (→ EstadoVacio),
+ * adminSelectPlan (→ SelectorMenu), adminUsuariosFiltro (→ SelectorMenu).
+ */
+
+/* Contenedor principal */
+.adminPanel {
+    padding: var(--espacioXl);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Grid de KPIs */
+.adminKpisGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--espacioLg);
+    margin-bottom: var(--espacioXl);
+}
+
+/* QK46: Variante compacta de KPIs para la tab de usuarios */
+.adminKpisCompacto {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: var(--espacioMd);
+    margin-bottom: var(--espacioLg);
+}
+
+.adminKpisCompacto .adminKpiTarjeta {
+    padding: var(--espacioMd);
+}
+
+.adminKpisCompacto .adminKpiValor {
+    font-size: var(--fuenteXl);
+}
+
+.adminKpiTarjeta {
+    background: var(--fondoElevado1);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--espacioMd);
+    padding: var(--espacioXl);
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioSm);
+}
+
+.adminKpiCabecera {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.adminKpiEtiqueta {
+    font-size: var(--fuenteXs);
+    font-weight: 500;
+    color: var(--textoSecundario);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.adminKpiIcono {
+    color: var(--acento);
+    opacity: 0.7;
+}
+
+.adminKpiValor {
+    font-size: var(--fuente2xl);
+    font-weight: 700;
+    color: var(--textoPrimario);
+    line-height: 1;
+}
+
+.adminKpiDetalle {
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+}
+
+/* Gráfica de actividad */
+/* C236+C350: Gráfica de barras rediseñada — tooltip CSS, cabecera con leyenda, hover por día */
+.adminGraficaContenedor {
+    background: var(--fondoElevado1);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioMd);
+    padding: var(--espacioXl);
+    margin-bottom: var(--espacioXl);
+}
+
+/* Cabecera: título a la izquierda + leyenda a la derecha */
+.adminGraficaCabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--espacioLg);
+    flex-wrap: wrap;
+    gap: var(--espacioSm);
+}
+
+.adminGraficaTitulo {
+    font-size: var(--fuenteMd);
+    font-weight: 600;
+    color: var(--textoPrimario);
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+}
+
+/* Contenedor principal: eje Y + área de barras */
+.adminGraficaArea {
+    display: flex;
+    gap: var(--espacioSm);
+}
+
+/* Eje Y — números de referencia */
+.adminGraficaEjeY {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-end;
+    height: 180px;
+    padding-bottom: var(--espacioXl);
+    min-width: 28px;
+}
+
+.adminGraficaEjeYLabel {
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+    line-height: 1;
+}
+
+/* Área de barras con grid lines de fondo */
+.adminGraficaBarrasArea {
+    flex: 1;
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+}
+
+/* Grid lines horizontales sutiles */
+.adminGraficaGridLines {
+    position: absolute;
+    inset: 0;
+    bottom: 20px;
+    pointer-events: none;
+}
+
+.adminGraficaGridLinea {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--bordeSutil);
+    opacity: 0.5;
+}
+
+/* Contenedor flex de barras */
+.adminGraficaBarras {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--espacioXs);
+    height: 180px;
+    padding-bottom: var(--espacioXl);
+}
+
+/* Grupo de un día: barras + etiqueta fecha + tooltip */
+.adminGraficaDia {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    min-width: 0;
+    position: relative;
+}
+
+/* Highlight sutil al hover del día completo */
+.adminGraficaDia:hover .adminGraficaDiaBarras {
+    background: var(--fondoElevado1);
+}
+
+/* 3 barras lado a lado dentro del día — gap/padding mínimo para separación visual entre barras */
+.adminGraficaDiaBarras {
+    display: flex;
+    align-items: flex-end;
+    gap: calc(var(--espacioXs) / 4);
+    flex: 1;
+    width: 100%;
+    min-height: 0;
+    overflow: hidden;
+    border-radius: var(--radioSm) var(--radioSm) 0 0;
+    padding: 0 calc(var(--espacioXs) / 4);
+    transition: background-color var(--transicionRapida);
+}
+
+/* Barra individual */
+.adminGraficaBarra {
+    flex: 1;
+    border-radius: var(--radioSm) var(--radioSm) 0 0;
+    min-height: calc(var(--espacioXs) / 4);
+    transition: filter 0.15s ease;
+    cursor: pointer;
+}
+
+.adminGraficaDia:hover .adminGraficaBarra {
+    filter: brightness(1.15);
+}
+
+/* Colores distinguibles: verde, azul, naranja */
+.adminGraficaBarraRegistros {
+    background: var(--acento);
+}
+
+.adminGraficaBarraUploads {
+    background: var(--info);
+}
+
+.adminGraficaBarraDescargas {
+    background: var(--advertencia);
+}
+
+/* Etiqueta de fecha (eje X) */
+.adminGraficaFecha {
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+    margin-top: var(--espacioXs);
+    white-space: nowrap;
+}
+
+/* Leyenda con totales */
+.adminGraficaLeyenda {
+    display: flex;
+    gap: var(--espacioLg);
+    flex-wrap: wrap;
+}
+
+.adminGraficaLeyendaItem {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioXs);
+    font-size: var(--fuenteXs);
+    color: var(--textoSecundario);
+}
+
+.adminGraficaLeyendaPunto {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radioFull);
+}
+
+/* Colores de leyenda por clase — elimina inline styles */
+.adminGraficaLeyendaPuntoRegistros {
+    background: var(--acento);
+}
+
+.adminGraficaLeyendaPuntoUploads {
+    background: var(--info);
+}
+
+.adminGraficaLeyendaPuntoDescargas {
+    background: var(--advertencia);
+}
+
+/* Tooltip CSS — aparece al hover del día, sin JS */
+.adminGraficaTooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--fondoElevado3);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioSm);
+    padding: var(--espacioXs) var(--espacioSm);
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--espacioXs) / 4);
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    z-index: 10;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    margin-bottom: var(--espacioXs);
+}
+
+.adminGraficaDia:hover .adminGraficaTooltip {
+    opacity: 1;
+}
+
+.adminGraficaTooltipFecha {
+    font-size: var(--fuenteXs);
+    font-weight: 600;
+    color: var(--textoPrimario);
+    margin-bottom: calc(var(--espacioXs) / 4);
+}
+
+.adminGraficaTooltipLinea {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioXs);
+    font-size: var(--fuenteXs);
+    color: var(--textoSecundario);
+}
+
+/* Tabla de usuarios */
+/* Controles búsqueda + filtro (D5: search icon + SelectorMenu ya maneja filtro) */
+.adminUsuariosControles {
+    display: flex;
+    gap: var(--espacioMd);
+    margin-bottom: var(--espacioLg);
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+/* Contenedor relativo para lupa sobre CampoTexto */
+.adminBusquedaContenedor {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+}
+
+.adminBusquedaIcono {
+    position: absolute;
+    left: var(--espacioSm);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--textoTerciario);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* El input de búsqueda necesita padding-left para la lupa */
+.adminUsuariosBusqueda .campTextoInput {
+    padding-left: var(--espacio2xl);
+}
+
+.adminTablaUsuarios {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--fuenteSm);
+}
+
+.adminTablaUsuarios th {
+    text-align: left;
+    padding: var(--espacioMd);
+    font-weight: 600;
+    color: var(--textoSecundario);
+    font-size: var(--fuenteXs);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--bordeSutil);
+}
+
+.adminTablaUsuarios td {
+    padding: var(--espacioMd);
+    border-bottom: 1px solid var(--bordeSutil);
+    color: var(--textoPrimario);
+}
+
+.adminTablaUsuarios tr:hover td {
+    background: var(--fondoElevado2);
+}
+
+.adminUsuarioFila {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+}
+
+.adminUsuarioAvatar {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radioFull);
+    object-fit: cover;
+    background: var(--fondoElevado1);
+}
+
+.adminUsuarioInfo {
+    display: flex;
+    flex-direction: column;
+}
+
+.adminUsuarioNombre {
+    font-weight: 600;
+    font-size: var(--fuenteMd);
+}
+
+.adminUsuarioUsername {
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+}
+
+.adminUsuarioAcciones {
+    display: flex;
+    gap: var(--espacioXs);
+}
+
+.adminBotonAccion {
+    padding: 0.3rem 0.5rem;
+    border-radius: var(--radioMd);
+    border: 1px solid var(--bordeSutil);
+    background: transparent;
+    color: var(--textoSecundario);
+    cursor: pointer;
+    font-size: var(--fuenteXs);
+    transition:
+        background-color 0.15s,
+        color 0.15s;
+}
+
+.adminBotonAccion:hover {
+    background: var(--fondoElevado2);
+    color: var(--textoPrimario);
+}
+
+.adminBotonAccionPeligro:hover {
+    background: var(--error);
+    color: var(--blanco);
+    border-color: var(--error);
+}
+
+/* Paginación */ */
+.adminPaginacion {
+    display: flex;
+    justify-content: center;
+    gap: var(--espacioSm);
+    margin-top: var(--espacioLg);
+}
+
+.adminPaginacionBoton {
+    padding: 0.4rem 0.75rem;
+    border-radius: var(--radioMd);
+    border: 1px solid var(--bordeSutil);
+    background: var(--fondoBase);
+    color: var(--textoPrimario);
+    cursor: pointer;
+    font-size: var(--fuenteSm);
+}
+
+.adminPaginacionBoton:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.adminPaginacionTexto {
+    font-size: var(--fuenteSm);
+    color: var(--textoSecundario);
+    padding: var(--espacioXs);
+}
+
+/* Moderación */
+.adminModeracionLista {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioMd);
+}
+
+.adminModeracionTarjeta {
+    background: var(--fondoElevado1);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--espacioMd);
+    padding: var(--espacioLg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioMd);
+}
+
+.adminModeracionCabecera {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+}
+
+.adminModeracionAvatar {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radioFull);
+    object-fit: cover;
+}
+
+.adminModeracionAutor {
+    font-weight: 600;
+    font-size: var(--fuenteSm);
+    color: var(--textoPrimario);
+}
+
+.adminModeracionFecha {
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+    margin-left: auto;
+}
+
+.adminModeracionContenido {
+    font-size: var(--fuenteSm);
+    color: var(--textoSecundario);
+    line-height: 1.5;
+    max-height: 100px;
+    overflow: hidden;
+}
+
+.adminModeracionDetalles {
+    margin-top: var(--espacioXs);
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+    white-space: pre-wrap;
+}
+
+.adminModeracionAcciones {
+    display: flex;
+    gap: var(--espacioSm);
+}
+
+.adminModeracionBotonAprobar {
+    padding: 0.4rem 0.75rem;
+    border-radius: var(--radioMd);
+    border: none;
+    background: var(--exito);
+    color: var(--blanco);
+    cursor: pointer;
+    font-size: var(--fuenteSm);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: var(--espacioXs);
+}
+
+.adminModeracionBotonRechazar {
+    padding: 0.4rem 0.75rem;
+    border-radius: var(--radioMd);
+    border: none;
+    background: var(--error);
+    color: var(--blanco);
+    cursor: pointer;
+    font-size: var(--fuenteSm);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: var(--espacioXs);
+}
+
+.adminModeracionBotonDescartar {
+    padding: 0.4rem 0.75rem;
+    border-radius: var(--radioMd);
+    border: 1px solid var(--bordeSutil);
+    background: transparent;
+    color: var(--textoSecundario);
+    cursor: pointer;
+    font-size: var(--fuenteSm);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: var(--espacioXs);
+    transition:
+        background-color 0.15s,
+        color 0.15s;
+}
+
+.adminModeracionBotonDescartar:hover {
+    background: var(--fondoElevado2);
+    color: var(--textoPrimario);
+}
+
+/* Detalle de decisión IA */
+.adminModeracionDetalle {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioXs);
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+    padding: var(--espacioXs) var(--espacioSm);
+    background: var(--fondoElevado2);
+    border-radius: var(--radioSm);
+    width: fit-content;
+}
+
+/*
+ * C351: Galería de imágenes en tarjeta de moderación.
+ * Muestra thumbnails con click para abrir en nueva pestaña.
+ */
+.adminModeracionImagenes {
+    display: flex;
+    gap: var(--espacioXs);
+    flex-wrap: wrap;
+    margin-top: var(--espacioXs);
+}
+
+.adminModeracionImagenLink {
+    display: block;
+    border-radius: var(--radioSm);
+    overflow: hidden;
+    border: 1px solid var(--bordeSutil);
+    transition: border-color var(--transicionRapida);
+}
+
+.adminModeracionImagenLink:hover {
+    border-color: var(--acento);
+}
+
+.adminModeracionImagen {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    display: block;
+}
+
+/* C351: Badge de razón de moderación */
+.adminModeracionRazon {
+    font-size: var(--fuenteXs);
+    padding: var(--espacioXs) var(--espacioSm);
+    background: var(--fondoElevado2);
+    color: var(--textoTerciario);
+    border-radius: var(--radioSm);
+    font-style: italic;
+}
+
+/* Historial IA: estilo más sutil */
+.adminModeracionHistorial {
+    opacity: 0.85;
+    border-left: 3px solid var(--bordeSutil);
+}
+
+/* Badges de estado */
+.adminBadge {
+    font-size: var(--fuenteXs);
+    font-weight: 600;
+    padding: calc(var(--espacioXs) / 2) var(--espacioSm);
+    border-radius: var(--radioSm);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.adminBadgeExito {
+    background: color-mix(in srgb, var(--exito) 15%, transparent);
+    color: var(--exito);
+}
+
+.adminBadgeAdvertencia {
+    background: color-mix(in srgb, var(--advertencia) 15%, transparent);
+    color: var(--advertencia);
+}
+
+.adminBadgeError {
+    background: color-mix(in srgb, var(--error) 15%, transparent);
+    color: var(--error);
+}
+
+.adminBadgeNeutro {
+    background: var(--fondoElevado2);
+    color: var(--textoSecundario);
+}
+
+/* Sección de reportes */
+/* QK46: Cabecera de seccion inline dentro de listas de moderacion */
+.adminModeracionCabeceraSeccion {
+    font-size: var(--fuenteMd);
+    font-weight: 600;
+    color: var(--textoSecundario);
+    margin-bottom: var(--espacioMd);
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+}
+
+/* Cargando */
+.adminCargando {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: var(--espacio4xl);
+    color: var(--textoTerciario);
+}
+
+.adminSpinner {
+    animation: adminGiro 1s linear infinite;
+}
+
+@keyframes adminGiro {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .adminPanel {
+        padding: var(--espacioLg);
+    }
+
+    .adminKpisGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .adminTablaUsuarios {
+        font-size: var(--fuenteXs);
+    }
+
+    .adminTablaUsuarios th:nth-child(n + 4),
+    .adminTablaUsuarios td:nth-child(n + 4) {
+        display: none;
+    }
+}
+
+/* Historial de moderacion - Grid adaptable */
+.historialGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: var(--espacioLg);
+    margin-bottom: var(--espacioXl);
+}
+
+@media (max-width: 768px) {
+    .historialGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .historialGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.historialTarjeta {
+    background: var(--fondoElevado1);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--espacioMd);
+    padding: var(--espacioLg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioMd);
+    min-height: 0;
+}
+
+.historialCabecera {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+}
+
+.historialAvatar {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radioFull);
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.historialUsuarioInfo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacio2xs);
+}
+
+.historialNombre {
+    font-weight: 600;
+    font-size: var(--fuenteSm);
+    color: var(--textoPrimario);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.historialUsername {
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+}
+
+.historialFecha {
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+    margin-left: auto;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.historialBadges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--espacioXs);
+    align-items: center;
+}
+
+.historialRazon {
+    font-size: var(--fuenteXs);
+    padding: calc(var(--espacioXs) / 2) var(--espacioSm);
+    background: var(--fondoElevado2);
+    color: var(--textoTerciario);
+    border-radius: var(--radioSm);
+    font-style: italic;
+}
+
+.historialContenidoTexto {
+    font-size: var(--fuenteSm);
+    color: var(--textoSecundario);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Acordeon nativo con <details> */
+.historialExpander {
+    border-top: 1px solid var(--bordeSutil);
+    padding-top: var(--espacioSm);
+}
+
+.historialExpanderTrigger {
+    cursor: pointer;
+    font-size: var(--fuenteXs);
+    color: var(--textoSecundario);
+    list-style: none;
+    padding: 0;
+    user-select: none;
+}
+
+.historialExpanderTrigger::-webkit-details-marker {
+    display: none;
+}
+
+.historialExpanderContenido {
+    margin-top: var(--espacioSm);
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioSm);
+}
+
+.historialDetalleJson {
+    font-family: var(--fuenteMono, monospace);
+    font-size: var(--fuenteXs);
+    line-height: 1.6;
+    max-height: 280px;
+    overflow: auto;
+    background: var(--fondoElevado2);
+    padding: var(--espacioMd);
+    border-radius: var(--radioSm);
+    border: 1px solid var(--bordeSutil);
+    white-space: pre;
+    color: var(--textoSecundario);
+    margin: 0;
+}
+
+/* Botones de accion del historial (texto, con borde, sin iconos) */
+.historialAcciones {
+    display: flex;
+    gap: var(--espacioSm);
+    align-items: center;
+    margin-top: auto;
+    padding-top: var(--espacioSm);
+    border-top: 1px solid var(--bordeSutil);
+}
+
+.historialBoton {
+    border: 1px solid var(--bordeSutil);
+    background: transparent;
+    padding: 0.35rem 0.7rem;
+    cursor: pointer;
+    border-radius: var(--radioMd);
+    font-size: var(--fuenteSm);
+    color: var(--textoSecundario);
+    transition:
+        background-color 0.15s,
+        color 0.15s,
+        border-color 0.15s;
+    white-space: nowrap;
+}
+
+.historialBoton:hover {
+    background: var(--fondoElevado2);
+    color: var(--textoPrimario);
+}
+
+.historialBotonAprobar {
+    border-color: var(--exito);
+    color: var(--exito);
+}
+
+.historialBotonAprobar:hover {
+    background: color-mix(in srgb, var(--exito) 12%, transparent);
+}
+
+.historialBotonRechazar {
+    border-color: var(--error);
+    color: var(--error);
+}
+
+.historialBotonRechazar:hover {
+    background: color-mix(in srgb, var(--error) 12%, transparent);
+}
+
+/* Menu de 3 puntos */
+.historialMenuContenedor {
+    position: relative;
+    margin-left: auto;
+}
+
+.historialMenuBoton {
+    background: transparent;
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioMd);
+    cursor: pointer;
+    padding: 0.25rem 0.55rem;
+    font-size: var(--fuenteLg);
+    color: var(--textoTerciario);
+    line-height: 1;
+    transition:
+        background-color 0.15s,
+        color 0.15s;
+}
+
+.historialMenuBoton:hover {
+    background: var(--fondoElevado2);
+    color: var(--textoPrimario);
+}
+
+.historialMenuDropdown {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 4px);
+    min-width: 210px;
+    z-index: var(--zMenu, 200);
+    background: var(--fondoElevado2);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioMd);
+    padding: var(--espacioXs);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.historialMenuItem {
+    width: 100%;
+    text-align: left;
+    padding: var(--espacioSm) var(--espacioMd);
+    cursor: pointer;
+    font-size: var(--fuenteSm);
+    background: transparent;
+    border: none;
+    color: var(--textoSecundario);
+    border-radius: var(--radioSm);
+    transition:
+        background-color 0.1s,
+        color 0.1s;
+}
+
+.historialMenuItem:hover {
+    background: var(--fondoElevado3, var(--fondoBase));
+    color: var(--textoPrimario);
+}
+
+.historialMenuItemPeligro {
+    color: var(--error);
+}
+
+.historialMenuItemPeligro:hover {
+    background: color-mix(in srgb, var(--error) 12%, transparent);
+    color: var(--error);
+}
+
+/* Panel de baneo inline (dentro del dropdown) */
+.historialBanPanel {
+    padding: var(--espacioSm);
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioSm);
+}
+
+.historialBanTitulo {
+    font-size: var(--fuenteSm);
+    font-weight: 600;
+    color: var(--textoPrimario);
+    padding: 0 var(--espacioXs);
+}
+
+.historialBanSelect,
+.historialBanInput {
+    width: 100%;
+    padding: var(--espacioXs) var(--espacioSm);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioSm);
+    background: var(--fondoBase);
+    color: var(--textoPrimario);
+    font-size: var(--fuenteSm);
+    box-sizing: border-box;
+}
+
+.historialBanSelect:focus,
+.historialBanInput:focus {
+    outline: none;
+    border-color: var(--acento);
+}
+
+.historialBanAcciones {
+    display: flex;
+    gap: var(--espacioSm);
+    justify-content: flex-end;
+}
+
+.historialBanCancelar {
+    background: transparent;
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioSm);
+    padding: var(--espacioXs) var(--espacioSm);
+    cursor: pointer;
+    font-size: var(--fuenteSm);
+    color: var(--textoSecundario);
+    transition: background-color 0.15s;
+}
+
+.historialBanCancelar:hover {
+    background: var(--fondoBase);
+}
+
+.historialBanAplicar {
+    background: var(--error);
+    border: none;
+    border-radius: var(--radioSm);
+    padding: var(--espacioXs) var(--espacioSm);
+    cursor: pointer;
+    font-size: var(--fuenteSm);
+    color: var(--blanco);
+    font-weight: 600;
+    transition: opacity 0.15s;
+}
+
+.historialBanAplicar:hover {
+    opacity: 0.85;
+}
+
+/* QK14: Lista compacta de historial — cola de procesamiento en tab Resumen */
+.adminHistorialContenedor {
+    background: var(--fondoElevado1);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioMd);
+    padding: var(--espacioXl);
+}
+
+.adminHistorialCabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--espacioLg);
+}
+
+.adminHistorialTitulo {
+    font-size: var(--fuenteMd);
+    font-weight: 600;
+    color: var(--textoPrimario);
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+}
+
+/* Stats compactos en fila */
+.adminHistorialStats {
+    display: flex;
+    gap: var(--espacioLg);
+    margin-bottom: var(--espacioLg);
+    padding-bottom: var(--espacioMd);
+    border-bottom: 1px solid var(--bordeSutil);
+}
+
+.adminHistorialStat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: calc(var(--espacioXs) / 2);
+}
+
+.adminHistorialStatValor {
+    font-size: var(--fuenteXl);
+    font-weight: 700;
+    color: var(--textoPrimario);
+    line-height: 1;
+}
+
+.adminHistorialStatEtiqueta {
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+/* Lista de items */
+.adminHistorialLista {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--espacioXs) / 2);
+}
+
+.adminHistorialItem {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    padding: var(--espacioSm) var(--espacioMd);
+    border-radius: var(--radioSm);
+    transition: background-color 0.1s;
+}
+
+.adminHistorialItem:hover {
+    background: var(--fondoElevado2);
+}
+
+.adminHistorialItemIcono {
+    color: var(--textoTerciario);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+}
+
+.adminHistorialItemInfo {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.adminHistorialItemTipo {
+    font-size: var(--fuenteXs);
+    font-weight: 600;
+    color: var(--textoPrimario);
+    text-transform: capitalize;
+    flex-shrink: 0;
+}
+
+.adminHistorialItemOp {
+    font-size: var(--fuenteXs);
+    color: var(--textoSecundario);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.adminHistorialItemError {
+    color: var(--error);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    cursor: help;
+}
+
+.adminHistorialItemTiempo {
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+    flex-shrink: 0;
+    margin-left: auto;
+    white-space: nowrap;
+}
+
+/* Estado vacio */
+.adminHistorialVacio {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--espacioSm);
+    padding: var(--espacioXl);
+    color: var(--textoTerciario);
+    font-size: var(--fuenteSm);
+}
+
+@media (max-width: 768px) {
+    .adminHistorialStats {
+        flex-wrap: wrap;
+        gap: var(--espacioMd);
+    }
+}
+

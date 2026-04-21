@@ -1,7 +1,13 @@
-/* [204A-1] Wrapper de ruta para mantener el router lazy sin duplicar la UI de auth. */
-
-import AuthPage from './AuthPage';
+import { useEffect } from 'react';
+import { Navigate } from 'react-router-dom';
+import { useAuthModalStore } from '../app/stores/authModalStore';
 
 export default function LoginPage() {
-  return <AuthPage mode="login" />;
+  const abrirAuth = useAuthModalStore((state) => state.abrir);
+
+  useEffect(() => {
+    abrirAuth('login');
+  }, [abrirAuth]);
+
+  return <Navigate replace to="/" />;
 }

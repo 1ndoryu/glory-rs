@@ -1,0 +1,165 @@
+/*
+ * Layout principal — Kamples
+ * Grid principal: sidebar + topbar + contenido + reproductor
+ */
+
+.layoutPrincipal {
+    display: grid;
+    grid-template-columns: var(--anchoSidebar) 1fr;
+    grid-template-rows: var(--altoTopbar) 1fr;
+    grid-template-areas:
+        "sidebar topbar"
+        "sidebar contenido";
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    background-color: var(--fondoBase);
+}
+
+/* Sidebar izquierda (iconos) */
+.areaSidebar {
+    grid-area: sidebar;
+    background-color: var(--fondoElevado1);
+    border-right: 1px solid var(--bordeSutil);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: var(--espacioMd);
+    gap: var(--espacioSm);
+    z-index: var(--zMenu);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* Topbar */
+.areaTopbar {
+    grid-area: topbar;
+    background-color: var(--fondoElevado1);
+    border-bottom: 1px solid var(--bordeSutil);
+    display: flex;
+    align-items: center;
+    padding: 0 var(--espacioXl);
+    gap: var(--espacioLg);
+    z-index: var(--zElevado);
+}
+
+/* Contenido principal */
+.areaContenido {
+    grid-area: contenido;
+    overflow-y: auto;
+    overflow-x: hidden;
+    /* padding: var(--espacio2xl); */
+    background-color: var(--fondoBase);
+    /* [2003A-26] Contener overscroll en el contenedor scroll principal.
+     * Evita que el overscroll propague al body y active pull-to-refresh nativo. */
+    overscroll-behavior-y: contain;
+}
+
+/* Limitador de ancho para contenido */
+.contenedorContenido {
+    /* max-width: var(--anchoMaximoContenido); */
+    /* margin: 0 auto; */
+    width: 100%;
+    min-width: 0;
+}
+
+/* Contenedor flex que aloja contenido + panel lateral (C86+C95+C111) */
+.contenedorContenidoConPanel {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+/* Cuando el panel está activo, el contenido principal scrollea independientemente */
+.contenedorContenidoConPanel > .contenedorContenido {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+/* Reproductor global — ahora flotante, sin grid area */
+.areaReproductor {
+    position: fixed;
+    bottom: var(--espacioLg);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: var(--zReproductor);
+    pointer-events: none;
+}
+
+/* QL100d: Android safe area — activar variables globales cuando hay status bar */
+body.plataformaAndroid {
+    --safeAreaTop: env(safe-area-inset-top, 0px);
+    --safeAreaBottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Responsive - sidebar como nav inferior en mobile */
+@media (max-width: 768px) {
+    .layoutPrincipal {
+        grid-template-columns: 1fr;
+        grid-template-rows: var(--altoTopbar) 1fr;
+        grid-template-areas:
+            "topbar"
+            "contenido";
+    }
+
+    /* QL45-B: Sidebar se convierte en barra fija inferior.
+     * height INCLUYE el safe-area-inset-bottom para que los iconos siempre
+     * tengan var(--altoNavMobile) de espacio util, independiente del dispositivo.
+     * El padding-bottom empuja el contenido visible arriba de la zona segura. */
+    .areaSidebar {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: calc(var(--altoNavMobile) + env(safe-area-inset-bottom, 0px));
+        width: 100%;
+        flex-direction: row;
+        border-right: none;
+        border-top: 1px solid var(--bordeSutil);
+        padding: 0;
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+        background-color: var(--fondoElevado1);
+        z-index: var(--zMenu);
+        overflow: visible;
+    }
+
+    .areaTopbar {
+        padding-left: var(--espacioLg);
+    }
+
+    /* QL45: Safe area top para Android — la barra de estado tapa el contenido */
+    body.plataformaAndroid .areaTopbar {
+        padding-top: env(safe-area-inset-top, 0px);
+    }
+
+    body.plataformaAndroid .layoutPrincipal {
+        grid-template-rows: calc(var(--altoTopbar) + env(safe-area-inset-top, 0px)) 1fr;
+    }
+
+    /* El contenido tiene padding inferior para no quedar bajo el nav */
+    .areaContenido {
+        padding-bottom: calc(var(--altoNavMobile) + env(safe-area-inset-bottom, 0px));
+    }
+
+    /* Reproductor flotante sube por encima del nav inferior */
+    .areaReproductor {
+        bottom: calc(var(--altoNavMobile) + var(--espacioMd) + env(safe-area-inset-bottom, 0px));
+        left: 50%;
+    }
+}
+
+/* Layout público — para usuarios no autenticados (landing, login, registro) */
+.layoutPublico {
+    min-height: 100vh;
+    width: 100vw;
+    background-color: var(--fondoBase);
+    overflow-x: hidden;
+}
+
+.areaContenidoPublico {
+    width: min(100%, var(--landingAnchoMaximo));
+    min-height: 100vh;
+    margin: 0 auto;
+}

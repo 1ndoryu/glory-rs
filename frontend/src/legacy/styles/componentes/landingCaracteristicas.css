@@ -1,0 +1,191 @@
+/*
+ * landingCaracteristicas.css - Grid 9 bloques de features Kamples.
+ *
+ * Replica EXACTA del sistema original (temp/estilos.css):
+ *   - .OSFED   ->  .landingCaracteristicas  (flex container, 100vh altura)
+ *   - .ADEEDE  ->  .landingCaracteristicasGrid (grid 3x4, 1fr rows, height:100%)
+ *   - .bloque  ->  .landingBloque           (flex, overflow:hidden, bg:#060606)
+ *   - .lazy-svg -> .landingBloqueSvg        (display:block, width:100%, height:auto)
+ *
+ * SVGs son inline (dangerouslySetInnerHTML) igual que el lazy-svg original.
+ * Overlay .landingBloqueOverlay replica .tinfo (backdrop-filter, bottom-left).
+ */
+
+/* Replica de .OSFED */
+.landingCaracteristicas {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    flex-direction: column;
+}
+
+/* Replica de .ADEEDE */
+.landingCaracteristicasGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    /* gap: --espacioSm(8px) -- aproximacion al gap:10px del original */
+    gap: var(--espacioSm);
+    max-width: 1250px;
+    width: 100%;
+    /* height: 100vh -- replica de .ADEEDE{height:100%} con .OSFED{min-height:100vh} */
+    height: 100vh;
+    min-height: 700px;
+    box-sizing: border-box;
+}
+
+/* Replica de .ADEEDE .bloque */
+.landingBloque {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* padding: 0px -- explicito en el original para anular el .bloque generico */
+    padding: 0;
+    width: unset;
+    overflow: hidden;
+    position: relative;
+    /* --fondoElevado1(#070707) -- equivalente mas cercano al #060606 del original */
+    background: var(--fondoElevado1);
+    border-radius: var(--radioMd);
+}
+
+/* Replica de .lazy-svg -- wrapper del SVG inline */
+.landingBloqueSvg {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+/* El elemento <svg> inyectado inline hereda el ancho del wrapper */
+.landingBloqueSvg svg {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+/* Placeholder para bloque 2 (sin SVG disponible -- era imagen en el original) */
+.landingBloqueIaPlaceholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #0a0a0a 0%, #111 50%, #0a0a0a 100%);
+}
+
+/* Overlay descriptivo -- replica de .tinfo (backdrop-filter, bottom-left, visible on hover) */
+.landingBloqueOverlay {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    text-align: start;
+    backdrop-filter: blur(10px);
+    /* --overlayOscuro -- replica de #11111170 del original */
+    background: var(--overlayOscuro);
+    /* espacioXl/espacioSm -- padding aproximado al 15px/20px original */
+    padding: var(--espacioXl) var(--espacioXl);
+    border-radius: var(--radioMd);
+    max-width: 80%;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.landingBloque:hover .landingBloqueOverlay {
+    opacity: 1;
+}
+
+.landingBloqueOverlay p {
+    font-size: var(--fuenteXs);
+    color: var(--blanco);
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* Grid areas -- replica exacta del original */
+.landingBloque1 { grid-area: 1 / 1 / 2 / 3; }
+.landingBloque2 { grid-area: 1 / 3 / 2 / 4; }
+.landingBloque3 { grid-area: 2 / 1 / 4 / 2; }
+.landingBloque4 { grid-area: 2 / 2 / 3 / 3; }
+.landingBloque5 { grid-area: 2 / 3 / 3 / 4; }
+.landingBloque6 { grid-area: 3 / 2 / 4 / 4; }
+.landingBloque7 { grid-area: 4 / 1 / 5 / 2; }
+.landingBloque8 { grid-area: 4 / 2 / 5 / 3; }
+.landingBloque9 { grid-area: 4 / 3 / 5 / 4; }
+
+/* Padding por bloque -- replica de .div3.bloque, .div4.bloque, .div5.bloque, .div6.bloque */
+.landingBloque3 { padding: 5px 65px; }
+.landingBloque4 { padding: var(--espacioSm); }
+.landingBloque5 { padding: var(--espacio3xl); }
+.landingBloque6 { padding: 15px 50px; }
+
+/* Ajustes de SVG por bloque -- replica de .div4 svg#Capa_2, .div7 .lazy-svg, etc. */
+
+/* div4: margen negativo del SVG -- replica de .div4 svg#Capa_2 { margin: -11px; margin-top: 5px } */
+.landingBloque4 .landingBloqueSvg svg {
+    margin: calc(var(--espacioMd) * -1);
+    margin-top: var(--espacioXs);
+}
+
+/* div7, div8: wrapper anclado al fondo del flex cell (margin-top:auto en hijo flex) */
+.landingBloque7 .landingBloqueSvg {
+    margin-top: auto;
+}
+
+/* div7: padding horizontal del SVG -- replica de .div7 svg#Capa_2 { padding: 0px 28px } */
+.landingBloque7 .landingBloqueSvg svg {
+    padding: 0 28px;
+}
+
+.landingBloque8 .landingBloqueSvg {
+    margin-top: auto;
+    overflow: hidden;
+}
+
+/* div9: padding del SVG -- replica de .div9 svg#Capa_2 { padding: 20px 50px 20px 50px } */
+.landingBloque9 .landingBloqueSvg svg {
+    padding: 20px 50px;
+}
+
+/* Tablet -- replica del original @media (max-width: 1020px) */
+@media (max-width: 1020px) {
+    .landingCaracteristicasGrid {
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(6, 1fr);
+        padding: var(--espacioXl);
+    }
+    .landingBloque1 { grid-area: 1 / 1 / 2 / 3; }
+    .landingBloque2 { grid-area: 5 / 2 / 6 / 3; }
+    .landingBloque3 { grid-area: 2 / 1 / 4 / 2; padding: 5px 75px; }
+    .landingBloque4 { grid-area: 2 / 2 / 3 / 3; }
+    .landingBloque5 { grid-area: 3 / 2 / 4 / 3; }
+    .landingBloque6 { grid-area: 4 / 1 / 5 / 3; }
+    .landingBloque7 { grid-area: 5 / 1 / 6 / 2; }
+    .landingBloque8 { grid-area: 6 / 1 / 7 / 2; }
+    .landingBloque9 { grid-area: 6 / 2 / 7 / 3; }
+}
+
+/* Movil -- replica del original @media (max-width: 640px) */
+@media (max-width: 640px) {
+    .landingCaracteristicasGrid {
+        grid-template-columns: 1fr;
+        grid-template-rows: repeat(9, 1fr);
+        padding: var(--espacioMd);
+    }
+    /* div2 oculto en movil -- replica de { display: none } del original */
+    .landingBloque2 { display: none; }
+    .landingBloque1 { grid-area: 1 / 1 / 2 / 2; }
+    .landingBloque3 { grid-area: 2 / 1 / 4 / 2; padding: 5px 75px; }
+    .landingBloque4 { grid-area: 4 / 1 / 5 / 2; }
+    .landingBloque5 { grid-area: 5 / 1 / 6 / 2; }
+    .landingBloque6 { grid-area: 6 / 1 / 7 / 2; }
+    .landingBloque7 { grid-area: 7 / 1 / 8 / 2; }
+    .landingBloque8 { grid-area: 8 / 1 / 9 / 2; }
+    .landingBloque9 { grid-area: 9 / 1 / 10 / 2; }
+
+    /* Ajustes SVG en movil -- replica de .div6 .lazy-svg svg y .div1 svg del original */
+    .landingBloque6 .landingBloqueSvg svg {
+        margin-left: calc(var(--espacio5xl) * -3.75);
+        margin-right: calc(var(--espacio5xl) * -1.5);
+    }
+    .landingBloque1 .landingBloqueSvg svg {
+        margin: -125px -272px -283px 0;
+    }
+}

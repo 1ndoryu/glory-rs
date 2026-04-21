@@ -4,8 +4,9 @@
  * en lugar de reciclar el dashboard legacy excluido del type-check actual. */
 
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { useAuthModalStore } from '../app/stores/authModalStore';
 import { useStats } from '../api/generated/payments/payments';
+import Boton from '../components/ui/Boton';
 import { useAuth } from '../hooks/useAuth';
 
 const compactFormatter = new Intl.NumberFormat('es-ES', {
@@ -34,6 +35,7 @@ function getErrorMessage(error: unknown): string {
 
 export default function DashboardPage() {
   const auth = useAuth();
+  const abrirAuth = useAuthModalStore((state) => state.abrir);
   const statsQuery = useStats({
     query: {
       enabled: auth.isAuthenticated,
@@ -67,8 +69,8 @@ export default function DashboardPage() {
             habilitar tu vista personal y el feed autenticado.
           </p>
           <div className="heroAcciones">
-            <Link className="accionPrimaria" to="/auth/login">Entrar</Link>
-            <Link className="accionSecundaria" to="/auth/registro">Crear cuenta</Link>
+            <Boton className="accionPrimaria" onClick={() => abrirAuth('login')} type="button">Entrar</Boton>
+            <Boton className="accionSecundaria" onClick={() => abrirAuth('registro')} type="button">Crear cuenta</Boton>
           </div>
         </div>
       </section>

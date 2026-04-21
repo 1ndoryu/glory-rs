@@ -12,9 +12,10 @@
  * lugar que cambia (axios-instance ya no leería de localStorage).
  */
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import {
+  useGoogleLogin,
   useLogin,
   useLogout,
   useRegister,
@@ -22,10 +23,13 @@ import {
 import { getMeQueryKey, useMe } from '../api/generated/users/users';
 import type {
   AuthResponse,
+  ErrorResponse,
+  GoogleAuthRequest,
   LoginRequest,
   PrivateProfileResponse,
   RegisterRequest,
 } from '../api/generated/model';
+import { useGoogleAuth } from './useGoogleAuth';
 
 const TOKEN_KEY = 'token';
 const REFRESH_KEY = 'refresh';
@@ -47,6 +51,23 @@ function unwrap<T>(response: unknown): T | undefined {
   return (payload?.data ?? payload) as T | undefined;
 }
 
+function getErrorMessage(error: unknown): string | null {
+  const payload = error as { message?: string; error?: string } | null;
+  if (!payload) {
+    return null;
+  }
+
+  if (typeof payload.message === 'string' && payload.message.trim()) {
+    return payload.message;
+  }
+
+  if (typeof payload.error === 'string' && payload.error.trim()) {
+    return payload.error;
+  }
+
+  return null;
+}
+
 export function useAuth() {
   const queryClient = useQueryClient();
   const hasToken = typeof window !== 'undefined' && !!localStorage.getItem(TOKEN_KEY);
@@ -55,6 +76,7 @@ export function useAuth() {
     query: { enabled: hasToken, retry: false, refetchOnWindowFocus: false },
   });
   const loginMutation = useLogin();
+  const googleLoginMutation = useGoogleLogin();
   const logoutMutation = useLogout();
   const registerMutation = useRegister();
 
@@ -76,6 +98,24 @@ export function useAuth() {
     [registerMutation, queryClient],
   );
 
+  const loginWithGoogle = useCallback(
+    async (body: GoogleAuthRequest) => {
+      const res = await googleLoginMutation.mutateAsync({ data: body });
+      persistTokens(unwrap<AuthResponse>(res));
+      await queryClient.invalidateQueries({ queryKey: getMeQueryKey() });
+    },
+    [googleLoginMutation, queryClient],
+  );
+
+  const handleGoogleCredential = useCallback(
+    async (credential: string) => {
+      await loginWithGoogle({ id_token: credential });
+    },
+    [loginWithGoogle],
+  );
+
+  const { buttonContainerRef: googleButtonRef } = useGoogleAuth(handleGoogleCredential, false);
+
   const logout = useCallback(async () => {
     const refreshToken = localStorage.getItem(REFRESH_KEY) ?? '';
     try {
@@ -87,16 +127,39 @@ export function useAuth() {
     queryClient.removeQueries({ queryKey: getMeQueryKey() });
   }, [logoutMutation, queryClient]);
 
+  const errorMessage = useMemo(() => {
+    return (
+      getErrorMessage(loginMutation.error as ErrorResponse | null)
+      ?? getErrorMessage(registerMutation.error as ErrorResponse | null)
+      ?? getErrorMessage(googleLoginMutation.error as ErrorResponse | null)
+      ?? getErrorMessage(logoutMutation.error as ErrorResponse | null)
+      ?? getErrorMessage(meQuery.error)
+    );
+  }, [googleLoginMutation.error, loginMutation.error, logoutMutation.error, meQuery.error, registerMutation.error]);
+
   return {
     user: unwrap<PrivateProfileResponse>(meQuery.data),
     isAuthenticated: hasToken && meQuery.isSuccess,
     isLoading: meQuery.isLoading,
     isSubmitting:
-      loginMutation.isPending || registerMutation.isPending || logoutMutation.isPending,
+      loginMutation.isPending || registerMutation.isPending || googleLoginMutation.isPending || logoutMutation.isPending,
     login,
+    iniciarSesion: (identifier: string, password: string) => login({ identifier, password }),
     register,
+    registrar: (body: { nombreVisible: string; username: string; email: string; password: string }) => register({
+      nombre_visible: body.nombreVisible || undefined,
+      username: body.username,
+      email: body.email,
+      password: body.password,
+    }),
+    googleBotonRef: googleButtonRef,
+    esGoogleNativo: false,
+    loginGoogleNativo: () => Promise.resolve(),
+    cargando:
+      loginMutation.isPending || registerMutation.isPending || googleLoginMutation.isPending,
     logout,
+    errorMessage,
     error:
-      loginMutation.error ?? registerMutation.error ?? logoutMutation.error ?? meQuery.error,
+      loginMutation.error ?? registerMutation.error ?? googleLoginMutation.error ?? logoutMutation.error ?? meQuery.error,
   };
 }

@@ -1,0 +1,580 @@
+/*
+ * modalCrear.css — Kamples
+ * Modal unificado de creación (publicación + sample).
+ */
+
+/* Selector de lado: paso previo cuando se adjunta a un sampleo sin lado definido (L7.1) */
+.selectorLadoModal {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--espacioMd);
+    padding: var(--espacioXl) var(--espacioMd);
+    text-align: center;
+}
+
+.selectorLadoIcono {
+    color: var(--acento);
+    opacity: 0.8;
+}
+
+.selectorLadoTitulo {
+    font-size: var(--fuenteLg);
+    font-weight: var(--pesoBold);
+    color: var(--textoPrimario);
+    margin: 0;
+}
+
+.selectorLadoDesc {
+    font-size: var(--fuenteSm);
+    color: var(--textoSecundario);
+    margin: 0;
+    max-width: 320px;
+}
+
+.selectorLadoOpciones {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--espacioMd);
+    width: 100%;
+    margin-top: var(--espacioSm);
+}
+
+.selectorLadoOpciones button {
+    padding: var(--espacioLg) !important;
+    height: unset !important;
+}
+
+.selectorLadoBtn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--espacioXs);
+    padding: var(--espacioMd);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioMd);
+    text-align: center;
+    height: auto;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+}
+
+.selectorLadoBtn:hover {
+    border-color: var(--acento);
+    background: var(--fondo);
+}
+
+.selectorLadoBtnTitulo {
+    font-size: var(--fuenteMd);
+    font-weight: var(--pesoBold);
+    color: var(--textoPrimario);
+    display: block;
+    white-space: normal;
+    line-height: 1.3;
+}
+
+.selectorLadoBtnArtista {
+    font-size: var(--fuenteSm);
+    color: var(--textoSecundario);
+    display: block;
+}
+
+.crearContenido {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioMd);
+    position: relative;
+}
+
+.crearContenido textarea.campoTextoArea {
+    border: unset;
+    /* padding: unset; */
+}
+
+.crearCabecera {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+}
+
+.crearUsuario {
+    font-size: var(--fuenteMd);
+    color: var(--textoPrimario);
+    font-weight: var(--pesoMedio);
+}
+
+/* Textarea auto-expandible, 2 a 6 líneas */
+.crearTextarea {
+    width: 100%;
+    min-height: 40px;
+    max-height: 120px;
+    resize: none;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--textoPrimario);
+    font-family: var(--fuentePrincipal);
+    font-size: var(--fuenteMd);
+    line-height: var(--espacioXl);
+    padding: 0;
+}
+
+.crearTextarea::placeholder {
+    color: var(--textoTerciario);
+}
+
+/* Tags extraídos del texto */
+.crearTags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--espacioXs);
+}
+
+/* Contador de tags mínimos para samples */
+.crearTagsContador {
+    font-size: var(--fuenteXs);
+    padding: var(--espacioXs) var(--espacioSm);
+    border-radius: var(--radioSm);
+    transition: all 0.2s ease;
+}
+
+.crearTagsInsuficientes {
+    color: var(--error);
+    opacity: 0.5;
+    padding: 0;
+}
+
+.crearTagsSuficientes {
+    color: var(--textoSecundario);
+}
+
+/* Audio adjunto (fila compacta) */
+.crearAdjunto {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    padding: var(--espacioSm) var(--espacioMd);
+    background-color: var(--fondoElevado3);
+    border-radius: var(--radioMd);
+    border: 1px solid var(--bordeSutil);
+}
+
+.crearAdjuntoIcono {
+    color: var(--acento-blanco);
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: none;
+    padding: 0;
+}
+
+/* [193A-90] El ícono de Image es clickeable para subir portada */
+.crearAdjuntoIconoBtn {
+    cursor: pointer;
+    border-radius: var(--radioMd);
+    transition: background-color var(--transicionRapida);
+}
+
+.crearAdjuntoIconoBtn:hover {
+    background-color: var(--fondoElevado2);
+}
+
+/* [193A-95] Tamaño mayor cuando hay portada asignada */
+.crearAdjuntoIconoGrande {
+    width: 56px;
+    height: 56px;
+}
+
+.crearAdjuntoInfo {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.crearAdjuntoNombre {
+    font-size: var(--fuenteSm);
+    color: var(--textoPrimario);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.crearAdjuntoMeta {
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+}
+
+.crearAdjuntoBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: none;
+    color: var(--textoTerciario);
+    cursor: pointer;
+    border-radius: var(--radioSm);
+    transition: color var(--transicionRapida);
+    flex-shrink: 0;
+}
+
+.crearAdjuntoBtn:hover {
+    color: var(--textoPrimario);
+}
+
+.crearAdjuntoBtnQuitar:hover {
+    color: var(--error);
+}
+
+/* [193A-90] Preview de portada reemplaza el ícono Music en la misma posición */
+.crearAdjuntoPortadaPreview {
+    position: relative;
+    border-radius: var(--radioMd);
+    overflow: hidden;
+    cursor: pointer;
+    border: 1px solid var(--bordeSutil);
+}
+
+.crearAdjuntoPortadaPreview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.crearAdjuntoPortadaQuitar {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--overlayFuerte);
+    color: var(--blanco);
+    opacity: 0;
+    transition: opacity var(--transicionRapida);
+}
+
+.crearAdjuntoPortadaPreview:hover .crearAdjuntoPortadaQuitar {
+    opacity: 1;
+}
+
+/* Waveform preview del audio adjunto */
+.crearWaveform {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--espacioXs);
+    padding: var(--espacioSm) var(--espacioMd);
+    background-color: var(--fondoElevado2);
+    border-radius: var(--radioMd);
+    cursor: pointer;
+    transition: background-color var(--transicionRapida);
+}
+
+.crearWaveform:hover {
+    background-color: var(--fondoElevado3);
+}
+
+.crearWaveformBarras {
+    display: flex;
+    align-items: flex-end;
+    gap: calc(var(--espacioXs) / 2);
+    width: 100%;
+    height: 40px;
+}
+
+.crearWaveformBarra {
+    flex: 1;
+    min-width: 2px;
+    background-color: var(--acento-blanco);
+    border-radius: calc(var(--espacioXs) / 4);
+    opacity: 0.6;
+    transition: opacity var(--transicionRapida);
+}
+
+.crearWaveform:hover .crearWaveformBarra {
+    opacity: 1;
+}
+
+/* Barra activa durante reproducción de preview */
+.crearWaveformBarraActiva {
+    background-color: var(--acento);
+    opacity: 1;
+}
+
+/* Condiciones del sample (descarga, licencia) */
+.crearCondiciones {
+    display: flex;
+    gap: var(--espacioSm);
+    flex-wrap: wrap;
+}
+
+.crearCondicionBtn {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioXs);
+    padding: var(--espacioXs) var(--espacioSm);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioSm);
+    background: none;
+    color: var(--textoTerciario);
+    font-size: var(--fuenteXs);
+    cursor: pointer;
+    transition: all var(--transicionRapida);
+}
+
+.crearCondicionBtn:hover {
+    border-color: var(--bordeActivo);
+    color: var(--textoSecundario);
+}
+
+.crearCondicionActiva, .crearCondicionPremium, .crearCondicionPrecio  {
+    border-color: var(--acento);
+    color: var(--acento) !important;
+    background-color: var(--fondoElevado3);
+    background: var(--acentoMuted) !important;
+}
+
+
+/* L7.2: Campo timing inicio del sample en la cancion original */
+.crearTimingContenedor {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    padding: var(--espacioXs) var(--espacioSm);
+}
+
+.crearTimingIcono {
+    color: var(--textoTerciario);
+    flex-shrink: 0;
+}
+
+.crearTimingLabel {
+    font-size: var(--fuenteXs);
+    color: var(--textoSecundario);
+    white-space: nowrap;
+}
+
+.crearTimingInput {
+    width: 80px;
+    padding: var(--espacioXs) var(--espacioSm);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioSm);
+    background: var(--fondoElevado2);
+    color: var(--textoPrimario);
+    font-size: var(--fuenteSm);
+    font-family: inherit;
+    outline: none;
+    transition: border-color var(--transicionRapida);
+}
+
+.crearTimingInput:focus {
+    border-color: var(--acento-blanco);
+}
+
+/* Campo precio para samples premium */
+.crearPrecioContenedor {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--espacioSm);
+    /* padding: 0 var(--espacioSm); */
+    flex-direction: column;
+}
+
+.crearPrecioLabel {
+    font-size: var(--fuenteXs);
+    color: var(--textoSecundario);
+    white-space: nowrap;
+}
+
+.crearPrecioInput {
+    width: 100px;
+    padding: var(--espacioXs) var(--espacioSm);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioSm);
+    background: var(--fondoElevado2);
+    color: var(--textoPrimario);
+    font-size: var(--fuenteSm);
+    font-family: inherit;
+    outline: none;
+    transition: border-color var(--transicionRapida);
+}
+
+.crearPrecioInput:focus {
+    border-color: var(--acento);
+}
+
+.crearPrecioInput::placeholder {
+    color: var(--textoTerciario);
+}
+
+/* Grid de imágenes */
+.crearImagenes {
+    display: grid;
+    gap: var(--espacioXs);
+    border-radius: var(--radioMd);
+    overflow: hidden;
+}
+
+.crearImagenes1 {
+    grid-template-columns: 1fr;
+}
+.crearImagenes2 {
+    grid-template-columns: 1fr 1fr;
+}
+
+.crearImagenes3 {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+}
+
+.crearImagenes3 .crearImagenItem:first-child {
+    grid-row: span 2;
+}
+
+.crearImagenes4 {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+}
+
+.crearImagenItem {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: var(--radioSm);
+}
+
+.crearImagenItem img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Overlay de edición: aparece al hacer hover, click = reemplazar imagen */
+.crearImagenOverlayEditar {
+    position: absolute;
+    inset: 0;
+    background-color: var(--overlayOscuro);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity var(--transicionRapida);
+    cursor: pointer;
+    border-radius: var(--radioSm);
+    color: var(--textoPrimario);
+}
+
+.crearImagenItem:hover .crearImagenOverlayEditar {
+    opacity: 1;
+}
+
+.crearImagenQuitar {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--overlayOscuro);
+    color: var(--textoPrimario);
+    border: none;
+    border-radius: var(--radioFull);
+    cursor: pointer;
+    transition: background-color var(--transicionRapida);
+}
+
+.crearImagenQuitar:hover {
+    background-color: var(--error);
+}
+
+/* Overlay de drag & drop (solo visible al arrastrar) */
+.crearDropOverlay {
+    position: absolute;
+    inset: 0;
+    background-color: var(--overlayOscuro);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--espacioSm);
+    border-radius: var(--radioMd);
+    border: 2px dashed var(--bordeActivo);
+    color: var(--textoPrimario);
+    z-index: 10;
+    font-size: var(--fuenteSm);
+}
+
+/* Barra de acciones */
+.crearAcciones {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: var(--espacioSm);
+}
+
+.crearAccionesIzquierda {
+    display: flex;
+    gap: var(--espacioXs);
+}
+
+.crearAccionesDerecha {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioMd);
+}
+
+.crearContador {
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+    font-variant-numeric: tabular-nums;
+}
+
+.crearContadorAlerta {
+    color: var(--error);
+}
+
+/* Mensajes de error y éxito en subida */
+.crearMensajeError,
+.crearMensajeExito {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    padding: var(--espacioSm) var(--espacioMd);
+    border-radius: var(--radioMd);
+    font-size: var(--fuenteSm);
+}
+
+.crearMensajeError {
+    background-color: var(--errorMuted);
+    color: var(--error);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.crearMensajeExito {
+    background-color: var(--exitoMuted);
+    color: var(--exito);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.crearMensajeCerrar {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    padding: calc(var(--espacioXs) / 2);
+    opacity: 0.7;
+}
+
+.crearMensajeCerrar:hover {
+    opacity: 1;
+}

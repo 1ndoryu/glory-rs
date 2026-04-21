@@ -1,0 +1,394 @@
+/*
+ * Estilos: DashboardCreadorIsland — Kamples (Fase 7.3)
+ * Panel de estadísticas del creador + Stripe Connect.
+ */
+
+.dashboardIsland {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: var(--espacioLg) var(--espacioMd);
+}
+
+/* Header */
+.dashboardHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--espacioXl);
+}
+
+.dashboardHeaderTitulo {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    color: var(--textoPrimario);
+}
+
+.dashboardHeaderTitulo h1 {
+    font-size: var(--fuenteLg);
+    font-weight: var(--pesoSemibold);
+    margin: 0;
+}
+
+/* Grid de tarjetas stat */
+.dashboardStatsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--espacioMd);
+    margin-bottom: var(--espacioXl);
+}
+
+.dashboardStat {
+    background: var(--fondoElevado1);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioMd);
+    padding: var(--espacioLg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioSm);
+}
+
+.dashboardStatHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dashboardStatTitulo {
+    font-size: var(--fuenteSm);
+    color: var(--textoSecundario);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.dashboardStatIcono {
+    color: var(--textoTerciario);
+}
+
+.dashboardStatValor {
+    font-size: var(--fuenteXl);
+    font-weight: var(--pesoBold);
+    color: var(--textoPrimario);
+}
+
+.dashboardStatCambio {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioXs);
+    font-size: var(--fuenteXs);
+}
+
+.dashboardStatCambioPositivo {
+    color: var(--exito);
+}
+
+.dashboardStatCambioNegativo {
+    color: var(--error);
+}
+
+/* Sección genérica */
+.dashboardSeccion {
+    background: var(--fondoElevado1);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioMd);
+    padding: var(--espacioLg);
+    margin-bottom: var(--espacioXl);
+}
+
+.dashboardSeccionTitulo {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    font-size: var(--fuenteMd);
+    font-weight: var(--pesoSemibold);
+    color: var(--textoPrimario);
+    margin: 0 0 var(--espacioLg) 0;
+}
+
+.dashboardSeccionFooter {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: var(--espacioMd);
+    font-size: var(--fuenteSm);
+    color: var(--textoSecundario);
+}
+
+/* Gráfica de barras */
+.dashboardGrafica {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioSm);
+}
+
+.dashboardGraficaBarras {
+    display: flex;
+    align-items: flex-end;
+    gap: calc(var(--espacioXs) / 2);
+    height: 120px;
+}
+
+.dashboardGraficaBarra {
+    flex: 1;
+    background: var(--fondoElevado3);
+    border-radius: calc(var(--espacioXs) / 2) calc(var(--espacioXs) / 2) 0 0;
+    min-height: 2px;
+    transition: background var(--transicionRapida);
+}
+
+.dashboardGraficaBarra:hover {
+    background: var(--textoSecundario);
+}
+
+.dashboardGraficaEje {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+}
+
+/* Resumen */
+.dashboardResumen {
+    padding: var(--espacioMd) 0;
+}
+
+.dashboardResumenStats {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioMd);
+}
+
+.dashboardResumenItem {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    font-size: var(--fuenteMd);
+    color: var(--textoSecundario);
+}
+
+/* Subtítulos */
+.dashboardSubtitulo {
+    font-size: var(--fuenteMd);
+    font-weight: var(--pesoSemibold);
+    color: var(--textoPrimario);
+    margin: var(--espacioMd) 0;
+}
+
+/* Tabla de datos */
+.dashboardTabla {
+    display: flex;
+    flex-direction: column;
+}
+
+.dashboardTablaHead {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+    gap: var(--espacioSm);
+    padding: var(--espacioSm) var(--espacioMd);
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--bordeSutil);
+}
+
+.dashboardTablaFila {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+    gap: var(--espacioSm);
+    padding: var(--espacioSm) var(--espacioMd);
+    font-size: var(--fuenteSm);
+    color: var(--textoSecundario);
+    border: none;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+    transition: background var(--transicionRapida);
+    width: 100%;
+    border-bottom: 1px solid var(--bordeSutil);
+}
+
+.dashboardTablaFila:hover {
+    background: var(--fondoElevado1);
+}
+
+.dashboardTablaFila:last-child {
+    border-bottom: none;
+}
+
+.dashboardTablaCelda {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioXs);
+    color: var(--textoPrimario);
+    font-weight: var(--pesoMedio);
+}
+
+.dashboardTablaRank {
+    color: var(--textoTerciario);
+    font-size: var(--fuenteXs);
+    min-width: 20px;
+}
+
+.dashboardTablaIngresos {
+    color: var(--exito);
+    font-weight: var(--pesoSemibold);
+}
+
+.dashboardTablaComprador {
+    color: var(--textoSecundario);
+}
+
+/* Empty state */
+.dashboardVacio {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--espacio3xl);
+    color: var(--textoTerciario);
+    font-size: var(--fuenteMd);
+}
+
+/* Stripe Connect */
+
+.dashboardConnect {
+    margin-top: var(--espacioMd);
+}
+
+/* Banners de estado Connect */
+.dashboardConnectBanner {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--espacioMd);
+    padding: var(--espacioMd);
+    border-radius: var(--radioMd);
+    border: 1px solid var(--bordeSutil);
+}
+
+.dashboardConnectBannerInfo {
+    background: var(--fondoElevado2);
+    border-color: var(--acento);
+}
+
+.dashboardConnectBannerInfo > svg {
+    color: var(--acento);
+    flex-shrink: 0;
+    margin-top: calc(var(--espacioXs) / 2);
+}
+
+.dashboardConnectBannerExito {
+    background: color-mix(in srgb, var(--exito) 8%, transparent);
+    border-color: color-mix(in srgb, var(--exito) 30%, transparent);
+}
+
+.dashboardConnectBannerExito > svg {
+    color: var(--exito);
+    flex-shrink: 0;
+    margin-top: calc(var(--espacioXs) / 2);
+}
+
+.dashboardConnectBannerAdvertencia {
+    background: color-mix(in srgb, var(--advertencia) 8%, transparent);
+    border-color: color-mix(in srgb, var(--advertencia) 30%, transparent);
+}
+
+.dashboardConnectBannerAdvertencia > svg {
+    color: var(--advertencia);
+    flex-shrink: 0;
+    margin-top: calc(var(--espacioXs) / 2);
+}
+
+.dashboardConnectBannerTexto {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioXs);
+    flex: 1;
+}
+
+.dashboardConnectBannerTexto strong {
+    color: var(--textoPrimario);
+    font-size: var(--fuenteSm);
+    font-weight: var(--pesoSemibold);
+}
+
+.dashboardConnectBannerTexto span {
+    color: var(--textoSecundario);
+    font-size: var(--fuenteXs);
+    line-height: 1.5;
+}
+
+/* Balance Connect */
+.dashboardConnectBalance {
+    display: flex;
+    gap: var(--espacioLg);
+    margin-top: var(--espacioMd);
+    padding: var(--espacioMd);
+    background: var(--fondoElevado2);
+    border-radius: var(--radioMd);
+    border: 1px solid var(--bordeSutil);
+}
+
+.dashboardConnectBalanceItem {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    color: var(--textoSecundario);
+    font-size: var(--fuenteSm);
+}
+
+.dashboardConnectBalanceLabel {
+    color: var(--textoTerciario);
+    font-size: var(--fuenteXs);
+}
+
+.dashboardConnectBalanceMonto {
+    font-weight: var(--pesoSemibold);
+    color: var(--textoPrimario);
+    font-size: var(--fuenteMd);
+}
+
+.dashboardConnectBalancePendiente {
+    color: var(--textoSecundario);
+}
+
+/* Spinner animación */
+.dashboardSpinner {
+    animation: dashboardSpin 1s linear infinite;
+}
+
+@keyframes dashboardSpin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .dashboardStatsGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .dashboardTablaHead,
+    .dashboardTablaFila {
+        grid-template-columns: 2fr 1fr 1fr;
+    }
+
+    /* Ocultar columnas secundarias en móvil */
+    .dashboardTablaHead span:nth-child(3),
+    .dashboardTablaHead span:nth-child(4),
+    .dashboardTablaFila span:nth-child(3),
+    .dashboardTablaFila span:nth-child(4) {
+        display: none;
+    }
+
+    .dashboardConnectBanner {
+        flex-direction: column;
+    }
+
+    .dashboardConnectBalance {
+        flex-direction: column;
+        gap: var(--espacioMd);
+    }
+}

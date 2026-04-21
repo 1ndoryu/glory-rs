@@ -1,0 +1,151 @@
+/*
+ * tarjetaRelacionSample.css — Kamples
+ * Tarjeta compacta que muestra relación de sampling entre canciones.
+ */
+
+.tarjetaRelacion {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioMd);
+    padding: var(--espacioMd);
+    background: var(--fondoElevado1);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioMd);
+    cursor: pointer;
+    transition: background var(--transicionNormal), border-color var(--transicionNormal);
+}
+
+.tarjetaRelacion:hover {
+    background: var(--fondoElevado2);
+    border-color: var(--bordeSutil);
+}
+
+/* .tarjetaRelacionImagen se aplica directamente al <img>, no a un wrapper */
+.tarjetaRelacionImagen {
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
+    flex-shrink: 0;
+    border-radius: var(--radioSm);
+    object-fit: cover;
+    display: block;
+}
+
+.tarjetaRelacionCuerpo {
+    display: flex;
+    flex-direction: row;
+    gap: var(--espacioSm);
+    min-width: 0;
+    flex: 1;
+    align-items: center;
+}
+
+/* Columna central: título + artista + año apilados verticalmente */
+.tarjetaRelacionInfo {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+    gap: var(--espacio2xs);
+}
+
+.tarjetaRelacionTitulo {
+    margin: 0;
+    font-size: var(--fuenteMd);
+    font-weight: var(--pesoSemibold);
+    color: var(--textoPrimario);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tarjetaRelacionArtista {
+    margin: 0;
+    font-size: var(--fuenteSm);
+    color: var(--textoSecundario);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+}
+
+.tarjetaRelacionArtista:hover {
+    color: var(--acento);
+    text-decoration: underline;
+}
+
+.tarjetaRelacionAnio {
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+}
+
+.tarjetaRelacionBadges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: calc(var(--espacioXs) / 2);
+    align-items: center;
+}
+
+.tarjetaRelacionTiming {
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+}
+
+.tarjetaRelacionMeta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: calc(var(--espacioXs) / 2);
+    flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+    .tarjetaRelacion {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .tarjetaRelacionMeta {
+        align-items: flex-start;
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+}
+
+.tarjetaRelacionContribuidor {
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+    font-style: italic;
+}
+
+.tarjetaRelacionPie {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: var(--espacioXs);
+    padding-top: var(--espacioXs);
+    border-top: 1px solid var(--bordeSutil);
+    margin-top: calc(-1 * var(--espacioXs)); /* compensar gap del flex parent */
+    width: 100%;
+}
+
+/* L6.2d: Botones de edicion comunitaria */
+.tarjetaRelacionAccionEditar,
+.tarjetaRelacionAccionReportar {
+    font-size: var(--fuenteXs);
+    opacity: 0;
+    transition: opacity var(--transicionNormal);
+}
+
+.tarjetaRelacion:hover .tarjetaRelacionAccionEditar,
+.tarjetaRelacion:hover .tarjetaRelacionAccionReportar {
+    opacity: 1;
+}
+
+.tarjetaRelacionAccionReportar {
+    color: var(--textoTerciario);
+}
+
+.tarjetaRelacionAccionEditar {
+    color: var(--acento);
+}

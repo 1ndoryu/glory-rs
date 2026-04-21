@@ -1,0 +1,158 @@
+/*
+ * BotonBase — Kamples
+ * Variantes: primario, secundario, ghost, peligro
+ * Tamaños: sm, md
+ */
+
+.botonBase {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--espacioSm);
+    font-family: var(--fuentePrincipal);
+    font-weight: var(--pesoMedio);
+    border-radius: var(--radioMd);
+    cursor: pointer;
+    transition: all var(--transicionRapida);
+    white-space: nowrap;
+    user-select: none;
+    border: 1px solid transparent;
+    line-height: 1;
+}
+
+/* Tamaño sm */
+.botonBase.tamanoSm {
+    font-size: var(--fuenteSm);
+    padding: var(--espacioSm) var(--espacioMd);
+    height: 34px;
+}
+
+/* Tamaño md */
+.botonBase.tamanoMd {
+    font-size: var(--fuenteMd);
+    padding: var(--espacioSm) var(--espacioMd);
+    height: 34px;
+}
+
+/* Variante primario */
+.botonBase.variantePrimario {
+    background-color: var(--acento-blanco);
+    color: var(--textoPrimarioInverso);
+    padding: 10px 12px;
+}
+
+.botonBase.variantePrimario:hover {
+    background-color: var(--acentoHover);
+    color: var(--acento-blanco);
+    border-color: var(--bordeSutil);
+}
+
+.botonBase.variantePrimario:active {
+    transform: scale(0.97);
+}
+
+/* Variante secundario */
+.botonBase.varianteSecundario {
+    background-color: transparent;
+    color: var(--textoPrimario);
+    border-color: var(--bordeSutil);
+}
+
+.botonBase.varianteSecundario:hover {
+    border-color: var(--bordeActivo);
+    background-color: var(--fondoElevado2);
+}
+
+/* Variante ghost */
+.botonBase.varianteGhost {
+    background-color: transparent;
+    color: var(--textoSecundario);
+}
+
+.botonBase.varianteGhost:hover {
+    color: var(--textoPrimario);
+    background-color: var(--fondoElevado2);
+}
+
+/* Variante peligro */
+.botonBase.variantePeligro {
+    background-color: var(--error);
+    color: var(--blanco);
+}
+
+.botonBase.variantePeligro:hover {
+    background-color: var(--acentoHover);
+    border-color: var(--bordeSutil);
+}
+
+/* Estado deshabilitado */
+.botonBase:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+    background: unset;
+    color: var(--acento-blanco);
+    border: 1px solid var(--bordeSutil);
+}
+
+/* Icono solo (cuadrado) */
+.botonBase.soloIcono {
+    padding: var(--espacioSm);
+    aspect-ratio: 1;
+}
+
+/* Ancho completo */
+.botonBase.anchoCompleto {
+    width: 100%;
+}
+
+/* Cargando */
+.botonBase.cargando {
+    pointer-events: none;
+    position: relative;
+    color: transparent;
+    background: unset;
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioLg);
+}
+
+.botonBase.cargando::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #ffffff;
+    border-radius: var(--radioFull);
+    animation: spinBoton 0.6s linear infinite;
+}
+
+@keyframes spinBoton {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/*
+ * C347: Clase compartida para botones "volver" en todas las islas.
+ * Uso: <BotonBase variante="ghost" className="botonVolver" ...>
+ */
+.botonVolver {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--espacioXs);
+    color: var(--textoSecundario);
+    font-size: var(--fuenteSm);
+    padding: 0 !important;
+    transition: color var(--transicionRapida);
+}
+
+.botonVolver:hover {
+    color: var(--textoPrimario);
+    background: unset !important;
+}
+
+.botonBase svg {
+    min-width: 12px;
+    min-height: 12px;
+}

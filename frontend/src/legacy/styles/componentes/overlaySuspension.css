@@ -1,0 +1,77 @@
+/*
+ * Estilos: OverlaySuspension — QQ65
+ * Overlay a pantalla completa con fondo desenfocado para usuarios suspendidos.
+ */
+
+.overlaySuspension {
+    position: fixed;
+    inset: 0;
+    z-index: calc(var(--zModal) + 500);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--overlayFuerte);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.overlaySuspensionContenido {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--espacioLg);
+    max-width: 440px;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    background: var(--fondoElevado1);
+    border-radius: var(--radioLg);
+    border: 1px solid var(--bordeSutil);
+}
+
+.overlaySuspensionIcono {
+    color: var(--error);
+    margin-bottom: var(--espacioSm);
+}
+
+.overlaySuspensionTitulo {
+    font-size: var(--fuenteXl);
+    font-weight: 700;
+    color: var(--textoPrimario);
+    margin: 0;
+}
+
+.overlaySuspensionRazon {
+    color: var(--textoSecundario);
+    font-size: var(--fuenteMd);
+    line-height: 1.5;
+    margin: 0;
+    padding: 0.75rem 1rem;
+    background: var(--fondoElevado2);
+    border-radius: var(--radioMd);
+    width: 100%;
+}
+
+.overlaySuspensionTimer {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    color: var(--textoSecundario);
+    font-size: var(--fuenteMd);
+    font-variant-numeric: tabular-nums;
+}
+
+.overlaySuspensionTimerPeligro {
+    color: var(--error);
+}
+
+.overlaySuspensionAcciones {
+    display: flex;
+    gap: var(--espacioMd);
+    margin-top: var(--espacioSm);
+}
+
+.overlaySuspensionNota {
+    color: var(--textoTerciario);
+    font-size: var(--fuenteSm);
+    margin: 0;
+}

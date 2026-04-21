@@ -2,6 +2,7 @@
 /* sentinel-disable-file limite-lineas — registro central de rutas y schemas OpenAPI */
 
 mod admin;
+mod app_versions;
 mod articles;
 mod auth;
 mod colecciones;
@@ -71,6 +72,7 @@ impl utoipa::Modify for SecurityAddon {
         auth::logout,
         auth::google_login,
         auth::google_pkce,
+        app_versions::get_app_versions,
         articles::list_articles,
         articles::list_categories,
         articles::get_article,
@@ -84,12 +86,14 @@ impl utoipa::Modify for SecurityAddon {
         sample_catalog::delete_sample,
         sample_catalog::get_sample,
         sample_catalog::list_samples,
+        sample_catalog::aggregate_tags,
         sample_catalog::random_sample,
         sample_catalog::similar_samples,
         sample_catalog::update_sample,
         samples::check_duplicate,
         samples::upload,
         plays::register_play,
+        plays::list_played_ids,
         likes::create_like,
         likes::delete_like,
         messages::list_conversations,
@@ -539,6 +543,7 @@ fn api_routes() -> Router<AppState> {
     Router::new()
         .merge(health::routes())
         .merge(auth::routes())
+        .merge(app_versions::routes())
         .merge(articles::routes())
         .merge(feed::routes())
         .merge(sample_catalog::routes())

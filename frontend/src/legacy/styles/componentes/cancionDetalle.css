@@ -1,0 +1,278 @@
+/*
+ * cancionDetalle.css — Kamples
+ * Página de detalle de canción: info, artistas, relaciones de sampling.
+ */
+
+.cancionDetalleContenedor {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioMd);
+    padding: var(--espacioLg);
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.cancionDetalleTarjeta {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioMd);
+    background: var(--fondoElevado1);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioLg);
+    padding: var(--espacioLg);
+}
+
+.cancionDetalleCabecera {
+    display: flex;
+    gap: var(--espacioLg);
+    align-items: flex-start;
+    position: relative;
+}
+
+/* [183A-32] Contenedor acciones: like + 3 puntos */
+.cancionDetalleAcciones {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--espacio2xs);
+}
+
+/* Boton 3 puntos para menu contextual de acciones */
+.cancionDetalleMenuBtn {
+    color: var(--textoSecundario);
+    border-radius: var(--radioSm);
+    padding: var(--espacioXs);
+    transition: color 0.15s;
+}
+
+.cancionDetalleMenuBtn:hover {
+    color: var(--acento);
+}
+
+/* [183A-32] Like en detalle de cancion */
+.cancionDetalleLikeBtn {
+    color: var(--textoSecundario);
+    border-radius: var(--radioSm);
+    padding: var(--espacioXs);
+    transition: color 0.15s;
+}
+
+.cancionDetalleLikeBtn:hover {
+    color: var(--acento);
+}
+
+.cancionDetalleLikeBtnActiva {
+    color: var(--acento);
+}
+
+.cancionDetallePortada {
+    width: 160px;
+    height: 160px;
+    min-width: 160px;
+    border-radius: var(--radioMd);
+    overflow: hidden;
+    background: var(--fondoElevado2);
+}
+
+.cancionDetallePortada img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.cancionDetalleInfo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioSm);
+    min-width: 0;
+    flex: 1;
+}
+
+.cancionDetalleTitulo {
+    margin: 0;
+    font-size: var(--fuenteXl);
+    font-weight: var(--pesoBold);
+    color: var(--textoPrimario);
+    line-height: 1.2;
+}
+
+.cancionDetalleArtistas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--espacioSm);
+    align-items: center;
+}
+
+.cancionDetalleArtista {
+    font-size: var(--fuenteMd);
+    color: var(--textoSecundario);
+    cursor: pointer;
+    transition: color var(--transicionNormal);
+    background: none;
+    border: none;
+    padding: 0;
+}
+
+.cancionDetalleArtista:hover {
+    color: var(--acento);
+    text-decoration: underline;
+}
+
+.cancionDetalleAnio {
+    font-size: var(--fuenteSm);
+    color: var(--textoTerciario);
+}
+
+.cancionDetalleMeta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--espacioSm);
+    align-items: center;
+}
+
+/* Tabla de relaciones: filas separadas por línea horizontal */
+.cancionDetalleRelaciones {
+    display: flex;
+    flex-direction: column;
+}
+
+/* YouTube embed */
+.cancionDetalleYoutube {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--radioMd);
+    overflow: hidden;
+    background: var(--fondoElevado2);
+}
+
+.cancionDetalleYoutube iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* Error y vacío */
+.cancionDetalleError {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--espacioMd);
+    padding: var(--espacioXl) var(--espacioLg);
+    color: var(--textoSecundario);
+    text-align: center;
+    min-height: 300px;
+}
+
+/* Reemplazado por EstadoVacio centralizado (C359) */
+
+@media (max-width: 600px) {
+    .cancionDetalleCabecera {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .cancionDetallePortada {
+        width: 120px;
+        height: 120px;
+        min-width: 120px;
+    }
+
+    .cancionDetalleInfo {
+        align-items: center;
+    }
+
+    .cancionDetalleArtistas {
+        justify-content: center;
+    }
+
+    .cancionDetalleMeta {
+        justify-content: center;
+    }
+}
+
+/* Widget Cadena de Samples */
+.cadenaContenedor {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioSm);
+    padding: var(--espacioMd);
+    background: var(--fondoElevado1);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioMd);
+    overflow: hidden;
+}
+
+.cadenaTitulo {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    font-size: var(--fuenteSm);
+    font-weight: var(--pesoSemibold);
+    color: var(--acento);
+}
+
+.cadenaLista {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--espacioXs) / 2);
+    overflow: hidden;
+}
+
+.cadenaFila {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--espacioXs) / 2);
+    min-width: 0;
+}
+
+.cadenaFlecha {
+    color: var(--textoTerciario);
+    flex-shrink: 0;
+}
+
+.cadenaNodo {
+    display: inline-flex;
+    align-items: center;
+    gap: calc(var(--espacioXs) / 2);
+    background: none;
+    border: none;
+    padding: calc(var(--espacioXs) / 2) var(--espacioSm);
+    border-radius: var(--radioSm);
+    color: var(--textoSecundario);
+    font-size: var(--fuenteSm);
+    cursor: pointer;
+    transition: background var(--transicionNormal), color var(--transicionNormal);
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.cadenaNodo:hover {
+    background: var(--fondoElevado2);
+    color: var(--acento);
+}
+
+.cadenaNodoRaiz {
+    font-weight: var(--pesoSemibold);
+    color: var(--textoPrimario);
+}
+
+.cadenaNodoTitulo {
+    font-weight: var(--pesoSemibold);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cadenaNodoArtista {
+    color: var(--textoTerciario);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

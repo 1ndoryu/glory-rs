@@ -1,0 +1,87 @@
+/*
+ * Badge — Kamples
+ * Tags para género, BPM, key, tipo de audio.
+ */
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--espacioMd);
+    font-family: var(--fuentePrincipal);
+    font-size: var(--fuenteSm);
+    font-weight: var(--pesoMedio);
+    padding: var(--espacioXs) var(--espacioMd);
+    border-radius: var(--radioFull);
+    white-space: nowrap;
+    user-select: none;
+    line-height: 1.4;
+    letter-spacing: 0.02em;
+}
+
+/* Tamaños */
+.badge.badgeXs {
+    font-size: var(--fuenteXs);
+    padding: calc(var(--espacioXs) / 2) var(--espacioSm);
+    height: auto;
+}
+
+/* Variantes de color */
+.badge.badgeNeutro {
+    background-color: var(--fondoElevado3);
+    color: var(--textoSecundario);
+    border: 1px solid var(--bordeSutil);
+}
+
+.badge.badgeAcento {
+    background-color: var(--acentoMuted);
+    color: var(--acentoTexto);
+}
+
+.badge.badgeExito {
+    background-color: var(--exitoMuted);
+    color: var(--exito);
+}
+
+.badge.badgeError {
+    background-color: var(--errorMuted);
+    color: var(--error);
+}
+
+.badge.badgeAdvertencia {
+    background-color: var(--advertenciaMuted);
+    color: var(--advertencia);
+}
+
+.badge.badgeInfo {
+    background-color: var(--infoMuted);
+    color: var(--info);
+}
+
+/* Con borde */
+.badge.badgeBorde {
+    border: 1px solid var(--bordeSutil);
+    background-color: transparent;
+    transition: border-color var(--transicionRapida), background-color var(--transicionRapida);
+}
+
+.badge.badgeBorde:hover {
+    border-color: var(--bordeActivo);
+    background-color: var(--fondoElevado2);
+}
+
+/* Interactivo (clickeable, para filtros) */
+.badge.badgeInteractivo {
+    cursor: pointer;
+    transition: opacity var(--transicionRapida);
+}
+
+.badge.badgeInteractivo:hover {
+    opacity: 0.8;
+}
+
+/* Badge premium */
+.badge.badgePremium {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: var(--blanco);
+    font-weight: var(--pesoSemibold);
+}

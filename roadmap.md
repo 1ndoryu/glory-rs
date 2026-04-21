@@ -105,7 +105,6 @@
 ### Fase 17 â€” Frontend SPA (completada)
 
 ### Fase 18 â€” Scraper / Mezclador / Mobile / Desktop (importacion completada, adaptacion pendiente)
-- 174A-109b-fase2 â€” Mezclador: sustituir imports `@app/*` y servicios `wp-json/...` por equivalentes en `frontend/src/{components,stores}` + hooks Orval (ver `frontend/src/features/mezclador/README.md`)
 - 174A-110b â€” mobile: cambiar `webDir` a SPA Rust + FCM register-token + deep links
 - 174A-111b â€” desktop: cliente Orval compartido + Google PKCE + WebSocket sync + auto-updates Tauri 2
 

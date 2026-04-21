@@ -1,0 +1,158 @@
+/*
+ * Variables globales CSS — Kamples Design System
+ * Paleta oscura minimalista, fondo #050505, espaciados controlados.
+ * Fuente de verdad para colores, tipografía, radios y espaciados.
+ */
+
+:root {
+    --fondoBase: #070707;
+    --fondoElevado1: #070707;
+    --fondoElevado2: #070707;
+    --fondoElevado3: #070707;
+    --bordeSutil: #161616;
+    --bordeActivo: #4a665b;
+    --textoPrimario: #e8e1c9;
+    --textoSecundario: #888888;
+    --textoTerciario: #555555;
+    --textoPrimarioInverso: #050505;
+    --blanco: #e5dfc7;
+    --negro: #000000;
+    --acento: #4a665b;
+    --acento-blanco: #e5dfc7;
+    --acentoHover: #070707;
+    --acentoMuted: #4a665b1a;
+    --acentoTexto: #eae4cc;
+    /* [193A-38] Fondo selección tarjetas (selección múltiple samples) */
+    --fondoSeleccion: rgba(74, 102, 91, 0.15);
+    --fondoSeleccionHover: rgba(74, 102, 91, 0.2);
+    --hoverSutil: rgba(255, 255, 255, 0.05);
+    --exito: #5da98b;
+    --exitoMuted: rgba(34, 197, 94, 0.15);
+    --error: #ef4444;
+    --errorMuted: rgba(239, 68, 68, 0.15);
+    --advertencia: #f59e0b;
+    --advertenciaMuted: rgba(245, 158, 11, 0.15);
+    --info: #3b82f6;
+    --infoMuted: rgba(59, 130, 246, 0.15);
+    --espacioMinimo: 1px;
+    --espacio2xs: 2px;
+    --espacio3xs: 3px;
+    --espacioXs: 4px;
+    --espacioSm: 8px;
+    --espacioMd: 12px;
+    --espacioLg: 16px;
+    --espacioXl: 20px;
+    --espacio2xl: 32px;
+    --espacio3xl: 48px;
+    --espacio4xl: 64px;
+    --espacio5xl: 80px;
+    --espacio6xl: 96px;
+    --fuente2xs: 10px;
+    --fuenteXs: 11px;
+    --fuenteSm: 12px;
+    --fuenteMd: 13px;
+    --fuenteLg: 18px;
+    --fuenteXl: 24px;
+    --fuente2xl: 32px;
+    --fuente3xl: 40px;
+    --fuente4xl: 58px;
+    --fuentePrincipal: 'Source Sans Variable', system-ui, -apple-system, sans-serif;
+    --fuenteMono: 'Fira Code', 'JetBrains Mono', monospace;
+    --pesoNormal: 400;
+    --pesoMedio: 400;
+    --pesoMedium: 400;
+    --pesoSemibold: 500;
+    --pesoBold: 500;
+    --radioSm: 4px;
+    --radioMd: 4px;
+    --radioLg: 4px;
+    --radioFull: 9999px;
+    --sombraElevada: unset;
+    --sombraModal: unset;
+    --sombraSutil: unset;
+    --overlayFuerte: rgba(0, 0, 0, 0.85);
+    --overlayOscuro: rgba(0, 0, 0, 0.7);
+    --overlaySuave: rgba(0, 0, 0, 0.4);
+    --sombraFlotante: 0 4px 24px rgba(0, 0, 0, 0.5);
+    --transicionRapida: 150ms ease;
+    --transicionNormal: 250ms ease;
+    --transicionLenta: 400ms ease;
+    --zBase: 1;
+    --zElevado: 10;
+    --zMenu: 100;
+    --zMenuPortal: 1100;
+    --zModal: 1000;
+    --zNotificacion: 2000;
+    --zReproductor: 500;
+    --anchoSidebar: 56px;
+    --anchoSidebarExpandido: 220px;
+    --altoTopbar: 52px;
+    --altoReproductor: 56px;
+    --altoNavMobile: 56px;
+    --anchoMaximoContenido: 1200px;
+    --anchoPanelLateral: 360px;
+    --landingAnchoMaximo: 98.4615rem;
+    --landingTituloPrincipal: 8rem;
+    --landingTituloTablet: 7.3846rem;
+    --landingTituloMovil: 5.5385rem;
+    --landingTituloMini: 3.6923rem;
+    --landingSubtitulo: 1.2308rem;
+    --landingTextoUi: 1rem;
+    --landingEspacioSeccion: 3rem;
+    --landingEspacioHero: 1.5rem;
+    --landingEspacioAcciones: 1rem;
+    --landingPaddingSuperior: 3rem;
+    --landingPaddingHorizontal: 2rem;
+    --landingPaddingHorizontalCompacto: 1.25rem;
+    --landingPaddingInferior: 4rem;
+    --landingPaddingInferiorCompacto: 3rem;
+    --landingPaddingHeroSuperior: 4rem;
+    --landingFuenteTitulo: 'Junicode Landing', 'Times New Roman', serif;
+    --landingFuenteSubtitulo: 'Bricolage Landing', var(--fuentePrincipal);
+
+    /* Safe area — overridden por plataforma Android/iOS cuando viewport-fit=cover */
+    --safeAreaTop: 0px;
+    --safeAreaBottom: 0px;
+    --siempreBlanco: #efefef;
+    /* [193A-51] Colores de waveform — cambian en light mode */
+    --colorWaveformNoReproducido: #d2c8a7;
+    --colorWaveformReproducido: #4a665b;
+}
+
+:root[data-theme='light'] {
+    --fondoBase: #ffffff;
+    --fondoElevado1: #ffffff;
+    --fondoElevado2: #ffffff;
+    --fondoElevado3: #ffffff;
+    --bordeSutil: #b1b1b1;
+    --bordeActivo: #2e2e2e;
+    --textoPrimario: #171717;
+    --textoSecundario: #4f4f4f;
+    --textoTerciario: #6e6e6e;
+    --textoPrimarioInverso: #f8f3df;
+    --blanco: #0f0f0f;
+    --negro: #efede3;
+    --acento: #2ca173;
+    --acento-blanco: #4a665b;
+    --acentoHover: #3e564c;
+    --acentoMuted: rgba(74, 102, 91, 0.14);
+    --acentoTexto: #3c3b36;
+    --fondoSeleccion: rgba(74, 102, 91, 0.15);
+    --fondoSeleccionHover: rgba(74, 102, 91, 0.2);
+    --exito: #2f8a68;
+    --exitoMuted: rgba(47, 138, 104, 0.14);
+    --error: #b4232f;
+    --errorMuted: rgba(180, 35, 47, 0.14);
+    --advertencia: #a46700;
+    --advertenciaMuted: rgba(164, 103, 0, 0.14);
+    --info: #1d64d6;
+    --infoMuted: rgba(29, 100, 214, 0.14);
+    --overlayFuerte: rgba(0, 0, 0, 0.5);
+    --overlayOscuro: rgba(0, 0, 0, 0.24);
+    --overlaySuave: rgba(0, 0, 0, 0.14);
+    --sombraFlotante: 0 4px 24px rgba(0, 0, 0, 0.18);
+    --siempreBlanco: #efefef;
+    /* [193A-51] Waveform en light mode: oscuro para contrastar sobre fondo blanco */
+    --colorWaveformNoReproducido: #4a4a4a;
+    --colorWaveformReproducido: #2ca173;
+}

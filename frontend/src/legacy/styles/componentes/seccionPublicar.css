@@ -1,0 +1,12 @@
+/*
+ * seccionPublicar.css — Kamples (C89/C124)
+ * Wrapper inline de la sección de publicación.
+ * La UI interna usa clases de modalCrear.css via ContenidoCrear.
+ */
+
+.seccionPublicar {
+    background-color: var(--fondoElevado1);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioLg);
+    padding: var(--espacioLg);
+}

@@ -1,0 +1,202 @@
+/*
+ * reproductorGlobal.css — Kamples
+ * QQ49: Reproductor flotante minimalista.
+ * Pill shape, portada circular, controles inline compactos.
+ */
+
+.reproductorGlobal {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioMd);
+    width: fit-content;
+    max-width: min(640px, calc(100vw - var(--espacioLg) * 2));
+    height: 48px;
+    padding: 0 var(--espacioLg) 0 var(--espacioSm);
+    background-color: var(--fondoElevado1);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioFull);
+    z-index: var(--zReproductor);
+    pointer-events: auto;
+    box-shadow: var(--sombraFlotante);
+    animation: reproductorEntrar 300ms ease forwards;
+    position: relative;
+    overflow: hidden;
+}
+
+/* QK73: Linea de tiempo como borde superior del reproductor */
+.reproductorTimelineSuperior {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: transparent;
+    cursor: pointer;
+    z-index: 1;
+}
+
+.reproductorTimelineRelleno {
+    height: 100%;
+    background-color: var(--acento);
+    transition: width 100ms linear;
+    border-radius: 0 var(--radioFull) var(--radioFull) 0;
+}
+
+.reproductorTimelineSuperior:hover {
+    height: 5px;
+}
+
+.reproductorTimelineSuperior:hover .reproductorTimelineRelleno {
+    background-color: var(--acentoTexto);
+}
+
+@keyframes reproductorEntrar {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Portada circular */
+.reproductorPortada {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radioFull);
+    flex-shrink: 0;
+    overflow: hidden;
+    background-color: var(--fondoElevado3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.reproductorPortada img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.reproductorPortadaIcono {
+    color: var(--textoTerciario);
+}
+
+/* Elementos clickeables que navegan al sample */
+.reproductorClickable {
+    cursor: pointer;
+}
+
+/* Info truncada */
+.reproductorInfo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioMinimo);
+    min-width: 0;
+    max-width: 120px;
+}
+
+.reproductorTitulo {
+    font-size: var(--fuenteXs);
+    font-weight: var(--pesoMedio);
+    color: var(--textoPrimario);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+}
+
+.reproductorArtista {
+    font-size: var(--fuente2xs);
+    color: var(--textoTerciario);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+}
+
+/* Controles agrupados */
+.reproductorControles {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioXs);
+}
+
+.reproductorBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: none;
+    color: var(--textoSecundario);
+    border-radius: var(--radioFull);
+    cursor: pointer;
+    transition: color var(--transicionRapida);
+    padding: 0 !important;
+}
+
+.reproductorBtn:hover {
+    color: var(--textoPrimario);
+}
+
+.reproductorBtnActivo {
+    color: var(--acento);
+}
+
+/* QK102: Boton cerrar reproductor */
+.reproductorBtnCerrar:hover {
+    color: var(--error);
+}
+
+/* Play/pause central */
+.reproductorPlayBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background-color: var(--blanco);
+    color: var(--fondoBase);
+    border-radius: var(--radioFull);
+    cursor: pointer;
+    transition: transform var(--transicionRapida);
+    padding: 0;
+}
+
+.reproductorPlayBtn:hover {
+    transform: scale(1.05);
+}
+
+.reproductorPlayBtn:active {
+    transform: scale(0.95);
+}
+
+/* QK73: Tiempo compacto — reemplaza barra de progreso removida */
+.reproductorTiempoCompacto {
+    font-size: var(--fuente2xs);
+    color: var(--textoTerciario);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    min-width: 60px;
+    text-align: center;
+}
+
+/* Responsive mobile */
+@media (max-width: 600px) {
+    .reproductorGlobal {
+        max-width: calc(100vw - var(--espacioSm) * 2);
+        gap: var(--espacioSm);
+        padding: 0 var(--espacioMd) 0 var(--espacioXs);
+    }
+
+    .reproductorInfo {
+        max-width: 80px;
+    }
+
+    .reproductorControles {
+        gap: var(--espacioSm);
+    }
+
+    .reproductorTiempoCompacto {
+        display: none;
+    }
+}

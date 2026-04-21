@@ -1,0 +1,402 @@
+/*
+ * panelLateral.css — Kamples (C86+C95+C111)
+ * Estilos para el panel lateral derecho (~30%).
+ * Muestra detalle de sample, comentarios o sugerencias.
+ */
+
+/* Panel contenedor — empuja del layout grid */
+.panelLateral {
+    width: var(--anchoPanelLateral);
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border-left: 1px solid var(--bordeSutil);
+    background-color: var(--fondoElevado1);
+    flex-shrink: 0;
+    position: relative;
+}
+
+.panelLateralInterno {
+    padding: var(--espacioLg);
+}
+
+/* C203: Sin padding cuando el mezclador está abierto — ocupa ancho completo */
+.panelLateralSinPadding {
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+}
+
+/* --- PanelDetalleSample --- */
+
+.panelDetalle {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioMd);
+}
+
+.panelDetalleCabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.panelDetalleAutor {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    background: none;
+    border: none;
+    color: var(--textoPrimario);
+    cursor: pointer;
+    padding: 0;
+    font-size: var(--fuenteSm);
+}
+
+.panelDetalleAutor:hover {
+    color: var(--acento);
+}
+
+.panelDetalleCerrar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: none;
+    border: none;
+    color: var(--textoSecundario);
+    cursor: pointer;
+    border-radius: var(--radioSm);
+    transition: color var(--transicionRapida);
+}
+
+.panelDetalleCerrar:hover {
+    color: var(--textoPrimario);
+}
+
+.panelDetalleTitulo {
+    font-size: var(--fuenteLg);
+    font-weight: var(--pesoSemibold);
+    color: var(--textoPrimario);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    line-height: 1.3;
+}
+
+.panelDetalleDescripcion {
+    font-size: var(--fuenteSm);
+    color: var(--textoSecundario);
+    line-height: 1.5;
+    margin: 0;
+}
+
+.panelDetalleWaveform {
+    width: 100%;
+    border-radius: var(--radioMd);
+    overflow: hidden;
+}
+
+.panelDetalleTags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--espacioXs);
+}
+
+.panelDetalleAcciones {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    padding-top: var(--espacioXs);
+}
+
+.panelDetalleSubtitulo {
+    font-size: var(--fuenteSm);
+    font-weight: var(--pesoSemibold);
+    color: var(--textoSecundario);
+    margin: 0 0 var(--espacioSm) 0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.panelDetalleComentarios {
+    padding-top: var(--espacioMd);
+}
+
+.panelDetalleDiscovery {
+    padding-top: var(--espacioMd);
+}
+
+.panelDetalleDiscoveryTarjetas {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioSm);
+}
+
+.panelDetalleSimilares {
+    padding-top: var(--espacioMd);
+}
+
+.panelDetalleSimilaresLista {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioSm);
+}
+
+/* C153: tarjeta compacta dentro del panel — solo nombre + tags, sin wave ni acciones */
+.panelDetalleTarjetaMini {
+    font-size: var(--fuenteXs);
+    padding: var(--espacioXs) var(--espacioSm);
+}
+
+.panelDetalleTarjetaMini .tarjetaAcciones {
+    display: none;
+}
+
+.panelDetalleTarjetaMini .tarjetaWaveform {
+    display: none;
+}
+
+/* --- PanelSugerencias --- */
+
+.panelSugerencias {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioMd);
+}
+
+.panelSugerenciasCabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.panelSugerenciasTitulo {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    font-size: var(--fuenteMd);
+    font-weight: var(--pesoSemibold);
+    color: var(--textoPrimario);
+}
+
+/* [183A-54] Título clickeable del panel de colección */
+.panelColeccionTitulo {
+    cursor: pointer;
+}
+
+.panelColeccionTitulo:hover {
+    color: var(--acento);
+}
+
+/* [183A-55] Portada de colección en panel de sugerencias — estilo Spotify */
+.panelColeccionPortada {
+    position: relative;
+    aspect-ratio: 3 / 2;
+    border-radius: var(--radioMd);
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.panelColeccionPortadaImg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.panelColeccionPortadaPlaceholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--fondoElevado2), var(--fondoElevado1));
+}
+
+.panelColeccionPortadaInfo {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: var(--espacioSm) var(--espacioMd);
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.panelColeccionPortadaNombre {
+    color: #fff;
+    font-size: var(--fuenteSm);
+    font-weight: var(--pesoSemibold);
+    line-height: 1.2;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.panelColeccionPortadaAutor {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: var(--fuenteXs);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.panelSugerenciasCargando,
+.panelSugerenciasVacio {
+    text-align: center;
+    color: var(--textoTerciario);
+    font-size: var(--fuenteSm);
+    padding: var(--espacio2xl) 0;
+}
+
+.panelSugerenciasLista {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioSm);
+}
+
+/* C184: Handle de resize del panel lateral (borde izquierdo arrastrable) */
+.panelLateralResizeHandle {
+    position: absolute;
+    top: 0;
+    left: -3px;
+    width: 6px;
+    height: 100%;
+    cursor: col-resize;
+    z-index: 10;
+    background: transparent;
+    transition: background var(--transicionRapida);
+}
+
+.panelLateralResizeHandle:hover,
+.panelLateralResizeHandle.activo {
+    background: var(--acento);
+    opacity: 0.5;
+}
+
+/* C241: Panel expandido a ancho completo */
+.panelLateralExpandido {
+    width: 100% !important;
+    border-left: none;
+}
+
+/* Responsive — ocultar panel en pantallas pequeñas */
+@media (max-width: 1024px) {
+    .panelLateral {
+        display: none;
+    }
+}
+
+/* --- C280: PanelLibreria --- */
+
+.panelLibreria {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+.panelLibreriaCabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--espacioSm) var(--espacioMd);
+    border-bottom: 1px solid var(--bordeSutil);
+    flex-shrink: 0;
+}
+
+.panelLibreriaTitulo {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioXs);
+    font-size: var(--fuenteSm);
+    font-weight: 600;
+    color: var(--textoPrimario);
+    margin: 0;
+}
+
+.panelLibreriaCerrar {
+    background: none;
+    border: none;
+    color: var(--textoTerciario);
+    cursor: pointer;
+    padding: var(--espacioXs);
+    border-radius: var(--radioSm);
+    display: flex;
+    align-items: center;
+}
+
+.panelLibreriaCerrar:hover {
+    color: var(--textoPrimario);
+    background: var(--fondoElevado2);
+}
+
+.panelLibreriaTabs {
+    display: flex;
+    gap: var(--espacio2xs);
+    padding: var(--espacioXs) var(--espacioSm);
+    border-bottom: 1px solid var(--bordeSutil);
+    flex-shrink: 0;
+}
+
+.panelLibreriaTab {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioXs);
+    padding: var(--espacioXs) var(--espacioSm);
+    font-size: var(--fuenteSm);
+    background: none;
+    border: none;
+    border-radius: var(--radioSm);
+    color: var(--textoTerciario);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s, color 0.15s;
+}
+
+.panelLibreriaTab:hover {
+    background: var(--fondoElevado2);
+    color: var(--textoPrimario);
+}
+
+.panelLibreriaTabActiva {
+    background: var(--fondoElevado2);
+    color: var(--acento);
+    font-weight: 600;
+}
+
+.panelLibreriaAcciones {
+    display: flex;
+    justify-content: flex-end;
+    padding: var(--espacioXs) var(--espacioSm);
+    min-height: 28px;
+    flex-shrink: 0;
+}
+
+.panelLibreriaContenido {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--espacioSm);
+}
+
+.panelLibreriaGrid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioSm);
+}
+
+.panelLibreriaLista {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioXs);
+}
+
+.panelLibreriaVacio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--espacioSm);
+    padding: var(--espacioXl);
+    color: var(--textoTerciario);
+    text-align: center;
+    font-size: var(--fuenteMd);
+}

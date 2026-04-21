@@ -3,8 +3,11 @@ use sqlx::{PgPool, Postgres, QueryBuilder};
 
 use super::sample::SampleRepository;
 
+mod aggregates;
 mod query;
 mod similar;
+
+pub use aggregates::{TagAggregateFilters, TagAggregateItem, TagAggregatesResult};
 
 use query::{
     push_public_filters, push_public_order, CountRow, SampleSummaryRow, SAMPLE_SUMMARY_SELECT,

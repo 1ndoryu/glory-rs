@@ -1,0 +1,582 @@
+/*
+ * modalConfiguracion.css — Kamples
+ * Desktop: modal con panel lateral de navegación.
+ * Móvil (QL89): pantalla completa con drill-down, sin wrapper Modal.
+ */
+
+/* Override del contenedor Modal para tamaño y fondo del config (solo desktop) */
+.modalContenedor.configModalLayout {
+    background-color: var(--fondoElevado1);
+    width: 90vw;
+    max-width: 720px;
+    height: 80vh;
+    max-height: 800px;
+}
+
+/* El cuerpo del Modal actua como flex row para nav + contenido */
+.configModalLayout .modalCuerpo {
+    display: flex;
+    flex-direction: row;
+    padding: 0;
+    overflow: hidden;
+}
+
+/* Panel lateral de navegación */
+.configNavLateral {
+    display: flex;
+    flex-direction: column;
+    width: 200px;
+    min-width: 200px;
+    background-color: var(--fondoElevado2);
+    border-right: 1px solid var(--bordeSutil);
+    padding: var(--espacioLg) 0;
+}
+
+.configNavTitulo {
+    font-size: var(--fuenteMd);
+    font-weight: var(--pesoBold);
+    color: var(--textoPrimario);
+    padding: 0 var(--espacioLg);
+    margin: 0 0 var(--espacioLg) 0;
+}
+
+.configNavLista {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--espacioXs) / 2);
+}
+
+.configNavItem {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    padding: var(--espacioSm) var(--espacioMd);
+    background: none;
+    border: none;
+    border-radius: var(--radioSm);
+    color: var(--textoSecundario);
+    font-size: var(--fuenteSm);
+    cursor: pointer;
+    transition: all var(--transicionRapida);
+    text-align: left;
+    width: 100%;
+}
+
+.configNavItem:hover {
+    color: var(--textoPrimario);
+    background-color: var(--fondoElevado3);
+}
+
+nav.configNavLista button {
+    align-items: start;
+    justify-content: flex-start;
+}
+
+.configNavItemActivo {
+    color: var(--textoPrimario);
+    background-color: var(--fondoElevado3);
+    font-weight: var(--pesoSemibold);
+}
+
+/* Contenido principal (derecha) */
+.configContenido {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    position: relative;
+}
+
+.configCerrarBtn {
+    position: absolute;
+    top: var(--espacioMd);
+    right: var(--espacioMd);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: var(--radioSm);
+    background: none;
+    color: var(--textoTerciario);
+    cursor: pointer;
+    transition: all var(--transicionRapida);
+    z-index: 1;
+}
+
+.configCerrarBtn:hover {
+    color: var(--textoPrimario);
+    background-color: var(--fondoElevado2);
+}
+
+.configSeccionContenido {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--espacioLg) var(--espacioXl);
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.configSeccionTitulo {
+    font-size: var(--fuenteLg);
+    font-weight: var(--pesoBold);
+    color: var(--textoPrimario);
+    margin: 0;
+}
+
+/* Secciones — con separador y padding para jerarquía visual */
+.configSeccion {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioMd);
+    padding: var(--espacioMd) 0;
+}
+
+.configSeccion:last-child {
+    border-bottom: none;
+}
+
+.configSeccionHorizontal {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.configSeccionInfo {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--espacioXs) / 2);
+}
+
+.configLabel {
+    font-size: var(--fuenteSm);
+    font-weight: var(--pesoMedio);
+    color: var(--textoSecundario);
+}
+
+.configLabelPeligro {
+    color: var(--error);
+}
+
+.configSubtexto {
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+}
+
+.configTemaOpciones {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+}
+
+/* Foto de perfil — contenedor clickeable */
+.configFotoContenedor {
+    position: relative;
+    display: inline-flex;
+    align-self: center;
+    cursor: pointer;
+    border-radius: var(--radioFull);
+    transition: opacity var(--transicionRapida);
+}
+
+.configFotoContenedor:hover {
+    opacity: 0.85;
+}
+
+/* Portada / Cover photo — contenedor clickeable con overlay hover */
+.configPortadaContenedor {
+    position: relative;
+    width: 100%;
+    height: 120px;
+    border-radius: var(--radioMd);
+    overflow: hidden;
+    background-color: var(--fondoElevado2);
+    cursor: pointer;
+}
+
+.configPortadaImg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Overlay translucido que aparece al hacer hover */
+.configPortadaOverlay {
+    position: absolute;
+    inset: 0;
+    background-color: var(--overlayOscuro);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--blanco);
+    opacity: 0;
+    transition: opacity var(--transicionRapida);
+}
+
+.configPortadaContenedor:hover .configPortadaOverlay {
+    opacity: 1;
+}
+
+/* Input genérico */
+.configInput {
+    width: 100%;
+    padding: var(--espacioSm) var(--espacioMd);
+    background-color: var(--fondoElevado2);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioSm);
+    color: var(--textoPrimario);
+    font-size: var(--fuenteSm);
+    outline: none;
+    transition: border-color var(--transicionRapida);
+}
+
+.configInput:focus {
+    border-color: var(--bordeActivo);
+}
+
+.configInput:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Input con prefijo @ */
+.configInputConPrefijo {
+    display: flex;
+    align-items: center;
+    background-color: var(--fondoElevado2);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioSm);
+    overflow: hidden;
+}
+
+.configInputConPrefijo:focus-within {
+    border-color: var(--bordeActivo);
+}
+
+.configPrefijo {
+    padding: var(--espacioSm);
+    color: var(--textoTerciario);
+    font-size: var(--fuenteSm);
+    background-color: var(--fondoElevado3);
+    border-right: 1px solid var(--bordeSutil);
+}
+
+.configInputConPrefijo .configInput {
+    border: none;
+    border-radius: 0;
+}
+
+/* Textarea */
+.configTextarea {
+    width: 100%;
+    padding: var(--espacioSm) var(--espacioMd);
+    background-color: var(--fondoElevado2);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioSm);
+    color: var(--textoPrimario);
+    font-size: var(--fuenteSm);
+    font-family: var(--fuentePrincipal);
+    resize: vertical;
+    outline: none;
+    min-height: 60px;
+    transition: border-color var(--transicionRapida);
+}
+
+.configTextarea:focus {
+    border-color: var(--bordeActivo);
+}
+
+.configContador {
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Toggle de notificaciones */
+.configToggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioSm);
+    background: none;
+    color: var(--textoTerciario);
+    cursor: pointer;
+    transition: all var(--transicionRapida);
+    flex-shrink: 0;
+}
+
+.configToggle:hover {
+    border-color: var(--bordeActivo);
+    color: var(--textoSecundario);
+}
+
+.configToggleActivo,
+.comunidadFiltroBtnActivo {
+    background-color: var(--acentoMuted) !important;
+    border-color: var(--acento);
+    color: var(--acento) !important;
+}
+
+/* Acciones — footer fijo */
+.configAcciones {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--espacioSm);
+    padding: var(--espacioMd) var(--espacioXl);
+    border-top: 1px solid var(--bordeSutil);
+}
+
+/* QL51: Chevron de navegacion en items — solo visible en pantalla móvil */
+.configNavChevron {
+    display: none;
+    margin-left: auto;
+    color: var(--textoTerciario);
+    flex-shrink: 0;
+}
+
+/* QL51 (legacy): Boton volver — solo visible en versión móvil */
+.configMovilVolver {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    color: var(--textoSecundario);
+    font-size: var(--fuenteSm);
+    font-weight: var(--pesoSemibold);
+    padding: 0;
+    background: none;
+    border: none;
+}
+
+/*
+ * QL89+QL101: Bottom sheet parcial tipo menu contextual movil.
+ * Reemplaza la pantalla completa por un panel anclado abajo con max-height.
+ */
+
+/* Overlay semitransparente — click fuera cierra */
+.configMovilOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: var(--zModal);
+    background-color: var(--overlayOscuro);
+    display: flex;
+    align-items: flex-end;
+    animation: configFadeIn 0.2s ease-out;
+}
+
+@keyframes configFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.configMovilPantalla {
+    position: relative;
+    width: 100%;
+    max-height: 75vh;
+    z-index: var(--zModal);
+    background-color: var(--fondoElevado1);
+    display: flex;
+    flex-direction: column;
+    padding-bottom: var(--safeAreaBottom);
+    border-radius: var(--radioLg) var(--radioLg) 0 0;
+    animation: configSlideUp 0.25s ease-out;
+    overflow: hidden;
+}
+
+@keyframes configSlideUp {
+    from {
+        transform: translateY(100%);
+        opacity: 0.5;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Cabecera móvil — título/volver + botón cerrar */
+.configMovilCabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--espacioMd);
+    border-bottom: 1px solid var(--bordeSutil);
+    min-height: 48px;
+    display: none;
+}
+
+.configMovilCabecera .configNavTitulo {
+    margin: 0;
+    padding: 0;
+}
+
+.configMovilCerrar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    color: var(--textoSecundario);
+    flex-shrink: 0;
+}
+
+/* Nav — lista de secciones a pantalla completa */
+.configMovilNav {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.configMovilNav .configNavLista {
+    gap: 0;
+}
+
+.configMovilNav .configNavItem {
+    padding: var(--espacioMd) var(--espacioLg);
+    font-size: var(--fuenteSm);
+    border-radius: 0;
+    min-height: 48px;
+}
+
+.configMovilNav .configNavItem:last-child {
+    border-bottom: none;
+}
+
+.configMovilNav .configNavChevron {
+    display: block;
+}
+
+/* Detalle — contenido de sección con scroll */
+.configMovilDetalle {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+}
+
+.configMovilContenido {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--espacioMd) var(--espacioLg);
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.configMovilDetalle .configAcciones {
+    padding: var(--espacioSm) var(--espacioMd);
+}
+
+.configMovilDetalle .configAcciones button {
+    width: 100%;
+    border: 1px solid var(--bordeSutil);
+}
+
+.configMovilDetalle .configPortadaContenedor {
+    height: 80px;
+}
+
+.configMovilDetalle .configSeccionHorizontal {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--espacioSm);
+}
+
+/* QQ25: Sección de bloqueos */
+.configBloqueoUsuario {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+}
+
+.configBloqueoInfo {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--espacioXs) / 2);
+}
+
+.configSeccionVacia {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--espacioSm);
+    padding: var(--espacioXl) 0;
+    color: var(--textoSecundario);
+}
+
+/* QK89: Formulario inline para email/contraseña en sección cuenta */
+.configFormInline {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioSm);
+    margin-top: var(--espacioXs);
+}
+
+.configFormAcciones {
+    display: flex;
+    gap: var(--espacioSm);
+    align-items: center;
+}
+
+/* [TareaFinal-B] Footer de versión al pie del nav lateral de configuraciones */
+.configNavVersion {
+    margin-top: auto;
+    padding: var(--espacioMd) var(--espacioLg);
+}
+
+.configNavVersionTexto {
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+}
+
+/* [2003A-16] Formulario de versiones de app en SeccionAdmin */
+.configAdminVersionFila {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioXs);
+    padding: var(--espacioSm) 0;
+    border-bottom: 1px solid var(--bordeSutil);
+}
+
+.configAdminVersionFila:last-of-type {
+    border-bottom: none;
+}
+
+.configAdminVersionLabel {
+    font-size: var(--fuenteSm);
+    font-weight: var(--pesoSemibold);
+    color: var(--textoSecundario);
+}
+
+.configAdminVersionCampos {
+    display: flex;
+    gap: var(--espacioSm);
+    flex-wrap: wrap;
+}
+
+.configAdminVersionInput {
+    width: 100px;
+}
+
+.configAdminVersionInputUrl {
+    flex: 1;
+    min-width: 180px;
+}
+
+/* Movil */
+
+@media (max-width: 768px) {
+    .configNavLista {
+        padding: var(--espacioLg);
+    }
+}

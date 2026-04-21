@@ -1,0 +1,27 @@
+/*
+ * coleccionesPublicas.css — Kamples (QQ88)
+ * Pagina publica de colecciones: cabecera con busqueda + grid responsive.
+ */
+
+.coleccionesPublicas {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioLg);
+    padding: var(--espacioLg);
+}
+
+/* Grid de colecciones */
+.coleccionesPublicasGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: var(--espacioMd);
+}
+
+/* Reemplazado por EstadoVacio centralizado (C359) */
+
+/* Responsive */
+@media (max-width: 600px) {
+    .coleccionesPublicasGrid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    }
+}

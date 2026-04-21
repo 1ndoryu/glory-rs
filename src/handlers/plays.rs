@@ -1,6 +1,6 @@
 use axum::extract::{Path, State};
 use axum::http::StatusCode;
-use axum::routing::post;
+use axum::routing::{get, post};
 use axum::{Json, Router};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
@@ -50,6 +50,11 @@ pub struct PlayTriggered {
     pub fast: bool,
     /// `true` cuando el planificador disparó el recálculo preciso.
     pub precise: bool,
+}
+
+#[derive(Debug, Clone, Serialize, ToSchema)]
+pub struct PlayedIdsResponse {
+    pub data: Vec<i32>,
 }
 
 #[utoipa::path(
@@ -140,6 +145,26 @@ pub async fn register_play(
     ))
 }
 
+#[utoipa::path(
+    get,
+    path = "/api/reproducciones/ids",
+    tag = "samples",
+    security(("bearer_auth" = [])),
+    responses(
+        (status = 200, description = "IDs únicos de samples reproducidos por el usuario", body = PlayedIdsResponse),
+        (status = 401, description = "No autenticado", body = ErrorResponse),
+    )
+)]
+pub async fn list_played_ids(
+    State(state): State<AppState>,
+    user: CurrentUser,
+) -> Result<Json<PlayedIdsResponse>, AppError> {
+    let data = PlayRepository::list_played_ids(&state.pool, user.user_id).await?;
+    Ok(Json(PlayedIdsResponse { data }))
+}
+
 pub fn routes() -> Router<AppState> {
-    Router::new().route("/samples/:id/play", post(register_play))
+    Router::new()
+        .route("/samples/:id/play", post(register_play))
+        .route("/reproducciones/ids", get(list_played_ids))
 }

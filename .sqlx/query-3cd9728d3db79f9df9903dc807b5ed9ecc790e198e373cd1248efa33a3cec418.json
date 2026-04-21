@@ -1,0 +1,33 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT i.val AS \"tag!\", COUNT(*)::bigint AS \"conteo!\"\n           FROM samples s\n           CROSS JOIN LATERAL jsonb_array_elements_text(\n                CASE WHEN jsonb_typeof(s.metadata->'instrumentos') = 'array'\n                    THEN s.metadata->'instrumentos'\n                    ELSE '[]'::jsonb\n                END\n           ) AS i(val)\n           WHERE s.eliminado_en IS NULL\n             AND s.estado = 'activo'\n             AND s.mostrar_en_comunidad = TRUE\n             AND ($1::text IS NULL OR (s.metadata->'genero') ? $1)\n             AND ($2::int IS NULL OR s.bpm >= $2)\n             AND ($3::int IS NULL OR s.bpm <= $3)\n             AND ($4::text IS NULL OR s.key = $4)\n             AND ($5::text IS NULL OR s.tipo = $5)\n             AND btrim(i.val) <> ''\n           GROUP BY i.val\n           ORDER BY COUNT(*) DESC, i.val ASC\n           LIMIT $6",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "tag!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "conteo!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int4",
+        "Int4",
+        "Text",
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "3cd9728d3db79f9df9903dc807b5ed9ecc790e198e373cd1248efa33a3cec418"
+}

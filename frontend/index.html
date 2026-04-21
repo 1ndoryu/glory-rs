@@ -6,7 +6,9 @@
     <title>Glory RS</title>
   </head>
   <body>
-    <div id="root"></div>
+    <!-- [204A-1] Glory framework requiere [data-island] como contenedor.
+         data-island="root" actua como root del PageRenderer en modo SPA. -->
+    <div id="root" data-island="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

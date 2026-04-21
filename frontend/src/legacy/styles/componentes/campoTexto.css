@@ -1,0 +1,69 @@
+/*
+ * CampoTexto — Kamples
+ * Input y textarea estilizados.
+ * Variante por defecto: 'minimal' (border-bottom).
+ * Variante 'bordado': border completo + padding + radius (para admin, filtros, etc.).
+ */
+
+.contenedorCampoTexto {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioXs);
+    width: 100%;
+}
+
+.etiquetaCampoTexto {
+    font-size: var(--fuenteSm);
+    font-weight: var(--pesoMedio);
+    color: var(--textoSecundario);
+}
+
+/* Estilo minimal (default): border-bottom solamente */
+.campTextoInput, .campoTextoArea {
+    width: 100%;
+    padding: var(--espacioMd) 0; 
+    color: var(--textoPrimario);
+    font-size: var(--fuenteMd);
+    font-family: var(--fuentePrincipal);
+    transition: border-color var(--transicionRapida);
+    background: unset;
+    border: unset;
+    border-bottom: 1px solid var(--bordeSutil);
+    border-radius: unset;
+}
+
+/* Estilo bordado: border completo + padding + radius */
+.campTextoInput.campoBordado, .campoTextoArea.campoBordado {
+    padding: var(--espacioSm) var(--espacioMd);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioMd);
+    background: var(--fondoBase);
+    font-size: var(--fuenteSm);
+}
+
+.campTextoInput::placeholder,
+.campoTextoArea::placeholder {
+    color: var(--textoTerciario);
+}
+
+.campTextoInput:focus,
+.campoTextoArea:focus {
+    border-color: var(--acento);
+    outline: none;
+}
+
+.campoTextoArea {
+    min-height: 80px;
+    resize: vertical;
+    field-sizing: content;
+}
+
+.errorCampoTexto {
+    font-size: var(--fuenteXs);
+    color: var(--error);
+}
+
+.campTextoInput.inputError,
+.campoTextoArea.inputError {
+    border-color: var(--error);
+}

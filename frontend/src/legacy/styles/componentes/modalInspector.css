@@ -1,0 +1,204 @@
+/*
+ * ModalInspector — Kamples
+ * Estilos para el modal de inspección técnica de samples.
+ * Diseño premium utilizadando variables del sistema.
+ */
+
+.inspectorContenido {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioLg);
+    /* El scroll y padding son manejados por .modalCuerpo en el componente Modal */
+}
+
+.inspectorSeccion {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--fondoElevado1);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioMd);
+    padding: var(--espacioMd);
+    transition: var(--transicionNormal);
+}
+
+.inspectorSeccion:hover {
+    border-color: var(--bordeActivo);
+}
+
+.inspectorSeccionTitulo {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    font-size: var(--fuenteSm);
+    font-weight: var(--pesoSemibold);
+    color: var(--textoPrimario);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding-bottom: var(--espacioSm);
+    border-bottom: 1px solid var(--bordeSutil);
+    margin-bottom: var(--espacioMd);
+    width: 100%;
+}
+
+/* Botón toggle del JSON reutiliza estilos de título pero añade cursor */
+button.inspectorSeccionTitulo {
+    cursor: pointer;
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--bordeSutil);
+    padding: 0 0 var(--espacioSm) 0;
+    width: 100%;
+    text-align: left;
+    transition: var(--transicionRapida);
+}
+
+button.inspectorSeccionTitulo:hover {
+    color: var(--blanco);
+    border-color: var(--textoTerciario);
+}
+
+.inspectorGrid {
+    display: grid;
+    /* Columnas responsivas y uniformes */
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: var(--espacioSm) var(--espacioLg);
+}
+
+.inspectorCampo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioXs); /* Un poco más de aire que 2px */
+}
+
+/* Campos que necesitan ocupar todo el ancho disponible */
+.inspectorCampoAncho {
+    grid-column: 1 / -1;
+}
+
+.inspectorCampoEtiqueta {
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+    font-weight: var(--pesoMedio);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.inspectorCampoValor {
+    font-size: var(--fuenteSm);
+    color: var(--textoPrimario);
+    word-break: break-all; /* Evita desbordes en hashes o rutas largas */
+    line-height: 1.4;
+}
+
+.inspectorCampoValor.inspectorNumerico {
+    font-family: var(--fuenteMono);
+    color: var(--blanco);
+    background-color: var(--fondoElevado2);
+    padding: calc(var(--espacioXs) / 2) calc(var(--espacioXs) * 1.5);
+    border-radius: var(--radioSm);
+    width: fit-content;
+    font-size: var(--fuenteXs);
+}
+
+/* QK32: Links clickables en el inspector (YouTube, canciones, URLs) */
+a.inspectorCampoValor.inspectorLink {
+    color: var(--acento);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: calc(var(--espacioXs) / 2);
+    transition: color var(--transicionNormal);
+}
+a.inspectorCampoValor.inspectorLink:hover {
+    color: var(--textoPrimario);
+    text-decoration: underline;
+}
+
+.inspectorTags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--espacioSm);
+}
+
+.inspectorTag {
+    font-size: var(--fuenteXs);
+    background-color: var(--fondoElevado2);
+    color: var(--textoSecundario);
+    padding: var(--espacioXs) calc(var(--espacioXs) * 2.5);
+    border-radius: var(--radioFull);
+    border: 1px solid var(--bordeSutil);
+    transition: var(--transicionRapida);
+}
+
+.inspectorTag:hover {
+    color: var(--textoPrimario);
+    border-color: var(--textoTerciario);
+    background-color: var(--fondoElevado3);
+}
+
+.inspectorMetadataIA {
+    font-size: var(--fuenteSm);
+    color: var(--textoSecundario);
+    line-height: 1.6;
+    background-color: var(--fondoBase);
+    padding: var(--espacioMd);
+    border-radius: var(--radioSm);
+    border: 1px solid var(--bordeSutil);
+    white-space: pre-wrap;
+    margin-top: var(--espacioSm);
+}
+
+.inspectorCreador {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioMd);
+    background-color: var(--fondoBase);
+    padding: var(--espacioSm);
+    border-radius: var(--radioSm);
+    border: 1px solid var(--bordeSutil);
+}
+
+.inspectorCreadorInfo {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--espacioXs) / 2);
+}
+
+.inspectorCreadorNombre {
+    font-size: var(--fuenteSm);
+    font-weight: var(--pesoBold);
+    color: var(--textoPrimario);
+    display: flex;
+    align-items: center;
+    gap: calc(var(--espacioXs) * 1.5);
+}
+
+.inspectorCreadorUsername {
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+    font-family: var(--fuenteMono);
+}
+
+.inspectorJsonCrudo {
+    font-family: var(--fuenteMono);
+    font-size: var(--fuenteXs);
+    background-color: var(--fondoBase);
+    color: var(--textoSecundario);
+    padding: var(--espacioMd);
+    border-radius: var(--radioSm);
+    border: 1px solid var(--bordeSutil);
+    overflow-x: auto;
+    white-space: pre-wrap;
+    max-height: 300px;
+    overflow-y: auto;
+    margin-top: var(--espacioSm);
+    /* Scrollbar sutil */
+    scrollbar-width: thin;
+    scrollbar-color: var(--bordeSutil) transparent;
+}
+
+/* [193A-55] Icono verificado en inspector */
+.inspectorVerificado {
+    color: var(--acento);
+    flex-shrink: 0;
+}

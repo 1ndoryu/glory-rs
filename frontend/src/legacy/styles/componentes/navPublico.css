@@ -1,0 +1,137 @@
+/*
+ * Estilos: NavPublico — Kamples (QQ82)
+ * Nav global para usuarios no autenticados.
+ */
+
+.navPublico {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: var(--landingPaddingSuperior) var(--landingPaddingHorizontal) 0;
+    background: var(--fondoBase);
+    /* border-bottom: 1px solid var(--bordeSutil); */
+    position: sticky;
+    width: min(100%, var(--landingAnchoMaximo));
+    top: 0;
+    z-index: 50;
+    padding-top: var(--espacio2xl);
+    margin: auto;
+}
+
+.navPublicoIzquierda {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioLg);
+}
+
+.navPublicoLogo {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: var(--textoPrimario);
+}
+
+.navPublicoEnlaces {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioLg);
+    padding: var(--espacioLg);
+}
+
+.navPublicoEnlace {
+    color: var(--textoSecundario);
+    text-decoration: none;
+    font-size: var(--fuenteMd);
+    font-weight: var(--pesoMedium);
+    transition: color var(--transicionRapida);
+}
+
+.navPublicoEnlace:hover {
+    color: var(--textoPrimario);
+}
+
+/* [2003A-6] Enlace de precios con color acento para mayor visibilidad */
+.navPublicoEnlacePrecios {
+    color: var(--acento);
+}
+
+.navPublicoEnlacePrecios:hover {
+    color: var(--textoPrimario);
+}
+
+.navPublicoDerecha {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+}
+
+/* [193A-37] Buscador inline en rutas de contenido */
+.navPublicoBuscador {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioXs);
+    background: var(--fondoElevado2);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioMd);
+    padding: var(--espacioXs) var(--espacioSm);
+    transition: border-color var(--transicionRapida);
+}
+
+.navPublicoBuscador:focus-within {
+    border-color: var(--bordeActivo);
+}
+
+.navPublicoBuscadorIcono {
+    color: var(--textoTerciario);
+    flex-shrink: 0;
+}
+
+/* Override estilos de Input para que encaje compacto en el nav */
+.navPublicoBuscadorInput.campTextoInput {
+    background: transparent;
+    border: none;
+    padding: 0;
+    font-size: var(--fuenteSm);
+    color: var(--textoPrimario);
+    width: 140px;
+    min-height: unset;
+    height: auto;
+    line-height: 1.4;
+}
+
+.navPublicoBuscadorInput.campTextoInput:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.navPublicoBuscadorInput.campTextoInput::placeholder {
+    color: var(--textoTerciario);
+}
+
+.navPublicoBuscadorLimpiar {
+    padding: var(--espacio2xs) !important;
+    min-width: unset !important;
+    min-height: unset !important;
+    color: var(--textoTerciario);
+}
+
+.navPublicoBuscadorLimpiar:hover {
+    color: var(--textoPrimario);
+}
+
+/* Responsivo */
+@media (max-width: 600px) {
+
+    .navPublicoEnlaces {
+        display: none;
+    }
+
+    .navPublicoBuscador {
+        display: none;
+    }
+}
+
+.areaContenidoPublico .inicioContenedor, .areaContenidoPublico .coleccionesPublicas {
+    padding: var(--landingPaddingSuperior) var(--landingPaddingHorizontal) 0 !important;
+}

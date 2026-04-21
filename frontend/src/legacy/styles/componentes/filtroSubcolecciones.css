@@ -1,0 +1,11 @@
+/*
+ * Estilos: filtroSubcolecciones — badges de subcolecciones.
+ * Layout horizontal con scroll, gap consistente con feedTags.
+ */
+
+.filtroSubcolecciones {
+    display: flex;
+    gap: var(--espacioXs);
+    flex-wrap: wrap;
+    padding: var(--espacioXs) 0;
+}

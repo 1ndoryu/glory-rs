@@ -98,7 +98,8 @@ pub use sample::{
 };
 pub use sample_catalog::{
     OwnedSampleRecord, SampleCatalogDetailRecord, SampleCatalogSummaryRecord, SampleListFilters,
-    SampleListResult, SampleTextSearch, UpdateSamplePatch,
+    SampleListResult, SampleTextSearch, TagAggregateFilters, TagAggregateItem,
+    TagAggregatesResult, UpdateSamplePatch,
 };
 pub use saved_collection::{SavedColeccion, SavedCollectionsRepository};
 pub use user::{OAuthRepository, UserRepository};

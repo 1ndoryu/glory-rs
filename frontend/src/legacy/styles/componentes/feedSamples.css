@@ -1,0 +1,281 @@
+/*
+ * feedSamples.css — Kamples
+ * Estilos del componente centralizado FeedSamples.
+ * Reutilizado en: InicioIsland, ColeccionDetalleIsland, Tab "Más Ideas", etc.
+ */
+
+.feedSamplesContenedor {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioMd);
+    width: 100%;
+}
+
+/* Clase centralizada para cualquier lista de samples (FeedSamples, LibreriaIsland, PerfilIsland, etc.) */
+.listaDeSamples {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioLg);
+    width: 100%;
+}
+
+/* QK101: Sin borde en móvil para maximizar espacio */
+@media (max-width: 768px) {
+    .listaDeSamples {
+        border: none;
+        border-radius: 0;
+    }
+}
+
+.feedSamplesVacio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--espacioMd);
+    padding: var(--espacio3xl) var(--espacioLg);
+    color: var(--textoSecundario);
+    text-align: center;
+}
+
+.feedSamplesVacioIcono {
+    color: var(--textoTerciario);
+    opacity: 0.5;
+}
+
+.feedSamplesSentinela {
+    min-height: 1px;
+}
+
+/* QK76: Skeleton de carga en vez de texto */
+.feedSamplesSkeletonMas {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+/* QL13/QL20: Skeletons de carga inicial — visualmente coherentes con listaDeSamples */
+.feedSamplesSkeletonInicial {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioLg);
+}
+
+/* Botón manual de "Cargar más" cuando el throttle de paginación lo requiere */
+.feedSamplesBotonManual {
+    display: flex;
+    justify-content: center;
+    padding: var(--espacioLg) 0;
+}
+
+.feedSamplesCargarMas {
+    background: var(--superficie2);
+    color: var(--textoSecundario);
+    border: 1px solid var(--borde);
+    border-radius: var(--radioMd);
+    padding: var(--espacioSm) var(--espacioXl);
+    font-size: var(--fuenteSm);
+    cursor: pointer;
+    transition: background var(--transicionRapida), color var(--transicionRapida);
+}
+
+.feedSamplesCargarMas:hover {
+    background: var(--superficie3);
+    color: var(--textoPrincipal);
+}
+
+/* Tags dinámicos */
+.feedTags {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioSm);
+    padding: 0;
+}
+
+/* C116: Fila de selects de categoría + BPM */
+.feedFiltrosSelects {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--espacioXs);
+    align-items: center;
+}
+
+.feedTagsLista {
+    display: flex;
+    gap: var(--espacioXs);
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    user-select: none;
+    cursor: grab;
+    padding: var(--espacioXs) 0;
+    flex-wrap: nowrap;
+}
+
+.feedTagsLista::-webkit-scrollbar {
+    display: none;
+}
+
+.feedTagsListaArrastrando {
+    cursor: grabbing;
+}
+
+/* feedTagsAgrupados eliminado en C116 — ahora se usan SelectFiltro dropdowns */
+
+/* C343: flex-shrink: 0 evita que los tags se compriman al desbordarse */
+.feedTagItem {
+    display: flex;
+    padding: calc(var(--espacioXs) / 4) var(--espacioMd);
+    align-items: center;
+    gap: 0;
+    background: var(--fondoElevado1);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioFull);
+    font-size: var(--fuenteXs);
+    transition: all 0.15s ease;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.feedTagItem:hover {
+    border-color: var(--bordeActivo);
+    padding: calc(var(--espacioXs) / 4) var(--espacioXs);
+}
+
+.feedTagItemIncluido {
+    background: var(--acento);
+    border-color: var(--acento);
+    color: var(--textoPrimarioInverso);
+}
+
+.feedTagItemExcluido {
+    background: var(--errorMuted);
+    border-color: var(--error);
+    color: var(--error);
+    text-decoration: line-through;
+}
+
+.feedTagBoton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 0;
+    height: 24px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: inherit;
+    opacity: 0;
+    overflow: hidden;
+    transition: all 0.2s ease;
+    padding: 0;
+}
+
+/* Override BotonBase: fuerza tamaño y sin padding para los botones +/- del feedTag.
+ * Especificidad 3 clases > .botonBase.tamanoMd (2 clases). */
+.feedTagItem .botonBase.feedTagBoton {
+    height: 24px;
+    padding: 0;
+    min-width: unset;
+    border-radius: var(--radioSm);
+    font-size: inherit;
+}
+
+.feedTagItem:hover .feedTagBoton {
+    width: 20px;
+    opacity: 0.7;
+}
+
+.feedTagBoton:hover {
+    opacity: 1 !important;
+}
+
+.feedTagBotonRestar:hover {
+    color: var(--error);
+}
+
+.feedTagBotonSumar:hover {
+    color: var(--exito);
+}
+
+.feedTagTexto {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--blanco);
+    font-size: var(--fuenteXs);
+    font-family: inherit;
+    font-weight: var(--pesoMedio);
+    line-height: 1.4;
+    white-space: nowrap;
+    user-select: none;
+    letter-spacing: 0.01em;
+    outline: none;
+}
+
+/* feedTagExpandirBtn eliminado en C116 — ya no se comprimen/expanden tags */
+/* QL109: Pull-to-refresh indicator */
+.feedPullIndicador {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    color: var(--textoSecundario);
+    transition: height 0.15s ease-out;
+}
+
+.feedPullRefrescando {
+    height: 40px !important;
+}
+
+.feedPullGirando {
+    animation: girarRefresh 0.8s linear infinite;
+}
+
+@keyframes girarRefresh {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* QL109: Estado offline */
+.feedSamplesOffline {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--espacioMd);
+    padding: var(--espacio3xl) var(--espacioLg);
+    color: var(--textoSecundario);
+    text-align: center;
+}
+
+.feedSamplesOffline h3 {
+    margin: 0;
+    font-size: var(--fuenteLg);
+    color: var(--textoPrincipal);
+}
+
+.feedSamplesOffline p {
+    margin: 0;
+    font-size: var(--fuenteSm);
+}
+
+/* QL109: Banner offline con datos cacheados */
+.feedSamplesBannerOffline {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    padding: var(--espacioXs) var(--espacioMd);
+    background: var(--superficieAdvertencia, var(--superficie2));
+    color: var(--textoSecundario);
+    font-size: var(--fuenteXs);
+    border-radius: var(--radioMd);
+}
+
+/* [193A-44] Toggle rápido "solo me encanta" — corazón activo */
+.filtroEncantaActivo {
+    color: var(--colorDanger, #e74c3c);
+}

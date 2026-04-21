@@ -1,0 +1,126 @@
+/*
+ * filaColecciones.css — Kamples (C180)
+ * Fila horizontal de colecciones con scroll invisible.
+ */
+
+.filaColecciones {
+    display: flex;
+    gap: var(--espacioLg);
+    overflow-x: auto;
+    /* Explicit hidden en Y para que el scroll vertical de la pagina no quede bloqueado */
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-bottom: var(--espacioXs);
+    /* [193A-1] manipulation permite scroll horizontal nativo en touch (APK) */
+    touch-action: manipulation;
+    cursor: grab;
+}
+
+.filaColecciones:active {
+    cursor: grabbing;
+}
+
+.filaColecciones::-webkit-scrollbar {
+    display: none;
+}
+
+.filaColeccionChip {
+    display: flex;
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radioLg);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform var(--transicionRapida), border-color var(--transicionRapida);
+    color: var(--textoPrimario);
+    font-family: var(--fuentePrincipal);
+    font-size: var(--fuenteSm);
+    align-items: stretch;
+    width: 200px;
+    height: 160px;
+    background-color: var(--fondoElevado2);
+}
+
+.filaColeccionChip:hover {
+    transform: translateY(calc(var(--espacio2xs) * -1));
+    border-color: var(--bordeActivo);
+}
+
+.filaColeccionImg {
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    object-fit: cover;
+    flex-shrink: 0;
+    transition: transform var(--transicionNormal), filter var(--transicionNormal);
+}
+
+.filaColeccionChip:hover .filaColeccionImg,
+.filaColeccionChip:focus-visible .filaColeccionImg {
+    transform: scale(1.04);
+    filter: brightness(0.72);
+}
+
+.filaColeccionOverlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--espacioSm);
+    padding: var(--espacioMd);
+    background: linear-gradient(to top, var(--overlayOscuro) 0%, rgba(0, 0, 0, 0.55) 36%, rgba(0, 0, 0, 0.08) 100%);
+}
+
+.filaColeccionAutor {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    opacity: 0;
+    transform: translateY(var(--espacioSm));
+    transition: opacity var(--transicionRapida), transform var(--transicionRapida);
+}
+
+.filaColeccionChip:hover .filaColeccionAutor,
+.filaColeccionChip:focus-visible .filaColeccionAutor {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.filaColeccionAutorAvatar.avatar {
+    width: 1.75rem;
+    height: 1.75rem;
+    min-width: 1.75rem;
+    min-height: 1.75rem;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14);
+}
+
+.filaColeccionAutorNombre,
+.filaColeccionNombre {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+}
+
+.filaColeccionAutorNombre {
+    font-size: var(--fuenteXs);
+    color: var(--blanco);
+    -webkit-line-clamp: 1;
+}
+
+.filaColeccionNombre {
+    font-size: var(--fuenteMd);
+    font-weight: var(--pesoMedio);
+    color: var(--siempreBlanco);
+    line-height: 1.2;
+    -webkit-line-clamp: 2;
+}
+
+@media (max-width: 48rem) {
+    .filaColeccionChip {
+        width: 160px;
+        height: 160px;
+    }
+}

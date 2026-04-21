@@ -1,0 +1,100 @@
+﻿/*
+ * comunidad.css  Kamples
+ * Layout de la isla de comunidad: contenedor, filtros, feed.
+ * Los estilos de la tarjeta de post estan en tarjetaPublicacion.css (fuente unica).
+ * Solo se definen aqui los extras propios de ComunidadIsland: boton seguir (+).
+ */
+
+/* -- Contenedor de la isla -- */
+.comunidadIsland {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioLg);
+    padding: var(--espacioLg);
+    max-width: 800px;
+    margin: auto;
+}
+
+/* -- Barra superior con filtros -- */
+.comunidadBarraSuperior {
+    display: flex;
+    align-items: center;
+}
+
+.comunidadFiltros {
+    display: flex;
+    gap: var(--espacioSm);
+}
+
+.comunidadFiltroBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--espacioXs);
+    padding: var(--espacioXs) var(--espacioMd);
+    background: none;
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioFull);
+    color: var(--textoSecundario);
+    font-size: var(--fuenteSm);
+    cursor: pointer;
+    transition: all var(--transicionRapida);
+}
+
+.comunidadFiltroBtn:hover {
+    border-color: var(--bordeActivo);
+    color: var(--textoPrimario);
+}
+
+/* -- Feed -- */
+.comunidadFeed {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioMd);
+}
+
+/* Reemplazado por EstadoVacio centralizado (C359) */
+
+/* -- Boton seguir (+) sobre el avatar -- exclusivo de ComunidadIsland
+   Se posiciona sobre .tarjetaPubAvatarContenedor que tiene position:relative */
+.comunidadBtnSeguirIcono.botonBase {
+    position: absolute;
+    bottom: 0;
+    right: -2px;
+    width: 16px;
+    height: 16px;
+    min-height: unset;
+    padding: 0;
+    border-radius: var(--radioFull);
+    background: var(--blanco);
+    border: 1.5px solid rgba(0, 0, 0, 0.12);
+    color: var(--negro);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition:
+        transform 0.12s,
+        box-shadow 0.12s;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+    z-index: 1;
+}
+
+.comunidadBtnSeguirIcono.botonBase:hover {
+    transform: scale(1.12);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
+}
+
+/* Botón manual de "Cargar más" para throttle de paginación */
+.comunidadBotonManual {
+    display: flex;
+    justify-content: center;
+    padding: var(--espacioLg) 0;
+}
+
+/* Movil */
+
+@media (max-width: 768px) {
+    .comunidadIsland {
+        padding: var(--espacioXs);
+        gap: var(--espacioMd);
+    }
+}

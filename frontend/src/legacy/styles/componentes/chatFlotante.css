@@ -1,0 +1,344 @@
+/*
+ * chatFlotante.css — Kamples
+ * Chats flotantes tipo Messenger en esquina inferior derecha.
+ * Se posicionan encima del reproductor global.
+ */
+
+/* Contenedor principal: stack horizontal en esquina inferior derecha */
+.chatFlotanteContenedor {
+    position: fixed;
+    bottom: var(--espacioLg);
+    right: var(--espacioLg);
+    display: flex;
+    flex-direction: row-reverse;
+    gap: var(--espacioSm);
+    z-index: var(--zModal);
+    pointer-events: none;
+}
+
+/* Subir chats cuando el reproductor global está activo */
+.layoutPrincipal:has(.reproductorGlobal) .chatFlotanteContenedor {
+    /* bottom: 100px; No es necesario */
+}
+
+/* Ventana individual de chat */
+.chatFlotanteVentana {
+    width: 320px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--fondoElevado1);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioLg);
+    box-shadow: 0 var(--espacioSm) 32px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    pointer-events: auto;
+}
+
+/* Chat minimizado: solo header */
+.chatFlotanteMinimizado {
+    max-height: unset;
+    width: 240px;
+}
+
+/* Header del chat */
+.chatFlotanteHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    padding: var(--espacioSm) var(--espacioMd);
+    background-color: var(--fondoElevado2);
+    border-bottom: 1px solid var(--bordeSutil);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.chatFlotanteNombre {
+    flex: 1;
+    font-size: var(--fuenteSm);
+    font-weight: var(--pesoMedio);
+    color: var(--textoPrimario);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* [2003A-31] Nombre clickeable para ver perfil */
+.chatFlotanteNombreClickeable {
+    cursor: pointer;
+}
+.chatFlotanteNombreClickeable:hover {
+    text-decoration: underline;
+}
+
+.chatFlotanteHeaderAcciones {
+    display: flex;
+    gap: calc(var(--espacioXs) / 2);
+}
+
+.chatFlotanteHeaderBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border: none;
+    background: none;
+    color: var(--textoTerciario);
+    cursor: pointer;
+    border-radius: var(--radioSm);
+    transition: all var(--transicionRapida);
+}
+
+.chatFlotanteHeaderBtn:hover {
+    color: var(--textoPrimario);
+    background-color: var(--fondoElevado3);
+}
+
+/* Area de mensajes */
+.chatFlotanteMensajes {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--espacioSm);
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioXs);
+    min-height: 330px;
+    max-height: 330px;
+    height: 100%;
+}
+
+.chatFlotanteVacio {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--textoTerciario);
+    font-size: var(--fuenteXs);
+}
+
+/* Burbujas de mensaje */
+.chatFlotanteBurbuja {
+    max-width: 80%;
+    padding: var(--espacioSm) var(--espacioMd);
+    border-radius: var(--radioMd);
+    font-size: var(--fuenteSm);
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+
+.chatFlotanteBurbuja p {
+    margin: 0;
+}
+
+.chatFlotanteBurbujaMia {
+    align-self: flex-end;
+    background-color: var(--acento-blanco);
+    color: var(--fondoBase);
+}
+
+.chatFlotanteBurbujaOtra {
+    align-self: flex-start;
+    background-color: var(--fondoElevado3);
+    color: var(--textoPrimario);
+    border: 1px solid var(--bordeSutil);
+}
+
+/* Input de mensaje */
+.chatFlotanteInput {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioXs);
+    padding: var(--espacioSm);
+    border-top: 1px solid var(--bordeSutil);
+    flex-shrink: 0;
+}
+
+/* [183A-103] Fila inferior: adjuntar + texto + enviar */
+.chatFlotanteInputFila {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioXs);
+}
+
+.chatFlotanteInput input {
+    flex: 1;
+    background: var(--fondoElevado2);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioFull);
+    padding: var(--espacioXs) var(--espacioSm);
+    color: var(--textoPrimario);
+    font-size: var(--fuenteSm);
+    outline: none;
+}
+
+.chatFlotanteInput input:focus {
+    border-color: var(--bordeActivo);
+}
+
+.chatFlotanteEnviar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: none;
+    color: var(--textoTerciario);
+    cursor: pointer;
+    border-radius: var(--radioFull);
+    transition: all var(--transicionRapida);
+}
+
+.chatFlotanteEnviarActivo {
+    color: var(--acento-blanco);
+}
+
+.chatFlotanteEnviar:hover:not(:disabled) {
+    background-color: var(--fondoElevado3);
+}
+
+.chatFlotanteEnviar:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* QK101: Chat expandido 100% pantalla en móvil, sin padding externo */
+@media (max-width: 768px) {
+    .chatFlotanteContenedor {
+        inset: 0;
+        bottom: 0;
+        right: 0;
+        flex-direction: column;
+        gap: 0;
+        padding-top: var(--safeAreaTop);
+    }
+
+    .chatFlotanteVentana {
+        width: 100%;
+        height: 100%;
+        border-radius: 0;
+        border: none;
+        box-shadow: none;
+    }
+
+    .chatFlotanteMinimizado {
+        width: 100%;
+    }
+
+    .chatFlotanteMensajes {
+        min-height: 0;
+        flex: 1;
+        max-height: unset;
+    }
+}
+
+/* C163: Menú contextual del header — ver perfil, reportar, bloquear */
+.chatFlotanteMenuContenedor {
+    position: relative;
+}
+
+.chatFlotanteMenu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: var(--espacioXs);
+    min-width: 140px;
+    background-color: var(--fondoElevado2);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioMd);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    z-index: 10;
+    padding: var(--espacioXs) 0;
+}
+
+.chatFlotanteMenuItem {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: var(--espacioSm);
+    width: 100%;
+    padding: var(--espacioXs) var(--espacioSm);
+    border: none;
+    background: none;
+    color: var(--textoSecundario);
+    font-size: var(--fuenteXs);
+    cursor: pointer;
+    transition: background-color var(--transicionRapida);
+}
+
+.chatFlotanteMenuItem:hover {
+    background-color: var(--fondoElevado3);
+    color: var(--textoPrimario);
+}
+
+.chatFlotanteMenuItemPeligro {
+    color: var(--error);
+}
+
+.chatFlotanteMenuItemPeligro:hover {
+    background-color: color-mix(in srgb, var(--error) 10%, transparent);
+    color: var(--error);
+}
+
+/* Boton de adjunto — sin padding para iconos compactos */
+.chatFlotanteAdjuntarBtn {
+    padding: 0;
+}
+
+/* QQ52: Staging preview — archivo seleccionado antes de enviar */
+.chatFlotanteStagingPreview {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    padding: var(--espacioSm);
+    background-color: var(--fondoElevado2);
+    border-radius: var(--radioMd);
+    margin-bottom: var(--espacioXs);
+    width: 100%;
+    flex-direction: column;
+    justify-content: center;
+    align-content: center;
+}
+
+.chatFlotanteStagingImagen {
+    width: 126px;
+    height: 126px;
+    object-fit: cover;
+    border-radius: var(--radioSm);
+    flex-shrink: 0;
+}
+
+.chatFlotanteStagingAudio {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioXs);
+    flex: 1;
+    min-width: 0;
+    font-size: var(--fuenteXs);
+    color: var(--textoSecundario);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.chatFlotanteStagingAcciones {
+    display: flex;
+    gap: var(--espacioXs);
+    flex-shrink: 0;
+}
+
+.chatFlotanteStagingCancelar {
+    color: var(--textoTerciario);
+    padding: 0;
+}
+
+.chatFlotanteStagingCancelar:hover {
+    color: var(--error);
+}
+
+.chatFlotanteStagingEnviar {
+    color: var(--acento);
+    padding: 0;
+}

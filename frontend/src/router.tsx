@@ -8,12 +8,16 @@
  * Las rutas espejean los paths que conoce el SeoKamples del backend
  * (/sample/{slug}, /perfil/{username}, /blog/{slug}) y `seo::metadata`. */
 
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { NavLink, createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom';
 import Boton from './components/ui/Boton';
+import ModalAuth from './components/auth/ModalAuth';
+import NavPublico from './components/layout/NavPublico';
+import { useAuthModalStore } from './app/stores/authModalStore';
 import { useAuth } from './hooks/useAuth';
 
 const HomePage = lazy(() => import('./pages/HomePage'));
+const DiscoverPage = lazy(() => import('./pages/DiscoverPage'));
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
@@ -24,10 +28,34 @@ const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 function Layout() {
   const auth = useAuth();
+  const abrirAuth = useAuthModalStore((state) => state.abrir);
+
+  useEffect(() => {
+    const layoutMode = !auth.isAuthenticated && !auth.isLoading ? 'public' : 'app';
+    document.body.dataset.layout = layoutMode;
+
+    return () => {
+      delete document.body.dataset.layout;
+    };
+  }, [auth.isAuthenticated, auth.isLoading]);
 
   const linkClassName = ({ isActive }: { isActive: boolean }) => (
     isActive ? 'enlace enlaceActivo' : 'enlace'
   );
+
+  if (!auth.isAuthenticated && !auth.isLoading) {
+    return (
+      <div className="layoutPublico">
+        <NavPublico />
+        <main className="areaContenidoPublico">
+          <Suspense fallback={<div className="cargando">Cargando…</div>}>
+            <Outlet />
+          </Suspense>
+        </main>
+        <ModalAuth />
+      </div>
+    );
+  }
 
   return (
     <div className="aplicacion">
@@ -35,6 +63,7 @@ function Layout() {
         <NavLink to="/" className="logo">Kamples</NavLink>
         <nav className="navegacion">
           <NavLink to="/" className={linkClassName}>Inicio</NavLink>
+          <NavLink to="/descubrir" className={linkClassName}>Descubrir</NavLink>
           <NavLink to="/dashboard" className={linkClassName}>Dashboard</NavLink>
           <NavLink to="/blog" className={linkClassName}>Blog</NavLink>
           <a className="enlace" href="/swagger-ui/" target="_blank" rel="noopener noreferrer">API</a>
@@ -53,8 +82,8 @@ function Layout() {
             </>
           ) : (
             <>
-              <NavLink to="/auth/login" className="accionSecundaria">Entrar</NavLink>
-              <NavLink to="/auth/registro" className="accionPrimaria">Crear cuenta</NavLink>
+              <Boton className="accionSecundaria" onClick={() => abrirAuth('login')} type="button">Entrar</Boton>
+              <Boton className="accionPrimaria" onClick={() => abrirAuth('registro')} type="button">Crear cuenta</Boton>
             </>
           )}
         </div>
@@ -64,6 +93,7 @@ function Layout() {
           <Outlet />
         </Suspense>
       </main>
+      <ModalAuth />
     </div>
   );
 }
@@ -74,6 +104,9 @@ const router = createBrowserRouter([
     element: <Layout />,
     children: [
       { index: true, element: <HomePage /> },
+      { path: 'descubrir', element: <DiscoverPage /> },
+      { path: 'colecciones', element: <DiscoverPage /> },
+      { path: 'musica', element: <DiscoverPage /> },
       { path: 'auth/login', element: <LoginPage /> },
       { path: 'auth/registro', element: <RegisterPage /> },
       { path: 'dashboard', element: <DashboardPage /> },

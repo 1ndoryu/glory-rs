@@ -1,0 +1,388 @@
+/*
+ * tarjetaSample.css — Kamples
+ * Tarjeta compacta de sample para listas y exploradores.
+ * Incluye waveform mini, play inline, metadata.
+ */
+
+.tarjetaSample {
+    display: grid;
+    grid-template-columns: 40px 1fr auto;
+    align-items: center;
+    gap: var(--espacioMd);
+    padding: var(--espacioMd) var(--espacioMd);
+    border-radius: var(--radioMd);
+    transition: background-color var(--transicionRapida);
+    cursor: pointer;
+    background: var(--fondoElevado1);
+    /* border: 1px solid var(--bordeSutil); */
+}
+
+.tarjetaSample:hover {
+    background-color: var(--fondoElevado2);
+    /* [193A-41] Elevar z-index en hover para que el tooltip de debug score
+     * se muestre por encima del sample de abajo. */
+    z-index: 1;
+    position: relative;
+}
+
+.tarjetaSampleActiva {
+    background-color: var(--fondoElevado2);
+}
+
+/* QL116: Estado de selección múltiple */
+.tarjetaSampleSeleccionado {
+    background-color: var(--fondoSeleccion);
+    outline: 1px solid var(--acento);
+    outline-offset: -1px;
+}
+
+.tarjetaSampleSeleccionado:hover {
+    background-color: var(--fondoSeleccionHover);
+}
+
+/* Portada con imagen de color */
+.tarjetaPortada {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radioSm);
+    overflow: hidden;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.tarjetaPortadaImg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Overlay play/pause sobre la imagen */
+.tarjetaPortadaOverlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--overlaySuave);
+    color: var(--blanco);
+    opacity: 0;
+    transition: opacity var(--transicionRapida);
+}
+
+.tarjetaPortada:hover .tarjetaPortadaOverlay,
+.tarjetaPortadaOverlayActivo {
+    opacity: 1;
+}
+
+/* Contenido central */
+/* [193A-41] overflow: visible para que el tooltip de BadgeDebugScore
+ * no quede cortado por el contenedor. Los hijos (.tarjetaTitulo,
+ * .tarjetaCreador, .tarjetaMeta) ya manejan su propio overflow. */
+.tarjetaContenido {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioXs);
+    min-width: 0;
+    overflow: visible;
+}
+
+.tarjetaCabecera {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    min-width: 0;
+}
+
+/* [193A-38] min-width: 0 permite que flex reduzca el título para dejar espacio
+ * a badges (verificado, premium, debugScore). Sin esto, el título empuja
+ * los badges fuera del contenedor con overflow:hidden y no se ven. */
+.tarjetaTitulo {
+    font-size: var(--fuenteMd);
+    font-weight: var(--pesoMedio);
+    color: var(--textoPrimario);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+
+/* Título clickeable: navega al detalle del sample */
+.tarjetaTituloClickeable {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    text-align: left;
+    font: inherit;
+    
+    transition: color var(--transicionRapida);
+}
+
+.tarjetaTituloClickeable:hover {
+    color: var(--acento);
+}
+
+/* QQ46: Punto rojo indicador de sample no reproducido */
+.tarjetaPuntoRojo {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: var(--radioFull);
+    background: var(--error);
+    flex-shrink: 0;
+    margin-left: var(--espacio2xs);
+}
+
+.tarjetaCreador {
+    font-size: var(--fuenteSm);
+    color: var(--textoSecundario);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tarjetaCreador:hover {
+    color: var(--acentoTexto);
+}
+
+/* Fila de metadata (BPM, key, tags, etc) */
+.tarjetaMeta {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioMd);
+    flex-wrap: nowrap;
+    overflow: hidden;
+}
+
+.tarjetaMeta .badgeNeutro {
+    border: unset !important;
+}
+
+.tarjetaMeta .badge {
+    padding: 0;
+}
+
+/* C344: Badge clickable para filtrar por metadata — hover blanco */
+.tarjetaMetaBadgeClickable {
+    cursor: pointer;
+    transition: color 0.15s ease;
+    border: unset !important;
+}
+
+/* [2103A-13] Badge editable de tipo (loop/oneshot) para admins — indica interactividad */
+.tarjetaMetaBadgeEditableTipo {
+    opacity: 0.85;
+    cursor: pointer;
+}
+
+.tarjetaMetaBadgeEditableTipo:hover {
+    opacity: 1;
+    color: var(--acento);
+}
+
+.tarjetaMeta .badge:hover {
+    color: var(--blanco);
+}
+
+.tarjetaMetaItem {
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+    white-space: nowrap;
+}
+
+/* Waveform mini */
+.tarjetaWaveform {
+    flex: 1;
+    min-width: 80px;
+    max-width: 200px;
+}
+
+/* Acciones a la derecha */
+.tarjetaAcciones {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioXl);
+    padding: 0 var(--espacioSm);
+}
+
+.paddingExtraAccion {
+    padding: 0 var(--espacioSm);
+}
+
+.tarjetaAccionBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--espacioSm);
+    height: 28px;
+    /* padding: 0 var(--espacioSm);*/
+    border: none;
+    background: none;
+    color: var(--textoTerciario);
+    border-radius: var(--radioSm);
+    cursor: pointer;
+    transition:
+        color var(--transicionRapida),
+        background-color var(--transicionRapida);
+    font-size: var(--fuenteXs);
+}
+
+/* Override BotonBase padding en botones de acciones de tarjeta */
+.tarjetaAcciones .botonBase.tarjetaAccionBtn {
+    padding: 0;
+    height: 28px;
+    min-width: unset;
+}
+
+.tarjetaAccionContador {
+    display: inline-block;
+    width: 24px;
+    font-size: var(--fuenteXs);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+}
+
+.tarjetaAccionBtn:hover {
+    color: var(--textoPrimario);
+    background-color: var(--fondoElevado3);
+}
+
+
+.tarjetaAcciones .botonBase.tarjetaAccionBtn.tarjetaAccionLiked {
+    color: var(--error);
+}
+
+.tarjetaAcciones .botonBase.tarjetaAccionBtn.tarjetaAccionLiked:hover {
+    color: var(--blanco);
+}
+
+/* C157: Botones de accion completada en rojo para indicar estado previo */
+.tarjetaAccionDescargado {
+    color: var(--error);
+}
+
+/* QQ16: Boton Solo Pro (Crown) para samples premium sin precio */
+.tarjetaAcciones .botonBase.tarjetaAccionBtn.tarjetaAccionPro {
+    color: var(--advertencia);
+}
+
+.tarjetaAcciones .botonBase.tarjetaAccionBtn.tarjetaAccionPro:hover {
+    color: var(--blanco);
+    background: var(--advertencia);
+}
+
+.tarjetaAccionDescargado:hover {
+    color: var(--blanco);
+}
+
+.tarjetaAccionGuardado {
+    color: var(--error);
+}
+
+.tarjetaAccionGuardado:hover {
+    color: var(--blanco);
+}
+
+.tarjetaAccionComentado {
+    color: var(--error);
+}
+
+.tarjetaAccionComentado:hover {
+    color: var(--blanco);
+}
+
+/* Duración y stats */
+.tarjetaDuracion {
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+    min-width: 36px;
+    text-align: right;
+}
+
+.tarjetaStats {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioXs);
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+}
+
+.tarjetaStatItem {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--espacioXs) / 2);
+}
+
+/* Badge premium */
+.tarjetaPremium {
+    font-size: var(--fuenteXs);
+    font-weight: var(--pesoSemibold);
+    color: var(--advertencia);
+    background-color: var(--advertenciaMuted);
+    padding: calc(var(--espacioXs) / 4) calc(var(--espacioXs) * 1.5);
+    border-radius: var(--radioFull);
+}
+
+/* C178: Icono verificado junto al titulo */
+.tarjetaVerificado {
+    color: var(--acento);
+    flex-shrink: 0;
+}
+
+/*
+ * C209: Preview personalizado para drag al mezclador.
+ * Se crea dinámicamente en JS y se usa con setDragImage().
+ */
+.dragPreviewSample {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    padding: var(--espacioSm) var(--espacioMd);
+    background: var(--acento);
+    color: var(--acentoTexto);
+    font-size: var(--fuenteSm);
+    font-weight: var(--pesoSemibold);
+    border-radius: var(--radioMd);
+    white-space: nowrap;
+    box-shadow: var(--sombraElevada);
+    pointer-events: none;
+    z-index: 99999;
+}
+
+/* QL54: Ocultar waveform en pantallas medianas por responsividad */
+@media (max-width: 870px) {
+    .tarjetaWaveform {
+        display: none;
+    }
+}
+
+/* QL54: Ocultar waveform cuando el panel lateral reduce el espacio disponible */
+@media (max-width: 1120px) {
+    .contenedorContenidoConPanel:has(.panelLateral) .tarjetaWaveform {
+        display: none;
+    }
+}
+
+/* Responsive mobile: ocultar botones secundarios */
+@media (max-width: 640px) {
+    .tarjetaSample {
+        grid-template-columns: 40px 1fr auto;
+        /* QK101: Ajustar padding en móvil */
+        padding-right: 0;
+        padding-left: var(--espacioXs);
+    }
+
+    /* Ocultar Guardar/Comentar/3puntos — disponibles via long press → menú contextual */
+    .tarjetaAccionGuardarBtn,
+    .tarjetaAccionComentarBtn,
+    .tarjetaMenuBtn {
+        display: none;
+    }
+
+    /* QK101: Más gap en acciones para móvil */
+    .tarjetaAcciones {
+        gap: var(--espacioLg);
+    }
+}

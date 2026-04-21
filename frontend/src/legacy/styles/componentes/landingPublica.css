@@ -1,0 +1,441 @@
+@font-face {
+    font-family: 'Junicode Landing';
+    src: url('../../../Assets/fonts/JunicodeVF-Roman-subset.woff2') format('woff2');
+    font-style: normal;
+    font-weight: 300 700;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Bricolage Landing';
+    src: url('../../../Assets/fonts/bricolage-grotesque-latin-400-normal.A6LyuA6R.woff2') format('woff2');
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Bricolage Landing';
+    src: url('../../../Assets/fonts/bricolage-grotesque-latin-500-normal.DEDBoLFO.woff2') format('woff2');
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Bricolage Landing';
+    src: url('../../../Assets/fonts/bricolage-grotesque-latin-600-normal.nxTgbNFE.woff2') format('woff2');
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+}
+
+.landingNav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0;
+    background: none;
+    border: 0;
+}
+
+.landingNavIzquierda {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    color: var(--textoPrimario);
+}
+
+.landingNavLogo {
+    font-family: var(--landingFuenteSubtitulo);
+    font-size: var(--landingTextoUi);
+    font-weight: var(--pesoBold);
+    color: var(--textoPrimario);
+}
+
+.landingNavDerecha {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+}
+
+.landingPublica {
+    display: flex;
+    flex-direction: column;
+    gap: var(--landingEspacioSeccion);
+    width: min(100%, var(--landingAnchoMaximo));
+    padding: var(--landingPaddingSuperior) var(--landingPaddingHorizontal) 0;
+    margin: 0 auto;
+}
+
+.landingHero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--landingEspacioHero);
+    padding: var(--landingPaddingHeroSuperior) 0 0;
+}
+
+.landingHeroTitulo {
+    font-family: var(--landingFuenteTitulo);
+    font-size: var(--landingTituloPrincipal);
+    font-weight: 300;
+    color: var(--textoPrimario);
+    line-height: 1.01;
+    letter-spacing: -0.03em;
+    max-width: 16ch;
+    margin: 0;
+    padding: var(--espacio4xl) 0 0;
+}
+
+.landingHeroResaltado {
+    color: var(--acentoTexto);
+}
+
+.landingHeroDescripcion {
+    font-family: var(--landingFuenteSubtitulo);
+    font-size: var(--landingSubtitulo);
+    font-weight: 400;
+    color: var(--textoSecundario);
+    max-width: 40rem;
+    line-height: 1.45;
+    margin: 0;
+    padding: var(--espacio2xl) 0;
+}
+
+.landingTrendingHeader h2,
+.landingPlanes h2,
+.landingPlan h3,
+.landingFooterCta h2 {
+    font-family: var(--landingFuenteSubtitulo);
+    font-size: var(--landingSubtitulo);
+    font-weight: 500;
+}
+
+.landingHeroAcciones {
+    display: flex;
+    gap: var(--landingEspacioAcciones);
+    align-items: center;
+}
+
+.landingHeroBuscador button {
+    border-radius: 100px;
+}
+
+.landingHeroAcciones {
+    display: none;
+}
+
+/* [183A-18] Buscador en el hero del landing para usuarios no autenticados */
+.landingHeroBuscador {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+    background: var(--fondoElevado2);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioFull);
+    padding: var(--espacioSm) var(--espacioMd);
+    width: 100%;
+    max-width: 36rem;
+    transition: border-color var(--transicionRapida), box-shadow var(--transicionRapida);
+    height: 50px;
+}
+
+.landingHeroBuscador:focus-within {
+    border-color: var(--acento);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--acento) 20%, transparent);
+}
+
+.landingHeroBuscadorIcono {
+    color: var(--textoTerciario);
+    flex-shrink: 0;
+}
+
+.landingHeroBuscadorInput {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    font-size: var(--textoSm);
+    color: var(--textoPrimario);
+    min-width: 0;
+}
+
+.landingHeroBuscadorInput::placeholder {
+    color: var(--textoTerciario);
+}
+
+/* Enlace envolvente para el botón de descarga (evita estilos de <a> por defecto) */
+.landingHeroDescargarEnlace {
+    text-decoration: none;
+    color: inherit;
+}
+
+.landingTrending {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioMd);
+}
+
+.landingTrendingHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioSm);
+}
+
+.landingTrendingHeader h2 {
+    font-weight: var(--pesoMedio);
+    color: var(--textoPrimario);
+    margin: 0;
+}
+
+.landingTrendingLista .tarjetaSample {
+    border: 1px solid var(--bordeSutil);
+}
+
+.landingTrendingLista {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioXs);
+    padding-top: var(--espacio4xl);
+}
+
+.landingTrendingCta {
+    display: flex;
+    justify-content: center;
+    padding-top: var(--espacioMd);
+}
+
+/* Sección visual: SVG Kamples superpuesto sobre la imagen de ambiente */
+.landingHeroVisual {
+    position: relative;
+    width: 100%;
+    margin: 0 auto;
+    border-radius: var(--radioLg);
+    overflow: hidden;
+    margin-top: var(--espacio2xl);
+}
+
+.titleSeccion {
+    font-family: var(--landingFuenteSubtitulo);
+    font-size: var(--fuenteLg);
+    font-weight: 500;
+    color: var(--textoPrimario);
+}
+
+.seccionEstandar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacio2xl);
+    padding: var(--espacio6xl) 0 var(--espacio2xl);
+}
+
+.subtitleSeccion {
+    font-family: var(--landingFuenteSubtitulo);
+    font-size: var(--landingSubtitulo);
+    font-weight: 400;
+    color: var(--textoSecundario);
+}
+
+.landingHeroImagen {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: var(--radioLg);
+    object-fit: cover;
+    aspect-ratio: 16 / 10;
+}
+
+.landingHeroSvg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: var(--espacio4xl) var(--espacioLg);
+}
+
+/* SVG Sync — ancho completo, con fondo propio (no overlay) */
+.landingSeccionSync {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: var(--radioLg);
+}
+
+/* Footer */
+.landingFooter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--espacioSm);
+    padding: var(--espacioXl) 0 var(--espacio2xl);
+    border-top: 1px solid var(--bordeSutil);
+}
+
+.landingFooterTexto {
+    font-family: var(--landingFuenteSubtitulo);
+    font-size: var(--landingTextoUi);
+    color: var(--textoSecundario);
+    margin: 0;
+    text-align: center;
+}
+
+.landingFooterEnlace {
+    color: var(--textoPrimario);
+    text-decoration: none;
+}
+
+.landingFooterEnlace:hover {
+    text-decoration: underline;
+}
+
+.landingFooterNav {
+    display: flex;
+    gap: var(--espacioMd);
+}
+
+.landingFooterNavEnlace {
+    font-family: var(--landingFuenteSubtitulo);
+    font-size: var(--landingTextoUi);
+    color: var(--textoTerciario);
+    text-decoration: none;
+}
+
+.landingFooterNavEnlace:hover {
+    color: var(--textoPrimario);
+}
+
+.landingPlanes {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--espacioXl);
+}
+
+.landingPlanes h2 {
+    font-weight: var(--pesoMedio);
+    color: var(--textoPrimario);
+    margin: 0;
+}
+
+.landingPlanesGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--espacioLg);
+    width: 100%;
+}
+
+.landingPlan {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioSm);
+    padding: var(--espacioXl);
+    background-color: var(--fondoElevado1);
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioMd);
+    align-items: center;
+    text-align: center;
+}
+
+.landingPlanDestacado {
+    border-color: var(--acento);
+    position: relative;
+}
+
+.landingPlan h3 {
+    font-weight: var(--pesoMedio);
+    color: var(--textoPrimario);
+    margin: 0;
+}
+
+.landingPlanPrecio {
+    font-size: var(--fuenteXl);
+    font-weight: var(--pesoBold);
+    color: var(--textoPrimario);
+}
+
+.landingPlanPrecio small {
+    font-size: var(--fuenteSm);
+    font-weight: var(--pesoNormal);
+    color: var(--textoTerciario);
+}
+
+.landingPlan ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioXs);
+}
+
+.landingPlan li {
+    font-size: var(--fuenteSm);
+    color: var(--textoSecundario);
+}
+
+.landingFooterCta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--espacioLg);
+    padding: var(--espacio2xl) 0;
+    border-top: 1px solid var(--bordeSutil);
+}
+
+.landingFooterCta h2 {
+    font-weight: var(--pesoMedio);
+    color: var(--textoPrimario);
+    margin: 0;
+}
+
+@media (max-width: 75rem) {
+    .landingHeroTitulo {
+        font-size: var(--landingTituloTablet);
+    }
+}
+
+@media (max-width: 56.25rem) {
+    .landingPublica {
+        padding: 2rem var(--landingPaddingHorizontalCompacto) var(--landingPaddingInferiorCompacto);
+    }
+
+    .landingNav {
+        gap: var(--espacioSm);
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .landingNavDerecha {
+        gap: var(--espacioXs);
+    }
+    .landingHeroTitulo {
+        font-size: var(--landingTituloMovil);
+    }
+}
+
+@media (max-width: 30rem) {
+    /* En pantallas muy pequeñas ocultar el botón ghost y dejar solo "Crear cuenta" */
+    .landingNavDerecha .botonBase:first-child {
+        display: none;
+    }
+}
+
+@media (max-width: 40rem) {
+    .landingHeroTitulo {
+        font-size: var(--landingTituloMini);
+        line-height: 0.98;
+    }
+
+    .landingHeroDescripcion,
+    .landingTrendingHeader h2,
+    .landingPlanes h2,
+    .landingPlan h3,
+    .landingFooterCta h2,
+    .landingNavLogo {
+        font-size: var(--landingTextoUi);
+    }
+}

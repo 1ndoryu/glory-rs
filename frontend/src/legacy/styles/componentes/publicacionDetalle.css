@@ -1,0 +1,43 @@
+/*
+ * Estilos: publicacionDetalle — Kamples
+ * Layout de la página de detalle de publicación individual.
+ * Solo contiene layout y estados (cargando, error, cabecera).
+ * El estilo del post viene de tarjetaPublicacion.css.
+ */
+
+.publicacionDetalleContenedor {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: var(--espacioMd) var(--espacioSm);
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioMd);
+}
+
+.publicacionDetalleCabecera {
+    display: flex;
+    align-items: center;
+}
+
+/* C347: clase .publicacionDetalleVolver eliminada — ahora usa .botonVolver (botonBase.css) */
+
+.publicacionDetalleCargando {
+    text-align: center;
+    padding: var(--espacioXl) 0;
+    color: var(--textoSecundario);
+    font-size: var(--fuenteSm);
+}
+
+.publicacionDetalleError {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--espacioMd);
+    padding: var(--espacioXl) 0;
+    color: var(--textoSecundario);
+    text-align: center;
+}
+
+.publicacionDetalleError p {
+    font-size: var(--fuenteMd);
+}
