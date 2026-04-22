@@ -7,6 +7,7 @@
 import { apiGet } from './apiCliente';
 import type { RespuestaApi } from './apiCliente';
 import type { SampleResumen } from '@app/types';
+import { normalizarListaSamples } from './normalizers/sampleNormalizer';
 
 /*
  * Sugerencias basadas en los samples descargados del usuario.
@@ -15,7 +16,18 @@ import type { SampleResumen } from '@app/types';
 export const obtenerSugerenciasDescargas = async (
     pagina = 1, limite = 20
 ): Promise<RespuestaApi<SampleResumen[]>> => {
-    return apiGet<SampleResumen[]>('/me/descargas/sugerencias', { pagina, limite });
+    const resp = await apiGet<unknown>('/me/descargas/sugerencias', { pagina, limite });
+    if (!resp.ok || !resp.data) {
+        return { ok: resp.ok, data: [], error: resp.error, status: resp.status, total: resp.total, hayMas: resp.hayMas };
+    }
+    return {
+        ok: true,
+        data: normalizarListaSamples(resp.data),
+        error: null,
+        status: resp.status,
+        total: resp.total,
+        hayMas: resp.hayMas,
+    };
 };
 
 /*
@@ -25,5 +37,16 @@ export const obtenerSugerenciasDescargas = async (
 export const obtenerSugerenciasFavoritos = async (
     pagina = 1, limite = 20
 ): Promise<RespuestaApi<SampleResumen[]>> => {
-    return apiGet<SampleResumen[]>('/me/favoritos/sugerencias', { pagina, limite });
+    const resp = await apiGet<unknown>('/me/favoritos/sugerencias', { pagina, limite });
+    if (!resp.ok || !resp.data) {
+        return { ok: resp.ok, data: [], error: resp.error, status: resp.status, total: resp.total, hayMas: resp.hayMas };
+    }
+    return {
+        ok: true,
+        data: normalizarListaSamples(resp.data),
+        error: null,
+        status: resp.status,
+        total: resp.total,
+        hayMas: resp.hayMas,
+    };
 };

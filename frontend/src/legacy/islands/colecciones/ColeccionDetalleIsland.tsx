@@ -93,7 +93,12 @@ const ColeccionDetalleBase = ({ coleccionSlug: propSlug }: ColeccionDetalleIslan
     const proveedorSugerencias = useCallback(async (pagina: number) => {
         if (!coleccionId) return { ok: true, data: [] as SampleResumen[] };
         const resp = await obtenerSugerencias(coleccionId, pagina);
-        return { ok: resp.ok, data: resp.ok && resp.data ? resp.data : [] };
+        return {
+            ok: resp.ok,
+            data: resp.ok && resp.data ? resp.data : [],
+            total: resp.total,
+            hayMas: resp.hayMas,
+        };
     }, [coleccionId]);
 
     if (cargando) {

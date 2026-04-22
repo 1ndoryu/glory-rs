@@ -17,6 +17,7 @@ import { esAndroid, esCapacitor } from '../utils/plataforma';
 
 const log = crearLogger('useAuth');
 const LS_KEY_TOKEN = 'kamples_auth_token';
+const LS_KEY_REFRESH = 'kamples_refresh_token';
 const LS_KEY_USUARIO = 'kamples_auth_usuario';
 
 /*
@@ -97,9 +98,10 @@ async function persistirTokenDesktop(token: string, usuario: UsuarioAutenticado 
     }
 }
 
-function limpiarSesionNativa(): void {
+export function limpiarSesionNativa(): void {
     try {
         localStorage.removeItem(LS_KEY_TOKEN);
+        localStorage.removeItem(LS_KEY_REFRESH);
         localStorage.removeItem(LS_KEY_USUARIO);
     } catch {
         /* noop */

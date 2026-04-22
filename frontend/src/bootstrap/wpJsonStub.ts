@@ -15,6 +15,7 @@
  */
 
 const LS_KEY_TOKEN = 'kamples_auth_token';
+const LS_KEY_REFRESH = 'kamples_refresh_token';
 
 /* Paths del legacy que tienen nombre diferente en el backend Rust */
 const PATH_MAP: Record<string, string> = {
@@ -207,15 +208,26 @@ function adaptarRespuesta(rustPath: string, json: unknown): unknown {
     return json;
 }
 
-/* Guarda el JWT en localStorage tras login exitoso para que
- * obtenerTokenNativo() lo envÃ­e en las siguientes peticiones. */
-function guardarTokenSiPresente(json: unknown): void {
+/* Guarda los tokens en localStorage tras login/registro OAuth exitoso.
+ * El access token autentica las requests y el refresh token evita que
+ * una sesión persistida quede rota en el siguiente arranque del SPA. */
+function guardarTokensSiPresentes(json: unknown): void {
     if (json !== null && typeof json === 'object') {
         const obj = json as Record<string, unknown>;
         const token = obj.token ?? (obj as { data?: Record<string, unknown> }).data?.token;
+        const refreshToken =
+            obj.refresh_token
+            ?? obj.refreshToken
+            ?? (obj as { data?: Record<string, unknown> }).data?.refresh_token
+            ?? (obj as { data?: Record<string, unknown> }).data?.refreshToken;
         if (typeof token === 'string' && token) {
             try {
                 localStorage.setItem(LS_KEY_TOKEN, token);
+            } catch { /* storage bloqueado */ }
+        }
+        if (typeof refreshToken === 'string' && refreshToken) {
+            try {
+                localStorage.setItem(LS_KEY_REFRESH, refreshToken);
             } catch { /* storage bloqueado */ }
         }
     }
@@ -230,24 +242,6 @@ window.fetch = async (input, init) => {
             : input instanceof Request
                 ? input.url
                 : String(input);
-
-/* Paths que aún no existen en el backend Rust — devolver respuesta stub
- * para evitar errores 404/400 en consola y mantener la UI funcional. */
-const STUB_RESPONSES: Record<string, unknown> = {
-    /* versionStore: web siempre está al día — stub vacío es suficiente */
-    '/app/versions': {},
-    /* reproducidosStore: IDs de samples reproducidos — vacío por ahora */
-    '/reproducciones/ids': [],
-    /* FiltroTags: tags agregados con conteo — vacío hasta implementar en Rust */
-    '/tags/aggregates': {},
-    /* FilaColecciones: colecciones públicas para explorar */
-    '/colecciones/explorar': { colecciones: [], tags_frecuentes: [] },
-};
-
-function buscarStub(legacyPath: string): unknown | undefined {
-    const key = legacyPath.split('?')[0];
-    return STUB_RESPONSES[key];
-}
 
     /* Llamadas directas a /api/* (cliente Orval generado): inyectar Bearer token si existe */
     if (url.includes('/api/') && !url.includes('/wp-json/')) {
@@ -279,14 +273,6 @@ function buscarStub(legacyPath: string): unknown | undefined {
         bodyText = typeof init.body === 'string' ? init.body : '';
     }
 
-    /* Stub: endpoints aún no implementados en Rust */
-    const stubData = buscarStub(legacyPath ?? '');
-    if (stubData !== undefined) {
-        return new Response(JSON.stringify(stubData), {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' },
-        });
-    }
     const adaptedBody = adaptarBody(rustPath, bodyText);
 
     /* Construir headers: eliminar X-WP-Nonce (el backend Rust no lo entiende)
@@ -337,9 +323,9 @@ function buscarStub(legacyPath: string): unknown | undefined {
         return new Response(text, { status: resp.status, headers: resp.headers });
     }
 
-    /* Guardar token si la respuesta de auth lo incluye */
+    /* Guardar tokens si la respuesta de auth los incluye */
     if (resp.ok && (rustPath === '/auth/login' || rustPath === '/auth/register' || rustPath.startsWith('/auth/google'))) {
-        guardarTokenSiPresente(json);
+        guardarTokensSiPresentes(json);
     }
 
     const adapted = adaptarRespuesta(rustPath, json);

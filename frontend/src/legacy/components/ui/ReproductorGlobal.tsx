@@ -34,6 +34,8 @@ export const ReproductorGlobal = (): JSX.Element | null => {
 
     if (!sampleActual) return null;
 
+    const nombreCreador = sampleActual.creador?.nombreVisible || sampleActual.creador?.username || 'Autor';
+
     return (
         <div className="reproductorGlobal" id="reproductorGlobal">
             {/* QK73: Linea de tiempo como borde superior con color acento */}
@@ -62,7 +64,7 @@ export const ReproductorGlobal = (): JSX.Element | null => {
             <div className="reproductorInfo reproductorClickable" onClick={irASample} title={t('reproductor.irAlSample')}>
                 <span className="reproductorTitulo">{sampleActual.titulo}</span>
                 <span className="reproductorArtista">
-                    {sampleActual.creador.nombreVisible || sampleActual.creador.username}
+                    {nombreCreador}
                 </span>
             </div>
 

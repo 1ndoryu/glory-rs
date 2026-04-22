@@ -7,6 +7,9 @@
 
 import { create } from 'zustand';
 import { obtenerIdsReproducidos } from '@app/services/apiReproduciones';
+import { useAuthStore } from '@app/stores/authStore';
+
+const LS_KEY_TOKEN = 'kamples_auth_token';
 
 interface ReproducidosState {
     ids: Set<number>;
@@ -23,6 +26,15 @@ export const useReproducidosStore = create<ReproducidosState>((set, get) => ({
 
     cargar: async () => {
         if (get().cargado) return;
+        const autenticado = useAuthStore.getState().autenticado;
+        const token = typeof window !== 'undefined'
+            ? window.localStorage.getItem(LS_KEY_TOKEN)
+            : null;
+
+        if (!autenticado || !token) {
+            return;
+        }
+
         const resp = await obtenerIdsReproducidos();
         if (resp.ok && Array.isArray(resp.data)) {
             set({ ids: new Set(resp.data), cargado: true });

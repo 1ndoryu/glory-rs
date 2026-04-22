@@ -1,6 +1,6 @@
 mod support;
 
-use axum::extract::{Multipart, Path, Query, State};
+use axum::extract::{DefaultBodyLimit, Multipart, Path, Query, State};
 use axum::http::StatusCode;
 use axum::routing::{get, post};
 use axum::{Json, Router};
@@ -26,6 +26,8 @@ use crate::models::{
 };
 use crate::repositories::{ArticleRepository, CreateArticleParams};
 use crate::AppState;
+
+const MAX_ARTICLE_MULTIPART_BODY_BYTES: usize = 8 * 1024 * 1024;
 
 #[derive(Debug, Clone, Deserialize, IntoParams)]
 pub struct ArticleListQuery {
@@ -368,7 +370,12 @@ pub async fn toggle_like_article(
 
 pub fn routes() -> Router<AppState> {
     Router::new()
-        .route("/articulos", get(list_articles).post(create_article))
+        .route(
+            "/articulos",
+            get(list_articles)
+                .post(create_article)
+                .layer(DefaultBodyLimit::max(MAX_ARTICLE_MULTIPART_BODY_BYTES)),
+        )
         .route("/articulos/categorias", get(list_categories))
         .route("/articulos/mis-articulos", get(list_my_articles))
         .route(

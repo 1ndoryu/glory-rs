@@ -156,7 +156,7 @@ pub(super) fn push_public_filters(
     }
 }
 
-fn push_auto_hide_filter(
+pub(super) fn push_auto_hide_filter(
     builder: &mut QueryBuilder<'_, Postgres>,
     target_expr: &str,
     creator_expr: &str,

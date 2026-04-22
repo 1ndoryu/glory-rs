@@ -12,6 +12,10 @@
 
 import {create} from 'zustand';
 import type {SampleResumen} from '../types';
+import { normalizarSampleResumen } from '../services/normalizers/sampleNormalizer';
+
+const normalizarContexto = (contexto: SampleResumen[] | undefined): SampleResumen[] | undefined =>
+    contexto?.map(sample => normalizarSampleResumen(sample));
 
 interface EstadoReproductor {
     sampleActual: SampleResumen | null;
@@ -66,13 +70,18 @@ export const useReproductorStore = create<EstadoReproductor>((set, get) => ({
     coleccionPreviewId: null,
 
     reproducir: (sample, contexto) => {
+        const sampleNormalizado = normalizarSampleResumen(sample);
+        const contextoNormalizado = normalizarContexto(contexto);
         const update: Partial<EstadoReproductor> = {
-            sampleActual: sample,
+            /* [214A-1] El reproductor comparte samples con panel lateral y cola.
+             * Normalizar en esta frontera evita que un sample incompleto propagado por runtime
+             * termine rompiendo renders posteriores al asumir creador.username. */
+            sampleActual: sampleNormalizado,
             reproduciendo: true,
             progreso: 0,
-            duracion: sample.duracion,
+            duracion: sampleNormalizado.duracion,
         };
-        if (contexto) update.contexto = contexto;
+        if (contextoNormalizado) update.contexto = contextoNormalizado;
         set(update);
     },
 

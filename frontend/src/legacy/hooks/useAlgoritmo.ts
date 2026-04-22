@@ -71,7 +71,7 @@ export const useAlgoritmo = (config: ConfigAlgoritmo = {}) => {
                     items: resp.data!,
                     cargando: false,
                     pagina: 1,
-                    hayMas: resp.data!.length >= porPagina,
+                    hayMas: resp.hayMas ?? resp.data!.length >= porPagina,
                     ultimaActualizacion: Date.now(),
                 }));
             }
@@ -102,7 +102,7 @@ export const useAlgoritmo = (config: ConfigAlgoritmo = {}) => {
                     items: [...prev.items, ...resp.data!],
                     cargandoMas: false,
                     pagina: siguientePagina,
-                    hayMas: resp.data!.length >= porPagina,
+                    hayMas: resp.hayMas ?? resp.data!.length >= porPagina,
                 }));
             }
         } catch (err) {

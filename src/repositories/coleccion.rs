@@ -21,6 +21,12 @@ use sqlx::PgPool;
 
 use crate::errors::AppError;
 
+mod legacy;
+
+pub use legacy::{
+    LegacyColeccionParentRecord, LegacyColeccionRecord, LegacyColeccionSampleRecord,
+};
+
 pub struct ColeccionesRepository;
 
 #[derive(Debug, Clone, sqlx::FromRow, serde::Serialize, utoipa::ToSchema)]

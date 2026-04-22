@@ -1,7 +1,7 @@
 mod notifications;
 mod payload;
 
-use axum::extract::{Path, Query, Request, State};
+use axum::extract::{DefaultBodyLimit, Path, Query, Request, State};
 use axum::http::StatusCode;
 use axum::routing::{get, post};
 use axum::{Json, Router};
@@ -33,6 +33,7 @@ const MAX_COMMENT_CHARS: usize = 2_000;
 const MAX_JSON_BODY_BYTES: usize = 64 * 1024;
 const MAX_IMAGE_UPLOAD_BYTES: usize = 8 * 1024 * 1024;
 const MAX_AUDIO_UPLOAD_BYTES: usize = 24 * 1024 * 1024;
+const MAX_COMMENT_MULTIPART_BODY_BYTES: usize = MAX_AUDIO_UPLOAD_BYTES + (4 * 1024 * 1024);
 const DEFAULT_PAGE: i64 = 1;
 const DEFAULT_PER_PAGE: i64 = 20;
 const MAX_PER_PAGE: i64 = 100;
@@ -534,7 +535,9 @@ pub fn routes() -> Router<AppState> {
     Router::new()
         .route(
             "/comentarios/:tipo/:target_id",
-            get(list_comments).post(create_comment),
+            get(list_comments)
+                .post(create_comment)
+                .layer(DefaultBodyLimit::max(MAX_COMMENT_MULTIPART_BODY_BYTES)),
         )
         .route(
             "/comentarios/:comment_id",

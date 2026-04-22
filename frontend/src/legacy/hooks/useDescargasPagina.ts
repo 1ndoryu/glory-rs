@@ -121,7 +121,12 @@ export function useDescargasPagina(busqueda = '', modoCorazonColeccionados: Modo
     const proveedorSugerencias = useCallback(async (pagina: number): Promise<ResultadoProveedor> => {
         try {
             const resp = await obtenerSugerenciasDescargas(pagina);
-            return { ok: resp.ok, data: resp.ok && resp.data ? resp.data : [] };
+            return {
+                ok: resp.ok,
+                data: resp.ok && resp.data ? resp.data : [],
+                total: resp.total,
+                hayMas: resp.hayMas,
+            };
         } catch (err) {
             log.error('Error cargando sugerencias de descargas', err);
             return { ok: false, data: [] };

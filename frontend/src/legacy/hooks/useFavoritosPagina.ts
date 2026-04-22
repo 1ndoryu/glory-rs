@@ -54,7 +54,12 @@ export function useFavoritosPagina(orden: string = 'recientes'): UseFavoritosPag
     const proveedorSugerencias = useCallback(async (pagina: number): Promise<ResultadoProveedor> => {
         try {
             const resp = await obtenerSugerenciasFavoritos(pagina);
-            return { ok: resp.ok, data: resp.ok && resp.data ? resp.data : [] };
+            return {
+                ok: resp.ok,
+                data: resp.ok && resp.data ? resp.data : [],
+                total: resp.total,
+                hayMas: resp.hayMas,
+            };
         } catch (err) {
             log.error('Error cargando sugerencias de favoritos', err);
             return { ok: false, data: [] };

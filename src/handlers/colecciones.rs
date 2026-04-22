@@ -32,6 +32,7 @@ use crate::repositories::{
 };
 use crate::AppState;
 
+pub mod legacy;
 pub mod zip;
 pub use zip::descargar_zip_coleccion;
 
@@ -79,6 +80,7 @@ pub struct OkResponse {
 
 #[derive(Debug, Deserialize, ToSchema)]
 pub struct AddSampleRequest {
+    #[serde(alias = "sampleId")]
     pub sample_id: i32,
 }
 
@@ -132,6 +134,7 @@ pub async fn create_coleccion(
     Ok((StatusCode::CREATED, Json(col)))
 }
 
+#[allow(dead_code)]
 #[utoipa::path(
     get, path = "/api/colecciones", tag = "colecciones",
     security(("bearer_auth" = [])),
@@ -145,6 +148,7 @@ pub async fn list_my_colecciones(
     Ok(Json(ColeccionListResponse { items }))
 }
 
+#[allow(dead_code)]
 #[utoipa::path(
     get, path = "/api/colecciones/{id}", tag = "colecciones",
     params(("id" = i64, Path, description = "ID de la coleccion")),
@@ -337,11 +341,16 @@ pub fn routes() -> Router<AppState> {
     Router::new()
         .route(
             "/colecciones",
-            post(create_coleccion).get(list_my_colecciones),
+            post(create_coleccion).get(legacy::list_my_colecciones_legacy),
+        )
+        .route("/colecciones/explorar", get(legacy::explore_colecciones_legacy))
+        .route(
+            "/colecciones/por-slug/:slug",
+            get(legacy::get_coleccion_by_slug_legacy),
         )
         .route(
             "/colecciones/:id",
-            get(get_coleccion)
+            get(legacy::get_coleccion_legacy)
                 .put(update_coleccion)
                 .delete(delete_coleccion),
         )
@@ -355,7 +364,12 @@ pub fn routes() -> Router<AppState> {
             "/colecciones/:id/save",
             post(save_coleccion).delete(unsave_coleccion),
         )
-        .route("/me/colecciones-guardadas", get(list_saved_colecciones))
+        .route(
+            "/colecciones/:id/guardar",
+            post(save_coleccion).delete(unsave_coleccion),
+        )
+        .route("/colecciones/guardadas", get(legacy::list_saved_colecciones_legacy))
+        .route("/me/colecciones-guardadas", get(legacy::list_saved_colecciones_legacy))
         .route(
             "/colecciones/:id/descargar-zip",
             post(descargar_zip_coleccion),
@@ -414,6 +428,7 @@ pub struct SavedListResponse {
     pub items: Vec<SavedColeccion>,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 pub struct SavedListQuery {
     #[serde(default = "default_limit")]
@@ -421,6 +436,7 @@ pub struct SavedListQuery {
     #[serde(default)]
     pub offset: i64,
 }
+#[allow(dead_code)]
 fn default_limit() -> i64 {
     30
 }
@@ -466,6 +482,7 @@ pub async fn unsave_coleccion(
     Ok(Json(OkResponse { ok: true }))
 }
 
+#[allow(dead_code)]
 #[utoipa::path(
     get, path = "/api/me/colecciones-guardadas", tag = "colecciones",
     params(

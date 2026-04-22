@@ -6,74 +6,9 @@
 
 import { apiGet, apiPost, apiPut, apiDelete, apiPostFormData } from './apiCliente';
 import type { RespuestaApi } from './apiCliente';
-import type { Coleccion, ColeccionResumen, SampleResumen, UsuarioResumen } from '../types';
-
-/*
- * Normalizador: convierte respuesta raw de PostgreSQL (snake_case)
- * a la interfaz Coleccion (camelCase).
- * Acepta ambos formatos para robustez.
- */
-const normalizarColeccion = (raw: Record<string, unknown>): Coleccion => {
-    const samples = raw.samples as Coleccion['samples'];
-    /* [183A-61] Priorizar total_items (count real de BD) sobre samples.length (paginado).
-     * Antes: si raw.samples existía, usaba su length (ej: 30 del LIMIT) como total.
-     * Ahora: siempre prioriza el count real, fallback a array length si no hay total. */
-    const totalReal = (raw.total_items ?? raw.total_samples ?? raw.totalSamples ?? null) as number | null;
-    const totalSamples = totalReal != null ? totalReal
-        : (Array.isArray(samples) ? samples.length : 0);
-
-    return {
-        id: (raw.id ?? 0) as number,
-        usuarioId: (raw.usuario_id ?? raw.usuarioId ?? 0) as number,
-        nombre: (raw.nombre ?? '') as string,
-        slug: (raw.slug ?? null) as string | null,
-        descripcion: (raw.descripcion ?? '') as string,
-        esPublica: (raw.publica ?? raw.esPublica ?? true) as boolean,
-        imagenUrl: (raw.imagen_url ?? raw.imagenUrl ?? null) as string | null,
-        /* [183A-13] El detalle prioriza el total del payload ya cargado para no mostrar 0 incorrecto. */
-        totalSamples,
-        creadoAt: (raw.created_at ?? raw.creadoAt ?? '') as string,
-        actualizadoAt: (raw.updated_at ?? raw.actualizadoAt ?? '') as string,
-        parentId: (raw.parent_id ?? raw.parentId ?? null) as number | null,
-        tags: Array.isArray(raw.tags) ? raw.tags as string[] : [],
-        usuario: raw.username ? {
-            id: (raw.usuario_id ?? raw.usuarioId ?? 0) as number,
-            username: raw.username as string,
-            nombreVisible: (raw.nombre_visible ?? raw.nombreVisible ?? raw.username) as string,
-            avatarUrl: (raw.avatar_url ?? raw.avatarUrl ?? null) as string | null,
-        } as UsuarioResumen : raw.usuario as Coleccion['usuario'],
-        samples,
-        subcolecciones: Array.isArray(raw.subcolecciones)
-            ? (raw.subcolecciones as Record<string, unknown>[]).map(normalizarColeccionResumen)
-            : undefined,
-        coleccionPadre: raw.coleccionPadre
-            ? raw.coleccionPadre as Coleccion['coleccionPadre']
-            : raw.coleccion_padre
-                ? raw.coleccion_padre as Coleccion['coleccionPadre']
-                : null,
-        contieneElSample: (raw.contieneElSample ?? raw.contiene_el_sample) as boolean | undefined,
-        estaGuardada: (raw.estaGuardada ?? raw.esta_guardada) as boolean | undefined,
-        /* [183A-22] Like de colección */
-        estaLikeada: (raw.estaLikeada ?? raw.esta_likeada) as boolean | undefined,
-        totalLikes: (raw.totalLikes ?? raw.total_likes ?? 0) as number,
-    };
-};
-
-/* Normalizador para resumen de subcolección */
-const normalizarColeccionResumen = (raw: Record<string, unknown>): ColeccionResumen => ({
-    id: (raw.id ?? 0) as number,
-    nombre: (raw.nombre ?? '') as string,
-    slug: (raw.slug ?? null) as string | null,
-    imagenUrl: (raw.imagen_url ?? raw.imagenUrl ?? null) as string | null,
-    totalSamples: (raw.total_items ?? raw.total_samples ?? raw.totalSamples ?? 0) as number,
-    esPublica: (raw.publica ?? raw.esPublica ?? true) as boolean,
-    parentId: (raw.parent_id ?? raw.parentId ?? null) as number | null,
-    tags: Array.isArray(raw.tags) ? raw.tags as string[] : [],
-});
-
-/* Normalizar array de colecciones */
-const normalizarLista = (data: unknown[]): Coleccion[] =>
-    Array.isArray(data) ? data.map(d => normalizarColeccion(d as Record<string, unknown>)) : [];
+import type { Coleccion, SampleResumen } from '../types';
+import { normalizarColeccion, normalizarLista } from './normalizers/coleccionesNormalizer';
+import { normalizarListaSamples } from './normalizers/sampleNormalizer';
 
 /* C388: Respuesta de listar colecciones con tags frecuentes */
 export interface RespuestaListarColecciones {
@@ -256,7 +191,18 @@ export const obtenerSugerencias = async (
     page = 1,
     per_page = 20
 ): Promise<RespuestaApi<SampleResumen[]>> => {
-    return apiGet<SampleResumen[]>(`/colecciones/${coleccionId}/sugerencias`, { page, per_page });
+    const resp = await apiGet<unknown>(`/colecciones/${coleccionId}/sugerencias`, { page, per_page });
+    if (!resp.ok || !resp.data) {
+        return { ok: resp.ok, data: [], error: resp.error, status: resp.status, total: resp.total, hayMas: resp.hayMas };
+    }
+    return {
+        ok: true,
+        data: normalizarListaSamples(resp.data),
+        error: null,
+        status: resp.status,
+        total: resp.total,
+        hayMas: resp.hayMas,
+    };
 };
 
 /* Colecciones más relevantes para un sample (para modal "Guardar en colección") */

@@ -65,6 +65,25 @@ impl SampleCatalogService {
         })
     }
 
+    pub async fn list_public_samples_by_ids(
+        pool: &sqlx::PgPool,
+        public_base_url: Option<&str>,
+        current_user_id: Option<i32>,
+        sample_ids: &[i32],
+    ) -> Result<Vec<SampleSummary>, AppError> {
+        let records = SampleRepository::find_public_samples_by_ids_in_order(
+            pool,
+            sample_ids,
+            current_user_id,
+        )
+        .await?;
+
+        Ok(records
+            .into_iter()
+            .map(|record| build_sample_summary(record, public_base_url))
+            .collect())
+    }
+
     pub async fn get_sample_detail(
         pool: &sqlx::PgPool,
         public_base_url: Option<&str>,

@@ -2,7 +2,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { useAuthModalStore } from '../app/stores/authModalStore';
 import { useGetMeFeed } from '../api/generated/feed/feed';
 import { useHealthCheck } from '../api/generated/health/health';
-import type { RankedSample, SampleSummary } from '../api/generated/model';
+import type { SampleSummary } from '../api/generated/model';
 import { useListSamples } from '../api/generated/sample-catalog/sample-catalog';
 import Boton from '../components/ui/Boton';
 import { useAuth } from '../hooks/useAuth';
@@ -45,10 +45,11 @@ type SampleCardData = {
   totalReproducciones: number;
 };
 
-function normalizeFeedItem(sample: RankedSample): SampleCardData {
+function normalizeFeedItem(sample: SampleSummary): SampleCardData {
   return {
     bpm: sample.bpm,
-    esNuevo: sample.es_nuevo,
+    creatorLabel: sample.creador.nombre_visible ?? sample.creador.username,
+    esNuevo: false,
     id: sample.id,
     publicadoAt: sample.publicado_at,
     slug: sample.slug,

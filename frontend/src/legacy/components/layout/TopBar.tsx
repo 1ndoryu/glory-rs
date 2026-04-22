@@ -23,7 +23,7 @@ import { DropdownMensajes } from '../ui/DropdownMensajes';
 import { LogoKamples } from '../ui/LogoKamples';
 import { cerrarSesion as apiCerrarSesion } from '@app/services/apiAuth';
 import { useAuthStore } from '@app/stores/authStore';
-import { limpiarStoresUsuario } from '@app/hooks/useAuth';
+import { limpiarSesionNativa, limpiarStoresUsuario } from '@app/hooks/useAuth';
 import { useNavigationStore } from '@/core/router/navigationStore';
 import { Modal } from '../ui/Modal';
 import { useTopBar } from '@app/hooks/useTopBar';
@@ -354,6 +354,8 @@ export const TopBar = (): JSX.Element => {
                     }
                 }
 
+                limpiarSesionNativa();
+                limpiarSesionNativa();
                 useAuthStore.getState().cerrarSesion();
                 limpiarStoresUsuario();
 

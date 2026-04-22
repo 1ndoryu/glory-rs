@@ -7,8 +7,10 @@
 import { useEffect, useState, useRef } from 'react';
 import { obtenerHistorial } from '@app/services/apiReproduciones';
 import { crearLogger } from '@app/services/logger';
+import { useAuthStore } from '@app/stores/authStore';
 
 const log = crearLogger('useHistorialIds');
+const LS_KEY_TOKEN = 'kamples_auth_token';
 
 interface UseHistorialIdsResult {
     idsReproducidos: Set<number>;
@@ -24,9 +26,24 @@ export const useHistorialIds = (activo: boolean): UseHistorialIdsResult => {
     const [idsReproducidos, setIdsReproducidos] = useState<Set<number>>(new Set());
     const [cargando, setCargando] = useState(false);
     const cargadoRef = useRef(false);
+    const autenticado = useAuthStore(s => s.autenticado);
+    const cargandoAuth = useAuthStore(s => s.cargando);
 
     useEffect(() => {
-        if (!activo || cargadoRef.current) return;
+        if (!activo || cargandoAuth) return;
+
+        const token = typeof window !== 'undefined'
+            ? window.localStorage.getItem(LS_KEY_TOKEN)
+            : null;
+
+        if (!autenticado || !token) {
+            cargadoRef.current = false;
+            setIdsReproducidos(new Set());
+            setCargando(false);
+            return;
+        }
+
+        if (cargadoRef.current) return;
 
         let cancelado = false;
 
@@ -70,7 +87,7 @@ export const useHistorialIds = (activo: boolean): UseHistorialIdsResult => {
         cargar();
 
         return () => { cancelado = true; };
-    }, [activo]);
+    }, [activo, autenticado, cargandoAuth]);
 
     return { idsReproducidos, cargando };
 };

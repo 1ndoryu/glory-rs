@@ -89,6 +89,9 @@ export const ReproductorIsland = (): JSX.Element => {
         );
     }
 
+    const nombreCreadorActual = sampleActual.creador?.nombreVisible || sampleActual.creador?.username || 'Autor';
+    const usernameCreadorActual = sampleActual.creador?.username ?? null;
+
     return (
         <div className="reproductorIsland" id="reproductorIsland">
             <div className="reproductorIslandGrid">
@@ -108,8 +111,18 @@ export const ReproductorIsland = (): JSX.Element => {
                     {/* Info del sample */}
                     <div className="reproductorIslandInfo">
                         <h1 className="reproductorIslandTitulo">{sampleActual.titulo}</h1>
-                        <BotonBase variante="ghost" className="reproductorIslandCreador" type="button" onClick={() => irAlCreador(sampleActual.creador.username)}>
-                            {sampleActual.creador.nombreVisible || sampleActual.creador.username}
+                        <BotonBase
+                            variante="ghost"
+                            className="reproductorIslandCreador"
+                            type="button"
+                            onClick={() => {
+                                if (usernameCreadorActual) {
+                                    irAlCreador(usernameCreadorActual);
+                                }
+                            }}
+                            disabled={!usernameCreadorActual}
+                        >
+                            {nombreCreadorActual}
                         </BotonBase>
 
                         <div className="reproductorIslandBadges">
@@ -216,7 +229,7 @@ const PanelCola = ({cola, sampleActualId, onSeleccionar, onQuitar, onMover, onLi
                             <div className="reproductorIslandColaImagen">{sample.imagenUrl ? <img src={sample.imagenUrl} alt="" /> : <Music size={14} />}</div>
                             <div className="reproductorIslandColaInfo">
                                 <span className="reproductorIslandColaTitulo">{sample.titulo}</span>
-                                <span className="reproductorIslandColaArtista">{sample.creador.nombreVisible || sample.creador.username}</span>
+                                <span className="reproductorIslandColaArtista">{sample.creador?.nombreVisible || sample.creador?.username || 'Autor'}</span>
                             </div>
                         </BotonBase>
 

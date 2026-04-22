@@ -10,7 +10,8 @@ mod similar;
 pub use aggregates::{TagAggregateFilters, TagAggregateItem, TagAggregatesResult};
 
 use query::{
-    push_public_filters, push_public_order, CountRow, SampleSummaryRow, SAMPLE_SUMMARY_SELECT,
+    push_auto_hide_filter, push_public_filters, push_public_order, CountRow, SampleSummaryRow,
+    SAMPLE_SUMMARY_SELECT,
 };
 
 /* [174A-44] Listado público de samples con filtros combinables.
@@ -218,6 +219,45 @@ impl SampleRepository {
                 .collect(),
             total,
         })
+    }
+
+    pub async fn find_public_samples_by_ids_in_order(
+        pool: &PgPool,
+        sample_ids: &[i32],
+        viewer_id: Option<i32>,
+    ) -> Result<Vec<SampleCatalogSummaryRecord>, sqlx::Error> {
+        if sample_ids.is_empty() {
+            return Ok(Vec::new());
+        }
+
+        let mut builder = QueryBuilder::<Postgres>::new(SAMPLE_SUMMARY_SELECT);
+
+        builder.push(
+            " FROM samples s
+              INNER JOIN usuarios_ext u ON u.id = s.creador_id
+              WHERE s.id = ANY(",
+        );
+        builder.push_bind(sample_ids.to_vec());
+        builder.push(
+            "::int[])
+              AND s.eliminado_en IS NULL
+              AND s.estado = 'activo'
+              AND s.mostrar_en_comunidad = TRUE",
+        );
+        push_auto_hide_filter(&mut builder, "s.id", "s.creador_id", viewer_id);
+        builder.push(" ORDER BY array_position(");
+        builder.push_bind(sample_ids.to_vec());
+        builder.push("::int[], s.id)");
+
+        let rows = builder
+            .build_query_as::<SampleSummaryRow>()
+            .fetch_all(pool)
+            .await?;
+
+        Ok(rows
+            .into_iter()
+            .map(SampleCatalogSummaryRecord::from)
+            .collect())
     }
 
     pub async fn find_sample_by_slug_or_short_id(

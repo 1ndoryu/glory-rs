@@ -5,9 +5,12 @@
  */
 
 import { crearLogger } from './logger';
+import { useAuthStore } from '../stores/authStore';
 
 const log = crearLogger('ApiCliente');
 const LS_KEY_TOKEN = 'kamples_auth_token';
+const LS_KEY_REFRESH = 'kamples_refresh_token';
+let refreshEnVuelo: Promise<boolean> | null = null;
 
 export interface RespuestaApi<T> {
     ok: boolean;
@@ -31,7 +34,122 @@ interface OpcionesPeticion {
     /* [183A-78] Omite X-WP-Nonce para endpoints que no requieren auth (login, registro).
      * Previene "cookie check failed" cuando existen cookies stale de sesión anterior. */
     omitirNonce?: boolean;
+    /* Reintento interno único tras renovar access token. */
+    reintentoAuth?: boolean;
 }
+
+const leerStorage = (clave: string): string => {
+    if (typeof window === 'undefined') return '';
+    try {
+        return localStorage.getItem(clave) ?? '';
+    } catch {
+        return '';
+    }
+};
+
+const escribirStorage = (clave: string, valor: string): void => {
+    if (typeof window === 'undefined' || !valor) return;
+    try {
+        localStorage.setItem(clave, valor);
+    } catch {
+        /* storage bloqueado */
+    }
+};
+
+const borrarStorage = (clave: string): void => {
+    if (typeof window === 'undefined') return;
+    try {
+        localStorage.removeItem(clave);
+    } catch {
+        /* storage bloqueado */
+    }
+};
+
+const sincronizarContexto = (autenticado: boolean): void => {
+    const ctx = window.GLORY_CONTEXT as Record<string, unknown> | undefined;
+    if (!ctx) return;
+    ctx.isLoggedIn = autenticado;
+    if (!autenticado) {
+        ctx.userId = 0;
+    }
+};
+
+const limpiarSesionPersistida = (): void => {
+    borrarStorage(LS_KEY_TOKEN);
+    borrarStorage(LS_KEY_REFRESH);
+    borrarStorage('kamples_auth_usuario');
+    sincronizarContexto(false);
+    useAuthStore.getState().cerrarSesion();
+};
+
+const persistirTokens = (json: Record<string, unknown>): boolean => {
+    const data =
+        json.data && typeof json.data === 'object' && !Array.isArray(json.data)
+            ? json.data as Record<string, unknown>
+            : json;
+
+    const token = data.token;
+    const refreshToken = data.refresh_token ?? data.refreshToken;
+
+    if (typeof token !== 'string' || !token) {
+        return false;
+    }
+
+    escribirStorage(LS_KEY_TOKEN, token);
+    if (typeof refreshToken === 'string' && refreshToken) {
+        escribirStorage(LS_KEY_REFRESH, refreshToken);
+    }
+    return true;
+};
+
+const refrescarSesion = async (): Promise<boolean> => {
+    if (refreshEnVuelo) return refreshEnVuelo;
+
+    const refreshToken = leerStorage(LS_KEY_REFRESH);
+    if (!refreshToken) {
+        limpiarSesionPersistida();
+        return false;
+    }
+
+    refreshEnVuelo = (async () => {
+        const baseUrl = obtenerBaseUrl();
+        const url = `${baseUrl}/kamples/v1/auth/refresh`;
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'same-origin',
+                cache: 'no-store',
+                body: JSON.stringify({ refresh_token: refreshToken }),
+            });
+
+            const texto = await response.text();
+            let json: Record<string, unknown> = {};
+            try {
+                json = texto ? JSON.parse(texto) as Record<string, unknown> : {};
+            } catch {
+                log.warn('refresh auth → JSON inválido', texto.slice(0, 200));
+            }
+
+            if (!response.ok || !persistirTokens(json)) {
+                limpiarSesionPersistida();
+                return false;
+            }
+
+            sincronizarContexto(true);
+            return true;
+        } catch (err) {
+            log.warn('refresh auth → fallo', err);
+            limpiarSesionPersistida();
+            return false;
+        } finally {
+            refreshEnVuelo = null;
+        }
+    })();
+
+    return refreshEnVuelo;
+};
 
 /*
  * Construye la URL base del API.
@@ -55,8 +173,6 @@ const obtenerNonce = (): string => {
 };
 
 const obtenerTokenNativo = (): string => {
-    if (typeof window === 'undefined') return '';
-
     const esDesktop = !!(window as Window).__KAMPLES_DESKTOP__;
     const esCapacitor = (() => {
         try {
@@ -68,11 +184,7 @@ const obtenerTokenNativo = (): string => {
 
     if (!esDesktop && !esCapacitor) return '';
 
-    try {
-        return localStorage.getItem(LS_KEY_TOKEN) ?? '';
-    } catch {
-        return '';
-    }
+    return leerStorage(LS_KEY_TOKEN);
 };
 
 /*
@@ -97,7 +209,15 @@ export const apiPeticion = async <T>(
     endpoint: string,
     opciones: OpcionesPeticion = {}
 ): Promise<RespuestaApi<T>> => {
-    const { method = 'GET', body, headers = {}, params, signal, omitirNonce = false } = opciones;
+    const {
+        method = 'GET',
+        body,
+        headers = {},
+        params,
+        signal,
+        omitirNonce = false,
+        reintentoAuth = true,
+    } = opciones;
     const baseUrl = obtenerBaseUrl();
     const nonce = omitirNonce ? '' : obtenerNonce();
     const tokenNativo = obtenerTokenNativo();
@@ -171,6 +291,23 @@ export const apiPeticion = async <T>(
             };
         }
 
+        if (
+            response.status === 401
+            && reintentoAuth
+            && endpoint !== '/auth/login'
+            && endpoint !== '/auth/register'
+            && endpoint !== '/auth/google'
+            && endpoint !== '/auth/refresh'
+        ) {
+            const refrescado = await refrescarSesion();
+            if (refrescado) {
+                return apiPeticion<T>(endpoint, {
+                    ...opciones,
+                    reintentoAuth: false,
+                });
+            }
+        }
+
         if (!response.ok) {
             const mensaje = (json?.message as string) ?? (json?.error as string) ?? `Error ${response.status}`;
             log.warn(`${method} ${endpoint} → ${response.status}`, mensaje);
@@ -188,7 +325,11 @@ export const apiPeticion = async <T>(
             error: null,
             status: response.status,
             ...(typeof json.total === 'number' ? { total: json.total } : {}),
-            ...(typeof json.hayMas === 'boolean' ? { hayMas: json.hayMas } : {}),
+            ...(typeof json.hayMas === 'boolean'
+                ? { hayMas: json.hayMas }
+                : typeof json.hay_mas === 'boolean'
+                    ? { hayMas: json.hay_mas }
+                    : {}),
             ...(json.estadosCuenta && typeof json.estadosCuenta === 'object'
                 ? { estadosCuenta: json.estadosCuenta as Record<string, number> }
                 : {}),

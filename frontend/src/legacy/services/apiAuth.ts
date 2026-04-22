@@ -6,6 +6,8 @@
 import { apiGet, apiPost, apiPut, apiPatch, apiPostFormData, apiPeticion } from './apiCliente';
 import type { Usuario, UsuarioAutenticado } from '../types';
 
+const LS_KEY_REFRESH = 'kamples_refresh_token';
+
 /*
  * Obtiene el perfil del usuario actualmente autenticado.
  * TO-DO: implementar endpoint /kamples/v1/me
@@ -86,7 +88,12 @@ export const registrar = async (datos: {
  * Destruye cookies WP server-side.
  */
 export const cerrarSesion = async () => {
-    return apiPost<{ ok: boolean }>('/auth/logout', {});
+    const refreshToken = typeof window !== 'undefined'
+        ? window.localStorage.getItem(LS_KEY_REFRESH)
+        : null;
+    return apiPost<{ ok: boolean }>('/auth/logout', {
+        ...(refreshToken ? { refresh_token: refreshToken } : {}),
+    });
 };
 
 /*

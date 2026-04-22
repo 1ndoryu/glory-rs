@@ -33,6 +33,12 @@ export const PanelDetalleSample = ({ sample }: PanelDetalleSampleProps): JSX.Ele
         manejarClickWaveform, manejarSeek, manejarLike, badges,
     } = usePanelDetalleSample(sample);
 
+    const creador = detalle?.creador ?? sample.creador;
+    const creadorUsername = creador?.username ?? 'autor';
+    const creadorNombreVisible = creador?.nombreVisible ?? creadorUsername;
+    const creadorAvatarUrl = creador?.avatarUrl ?? null;
+    const creadorVerificado = creador?.verificado ?? false;
+
     const { t } = useT();
     const { relacion: relacionDiscovery } = useRelacionDiscovery(sample.id);
 
@@ -55,10 +61,10 @@ export const PanelDetalleSample = ({ sample }: PanelDetalleSampleProps): JSX.Ele
             {/* Cabecera con boton cerrar — C158: PanelRightClose en vez de X */}
             <div className="panelDetalleCabecera">
                 <EnlaceCreador
-                    username={sample.creador.username}
-                    nombreVisible={sample.creador.nombreVisible}
-                    avatarUrl={sample.creador.avatarUrl}
-                    verificado={sample.creador.verificado}
+                    username={creadorUsername}
+                    nombreVisible={creadorNombreVisible}
+                    avatarUrl={creadorAvatarUrl}
+                    verificado={creadorVerificado}
                     className="panelDetalleAutor"
                 />
                 <BotonBase variante="ghost" className="panelDetalleCerrar" onClick={cerrar} type="button" aria-label={t('sample.panelCerrar')}>
@@ -221,7 +227,7 @@ export const PanelDetalleSample = ({ sample }: PanelDetalleSampleProps): JSX.Ele
                         <div className="panelColeccionPortadaInfo">
                             <span className="panelColeccionPortadaNombre">{coleccion.nombre}</span>
                             {sample.creador?.username && (
-                                <span className="panelColeccionPortadaAutor">por @{sample.creador.username}</span>
+                                <span className="panelColeccionPortadaAutor">por @{creadorUsername}</span>
                             )}
                         </div>
                     </div>

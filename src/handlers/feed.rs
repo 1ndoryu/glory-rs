@@ -24,7 +24,9 @@ use crate::errors::AppError;
 #[allow(unused_imports)]
 use crate::errors::ErrorResponse;
 use crate::middleware::CurrentUser;
+use crate::models::SampleSummary;
 use crate::repositories::{ReportRepository, AUTO_HIDE_SAMPLE_REPORT_THRESHOLD};
+use crate::services::SampleCatalogService;
 use crate::AppState;
 
 #[derive(Debug, Clone, Deserialize, IntoParams)]
@@ -37,9 +39,10 @@ pub struct FeedQuery {
 
 #[derive(Debug, Clone, Serialize, ToSchema)]
 pub struct FeedResponse {
-    pub items: Vec<RankedSample>,
+    pub items: Vec<SampleSummary>,
     pub limit: i64,
     pub offset: i64,
+    pub hay_mas: bool,
 }
 
 const DEFAULT_LIMIT: i64 = 20;
@@ -72,7 +75,7 @@ pub async fn get_feed(
 ) -> Result<Json<FeedResponse>, AppError> {
     let (limit, offset) = normalize_pagination(&query);
     let config = RecommenderConfig::legacy_defaults();
-    let items = RecommenderService::feed(
+    let ranked_items = RecommenderService::feed(
         state.pool.clone(),
         state.redis.clone(),
         current_user.user_id,
@@ -81,12 +84,25 @@ pub async fn get_feed(
         &config,
     )
     .await?;
-    let items = filter_hidden_samples(&state, current_user.user_id, items).await?;
+    let hay_mas = ranked_items.len() == limit;
+    let visible_ranked_items = filter_hidden_samples(&state, current_user.user_id, ranked_items).await?;
+    let sample_ids = visible_ranked_items
+        .iter()
+        .map(|item| item.id)
+        .collect::<Vec<_>>();
+    let items = SampleCatalogService::list_public_samples_by_ids(
+        &state.pool,
+        state.public_base_url.as_deref(),
+        Some(current_user.user_id),
+        &sample_ids,
+    )
+    .await?;
 
     Ok(Json(FeedResponse {
         items,
         limit: i64::try_from(limit).unwrap_or(DEFAULT_LIMIT),
         offset: i64::try_from(offset).unwrap_or(0),
+        hay_mas,
     }))
 }
 

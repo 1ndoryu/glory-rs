@@ -1,5 +1,5 @@
 use axum::body::{to_bytes, Body};
-use axum::extract::{Multipart, Request, State};
+use axum::extract::{DefaultBodyLimit, Multipart, Request, State};
 use axum::http::{header::CONTENT_TYPE, HeaderMap, StatusCode};
 use axum::routing::post;
 use axum::{Json, Router};
@@ -22,6 +22,7 @@ use crate::AppState;
 const MAX_JSON_HASH_BODY_BYTES: usize = 8 * 1024;
 const MAX_HASH_STREAM_BYTES: u64 = 256 * 1024 * 1024;
 const MAX_AUDIO_UPLOAD_BYTES: usize = 50 * 1024 * 1024;
+const MAX_SAMPLE_MULTIPART_BODY_BYTES: usize = 64 * 1024 * 1024;
 const IDEMPOTENCY_TTL_SECS: u64 = 60 * 60;
 
 /* [174A-28] Precheck de duplicados para uploads.
@@ -100,7 +101,10 @@ pub async fn check_duplicate(
 pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/samples/check-duplicate", post(check_duplicate))
-        .route("/samples/upload", post(upload))
+        .route(
+            "/samples/upload",
+            post(upload).layer(DefaultBodyLimit::max(MAX_SAMPLE_MULTIPART_BODY_BYTES)),
+        )
 }
 
 #[utoipa::path(

@@ -1,6 +1,6 @@
 mod payload;
 
-use axum::extract::{Path, Query, Request, State};
+use axum::extract::{DefaultBodyLimit, Path, Query, Request, State};
 use axum::http::StatusCode;
 use axum::routing::{get, post};
 use axum::{Json, Router};
@@ -26,6 +26,7 @@ const MAX_MESSAGE_CHARS: usize = 5_000;
 const MAX_JSON_BODY_BYTES: usize = 64 * 1024;
 const MAX_IMAGE_UPLOAD_BYTES: usize = 10 * 1024 * 1024;
 const MAX_AUDIO_UPLOAD_BYTES: usize = 30 * 1024 * 1024;
+const MAX_MESSAGE_MULTIPART_BODY_BYTES: usize = MAX_AUDIO_UPLOAD_BYTES + (4 * 1024 * 1024);
 const DEFAULT_MESSAGES_LIMIT: i64 = 50;
 const MAX_MESSAGES_LIMIT: i64 = 100;
 const SPAM_TERMS: [&str; 9] = [
@@ -435,7 +436,9 @@ pub fn routes() -> Router<AppState> {
         .route("/mensajes/leer-todas", post(mark_all_read))
         .route(
             "/mensajes/:conversacion_id",
-            get(list_messages).post(send_message),
+            get(list_messages)
+                .post(send_message)
+                .layer(DefaultBodyLimit::max(MAX_MESSAGE_MULTIPART_BODY_BYTES)),
         )
         .route("/mensajes/:conversacion_id/leer", post(mark_read))
 }

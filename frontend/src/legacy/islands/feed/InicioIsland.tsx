@@ -196,16 +196,12 @@ export const FeedUnificado = (): JSX.Element => {
             : 'descubrir';
         const resp = await obtenerFeed(tipo, pagina, busquedaDebounced, filtrosBackend);
         if (resp.total != null) setTotalServidor(resp.total);
-        /* El backend Rust devuelve { items, limit, offset } — extraer el array.
-         * apiCliente hace json.data ?? json → resp.data puede ser el objeto completo
-         * o un array si el wrapper lo normaliza. */
-        const rawData = resp.ok ? (resp.data as unknown) : null;
-        const items = Array.isArray(rawData)
-            ? rawData
-            : Array.isArray((rawData as Record<string, unknown> | null)?.['items'])
-                ? (rawData as Record<string, unknown[]>)['items']
-                : [];
-        return { ok: resp.ok, data: items };
+        return {
+            ok: resp.ok,
+            data: resp.ok && resp.data ? resp.data : [],
+            total: resp.total,
+            hayMas: resp.hayMas,
+        };
     }, [ordenamiento, busquedaDebounced, filtrosBackend]);
 
     /* QL24: Resetear totalServidor al cambiar ordenamiento/búsqueda/filtros para evitar

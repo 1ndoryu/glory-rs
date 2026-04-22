@@ -110,6 +110,9 @@ const ItemCancion = ({ datos: c, onIr }: { datos: ResultadoCancion; onIr: (r: st
 );
 
 const ItemSample = ({ datos: s, onIr }: { datos: ResultadoSample; onIr: (r: string) => void }) => (
+    (() => {
+        const nombreCreador = s.creador?.nombreVisible ?? s.creador?.username ?? 'Autor';
+        return (
     <BotonBase
         variante="ghost"
         tamano="ninguno"
@@ -127,13 +130,15 @@ const ItemSample = ({ datos: s, onIr }: { datos: ResultadoSample; onIr: (r: stri
         <div className="busquedaRapidaInfo">
             <span className="busquedaRapidaTitulo">{s.titulo}</span>
             <span className="busquedaRapidaSubtexto">
-                por {s.creador.nombreVisible}
+                por {nombreCreador}
             </span>
         </div>
         <span className="busquedaRapidaTipo">
             <Disc3 size={10} />
         </span>
     </BotonBase>
+        );
+    })()
 );
 
 const ItemSampleo = ({ datos: rel, onIr }: { datos: ResultadoSampleo; onIr: (r: string) => void }) => (

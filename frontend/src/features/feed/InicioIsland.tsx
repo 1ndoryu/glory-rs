@@ -196,7 +196,12 @@ export const FeedUnificado = (): JSX.Element => {
             : 'descubrir';
         const resp = await obtenerFeed(tipo, pagina, busquedaDebounced, filtrosBackend);
         if (resp.total != null) setTotalServidor(resp.total);
-        return { ok: resp.ok, data: resp.ok && resp.data ? resp.data : [] };
+        return {
+            ok: resp.ok,
+            data: resp.ok && resp.data ? resp.data : [],
+            total: resp.total,
+            hayMas: resp.hayMas,
+        };
     }, [ordenamiento, busquedaDebounced, filtrosBackend]);
 
     /* QL24: Resetear totalServidor al cambiar ordenamiento/búsqueda/filtros para evitar

@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, nombre, NULL::text AS slug\n                             FROM colecciones\n                             WHERE id = $1\n                                 AND eliminado_en IS NULL",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "nombre",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "slug",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "09ec2db24f46f3258dbb77670e7c7c28557e86cfdfa2d5f1327dd329fde49f02"
+}

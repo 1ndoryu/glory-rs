@@ -64,7 +64,9 @@ export const useMenuContextualSample = (): RetornoMenuSample => {
 
     const puedeEditar = useMemo(() => {
         if (!usuario || !estado.sample) return false;
-        return usuario.id === estado.sample.creador.id || usuario.rol === 'admin';
+        const creadorId = estado.sample.creador?.id;
+        if (creadorId == null) return usuario.rol === 'admin';
+        return usuario.id === creadorId || usuario.rol === 'admin';
     }, [usuario, estado.sample]);
 
     const puedeEliminar = puedeEditar;

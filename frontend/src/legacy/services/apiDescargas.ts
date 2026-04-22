@@ -8,6 +8,7 @@ import { apiGet, apiPost } from './apiCliente';
 import { crearLogger } from './logger';
 import type { RespuestaApi } from './apiCliente';
 import type { SampleResumen } from '@app/types';
+import { normalizarListaSamples } from './normalizers/sampleNormalizer';
 
 const log = crearLogger('apiDescargas');
 
@@ -79,11 +80,20 @@ export const puedeDescargar = async (): Promise<boolean> => {
  */
 export const obtenerComprados = async (): Promise<RespuestaApi<SampleResumen[]>> => {
     try {
-        const resp = await apiGet<{ ok: boolean; data: SampleResumen[] }>('/descargas/comprados');
+        const resp = await apiGet<unknown>('/descargas/comprados');
         if (resp.ok && resp.data) {
-            return { ok: true, data: resp.data.data ?? [], error: null, status: resp.status };
+            const raw = resp.data as { data?: unknown[] } | unknown[];
+            const items = Array.isArray(raw) ? raw : raw.data;
+            return {
+                ok: true,
+                data: normalizarListaSamples(items),
+                error: null,
+                status: resp.status,
+                total: resp.total,
+                hayMas: resp.hayMas,
+            };
         }
-        return { ok: false, data: [], error: resp.error, status: resp.status };
+        return { ok: false, data: [], error: resp.error, status: resp.status, total: resp.total, hayMas: resp.hayMas };
     } catch (err) {
         log.error('Error obteniendo comprados', err);
         return { ok: false, data: [], error: 'Error de red', status: 500 };

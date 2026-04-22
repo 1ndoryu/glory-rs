@@ -41,7 +41,10 @@ pub use article::{
     ArticleRepository, ArticleSummary, CreateArticleParams, UpdateArticleParams,
 };
 pub use block::{BlockRepository, BlockedUser};
-pub use coleccion::{Coleccion, ColeccionSample, ColeccionSampleFile, ColeccionesRepository};
+pub use coleccion::{
+    Coleccion, ColeccionSample, ColeccionSampleFile, ColeccionesRepository,
+    LegacyColeccionParentRecord, LegacyColeccionRecord, LegacyColeccionSampleRecord,
+};
 pub use comment::{
     CommentAuthorSummary, CommentContentKind, CommentContext, CommentDetail, CommentRepository,
     CommentTargetKind, CreateCommentParams,

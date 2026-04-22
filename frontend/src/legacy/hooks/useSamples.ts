@@ -103,8 +103,8 @@ export const useSamples = () => {
                     cargando: false,
                     error: null,
                     pagina,
-                    totalPaginas: pagina + 1, /* Feed infinito, siempre hay más páginas en teoría */
-                    hayMas: resp.data!.length >= 20,
+                    totalPaginas: resp.hayMas === false ? pagina : pagina + 1,
+                    hayMas: resp.hayMas ?? resp.data!.length >= 20,
                 }));
             } else {
                 setEstado(prev => ({

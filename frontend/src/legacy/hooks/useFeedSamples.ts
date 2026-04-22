@@ -232,8 +232,12 @@ export function useFeedSamples(opciones: UseFeedSamplesOpciones) {
                 if (resultado.ok) {
                     cacheFeedRef.current[key] = resultado.data;
                     if (resultado.total !== undefined) totalServidorRef.current = resultado.total;
-                        if (pagina === 1) guardarCacheFeed(claveCache, resultado.data, resultado.total);
-                        if (resultado.data.length === 0) setHayMasPaginas(false);
+                    if (pagina === 1) guardarCacheFeed(claveCache, resultado.data, resultado.total);
+                    if (resultado.hayMas !== undefined) {
+                        setHayMasPaginas(resultado.hayMas);
+                    } else if (resultado.data.length === 0) {
+                        setHayMasPaginas(false);
+                    }
                     setSamples(resultado.data);
                 }
             } catch {
@@ -264,6 +268,9 @@ export function useFeedSamples(opciones: UseFeedSamplesOpciones) {
                 if (resultado.total !== undefined) totalServidorRef.current = resultado.total;
                 if (pagina === 1) guardarCacheFeed(claveCache, resultado.data, resultado.total);
                 datos = resultado.data;
+                if (resultado.hayMas !== undefined) {
+                    setHayMasPaginas(resultado.hayMas);
+                }
             }
 
             if (datos.length === 0) setHayMasPaginas(false);

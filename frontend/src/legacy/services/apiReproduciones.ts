@@ -7,6 +7,7 @@
 import { apiGet, apiPost, type RespuestaApi } from './apiCliente';
 import { crearLogger } from './logger';
 import type { SampleResumen } from '../types';
+import { normalizarListaSamples } from './normalizers/sampleNormalizer';
 
 const log = crearLogger('apiReproduciones');
 
@@ -47,10 +48,21 @@ export const obtenerHistorial = async (
 ): Promise<RespuestaApi<SampleResumen[]>> => {
     try {
         /* apiGet auto-unwrap: backend {data:[...],page} → resp.data = [...] */
-        return await apiGet<SampleResumen[]>('/reproducciones/historial', {
+        const resp = await apiGet<unknown>('/reproducciones/historial', {
             page: pagina,
             per_page: porPagina,
         });
+        if (!resp.ok || !resp.data) {
+            return { ok: resp.ok, data: [], error: resp.error, status: resp.status, total: resp.total, hayMas: resp.hayMas };
+        }
+        return {
+            ok: true,
+            data: normalizarListaSamples(resp.data),
+            error: null,
+            status: resp.status,
+            total: resp.total,
+            hayMas: resp.hayMas,
+        };
     } catch (err) {
         log.error('Error obteniendo historial', err);
         return { ok: false, data: [], error: 'Error cargando historial', status: 0 };
@@ -81,10 +93,21 @@ export const obtenerSimilares = async (
     limite = 5
 ): Promise<RespuestaApi<SampleResumen[]>> => {
     try {
-        return await apiGet<SampleResumen[]>(
+        const resp = await apiGet<unknown>(
             `/samples/${sampleId}/similares`,
             { limite }
         );
+        if (!resp.ok || !resp.data) {
+            return { ok: resp.ok, data: [], error: resp.error, status: resp.status, total: resp.total, hayMas: resp.hayMas };
+        }
+        return {
+            ok: true,
+            data: normalizarListaSamples(resp.data),
+            error: null,
+            status: resp.status,
+            total: resp.total,
+            hayMas: resp.hayMas,
+        };
     } catch (err) {
         log.error('Error obteniendo samples similares', err);
         return { ok: false, data: [], error: 'Error de red', status: 0 };

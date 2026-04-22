@@ -31,6 +31,7 @@ export interface ResultadoProveedor {
     data: SampleResumen[];
     /* QL82: Total real del servidor para contadores precisos */
     total?: number;
+    hayMas?: boolean;
 }
 
 /* Tipo del proveedor de datos: recibe pagina, devuelve resultado con flag de exito */

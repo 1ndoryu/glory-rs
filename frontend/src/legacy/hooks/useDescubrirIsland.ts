@@ -74,7 +74,12 @@ export const useDescubrirIsland = () => {
         /* [183A-65] Pasar busqueda al API para que el endpoint filtre */
         const resp = await obtenerFeed(tipo, pagina, busqueda);
         if (resp.total != null) setTotalServidor(resp.total);
-        return { ok: resp.ok, data: resp.ok && resp.data ? resp.data : [] };
+        return {
+            ok: resp.ok,
+            data: resp.ok && resp.data ? resp.data : [],
+            total: resp.total,
+            hayMas: resp.hayMas,
+        };
     }, [ordenamiento, busqueda]);
 
     /* QL24: Resetear totalServidor al cambiar ordenamiento */

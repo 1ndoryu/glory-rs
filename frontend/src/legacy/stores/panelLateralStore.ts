@@ -10,12 +10,20 @@
 import { create } from 'zustand';
 import type { SampleResumen, Coleccion } from '@app/types';
 import { crearLogger } from '@app/services/logger';
+import { normalizarSampleResumen } from '@app/services/normalizers/sampleNormalizer';
 
 type ModoPanelLateral = 'sugerencias' | 'detalle' | 'comentarios' | 'mezclador' | 'libreria' | 'coleccion' | null;
 
 /* C155: Clave localStorage para persistir preferencia */
 const LS_KEY_SUGERENCIAS = 'kamples:sugerenciasAlDarLike';
 const log = crearLogger('panelLateralStore');
+
+const normalizarSamplePanel = (sample: SampleResumen): SampleResumen => {
+    /* [214A-1] El panel recibe samples desde stores y callbacks runtime donde TypeScript
+     * no puede verificar la forma real del objeto; normalizar aquí evita crashes por
+     * creador/username ausentes cuando el dato viene incompleto. */
+    return normalizarSampleResumen(sample);
+};
 
 const leerPreferenciaSugerencias = (): boolean => {
     try {
@@ -94,14 +102,14 @@ export const usePanelLateralStore = create<PanelLateralState>((set, get) => ({
         modo: 'detalle',
         sampleId: sample.id,
         sampleSlug: sample.slug,
-        sample,
+        sample: normalizarSamplePanel(sample),
     }),
 
     abrirComentarios: (sample) => set({
         modo: 'comentarios',
         sampleId: sample.id,
         sampleSlug: sample.slug,
-        sample,
+        sample: normalizarSamplePanel(sample),
     }),
 
     /* [183A-72] abrirSugerencias unificado: usa el mismo panel de detalle para no tener dos paneles distintos.
@@ -115,7 +123,7 @@ export const usePanelLateralStore = create<PanelLateralState>((set, get) => ({
             modo: 'detalle',
             sampleId: sample.id,
             sampleSlug: sample.slug,
-            sample,
+            sample: normalizarSamplePanel(sample),
         });
     },
 

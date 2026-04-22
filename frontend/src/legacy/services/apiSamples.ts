@@ -9,6 +9,11 @@ import type { RespuestaApi } from './apiCliente';
 import type { SampleResumen, Sample } from '../types';
 import type { CategoriaTag } from './tagUtils';
 import { normalizarTag } from './tagUtils';
+import {
+    normalizarListaSamples,
+    normalizarSampleDetalle,
+    normalizarSampleResumen,
+} from './normalizers/sampleNormalizer';
 
 export interface PaginacionSamples {
     page: number;
@@ -21,6 +26,77 @@ export interface RespuestaListaSamples {
     data: SampleResumen[];
     pagination: PaginacionSamples;
 }
+
+interface RespuestaListaSamplesRaw {
+    data?: unknown[];
+    pagination?: PaginacionSamples;
+}
+
+interface FeedResponseRaw {
+    items?: unknown[];
+    limit?: number;
+    offset?: number;
+    hay_mas?: boolean;
+    hayMas?: boolean;
+}
+
+const FEED_PAGE_SIZE = 20;
+
+const copiarMetaRespuesta = <T>(resp: RespuestaApi<unknown>, data: T): RespuestaApi<T> => ({
+    ok: resp.ok,
+    data,
+    error: resp.error,
+    status: resp.status,
+    total: resp.total,
+    hayMas: resp.hayMas,
+});
+
+const copiarErrorRespuesta = <T>(resp: RespuestaApi<unknown>): RespuestaApi<T> => ({
+    ok: resp.ok,
+    data: null,
+    error: resp.error,
+    status: resp.status,
+    total: resp.total,
+    hayMas: resp.hayMas,
+});
+
+const normalizarRespuestaListaSamples = (
+    resp: RespuestaApi<RespuestaListaSamplesRaw>,
+    fallbackPerPage: number,
+    fallbackPage: number
+): RespuestaApi<RespuestaListaSamples> => {
+    if (!resp.ok || !resp.data) {
+        return copiarErrorRespuesta(resp);
+    }
+
+    const pagination = resp.data.pagination ?? {
+        page: fallbackPage,
+        per_page: fallbackPerPage,
+        total: normalizarListaSamples(resp.data.data).length,
+        pages: 1,
+    };
+
+    return {
+        ...copiarMetaRespuesta(resp, {
+            data: normalizarListaSamples(resp.data.data),
+            pagination,
+        }),
+        total: resp.total ?? pagination.total,
+        hayMas: resp.hayMas ?? pagination.page < pagination.pages,
+    };
+};
+
+const normalizarRespuestaListaSimple = (
+    resp: RespuestaApi<unknown>
+): RespuestaApi<SampleResumen[]> => {
+    if (!resp.ok || !resp.data) {
+        return copiarMetaRespuesta(resp, []);
+    }
+
+    const raw = resp.data as { data?: unknown[] } | unknown[];
+    const items = Array.isArray(raw) ? raw : raw.data;
+    return copiarMetaRespuesta(resp, normalizarListaSamples(items));
+};
 
 export interface FiltrosSamples {
     busqueda?: string;
@@ -40,7 +116,7 @@ export interface FiltrosSamples {
 export const listarSamples = async (filtros: FiltrosSamples = {}): Promise<RespuestaApi<RespuestaListaSamples>> => {
     /* [193A-34] Enviar forma normalizada para que el backend busque sinónimos */
     const busquedaNorm = filtros.busqueda ? normalizarTag(filtros.busqueda) : undefined;
-    return apiGet<RespuestaListaSamples>('/samples', {
+    const resp = await apiGet<RespuestaListaSamplesRaw>('/samples', {
         page: filtros.page ?? 1,
         per_page: filtros.perPage ?? 12,
         busqueda: filtros.busqueda,
@@ -52,20 +128,29 @@ export const listarSamples = async (filtros: FiltrosSamples = {}): Promise<Respu
         tipo: filtros.tipo,
         creador: filtros.creador,
     });
+
+    return normalizarRespuestaListaSamples(resp, filtros.perPage ?? 12, filtros.page ?? 1);
 };
 
 /*
  * Obtiene un sample individual por slug.
  */
 export const obtenerSample = async (slug: string): Promise<RespuestaApi<Sample>> => {
-    return apiGet<Sample>(`/samples/${slug}`);
+    const resp = await apiGet<unknown>(`/samples/${slug}`);
+    if (!resp.ok || !resp.data) {
+        return copiarErrorRespuesta(resp);
+    }
+    return copiarMetaRespuesta(resp, normalizarSampleDetalle(resp.data));
 };
 
 /* [2103A-12] Obtiene un sample aleatorio del top 1000 del catálogo activo.  */
 /* [223A-7] coleccionId opcional para aleatorio dentro de una colección (incluye subcolecciones) */
 export const obtenerSampleAleatorio = async (coleccionId?: number): Promise<RespuestaApi<SampleResumen>> => {
-    const params = coleccionId ? `?coleccion_id=${coleccionId}` : '';
-    return apiGet<SampleResumen>(`/samples/aleatorio${params}`);
+    const resp = await apiGet<unknown>('/samples/aleatorio', coleccionId ? { coleccion_id: coleccionId } : undefined);
+    if (!resp.ok || !resp.data) {
+        return copiarErrorRespuesta(resp);
+    }
+    return copiarMetaRespuesta(resp, normalizarSampleResumen(resp.data));
 };
 
 /* [193A-82] Filtros backend para /feed — evitan filtrado client-side que causaba
@@ -90,7 +175,12 @@ export const obtenerFeed = async (
     busqueda = '',
     filtrosBackend: FiltrosFeedBackend = {}
 ): Promise<RespuestaApi<SampleResumen[]>> => {
-    const params: Record<string, string | number> = { tipo, page };
+    const params: Record<string, string | number> = {
+        tipo,
+        page,
+        limit: FEED_PAGE_SIZE,
+        offset: Math.max(0, (page - 1) * FEED_PAGE_SIZE),
+    };
     if (busqueda.trim()) {
         params.busqueda = busqueda.trim();
         /* [193A-34] Enviar forma normalizada para sinónimos (guitarra→guitar, vocals→vocal) */
@@ -111,7 +201,23 @@ export const obtenerFeed = async (
     if (typeof window !== 'undefined' && localStorage.getItem('kamples_debug_score') === '1') {
         params.debug = 1;
     }
-    return apiGet<SampleResumen[]>('/feed', params);
+    const resp = await apiGet<FeedResponseRaw>('/feed', params);
+    if (!resp.ok || !resp.data) {
+        return copiarMetaRespuesta(resp, []);
+    }
+
+    const raw = resp.data;
+    const items = normalizarListaSamples(Array.isArray(raw) ? raw : raw.items);
+    const hayMas = typeof raw.hay_mas === 'boolean'
+        ? raw.hay_mas
+        : typeof raw.hayMas === 'boolean'
+            ? raw.hayMas
+            : items.length >= FEED_PAGE_SIZE;
+
+    return {
+        ...copiarMetaRespuesta(resp, items),
+        hayMas,
+    };
 };
 
 /*
@@ -254,7 +360,11 @@ export const actualizarSample = async (
     sampleId: number,
     datos: DatosActualizarSample
 ): Promise<RespuestaApi<Sample>> => {
-    return apiPut<Sample>(`/samples/${sampleId}`, datos);
+    const resp = await apiPut<unknown>(`/samples/${sampleId}`, datos);
+    if (!resp.ok || !resp.data) {
+        return copiarErrorRespuesta(resp);
+    }
+    return copiarMetaRespuesta(resp, normalizarSampleDetalle(resp.data));
 };
 
 /*
@@ -263,8 +373,10 @@ export const actualizarSample = async (
  */
 export const obtenerSamplesDeRelacion = async (
     relacionId: number
-): Promise<RespuestaApi<SampleResumen[]>> =>
-    apiGet<SampleResumen[]>(`/relaciones/${relacionId}/samples`);
+): Promise<RespuestaApi<SampleResumen[]>> => {
+    const resp = await apiGet<unknown>(`/relaciones/${relacionId}/samples`);
+    return normalizarRespuestaListaSimple(resp);
+};
 
 /*
  * Samples publicados extraídos de una canción concreta (cancion_origen_id = cancion.id).
@@ -272,8 +384,10 @@ export const obtenerSamplesDeRelacion = async (
  */
 export const obtenerSamplesDeCancion = async (
     slug: string
-): Promise<RespuestaApi<SampleResumen[]>> =>
-    apiGet<SampleResumen[]>(`/canciones/${encodeURIComponent(slug)}/samples`);
+): Promise<RespuestaApi<SampleResumen[]>> => {
+    const resp = await apiGet<unknown>(`/canciones/${encodeURIComponent(slug)}/samples`);
+    return normalizarRespuestaListaSimple(resp);
+};
 
 /*
  * C87: Obtiene los samples favoritos (liked) del usuario autenticado.
@@ -284,14 +398,16 @@ export const obtenerMisFavoritos = async (page = 1, perPage = 20, orden = 'recie
     if (busqueda) params.busqueda = busqueda;
     if (soloEncanta) params.solo_encanta = 1;
     if (soloLike) params.solo_like = 1;
-    return apiGet<RespuestaListaSamples>('/me/favoritos', params);
+    const resp = await apiGet<RespuestaListaSamplesRaw>('/me/favoritos', params);
+    return normalizarRespuestaListaSamples(resp, perPage, page);
 };
 
 /*
  * C87: Obtiene los samples descargados por el usuario autenticado.
  */
 export const obtenerMisDescargas = async (page = 1, perPage = 20, orden = 'recientes'): Promise<RespuestaApi<RespuestaListaSamples>> => {
-    return apiGet<RespuestaListaSamples>('/me/descargas', { page, per_page: perPage, orden });
+    const resp = await apiGet<RespuestaListaSamplesRaw>('/me/descargas', { page, per_page: perPage, orden });
+    return normalizarRespuestaListaSamples(resp, perPage, page);
 };
 
 /*
