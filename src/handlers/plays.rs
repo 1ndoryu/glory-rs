@@ -166,5 +166,7 @@ pub async fn list_played_ids(
 pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/samples/:id/play", post(register_play))
+        /* Alias para compatibilidad con clientes legacy que usan /reproduccion */
+        .route("/samples/:id/reproduccion", post(register_play))
         .route("/reproducciones/ids", get(list_played_ids))
 }
