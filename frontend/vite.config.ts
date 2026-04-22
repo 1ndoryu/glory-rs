@@ -33,6 +33,14 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:3000',
         changeOrigin: true,
+        /* Sin timeout para permitir uploads grandes (audio ~50MB puede tardar en procesarse) */
+        proxyTimeout: 0,
+        timeout: 0,
+      },
+      /* Proxy para archivos de audio/assets servidos por el backend Rust vía ServeDir */
+      '/uploads': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
       },
       '/swagger-ui': {
         target: 'http://localhost:3000',

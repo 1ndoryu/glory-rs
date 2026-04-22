@@ -12,6 +12,11 @@
 const SERVIDOR_PROD = 'https://kamples.com';
 const PREFIJO_LEGACY_WP = '/wp-content/themes/glorytemplate/App/Assets';
 const PREFIJO_SPA = '/legacy-assets';
+/* [224A-x] Las imágenes de color viven fuera de App/Assets; se rebasean por separado.
+ * En producción WordPress el path original funciona. En el SPA standalone (Vite),
+ * /wp-content/themes/glorytemplate/colors/ → /legacy-assets/colors/ (junction local). */
+const PREFIJO_COLORS_WP = '/wp-content/themes/glorytemplate/colors';
+const PREFIJO_COLORS_SPA = '/legacy-assets/colors';
 
 const esEntornoTauri = (): boolean =>
     typeof window !== 'undefined' && !!(window as unknown as Record<string, unknown>).__KAMPLES_DESKTOP__;
@@ -19,6 +24,9 @@ const esEntornoTauri = (): boolean =>
 function rebaseAsset(ruta: string): string {
     if (ruta.startsWith(PREFIJO_LEGACY_WP)) {
         return PREFIJO_SPA + ruta.slice(PREFIJO_LEGACY_WP.length);
+    }
+    if (ruta.startsWith(PREFIJO_COLORS_WP)) {
+        return PREFIJO_COLORS_SPA + ruta.slice(PREFIJO_COLORS_WP.length);
     }
     return ruta;
 }

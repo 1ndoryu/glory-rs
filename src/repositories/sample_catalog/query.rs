@@ -20,7 +20,7 @@ pub(super) const SAMPLE_SUMMARY_SELECT: &str = "SELECT
         s.es_premium,
         CAST(s.precio AS double precision) AS precio,
         s.verificado,
-        s.ruta_preview,
+        COALESCE(NULLIF(s.ruta_preview, ''), s.ruta_optimizada) AS ruta_preview,
         s.ruta_waveform,
         s.imagen_url,
         COALESCE(s.total_descargas, 0) AS total_descargas,
