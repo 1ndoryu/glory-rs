@@ -35,8 +35,21 @@ function rebaseAsset(ruta: string): string {
  * Resuelve una ruta relativa al servidor correcto.
  * En web, retorna la ruta reescrita al SPA (legacy-assets).
  * En Tauri/APK, prefija con el servidor de producción.
+ *
+ * [224A-3] También acepta URLs absolutas con dominio de producción:
+ * en entorno no-Tauri (SPA/Vite), stripea el dominio y rebasea la ruta.
+ * Esto corrige imagenUrl almacenados como "https://kamples.com/wp-content/..."
+ * que en dev no resuelven.
  */
 export const resolverRutaAsset = (rutaRelativa: string): string => {
-    if (esEntornoTauri()) return `${SERVIDOR_PROD}${rutaRelativa}`;
-    return rebaseAsset(rutaRelativa);
+    if (esEntornoTauri()) {
+        /* En Tauri, si ya es absoluta con el dominio correcto, devolverla tal cual */
+        if (rutaRelativa.startsWith(SERVIDOR_PROD)) return rutaRelativa;
+        return `${SERVIDOR_PROD}${rutaRelativa}`;
+    }
+    /* Stripear dominio de producción en entorno SPA/dev para rebasear correctamente */
+    const rutaNormalizada = rutaRelativa.startsWith(SERVIDOR_PROD)
+        ? rutaRelativa.slice(SERVIDOR_PROD.length)
+        : rutaRelativa;
+    return rebaseAsset(rutaNormalizada);
 };
