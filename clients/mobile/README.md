@@ -1,42 +1,45 @@
 # Kamples Mobile
 
-Proyecto nativo separado para Android con Capacitor. Permite abrir/correr la app desde Android Studio sin volver a meter Android dentro de Tauri.
+Shell Capacitor para Android que **empaqueta la SPA Rust** del frontend (`frontend/dist`) en una APK nativa.
+
+## Arquitectura
+
+- `webDir = ../../frontend/dist` → la APK incluye el bundle Vite del SPA
+- FCM, Google PKCE deep links y push notifications los maneja el SPA en `frontend/src/legacy/services/`
+- Backend Rust se consume vía cliente Orval (apunta a `https://api.kamples.com` o env)
+- En producción **no** hay `server.url` → todo corre offline-first desde el bundle local
 
 ## Scripts
 
-- `npm run prepare:web`: genera el `www/` mínimo de respaldo para Capacitor
-- `npm run android:sync`: prepara `www/` y sincroniza `android/`
+- `npm run prepare:web`: construye `frontend/dist` (delega a `npm run build` del SPA)
+- `npm run prepare:web -- --force`: fuerza rebuild aunque ya exista
+- `npm run android:sync`: prepare:web + `npx cap sync android`
 - `npm run android:open`: abre Android Studio sin resincronizar
 - `npm run android:open:sync`: sincroniza y luego abre Android Studio
-- `npm run android:run`: sincroniza y ejecuta en dispositivo/emulador con Capacitor CLI
+- `npm run android:run`: sincroniza y ejecuta en dispositivo/emulador
 
-## Live reload en Android Studio
+## Live reload contra vite dev server
 
-1. Arranca la URL que quieras cargar dentro del WebView móvil.
-   - Producción ya funciona por defecto: `https://kamples.com`
-   - Para local, usa una URL completa accesible desde Android.
-2. En PowerShell exporta la URL accesible desde el emulador o dispositivo:
-   - `$env:KAMPLES_CAP_SERVER_URL = 'http://10.0.2.2:5173'`
-3. Sincroniza y abre Android Studio:
-   - `npm run android:sync`
-   - `npm run android:open`
+1. Arranca el dev server SPA: `npm run dev --prefix frontend` (puerto 5173)
+2. PowerShell: `$env:KAMPLES_CAP_SERVER_URL = 'http://10.0.2.2:5173'`
+3. `npm run android:sync` → `npm run android:open`
+4. La APK cargará el dev server (con HMR) en lugar del bundle local
 
-Si usas dispositivo físico, cambia `10.0.2.2` por la IP LAN real de tu máquina.
+Para device físico, reemplaza `10.0.2.2` por la IP LAN de la máquina.
 
 ## Flujo normal
 
-1. `npm install --prefix mobile`
-2. `npm run android:sync --prefix mobile`
-3. `npm run android:open --prefix mobile`
-4. En Android Studio espera el primer sync Gradle y ejecuta la configuración `app`
+1. `npm install --prefix clients/mobile`
+2. `npm install --prefix frontend && npm run build --prefix frontend`
+3. `npm run android:sync --prefix clients/mobile`
+4. `npm run android:open --prefix clients/mobile`
 
-## Rendimiento de Gradle
+## Permisos Android
 
-- El wrapper usa `gradle-8.2.1-bin.zip`, no `all.zip`, para bajar bastante la descarga inicial.
-- La descarga grande solo debe ocurrir una vez por caché local de Gradle en `%USERPROFILE%/.gradle`.
-- Si Android Studio ya quedó abierto y no cambiaste plugins nativos, usa `npm run android:open` y evita resincronizar.
-- Si el wrapper vuelve a descargarse desde cero con frecuencia, revisar que `%USERPROFILE%/.gradle` no esté siendo limpiado por OneDrive, antivirus o herramientas de limpieza.
+- `INTERNET`: requerido para fetch al backend
+- `POST_NOTIFICATIONS`: Android 13+ requiere prompt explícito (lo gestiona `fcmToken.ts`)
 
-## Nota arquitectónica
+## Deep links
 
-La base web actual es WordPress + React Islands, no una SPA standalone con `index.html` propio. Por eso este proyecto móvil usa un shell nativo de Capacitor que carga una URL web real en el WebView y deja `www/` solo como respaldo mínimo del runtime.
+- `kamples://auth/...` → flujo Google PKCE (`googleAuthMobileCapacitor.ts`)
+- `kamples://notification/...` → click en push FCM (`fcmToken.ts` lo persiste en sessionStorage)

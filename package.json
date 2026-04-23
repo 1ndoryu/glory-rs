@@ -15,6 +15,10 @@
     "test": "cargo test",
     "roadmap": "node scripts/check-roadmap.mjs",
     "roadmap:watch": "node scripts/check-roadmap.mjs --watch",
-    "self-check": "powershell -ExecutionPolicy Bypass -File scripts/self-check.ps1"
+    "self-check": "powershell -ExecutionPolicy Bypass -File scripts/self-check.ps1",
+    "clean:cargo": "powershell -ExecutionPolicy Bypass -File scripts/clean-cargo-target.ps1",
+    "clean:cargo:hard": "powershell -ExecutionPolicy Bypass -File scripts/clean-cargo-target.ps1 -Aggressive",
+    "dev:clean": "npm run clean:cargo && npm run dev",
+    "postdev": "powershell -ExecutionPolicy Bypass -File scripts/clean-cargo-target.ps1"
   }
 }

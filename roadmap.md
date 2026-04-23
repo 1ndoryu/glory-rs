@@ -105,8 +105,7 @@
 ### Fase 17 â€” Frontend SPA (completada)
 
 ### Fase 18 â€” Scraper / Mezclador / Mobile / Desktop (importacion completada, adaptacion pendiente)
-- 174A-110b â€” mobile: cambiar `webDir` a SPA Rust + FCM register-token + deep links
-- 174A-111b â€” desktop: cliente Orval compartido + Google PKCE + WebSocket sync + auto-updates Tauri 2
+
 
 ### Fase 18.5 â€” Frontend SPA reales
 

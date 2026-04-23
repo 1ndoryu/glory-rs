@@ -22,11 +22,21 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <!-- [174A-110b] Deep links Google PKCE (custom scheme) — handled by googleAuthMobileCapacitor.ts -->
             <intent-filter android:autoVerify="false">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="@string/custom_url_scheme" android:host="auth" />
+            </intent-filter>
+
+            <!-- [174A-110b] Deep links de notificaciones FCM (apertura de la app vía custom scheme).
+                 El payload `enlace` viaja en data y es leído por fcmToken.ts → sessionStorage. -->
+            <intent-filter android:autoVerify="false">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="@string/custom_url_scheme" android:host="notification" />
             </intent-filter>
 
         </activity>
