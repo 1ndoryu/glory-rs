@@ -58,7 +58,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; connect-src 'self' http://localhost http://localhost:1420 https://kamples.com http://kamples.com wss://ws.kamples.com https://*.stripe.com https://accounts.google.com ipc: http://ipc.localhost; img-src 'self' https://kamples.com http://kamples.com asset: http://asset.localhost data: blob: https:; media-src 'self' https://kamples.com http://kamples.com asset: http://asset.localhost blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; script-src 'self' 'unsafe-inline' https://accounts.google.com; frame-src 'self' https://accounts.google.com",
+      "csp": "default-src 'self'; connect-src 'self' http://localhost http://localhost:1420 http://localhost:3000 https://api.kamples.com wss://api.kamples.com ws://localhost:3000 https://*.stripe.com https://accounts.google.com ipc: http://ipc.localhost; img-src 'self' http://localhost:3000 https://api.kamples.com asset: http://asset.localhost data: blob: https:; media-src 'self' http://localhost:3000 https://api.kamples.com asset: http://asset.localhost blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; script-src 'self' 'unsafe-inline' https://accounts.google.com; frame-src 'self' https://accounts.google.com",
       "dangerousDisableAssetCspModification": false
     }
   },
@@ -88,7 +88,7 @@
     "updater": {
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDUzMkY4N0I4MjEzRkZCOTcKUldTWCt6OGh1SWN2VTJoblVNQm9vUnVzU0NaVTczQjMvQW1TcTBHNDNOQWVMWDN2ZmZDeUF5RjcK",
       "endpoints": [
-        "https://kamples.com/wp-json/kamples/v1/desktop/update/{{target}}/{{arch}}/{{current_version}}"
+        "https://api.kamples.com/api/app/updater/{{target}}/{{arch}}/{{current_version}}"
       ],
       "dialog": true,
       "windows": {

@@ -6,13 +6,16 @@ import { existsSync } from 'fs';
 
 /*
  * Vite config para Kamples Desktop (Tauri 2.0)
- * Reutiliza los mismos componentes React del proyecto web via aliases.
+ * [174A-111b] Migrado del backend WP a backend Axum (Rust). Reutiliza el
+ * cliente Orval del SPA principal (frontend/src/api/generated) en vez de
+ * re-generarlo. Los servicios legacy en src/services/* siguen apuntando a
+ * `wp-json/` y deben migrarse a hooks Orval — ver TODO en cada archivo.
  *
- * El proxy de dev redirige a KAMPLES_API_TARGET (env) o kamples.com por defecto.
- * Para apuntar a WP local: set KAMPLES_API_TARGET=http://glory.local
+ * El proxy de dev redirige /api a KAMPLES_API_TARGET (env) o
+ * http://localhost:3000 por defecto (backend Rust local).
  */
 
-const apiTarget = process.env.KAMPLES_API_TARGET || 'https://kamples.com';
+const apiTarget = process.env.KAMPLES_API_TARGET || 'http://localhost:3000';
 
 /*
  * Raiz del tema (glorytemplate/) — los assets del tema estan aqui.
@@ -102,6 +105,20 @@ export default defineConfig({
          * Para WP local: set KAMPLES_API_TARGET=http://glory.local
          */
         proxy: {
+            /* [174A-111b] Backend Rust principal — todo /api/* va al servidor Axum. */
+            '/api': {
+                target: apiTarget,
+                changeOrigin: true,
+                secure: false,
+            },
+            /* [174A-111b] Uploads servidos por backend Rust (storage local o S3). */
+            '/uploads': {
+                target: apiTarget,
+                changeOrigin: true,
+                secure: false,
+            },
+            /* Compatibilidad transicional con servicios legacy aún apuntando a wp-json.
+             * TODO 174A-111b: eliminar cuando todos los services migren a Orval. */
             '/wp-json': {
                 target: apiTarget,
                 changeOrigin: true,
@@ -149,6 +166,10 @@ export default defineConfig({
             '@mezclador': resolve(__dirname, '../Mezclador'),
             /* Desktop-specific code */
             '@desktop': resolve(__dirname, 'src'),
+            /* [174A-111b] Cliente Orval compartido con la SPA Rust principal —
+             * evita duplicar la generación. Cualquier import de '@api/...'
+             * resuelve a frontend/src/api/generated del proyecto Axum. */
+            '@api': resolve(__dirname, '../../frontend/src/api/generated'),
             /* Dependencias compartidas: resolver desde node_modules del desktop */
             'soundtouchjs': resolve(__dirname, 'node_modules/soundtouchjs'),
             /* QL17: Plugin notification vive en desktop/node_modules pero se importa

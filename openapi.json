@@ -1786,6 +1786,58 @@
         ]
       }
     },
+    "/api/app/updater/{target}/{arch}/{current_version}": {
+      "get": {
+        "tags": [
+          "sync"
+        ],
+        "operationId": "get_desktop_updater",
+        "parameters": [
+          {
+            "name": "target",
+            "in": "path",
+            "description": "Plataforma: windows, darwin, linux",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "arch",
+            "in": "path",
+            "description": "Arquitectura: x86_64, aarch64, i686",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "current_version",
+            "in": "path",
+            "description": "Versión semver instalada en el cliente",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Hay update disponible",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DesktopUpdaterManifest"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "El cliente ya tiene la última versión"
+          }
+        }
+      }
+    },
     "/api/app/versions": {
       "get": {
         "tags": [
@@ -11051,6 +11103,33 @@
             "format": "int32",
             "description": "Dias hasta eliminacion definitiva (default 30).",
             "nullable": true
+          }
+        }
+      },
+      "DesktopUpdaterManifest": {
+        "type": "object",
+        "required": [
+          "version",
+          "notes",
+          "pub_date",
+          "url",
+          "signature"
+        ],
+        "properties": {
+          "notes": {
+            "type": "string"
+          },
+          "pub_date": {
+            "type": "string"
+          },
+          "signature": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
           }
         }
       },
