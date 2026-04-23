@@ -66,6 +66,21 @@ pub async fn check_duplicate(
         hash_body_streaming(request.into_body()).await?
     };
 
+    /* [224A-2] En modo dev (ALLOW_DUPLICATE_UPLOADS=true) siempre retorna
+     * possible_duplicate=false — permite re-subir el mismo audio en local
+     * sin bloqueos. Nunca habilitar en producción. */
+    if state.allow_duplicate_uploads {
+        return Ok(Json(CheckDuplicateResponse {
+            audio_hash,
+            possible_duplicate: false,
+            sample_id: None,
+            same_owner: None,
+            title: None,
+            message: None,
+            bytes_hashed,
+        }));
+    }
+
     let duplicate =
         SampleRepository::find_duplicate_by_audio_hash(&state.pool, &audio_hash).await?;
     let response = if let Some(existing) = duplicate {

@@ -83,6 +83,10 @@ pub struct AppConfig {
      * claves sueltas. El runtime decide si la integración queda habilitada
      * según `secret_key`, pero publishable/webhook/precios pueden faltar en local. */
     pub stripe: StripeConfig,
+    /* [224A-2] En modo dev/local permite subir audios con el mismo hash sin
+     * que check-duplicate devuelva possible_duplicate=true. Nunca habilitar
+     * en producción — evita duplicados en el catálogo. */
+    pub allow_duplicate_uploads: bool,
 }
 
 impl AppConfig {
@@ -136,6 +140,9 @@ impl AppConfig {
             smtp: load_optional_smtp()?,
             stripe: load_optional_stripe(),
             scraper_secret: first_env(&["SCRAPER_SECRET", "KAMPLES_CRON_SECRET"]),
+            allow_duplicate_uploads: std::env::var("ALLOW_DUPLICATE_UPLOADS")
+                .map(|v| matches!(v.trim().to_ascii_lowercase().as_str(), "1" | "true" | "yes"))
+                .unwrap_or(false),
         })
     }
 }

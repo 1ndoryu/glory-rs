@@ -533,6 +533,7 @@ pub fn create_router(
         ws_node_id,
         algo_planner,
         scraper_secret: config.scraper_secret,
+        allow_duplicate_uploads: config.allow_duplicate_uploads,
     };
 
     /* CORS: en desarrollo se permite todo. En producción, restringir orígenes */

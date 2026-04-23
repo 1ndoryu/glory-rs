@@ -55,4 +55,7 @@ pub struct AppState {
      * llamadas a /api/admin/scraper/{publicar-auto,reporte-lote}
      * sin sesión de usuario. */
     pub scraper_secret: Option<String>,
+    /* [224A-2] Flag de dev: bypasa check-duplicate para permitir re-subida
+     * del mismo audio. Solo activar con ALLOW_DUPLICATE_UPLOADS=true en local. */
+    pub allow_duplicate_uploads: bool,
 }
