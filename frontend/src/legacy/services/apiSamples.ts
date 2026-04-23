@@ -318,10 +318,10 @@ export const subirSample = async (datos: DatosSubida): Promise<RespuestaApi<Resp
 /*
  * Eliminar un sample.
  * Solo el propietario o un admin pueden borrar.
- * Endpoint: DELETE /samples/{id}
+ * Endpoint: DELETE /samples/{slug} — acepta slug o id_corto, NO id numérico.
  */
-export const eliminarSample = async (sampleId: number): Promise<RespuestaApi<{ eliminado: boolean }>> => {
-    return apiDelete<{ eliminado: boolean }>(`/samples/${sampleId}`);
+export const eliminarSample = async (slug: string): Promise<RespuestaApi<{ eliminado: boolean }>> => {
+    return apiDelete<{ eliminado: boolean }>(`/samples/${slug}`);
 };
 
 /* D8: Subir/reemplazar imagen de portada de un sample */

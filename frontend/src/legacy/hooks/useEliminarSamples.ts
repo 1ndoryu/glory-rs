@@ -41,10 +41,10 @@ export const useEliminarSamples = (): UseEliminarSamples => {
         setCargando(true);
 
         const titulo = sampleActual.titulo;
-        const id = sampleActual.id;
+        const slug = sampleActual.slug;
 
         try {
-            const resp = await eliminarSample(id);
+            const resp = await eliminarSample(slug);
 
             if (!resp.ok) {
                 agregar({

@@ -165,7 +165,7 @@ export const construirItemsMenuSample = (d: DepsMenuSample): MenuItemDef[] => {
         items.push({ id: 'eliminar', etiqueta: t('sample.menu.eliminar'), icono: ic(Trash2), peligro: true, onClick: () => {
             toast.confirmar(t('sample.confirm.eliminar', { titulo: s.titulo }), async () => {
                 emitirEvento(EVENTO_SAMPLE_ELIMINADO, { sampleId: s.id });
-                const resp = await eliminarSample(s.id);
+                const resp = await eliminarSample(s.slug);
                 if (resp.ok) toast.exito(t('sample.toast.eliminado'));
                 else { emitirEvento(EVENTO_SAMPLE_RESTAURADO, { sample: s }); toast.error('Error al eliminar'); }
             });

@@ -111,7 +111,7 @@ export function useBarraSeleccionMultiple() {
 
         for (const s of samplesArr) {
             emitir(EVENTO_SAMPLE_ELIMINADO, { sampleId: s.id });
-            const resp = await eliminarSample(s.id);
+            const resp = await eliminarSample(s.slug);
             if (resp.ok) {
                 exitos++;
             } else {
