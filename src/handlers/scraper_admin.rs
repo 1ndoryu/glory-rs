@@ -98,10 +98,11 @@ pub async fn publicar_auto(
 ) -> Result<Json<PublicarAutoResponse>, AppError> {
     require_scraper_secret(&state, &headers)?;
 
-    let result = sqlx::query(
+    /* [Fase3-sqlx] Convertido a query! para validacion compile-time. */
+    let result = sqlx::query!(
         "UPDATE cola_extraccion_samples \
          SET estado = 'completado', procesado_at = NOW() \
-         WHERE estado = 'extraido' AND sample_id IS NOT NULL",
+         WHERE estado = 'extraido' AND sample_id IS NOT NULL"
     )
     .execute(&state.pool)
     .await?;

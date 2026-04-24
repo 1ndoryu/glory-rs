@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE usuarios_ext SET estado = 'en_eliminacion', marcado_eliminacion_en = $2, sera_eliminado_en = $3 WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Timestamptz",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "088f059fe4e29390798407df70628afe5744291dbb97090b54dddfd518acf95d"
+}

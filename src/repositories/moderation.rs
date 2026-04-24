@@ -14,11 +14,12 @@ impl ModerationRepository {
         razon: &str,
         hasta: Option<DateTime<Utc>>,
     ) -> Result<(), AppError> {
-        let res = sqlx::query(
+        /* [Fase3-sqlx] Convertido a query! para validacion compile-time. */
+        let res = sqlx::query!(
             "UPDATE usuarios_ext SET estado = 'suspendido', suspendido_hasta = $2, suspension_razon = $3 \
-             WHERE id = $1 AND estado != 'en_eliminacion'"
+             WHERE id = $1 AND estado != 'en_eliminacion'",
+            user_id, hasta, razon
         )
-        .bind(user_id).bind(hasta).bind(razon)
         .execute(pool).await?;
         if res.rows_affected() == 0 {
             return Err(AppError::NotFound(format!("usuario {user_id}")));
@@ -27,12 +28,13 @@ impl ModerationRepository {
     }
 
     pub async fn activate(pool: &PgPool, user_id: i32) -> Result<(), AppError> {
-        let res = sqlx::query(
+        /* [Fase3-sqlx] Convertido a query! para validacion compile-time. */
+        let res = sqlx::query!(
             "UPDATE usuarios_ext SET estado = 'activo', suspendido_hasta = NULL, \
              suspension_razon = NULL, marcado_eliminacion_en = NULL, sera_eliminado_en = NULL \
              WHERE id = $1",
+            user_id
         )
-        .bind(user_id)
         .execute(pool)
         .await?;
         if res.rows_affected() == 0 {
@@ -48,13 +50,12 @@ impl ModerationRepository {
     ) -> Result<(), AppError> {
         let now = Utc::now();
         let sera = now + Duration::days(i64::from(dias_gracia));
-        let res = sqlx::query(
+        /* [Fase3-sqlx] Convertido a query! para validacion compile-time. */
+        let res = sqlx::query!(
             "UPDATE usuarios_ext SET estado = 'en_eliminacion', \
              marcado_eliminacion_en = $2, sera_eliminado_en = $3 WHERE id = $1",
+            user_id, now, sera
         )
-        .bind(user_id)
-        .bind(now)
-        .bind(sera)
         .execute(pool)
         .await?;
         if res.rows_affected() == 0 {
@@ -74,11 +75,12 @@ impl ModerationRepository {
                 "No puedes bloquearte a ti mismo".into(),
             ));
         }
-        sqlx::query(
+        /* [Fase3-sqlx] Convertido a query! para validacion compile-time. */
+        sqlx::query!(
             "INSERT INTO bloqueos (bloqueador_id, bloqueado_id, razon) \
-             VALUES ($1, $2, $3) ON CONFLICT (bloqueador_id, bloqueado_id) DO UPDATE SET razon = EXCLUDED.razon"
+             VALUES ($1, $2, $3) ON CONFLICT (bloqueador_id, bloqueado_id) DO UPDATE SET razon = EXCLUDED.razon",
+            bloqueador_id, target_id, razon
         )
-        .bind(bloqueador_id).bind(target_id).bind(razon)
         .execute(pool).await?;
         Ok(())
     }
@@ -88,9 +90,8 @@ impl ModerationRepository {
         bloqueador_id: i32,
         target_id: i32,
     ) -> Result<(), AppError> {
-        sqlx::query("DELETE FROM bloqueos WHERE bloqueador_id = $1 AND bloqueado_id = $2")
-            .bind(bloqueador_id)
-            .bind(target_id)
+        /* [Fase3-sqlx] Convertido a query! para validacion compile-time. */
+        sqlx::query!("DELETE FROM bloqueos WHERE bloqueador_id = $1 AND bloqueado_id = $2", bloqueador_id, target_id)
             .execute(pool)
             .await?;
         Ok(())

@@ -152,15 +152,13 @@ impl OAuthRepository {
         sub: &str,
         email: Option<&str>,
     ) -> Result<(), sqlx::Error> {
-        sqlx::query(
+        /* [Fase3-sqlx] Convertido a query! para validacion compile-time. */
+        sqlx::query!(
             "INSERT INTO usuarios_ext_oauth (user_id, provider, provider_sub, email) \
              VALUES ($1, $2, $3, $4) \
              ON CONFLICT (provider, provider_sub) DO UPDATE SET email = EXCLUDED.email",
+            user_id, provider, sub, email
         )
-        .bind(user_id)
-        .bind(provider)
-        .bind(sub)
-        .bind(email)
         .execute(pool)
         .await?;
         Ok(())

@@ -73,7 +73,7 @@
 ### Fase 2 â€” Auth y usuarios
 
 ### Fase 3 â€” Storage + uploads
-- nota: me di cuenta que hay lugares en donde no se esta usando query y en vez se usa sin as!, necesitamos comprobaciones reales en tiempo real para ir chqueando que todo va quedando bien, corrige todo los query posibles.
+
 
 ### Fase 4 â€” Audio pipeline (lo mÃ¡s difÃ­cil)
 

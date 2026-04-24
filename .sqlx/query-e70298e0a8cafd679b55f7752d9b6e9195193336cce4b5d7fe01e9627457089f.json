@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO usuarios_ext_oauth (user_id, provider, provider_sub, email) VALUES ($1, $2, $3, $4) ON CONFLICT (provider, provider_sub) DO UPDATE SET email = EXCLUDED.email",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e70298e0a8cafd679b55f7752d9b6e9195193336cce4b5d7fe01e9627457089f"
+}
