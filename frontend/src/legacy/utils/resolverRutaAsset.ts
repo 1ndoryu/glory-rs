@@ -7,7 +7,12 @@
  * [204A-1] En el SPA Vite, los assets del tema WordPress fueron copiados a
  * /legacy-assets/. Reescribimos /wp-content/themes/glorytemplate/App/Assets/* →
  * /legacy-assets/* para que las imagenes y fuentes resuelvan en el navegador.
- */
+ *
+ * [224A-4] Bug corregido: antes se usaba __KAMPLES_DESKTOP__ como proxy de Tauri, pero
+ * gloryContextShim.ts lo pone en true en TODOS los entornos (incluyendo browser/web) para
+ * activar auth JWT. Eso hacía que resolverRutaAsset devolviera la URL absoluta de producción
+ * en el browser, causando 404 porque el backend Rust no sirve /wp-content/.
+ * Fix: usar __TAURI_INTERNALS__ que Tauri v2 inyecta ÚNICAMENTE en su WebView. */
 
 const SERVIDOR_PROD = 'https://kamples.com';
 const PREFIJO_LEGACY_WP = '/wp-content/themes/glorytemplate/App/Assets';
@@ -18,8 +23,10 @@ const PREFIJO_SPA = '/legacy-assets';
 const PREFIJO_COLORS_WP = '/wp-content/themes/glorytemplate/colors';
 const PREFIJO_COLORS_SPA = '/legacy-assets/colors';
 
+/* Detecta el WebView de Tauri v2 via __TAURI_INTERNALS__ (inyectado por Tauri).
+ * NO usar __KAMPLES_DESKTOP__ — ese flag se activa en todos los entornos para JWT auth. */
 const esEntornoTauri = (): boolean =>
-    typeof window !== 'undefined' && !!(window as unknown as Record<string, unknown>).__KAMPLES_DESKTOP__;
+    typeof window !== 'undefined' && !!(window as unknown as Record<string, unknown>).__TAURI_INTERNALS__;
 
 function rebaseAsset(ruta: string): string {
     if (ruta.startsWith(PREFIJO_LEGACY_WP)) {
