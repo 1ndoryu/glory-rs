@@ -662,6 +662,329 @@
         ]
       }
     },
+    "/api/admin/procesos": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "operationId": "list_processes",
+        "responses": {
+          "200": {
+            "description": "Estado de procesos de fondo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminProcessesResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Requiere admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/procesos/cookies": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "operationId": "process_cookies",
+        "responses": {
+          "200": {
+            "description": "Info de cookies yt-dlp"
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Requiere admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "operationId": "save_process_cookies",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminProcessCookiesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Cookies guardadas"
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Requiere admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Payload invalido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/procesos/{nombre}": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "operationId": "process_state",
+        "parameters": [
+          {
+            "name": "nombre",
+            "in": "path",
+            "description": "Nombre del proceso",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Estado de un proceso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminProcessState"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Requiere admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Proceso invalido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/procesos/{nombre}/start": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "operationId": "start_process",
+        "parameters": [
+          {
+            "name": "nombre",
+            "in": "path",
+            "description": "Nombre del proceso",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminProcessStartRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Proceso iniciado"
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Requiere admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Proceso ya activo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/procesos/{nombre}/stop": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "operationId": "stop_process",
+        "parameters": [
+          {
+            "name": "nombre",
+            "in": "path",
+            "description": "Nombre del proceso",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Proceso detenido"
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Requiere admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
     "/api/admin/relaciones": {
       "post": {
         "tags": [
@@ -8909,6 +9232,128 @@
           }
         }
       },
+      "AdminProcessCookieInfo": {
+        "type": "object",
+        "required": [
+          "existe"
+        ],
+        "properties": {
+          "existe": {
+            "type": "boolean"
+          },
+          "modificado": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "tamano": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true,
+            "minimum": 0
+          }
+        }
+      },
+      "AdminProcessCookiesRequest": {
+        "type": "object",
+        "required": [
+          "contenido"
+        ],
+        "properties": {
+          "contenido": {
+            "type": "string"
+          },
+          "tipo": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AdminProcessStartRequest": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true,
+            "minimum": 0
+          }
+        }
+      },
+      "AdminProcessState": {
+        "type": "object",
+        "required": [
+          "nombre",
+          "estado",
+          "log_tail"
+        ],
+        "properties": {
+          "error": {
+            "type": "string",
+            "nullable": true
+          },
+          "estado": {
+            "type": "string"
+          },
+          "iniciado_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "log_tail": {
+            "type": "string"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "pid": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true,
+            "minimum": 0
+          },
+          "progreso": {
+            "type": "number",
+            "format": "float",
+            "nullable": true
+          },
+          "resultado": {
+            "type": "object",
+            "additionalProperties": {},
+            "nullable": true
+          },
+          "ultimo_log": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "AdminProcessesResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "procesos",
+          "cookies"
+        ],
+        "properties": {
+          "cookies": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/AdminProcessCookieInfo"
+            }
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "procesos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminProcessState"
+            }
+          }
+        }
+      },
       "AdminScraperItem": {
         "type": "object",
         "required": [
@@ -14332,6 +14777,9 @@
             "type": "string",
             "nullable": true
           },
+          "metadata": {
+            "type": "object"
+          },
           "precio": {
             "type": "number",
             "format": "double",
@@ -14383,9 +14831,6 @@
           },
           "verificado": {
             "type": "boolean"
-          },
-          "metadata": {
-            "type": "object"
           }
         }
       },

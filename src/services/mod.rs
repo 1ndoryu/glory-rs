@@ -1,4 +1,5 @@
 pub mod algo_timing;
+mod admin_processes;
 mod audio_pipeline;
 mod auth;
 pub mod download_token;
@@ -24,6 +25,7 @@ pub use audio_pipeline::{
     AudioPipelineError, AudioPipelineRequest, AudioPipelineResult, AudioPipelineService,
     AudioPipelineStage, AudioTechnicalAnalysis, GeneratedAudioAssets,
 };
+pub use admin_processes::AdminProcessService;
 pub use auth::{AuthService, Claims};
 pub use email::{
     EmailDeliveryRuntime, EmailDeliveryRuntimeError, EmailNotificationService,

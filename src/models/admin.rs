@@ -114,6 +114,54 @@ pub struct AdminOkResponse {
     pub ok: bool,
 }
 
+#[derive(Debug, Clone, Serialize, ToSchema)]
+pub struct AdminProcessCookieInfo {
+    pub existe: bool,
+    pub tamano: Option<u64>,
+    pub modificado: Option<DateTime<Utc>>,
+}
+
+impl AdminProcessCookieInfo {
+    pub fn missing() -> Self {
+        Self {
+            existe: false,
+            tamano: None,
+            modificado: None,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, ToSchema)]
+pub struct AdminProcessState {
+    pub nombre: String,
+    pub estado: String,
+    pub pid: Option<u32>,
+    pub iniciado_at: Option<DateTime<Utc>>,
+    pub ultimo_log: Option<DateTime<Utc>>,
+    pub log_tail: String,
+    pub progreso: Option<f32>,
+    pub error: Option<String>,
+    pub resultado: Option<BTreeMap<String, serde_json::Value>>,
+}
+
+#[derive(Debug, Clone, Serialize, ToSchema)]
+pub struct AdminProcessesResponse {
+    pub ok: bool,
+    pub procesos: Vec<AdminProcessState>,
+    pub cookies: BTreeMap<String, AdminProcessCookieInfo>,
+}
+
+#[derive(Debug, Clone, Deserialize, ToSchema, Default)]
+pub struct AdminProcessStartRequest {
+    pub limit: Option<u32>,
+}
+
+#[derive(Debug, Clone, Deserialize, ToSchema)]
+pub struct AdminProcessCookiesRequest {
+    pub contenido: String,
+    pub tipo: Option<String>,
+}
+
 #[derive(Debug, Clone, Serialize, ToSchema, FromRow)]
 pub struct AdminScraperItem {
     pub id: i32,

@@ -1,0 +1,489 @@
+use std::collections::BTreeMap;
+use std::fs::{self, File, OpenOptions};
+use std::io::Write;
+use std::path::{Path, PathBuf};
+use std::process::{Command, Stdio};
+
+use chrono::{DateTime, Utc};
+use serde_json::{json, Value};
+
+use crate::errors::AppError;
+use crate::models::{AdminProcessCookieInfo, AdminProcessState, AdminProcessesResponse};
+
+const PROCESS_SCRAPING: &str = "scraping";
+const PROCESS_EXTRACTION: &str = "extraccion";
+const PROCESS_SEED: &str = "seed";
+const COOKIE_TYPES: [&str; 2] = ["youtube", "soundcloud"];
+
+#[derive(Debug, Clone, Copy)]
+enum ProcessKind {
+    Scraping,
+    Extraction,
+    Seed,
+}
+
+impl ProcessKind {
+    fn name(self) -> &'static str {
+        match self {
+            Self::Scraping => PROCESS_SCRAPING,
+            Self::Extraction => PROCESS_EXTRACTION,
+            Self::Seed => PROCESS_SEED,
+        }
+    }
+
+    fn all() -> [Self; 3] {
+        [Self::Scraping, Self::Extraction, Self::Seed]
+    }
+
+    fn from_name(name: &str) -> Result<Self, AppError> {
+        match name {
+            PROCESS_SCRAPING => Ok(Self::Scraping),
+            PROCESS_EXTRACTION => Ok(Self::Extraction),
+            PROCESS_SEED => Ok(Self::Seed),
+            other => Err(AppError::BadRequest(format!(
+                "Proceso desconocido: '{other}'. Validos: scraping, extraccion, seed"
+            ))),
+        }
+    }
+}
+
+#[derive(Debug, serde::Deserialize, serde::Serialize)]
+struct ProcessLock {
+    nombre: String,
+    estado: String,
+    pid: Option<u32>,
+    iniciado_at: Option<DateTime<Utc>>,
+    ultimo_log: Option<DateTime<Utc>>,
+    progreso: Option<f32>,
+    error: Option<String>,
+    resultado: Option<BTreeMap<String, Value>>,
+}
+
+impl ProcessLock {
+    fn stopped(name: &str) -> Self {
+        Self {
+            nombre: name.to_string(),
+            estado: "stopped".to_string(),
+            pid: None,
+            iniciado_at: None,
+            ultimo_log: None,
+            progreso: None,
+            error: None,
+            resultado: None,
+        }
+    }
+}
+
+pub struct AdminProcessService;
+
+impl AdminProcessService {
+    /* [254A-1] Paridad con GestorProcesosFondo legacy: el panel admin debe ver
+     * siempre scraping, extraccion y seed, aunque no existan locks todavía.
+     * Gotcha: start/stop usa std::process::Command con args separados para no
+     * reintroducir shell escaping manual. Pendiente: portar el seed PHP real. */
+    pub fn list() -> Result<AdminProcessesResponse, AppError> {
+        let procesos = ProcessKind::all()
+            .into_iter()
+            .map(Self::state_for_kind)
+            .collect::<Result<Vec<_>, _>>()?;
+
+        Ok(AdminProcessesResponse {
+            ok: true,
+            procesos,
+            cookies: Self::all_cookie_info(),
+        })
+    }
+
+    pub fn state(name: &str) -> Result<AdminProcessState, AppError> {
+        Self::state_for_kind(ProcessKind::from_name(name)?)
+    }
+
+    pub fn start(name: &str, limit: Option<u32>) -> Result<Value, AppError> {
+        let kind = ProcessKind::from_name(name)?;
+        let current = Self::state_for_kind(kind)?;
+        if current.estado == "running" {
+            return Err(AppError::Conflict(format!(
+                "El proceso '{name}' ya esta corriendo (PID: {}).",
+                current.pid.unwrap_or_default()
+            )));
+        }
+
+        match kind {
+            ProcessKind::Seed => Self::run_seed_placeholder(kind),
+            ProcessKind::Scraping | ProcessKind::Extraction => Self::spawn_python(kind, limit),
+        }
+    }
+
+    pub fn stop(name: &str) -> Result<Value, AppError> {
+        let kind = ProcessKind::from_name(name)?;
+        let state = Self::state_for_kind(kind)?;
+        let Some(pid) = state.pid else {
+            return Ok(json!({ "ok": true, "mensaje": format!("El proceso '{name}' no esta corriendo.") }));
+        };
+
+        Self::kill_process_tree(pid)?;
+        Self::write_lock(&ProcessLock {
+            nombre: name.to_string(),
+            estado: "stopped".to_string(),
+            pid: None,
+            iniciado_at: state.iniciado_at,
+            ultimo_log: Some(Utc::now()),
+            progreso: state.progreso,
+            error: None,
+            resultado: state.resultado,
+        })?;
+
+        Ok(json!({ "ok": true, "mensaje": format!("Proceso '{name}' detenido (PID: {pid}).") }))
+    }
+
+    pub fn save_cookies(cookie_type: &str, content: &str) -> Result<Value, AppError> {
+        Self::validate_cookie_type(cookie_type)?;
+        let scraper_dir = Self::scraper_dir();
+        fs::create_dir_all(&scraper_dir)
+            .map_err(|error| AppError::Internal(format!("No se pudo crear directorio scraper: {error}")))?;
+
+        let cookie_path = scraper_dir.join(Self::cookie_filename(cookie_type)?);
+        let backup = if cookie_path.exists() {
+            let backup_path = cookie_path.with_extension(format!("txt.bak.{}", Utc::now().format("%Y%m%d_%H%M%S")));
+            fs::copy(&cookie_path, &backup_path)
+                .map_err(|error| AppError::Internal(format!("No se pudo crear backup de cookies: {error}")))?;
+            backup_path.file_name().map(|name| name.to_string_lossy().to_string())
+        } else {
+            None
+        };
+
+        let final_content = if content.contains("# Netscape HTTP Cookie File") {
+            content.to_string()
+        } else {
+            format!("# Netscape HTTP Cookie File\n# https://curl.haxx.se/rfc/cookie_spec.html\n\n{content}")
+        };
+
+        fs::write(&cookie_path, final_content)
+            .map_err(|error| AppError::Internal(format!("No se pudo escribir cookies: {error}")))?;
+
+        Ok(json!({
+            "ok": true,
+            "mensaje": format!("Cookies {cookie_type} actualizadas correctamente."),
+            "backup": backup,
+        }))
+    }
+
+    pub fn all_cookie_info() -> BTreeMap<String, AdminProcessCookieInfo> {
+        COOKIE_TYPES
+            .into_iter()
+            .map(|cookie_type| (cookie_type.to_string(), Self::cookie_info(cookie_type)))
+            .collect()
+    }
+
+    fn state_for_kind(kind: ProcessKind) -> Result<AdminProcessState, AppError> {
+        let name = kind.name();
+        let mut lock = Self::read_lock(name)?.unwrap_or_else(|| ProcessLock::stopped(name));
+
+        if lock.estado == "running" {
+            if let Some(pid) = lock.pid {
+                if !Self::pid_alive(pid) {
+                    lock.estado = "stopped".to_string();
+                    lock.pid = None;
+                    lock.ultimo_log = Some(Utc::now());
+                    Self::write_lock(&lock)?;
+                }
+            }
+        }
+
+        Ok(AdminProcessState {
+            nombre: lock.nombre,
+            estado: lock.estado,
+            pid: lock.pid,
+            iniciado_at: lock.iniciado_at,
+            ultimo_log: lock.ultimo_log,
+            log_tail: Self::read_log_tail(name, 30).unwrap_or_default(),
+            progreso: lock.progreso,
+            error: lock.error,
+            resultado: lock.resultado,
+        })
+    }
+
+    fn spawn_python(kind: ProcessKind, limit: Option<u32>) -> Result<Value, AppError> {
+        let python = Self::detect_python()?;
+        let scraper_dir = Self::scraper_dir();
+        if !scraper_dir.is_dir() {
+            return Err(AppError::BadRequest("Directorio del scraper no encontrado.".to_string()));
+        }
+
+        let log_path = Self::log_path(kind.name())?;
+        Self::append_log_header(&log_path, kind.name())?;
+        let stdout = Self::open_log_append(&log_path)?;
+        let stderr = Self::open_log_append(&log_path)?;
+
+        let mut command = Command::new(&python);
+        command.current_dir(&scraper_dir).stdin(Stdio::null()).stdout(Stdio::from(stdout)).stderr(Stdio::from(stderr));
+
+        match kind {
+            ProcessKind::Scraping => {
+                command.arg("scripts/cron_runner.py").arg("daily");
+            }
+            ProcessKind::Extraction => {
+                command.arg("-m").arg("extractor.pipeline").arg("--limit").arg(limit.unwrap_or(20).to_string());
+                command.arg("--output-dir").arg(Self::extractions_dir()?);
+            }
+            ProcessKind::Seed => unreachable!("seed no usa python"),
+        }
+
+        let child = command
+            .spawn()
+            .map_err(|error| AppError::Internal(format!("No se pudo iniciar proceso: {error}")))?;
+        let pid = child.id();
+
+        Self::write_lock(&ProcessLock {
+            nombre: kind.name().to_string(),
+            estado: "running".to_string(),
+            pid: Some(pid),
+            iniciado_at: Some(Utc::now()),
+            ultimo_log: Some(Utc::now()),
+            progreso: None,
+            error: None,
+            resultado: None,
+        })?;
+
+        Ok(json!({
+            "ok": true,
+            "pid": pid,
+            "mensaje": format!("Proceso '{}' iniciado.", kind.name()),
+            "log": log_path.file_name().map(|name| name.to_string_lossy().to_string()),
+        }))
+    }
+
+    fn run_seed_placeholder(kind: ProcessKind) -> Result<Value, AppError> {
+        let mut resultado = BTreeMap::new();
+        resultado.insert("usuarios_generados".to_string(), json!(0));
+        resultado.insert("relaciones".to_string(), json!(0));
+        resultado.insert("samples".to_string(), json!(0));
+        resultado.insert(
+            "nota".to_string(),
+            json!("Seed PHP legacy no aplica en Rust; fixtures y migraciones cubren el estado base."),
+        );
+
+        Self::write_lock(&ProcessLock {
+            nombre: kind.name().to_string(),
+            estado: "stopped".to_string(),
+            pid: None,
+            iniciado_at: Some(Utc::now()),
+            ultimo_log: Some(Utc::now()),
+            progreso: Some(100.0),
+            error: None,
+            resultado: Some(resultado.clone()),
+        })?;
+
+        Ok(json!({
+            "ok": true,
+            "mensaje": "Proceso 'seed' completado.",
+            "resultado": resultado,
+        }))
+    }
+
+    fn project_root() -> PathBuf {
+        std::env::var("KAMPLES_PROJECT_ROOT").map_or_else(
+            |_| std::env::current_dir().unwrap_or_else(|_| PathBuf::from(".")),
+            PathBuf::from,
+        )
+    }
+
+    fn logs_dir() -> PathBuf {
+        Self::project_root().join("logs")
+    }
+
+    fn scraper_dir() -> PathBuf {
+        std::env::var("KAMPLES_SCRAPER_DIR").map_or_else(
+            |_| Self::project_root().join("clients").join("kamples-scraper"),
+            PathBuf::from,
+        )
+    }
+
+    fn extractions_dir() -> Result<PathBuf, AppError> {
+        let path = std::env::var("KAMPLES_EXTRACTIONS_DIR").map_or_else(
+            |_| Self::project_root().join("uploads").join("kamples").join("extracciones"),
+            PathBuf::from,
+        );
+        fs::create_dir_all(&path)
+            .map_err(|error| AppError::Internal(format!("No se pudo crear directorio de extracciones: {error}")))?;
+        Ok(path)
+    }
+
+    fn lock_path(name: &str) -> PathBuf {
+        Self::logs_dir().join(format!("{name}.lock"))
+    }
+
+    fn log_path(name: &str) -> Result<PathBuf, AppError> {
+        let logs_dir = Self::logs_dir();
+        fs::create_dir_all(&logs_dir)
+            .map_err(|error| AppError::Internal(format!("No se pudo crear directorio de logs: {error}")))?;
+        Ok(logs_dir.join(format!("{name}-output-{}.log", Utc::now().format("%Y-%m-%d"))))
+    }
+
+    fn read_lock(name: &str) -> Result<Option<ProcessLock>, AppError> {
+        let path = Self::lock_path(name);
+        if !path.exists() {
+            return Ok(None);
+        }
+        let content = fs::read_to_string(&path)
+            .map_err(|error| AppError::Internal(format!("Error leyendo lock {name}: {error}")))?;
+        let lock = serde_json::from_str::<ProcessLock>(&content)
+            .map_err(|error| AppError::Internal(format!("Lock invalido {name}: {error}")))?;
+        Ok(Some(lock))
+    }
+
+    fn write_lock(lock: &ProcessLock) -> Result<(), AppError> {
+        let logs_dir = Self::logs_dir();
+        fs::create_dir_all(&logs_dir)
+            .map_err(|error| AppError::Internal(format!("No se pudo crear directorio de logs: {error}")))?;
+        let json = serde_json::to_string_pretty(lock)
+            .map_err(|error| AppError::Internal(format!("No se pudo serializar lock: {error}")))?;
+        fs::write(Self::lock_path(&lock.nombre), json)
+            .map_err(|error| AppError::Internal(format!("No se pudo escribir lock: {error}")))
+    }
+
+    fn append_log_header(path: &Path, name: &str) -> Result<(), AppError> {
+        let mut file = Self::open_log_append(path)?;
+        writeln!(file, "\n------------------------------------------------------------")
+            .map_err(|error| AppError::Internal(format!("No se pudo escribir log: {error}")))?;
+        writeln!(file, "[{}] INICIO proceso={name}", Utc::now().format("%Y-%m-%d %H:%M:%S"))
+            .map_err(|error| AppError::Internal(format!("No se pudo escribir log: {error}")))?;
+        writeln!(file, "------------------------------------------------------------")
+            .map_err(|error| AppError::Internal(format!("No se pudo escribir log: {error}")))
+    }
+
+    fn open_log_append(path: &Path) -> Result<File, AppError> {
+        OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(path)
+            .map_err(|error| AppError::Internal(format!("No se pudo abrir log: {error}")))
+    }
+
+    fn read_log_tail(name: &str, lines: usize) -> Result<String, AppError> {
+        let path = Self::logs_dir().join(format!("{name}-output-{}.log", Utc::now().format("%Y-%m-%d")));
+        if !path.exists() {
+            return Ok(String::new());
+        }
+        let content = fs::read_to_string(&path)
+            .map_err(|error| AppError::Internal(format!("No se pudo leer log: {error}")))?;
+        let tail = content
+            .lines()
+            .rev()
+            .take(lines)
+            .collect::<Vec<_>>()
+            .into_iter()
+            .rev()
+            .collect::<Vec<_>>()
+            .join("\n");
+        Ok(tail)
+    }
+
+    fn detect_python() -> Result<String, AppError> {
+        if let Ok(path) = std::env::var("KAMPLES_PYTHON_PATH") {
+            if Self::python_works(&path) {
+                return Ok(path);
+            }
+        }
+
+        let venv_python = if cfg!(windows) {
+            Self::scraper_dir().join(".venv").join("Scripts").join("python.exe")
+        } else {
+            Self::scraper_dir().join(".venv").join("bin").join("python")
+        };
+        if venv_python.exists() {
+            let path = venv_python.to_string_lossy().to_string();
+            if Self::python_works(&path) {
+                return Ok(path);
+            }
+        }
+
+        for candidate in ["python3", "python", "py"] {
+            if Self::python_works(candidate) {
+                return Ok(candidate.to_string());
+            }
+        }
+
+        Err(AppError::BadRequest("Python no encontrado en el sistema.".to_string()))
+    }
+
+    fn python_works(candidate: &str) -> bool {
+        Command::new(candidate)
+            .arg("--version")
+            .output()
+            .map(|output| output.status.success())
+            .unwrap_or(false)
+    }
+
+    fn pid_alive(pid: u32) -> bool {
+        if cfg!(windows) {
+            Command::new("tasklist")
+                .args(["/FI", &format!("PID eq {pid}"), "/NH"])
+                .output()
+                .map(|output| String::from_utf8_lossy(&output.stdout).contains(&pid.to_string()))
+                .unwrap_or(false)
+        } else {
+            Command::new("kill")
+                .args(["-0", &pid.to_string()])
+                .status()
+                .map(|status| status.success())
+                .unwrap_or(false)
+        }
+    }
+
+    fn kill_process_tree(pid: u32) -> Result<(), AppError> {
+        let status = if cfg!(windows) {
+            Command::new("taskkill")
+                .args(["/PID", &pid.to_string(), "/T", "/F"])
+                .status()
+        } else {
+            Command::new("kill").args(["-TERM", &pid.to_string()]).status()
+        }
+        .map_err(|error| AppError::Internal(format!("No se pudo detener proceso: {error}")))?;
+
+        if status.success() {
+            Ok(())
+        } else {
+            Err(AppError::Internal(format!("El comando para detener PID {pid} fallo")))
+        }
+    }
+
+    fn validate_cookie_type(cookie_type: &str) -> Result<(), AppError> {
+        if COOKIE_TYPES.contains(&cookie_type) {
+            Ok(())
+        } else {
+            Err(AppError::BadRequest(format!("Tipo de cookies invalido: {cookie_type}")))
+        }
+    }
+
+    fn cookie_filename(cookie_type: &str) -> Result<&'static str, AppError> {
+        match cookie_type {
+            "youtube" => Ok("cookies_youtube.txt"),
+            "soundcloud" => Ok("cookies_soundcloud.txt"),
+            other => Err(AppError::BadRequest(format!("Tipo de cookies invalido: {other}"))),
+        }
+    }
+
+    fn cookie_info(cookie_type: &str) -> AdminProcessCookieInfo {
+        let primary = match Self::cookie_filename(cookie_type) {
+            Ok(filename) => Self::scraper_dir().join(filename),
+            Err(_) => return AdminProcessCookieInfo::missing(),
+        };
+        let path = if cookie_type == "youtube" && !primary.exists() {
+            let legacy = Self::scraper_dir().join("cookies.txt");
+            if legacy.exists() { legacy } else { primary }
+        } else {
+            primary
+        };
+
+        let Ok(metadata) = fs::metadata(&path) else {
+            return AdminProcessCookieInfo::missing();
+        };
+        let modified = metadata.modified().ok().map(DateTime::<Utc>::from);
+        AdminProcessCookieInfo {
+            existe: true,
+            tamano: Some(metadata.len()),
+            modificado: modified,
+        }
+    }
+}

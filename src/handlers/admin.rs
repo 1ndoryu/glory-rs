@@ -12,13 +12,15 @@ use crate::errors::ErrorResponse;
 use crate::middleware::CurrentUser;
 use crate::models::{
     AdminActivityQuery, AdminActivityResponse, AdminExtractionQueueQuery,
-    AdminExtractionQueueResponse, AdminOkResponse, AdminScrapersQuery, AdminScrapersResponse,
-    AdminSummaryStats, AdminUserDeleteRequest, AdminUserSuspendRequest,
+    AdminExtractionQueueResponse, AdminOkResponse, AdminProcessCookiesRequest,
+    AdminProcessesResponse, AdminProcessStartRequest, AdminScrapersQuery,
+    AdminScrapersResponse, AdminSummaryStats, AdminUserDeleteRequest, AdminUserSuspendRequest,
     AdminUserUpdateRequest, AdminUsersQuery, AdminUsersResponse, DeleteUserRequest,
     SuspendUserRequest,
 };
 use crate::repositories::{AdminPanelRepository, ModerationRepository};
 use crate::services::algo_timing::{TimingEntry, ALGO_TIMING};
+use crate::services::AdminProcessService;
 use crate::AppState;
 
 /* [174A-25] Endpoints admin: requiere rol admin (validado via require_admin). */
@@ -322,6 +324,133 @@ pub async fn list_extraction_queue(
     ))
 }
 
+#[utoipa::path(
+    get,
+    path = "/api/admin/procesos",
+    tag = "admin",
+    security(("bearer_auth" = [])),
+    responses(
+        (status = 200, description = "Estado de procesos de fondo", body = AdminProcessesResponse),
+        (status = 401, description = "No autenticado", body = ErrorResponse),
+        (status = 403, description = "Requiere admin", body = ErrorResponse)
+    )
+)]
+pub async fn list_processes(user: CurrentUser) -> Result<Json<AdminProcessesResponse>, AppError> {
+    user.require_admin()?;
+    Ok(Json(AdminProcessService::list()?))
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/admin/procesos/{nombre}",
+    tag = "admin",
+    params(("nombre" = String, Path, description = "Nombre del proceso")),
+    security(("bearer_auth" = [])),
+    responses(
+        (status = 200, description = "Estado de un proceso", body = AdminProcessState),
+        (status = 401, description = "No autenticado", body = ErrorResponse),
+        (status = 403, description = "Requiere admin", body = ErrorResponse),
+        (status = 422, description = "Proceso invalido", body = ErrorResponse)
+    )
+)]
+pub async fn process_state(
+    user: CurrentUser,
+    Path(nombre): Path<String>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    user.require_admin()?;
+    Ok(Json(serde_json::json!({
+        "ok": true,
+        "proceso": AdminProcessService::state(&nombre)?,
+    })))
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/admin/procesos/{nombre}/start",
+    tag = "admin",
+    params(("nombre" = String, Path, description = "Nombre del proceso")),
+    request_body = AdminProcessStartRequest,
+    security(("bearer_auth" = [])),
+    responses(
+        (status = 200, description = "Proceso iniciado"),
+        (status = 401, description = "No autenticado", body = ErrorResponse),
+        (status = 403, description = "Requiere admin", body = ErrorResponse),
+        (status = 409, description = "Proceso ya activo", body = ErrorResponse)
+    )
+)]
+pub async fn start_process(
+    user: CurrentUser,
+    Path(nombre): Path<String>,
+    Json(request): Json<AdminProcessStartRequest>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    user.require_admin()?;
+    Ok(Json(AdminProcessService::start(&nombre, request.limit)?))
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/admin/procesos/{nombre}/stop",
+    tag = "admin",
+    params(("nombre" = String, Path, description = "Nombre del proceso")),
+    security(("bearer_auth" = [])),
+    responses(
+        (status = 200, description = "Proceso detenido"),
+        (status = 401, description = "No autenticado", body = ErrorResponse),
+        (status = 403, description = "Requiere admin", body = ErrorResponse)
+    )
+)]
+pub async fn stop_process(
+    user: CurrentUser,
+    Path(nombre): Path<String>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    user.require_admin()?;
+    Ok(Json(AdminProcessService::stop(&nombre)?))
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/admin/procesos/cookies",
+    tag = "admin",
+    security(("bearer_auth" = [])),
+    responses(
+        (status = 200, description = "Info de cookies yt-dlp"),
+        (status = 401, description = "No autenticado", body = ErrorResponse),
+        (status = 403, description = "Requiere admin", body = ErrorResponse)
+    )
+)]
+pub async fn process_cookies(user: CurrentUser) -> Result<Json<serde_json::Value>, AppError> {
+    user.require_admin()?;
+    Ok(Json(serde_json::json!({
+        "ok": true,
+        "cookies": AdminProcessService::all_cookie_info(),
+    })))
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/admin/procesos/cookies",
+    tag = "admin",
+    request_body = AdminProcessCookiesRequest,
+    security(("bearer_auth" = [])),
+    responses(
+        (status = 200, description = "Cookies guardadas"),
+        (status = 401, description = "No autenticado", body = ErrorResponse),
+        (status = 403, description = "Requiere admin", body = ErrorResponse),
+        (status = 422, description = "Payload invalido", body = ErrorResponse)
+    )
+)]
+pub async fn save_process_cookies(
+    user: CurrentUser,
+    Json(request): Json<AdminProcessCookiesRequest>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    user.require_admin()?;
+    let cookie_type = request.tipo.as_deref().unwrap_or("youtube");
+    Ok(Json(AdminProcessService::save_cookies(
+        cookie_type,
+        &request.contenido,
+    )?))
+}
+
 /* [174A-57] Endpoint admin para inspeccionar las últimas mediciones del
  * algoritmo. Solo se acumulan para `KAMPLES_ALGO_TIMING_USER_ID` (default 1). */
 
@@ -366,6 +495,14 @@ pub fn routes() -> Router<AppState> {
         )
         .route("/admin/scrapers", get(list_scrapers))
         .route("/admin/cola-extraccion", get(list_extraction_queue))
+        .route("/admin/procesos", get(list_processes))
+        .route(
+            "/admin/procesos/cookies",
+            get(process_cookies).post(save_process_cookies),
+        )
+        .route("/admin/procesos/:nombre", get(process_state))
+        .route("/admin/procesos/:nombre/start", post(start_process))
+        .route("/admin/procesos/:nombre/stop", post(stop_process))
         .route("/admin/users/:id/suspend", post(suspend))
         .route("/admin/users/:id/activate", post(activate))
         .route("/admin/users/:id/delete", post(mark_delete))
