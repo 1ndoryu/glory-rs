@@ -1,7 +1,7 @@
 use axum::extract::{Path, Query, State};
-use axum::routing::get;
+use axum::routing::{get, post};
 use axum::{Json, Router};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
 use crate::errors::AppError;
@@ -12,7 +12,7 @@ use crate::models::{
     DeleteSampleResponse, ListSamplesQuery, ListSamplesResponse, SampleDetailResponse,
     SimilarSamplesQuery, SimilarSamplesResponse, UpdateSampleRequest,
 };
-use crate::services::SampleCatalogService;
+use crate::services::{correct_sample_metadata, AudioIaService, SampleCatalogService};
 use crate::repositories::{TagAggregateFilters, TagAggregatesResult, SampleRepository};
 use crate::AppState;
 
@@ -231,8 +231,59 @@ pub fn routes() -> Router<AppState> {
         .route("/samples/aleatorio", get(random_sample))
         .route("/samples/:id/similar", get(similar_samples))
         .route("/samples/:id/similares", get(similar_samples))
+        .route("/samples/:id/corregir-ia", post(correct_sample_ia))
         .route(
             "/samples/:slug",
             get(get_sample).patch(update_sample).delete(delete_sample),
         )
+}
+
+/* [254A-8b] Body + response del endpoint admin de correccion IA. */
+#[derive(Debug, Clone, Deserialize, ToSchema)]
+pub struct CorregirIaRequest {
+    pub instrucciones: String,
+}
+
+#[derive(Debug, Clone, Serialize, ToSchema)]
+pub struct CorregirIaResponse {
+    pub ok: bool,
+    pub mensaje: String,
+    pub cambios: serde_json::Map<String, serde_json::Value>,
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/samples/{id}/corregir-ia",
+    request_body = CorregirIaRequest,
+    params(("id" = i32, Path, description = "ID numerico del sample a corregir")),
+    security(("bearer_auth" = [])),
+    responses(
+        (status = 200, description = "Metadata corregida", body = CorregirIaResponse),
+        (status = 401, description = "No autenticado", body = ErrorResponse),
+        (status = 403, description = "Solo admin", body = ErrorResponse),
+        (status = 404, description = "Sample no encontrado", body = ErrorResponse),
+        (status = 422, description = "Instrucciones invalidas", body = ErrorResponse),
+        (status = 502, description = "Error en proveedores IA", body = ErrorResponse)
+    )
+)]
+pub async fn correct_sample_ia(
+    State(state): State<AppState>,
+    current_user: CurrentUser,
+    Path(sample_id): Path<i32>,
+    Json(request): Json<CorregirIaRequest>,
+) -> Result<Json<CorregirIaResponse>, AppError> {
+    current_user.require_admin()?;
+
+    let ia = AudioIaService::from_env().map_err(|error| AppError::ExternalService {
+        service: "ia".to_owned(),
+        message: format!("No se pudo inicializar IA: {error}"),
+    })?;
+
+    let outcome = correct_sample_metadata(&state.pool, &ia, sample_id, &request.instrucciones).await?;
+
+    Ok(Json(CorregirIaResponse {
+        ok: outcome.ok,
+        mensaje: outcome.mensaje,
+        cambios: outcome.cambios,
+    }))
 }

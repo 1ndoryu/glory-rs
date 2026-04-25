@@ -43,7 +43,7 @@ pub use ia_queue::{
 };
 pub use ia_service::{
     AudioIaAnalysisRequest, AudioIaAnalysisResult, AudioIaFailure, AudioIaProvider, AudioIaService,
-    AudioIaServiceError, OpenAiAttemptFailure,
+    AudioIaServiceError, MetadataCorrectionRequest, OpenAiAttemptFailure,
 };
 pub use idempotency::IdempotencyStore;
 pub use moderation::{
@@ -62,7 +62,7 @@ pub use push::{
 };
 #[cfg(feature = "s3")]
 pub use s3_storage::S3Storage;
-pub use sample_catalog::SampleCatalogService;
+pub use sample_catalog::{correct_sample_metadata, CorrectionOutcome, SampleCatalogService};
 pub use search::SearchService;
 pub use storage::{FileStorage, LocalFs};
 pub use stripe_service::{

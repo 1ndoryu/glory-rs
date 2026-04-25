@@ -2,7 +2,8 @@ use crate::audio::ia::groq::{GroqAttemptFailure, GroqChatRequest, GroqClient, Gr
 use crate::audio::ia::json_repairer::{AudioCreativeMetadata, JsonRepairer};
 use crate::audio::ia::openai::{OpenAiChatRequest, OpenAiClient, OpenAiClientError};
 use crate::audio::ia::prompts::{
-    build_analysis_prompt, AudioAnalysisPromptInput, AudioExtractionContext,
+    build_analysis_prompt, build_correction_prompt, AudioAnalysisPromptInput,
+    AudioExtractionContext, MetadataCorrectionPromptInput,
 };
 use thiserror::Error;
 
@@ -15,6 +16,15 @@ use thiserror::Error;
 pub struct AudioIaService {
     groq: Option<GroqClient>,
     openai: Option<OpenAiClient>,
+}
+
+#[derive(Debug, Clone, Default, PartialEq)]
+pub struct MetadataCorrectionRequest {
+    pub current_metadata_json: String,
+    pub title: String,
+    pub instructions: String,
+    pub bpm: Option<f32>,
+    pub musical_key: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, PartialEq)]
@@ -123,6 +133,85 @@ impl AudioIaService {
         request: &AudioIaAnalysisRequest,
     ) -> Result<AudioIaAnalysisResult, AudioIaServiceError> {
         let prompt = build_analysis_prompt(&AudioAnalysisPromptInput::from(request));
+        let mut failures = Vec::new();
+
+        if let Some(groq) = &self.groq {
+            match groq
+                .chat_completion(&GroqChatRequest::new(prompt.clone()))
+                .await
+            {
+                Ok(success) => match JsonRepairer::extract_metadata_from_text(&success.content) {
+                    Ok(metadata) => {
+                        return Ok(AudioIaAnalysisResult {
+                            metadata,
+                            provider: AudioIaProvider::Groq,
+                            model: success.model,
+                            attempt_count: success.attempt_count,
+                            provider_key_index: Some(success.key_index),
+                        });
+                    }
+                    Err(error) => failures.push(AudioIaFailure::Parse(AudioIaParseFailure {
+                        provider: AudioIaProvider::Groq,
+                        model: success.model,
+                        message: error.to_string(),
+                    })),
+                },
+                Err(GroqClientError::Exhausted {
+                    failures: groq_failures,
+                }) => {
+                    failures.extend(groq_failures.into_iter().map(AudioIaFailure::Groq));
+                }
+                Err(GroqClientError::MissingApiKeys | GroqClientError::MissingModels) => {}
+            }
+        }
+
+        if let Some(openai) = &self.openai {
+            match openai
+                .chat_completion(&OpenAiChatRequest::new(prompt))
+                .await
+            {
+                Ok(success) => match JsonRepairer::extract_metadata_from_text(&success.content) {
+                    Ok(metadata) => {
+                        return Ok(AudioIaAnalysisResult {
+                            metadata,
+                            provider: AudioIaProvider::OpenAi,
+                            model: success.model,
+                            attempt_count: success.attempt_count,
+                            provider_key_index: None,
+                        });
+                    }
+                    Err(error) => failures.push(AudioIaFailure::Parse(AudioIaParseFailure {
+                        provider: AudioIaProvider::OpenAi,
+                        model: success.model,
+                        message: error.to_string(),
+                    })),
+                },
+                Err(error) => failures.push(AudioIaFailure::OpenAi(map_openai_error(error))),
+            }
+        }
+
+        if failures.is_empty() {
+            Err(AudioIaServiceError::MissingProviders)
+        } else {
+            Err(AudioIaServiceError::Exhausted { failures })
+        }
+    }
+
+    /* [254A-8b] Corrige metadata IA existente segun instrucciones del usuario.
+     * Usa la misma cadena Groq -> OpenAI fallback que `analyze_audio` pero con
+     * `build_correction_prompt`. Devuelve la metadata corregida lista para que
+     * el handler la persista en el sample. */
+    pub async fn correct_metadata(
+        &self,
+        request: &MetadataCorrectionRequest,
+    ) -> Result<AudioIaAnalysisResult, AudioIaServiceError> {
+        let prompt = build_correction_prompt(&MetadataCorrectionPromptInput {
+            current_metadata_json: request.current_metadata_json.clone(),
+            title: request.title.clone(),
+            instructions: request.instructions.clone(),
+            bpm: request.bpm,
+            musical_key: request.musical_key.clone(),
+        });
         let mut failures = Vec::new();
 
         if let Some(groq) = &self.groq {

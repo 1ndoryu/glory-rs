@@ -15,6 +15,10 @@ use crate::repositories::{
 #[cfg(test)]
 mod tests;
 
+mod ai_correction;
+
+pub use ai_correction::{correct_sample_metadata, CorrectionOutcome};
+
 const DEFAULT_PAGE: i64 = 1;
 const DEFAULT_PER_PAGE: i64 = 20;
 const MAX_TAG_FILTERS: usize = 10;

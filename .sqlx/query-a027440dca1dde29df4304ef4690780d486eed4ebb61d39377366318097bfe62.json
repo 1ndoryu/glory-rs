@@ -1,0 +1,58 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n            id,\n            id_corto,\n            titulo AS \"titulo!\",\n            bpm,\n            key,\n            escala,\n            COALESCE(metadata, '{}'::jsonb) AS \"metadata!: serde_json::Value\"\n         FROM samples\n         WHERE id = $1 AND eliminado_en IS NULL\n         LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "id_corto",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "titulo!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "bpm",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "key",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "escala",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "metadata!: serde_json::Value",
+        "type_info": "Jsonb"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      false,
+      true,
+      true,
+      true,
+      null
+    ]
+  },
+  "hash": "a027440dca1dde29df4304ef4690780d486eed4ebb61d39377366318097bfe62"
+}
