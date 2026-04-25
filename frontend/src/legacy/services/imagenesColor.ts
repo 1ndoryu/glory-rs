@@ -35,6 +35,19 @@ export const obtenerImagenColor = (id: number): string => {
 };
 
 /*
+ * [224A-x] Resuelve la imagen de portada de un sample:
+ * - Si imagenUrl existe, la pasa por resolverRutaAsset para rebasear rutas WP → SPA.
+ * - Si es null/vacío, usa obtenerImagenColor(id) como fallback determinista.
+ * Centraliza la lógica que antes se repetía en TarjetaSample, SampleDetalle, Reproductor.
+ */
+export const resolverImagenSample = (imagenUrl: string | null | undefined, id: number): string => {
+    if (imagenUrl) {
+        return resolverRutaAsset(imagenUrl);
+    }
+    return obtenerImagenColor(id);
+};
+
+/*
  * Obtiene la URL de una imagen de color basada en un string (nombre de colección, etc).
  * Hace un hash simple del string para generar un índice determinista.
  */

@@ -26,7 +26,7 @@ import { SampleDetalleAcciones } from '@app/components/samples/SampleDetalleAcci
 import { SeccionSampleDiscovery } from '@app/components/samples/SeccionSampleDiscovery';
 import { BadgeModeracion } from '@app/components/ui/BadgeModeracion';
 import EnlaceCreador from '@app/components/social/EnlaceCreador';
-import { obtenerImagenColor } from '@app/services/imagenesColor';
+import { resolverImagenSample } from '@app/services/imagenesColor';
 import { useTabsIsla } from '@app/hooks/useTabsIsla';
 import { useMenuContextualSample } from '@app/hooks/useMenuContextualSample';
 import { ModalInspectorSample } from '@app/components/ui/ModalInspectorSample';
@@ -154,7 +154,7 @@ export const SampleDetalleIsland = ({ slug: slugProp }: SampleDetalleProps): JSX
                         aria-label={reproduciendo ? t('cancion.pausarSample') : t('cancion.reproducirSample')}
                     >
                         <img
-                            src={sample.imagenUrl || obtenerImagenColor(sample.id)}
+                            src={resolverImagenSample(sample.imagenUrl, sample.id)}
                             alt={sample.titulo}
                             className="detallePortadaImg"
                         />

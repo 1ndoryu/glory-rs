@@ -1,7 +1,8 @@
 /*
  * Datos: Lista de archivos de imagen en colors/.
- * Generado a partir del directorio colors/ del tema.
- * Separado del servicio imagenesColor para cumplir límites de archivo.
+ * GENERADO AUTOMATICAMENTE por scripts/gen-colors-list.mjs
+ * No editar manualmente. Cambios se pierden en el siguiente build.
+ * Ultima generacion: 2026-04-25T00:53:12.427Z
  */
 
 export const IMAGENES_COLOR: string[] = [
@@ -130,7 +131,6 @@ export const IMAGENES_COLOR: string[] = [
     '7f79c290b4ff8a2e80a6abae597ca079.jpg',
     '802fabece6bbeb85ef7c3e7499f056e0.jpg',
     '80328035aa56e385f3b016474d8611e5.jpg',
-    '806c81d62088c30dda02a30544feac10.gif',
     '8095571ff3fa66a458d7a044e99f4818.jpg',
     '80d8da53fa06fff25f889205fad60840.jpg',
     '810344c111f739b952b5307148f2cd91.jpg',
@@ -149,7 +149,6 @@ export const IMAGENES_COLOR: string[] = [
     '8f9754b75fcea1be8e23ccd2c308510c.jpg',
     '9151c566a94d29a374d014d5a2c3e4c0.jpg',
     '9372dff89c0bbafdfdaa285aa4994e06.jpg',
-    '9548ec1b73fcae29f1492baaa8103050.gif',
     '99034d5b406f41af20988e434591678e.jpg',
     '993245e6afae9f50fd5ecf85fcda0039.jpg',
     '99a08d35390b82507367644beaba738d.jpg',
@@ -179,11 +178,9 @@ export const IMAGENES_COLOR: string[] = [
     'ae96c35f7d2c66b9ff9809817dc99ad5.jpg',
     'aeb325807dfdc8c2fdf08c7d5deac5f6.jpg',
     'aec08003ebf94b62d08a3f266d20311e.jpg',
-    'b149b97f899681efde8751c3ff8d3f9a.gif',
     'b1bead7070338cf46c3d2accc27b607c.jpg',
     'b267a6d355cb4ba32649d12ca9e0af8e.jpg',
     'b34c54e06d8f7a7713a709cb1adb495c.jpg',
-    'b6260954eab482a20d29f93863b21575.gif',
     'b62f8672348e6dc6b55d857a859dc922.jpg',
     'b71c4447b6413d62c486c22aa6596146.jpg',
     'b7e0cff967538c3654495b759ad6a083.jpg',

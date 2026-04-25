@@ -16,6 +16,7 @@ import { BotonBase } from '../../components/ui/BotonBase';
 import { EstadoVacio } from '@app/components/ui/EstadoVacio';
 import { Input } from '../../components/ui/Input';
 import { useT } from '@app/utils/i18n/useT';
+import { resolverImagenSample } from '@app/services/imagenesColor';
 
 /* Formatear segundos a mm:ss */
 const formatearTiempo = (segundos: number): string => {
@@ -97,7 +98,7 @@ export const ReproductorIsland = (): JSX.Element => {
                     {/* Artwork */}
                     <div className="reproductorIslandArt">
                         {sampleActual.imagenUrl ? (
-                            <img src={sampleActual.imagenUrl} alt={sampleActual.titulo} />
+                            <img src={resolverImagenSample(sampleActual.imagenUrl, sampleActual.id)} alt={sampleActual.titulo} />
                         ) : (
                             <div className="reproductorIslandArtPlaceholder">
                                 <Music size={64} />
@@ -213,7 +214,7 @@ const PanelCola = ({cola, sampleActualId, onSeleccionar, onQuitar, onMover, onLi
                 {cola.map((sample, indice) => (
                     <div key={sample.id} className={`reproductorIslandColaItem ${sample.id === sampleActualId ? 'reproductorIslandColaItemActivo' : ''}`}>
                         <BotonBase variante="ghost" className="reproductorIslandColaPlay" onClick={() => onSeleccionar(sample)} type="button">
-                            <div className="reproductorIslandColaImagen">{sample.imagenUrl ? <img src={sample.imagenUrl} alt="" /> : <Music size={14} />}</div>
+                            <div className="reproductorIslandColaImagen">{sample.imagenUrl ? <img src={resolverImagenSample(sample.imagenUrl, sample.id)} alt="" /> : <Music size={14} />}</div>
                             <div className="reproductorIslandColaInfo">
                                 <span className="reproductorIslandColaTitulo">{sample.titulo}</span>
                                 <span className="reproductorIslandColaArtista">{sample.creador.nombreVisible || sample.creador.username}</span>

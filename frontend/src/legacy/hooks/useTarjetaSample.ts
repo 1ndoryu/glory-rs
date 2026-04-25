@@ -19,8 +19,7 @@
 
 import { useCallback, useEffect, useState, type MouseEvent } from 'react';
 import type { SampleResumen, TipoReaccion } from '@app/types';
-import { obtenerImagenColor } from '@app/services/imagenesColor';
-import { resolverRutaAsset } from '@app/utils/resolverRutaAsset';
+import { resolverImagenSample } from '@app/services/imagenesColor';
 import { descargarSample } from '@app/services/apiDescargas';
 import { useNavigationStore } from '@/core/router';
 import { useColeccionPickerStore } from '@app/stores/coleccionPickerStore';
@@ -340,10 +339,9 @@ function esperarUmbralDrag(origenX: number, origenY: number, umbral: number): Pr
     const clases = ['tarjetaSample', estaActiva ? 'tarjetaSampleActiva' : '', className].filter(Boolean).join(' ');
     /* [224A-3] Normalizar imagenUrl: puede llegar con dominio absoluto de producción
      * (https://kamples.com/...) si fue importado desde WordPress. resolverRutaAsset
-     * stripea el dominio en SPA/dev y rebasea el path a /legacy-assets/. */
-    const imagenPortada = sample.imagenUrl
-        ? resolverRutaAsset(sample.imagenUrl)
-        : obtenerImagenColor(sample.id);
+     * stripea el dominio en SPA/dev y rebasea el path a /legacy-assets/.
+     * [224A-x] Centralizado en resolverImagenSample para consistencia en toda la app. */
+    const imagenPortada = resolverImagenSample(sample.imagenUrl, sample.id);
 
     return {
         picosAudio,
