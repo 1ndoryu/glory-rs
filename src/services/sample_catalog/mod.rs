@@ -245,7 +245,7 @@ async fn load_owned_sample(
     Ok(sample)
 }
 
-fn build_sample_summary(
+pub(crate) fn build_sample_summary(
     record: SampleCatalogSummaryRecord,
     public_base_url: Option<&str>,
 ) -> SampleSummary {

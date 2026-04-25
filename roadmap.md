@@ -63,7 +63,6 @@
 
 ### Pendientes derivados de auditorías
 
-- 254A-7c — Implementar `GET/POST /api/me/coleccionados/*` (listado, carpetas, asignación de carpeta) en Rust.
 - 254A-8c — Implementar `POST /api/samples/:id/extender-recorte` en Rust.
 - Remplazar el daw que hicimos, por https://github.com/andremichelle/opendaw, requiere revisar el daw a actual para ver como estaba integrado, y hacer un plan de las integraciones necesaria (como que un sample se pudiera arrastrar y soltar), el daw actual es muy pobre y malo, por eso vamos a cambiar a opendaw, tienes que hacer un fork en mi cuenta 1ndoryu
 - completa todo lo de las md de (auditoría sync desktop y auditoría menu contextual)

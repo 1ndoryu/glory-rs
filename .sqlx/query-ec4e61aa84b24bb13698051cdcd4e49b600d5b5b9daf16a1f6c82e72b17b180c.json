@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT EXISTS (\n                SELECT 1 FROM samples s\n                WHERE s.id = $1 AND s.creador_id = $2\n                UNION\n                SELECT 1 FROM samples s\n                JOIN descargas d ON d.sample_id = s.id AND d.usuario_id = $2\n                WHERE s.id = $1 AND s.estado = 'activo'\n            ) AS \"existe!: bool\"\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "existe!: bool",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "ec4e61aa84b24bb13698051cdcd4e49b600d5b5b9daf16a1f6c82e72b17b180c"
+}

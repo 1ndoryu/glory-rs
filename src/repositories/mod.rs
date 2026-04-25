@@ -2,6 +2,7 @@ mod admin_ia_queue;
 mod admin_panel;
 mod admin_seed;
 mod article;
+mod biblioteca;
 mod billing;
 mod block;
 mod coleccion;
@@ -42,6 +43,9 @@ pub use admin_seed::{AdminSeedRepository, InsertSeedUserInput};
 pub use article::{
     ArticleAuthorSummary, ArticleCategoryCount, ArticleDetail, ArticleEmbed, ArticleMeta,
     ArticleRepository, ArticleSummary, CreateArticleParams, UpdateArticleParams,
+};
+pub use biblioteca::{
+    BibliotecaRepository, CarpetaRow, ColeccionadosFilters, FiltroReaccion, CARPETA_DEFAULT,
 };
 pub use billing::{
     BillingRepository, CompletedDownloadRevenueShareInsert, CompletedSamplePurchaseInsert,

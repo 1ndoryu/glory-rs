@@ -63,6 +63,7 @@ pub use push::{
 #[cfg(feature = "s3")]
 pub use s3_storage::S3Storage;
 pub use sample_catalog::{correct_sample_metadata, CorrectionOutcome, SampleCatalogService};
+pub(crate) use sample_catalog::build_sample_summary;
 pub use search::SearchService;
 pub use storage::{FileStorage, LocalFs};
 pub use stripe_service::{

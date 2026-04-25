@@ -10,6 +10,7 @@ mod admin_moderacion;
 mod app_versions;
 mod articles;
 mod auth;
+mod biblioteca;
 mod colecciones;
 mod comments;
 mod connect;
@@ -128,6 +129,9 @@ impl utoipa::Modify for SecurityAddon {
         sync::get_changelog,
         sync::get_me_sync_delta,
         sync::get_me_sync_colecciones,
+        biblioteca::get_coleccionados,
+        biblioteca::get_carpetas,
+        biblioteca::put_mover_carpeta,
         payments::list_plans,
         payments::create_subscription_checkout,
         payments::create_sample_checkout,
@@ -421,6 +425,14 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::SyncColeccionesData,
         crate::models::SyncColeccion,
         crate::models::SyncSample,
+        biblioteca::BibliotecaSamplesResponse,
+        biblioteca::BibliotecaSamplesData,
+        biblioteca::CarpetasResponse,
+        biblioteca::CarpetaItem,
+        biblioteca::SubcarpetaItem,
+        biblioteca::MoverCarpetaRequest,
+        biblioteca::MoverCarpetaResponse,
+        biblioteca::MoverCarpetaData,
         crate::repositories::TagAggregateItem,
         crate::repositories::TagAggregatesResult,
         crate::models::UploadSampleRequestDoc,
@@ -596,6 +608,7 @@ fn api_routes() -> Router<AppState> {
         .merge(auth::routes())
         .merge(app_versions::routes())
         .merge(articles::routes())
+        .merge(biblioteca::routes())
         .merge(feed::routes())
         .merge(sample_catalog::routes())
         .merge(samples::routes())

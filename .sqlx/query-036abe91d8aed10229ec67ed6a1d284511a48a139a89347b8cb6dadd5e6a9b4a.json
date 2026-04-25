@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            UPDATE samples\n            SET metadata = jsonb_set(\n                jsonb_set(COALESCE(metadata, '{}'::jsonb), '{carpeta_primaria}', $2::jsonb),\n                '{carpeta_secundaria}', $3::jsonb\n            ),\n            updated_at = NOW()\n            WHERE id = $1\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Jsonb",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "036abe91d8aed10229ec67ed6a1d284511a48a139a89347b8cb6dadd5e6a9b4a"
+}
