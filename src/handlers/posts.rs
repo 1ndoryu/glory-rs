@@ -48,6 +48,10 @@ pub struct PostListQuery {
     #[serde(default = "default_filter")]
     pub filtro: String,
     pub author_id: Option<i32>,
+    /* [254A-6] El frontend legacy (apiSocial.listarPublicacionesUsuario) envia
+     * `?autor=<username>` en vez de `?author_id=<int>`. Aceptamos ambos para no
+     * acoplar el backend al wpJsonStub: si llega autor, lo resolvemos al id real. */
+    pub autor: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, ToSchema)]
@@ -151,13 +155,28 @@ pub async fn list_posts(
     } else {
         vec![]
     };
+    /* [254A-6] author_id directo tiene precedencia; si solo viene `autor=username`,
+     * lo traducimos. Username inexistente => lista vacia (no error) para no romper
+     * la UX del perfil cuando alguien navega a un usuario borrado. */
+    let author_id = match query.author_id {
+        Some(id) => Some(id),
+        None => match query.autor.as_deref().map(str::trim).filter(|s| !s.is_empty()) {
+            Some(username) => match crate::repositories::UserRepository::find_by_username(&state.pool, username).await? {
+                Some(u) => Some(u.id),
+                None => {
+                    return Ok(Json(PostListResponse { items: vec![], page, per_page }));
+                }
+            },
+            None => None,
+        },
+    };
     let items = PostRepository::list(
         &state.pool,
         crate::repositories::PostListParams {
             viewer_id,
             only_following,
             sort_popular,
-            author_id: query.author_id,
+            author_id,
             blocked_ids: &hidden,
             limit: per_page,
             offset,

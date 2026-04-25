@@ -310,8 +310,8 @@ impl PostRepository {
                     COALESCE(op.total_reposts, 0) AS "original_total_reposts!",
                     op.created_at AS "original_created_at?: chrono::DateTime<chrono::Utc>",
                     ou.username AS "original_author_username?",
-                    ou.nombre_visible AS "original_author_display_name",
-                    ou.avatar_url AS "original_author_avatar_url",
+                    ou.nombre_visible AS "original_author_display_name?",
+                    ou.avatar_url AS "original_author_avatar_url?",
                     COALESCE(ou.verificado, FALSE) AS "original_author_verified!"
                FROM publicaciones p
                JOIN usuarios_ext u ON u.id = p.autor_id
@@ -389,8 +389,8 @@ impl PostRepository {
                     COALESCE(op.total_reposts, 0) AS "original_total_reposts!",
                     op.created_at AS "original_created_at?: chrono::DateTime<chrono::Utc>",
                     ou.username AS "original_author_username?",
-                    ou.nombre_visible AS "original_author_display_name",
-                    ou.avatar_url AS "original_author_avatar_url",
+                    ou.nombre_visible AS "original_author_display_name?",
+                    ou.avatar_url AS "original_author_avatar_url?",
                     COALESCE(ou.verificado, FALSE) AS "original_author_verified!"
                FROM publicaciones p
                JOIN usuarios_ext u ON u.id = p.autor_id

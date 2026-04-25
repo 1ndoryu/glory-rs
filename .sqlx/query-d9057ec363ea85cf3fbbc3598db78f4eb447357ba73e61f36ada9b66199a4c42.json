@@ -1,0 +1,220 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n                    p.id AS \"post_id!\",\n                p.autor_id AS \"post_autor_id!\",\n                    COALESCE(p.tipo, 'social') AS \"tipo!\",\n                    COALESCE(p.contenido, '') AS \"contenido!\",\n                    p.imagenes AS \"imagenes!: Vec<String>\",\n                    p.samples_adjuntos AS \"samples_adjuntos!: Vec<i32>\",\n                    p.repost_id,\n                    COALESCE(p.moderacion_estado, 'aprobado') AS \"moderacion_estado!\",\n                    COALESCE(p.total_likes, 0) AS \"total_likes!\",\n                    COALESCE(p.total_comentarios, 0) AS \"total_comentarios!\",\n                    COALESCE(p.total_reposts, 0) AS \"total_reposts!\",\n                    p.created_at AS \"created_at!: chrono::DateTime<chrono::Utc>\",\n                    u.id AS \"author_id!\",\n                    u.username AS \"author_username!\",\n                    u.nombre_visible AS \"author_display_name\",\n                    u.avatar_url AS \"author_avatar_url\",\n                    COALESCE(u.verificado, FALSE) AS \"author_verified!\",\n                    EXISTS(SELECT 1 FROM follows f WHERE f.seguidor_id = $1 AND f.seguido_id = p.autor_id) AS \"siguiendo_autor!\",\n                    (SELECT reaccion FROM likes WHERE usuario_id = $1 AND tipo = 'publicacion' AND target_id = p.id LIMIT 1) AS \"mi_reaccion\",\n                    EXISTS(SELECT 1 FROM publicaciones mr WHERE mr.autor_id = $1 AND mr.repost_id = COALESCE(p.repost_id, p.id) AND mr.eliminado_en IS NULL) AS \"yo_ya_repostee!\",\n                    op.id AS \"original_id?\",\n                    op.autor_id AS \"original_author_id?\",\n                    COALESCE(op.contenido, '') AS \"original_contenido!\",\n                    COALESCE(op.imagenes, '{}'::text[]) AS \"original_imagenes!: Vec<String>\",\n                    COALESCE(op.samples_adjuntos, '{}'::int[]) AS \"original_samples_adjuntos!: Vec<i32>\",\n                    COALESCE(op.total_likes, 0) AS \"original_total_likes!\",\n                    COALESCE(op.total_comentarios, 0) AS \"original_total_comentarios!\",\n                    COALESCE(op.total_reposts, 0) AS \"original_total_reposts!\",\n                    op.created_at AS \"original_created_at?: chrono::DateTime<chrono::Utc>\",\n                    ou.username AS \"original_author_username?\",\n                    ou.nombre_visible AS \"original_author_display_name?\",\n                    ou.avatar_url AS \"original_author_avatar_url?\",\n                    COALESCE(ou.verificado, FALSE) AS \"original_author_verified!\"\n               FROM publicaciones p\n               JOIN usuarios_ext u ON u.id = p.autor_id\n               LEFT JOIN publicaciones op ON op.id = p.repost_id AND op.eliminado_en IS NULL\n               LEFT JOIN usuarios_ext ou ON ou.id = op.autor_id\n               WHERE p.eliminado_en IS NULL\n                 AND COALESCE(p.moderacion_estado, 'aprobado') <> 'rechazado'\n                                 AND (\n                                         p.autor_id = $1\n                                         OR (\n                                                 SELECT COUNT(*)\n                                                 FROM reportes r\n                                                 WHERE r.tipo = 'publicacion'\n                                                     AND COALESCE(r.estado, 'pendiente') = 'pendiente'\n                                                     AND r.target_id = p.id\n                                         ) < 3\n                                 )\n                 AND ($2::bool = FALSE OR EXISTS(SELECT 1 FROM follows ff WHERE ff.seguidor_id = $1 AND ff.seguido_id = p.autor_id))\n                 AND ($3::int IS NULL OR p.autor_id = $3)\n                 AND NOT (p.autor_id = ANY($4::int[]))\n                 AND (p.repost_id IS NULL OR op.id IS NOT NULL)\n                                 AND (\n                                         p.repost_id IS NULL\n                                         OR op.autor_id = $1\n                                         OR (\n                                                 SELECT COUNT(*)\n                                                 FROM reportes r\n                                                 WHERE r.tipo = 'publicacion'\n                                                     AND COALESCE(r.estado, 'pendiente') = 'pendiente'\n                                                     AND r.target_id = op.id\n                                         ) < 3\n                                 )\n               ORDER BY\n                 CASE WHEN $7::bool THEN (COALESCE(p.total_likes, 0) + COALESCE(p.total_comentarios, 0) + COALESCE(p.total_reposts, 0)) ELSE 0 END DESC,\n                 p.created_at DESC\n               LIMIT $5 OFFSET $6",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "post_id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "post_autor_id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "tipo!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "contenido!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "imagenes!: Vec<String>",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 5,
+        "name": "samples_adjuntos!: Vec<i32>",
+        "type_info": "Int4Array"
+      },
+      {
+        "ordinal": 6,
+        "name": "repost_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 7,
+        "name": "moderacion_estado!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 8,
+        "name": "total_likes!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 9,
+        "name": "total_comentarios!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 10,
+        "name": "total_reposts!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 11,
+        "name": "created_at!: chrono::DateTime<chrono::Utc>",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 12,
+        "name": "author_id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 13,
+        "name": "author_username!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 14,
+        "name": "author_display_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 15,
+        "name": "author_avatar_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 16,
+        "name": "author_verified!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 17,
+        "name": "siguiendo_autor!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 18,
+        "name": "mi_reaccion",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 19,
+        "name": "yo_ya_repostee!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 20,
+        "name": "original_id?",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 21,
+        "name": "original_author_id?",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 22,
+        "name": "original_contenido!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 23,
+        "name": "original_imagenes!: Vec<String>",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 24,
+        "name": "original_samples_adjuntos!: Vec<i32>",
+        "type_info": "Int4Array"
+      },
+      {
+        "ordinal": 25,
+        "name": "original_total_likes!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 26,
+        "name": "original_total_comentarios!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 27,
+        "name": "original_total_reposts!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 28,
+        "name": "original_created_at?: chrono::DateTime<chrono::Utc>",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 29,
+        "name": "original_author_username?",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 30,
+        "name": "original_author_display_name?",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 31,
+        "name": "original_author_avatar_url?",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 32,
+        "name": "original_author_verified!",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Bool",
+        "Int4",
+        "Int4Array",
+        "Int8",
+        "Int8",
+        "Bool"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      null,
+      null,
+      true,
+      true,
+      true,
+      null,
+      null,
+      null,
+      null,
+      true,
+      false,
+      false,
+      false,
+      true,
+      null,
+      null,
+      null,
+      null,
+      false,
+      false,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      true,
+      false,
+      false,
+      true,
+      null
+    ]
+  },
+  "hash": "d9057ec363ea85cf3fbbc3598db78f4eb447357ba73e61f36ada9b66199a4c42"
+}
