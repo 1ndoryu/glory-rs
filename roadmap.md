@@ -66,7 +66,6 @@
 - 254A-7a — Implementar `GET /api/me/sync/delta?cursor=...` en Rust (protocolo delta para watcher desktop). Ver `Agente/documentacion/sync/auditoria-sync-desktop-2026-04-25.md`.
 - 254A-7b — Implementar `GET /api/me/sync/colecciones` en Rust.
 - 254A-7c — Implementar `GET/POST /api/me/coleccionados/*` (listado, carpetas, asignación de carpeta) en Rust.
-- 254A-7d — Adapter de path en desktop: reescribir `/wp-json/kamples/v1/*` → `/api/*` análogo a `wpJsonStub` del frontend, o migrar `fetch` a `apiDesktopAdapter`. Sin esto, sync desktop no funciona contra backend Rust (solo contra WP legacy).
 - 254A-8b — Implementar `POST /api/samples/:id/corregir-ia` en Rust (handler IA + cola de moderación).
 - 254A-8c — Implementar `POST /api/samples/:id/extender-recorte` en Rust.
 - 254A-8d — Auditar y completar el flujo `reportar`: confirmar endpoint, implementar `POST /api/reportes` si falta.
