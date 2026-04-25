@@ -63,7 +63,6 @@
 
 - 254A-7 — Revisar detalladamente que la aplicación de sincronización (sync) funcione en la aplicación de escritorio (Tauri/desktop). Auditar handshake WS, autenticación, descarga incremental.
 - 254A-8 — Revisar todas las acciones del menú contextual (descargar, descargar SVG, etc.): inventariar qué hace cada item, comprobar que la acción real se dispara y devuelve resultado.d)
-- 254A-9 — Revisa que la publicacion de blog funcione
 
 
 ### Fase 19 â€” Despliegue
