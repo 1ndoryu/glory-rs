@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE relaciones_sample\n               SET contribuidor_id = $1\n               WHERE id = $2 AND contribuidor_id IS NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4ce7c604eeb9f4e7281913b976513e27ce6bcd9f11c7153e4b038db867189753"
+}

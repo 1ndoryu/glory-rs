@@ -13,10 +13,9 @@ use crate::middleware::CurrentUser;
 use crate::models::{
     AdminActivityQuery, AdminActivityResponse, AdminExtractionQueueQuery,
     AdminExtractionQueueResponse, AdminOkResponse, AdminProcessCookiesRequest,
-    AdminProcessesResponse, AdminProcessStartRequest, AdminScrapersQuery,
-    AdminScrapersResponse, AdminSummaryStats, AdminUserDeleteRequest, AdminUserSuspendRequest,
-    AdminUserUpdateRequest, AdminUsersQuery, AdminUsersResponse, DeleteUserRequest,
-    SuspendUserRequest,
+    AdminProcessStartRequest, AdminProcessesResponse, AdminScrapersQuery, AdminScrapersResponse,
+    AdminSummaryStats, AdminUserDeleteRequest, AdminUserSuspendRequest, AdminUserUpdateRequest,
+    AdminUsersQuery, AdminUsersResponse, DeleteUserRequest, SuspendUserRequest,
 };
 use crate::repositories::{AdminPanelRepository, ModerationRepository};
 use crate::services::algo_timing::{TimingEntry, ALGO_TIMING};
@@ -111,7 +110,9 @@ pub async fn activity(
     Query(query): Query<AdminActivityQuery>,
 ) -> Result<Json<AdminActivityResponse>, AppError> {
     user.require_admin()?;
-    Ok(Json(AdminPanelRepository::activity(&state.pool, &query).await?))
+    Ok(Json(
+        AdminPanelRepository::activity(&state.pool, &query).await?,
+    ))
 }
 
 #[utoipa::path(
@@ -132,7 +133,9 @@ pub async fn list_users(
     Query(query): Query<AdminUsersQuery>,
 ) -> Result<Json<AdminUsersResponse>, AppError> {
     user.require_admin()?;
-    Ok(Json(AdminPanelRepository::list_users(&state.pool, &query).await?))
+    Ok(Json(
+        AdminPanelRepository::list_users(&state.pool, &query).await?,
+    ))
 }
 
 #[utoipa::path(
@@ -157,7 +160,8 @@ pub async fn update_user_legacy(
     Json(request): Json<AdminUserUpdateRequest>,
 ) -> Result<Json<AdminOkResponse>, AppError> {
     user.require_admin()?;
-    let updated = AdminPanelRepository::update_user(&state.pool, user.user_id, id, &request).await?;
+    let updated =
+        AdminPanelRepository::update_user(&state.pool, user.user_id, id, &request).await?;
     if !updated {
         return Err(AppError::NotFound(format!("usuario {id}")));
     }
@@ -298,7 +302,9 @@ pub async fn list_scrapers(
     Query(query): Query<AdminScrapersQuery>,
 ) -> Result<Json<AdminScrapersResponse>, AppError> {
     user.require_admin()?;
-    Ok(Json(AdminPanelRepository::list_scrapers(&state.pool, &query).await?))
+    Ok(Json(
+        AdminPanelRepository::list_scrapers(&state.pool, &query).await?,
+    ))
 }
 
 #[utoipa::path(
@@ -379,12 +385,15 @@ pub async fn process_state(
     )
 )]
 pub async fn start_process(
+    State(state): State<AppState>,
     user: CurrentUser,
     Path(nombre): Path<String>,
     Json(request): Json<AdminProcessStartRequest>,
 ) -> Result<Json<serde_json::Value>, AppError> {
     user.require_admin()?;
-    Ok(Json(AdminProcessService::start(&nombre, request.limit)?))
+    Ok(Json(
+        AdminProcessService::start(&nombre, request.limit, &state.pool).await?,
+    ))
 }
 
 #[utoipa::path(
@@ -487,7 +496,10 @@ pub fn routes() -> Router<AppState> {
         .route("/admin/usuarios", get(list_users))
         .route("/admin/usuarios/:id", put(update_user_legacy))
         .route("/admin/usuarios/:id/suspender", post(suspend_user_legacy))
-        .route("/admin/usuarios/:id/desuspender", post(unsuspend_user_legacy))
+        .route(
+            "/admin/usuarios/:id/desuspender",
+            post(unsuspend_user_legacy),
+        )
         .route("/admin/usuarios/:id/eliminar", post(mark_delete_legacy))
         .route(
             "/admin/usuarios/:id/cancelar-eliminacion",

@@ -230,7 +230,7 @@ def main():
     lock = adquirir_lock(args.tarea)
     if lock is None:
         logger.info("Tarea '%s' ya en ejecucion. Abortando.", args.tarea)
-        return
+        return 0
 
     try:
         logger.info("=== Iniciando tarea: %s ===", args.tarea)
@@ -251,14 +251,17 @@ def main():
             logger.info("=== Tarea '%s' completada OK ===", args.tarea)
         else:
             logger.error("=== Tarea '%s' fallo con codigo %d ===", args.tarea, code)
+        return code
 
     except subprocess.TimeoutExpired:
         logger.error("Tarea '%s' excedio tiempo limite", args.tarea)
+        return 1
     except Exception:
         logger.exception("Error inesperado en tarea '%s'", args.tarea)
+        return 1
     finally:
         liberar_lock(lock)
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

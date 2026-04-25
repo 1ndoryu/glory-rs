@@ -1,5 +1,6 @@
-pub mod algo_timing;
 mod admin_processes;
+mod admin_seed;
+pub mod algo_timing;
 mod audio_pipeline;
 mod auth;
 pub mod download_token;
@@ -15,17 +16,18 @@ mod notification_fanout;
 mod push;
 #[cfg(feature = "s3")]
 pub mod s3_storage;
-mod search;
 mod sample_catalog;
+mod search;
 pub mod storage;
 mod stripe_service;
 mod token_store;
 
+pub use admin_processes::AdminProcessService;
+pub use admin_seed::AdminSeedService;
 pub use audio_pipeline::{
     AudioPipelineError, AudioPipelineRequest, AudioPipelineResult, AudioPipelineService,
     AudioPipelineStage, AudioTechnicalAnalysis, GeneratedAudioAssets,
 };
-pub use admin_processes::AdminProcessService;
 pub use auth::{AuthService, Claims};
 pub use email::{
     EmailDeliveryRuntime, EmailDeliveryRuntimeError, EmailNotificationService,
@@ -60,8 +62,8 @@ pub use push::{
 };
 #[cfg(feature = "s3")]
 pub use s3_storage::S3Storage;
-pub use search::SearchService;
 pub use sample_catalog::SampleCatalogService;
+pub use search::SearchService;
 pub use storage::{FileStorage, LocalFs};
 pub use stripe_service::{
     StripeCheckoutSessionSummary, StripeConnectAccountSummary, StripeConnectBalanceSummary,

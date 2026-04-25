@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE samples s\n               SET creador_id = r.contribuidor_id\n               FROM relaciones_sample r\n               WHERE (r.sample_fuente_id = s.id OR r.sample_destino_id = s.id)\n                 AND r.contribuidor_id IS NOT NULL\n                 AND s.cancion_origen_id IS NOT NULL\n                 AND s.creador_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "6f476b078214245f25f8db17c3237c1a7683103dceb1aab53d4e6c34554e1903"
+}

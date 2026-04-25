@@ -1,4 +1,5 @@
 mod admin_panel;
+mod admin_seed;
 mod article;
 mod billing;
 mod block;
@@ -13,8 +14,8 @@ mod free_code;
 mod ia_queue;
 mod like;
 mod message;
-mod music;
 mod moderation;
+mod music;
 mod notification;
 mod notification_target;
 mod play;
@@ -23,22 +24,23 @@ mod processing_queue;
 mod profile;
 mod push;
 mod report;
-mod search;
 mod sample;
 mod sample_catalog;
 mod saved_collection;
+mod search;
+mod seo;
 mod sync_changelog;
 mod user;
 
 pub use admin_panel::AdminPanelRepository;
-pub use billing::{
-    BillingRepository, CompletedDownloadRevenueShareInsert, CompletedSamplePurchaseInsert,
-    SampleCheckoutCandidate, StripeUserProfile, SubscriptionRecord, UpsertStripeSubscriptionRecord,
-};
-pub use creator_dashboard::CreatorDashboardRepository;
+pub use admin_seed::{AdminSeedRepository, InsertSeedUserInput};
 pub use article::{
     ArticleAuthorSummary, ArticleCategoryCount, ArticleDetail, ArticleEmbed, ArticleMeta,
     ArticleRepository, ArticleSummary, CreateArticleParams, UpdateArticleParams,
+};
+pub use billing::{
+    BillingRepository, CompletedDownloadRevenueShareInsert, CompletedSamplePurchaseInsert,
+    SampleCheckoutCandidate, StripeUserProfile, SubscriptionRecord, UpsertStripeSubscriptionRecord,
 };
 pub use block::{BlockRepository, BlockedUser};
 pub use coleccion::{
@@ -52,6 +54,7 @@ pub use comment::{
 pub use conversation::{
     ConversationParticipantSummary, ConversationRepository, ConversationSummary,
 };
+pub use creator_dashboard::CreatorDashboardRepository;
 pub use download::{DownloadRepository, SampleDownloadInfo, SampleFileInfo, UserDownloadAllowance};
 pub use fcm::{FcmTokenRecord, FcmTokenRepository, RegisterFcmTokenRecord};
 pub use follow::FollowRepository;
@@ -64,8 +67,8 @@ pub use message::{
     ConversationMessage, CreateMessageParams, DirectMessageKind, MessageRepository,
     SharedSampleMessage,
 };
-pub use music::MusicRepository;
 pub use moderation::ModerationRepository;
+pub use music::MusicRepository;
 pub use notification::{
     CreateNotificationRecord, NotificationActor, NotificationRepository, UserNotification,
 };
@@ -88,11 +91,6 @@ pub use report::{
     CreateReportRecord, LegalReportRow, ReportRepository, AUTO_HIDE_POST_REPORT_THRESHOLD,
     AUTO_HIDE_SAMPLE_REPORT_THRESHOLD,
 };
-pub use search::{
-    SearchCollectionRecord, SearchRepository, SearchSampleRecord, SearchSampleRelationRecord,
-    SearchSongRecord, SearchUserRecord,
-};
-pub use sync_changelog::SyncChangelogRepository;
 pub use sample::{
     ApplyAudioIaMetadataParams, AudioIaSample, AudioPipelineSample, CompleteAudioPipelineParams,
     CreateUploadSampleParams, CreatedUploadSample, DuplicateSampleCandidate,
@@ -101,8 +99,14 @@ pub use sample::{
 };
 pub use sample_catalog::{
     OwnedSampleRecord, SampleCatalogDetailRecord, SampleCatalogSummaryRecord, SampleListFilters,
-    SampleListResult, SampleTextSearch, TagAggregateFilters, TagAggregateItem,
-    TagAggregatesResult, UpdateSamplePatch,
+    SampleListResult, SampleTextSearch, TagAggregateFilters, TagAggregateItem, TagAggregatesResult,
+    UpdateSamplePatch,
 };
 pub use saved_collection::{SavedColeccion, SavedCollectionsRepository};
+pub use search::{
+    SearchCollectionRecord, SearchRepository, SearchSampleRecord, SearchSampleRelationRecord,
+    SearchSongRecord, SearchUserRecord,
+};
+pub use seo::SeoRepository;
+pub use sync_changelog::SyncChangelogRepository;
 pub use user::{OAuthRepository, UserRepository};

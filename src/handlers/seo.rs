@@ -1,4 +1,4 @@
-﻿/* [174A-98] Sitemap XML dinámico + robots.txt.
+/* [174A-98] Sitemap XML dinámico + robots.txt.
  *
  * Reemplaza al SeoSitemapProvider PHP del legado. Genera un único sitemap.xml
  * con URLs de samples activos, canciones, artistas y perfiles activos.
@@ -19,7 +19,9 @@ use axum::Json;
 use axum::Router;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
+use sqlx::PgPool;
 
+use crate::repositories::SeoRepository;
 use crate::AppState;
 
 const SITEMAP_LIMIT: i64 = 10_000;
@@ -34,74 +36,18 @@ pub async fn sitemap(State(state): State<AppState>) -> impl IntoResponse {
         .to_string();
 
     let mut body = String::with_capacity(64 * 1024);
-    body.push_str(r#"<?xml version="1.0" encoding="UTF-8"?>
+    body.push_str(
+        r#"<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-"#);
+"#,
+    );
 
-    /* Páginas estáticas root. */
-    write_url(&mut body, &format!("{base}/"), None, "daily", "1.0");
-    write_url(&mut body, &format!("{base}/explorar"), None, "daily", "0.9");
-    write_url(&mut body, &format!("{base}/blog"), None, "weekly", "0.7");
-
-    /* Samples activos. */
-    if let Ok(rows) = sqlx::query!(
-        r#"SELECT slug, updated_at FROM samples
-           WHERE estado = 'activo' AND slug IS NOT NULL
-           ORDER BY updated_at DESC NULLS LAST LIMIT $1"#,
-        SITEMAP_LIMIT
-    ).fetch_all(pool).await {
-        for row in rows {
-            let lastmod: Option<String> = row.updated_at.map(|t: chrono::DateTime<chrono::Utc>| t.to_rfc3339());
-            write_url(&mut body, &format!("{base}/sample/{}", row.slug), lastmod.as_deref(), "weekly", "0.8");
-        }
-    }
-
-    /* Canciones. */
-    if let Ok(rows) = sqlx::query!(
-        r#"SELECT slug FROM canciones ORDER BY id DESC LIMIT $1"#,
-        SITEMAP_LIMIT
-    ).fetch_all(pool).await {
-        for row in rows {
-            write_url(&mut body, &format!("{base}/cancion/{}", row.slug), None, "monthly", "0.6");
-        }
-    }
-
-    /* Artistas. */
-    if let Ok(rows) = sqlx::query!(
-        r#"SELECT slug FROM artistas_musicales ORDER BY id DESC LIMIT $1"#,
-        SITEMAP_LIMIT
-    ).fetch_all(pool).await {
-        for row in rows {
-            write_url(&mut body, &format!("{base}/artista/{}", row.slug), None, "monthly", "0.6");
-        }
-    }
-
-    /* Perfiles públicos activos. */
-    if let Ok(rows) = sqlx::query!(
-        r#"SELECT username, updated_at FROM usuarios_ext
-           WHERE estado = 'activo'
-           ORDER BY updated_at DESC NULLS LAST LIMIT $1"#,
-        SITEMAP_LIMIT
-    ).fetch_all(pool).await {
-        for row in rows {
-            let lastmod: Option<String> = row.updated_at.map(|t: chrono::DateTime<chrono::Utc>| t.to_rfc3339());
-            write_url(&mut body, &format!("{base}/perfil/{}", row.username), lastmod.as_deref(), "weekly", "0.7");
-        }
-    }
-
-    /* Artículos del blog. */
-    if let Ok(rows) = sqlx::query!(
-        r#"SELECT slug, updated_at FROM articulos
-           WHERE moderacion_estado = 'aprobado' AND publicado_en IS NOT NULL
-             AND eliminado_en IS NULL
-           ORDER BY publicado_en DESC LIMIT $1"#,
-        SITEMAP_LIMIT
-    ).fetch_all(pool).await {
-        for row in rows {
-            let lastmod: Option<String> = Some(row.updated_at.to_rfc3339());
-            write_url(&mut body, &format!("{base}/blog/{}", row.slug), lastmod.as_deref(), "monthly", "0.6");
-        }
-    }
+    write_static_urls(&mut body, &base);
+    append_sample_urls(&mut body, &base, pool).await;
+    append_song_urls(&mut body, &base, pool).await;
+    append_artist_urls(&mut body, &base, pool).await;
+    append_profile_urls(&mut body, &base, pool).await;
+    append_blog_urls(&mut body, &base, pool).await;
 
     body.push_str("</urlset>\n");
 
@@ -111,7 +57,96 @@ pub async fn sitemap(State(state): State<AppState>) -> impl IntoResponse {
     )
 }
 
-fn write_url(body: &mut String, loc: &str, lastmod: Option<&str>, changefreq: &str, priority: &str) {
+fn write_static_urls(body: &mut String, base: &str) {
+    write_url(body, &format!("{base}/"), None, "daily", "1.0");
+    write_url(body, &format!("{base}/explorar"), None, "daily", "0.9");
+    write_url(body, &format!("{base}/blog"), None, "weekly", "0.7");
+}
+
+async fn append_sample_urls(body: &mut String, base: &str, pool: &PgPool) {
+    if let Ok(rows) = SeoRepository::sitemap_samples(pool, SITEMAP_LIMIT).await {
+        for row in rows {
+            let lastmod: Option<String> = row
+                .updated_at
+                .map(|t: chrono::DateTime<chrono::Utc>| t.to_rfc3339());
+            write_url(
+                body,
+                &format!("{base}/sample/{}", row.slug),
+                lastmod.as_deref(),
+                "weekly",
+                "0.8",
+            );
+        }
+    }
+}
+
+async fn append_song_urls(body: &mut String, base: &str, pool: &PgPool) {
+    if let Ok(rows) = SeoRepository::sitemap_songs(pool, SITEMAP_LIMIT).await {
+        for row in rows {
+            write_url(
+                body,
+                &format!("{base}/cancion/{}", row.slug),
+                None,
+                "monthly",
+                "0.6",
+            );
+        }
+    }
+}
+
+async fn append_artist_urls(body: &mut String, base: &str, pool: &PgPool) {
+    if let Ok(rows) = SeoRepository::sitemap_artists(pool, SITEMAP_LIMIT).await {
+        for row in rows {
+            write_url(
+                body,
+                &format!("{base}/artista/{}", row.slug),
+                None,
+                "monthly",
+                "0.6",
+            );
+        }
+    }
+}
+
+async fn append_profile_urls(body: &mut String, base: &str, pool: &PgPool) {
+    if let Ok(rows) = SeoRepository::sitemap_profiles(pool, SITEMAP_LIMIT).await {
+        for row in rows {
+            let lastmod: Option<String> = row
+                .updated_at
+                .map(|t: chrono::DateTime<chrono::Utc>| t.to_rfc3339());
+            write_url(
+                body,
+                &format!("{base}/perfil/{}", row.username),
+                lastmod.as_deref(),
+                "weekly",
+                "0.7",
+            );
+        }
+    }
+}
+
+async fn append_blog_urls(body: &mut String, base: &str, pool: &PgPool) {
+    if let Ok(rows) = SeoRepository::sitemap_blog(pool, SITEMAP_LIMIT).await {
+        for row in rows {
+            let lastmod: Option<String> = Some(row.updated_at.to_rfc3339());
+            write_url(
+                body,
+                &format!("{base}/blog/{}", row.slug),
+                lastmod.as_deref(),
+                "monthly",
+                "0.6",
+            );
+        }
+    }
+}
+
+fn write_url(
+    body: &mut String,
+    loc: &str,
+    lastmod: Option<&str>,
+    changefreq: &str,
+    priority: &str,
+) {
     let _ = writeln!(body, "  <url>");
     let _ = writeln!(body, "    <loc>{}</loc>", xml_escape(loc));
     if let Some(lm) = lastmod {
@@ -140,10 +175,7 @@ pub async fn robots(State(state): State<AppState>) -> impl IntoResponse {
     let body = format!(
         "User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /admin/\n\nSitemap: {base}/sitemap.xml\n"
     );
-    (
-        [(header::CONTENT_TYPE, "text/plain; charset=utf-8")],
-        body,
-    )
+    ([(header::CONTENT_TYPE, "text/plain; charset=utf-8")], body)
 }
 
 pub fn routes() -> Router<AppState> {
@@ -180,7 +212,6 @@ pub struct SeoMetadata {
     pub json_ld: Option<Value>,
 }
 
-#[allow(clippy::too_many_lines)]
 pub async fn metadata(
     State(state): State<AppState>,
     Query(q): Query<MetadataQuery>,
@@ -198,14 +229,7 @@ pub async fn metadata(
     /* /sample/{slug} */
     if let Some(slug) = path.strip_prefix("/sample/") {
         let slug = slug.trim_end_matches('/');
-        if let Ok(Some(row)) = sqlx::query!(
-            r#"SELECT titulo, descripcion, slug
-               FROM samples WHERE slug = $1 AND estado = 'activo' LIMIT 1"#,
-            slug
-        )
-        .fetch_optional(pool)
-        .await
-        {
+        if let Ok(Some(row)) = SeoRepository::sample_metadata(pool, slug).await {
             let title = format!("{} | Sample gratis para descargar", row.titulo);
             let description = row
                 .descripcion
@@ -230,14 +254,7 @@ pub async fn metadata(
     /* /perfil/{username} */
     if let Some(username) = path.strip_prefix("/perfil/") {
         let username = username.trim_end_matches('/');
-        if let Ok(Some(row)) = sqlx::query!(
-            r#"SELECT username, nombre_visible, bio, avatar_url
-               FROM usuarios_ext WHERE username = $1 AND estado = 'activo' LIMIT 1"#,
-            username
-        )
-        .fetch_optional(pool)
-        .await
-        {
+        if let Ok(Some(row)) = SeoRepository::profile_metadata(pool, username).await {
             let display = row.nombre_visible;
             let bio = row.bio.unwrap_or_default();
             let title = format!("{display} | Perfil en Kamples");
@@ -267,17 +284,7 @@ pub async fn metadata(
     /* /blog/{slug} */
     if let Some(slug) = path.strip_prefix("/blog/") {
         let slug = slug.trim_end_matches('/');
-        if let Ok(Some(row)) = sqlx::query!(
-            r#"SELECT titulo, extracto, slug
-               FROM articulos
-               WHERE slug = $1 AND moderacion_estado = 'aprobado'
-                 AND publicado_en IS NOT NULL AND eliminado_en IS NULL
-               LIMIT 1"#,
-            slug
-        )
-        .fetch_optional(pool)
-        .await
-        {
+        if let Ok(Some(row)) = SeoRepository::article_metadata(pool, slug).await {
             let title = format!("{} | Blog Kamples", row.titulo);
             let extracto = row.extracto;
             let description = if extracto.is_empty() {

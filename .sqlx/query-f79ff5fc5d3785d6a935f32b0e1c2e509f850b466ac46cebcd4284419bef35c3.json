@@ -1,0 +1,25 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO usuarios_ext (\n                    wp_user_id, username, email, nombre_visible, es_seed, rol, estado\n                )\n                VALUES ($1, $2, $3, $4, TRUE, 'usuario', 'activo')\n                ON CONFLICT (username) DO NOTHING\n                RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Varchar",
+        "Varchar",
+        "Varchar"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "f79ff5fc5d3785d6a935f32b0e1c2e509f850b466ac46cebcd4284419bef35c3"
+}
