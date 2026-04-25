@@ -269,6 +269,7 @@ fn build_sample_summary(
         total_reproducciones: record.total_reproducciones,
         total_comentarios: record.total_comentarios,
         publicado_at: record.publicado_at,
+        metadata: record.metadata,
         creador: build_creator_summary(
             record.creator_id,
             record.creator_username,

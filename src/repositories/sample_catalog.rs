@@ -100,6 +100,7 @@ pub struct SampleCatalogSummaryRecord {
     pub creator_nombre_visible: Option<String>,
     pub creator_avatar_url: Option<String>,
     pub creator_verificado: bool,
+    pub metadata: serde_json::Value,
 }
 
 #[derive(Debug, Clone)]

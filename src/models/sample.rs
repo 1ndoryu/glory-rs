@@ -128,6 +128,8 @@ pub struct SampleSummary {
     pub total_reproducciones: i32,
     pub total_comentarios: i32,
     pub publicado_at: Option<chrono::DateTime<chrono::Utc>>,
+    #[schema(value_type = Object)]
+    pub metadata: serde_json::Value,
     pub creador: SampleCreatorSummary,
 }
 

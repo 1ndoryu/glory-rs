@@ -1,4 +1,5 @@
 use chrono::{DateTime, Utc};
+use serde_json::Value;
 use sqlx::{FromRow, Postgres, QueryBuilder};
 
 use super::{SampleCatalogSummaryRecord, SampleListFilters, SampleTextSearch};
@@ -32,7 +33,8 @@ pub(super) const SAMPLE_SUMMARY_SELECT: &str = "SELECT
         u.username AS creator_username,
         u.nombre_visible AS creator_nombre_visible,
         u.avatar_url AS creator_avatar_url,
-        COALESCE(u.verificado, FALSE) AS creator_verificado";
+        COALESCE(u.verificado, FALSE) AS creator_verificado,
+        COALESCE(s.metadata, '{}'::jsonb) AS metadata";
 
 #[derive(Debug, FromRow)]
 pub(super) struct CountRow {
@@ -69,6 +71,7 @@ pub(super) struct SampleSummaryRow {
     creator_nombre_visible: Option<String>,
     creator_avatar_url: Option<String>,
     creator_verificado: bool,
+    metadata: Value,
 }
 
 impl From<SampleSummaryRow> for SampleCatalogSummaryRecord {
@@ -102,6 +105,7 @@ impl From<SampleSummaryRow> for SampleCatalogSummaryRecord {
             creator_nombre_visible: row.creator_nombre_visible,
             creator_avatar_url: row.creator_avatar_url,
             creator_verificado: row.creator_verificado,
+            metadata: row.metadata,
         }
     }
 }

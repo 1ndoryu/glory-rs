@@ -14287,6 +14287,7 @@
           "total_likes",
           "total_reproducciones",
           "total_comentarios",
+          "metadata",
           "creador"
         ],
         "properties": {
@@ -14382,6 +14383,9 @@
           },
           "verificado": {
             "type": "boolean"
+          },
+          "metadata": {
+            "type": "object"
           }
         }
       },

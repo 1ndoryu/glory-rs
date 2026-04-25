@@ -58,7 +58,7 @@ function normalizarSample(sample: SampleSummary): SampleResumen {
     totalDescargas: sample.total_descargas,
     totalLikes: sample.total_likes,
     totalReproducciones: sample.total_reproducciones,
-    metadata: null,
+    metadata: (sample.metadata as Record<string, unknown>) ?? null,
     creador: {
       id: sample.creador.id,
       username: sample.creador.username,
