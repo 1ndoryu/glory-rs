@@ -37,14 +37,14 @@ export const BadgesMetadata = ({ sample, onFiltrar }: BadgesMetadataProps): JSX.
         if (!esAdmin) return;
         const nuevoTipo = tipoActual === 'loop' ? 'oneshot' : 'loop';
         setTipoLocal(nuevoTipo);
-        const resp = await actualizarSample(sample.id, { tipo: nuevoTipo });
+        const resp = await actualizarSample(sample.slug, { tipo: nuevoTipo });
         if (resp.ok) {
             toast.exito(t('admin.tipoActualizado'));
         } else {
             setTipoLocal(null); /* rollback optimista */
             toast.error(t('admin.tipoError'));
         }
-    }, [esAdmin, tipoActual, sample.id, t]);
+    }, [esAdmin, tipoActual, sample.slug, sample.id, t]);
 
     const meta = sample.metadata;
     const badges: { texto: string; clave: string }[] = [];

@@ -67,11 +67,11 @@
 - 254A-7b — Implementar `GET /api/me/sync/colecciones` en Rust.
 - 254A-7c — Implementar `GET/POST /api/me/coleccionados/*` (listado, carpetas, asignación de carpeta) en Rust.
 - 254A-7d — Adapter de path en desktop: reescribir `/wp-json/kamples/v1/*` → `/api/*` análogo a `wpJsonStub` del frontend, o migrar `fetch` a `apiDesktopAdapter`. Sin esto, sync desktop no funciona contra backend Rust (solo contra WP legacy).
-- 254A-8a — Migrar `actualizarSample` (frontend) de `PUT /samples/{id}` a `PATCH /samples/{slug}`. Resolver slug a partir de id. Ver `Agente/documentacion/ui/auditoria-menu-contextual-2026-04-25.md`.
 - 254A-8b — Implementar `POST /api/samples/:id/corregir-ia` en Rust (handler IA + cola de moderación).
 - 254A-8c — Implementar `POST /api/samples/:id/extender-recorte` en Rust.
 - 254A-8d — Auditar y completar el flujo `reportar`: confirmar endpoint, implementar `POST /api/reportes` si falta.
 - Remplazar el daw que hicimos, por https://github.com/andremichelle/opendaw, requiere revisar el daw a actual para ver como estaba integrado, y hacer un plan de las integraciones necesaria (como que un sample se pudiera arrastrar y soltar), el daw actual es muy pobre y malo, por eso vamos a cambiar a opendaw, tienes que hacer un fork en mi cuenta 1ndoryu
+- completa todo lo de las md de (auditoría sync desktop y auditoría menu contextual)
 
 ### Fase 19 â€” Despliegue
 - Nota: un error pasado hizo que se borrara la base de datos, hay que reforzar para que no vuelva a suceder, el error problemente fue causado al desplegar directamente o alguna otra razón, se debe tomar todo los medios necesarios para evitar la perdida de datos, tanto de la base de datos tanto como los archivos fisicos que deben perdurar, esto debe tomarse muy en serio porque ya es un error que se cometio en el pasado.

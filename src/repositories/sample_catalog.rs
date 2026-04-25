@@ -411,41 +411,44 @@ impl SampleRepository {
         sample_id: i32,
         patch: &UpdateSamplePatch,
     ) -> Result<(), sqlx::Error> {
+        /* [254A-8a] Bug pre-existente: Separated::push_bind inserta el separador
+         * antes del bind, lo que generaba `col = , $1`. Se usa push_bind_unseparated
+         * y push_unseparated para mantener `col = $1` dentro de cada asignacion. */
         let mut builder = QueryBuilder::<Postgres>::new("UPDATE samples SET ");
         {
             let mut separated = builder.separated(", ");
 
             if let Some(titulo) = &patch.titulo {
                 separated.push("titulo = ");
-                separated.push_bind(titulo.clone());
+                separated.push_bind_unseparated(titulo.clone());
             }
 
             if let Some(descripcion) = &patch.descripcion {
                 separated.push("descripcion = ");
-                separated.push_bind(descripcion.clone());
+                separated.push_bind_unseparated(descripcion.clone());
             }
 
             if let Some(tags) = &patch.tags {
                 separated.push("tags = ");
-                separated.push_bind(tags.clone());
-                separated.push("::text[]");
+                separated.push_bind_unseparated(tags.clone());
+                separated.push_unseparated("::text[]");
             }
 
             if let Some(sample_type) = &patch.sample_type {
                 separated.push("tipo = ");
-                separated.push_bind(sample_type.clone());
+                separated.push_bind_unseparated(sample_type.clone());
             }
 
             if let Some(es_premium) = patch.es_premium {
                 separated.push("es_premium = ");
-                separated.push_bind(es_premium);
+                separated.push_bind_unseparated(es_premium);
             }
 
             if let Some(precio) = &patch.precio {
                 match precio {
                     Some(value) => {
                         separated.push("precio = ");
-                        separated.push_bind(*value);
+                        separated.push_bind_unseparated(*value);
                     }
                     None => {
                         separated.push("precio = NULL");
@@ -455,24 +458,24 @@ impl SampleRepository {
 
             if let Some(permitir_descarga) = patch.permitir_descarga {
                 separated.push("permitir_descarga = ");
-                separated.push_bind(permitir_descarga);
+                separated.push_bind_unseparated(permitir_descarga);
             }
 
             if let Some(licencia_libre) = patch.licencia_libre {
                 separated.push("licencia_libre = ");
-                separated.push_bind(licencia_libre);
+                separated.push_bind_unseparated(licencia_libre);
             }
 
             if let Some(mostrar_en_comunidad) = patch.mostrar_en_comunidad {
                 separated.push("mostrar_en_comunidad = ");
-                separated.push_bind(mostrar_en_comunidad);
+                separated.push_bind_unseparated(mostrar_en_comunidad);
             }
 
             if let Some(imagen_url) = &patch.imagen_url {
                 match imagen_url {
                     Some(value) => {
                         separated.push("imagen_url = ");
-                        separated.push_bind(value.clone());
+                        separated.push_bind_unseparated(value.clone());
                     }
                     None => {
                         separated.push("imagen_url = NULL");

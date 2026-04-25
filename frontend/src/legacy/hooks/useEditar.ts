@@ -184,7 +184,7 @@ export const useEditar = (
                     .map((t) => t.trim())
                     .filter(Boolean);
 
-                const resp = await actualizarSample(sample.id, {
+                const resp = await actualizarSample(sample.slug, {
                     titulo: formularioSample.titulo.trim(),
                     descripcion: formularioSample.descripcion.trim(),
                     tags: tagsArray,

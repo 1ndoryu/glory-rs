@@ -113,7 +113,8 @@ export const construirItemsMenuSample = (d: DepsMenuSample): MenuItemDef[] => {
     if (d.esAdmin)
         items.push({ id: 'verificar', etiqueta: s.verificado ? t('sample.menu.quitarVerificacion') : t('sample.menu.verificar'), icono: ic(BadgeCheck), separadorDespues: true, onClick: () => {
             const nv = !s.verificado;
-            actualizarSample(s.id, { verificado: nv }).then((r) => {
+            /* [254A-8a] actualizarSample ahora requiere slug (PATCH /samples/:slug) */
+            actualizarSample(s.slug, { verificado: nv }).then((r) => {
                 if (r.ok) { toast.exito(nv ? t('sample.toast.verificado') : t('sample.toast.verificacionRemovida')); emitirEvento(EVENTO_SAMPLE_ACTUALIZADO, { sampleId: s.id, cambios: { verificado: nv } }); }
                 else toast.error(t('sample.toast.errorVerificacion'));
             });

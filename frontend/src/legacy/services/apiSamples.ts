@@ -4,7 +4,7 @@
  * Conecta directamente con la API real, sin fallback a mock.
  */
 
-import { apiGet, apiPost, apiPostFormData, apiDelete, apiPut } from './apiCliente';
+import { apiGet, apiPost, apiPostFormData, apiDelete, apiPatch } from './apiCliente';
 import type { RespuestaApi } from './apiCliente';
 import type { SampleResumen, Sample } from '../types';
 import type { CategoriaTag } from './tagUtils';
@@ -354,13 +354,15 @@ export interface DatosActualizarSample {
 /*
  * C126: Actualizar metadatos de un sample.
  * Solo el propietario o admin pueden editar.
- * Endpoint: PUT /samples/{id}
+ * Endpoint: PATCH /samples/{slug} — el backend Rust acepta slug o id_corto, NO id numerico.
+ * [254A-8a] Migrado de PUT /samples/{id} a PATCH /samples/{slug} para alinear
+ *   con el contrato del backend Rust (`PATCH /api/samples/:slug`).
  */
 export const actualizarSample = async (
-    sampleId: number,
+    slug: string,
     datos: DatosActualizarSample
 ): Promise<RespuestaApi<Sample>> => {
-    const resp = await apiPut<unknown>(`/samples/${sampleId}`, datos);
+    const resp = await apiPatch<unknown>(`/samples/${slug}`, datos);
     if (!resp.ok || !resp.data) {
         return copiarErrorRespuesta(resp);
     }
