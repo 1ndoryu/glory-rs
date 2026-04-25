@@ -68,8 +68,7 @@ export const ROUTES: GloryRoutesMap = {
     '/componentes/': { island: 'ShowcaseIsland', props: {}, title: 'Componentes' },
     '/dev/componentes/': { island: 'ShowcaseIsland', props: {}, title: 'Componentes' },
 
-    /* Blog dinamico: /blog/:slug */
-    '/blog/': { island: 'BlogPageIsland', props: {}, title: 'Blog', params: ':slug' },
+    /* [254A-B] Ruta /blog/ removida de produccion: el blog/articulos ya no es accesible. */
 
     '/privacy/': { island: 'PrivacidadIsland', props: {}, title: 'Privacidad' },
     '/terms/': { island: 'TerminosIsland', props: {}, title: 'Terminos' },

@@ -23,7 +23,7 @@ const LoginPage = lazy(() => import('./pages/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
 const SamplePage = lazy(() => import('./pages/SamplePage'));
 const PerfilPage = lazy(() => import('./pages/PerfilPage'));
-const BlogPage = lazy(() => import('./pages/BlogPage'));
+/* [254A-B] BlogPage removida de produccion: el blog/articulos ya no es accesible desde la UI. */
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 function Layout() {
@@ -65,7 +65,7 @@ function Layout() {
           <NavLink to="/" className={linkClassName}>Inicio</NavLink>
           <NavLink to="/descubrir" className={linkClassName}>Descubrir</NavLink>
           <NavLink to="/dashboard" className={linkClassName}>Dashboard</NavLink>
-          <NavLink to="/blog" className={linkClassName}>Blog</NavLink>
+          {/* [254A-B] Tab "Blog" removida de produccion. */}
           <a className="enlace" href="/swagger-ui/" target="_blank" rel="noopener noreferrer">API</a>
         </nav>
         <div className="accionesCabecera">
@@ -112,8 +112,7 @@ const router = createBrowserRouter([
       { path: 'dashboard', element: <DashboardPage /> },
       { path: 'sample/:slug', element: <SamplePage /> },
       { path: 'perfil/:username', element: <PerfilPage /> },
-      { path: 'blog', element: <BlogPage /> },
-      { path: 'blog/:slug', element: <BlogPage /> },
+      /* [254A-B] Rutas /blog y /blog/:slug removidas de produccion. */
       { path: '*', element: <NotFoundPage /> },
     ],
   },

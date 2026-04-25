@@ -11,7 +11,7 @@
  */
 
 import { useState } from 'react';
-import { Bell, Mail, User, Settings, LogOut, Plus, Crown, Sparkles, Search, Download, Music, Music2, Trash2, Trash, Menu, MessageCircle, Heart, ShieldCheck, Box, BookOpen, Activity, Monitor, Smartphone } from 'lucide-react';
+import { Bell, Mail, User, Settings, LogOut, Plus, Crown, Sparkles, Search, Download, Music, Music2, Trash2, Trash, Menu, MessageCircle, Heart, ShieldCheck, Box, Activity, Monitor, Smartphone } from 'lucide-react';
 import { InputBusqueda } from '../ui/InputBusqueda';
 import { ResultadosBusquedaRapidaDropdown } from '../ui/ResultadosBusquedaRapida';
 import { Badge } from '../ui/Badge';
@@ -30,7 +30,6 @@ import { useTopBar } from '@app/hooks/useTopBar';
 import { useBusquedaRapida } from '@app/hooks/useBusquedaRapida';
 import { useEliminarSamples } from '@app/hooks/useEliminarSamples';
 import { useSolicitudWhatsappStore } from '@app/stores/solicitudWhatsappStore';
-import { useArticuloEditorStore } from '@app/stores/articuloEditorStore';
 import { useAlgoTimingStore } from '@app/stores/algoTimingStore';
 import { useVersionStore } from '@app/stores/versionStore';
 import { useT } from '@app/utils/i18n';
@@ -91,9 +90,9 @@ export const TopBar = (): JSX.Element => {
     const [hamburguesaAbierta, setHamburguesaAbierta] = useState(false);
     const [hamburguesaPos, setHamburguesaPos] = useState({ x: 0, y: 0 });
 
-    /* [183A-109] Menu contextual del botón "+" — elegir entre publicación y artículo.
-     * Estado combinado en un solo useState para cumplir max 3 useState por componente. */
-    const [crearMenu, setCrearMenu] = useState({ abierto: false, x: 0, y: 0 });
+    /* [254A-B] Antes el botón "+" abría un menú contextual con las opciones
+     * "publicación" y "artículo". Ahora abre directamente el modal de publicar
+     * (sample / post normal). El blog/artículos queda fuera de producción. */
 
     const esAdmin = usuario?.rol === 'admin';
     const mostrarHerramientasDev = esAdmin && devModeActivo;
@@ -110,16 +109,8 @@ export const TopBar = (): JSX.Element => {
             etiqueta: t('topbar.crearPublicacion'),
             icono: <Plus size={14} />,
             onClick: () => {
+                /* [254A-B] Removida la opción de artículos del menú hamburguesa. */
                 abrirCrear();
-                setHamburguesaAbierta(false);
-            },
-        },
-        {
-            id: 'hb-crear-articulo',
-            etiqueta: t('topbar.escribirArticulo'),
-            icono: <BookOpen size={14} />,
-            onClick: () => {
-                useArticuloEditorStore.getState().abrir();
                 setHamburguesaAbierta(false);
             },
         },
@@ -462,52 +453,19 @@ export const TopBar = (): JSX.Element => {
                         </div>
                     )}
 
+                    {/* [254A-B] El botón "+" abre directamente el modal de publicar.
+                     * Antes mostraba un menú con "publicación" y "artículo"; ahora
+                     * los artículos no se publican desde producción. */}
                     <BotonBase
                         variante="ghost"
                         tamano="md"
                         soloIcono
                         className="topbarBtnCrear"
-                        onClick={(e) => {
-                            const rect = (e.currentTarget as HTMLButtonElement).getBoundingClientRect();
-                            setCrearMenu(prev => ({
-                                abierto: !prev.abierto,
-                                x: rect.right,
-                                y: rect.bottom,
-                            }));
-                        }}
+                        onClick={() => abrirCrear()}
                         aria-label="Crear"
                     >
                         <Plus size={20} />
                     </BotonBase>
-
-                    {/* [183A-109] Menu contextual "Crear": publicación o artículo */}
-                    <MenuContextual
-                        abierto={crearMenu.abierto}
-                        onCerrar={() => setCrearMenu(prev => ({ ...prev, abierto: false }))}
-                        items={[
-                            {
-                                id: 'crear-publicacion',
-                                etiqueta: t('topbar.publicacion'),
-                                icono: <Plus size={14} />,
-                                onClick: () => {
-                                    abrirCrear();
-                                    setCrearMenu(prev => ({ ...prev, abierto: false }));
-                                },
-                            },
-                            {
-                                id: 'crear-articulo',
-                                etiqueta: t('topbar.escribirArticulo'),
-                                icono: <BookOpen size={14} />,
-                                onClick: () => {
-                                    useArticuloEditorStore.getState().abrir();
-                                    setCrearMenu(prev => ({ ...prev, abierto: false }));
-                                },
-                            },
-                        ]}
-                        x={crearMenu.x}
-                        y={crearMenu.y}
-                        alinearDerecha
-                    />
 
                     {/* C184: Botón mezclador */}
                     <BotonBase
