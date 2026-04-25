@@ -2,7 +2,11 @@
                                      /* sentinel-disable-file limite-lineas — registro central de rutas y schemas OpenAPI */
 
 mod admin;
+mod admin_automatizacion;
+mod admin_contribuciones;
+mod admin_duplicados;
 mod admin_ia_queue;
+mod admin_moderacion;
 mod app_versions;
 mod articles;
 mod auth;
@@ -611,4 +615,8 @@ fn api_routes() -> Router<AppState> {
         .merge(scraper_admin::routes())
         .merge(admin::routes())
         .merge(admin_ia_queue::routes())
+        .merge(admin_automatizacion::routes())
+        .merge(admin_contribuciones::routes())
+        .merge(admin_duplicados::routes())
+        .merge(admin_moderacion::routes())
 }

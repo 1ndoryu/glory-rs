@@ -61,6 +61,12 @@
 7. Newtypes para IDs de dominio (`SampleId`, `UserId`, `ColeccionId`...).
 8. Cero parches: si el diseÃ±o PHP era subÃ³ptimo, rediseÃ±ar â€” no portar deuda tÃ©cnica.
 
+- 254A-6 — Bug: `/api/publicaciones` responde 500 (GET `?filtro=todos&page=1`, GET `?autor=admin&page=1`, POST). Revisar handler `posts::routes`/`posts::list` y log del backend para identificar la causa raíz (probablemente columna o tipo mal inferido tras los últimos cambios). Reproducir local antes de fixar.
+- 254A-7 — Revisar detalladamente que la aplicación de sincronización (sync) funcione en la aplicación de escritorio (Tauri/desktop). Auditar handshake WS, autenticación, descarga incremental.
+- 254A-8 — Revisar todas las acciones del menú contextual (descargar, descargar SVG, etc.): inventariar qué hace cada item, comprobar que la acción real se dispara y devuelve resultado.d)
+- 
+
+
 ### Fase 19 â€” Despliegue
 - Nota: un error pasado hizo que se borrara la base de datos, hay que reforzar para que no vuelva a suceder, el error problemente fue causado al desplegar directamente o alguna otra razón, se debe tomar todo los medios necesarios para evitar la perdida de datos, tanto de la base de datos tanto como los archivos fisicos que deben perdurar, esto debe tomarse muy en serio porque ya es un error que se cometio en el pasado.
 - 174A-116 â€” MigraciÃ³n inicial automÃ¡tica + healthcheck (no hacerlo hasta mi confirmacion)
