@@ -7,6 +7,7 @@
 import { useState, useCallback } from 'react';
 import { useGenerosModalStore } from '@app/stores/generosModalStore';
 import { useAuthStore } from '@app/stores';
+import { useToastStore } from '@app/stores/toastStore';
 import { actualizarPerfil } from '@app/services/apiAuth';
 import { crearLogger } from '@app/services/logger';
 
@@ -74,6 +75,10 @@ export function useModalGeneros() {
             cerrar();
         } else {
             log.error('Error guardando generos', resp.error);
+            useToastStore.getState().agregar({
+                tipo: 'error',
+                mensaje: 'No se pudieron guardar los géneros. Intenta de nuevo.',
+            });
         }
 
         setGuardando(false);

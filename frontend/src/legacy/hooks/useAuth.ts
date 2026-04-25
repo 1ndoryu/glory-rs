@@ -174,7 +174,9 @@ export const useAuth = () => {
                 /* El backend retorna { token, usuario } dentro de data */
                 const datos = resp.data as unknown as { token?: string; usuario?: UsuarioAutenticado };
                 const usuarioResp = datos.usuario ?? (resp.data as unknown as UsuarioAutenticado);
-                setUsuario(usuarioResp);
+                /* [QK3-fix] AuthResponse.user es partial (sin generos_favoritos).
+                 * Pasar false para que QK3 refetche /me y cargue el perfil completo. */
+                setUsuario(usuarioResp, false);
 
                 /* En desktop (Tauri): guardar JWT ANTES de redirigir.
                  * El await es crítico: sin él, window.location.href recarga la página
@@ -224,7 +226,9 @@ export const useAuth = () => {
                 /* El backend retorna { token, usuario } dentro de data */
                 const datos = resp.data as unknown as { token?: string; usuario?: UsuarioAutenticado };
                 const usuarioResp = datos.usuario ?? (resp.data as unknown as UsuarioAutenticado);
-                setUsuario(usuarioResp);
+                /* [QK3-fix] AuthResponse.user es partial (sin generos_favoritos).
+                 * Pasar false para que QK3 refetche /me y cargue el perfil completo. */
+                setUsuario(usuarioResp, false);
 
                 /* En desktop (Tauri): guardar JWT ANTES de navegar */
                 if (datos.token && esGoogleNativo) {
@@ -261,7 +265,9 @@ export const useAuth = () => {
             if (resp.ok && resp.data) {
                 const datos = resp.data as unknown as { token?: string; usuario?: UsuarioAutenticado };
                 const usuarioResp = datos.usuario ?? (resp.data as unknown as UsuarioAutenticado);
-                setUsuario(usuarioResp);
+                /* [QK3-fix] AuthResponse.user es partial (sin generos_favoritos).
+                 * Pasar false para que QK3 refetche /me y cargue el perfil completo. */
+                setUsuario(usuarioResp, false);
 
                 if (datos.token && esGoogleNativo) {
                     await persistirTokenDesktop(datos.token, datos.usuario ?? null);
@@ -317,7 +323,9 @@ export const useAuth = () => {
                 throw new Error('Google OAuth nativo no disponible');
             }
 
-            setUsuario(datos.usuario);
+            /* [QK3-fix] datos.usuario es partial (sin generos_favoritos).
+             * Pasar false para que QK3 refetche /me y cargue el perfil completo. */
+            setUsuario(datos.usuario, false);
 
             if (datos.token) {
                 await persistirTokenDesktop(datos.token, datos.usuario ?? null);
