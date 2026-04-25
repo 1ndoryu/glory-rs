@@ -30,7 +30,8 @@ pub use dashboard::{
     CreatorDashboardTransactionType, CreatorDashboardTransactionsQuery,
 };
 pub use sync::{
-    SyncChangelogDelta, SyncChangelogEntry, SyncChangelogQuery, SyncChangelogTipo,
+    MeSyncColeccionesResponse, SyncChangelogDelta, SyncChangelogEntry, SyncChangelogQuery,
+    SyncChangelogTipo, SyncColeccion, SyncColeccionesData, SyncSample,
 };
 pub use music::{
     ArtistDetailResponse, ArtistStats, CreateArtistRequest, CreateRelationRequest,

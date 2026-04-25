@@ -13,14 +13,17 @@ use utoipa::ToSchema;
 
 use crate::errors::AppError;
 use crate::middleware::CurrentUser;
-use crate::models::{SyncChangelogDelta, SyncChangelogQuery};
-use crate::repositories::SyncChangelogRepository;
+use crate::models::{
+    MeSyncColeccionesResponse, SyncChangelogDelta, SyncChangelogQuery, SyncColeccionesData,
+};
+use crate::repositories::{SyncChangelogRepository, SyncFullRepository};
 use crate::AppState;
 
 pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/sync/changelog", get(get_changelog))
         .route("/me/sync/delta", get(get_me_sync_delta))
+        .route("/me/sync/colecciones", get(get_me_sync_colecciones))
 }
 
 #[utoipa::path(
@@ -73,4 +76,33 @@ pub async fn get_me_sync_delta(
 
     let delta = SyncChangelogRepository::delta(&state.pool, user.user_id, cursor, limite).await?;
     Ok(Json(MeSyncDeltaResponse { data: delta }))
+}
+
+/* [254A-7b] Full sync inicial: lista de colecciones (con samples embebidos)
+ * + samples sueltos (descargados o subidos por el usuario que no estan en
+ * ninguna coleccion). Replica SyncController::coleccionesParaSync (PHP). */
+#[utoipa::path(
+    get,
+    path = "/api/me/sync/colecciones",
+    tag = "sync",
+    security(("bearer_auth" = [])),
+    responses(
+        (status = 200, description = "Full sync de colecciones+samples", body = MeSyncColeccionesResponse),
+        (status = 401, description = "No autenticado"),
+    )
+)]
+pub async fn get_me_sync_colecciones(
+    State(state): State<AppState>,
+    user: CurrentUser,
+) -> Result<Json<MeSyncColeccionesResponse>, AppError> {
+    let colecciones =
+        SyncFullRepository::colecciones_con_samples(&state.pool, user.user_id).await?;
+    let sin_coleccion =
+        SyncFullRepository::descargas_sin_coleccion(&state.pool, user.user_id).await?;
+    Ok(Json(MeSyncColeccionesResponse {
+        data: SyncColeccionesData {
+            colecciones,
+            sin_coleccion,
+        },
+    }))
 }

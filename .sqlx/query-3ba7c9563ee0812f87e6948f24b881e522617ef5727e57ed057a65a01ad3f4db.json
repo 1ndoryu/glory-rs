@@ -1,0 +1,46 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            WITH samples_por_coleccion AS (\n                SELECT\n                    cs.coleccion_id,\n                    json_agg(\n                        json_build_object(\n                            'id', s.id,\n                            'titulo', s.titulo,\n                            'formato', s.formato,\n                            'tamano', s.tamano,\n                            'imagenUrl', s.imagen_url\n                        ) ORDER BY cs.orden ASC, cs.added_at DESC\n                    ) AS samples_json\n                FROM coleccion_samples cs\n                JOIN samples s ON cs.sample_id = s.id\n                WHERE s.estado = 'activo' AND s.eliminado_en IS NULL\n                GROUP BY cs.coleccion_id\n            )\n            SELECT\n                c.id              AS \"id!: i64\",\n                c.nombre          AS \"nombre!: String\",\n                c.parent_id       AS \"parent_id?: i64\",\n                c.version         AS \"version!: i32\",\n                COALESCE(spc.samples_json, '[]'::json) AS \"samples_json!: serde_json::Value\"\n            FROM colecciones c\n            LEFT JOIN samples_por_coleccion spc ON spc.coleccion_id = c.id\n            WHERE c.usuario_id = $1 AND c.eliminado_en IS NULL\n            ORDER BY c.updated_at DESC\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!: i64",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "nombre!: String",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "parent_id?: i64",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 3,
+        "name": "version!: i32",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "samples_json!: serde_json::Value",
+        "type_info": "Json"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      null
+    ]
+  },
+  "hash": "3ba7c9563ee0812f87e6948f24b881e522617ef5727e57ed057a65a01ad3f4db"
+}

@@ -78,3 +78,38 @@ pub struct SyncChangelogQuery {
     #[serde(default)]
     pub limite: Option<i64>,
 }
+
+/* [254A-7b] Modelos para GET /api/me/sync/colecciones (full sync inicial del
+ * desktop watcher). Replica el contrato de SyncController::coleccionesParaSync:
+ * `{ data: { colecciones: [...], sinColeccion: [...] } }`. */
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct SyncSample {
+    pub id: i32,
+    pub titulo: String,
+    pub formato: String,
+    pub tamano: i64,
+    pub imagen_url: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct SyncColeccion {
+    pub id: i64,
+    pub nombre: String,
+    pub parent_id: Option<i64>,
+    pub version: i32,
+    pub samples: Vec<SyncSample>,
+}
+
+#[derive(Debug, Clone, Serialize, ToSchema)]
+pub struct SyncColeccionesData {
+    pub colecciones: Vec<SyncColeccion>,
+    #[serde(rename = "sinColeccion")]
+    pub sin_coleccion: Vec<SyncSample>,
+}
+
+#[derive(Debug, Clone, Serialize, ToSchema)]
+pub struct MeSyncColeccionesResponse {
+    pub data: SyncColeccionesData,
+}

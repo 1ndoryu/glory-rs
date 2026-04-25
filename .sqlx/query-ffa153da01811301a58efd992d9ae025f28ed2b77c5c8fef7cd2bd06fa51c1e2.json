@@ -1,0 +1,46 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT DISTINCT ON (s.id)\n                s.id         AS \"id!: i32\",\n                s.titulo     AS \"titulo!: String\",\n                s.formato    AS \"formato!: String\",\n                s.tamano     AS \"tamano!: i64\",\n                s.imagen_url AS \"imagen_url?: String\"\n            FROM samples s\n            LEFT JOIN descargas d\n                   ON d.sample_id = s.id\n                  AND d.usuario_id = $1\n            WHERE s.estado = 'activo'\n              AND s.eliminado_en IS NULL\n              AND (\n                    d.usuario_id IS NOT NULL\n                    OR s.creador_id = $1\n              )\n              AND NOT EXISTS (\n                  SELECT 1 FROM coleccion_samples cs\n                  JOIN colecciones c ON cs.coleccion_id = c.id\n                  WHERE cs.sample_id = s.id\n                    AND c.usuario_id = $1\n                    AND c.eliminado_en IS NULL\n              )\n            ORDER BY s.id, d.created_at DESC NULLS LAST, s.updated_at DESC\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!: i32",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "titulo!: String",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "formato!: String",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "tamano!: i64",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 4,
+        "name": "imagen_url?: String",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "ffa153da01811301a58efd992d9ae025f28ed2b77c5c8fef7cd2bd06fa51c1e2"
+}

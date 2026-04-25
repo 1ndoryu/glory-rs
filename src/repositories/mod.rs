@@ -31,6 +31,7 @@ mod saved_collection;
 mod search;
 mod seo;
 mod sync_changelog;
+mod sync_full;
 mod user;
 
 pub use admin_ia_queue::{
@@ -113,4 +114,5 @@ pub use search::{
 };
 pub use seo::SeoRepository;
 pub use sync_changelog::SyncChangelogRepository;
+pub use sync_full::SyncFullRepository;
 pub use user::{OAuthRepository, UserRepository};
