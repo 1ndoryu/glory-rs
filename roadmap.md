@@ -61,8 +61,14 @@
 7. Newtypes para IDs de dominio (`SampleId`, `UserId`, `ColeccionId`...).
 8. Cero parches: si el diseÃ±o PHP era subÃ³ptimo, rediseÃ±ar â€” no portar deuda tÃ©cnica.
 
-- 254A-7 — Revisar detalladamente que la aplicación de sincronización (sync) funcione en la aplicación de escritorio (Tauri/desktop). Auditar handshake WS, autenticación, descarga incremental.
 - 254A-8 — Revisar todas las acciones del menú contextual (descargar, descargar SVG, etc.): inventariar qué hace cada item, comprobar que la acción real se dispara y devuelve resultado.d)
+
+### Pendientes derivados de auditorías
+
+- 254A-7a — Implementar `GET /api/me/sync/delta?cursor=...` en Rust (protocolo delta para watcher desktop). Ver `Agente/documentacion/sync/auditoria-sync-desktop-2026-04-25.md`.
+- 254A-7b — Implementar `GET /api/me/sync/colecciones` en Rust.
+- 254A-7c — Implementar `GET/POST /api/me/coleccionados/*` (listado, carpetas, asignación de carpeta) en Rust.
+- 254A-7d — Adapter de path en desktop: reescribir `/wp-json/kamples/v1/*` → `/api/*` análogo a `wpJsonStub` del frontend, o migrar `fetch` a `apiDesktopAdapter`. Sin esto, sync desktop no funciona contra backend Rust (solo contra WP legacy).
 
 
 ### Fase 19 â€” Despliegue
