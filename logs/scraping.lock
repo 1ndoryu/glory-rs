@@ -1,0 +1,10 @@
+{
+  "nombre": "scraping",
+  "estado": "stopped",
+  "pid": null,
+  "iniciado_at": "2026-04-25T08:10:30.543602200Z",
+  "ultimo_log": "2026-04-25T08:10:30.980049400Z",
+  "progreso": null,
+  "error": null,
+  "resultado": null
+}

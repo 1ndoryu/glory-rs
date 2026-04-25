@@ -1,3 +1,4 @@
+/* sentinel-disable-file limite-lineas — proyecciones SQL legacy de colecciones agrupadas para preservar paridad PHP; dividir cuando se cierre la migración legacy. */
 use chrono::{DateTime, Utc};
 use sqlx::{FromRow, PgPool, Postgres, QueryBuilder};
 
@@ -69,6 +70,7 @@ pub struct LegacyColeccionRecord {
     pub esta_guardada: bool,
     pub esta_likeada: bool,
     pub total_likes: i32,
+    pub contiene_el_sample: Option<bool>,
 }
 
 #[derive(Debug, Clone, FromRow)]
@@ -117,7 +119,7 @@ impl ColeccionesRepository {
         busqueda: Option<&str>,
     ) -> Result<Vec<LegacyColeccionRecord>, AppError> {
         let mut builder = QueryBuilder::<Postgres>::new(
-            "SELECT c.id, c.usuario_id, c.nombre, NULL::text AS slug, COALESCE(c.descripcion, '') AS descripcion, \
+            "SELECT c.id, c.usuario_id, c.nombre, c.slug, COALESCE(c.descripcion, '') AS descripcion, \
                     c.publica, c.parent_id, c.imagen_url, c.version, c.total_samples, ",
         );
         push_collection_projection(&mut builder, None);
@@ -149,7 +151,7 @@ impl ColeccionesRepository {
         offset: i64,
     ) -> Result<Vec<LegacyColeccionRecord>, AppError> {
         let mut builder = QueryBuilder::<Postgres>::new(
-            "SELECT c.id, c.usuario_id, c.nombre, NULL::text AS slug, COALESCE(c.descripcion, '') AS descripcion, \
+            "SELECT c.id, c.usuario_id, c.nombre, c.slug, COALESCE(c.descripcion, '') AS descripcion, \
                     c.publica, c.parent_id, c.imagen_url, c.version, c.total_samples, ",
         );
         push_collection_projection(&mut builder, viewer_id);
@@ -193,10 +195,10 @@ impl ColeccionesRepository {
         offset: i64,
     ) -> Result<Vec<LegacyColeccionRecord>, AppError> {
         let mut builder = QueryBuilder::<Postgres>::new(
-            "SELECT c.id, c.usuario_id, c.nombre, NULL::text AS slug, COALESCE(c.descripcion, '') AS descripcion, \
+            "SELECT c.id, c.usuario_id, c.nombre, c.slug, COALESCE(c.descripcion, '') AS descripcion, \
                     c.publica, c.parent_id, c.imagen_url, c.version, c.total_samples, ",
         );
-        push_collection_projection(&mut builder, Some(usuario_id));
+        push_collection_projection_common(&mut builder, Some(usuario_id));
         builder.push(
             " FROM colecciones_guardadas g \
                JOIN colecciones c ON c.id = g.coleccion_id \
@@ -204,7 +206,9 @@ impl ColeccionesRepository {
                WHERE g.usuario_id = ",
         );
         builder.push_bind(usuario_id);
-        builder.push(" AND c.eliminado_en IS NULL AND u.estado = 'activo' ORDER BY g.created_at DESC LIMIT ");
+        builder.push(
+            " AND c.eliminado_en IS NULL AND u.estado = 'activo' ORDER BY g.created_at DESC LIMIT ",
+        );
         builder.push_bind(limit);
         builder.push(" OFFSET ");
         builder.push_bind(offset);
@@ -217,8 +221,8 @@ impl ColeccionesRepository {
     }
 
     pub async fn count_saved_legacy(pool: &PgPool, usuario_id: i32) -> Result<i64, AppError> {
-                let total = sqlx::query_scalar::<_, i64>(
-                        r"SELECT COUNT(*)
+        let total = sqlx::query_scalar::<_, i64>(
+            r"SELECT COUNT(*)
                FROM colecciones_guardadas g
                JOIN colecciones c ON c.id = g.coleccion_id
                JOIN usuarios_ext u ON u.id = c.usuario_id
@@ -302,7 +306,7 @@ impl ColeccionesRepository {
         viewer_id: Option<i32>,
     ) -> Result<Option<LegacyColeccionRecord>, AppError> {
         let mut builder = QueryBuilder::<Postgres>::new(
-            "SELECT c.id, c.usuario_id, c.nombre, NULL::text AS slug, COALESCE(c.descripcion, '') AS descripcion, \
+            "SELECT c.id, c.usuario_id, c.nombre, c.slug, COALESCE(c.descripcion, '') AS descripcion, \
                     c.publica, c.parent_id, c.imagen_url, c.version, c.total_samples, ",
         );
         push_collection_projection(&mut builder, viewer_id);
@@ -327,18 +331,118 @@ impl ColeccionesRepository {
         viewer_id: Option<i32>,
     ) -> Result<Option<LegacyColeccionRecord>, AppError> {
         let maybe_id = parse_slug_collection_id(slug);
-        match maybe_id {
-            Some(id) => Self::fetch_legacy_by_id(pool, id, viewer_id).await,
-            None => Ok(None),
+        if let Some(id) = maybe_id {
+            if let Some(row) = Self::fetch_legacy_by_id(pool, id, viewer_id).await? {
+                return Ok(Some(row));
+            }
         }
+
+        Self::fetch_legacy_by_slug_exact(pool, slug, viewer_id).await
+    }
+
+    pub async fn fetch_legacy_by_slug_exact(
+        pool: &PgPool,
+        slug: &str,
+        viewer_id: Option<i32>,
+    ) -> Result<Option<LegacyColeccionRecord>, AppError> {
+        let mut builder = QueryBuilder::<Postgres>::new(
+            "SELECT c.id, c.usuario_id, c.nombre, c.slug, COALESCE(c.descripcion, '') AS descripcion, \
+                    c.publica, c.parent_id, c.imagen_url, c.version, c.total_samples, ",
+        );
+        push_collection_projection(&mut builder, viewer_id);
+        builder.push(
+            " FROM colecciones c \
+               JOIN usuarios_ext u ON u.id = c.usuario_id \
+               WHERE c.slug = ",
+        );
+        builder.push_bind(slug.trim().to_owned());
+        builder.push(" AND c.eliminado_en IS NULL AND u.estado = 'activo'");
+
+        let row = builder
+            .build_query_as::<LegacyColeccionRecord>()
+            .fetch_optional(pool)
+            .await?;
+        Ok(row)
+    }
+
+    pub async fn list_relevant_for_sample_legacy(
+        pool: &PgPool,
+        usuario_id: i32,
+        sample_id: i32,
+        limit: i64,
+    ) -> Result<Vec<LegacyColeccionRecord>, AppError> {
+        let mut builder = QueryBuilder::<Postgres>::new(
+            "WITH reference_tags AS (
+                SELECT DISTINCT tag_val
+                FROM samples rs
+                CROSS JOIN LATERAL jsonb_array_elements_text(
+                    COALESCE(
+                        CASE WHEN jsonb_typeof(rs.metadata->'tags') = 'array' THEN rs.metadata->'tags' END,
+                        CASE WHEN jsonb_typeof(rs.metadata->'tags_es') = 'array' THEN rs.metadata->'tags_es' END,
+                        to_jsonb(COALESCE(rs.tags_enriquecidos, ARRAY[]::text[])),
+                        '[]'::jsonb
+                    )
+                ) AS tag_val
+                WHERE rs.id = ",
+        );
+        builder.push_bind(sample_id);
+        builder.push(
+            " AND rs.eliminado_en IS NULL
+            )
+            SELECT c.id, c.usuario_id, c.nombre, c.slug, COALESCE(c.descripcion, '') AS descripcion,
+                   c.publica, c.parent_id, c.imagen_url, c.version, c.total_samples, ",
+        );
+        push_collection_projection(&mut builder, Some(usuario_id));
+        builder.push(
+            ", EXISTS(
+                SELECT 1 FROM coleccion_samples cs_contains
+                WHERE cs_contains.coleccion_id = c.id AND cs_contains.sample_id = ",
+        );
+        builder.push_bind(sample_id);
+        builder.push(
+            ") AS contiene_el_sample
+             FROM colecciones c
+             JOIN usuarios_ext u ON u.id = c.usuario_id
+             LEFT JOIN LATERAL (
+                SELECT COUNT(*) AS overlap
+                FROM coleccion_samples cs_rel
+                JOIN samples s_rel ON s_rel.id = cs_rel.sample_id
+                CROSS JOIN LATERAL jsonb_array_elements_text(
+                    COALESCE(
+                        CASE WHEN jsonb_typeof(s_rel.metadata->'tags') = 'array' THEN s_rel.metadata->'tags' END,
+                        CASE WHEN jsonb_typeof(s_rel.metadata->'tags_es') = 'array' THEN s_rel.metadata->'tags_es' END,
+                        to_jsonb(COALESCE(s_rel.tags_enriquecidos, ARRAY[]::text[])),
+                        '[]'::jsonb
+                    )
+                ) AS rel_tag
+                WHERE cs_rel.coleccion_id = c.id
+                  AND rel_tag IN (SELECT tag_val FROM reference_tags)
+                  AND s_rel.estado = 'activo'
+                  AND s_rel.eliminado_en IS NULL
+             ) rel ON TRUE
+             WHERE c.usuario_id = ",
+        );
+        builder.push_bind(usuario_id);
+        builder.push(
+            " AND c.eliminado_en IS NULL AND u.estado = 'activo'
+             ORDER BY contiene_el_sample DESC, COALESCE(rel.overlap, 0) DESC, c.updated_at DESC, c.id DESC
+             LIMIT ",
+        );
+        builder.push_bind(limit.clamp(1, 50));
+
+        let rows = builder
+            .build_query_as::<LegacyColeccionRecord>()
+            .fetch_all(pool)
+            .await?;
+        Ok(rows)
     }
 
     pub async fn list_subcollection_ids_legacy(
         pool: &PgPool,
         parent_id: i64,
     ) -> Result<Vec<i64>, AppError> {
-                let rows = sqlx::query_scalar::<_, i64>(
-                        r"SELECT id
+        let rows = sqlx::query_scalar::<_, i64>(
+            r"SELECT id
                FROM colecciones
                WHERE parent_id = $1
                  AND eliminado_en IS NULL
@@ -356,7 +460,7 @@ impl ColeccionesRepository {
         viewer_id: Option<i32>,
     ) -> Result<Vec<LegacyColeccionRecord>, AppError> {
         let mut builder = QueryBuilder::<Postgres>::new(
-            "SELECT c.id, c.usuario_id, c.nombre, NULL::text AS slug, COALESCE(c.descripcion, '') AS descripcion, \
+            "SELECT c.id, c.usuario_id, c.nombre, c.slug, COALESCE(c.descripcion, '') AS descripcion, \
                     c.publica, c.parent_id, c.imagen_url, c.version, c.total_samples, ",
         );
         push_collection_projection(&mut builder, viewer_id);
@@ -379,16 +483,16 @@ impl ColeccionesRepository {
         pool: &PgPool,
         id: i64,
     ) -> Result<Option<LegacyColeccionParentRecord>, AppError> {
-                let row = sqlx::query_as!(
-                        LegacyColeccionParentRecord,
-                    r#"SELECT id, nombre, NULL::text AS slug
+        let row = sqlx::query_as!(
+            LegacyColeccionParentRecord,
+            r#"SELECT id, nombre, slug
                              FROM colecciones
                              WHERE id = $1
                                  AND eliminado_en IS NULL"#,
-                        id,
-                )
-                .fetch_optional(pool)
-                .await?;
+            id,
+        )
+        .fetch_optional(pool)
+        .await?;
         Ok(row)
     }
 
@@ -432,6 +536,11 @@ impl ColeccionesRepository {
 }
 
 fn push_collection_projection(builder: &mut QueryBuilder<Postgres>, viewer_id: Option<i32>) {
+    push_collection_projection_common(builder, viewer_id);
+    builder.push(", NULL::boolean AS contiene_el_sample");
+}
+
+fn push_collection_projection_common(builder: &mut QueryBuilder<Postgres>, viewer_id: Option<i32>) {
     builder.push(COLLECTION_TOTAL_ITEMS_SQL);
     builder.push(" AS total_items, c.created_at, c.updated_at, ");
     builder.push(COLLECTION_TAGS_SQL);

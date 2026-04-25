@@ -36,7 +36,7 @@ pub struct SavedColeccionesQuery {
 #[derive(Debug, Deserialize, ToSchema, Default)]
 pub struct ColeccionDetailQuery {
     #[serde(default, alias = "incluirSubcolecciones")]
-    pub incluir_subcolecciones: Option<bool>,
+    pub incluir_subcolecciones: Option<String>,
     pub orden: Option<String>,
 }
 
@@ -63,6 +63,8 @@ pub struct LegacyColeccionResponse {
     pub esta_guardada: bool,
     pub esta_likeada: bool,
     pub total_likes: i32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub contiene_el_sample: Option<bool>,
 }
 
 #[derive(Debug, Clone, Serialize, ToSchema)]
@@ -236,8 +238,9 @@ pub async fn list_saved_colecciones_legacy(
         .unwrap_or(DEFAULT_SAVED_PER_PAGE)
         .clamp(1, MAX_PER_PAGE);
     let offset = (page - 1) * per_page;
-    let rows = ColeccionesRepository::list_saved_legacy(&state.pool, user.user_id, per_page, offset)
-        .await?;
+    let rows =
+        ColeccionesRepository::list_saved_legacy(&state.pool, user.user_id, per_page, offset)
+            .await?;
     let total = ColeccionesRepository::count_saved_legacy(&state.pool, user.user_id).await?;
 
     Ok(Json(LegacySavedColeccionesPayload {
@@ -304,6 +307,35 @@ pub async fn get_coleccion_by_slug_legacy(
     build_collection_detail(&state, row, viewer_id, query).await
 }
 
+#[utoipa::path(
+    get,
+    path = "/api/colecciones/relevantes/{sample_id}",
+    params(("sample_id" = i32, Path, description = "ID del sample")),
+    security(("bearer_auth" = [])),
+    responses((status = 200, body = [LegacyColeccionResponse]))
+)]
+pub async fn list_relevant_for_sample_legacy(
+    State(state): State<AppState>,
+    user: CurrentUser,
+    Path(sample_id): Path<i32>,
+) -> Result<Json<Vec<LegacyColeccionResponse>>, AppError> {
+    if sample_id <= 0 {
+        return Err(AppError::BadRequest("sample_id invalido".into()));
+    }
+    let rows = ColeccionesRepository::list_relevant_for_sample_legacy(
+        &state.pool,
+        user.user_id,
+        sample_id,
+        12,
+    )
+    .await?;
+    Ok(Json(
+        rows.into_iter()
+            .map(|row| map_collection(row, state.public_base_url.as_deref()))
+            .collect(),
+    ))
+}
+
 async fn build_collection_detail(
     state: &AppState,
     row: LegacyColeccionRecord,
@@ -312,13 +344,19 @@ async fn build_collection_detail(
 ) -> Result<Json<LegacyColeccionDetailResponse>, AppError> {
     let _orden = query.orden.as_deref();
     if !row.publica && viewer_id != Some(row.usuario_id) {
-        return Err(AppError::NotFound(format!("coleccion {} no encontrada", row.id)));
+        return Err(AppError::NotFound(format!(
+            "coleccion {} no encontrada",
+            row.id
+        )));
     }
 
-    let include_subcollections = query.incluir_subcolecciones.unwrap_or(false) && row.parent_id.is_none();
+    let include_subcollections =
+        legacy_bool(query.incluir_subcolecciones.as_deref()) && row.parent_id.is_none();
     let mut coleccion_ids = vec![row.id];
     if include_subcollections {
-        coleccion_ids.extend(ColeccionesRepository::list_subcollection_ids_legacy(&state.pool, row.id).await?);
+        coleccion_ids.extend(
+            ColeccionesRepository::list_subcollection_ids_legacy(&state.pool, row.id).await?,
+        );
     }
 
     let samples = ColeccionesRepository::list_detail_samples_legacy(&state.pool, &coleccion_ids)
@@ -383,7 +421,15 @@ fn map_collection(
         esta_guardada: row.esta_guardada,
         esta_likeada: row.esta_likeada,
         total_likes: row.total_likes,
+        contiene_el_sample: row.contiene_el_sample,
     }
+}
+
+fn legacy_bool(value: Option<&str>) -> bool {
+    matches!(
+        value.map(str::trim).map(str::to_ascii_lowercase).as_deref(),
+        Some("1" | "true" | "yes" | "si" | "on")
+    )
 }
 
 fn map_parent(row: LegacyColeccionParentRecord) -> LegacyColeccionParentResponse {

@@ -25,7 +25,7 @@ pub struct CreatePostRequest {
     pub contenido: String,
     #[serde(default)]
     pub imagenes: Vec<String>,
-    #[serde(default)]
+    #[serde(default, alias = "samplesAdjuntos")]
     pub samples_adjuntos: Vec<i32>,
 }
 
@@ -35,7 +35,7 @@ pub struct UpdatePostRequest {
     pub contenido: String,
     #[serde(default)]
     pub imagenes: Vec<String>,
-    #[serde(default)]
+    #[serde(default, alias = "samplesAdjuntos")]
     pub samples_adjuntos: Vec<i32>,
 }
 

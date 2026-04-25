@@ -1,0 +1,10 @@
+{
+  "nombre": "extraccion",
+  "estado": "stopped",
+  "pid": null,
+  "iniciado_at": "2026-04-25T08:10:39.388689200Z",
+  "ultimo_log": "2026-04-25T08:10:39.388691400Z",
+  "progreso": 100.0,
+  "error": null,
+  "resultado": null
+}

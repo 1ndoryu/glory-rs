@@ -1,7 +1,8 @@
 #![allow(clippy::needless_for_each)] // Generado por utoipa OpenApi derive
-/* sentinel-disable-file limite-lineas — registro central de rutas y schemas OpenAPI */
+                                     /* sentinel-disable-file limite-lineas — registro central de rutas y schemas OpenAPI */
 
 mod admin;
+mod admin_ia_queue;
 mod app_versions;
 mod articles;
 mod auth;
@@ -24,11 +25,11 @@ mod plays;
 mod posts;
 mod push;
 mod reports;
-mod search;
-mod seo;
 mod sample_catalog;
 mod samples;
 mod scraper_admin;
+mod search;
+mod seo;
 mod social;
 mod sync;
 mod users;
@@ -135,6 +136,7 @@ impl utoipa::Modify for SecurityAddon {
         search::global_search,
         search::legacy_quick_search,
         music::public::list_songs,
+        music::public::song_sections,
         music::public::search_songs,
         music::public::top_songs,
         music::public::get_song,
@@ -190,6 +192,7 @@ impl utoipa::Modify for SecurityAddon {
         colecciones::legacy::explore_colecciones_legacy,
         colecciones::legacy::get_coleccion_legacy,
         colecciones::legacy::get_coleccion_by_slug_legacy,
+        colecciones::legacy::list_relevant_for_sample_legacy,
         colecciones::update_coleccion,
         colecciones::delete_coleccion,
         colecciones::add_sample,
@@ -202,6 +205,8 @@ impl utoipa::Modify for SecurityAddon {
         colecciones::zip::descargar_zip_coleccion,
         users::me,
         users::update_me,
+        users::upload_avatar,
+        users::upload_portada,
         users::public_profile,
         users::block,
         users::unblock,
@@ -605,4 +610,5 @@ fn api_routes() -> Router<AppState> {
         .merge(metrics::routes())
         .merge(scraper_admin::routes())
         .merge(admin::routes())
+        .merge(admin_ia_queue::routes())
 }

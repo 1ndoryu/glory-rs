@@ -155,6 +155,14 @@ function adaptarBody(rustPath: string, bodyText: string): string {
 
             return JSON.stringify(payload);
         }
+
+        if (rustPath === '/publicaciones') {
+            if (payload.samplesAdjuntos !== undefined && payload.samples_adjuntos === undefined) {
+                payload.samples_adjuntos = payload.samplesAdjuntos;
+                delete payload.samplesAdjuntos;
+            }
+            return JSON.stringify(payload);
+        }
     } catch { /* JSON invÃ¡lido â€” pasar tal cual */ }
     return bodyText;
 }
@@ -163,6 +171,7 @@ function adaptarBody(rustPath: string, bodyText: string): string {
  * Devuelve el objeto modificado o el original si no necesita cambios. */
 function adaptarRespuesta(rustPath: string, json: unknown): unknown {
     if (json === null || json === undefined || typeof json !== 'object') return json;
+    if (Array.isArray(json)) return json;
     const obj = json as Record<string, unknown>;
 
     /* Auth (login/register/google): Rust devuelve { token, refresh_token, user }
@@ -183,12 +192,31 @@ function adaptarRespuesta(rustPath: string, json: unknown): unknown {
     }
 
     /* /users/me: PrivateProfileResponse (snake_case) â†’ UsuarioAutenticado (camelCase) */
-    if (rustPath === '/users/me' || rustPath.startsWith('/users/me/')) {
+    if (rustPath === '/users/me/avatar' || rustPath === '/users/me/portada') {
+        const data = obj.data && typeof obj.data === 'object' && !Array.isArray(obj.data)
+            ? adaptarUsuario(obj.data as Record<string, unknown>)
+            : obj.data;
+        return {
+            ...obj,
+            data,
+            avatarUrl: rustPath.endsWith('/avatar') ? (obj.url ?? (data as Record<string, unknown>)?.avatarUrl) : undefined,
+            portadaUrl: rustPath.endsWith('/portada') ? (obj.url ?? (data as Record<string, unknown>)?.portadaUrl) : undefined,
+        };
+    }
+
+    if (rustPath === '/users/me') {
         /* Si ya viene con 'username' y clave snake_case, adaptar */
         if ('nombre_visible' in obj || 'avatar_url' in obj || 'created_at' in obj) {
             return adaptarUsuario(obj);
         }
         return adaptarUsuario(obj);
+    }
+
+    if (rustPath === '/publicaciones' && obj.post && typeof obj.post === 'object') {
+        return {
+            ok: obj.ok ?? true,
+            data: convertKeys(obj.post),
+        };
     }
 
     /* /users/{username}: PublicProfileResponse â†’ Usuario (camelCase) */

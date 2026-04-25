@@ -343,10 +343,17 @@ pub fn routes() -> Router<AppState> {
             "/colecciones",
             post(create_coleccion).get(legacy::list_my_colecciones_legacy),
         )
-        .route("/colecciones/explorar", get(legacy::explore_colecciones_legacy))
+        .route(
+            "/colecciones/explorar",
+            get(legacy::explore_colecciones_legacy),
+        )
         .route(
             "/colecciones/por-slug/:slug",
             get(legacy::get_coleccion_by_slug_legacy),
+        )
+        .route(
+            "/colecciones/relevantes/:sample_id",
+            get(legacy::list_relevant_for_sample_legacy),
         )
         .route(
             "/colecciones/:id",
@@ -368,8 +375,14 @@ pub fn routes() -> Router<AppState> {
             "/colecciones/:id/guardar",
             post(save_coleccion).delete(unsave_coleccion),
         )
-        .route("/colecciones/guardadas", get(legacy::list_saved_colecciones_legacy))
-        .route("/me/colecciones-guardadas", get(legacy::list_saved_colecciones_legacy))
+        .route(
+            "/colecciones/guardadas",
+            get(legacy::list_saved_colecciones_legacy),
+        )
+        .route(
+            "/me/colecciones-guardadas",
+            get(legacy::list_saved_colecciones_legacy),
+        )
         .route(
             "/colecciones/:id/descargar-zip",
             post(descargar_zip_coleccion),

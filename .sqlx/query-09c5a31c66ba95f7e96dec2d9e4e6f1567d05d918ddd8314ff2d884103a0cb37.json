@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE cola_procesamiento_ia\n             SET estado = 'pendiente', intentos = 0, ultimo_error = NULL, proximo_intento = NULL\n             WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "09c5a31c66ba95f7e96dec2d9e4e6f1567d05d918ddd8314ff2d884103a0cb37"
+}

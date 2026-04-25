@@ -1,0 +1,56 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n                COUNT(*) AS \"total!\",\n                COUNT(*) FILTER (WHERE estado = 'pendiente') AS \"pendientes!\",\n                COUNT(*) FILTER (WHERE estado = 'procesando') AS \"procesando!\",\n                COUNT(*) FILTER (WHERE estado = 'completado' AND procesado_at >= CURRENT_DATE) AS \"completados_hoy!\",\n                COUNT(*) FILTER (WHERE estado = 'error_reintento') AS \"en_reintento!\",\n                COUNT(*) FILTER (WHERE estado = 'error_final') AS \"errores!\",\n                COUNT(*) FILTER (WHERE created_at >= CURRENT_DATE) AS \"encolados_hoy!\"\n             FROM cola_procesamiento_ia",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "total!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "pendientes!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 2,
+        "name": "procesando!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 3,
+        "name": "completados_hoy!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 4,
+        "name": "en_reintento!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 5,
+        "name": "errores!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 6,
+        "name": "encolados_hoy!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "2bf8c9b609e3bf1d3236dcc04d6fc4e3201fac241e0cdbd463c248786c192942"
+}

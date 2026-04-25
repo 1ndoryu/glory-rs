@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id, nombre, NULL::text AS slug\n                             FROM colecciones\n                             WHERE id = $1\n                                 AND eliminado_en IS NULL",
+  "query": "SELECT id, nombre, slug\n                             FROM colecciones\n                             WHERE id = $1\n                                 AND eliminado_en IS NULL",
   "describe": {
     "columns": [
       {
@@ -16,7 +16,7 @@
       {
         "ordinal": 2,
         "name": "slug",
-        "type_info": "Text"
+        "type_info": "Varchar"
       }
     ],
     "parameters": {
@@ -27,8 +27,8 @@
     "nullable": [
       false,
       false,
-      null
+      true
     ]
   },
-  "hash": "09ec2db24f46f3258dbb77670e7c7c28557e86cfdfa2d5f1327dd329fde49f02"
+  "hash": "671e937f62490ce2f05313392c8e678397652c5a2d196d1a59d95e4018d177ef"
 }

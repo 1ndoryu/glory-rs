@@ -1,0 +1,25 @@
+{
+  "nombre": "seed",
+  "estado": "stopped",
+  "pid": null,
+  "iniciado_at": "2026-04-25T08:10:48.493239400Z",
+  "ultimo_log": "2026-04-25T08:10:48.493242500Z",
+  "progreso": 100.0,
+  "error": null,
+  "resultado": {
+    "relaciones": {
+      "asignadas": 0,
+      "total_relaciones": 0
+    },
+    "samples": {
+      "reasignados": 0,
+      "sistema_user_id": 7
+    },
+    "usuarios_generados": {
+      "creados": 1,
+      "errores": 0,
+      "existentes": 0,
+      "requeridos": 1
+    }
+  }
+}

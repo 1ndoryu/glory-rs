@@ -1,5 +1,6 @@
 use axum::extract::{Path, Query, State};
 use axum::Json;
+use serde::{Deserialize, Serialize};
 use validator::Validate;
 
 use super::support::{
@@ -10,13 +11,117 @@ use crate::errors::AppError;
 #[allow(unused_imports)]
 use crate::errors::ErrorResponse;
 use crate::models::{
-    ArtistDetailResponse, LimitQuery, ListSongsQuery, MusicArtistsResponse,
-    MusicPagination, MusicSongsResponse, RelationChainQuery, RelationChainResponse,
+    ArtistDetailResponse, LimitQuery, ListSongsQuery, MusicArtist, MusicArtistsResponse,
+    MusicPagination, MusicSong, MusicSongsResponse, RelationChainQuery, RelationChainResponse,
     RelationSampleSide, RelationStatsResponse, RelationTypeCount, SampleRelationDetail,
     SampleRelationLookupResponse, SearchSongsQuery, SongDetailResponse, SongListResponse,
 };
 use crate::repositories::MusicRepository;
 use crate::AppState;
+
+#[derive(Debug, Deserialize, utoipa::IntoParams)]
+pub struct SongSectionsQuery {
+    pub por_seccion: Option<i64>,
+}
+
+#[derive(Debug, Serialize, utoipa::ToSchema)]
+pub struct SongSection {
+    pub tipo: String,
+    pub titulo: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub genero: Option<String>,
+    pub canciones: Vec<MusicSong>,
+    pub artistas: Vec<MusicArtist>,
+}
+
+#[derive(Debug, Serialize, utoipa::ToSchema)]
+pub struct SongSectionsResponse {
+    pub data: Vec<SongSection>,
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/canciones/secciones",
+    tag = "music",
+    params(SongSectionsQuery),
+    responses((status = 200, description = "Secciones legacy de canciones", body = SongSectionsResponse))
+)]
+pub async fn song_sections(
+    State(state): State<AppState>,
+    Query(query): Query<SongSectionsQuery>,
+) -> Result<Json<SongSectionsResponse>, AppError> {
+    let per_section = query.por_seccion.unwrap_or(DEFAULT_LIMIT).clamp(1, 30);
+    let top = MusicRepository::top_songs(&state.pool, per_section).await?;
+    let recent = MusicRepository::list_songs(&state.pool, per_section * 3, 0).await?;
+    let artists = MusicRepository::top_artists(&state.pool, per_section).await?;
+    let take_count = usize::try_from(per_section).unwrap_or(30);
+
+    let mut sections = vec![
+        SongSection {
+            tipo: "top".into(),
+            titulo: "Más sampleadas".into(),
+            genero: None,
+            canciones: top,
+            artistas: Vec::new(),
+        },
+        SongSection {
+            tipo: "recientes".into(),
+            titulo: "Descubrimientos recientes".into(),
+            genero: None,
+            canciones: recent.iter().take(take_count).cloned().collect(),
+            artistas: Vec::new(),
+        },
+    ];
+
+    for genre in top_genres(&recent, 3) {
+        let songs = recent
+            .iter()
+            .filter(|song| song.genero.as_deref() == Some(genre.as_str()))
+            .take(take_count)
+            .cloned()
+            .collect::<Vec<_>>();
+        if !songs.is_empty() {
+            sections.push(SongSection {
+                tipo: "genero".into(),
+                titulo: genre.clone(),
+                genero: Some(genre),
+                canciones: songs,
+                artistas: Vec::new(),
+            });
+        }
+    }
+
+    sections.push(SongSection {
+        tipo: "artistas".into(),
+        titulo: "Artistas destacados".into(),
+        genero: None,
+        canciones: Vec::new(),
+        artistas: artists,
+    });
+
+    Ok(Json(SongSectionsResponse { data: sections }))
+}
+
+fn top_genres(songs: &[MusicSong], limit: usize) -> Vec<String> {
+    let mut counts = std::collections::HashMap::<String, usize>::new();
+    for song in songs {
+        if let Some(genre) = song
+            .genero
+            .as_deref()
+            .map(str::trim)
+            .filter(|value| !value.is_empty())
+        {
+            *counts.entry(genre.to_owned()).or_default() += 1;
+        }
+    }
+    let mut pairs = counts.into_iter().collect::<Vec<_>>();
+    pairs.sort_by(|left, right| right.1.cmp(&left.1).then_with(|| left.0.cmp(&right.0)));
+    pairs
+        .into_iter()
+        .take(limit)
+        .map(|(genre, _)| genre)
+        .collect()
+}
 
 #[utoipa::path(
     get,
@@ -82,8 +187,9 @@ pub async fn search_songs(
     }
 
     let per_page = query.per_page.unwrap_or(DEFAULT_LIMIT).clamp(1, 100);
-    let data = MusicRepository::search_songs(&state.pool, trimmed, &format!("%{trimmed}%"), per_page)
-        .await?;
+    let data =
+        MusicRepository::search_songs(&state.pool, trimmed, &format!("%{trimmed}%"), per_page)
+            .await?;
     Ok(Json(MusicSongsResponse { data }))
 }
 
@@ -148,7 +254,10 @@ pub async fn get_song_chain(
     let song = MusicRepository::find_song_by_slug(&state.pool, slug.trim())
         .await?
         .ok_or_else(|| AppError::NotFound(format!("cancion {}", slug.trim())))?;
-    let depth = query.profundidad.unwrap_or(DEFAULT_CHAIN_DEPTH).clamp(1, 10);
+    let depth = query
+        .profundidad
+        .unwrap_or(DEFAULT_CHAIN_DEPTH)
+        .clamp(1, 10);
     let chain = MusicRepository::relation_chain(&state.pool, song.id, depth).await?;
     Ok(Json(RelationChainResponse {
         cancion_raiz: song,
@@ -189,7 +298,9 @@ pub async fn get_artist(
     State(state): State<AppState>,
     Path(slug): Path<String>,
 ) -> Result<Json<ArtistDetailResponse>, AppError> {
-    Ok(Json(fetch_artist_detail_by_slug(&state, slug.trim()).await?))
+    Ok(Json(
+        fetch_artist_detail_by_slug(&state, slug.trim()).await?,
+    ))
 }
 
 #[utoipa::path(
@@ -254,5 +365,7 @@ pub async fn relation_stats(
             total,
         })
         .collect();
-    Ok(Json(RelationStatsResponse { relaciones_por_tipo }))
+    Ok(Json(RelationStatsResponse {
+        relaciones_por_tipo,
+    }))
 }
