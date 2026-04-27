@@ -15,8 +15,10 @@ use crate::models::{
     MusicPagination, MusicSong, MusicSongsResponse, RelationChainQuery, RelationChainResponse,
     RelationSampleSide, RelationStatsResponse, RelationTypeCount, SampleRelationDetail,
     SampleRelationLookupResponse, SearchSongsQuery, SongDetailResponse, SongListResponse,
+    SampleSummary,
 };
-use crate::repositories::MusicRepository;
+use crate::repositories::{MusicRepository, SampleRepository};
+use crate::services::build_sample_summary;
 use crate::AppState;
 
 #[derive(Debug, Deserialize, utoipa::IntoParams)]
@@ -368,4 +370,46 @@ pub async fn relation_stats(
     Ok(Json(RelationStatsResponse {
         relaciones_por_tipo,
     }))
+}
+
+/* [274A-7] GET /canciones/:slug/samples — samples de audio vinculados a una canción.
+ * La canción se resuelve por slug; los samples se filtran por cancion_origen_id.
+ * Devuelve array vacío si la canción no existe o no tiene samples activos. */
+#[derive(Debug, Serialize, utoipa::ToSchema)]
+pub struct SongSamplesResponse {
+    pub data: Vec<SampleSummary>,
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/canciones/{slug}/samples",
+    tag = "music",
+    params(("slug" = String, Path, description = "Slug de la canción")),
+    responses(
+        (status = 200, description = "Samples activos de la canción", body = SongSamplesResponse),
+        (status = 404, description = "Canción no encontrada", body = ErrorResponse)
+    )
+)]
+pub async fn get_song_samples(
+    State(state): State<AppState>,
+    Path(slug): Path<String>,
+) -> Result<Json<SongSamplesResponse>, AppError> {
+    let cancion = MusicRepository::find_song_by_slug(&state.pool, &slug)
+        .await?
+        .ok_or_else(|| AppError::NotFound("Canción no encontrada".into()))?;
+
+    let records = SampleRepository::list_by_cancion_id(
+        &state.pool,
+        cancion.id,
+        None,
+    )
+    .await
+    .map_err(AppError::from)?;
+
+    let data = records
+        .into_iter()
+        .map(|r| build_sample_summary(r, state.public_base_url.as_deref()))
+        .collect();
+
+    Ok(Json(SongSamplesResponse { data }))
 }

@@ -12,8 +12,8 @@ pub use admin::{
 };
 pub use mutations::{link_sample_to_relation, unlink_sample_from_relation, verify_relation};
 pub use public::{
-    get_artist, get_relation, get_relation_by_sample, get_song, get_song_chain, list_songs,
-    relation_stats, search_songs, song_sections, top_artists, top_songs,
+    get_artist, get_relation, get_relation_by_sample, get_song, get_song_chain, get_song_samples,
+    list_songs, relation_stats, search_songs, song_sections, top_artists, top_songs,
 };
 
 use crate::AppState;
@@ -25,6 +25,7 @@ pub fn routes() -> Router<AppState> {
         .route("/canciones/secciones", get(song_sections))
         .route("/canciones/top", get(top_songs))
         .route("/canciones/:slug/cadena", get(get_song_chain))
+        .route("/canciones/:slug/samples", get(get_song_samples))
         .route("/canciones/:slug", get(get_song))
         .route("/artistas/top", get(top_artists))
         .route("/artistas/:slug", get(get_artist))

@@ -521,4 +521,33 @@ impl SampleRepository {
         let row = builder.build_query_as::<CountRow>().fetch_one(pool).await?;
         Ok(row.total)
     }
+
+    /* [274A-7] GET /canciones/:slug/samples — devuelve los samples publicados
+     * cuyo cancion_origen_id apunta a la cancion identificada por slug.
+     * Reutiliza SAMPLE_SUMMARY_SELECT y el filtro de auto-hide para consistencia. */
+    pub async fn list_by_cancion_id(
+        pool: &PgPool,
+        cancion_id: i32,
+        viewer_id: Option<i32>,
+    ) -> Result<Vec<SampleCatalogSummaryRecord>, sqlx::Error> {
+        let mut builder = QueryBuilder::<Postgres>::new(SAMPLE_SUMMARY_SELECT);
+        builder.push(
+            " FROM samples s
+              INNER JOIN usuarios_ext u ON u.id = s.creador_id
+              WHERE s.eliminado_en IS NULL
+                AND s.estado = 'activo'
+                AND s.mostrar_en_comunidad = TRUE
+                AND s.cancion_origen_id = ",
+        );
+        builder.push_bind(cancion_id);
+        push_auto_hide_filter(&mut builder, "s.id", "s.creador_id", viewer_id);
+        builder.push(" ORDER BY s.publicado_at DESC NULLS LAST, s.id DESC");
+
+        let rows = builder
+            .build_query_as::<SampleSummaryRow>()
+            .fetch_all(pool)
+            .await?;
+
+        Ok(rows.into_iter().map(SampleCatalogSummaryRecord::from).collect())
+    }
 }
