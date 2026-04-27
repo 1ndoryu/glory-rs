@@ -347,6 +347,35 @@ impl BillingRepository {
         .await
     }
 
+    /* [274A-4] Lista los sample_ids comprados (compra individual completada) por
+     * un usuario, ordenados por compra más reciente primero. Replica
+     * `TransaccionesRepository::listarSamplesComprados` del legacy PHP. */
+    pub async fn list_purchased_sample_ids(
+        pool: &PgPool,
+        buyer_id: i32,
+        limit: i64,
+    ) -> Result<Vec<i32>, sqlx::Error> {
+        let rows = sqlx::query!(
+            r#"
+            SELECT
+                sample_id AS "sample_id!"
+            FROM transacciones
+            WHERE comprador_id = $1
+              AND tipo = 'compra_sample'
+              AND estado IN ('completada', 'completed')
+              AND sample_id IS NOT NULL
+            GROUP BY sample_id
+            ORDER BY MAX(created_at) DESC
+            LIMIT $2
+            "#,
+            buyer_id,
+            limit
+        )
+        .fetch_all(pool)
+        .await?;
+        Ok(rows.into_iter().map(|r| r.sample_id).collect())
+    }
+
     pub async fn insert_completed_sample_purchase(
         pool: &PgPool,
         insert: &CompletedSamplePurchaseInsert,

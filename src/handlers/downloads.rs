@@ -11,11 +11,12 @@ use crate::algorithm::InteractionKind;
 use crate::domain::{calculate_subscription_download_revenue_share, KamplesPlanId};
 use crate::errors::AppError;
 use crate::middleware::CurrentUser;
-use crate::models::DownloadGrantRequest;
+use crate::models::{DownloadGrantRequest, SampleSummary};
 use crate::repositories::{
     BillingRepository, CompletedDownloadRevenueShareInsert, DownloadRepository, FreeCodeRepository,
 };
 use crate::services::download_token;
+use crate::services::SampleCatalogService;
 use crate::AppState;
 
 /* [174A-61] Downloads — port mínimo de DescargasController.php.
@@ -83,6 +84,17 @@ pub struct DownloadLimitsResponse {
     pub restantes: Option<i64>,
     pub calidad: String,
 }
+
+/* [274A-4] Respuesta de /descargas/comprados — replica el contrato legacy
+ * `{ ok: true, data: SampleResumen[] }`. El frontend desempaqueta `data.data`
+ * (ver legacy/services/apiDescargas.ts::obtenerComprados). */
+#[derive(Debug, Clone, Serialize, ToSchema)]
+pub struct PurchasedSamplesResponse {
+    pub ok: bool,
+    pub data: Vec<SampleSummary>,
+}
+
+const PURCHASED_SAMPLES_LIMIT: i64 = 50;
 
 #[utoipa::path(
     post,
@@ -249,10 +261,60 @@ pub async fn download_limits(
     }))
 }
 
+/* [274A-4] GET /api/descargas/comprados
+ * Lista samples comprados (compra individual completada) por el usuario,
+ * ordenados por compra más reciente primero. Reusa
+ * `SampleCatalogService::list_public_samples_by_ids` para construir summaries
+ * con los flags y assets normalizados que espera el frontend. El campo
+ * `ya_comprado` se calcula on-the-fly por el catálogo cuando hay
+ * `current_user_id`, así que aquí solo aportamos los IDs en el orden correcto. */
+#[utoipa::path(
+    get,
+    path = "/api/descargas/comprados",
+    tag = "downloads",
+    security(("bearer_auth" = [])),
+    responses(
+        (status = 200, description = "Samples comprados por el usuario", body = PurchasedSamplesResponse),
+        (status = 401, description = "No autenticado"),
+    )
+)]
+pub async fn list_purchased_samples(
+    State(state): State<AppState>,
+    user: CurrentUser,
+) -> Result<Json<PurchasedSamplesResponse>, AppError> {
+    let sample_ids = BillingRepository::list_purchased_sample_ids(
+        &state.pool,
+        user.user_id,
+        PURCHASED_SAMPLES_LIMIT,
+    )
+    .await?;
+
+    if sample_ids.is_empty() {
+        return Ok(Json(PurchasedSamplesResponse {
+            ok: true,
+            data: Vec::new(),
+        }));
+    }
+
+    let summaries = SampleCatalogService::list_public_samples_by_ids(
+        &state.pool,
+        state.public_base_url.as_deref(),
+        Some(user.user_id),
+        &sample_ids,
+    )
+    .await?;
+
+    Ok(Json(PurchasedSamplesResponse {
+        ok: true,
+        data: summaries,
+    }))
+}
+
 pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/samples/:id/descargar", post(register_download))
         .route("/descargas/limites", get(download_limits))
+        .route("/descargas/comprados", get(list_purchased_samples))
         .route("/descargas/stream", get(stream_download))
 }
 

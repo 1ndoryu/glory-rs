@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT\n                sample_id AS \"sample_id!\"\n            FROM transacciones\n            WHERE comprador_id = $1\n              AND tipo = 'compra_sample'\n              AND estado IN ('completada', 'completed')\n              AND sample_id IS NOT NULL\n            GROUP BY sample_id\n            ORDER BY MAX(created_at) DESC\n            LIMIT $2\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "sample_id!",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "5eeb6893189be74583cb3dca2222281116deccde4be5e75917095a434634a818"
+}
