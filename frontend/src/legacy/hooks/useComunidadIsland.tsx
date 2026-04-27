@@ -9,31 +9,14 @@ import { useNavigationStore } from '@/core/router';
 import { useAuthStore } from '@app/stores/authStore';
 import { useMenuContextualSample } from '@app/hooks/useMenuContextualSample';
 import { useMenuContextualPublicacion } from '@app/hooks/useMenuContextualPublicacion';
-import { apiGet } from '@app/services/apiCliente';
 import { toast } from '@app/stores/toastStore';
 import { getT } from '@app/utils/i18n';
-import { darLike, quitarLike, repostear, quitarRepost, obtenerPublicacion } from '@app/services/apiSocial';
+import { darLike, quitarLike, repostear, quitarRepost, obtenerPublicacion, listarPublicaciones } from '@app/services/apiSocial';
 import { EVENTO_ENTIDAD_ACTUALIZADA } from '@app/components/social/ModalEditar';
 import type { TipoReaccion, Publicacion } from '@app/types';
 import { usePaginacionProgresiva } from '@app/hooks/usePaginacionProgresiva';
 
 export type FiltroComunidad = 'todos' | 'siguiendo' | 'populares';
-
-type RespuestaListadoPublicaciones =
-    | Publicacion[]
-    | { data?: Publicacion[] | null; items?: Publicacion[] | null }
-    | null
-    | undefined;
-
-/* [274A-2] El backend Rust de /publicaciones devuelve { items, page, per_page },
- * pero este hook legacy seguía leyendo { data }. Normalizamos ambas formas
- * para que el feed de comunidad no quede vacío tras publicar. */
-const extraerPublicaciones = (payload: RespuestaListadoPublicaciones): Publicacion[] => {
-    if (Array.isArray(payload)) return payload;
-    if (Array.isArray(payload?.items)) return payload.items;
-    if (Array.isArray(payload?.data)) return payload.data;
-    return [];
-};
 
 /* Debe coincidir con el limit del backend (PublicacionesController::listar) */
 const PAGE_SIZE = 20;
@@ -89,9 +72,9 @@ export function useComunidadIsland() {
 
         const cargar = async () => {
             try {
-                const resp = await apiGet<RespuestaListadoPublicaciones>('/publicaciones', { filtro, page: 1 });
+                const resp = await listarPublicaciones({ filtro, page: 1 });
                 if (!activo) return;
-                const arr = extraerPublicaciones(resp.data);
+                const arr = resp.data?.data ?? [];
                 setPublicaciones(arr);
                 setHayMas(arr.length >= PAGE_SIZE);
             } catch {
@@ -111,8 +94,8 @@ export function useComunidadIsland() {
         const nuevaPagina = paginaRef.current + 1;
         setCargandoMas(true);
         try {
-            const resp = await apiGet<RespuestaListadoPublicaciones>('/publicaciones', { filtro, page: nuevaPagina });
-            const arr = extraerPublicaciones(resp.data);
+            const resp = await listarPublicaciones({ filtro, page: nuevaPagina });
+            const arr = resp.data?.data ?? [];
             setPublicaciones(prev => [...prev, ...arr]);
             paginaRef.current = nuevaPagina;
             setHayMas(arr.length >= PAGE_SIZE);
@@ -146,8 +129,8 @@ export function useComunidadIsland() {
         paginaRef.current = 1;
         setHayMas(true);
         try {
-            const resp = await apiGet<RespuestaListadoPublicaciones>('/publicaciones', { filtro, page: 1 });
-            const arr = extraerPublicaciones(resp.data);
+            const resp = await listarPublicaciones({ filtro, page: 1 });
+            const arr = resp.data?.data ?? [];
             setPublicaciones(arr);
             setHayMas(arr.length >= PAGE_SIZE);
         } catch { /* sin-op */ }

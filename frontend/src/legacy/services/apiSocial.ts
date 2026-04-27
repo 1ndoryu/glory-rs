@@ -7,6 +7,33 @@
 import { apiGet, apiPost, apiDelete, apiPostFormData, apiPut } from './apiCliente';
 import type { RespuestaApi } from './apiCliente';
 import type { Publicacion, Comentario, TipoReaccion } from '../types';
+import { normalizarListaPublicaciones, normalizarPublicacion } from './normalizers/postNormalizer';
+
+type RespuestaListadoPublicacionesRaw = {
+    items?: unknown[];
+    data?: unknown[];
+    page?: number;
+    per_page?: number;
+};
+
+const normalizarRespuestaListadoPublicaciones = (
+    res: RespuestaApi<RespuestaListadoPublicacionesRaw | Publicacion[]>
+): RespuestaApi<{ data: Publicacion[]; page: number }> => {
+    if (!res.ok || !res.data) {
+        return res as unknown as RespuestaApi<{ data: Publicacion[]; page: number }>;
+    }
+
+    const raw = res.data as RespuestaListadoPublicacionesRaw;
+    const items = raw.items ?? raw.data ?? res.data;
+
+    return {
+        ...res,
+        data: {
+            data: normalizarListaPublicaciones(items),
+            page: Number(raw.page ?? 1),
+        },
+    };
+};
 
 /* Follows */
 
@@ -75,7 +102,20 @@ export const crearPublicacion = async (datos: {
     imagenes?: string[];
     samplesAdjuntos?: number[];
 }): Promise<RespuestaApi<Publicacion>> => {
-    return apiPost<Publicacion>('/publicaciones', datos);
+    const res = await apiPost<Record<string, unknown>>('/publicaciones', datos);
+    if (!res.ok || !res.data) return res as unknown as RespuestaApi<Publicacion>;
+    return { ...res, data: normalizarPublicacion((res.data as Record<string, unknown>).post ?? res.data) };
+};
+
+export const listarPublicaciones = async (
+    params?: { filtro?: 'todos' | 'siguiendo' | 'populares'; page?: number; perPage?: number }
+): Promise<RespuestaApi<{ data: Publicacion[]; page: number }>> => {
+    const res = await apiGet<RespuestaListadoPublicacionesRaw>('/publicaciones', {
+        filtro: params?.filtro,
+        page: params?.page,
+        per_page: params?.perPage,
+    });
+    return normalizarRespuestaListadoPublicaciones(res);
 };
 
 /* Listar publicaciones de un usuario específico (para tab perfil) */
@@ -83,7 +123,8 @@ export const listarPublicacionesUsuario = async (
     username: string,
     page = 1
 ): Promise<RespuestaApi<{ data: Publicacion[]; page: number }>> => {
-    return apiGet<{ data: Publicacion[]; page: number }>('/publicaciones', { autor: username, page });
+    const res = await apiGet<RespuestaListadoPublicacionesRaw>('/publicaciones', { autor: username, page });
+    return normalizarRespuestaListadoPublicaciones(res);
 };
 
 export const obtenerFeedInicio = async (page = 1): Promise<RespuestaApi<Publicacion[]>> => {
@@ -184,7 +225,9 @@ export const quitarRepost = async (publicacionId: number): Promise<RespuestaApi<
 
 /* Obtener una publicación individual (para actualizar en tiempo real tras edición) */
 export const obtenerPublicacion = async (id: number): Promise<RespuestaApi<Publicacion>> => {
-    return apiGet<Publicacion>(`/publicaciones/${id}`);
+    const res = await apiGet<Record<string, unknown>>(`/publicaciones/${id}`);
+    if (!res.ok || !res.data) return res as unknown as RespuestaApi<Publicacion>;
+    return { ...res, data: normalizarPublicacion((res.data as Record<string, unknown>).post ?? res.data) };
 };
 
 /* Subir imagen para publicación al servidor (evita blob:// URLs) */
