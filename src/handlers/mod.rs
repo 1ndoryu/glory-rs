@@ -3,6 +3,7 @@
 
 mod admin;
 mod admin_automatizacion;
+mod admin_config;
 mod admin_contribuciones;
 mod admin_duplicados;
 mod admin_ia_queue;
@@ -245,6 +246,11 @@ impl utoipa::Modify for SecurityAddon {
         admin::algo_timing_history,
         scraper_admin::publicar_auto,
         scraper_admin::reporte_lote,
+        admin_config::get_extraccion_config,
+        admin_config::put_extraccion_config,
+        admin_config::get_scraping_config,
+        admin_config::put_scraping_config,
+        admin_config::get_extraccion_stats,
         extension_recorte::extender_recorte,
         extension_recorte::generar_siguiente,
         extension_recorte::restaurar_recorte,
@@ -518,6 +524,9 @@ impl utoipa::Modify for SecurityAddon {
         scraper_admin::PublicarAutoResponse,
         scraper_admin::ReporteLoteRequest,
         scraper_admin::ReporteLoteResponse,
+        admin_config::ExtraccionConfig,
+        admin_config::ScrapingConfig,
+        admin_config::ExtraccionStats,
         extension_recorte::ExtenderRecorteRequest,
         extension_recorte::GenerarSiguienteRequest,
         crate::services::extension_recorte::EncoladoResult,
@@ -644,6 +653,7 @@ fn api_routes() -> Router<AppState> {
         .merge(users::routes())
         .merge(metrics::routes())
         .merge(scraper_admin::routes())
+        .merge(admin_config::routes())
         .merge(admin::routes())
         .merge(admin_ia_queue::routes())
         .merge(admin_automatizacion::routes())

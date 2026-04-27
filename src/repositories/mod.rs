@@ -1,6 +1,7 @@
 mod admin_ia_queue;
 mod admin_panel;
 mod admin_seed;
+mod app_config;
 mod article;
 mod biblioteca;
 mod billing;
@@ -41,6 +42,7 @@ pub use admin_ia_queue::{
 };
 pub use admin_panel::AdminPanelRepository;
 pub use admin_seed::{AdminSeedRepository, InsertSeedUserInput};
+pub use app_config::{AppConfigEntry, AppConfigRepository};
 pub use article::{
     ArticleAuthorSummary, ArticleCategoryCount, ArticleDetail, ArticleEmbed, ArticleMeta,
     ArticleRepository, ArticleSummary, CreateArticleParams, UpdateArticleParams,
