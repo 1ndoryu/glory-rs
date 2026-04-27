@@ -60,9 +60,25 @@ const formatearFechaRelativa = (fecha: string): string => {
     return t('tiempo.haceDias', { n: Math.floor(h / 24) });
 };
 
-const formatearJson = (raw: string | null): string => {
-    if (!raw) return '';
-    try { return JSON.stringify(JSON.parse(raw), null, 2); } catch { return raw; }
+/* [274A-1] moderacion_detalle puede llegar como string JSON o como objeto ya parseado.
+ * Si el backend entrega un objeto y devolvemos `raw` tal cual, React intenta renderizarlo
+ * dentro de <pre> y rompe la isla con "Objects are not valid as a React child". */
+const formatearJson = (raw: unknown): string => {
+    if (raw == null || raw === '') return '';
+
+    if (typeof raw === 'string') {
+        try {
+            return JSON.stringify(JSON.parse(raw), null, 2);
+        } catch {
+            return raw;
+        }
+    }
+
+    try {
+        return JSON.stringify(raw, null, 2) ?? '';
+    } catch {
+        return String(raw);
+    }
 };
 
 const BadgeEstado = ({ estado }: { estado: string }): JSX.Element => {

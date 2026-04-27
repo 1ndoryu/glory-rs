@@ -58,7 +58,7 @@ export interface PublicacionModeracion {
     contenido: string;
     imagenes: string[];
     moderacion_estado: string;
-    moderacion_detalle: string | null;
+    moderacion_detalle: unknown;
     moderacion_razon: string | null;
     created_at: string;
     username: string;
