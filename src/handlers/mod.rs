@@ -135,6 +135,7 @@ impl utoipa::Modify for SecurityAddon {
         biblioteca::get_coleccionados,
         biblioteca::get_carpetas,
         biblioteca::put_mover_carpeta,
+        biblioteca::get_favoritos,
         payments::list_plans,
         payments::create_subscription_checkout,
         payments::create_sample_checkout,

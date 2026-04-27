@@ -32,6 +32,7 @@ pub fn routes() -> Router<AppState> {
         .route("/me/coleccionados", get(get_coleccionados))
         .route("/me/coleccionados/carpetas", get(get_carpetas))
         .route("/me/coleccionados/:id/carpeta", put(put_mover_carpeta))
+        .route("/me/favoritos", get(get_favoritos))
 }
 
 #[derive(Debug, Clone, Deserialize, IntoParams, Default)]
@@ -102,6 +103,86 @@ pub async fn get_coleccionados(
 
     let records = BibliotecaRepository::coleccionados_de_usuario(&state.pool, &filters).await?;
     let total = BibliotecaRepository::contar_coleccionados(&state.pool, &filters).await?;
+
+    let public_base = state.public_base_url.as_deref();
+    let data: Vec<SampleSummary> = records
+        .into_iter()
+        .map(|r| build_sample_summary(r, public_base))
+        .collect();
+
+    let pages = if per_page > 0 {
+        (total as f64 / per_page as f64).ceil() as i64
+    } else {
+        0
+    };
+
+    Ok(Json(BibliotecaSamplesResponse {
+        data: BibliotecaSamplesData {
+            data,
+            pagination: SamplesPagination {
+                page,
+                per_page,
+                total,
+                pages,
+            },
+        },
+    }))
+}
+
+/* [274A-7] GET /api/me/favoritos
+ * Devuelve los samples a los que el usuario dio like/encanta. Mismo contrato
+ * de respuesta que /me/coleccionados (BibliotecaSamplesResponse) para reusar
+ * normalizadores existentes en el frontend. */
+#[derive(Debug, Clone, Deserialize, IntoParams, Default)]
+#[into_params(parameter_in = Query)]
+pub struct FavoritosQuery {
+    pub page: Option<i64>,
+    pub per_page: Option<i64>,
+    pub orden: Option<String>,
+    pub busqueda: Option<String>,
+    pub solo_encanta: Option<String>,
+    pub solo_like: Option<String>,
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/me/favoritos",
+    tag = "biblioteca",
+    params(FavoritosQuery),
+    security(("bearer_auth" = [])),
+    responses(
+        (status = 200, description = "Samples favoritos del usuario", body = BibliotecaSamplesResponse),
+        (status = 401, description = "No autenticado"),
+    )
+)]
+pub async fn get_favoritos(
+    State(state): State<AppState>,
+    user: CurrentUser,
+    Query(q): Query<FavoritosQuery>,
+) -> Result<Json<BibliotecaSamplesResponse>, AppError> {
+    let page = q.page.unwrap_or(1).max(1);
+    let per_page = q.per_page.unwrap_or(20).clamp(1, 100);
+
+    let filtro_reaccion = if q.solo_encanta.as_deref().map(parse_bool).unwrap_or(false) {
+        Some(FiltroReaccion::Encanta)
+    } else if q.solo_like.as_deref().map(parse_bool).unwrap_or(false) {
+        Some(FiltroReaccion::Like)
+    } else {
+        None
+    };
+
+    let filters = ColeccionadosFilters {
+        user_id: user.user_id,
+        page,
+        per_page,
+        carpeta: String::new(),
+        orden: q.orden.unwrap_or_else(|| "recientes".to_string()),
+        busqueda: q.busqueda.unwrap_or_default(),
+        filtro_reaccion,
+    };
+
+    let records = BibliotecaRepository::favoritos_de_usuario(&state.pool, &filters).await?;
+    let total = BibliotecaRepository::contar_favoritos(&state.pool, &filters).await?;
 
     let public_base = state.public_base_url.as_deref();
     let data: Vec<SampleSummary> = records

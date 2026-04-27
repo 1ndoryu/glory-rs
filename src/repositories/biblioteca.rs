@@ -282,6 +282,100 @@ impl BibliotecaRepository {
         Ok(row.total)
     }
 
+    /* [274A-7] Favoritos del usuario: samples a los que dio like/encanta.
+     * INNER JOIN con `likes` filtrado por tipo='sample' y usuario. El filtro
+     * de reaccion en ColeccionadosFilters refina:
+     *   - Encanta -> reaccion = 'encanta'
+     *   - Like    -> reaccion = 'like'
+     *   - None    -> reaccion IN ('like','encanta')  (se excluye 'dislike')
+     * Orden "recientes" usa l.created_at (cuando dio like), no s.publicado_at. */
+    pub async fn favoritos_de_usuario(
+        pool: &PgPool,
+        f: &ColeccionadosFilters,
+    ) -> Result<Vec<SampleCatalogSummaryRecord>, AppError> {
+        let mut b = QueryBuilder::<Postgres>::new(BIBLIOTECA_SAMPLE_SELECT);
+        b.push(" FROM samples s INNER JOIN usuarios_ext u ON u.id = s.creador_id");
+        b.push(" INNER JOIN likes l ON l.target_id = s.id AND l.tipo = 'sample' AND l.usuario_id = ");
+        b.push_bind(f.user_id);
+        b.push(" WHERE s.estado = 'activo' AND s.eliminado_en IS NULL");
+        Self::push_favoritos_reaccion(&mut b, f.filtro_reaccion);
+        Self::apply_favoritos_busqueda(&mut b, f);
+        Self::push_favoritos_order(&mut b, &f.orden);
+        b.push(" LIMIT ");
+        b.push_bind(f.per_page);
+        b.push(" OFFSET ");
+        b.push_bind(f.offset());
+
+        let rows = b
+            .build_query_as::<BibliotecaSampleRow>()
+            .fetch_all(pool)
+            .await
+            .map_err(AppError::from)?;
+        Ok(rows.into_iter().map(Into::into).collect())
+    }
+
+    pub async fn contar_favoritos(
+        pool: &PgPool,
+        f: &ColeccionadosFilters,
+    ) -> Result<i64, AppError> {
+        let mut b = QueryBuilder::<Postgres>::new("SELECT COUNT(*) AS total");
+        b.push(" FROM samples s");
+        b.push(" INNER JOIN likes l ON l.target_id = s.id AND l.tipo = 'sample' AND l.usuario_id = ");
+        b.push_bind(f.user_id);
+        b.push(" WHERE s.estado = 'activo' AND s.eliminado_en IS NULL");
+        Self::push_favoritos_reaccion(&mut b, f.filtro_reaccion);
+        Self::apply_favoritos_busqueda(&mut b, f);
+
+        #[derive(FromRow)]
+        struct CountRow {
+            total: i64,
+        }
+        let row = b
+            .build_query_as::<CountRow>()
+            .fetch_one(pool)
+            .await
+            .map_err(AppError::from)?;
+        Ok(row.total)
+    }
+
+    fn push_favoritos_reaccion(
+        b: &mut QueryBuilder<'_, Postgres>,
+        reac: Option<FiltroReaccion>,
+    ) {
+        match reac {
+            Some(r) => {
+                b.push(" AND l.reaccion = ");
+                b.push_bind(r.db_value());
+            }
+            None => {
+                b.push(" AND l.reaccion IN ('like','encanta')");
+            }
+        }
+    }
+
+    fn apply_favoritos_busqueda(
+        b: &mut QueryBuilder<'_, Postgres>,
+        f: &ColeccionadosFilters,
+    ) {
+        if !f.busqueda.is_empty() {
+            let like = format!("%{}%", f.busqueda);
+            b.push(" AND (s.titulo ILIKE ");
+            b.push_bind(like.clone());
+            b.push(" OR EXISTS (SELECT 1 FROM UNNEST(s.tags) tag WHERE tag ILIKE ");
+            b.push_bind(like);
+            b.push("))");
+        }
+    }
+
+    fn push_favoritos_order(b: &mut QueryBuilder<'_, Postgres>, orden: &str) {
+        match orden {
+            "antiguos" => b.push(" ORDER BY l.created_at ASC, s.id ASC"),
+            "populares" => b.push(" ORDER BY s.total_likes DESC, s.id DESC"),
+            "descargas" => b.push(" ORDER BY s.total_descargas DESC, s.id DESC"),
+            _ => b.push(" ORDER BY l.created_at DESC, s.id DESC"),
+        };
+    }
+
     pub async fn carpetas_coleccionados(
         pool: &PgPool,
         user_id: i32,
