@@ -6,6 +6,7 @@ mod auth;
 pub mod download_token;
 mod email;
 pub mod extension_recorte;
+pub mod extraccion_publisher;
 mod fcm;
 mod google_oauth;
 mod ia_queue;

@@ -23,6 +23,25 @@ pub struct ColaExtraccionRow {
     pub sample_id: Option<i32>,
 }
 
+/* [264A-3] Fila reclamada por el publicador Rust. Incluye todo lo necesario
+ * para crear el sample (ruta del audio extraido, metadata, lado, sample_id
+ * si la fila ya estaba vinculada — caso extender/restaurar). */
+#[derive(Debug, Clone, sqlx::FromRow)]
+pub struct ColaExtraidoReclamado {
+    pub id: i32,
+    pub relacion_id: i32,
+    pub lado: String,
+    pub youtube_id: Option<String>,
+    pub spotify_id: Option<String>,
+    pub ruta_audio_extraido: Option<String>,
+    pub ruta_audio_completo: Option<String>,
+    pub metadata_extraccion: Option<serde_json::Value>,
+    pub sample_id: Option<i32>,
+    pub bpm_detectado: Option<i16>,
+    pub compas_inicio_seg: Option<f64>,
+    pub compas_fin_seg: Option<f64>,
+}
+
 pub struct EncolarParams<'a> {
     pub cola_id: i32,
     pub nuevo_inicio: f64,
@@ -38,7 +57,7 @@ impl ColaExtraccionRepository {
         sample_id: i32,
     ) -> Result<Option<ColaExtraccionRow>, sqlx::Error> {
         sqlx::query_as::<_, ColaExtraccionRow>(
-            r#"SELECT
+            "SELECT
                 id,
                 relacion_id,
                 youtube_id,
@@ -48,7 +67,7 @@ impl ColaExtraccionRepository {
                 sample_id
              FROM cola_extraccion_samples
              WHERE sample_id = $1
-             LIMIT 1"#,
+             LIMIT 1",
         )
         .bind(sample_id)
         .fetch_optional(pool)
@@ -88,4 +107,132 @@ impl ColaExtraccionRepository {
         .await?;
         Ok(())
     }
+
+    /* [264A-3] Reclama atomicamente N filas en estado='extraido' que aun no
+     * tienen sample_id asignado. Usa `procesado_at` como flag de "siendo
+     * procesado por el publicador" para evitar que dos workers tomen la misma
+     * fila. Si la publicacion falla, `revertir_reclamo` la regresa al pool. */
+    pub async fn reclamar_para_publicar(
+        pool: &PgPool,
+        limit: i64,
+    ) -> Result<Vec<ColaExtraidoReclamado>, sqlx::Error> {
+        sqlx::query_as::<_, ColaExtraidoReclamado>(
+            "UPDATE cola_extraccion_samples
+               SET procesado_at = NOW()
+               WHERE id IN (
+                   SELECT id FROM cola_extraccion_samples
+                   WHERE estado = 'extraido'
+                     AND sample_id IS NULL
+                     AND procesado_at IS NULL
+                     AND ruta_audio_extraido IS NOT NULL
+                   ORDER BY id
+                   LIMIT $1
+                   FOR UPDATE SKIP LOCKED
+               )
+               RETURNING
+                   id,
+                   relacion_id,
+                   lado,
+                   youtube_id,
+                   spotify_id,
+                   ruta_audio_extraido,
+                   ruta_audio_completo,
+                   metadata_extraccion,
+                   sample_id,
+                   bpm_detectado,
+                   compas_inicio_seg::DOUBLE PRECISION AS compas_inicio_seg,
+                   compas_fin_seg::DOUBLE PRECISION    AS compas_fin_seg",
+        )
+        .bind(limit)
+        .fetch_all(pool)
+        .await
+    }
+
+    /* [264A-3] Variante para los modos extender/restaurar: reclama filas que
+     * YA tienen sample_id (apunta al sample existente). El publicador detecta
+     * `metadata_extraccion.extension_modo` y reemplaza assets en lugar de crear
+     * un sample nuevo. */
+    pub async fn reclamar_para_reemplazar(
+        pool: &PgPool,
+        limit: i64,
+    ) -> Result<Vec<ColaExtraidoReclamado>, sqlx::Error> {
+        sqlx::query_as::<_, ColaExtraidoReclamado>(
+            "UPDATE cola_extraccion_samples
+               SET procesado_at = NOW()
+               WHERE id IN (
+                   SELECT id FROM cola_extraccion_samples
+                   WHERE estado = 'extraido'
+                     AND sample_id IS NOT NULL
+                     AND procesado_at IS NULL
+                     AND ruta_audio_extraido IS NOT NULL
+                     AND (metadata_extraccion ->> 'extension_modo') IN ('extender', 'restaurar')
+                   ORDER BY id
+                   LIMIT $1
+                   FOR UPDATE SKIP LOCKED
+               )
+               RETURNING
+                   id,
+                   relacion_id,
+                   lado,
+                   youtube_id,
+                   spotify_id,
+                   ruta_audio_extraido,
+                   ruta_audio_completo,
+                   metadata_extraccion,
+                   sample_id,
+                   bpm_detectado,
+                   compas_inicio_seg::DOUBLE PRECISION AS compas_inicio_seg,
+                   compas_fin_seg::DOUBLE PRECISION    AS compas_fin_seg",
+        )
+        .bind(limit)
+        .fetch_all(pool)
+        .await
+    }
+
+    /* [264A-3] Marca una fila publicada con exito: estado=completado, sample_id
+     * vinculado, ruta_audio_extraido apuntando ahora a la storage_key persistente. */
+    pub async fn marcar_completado(
+        pool: &PgPool,
+        cola_id: i32,
+        sample_id: i32,
+        ruta_storage: &str,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query(
+            "UPDATE cola_extraccion_samples
+               SET estado = 'completado',
+                   sample_id = $2,
+                   ruta_audio_extraido = $3,
+                   procesado_at = NOW(),
+                   error_mensaje = NULL
+               WHERE id = $1",
+        )
+        .bind(cola_id)
+        .bind(sample_id)
+        .bind(ruta_storage)
+        .execute(pool)
+        .await?;
+        Ok(())
+    }
+
+    /* [264A-3] Revierte el reclamo cuando la publicacion falla: deja la fila
+     * de vuelta en estado='extraido' con procesado_at=NULL para que el siguiente
+     * ciclo del publicador la vuelva a tomar. Registra el mensaje de error. */
+    pub async fn revertir_reclamo(
+        pool: &PgPool,
+        cola_id: i32,
+        error: &str,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query(
+            "UPDATE cola_extraccion_samples
+               SET procesado_at = NULL,
+                   error_mensaje = LEFT($2, 1000)
+               WHERE id = $1",
+        )
+        .bind(cola_id)
+        .bind(error)
+        .execute(pool)
+        .await?;
+        Ok(())
+    }
 }
+

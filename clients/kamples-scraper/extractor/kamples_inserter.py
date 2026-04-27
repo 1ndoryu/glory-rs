@@ -65,12 +65,19 @@ def registrar_extraccion(
     conn = get_connection()
     try:
         with conn.cursor() as cur:
+            # [264A-4] Preservar campos `extension_*` puestos por el backend Rust
+            # (ver src/services/extension_recorte.rs). El publicador Rust los lee
+            # despues para decidir entre crear sample nuevo vs reemplazar assets
+            # del sample existente. Antes haciamos SET completo y los borrabamos.
+            # Ahora mergeamos con `||` JSONB: la metadata nueva pisa claves comunes,
+            # pero `extension_modo`, `extension_nuevo_inicio`, etc. quedan intactas
+            # porque pipeline.py no las re-emite.
             cur.execute(
                 "UPDATE cola_extraccion_samples "
                 "SET estado = %s, "
                 "    ruta_audio_extraido = %s, "
                 "    ruta_audio_completo = %s, "
-                "    metadata_extraccion = %s, "
+                "    metadata_extraccion = COALESCE(metadata_extraccion, '{}'::jsonb) || %s::jsonb, "
                 "    bpm_detectado = %s, "
                 "    duracion_compas_seg = %s, "
                 "    compas_inicio_seg = %s, "

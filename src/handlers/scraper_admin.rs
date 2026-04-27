@@ -20,16 +20,25 @@ use std::collections::HashMap;
 use utoipa::ToSchema;
 
 use crate::errors::AppError;
+use crate::services::extraccion_publisher::{ExtraccionPublisherService, PublicarResultado};
 use crate::AppState;
 
 const HEADER_NAME: &str = "x-kamples-secret";
+const LIMITE_POR_LOTE_PUBLICACION: i64 = 50;
 
 /// Resultado de la operación `publicar-auto`.
 #[derive(Debug, Serialize, ToSchema)]
 pub struct PublicarAutoResponse {
-    /// Cantidad de items de `cola_extraccion_samples` que pasaron de
-    /// `extraido` → `completado` en esta llamada.
-    pub publicados: i64,
+    /// Cantidad de items de `cola_extraccion_samples` que se publicaron como
+    /// samples nuevos en esta llamada.
+    pub publicados: usize,
+    /// Cantidad de items cuyos assets se reemplazaron sobre un sample existente
+    /// (modos `extender` / `restaurar`).
+    pub reemplazados: usize,
+    /// Cantidad de items que fallaron y quedaron disponibles para reintento.
+    pub errores: usize,
+    /// Detalle por item.
+    pub detalle: PublicarResultado,
 }
 
 /// Payload del reporte de un lote de scraping.
@@ -98,18 +107,30 @@ pub async fn publicar_auto(
 ) -> Result<Json<PublicarAutoResponse>, AppError> {
     require_scraper_secret(&state, &headers)?;
 
-    /* [Fase3-sqlx] Convertido a query! para validacion compile-time. */
-    let result = sqlx::query!(
-        "UPDATE cola_extraccion_samples \
-         SET estado = 'completado', procesado_at = NOW() \
-         WHERE estado = 'extraido' AND sample_id IS NOT NULL"
+    /* [264A-3] Antes este endpoint era un no-op: solo marcaba estado='completado'
+     * para filas que ya tenian sample_id, pero NADIE asignaba sample_id, asi que
+     * jamas publicaba nada. Ahora delega en ExtraccionPublisherService que crea
+     * el sample real (o reemplaza assets en modo extender/restaurar). */
+    let detalle = ExtraccionPublisherService::publicar_pendientes(
+        &state.pool,
+        &state.storage,
+        LIMITE_POR_LOTE_PUBLICACION,
     )
-    .execute(&state.pool)
     .await?;
 
-    let publicados = result.rows_affected().cast_signed();
-    tracing::info!(publicados, "scraper publicar-auto ejecutado");
-    Ok(Json(PublicarAutoResponse { publicados }))
+    tracing::info!(
+        publicados = detalle.publicados,
+        reemplazados = detalle.reemplazados,
+        errores = detalle.errores,
+        "scraper publicar-auto ejecutado",
+    );
+
+    Ok(Json(PublicarAutoResponse {
+        publicados: detalle.publicados,
+        reemplazados: detalle.reemplazados,
+        errores: detalle.errores,
+        detalle,
+    }))
 }
 
 /// Recibe el reporte resumen de un lote del scraper. Por ahora solo

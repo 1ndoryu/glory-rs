@@ -55,7 +55,9 @@ pub use billing::{
     SampleCheckoutCandidate, StripeUserProfile, SubscriptionRecord, UpsertStripeSubscriptionRecord,
 };
 pub use block::{BlockRepository, BlockedUser};
-pub use cola_extraccion::{ColaExtraccionRepository, ColaExtraccionRow, EncolarParams};
+pub use cola_extraccion::{
+    ColaExtraccionRepository, ColaExtraccionRow, ColaExtraidoReclamado, EncolarParams,
+};
 pub use coleccion::{
     Coleccion, ColeccionSample, ColeccionSampleFile, ColeccionesRepository,
     LegacyColeccionParentRecord, LegacyColeccionRecord, LegacyColeccionSampleRecord,
