@@ -37,6 +37,22 @@ const log = crearLogger('PerfilIsland');
 const TABS_BASE = [{ id: 'publicaciones', etiqueta: 'Publicaciones' }, { id: 'samples', etiqueta: 'Samples' }];
 const TABS_CON_GANANCIAS = [...TABS_BASE, { id: 'ganancias', etiqueta: 'Ganancias' }];
 
+type RespuestaListadoPublicacionesPerfil =
+    | Publicacion[]
+    | { data?: Publicacion[] | null; items?: Publicacion[] | null }
+    | null
+    | undefined;
+
+/* [274A-2] El contrato Rust de /publicaciones ahora responde { items, page, per_page }.
+ * El perfil legacy todavía leía { data }, así que las publicaciones del usuario podían
+ * desaparecer aunque existieran en backend. */
+const extraerPublicacionesPerfil = (payload: RespuestaListadoPublicacionesPerfil): Publicacion[] => {
+    if (Array.isArray(payload)) return payload;
+    if (Array.isArray(payload?.items)) return payload.items;
+    if (Array.isArray(payload?.data)) return payload.data;
+    return [];
+};
+
 interface PerfilParams {
     usernameProp?: string;
 }
@@ -189,8 +205,7 @@ export function usePerfilIsland({ usernameProp }: PerfilParams) {
                 } else if (tabActiva === 'publicaciones') {
                     const resp = await listarPublicacionesUsuario(usuario.username, 1);
                     if (!controller.signal.aborted && resp.ok && resp.data) {
-                        const lista = resp.data.data ?? resp.data ?? [];
-                        setPublicacionesPerfil(Array.isArray(lista) ? lista : []);
+                        setPublicacionesPerfil(extraerPublicacionesPerfil(resp.data));
                     }
                 }
             } catch (err) {
@@ -210,8 +225,7 @@ export function usePerfilIsland({ usernameProp }: PerfilParams) {
         try {
             const resp = await listarPublicacionesUsuario(usuario.username, 1);
             if (resp.ok && resp.data) {
-                const lista = resp.data.data ?? resp.data ?? [];
-                setPublicacionesPerfil(Array.isArray(lista) ? lista : []);
+                setPublicacionesPerfil(extraerPublicacionesPerfil(resp.data));
             }
         } catch { /* sin-op */ }
     }, [usuario]);

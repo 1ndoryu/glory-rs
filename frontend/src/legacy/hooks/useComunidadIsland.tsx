@@ -19,6 +19,22 @@ import { usePaginacionProgresiva } from '@app/hooks/usePaginacionProgresiva';
 
 export type FiltroComunidad = 'todos' | 'siguiendo' | 'populares';
 
+type RespuestaListadoPublicaciones =
+    | Publicacion[]
+    | { data?: Publicacion[] | null; items?: Publicacion[] | null }
+    | null
+    | undefined;
+
+/* [274A-2] El backend Rust de /publicaciones devuelve { items, page, per_page },
+ * pero este hook legacy seguía leyendo { data }. Normalizamos ambas formas
+ * para que el feed de comunidad no quede vacío tras publicar. */
+const extraerPublicaciones = (payload: RespuestaListadoPublicaciones): Publicacion[] => {
+    if (Array.isArray(payload)) return payload;
+    if (Array.isArray(payload?.items)) return payload.items;
+    if (Array.isArray(payload?.data)) return payload.data;
+    return [];
+};
+
 /* Debe coincidir con el limit del backend (PublicacionesController::listar) */
 const PAGE_SIZE = 20;
 
@@ -73,10 +89,9 @@ export function useComunidadIsland() {
 
         const cargar = async () => {
             try {
-                const resp = await apiGet<{ data: Publicacion[] }>('/publicaciones', { filtro, page: 1 });
+                const resp = await apiGet<RespuestaListadoPublicaciones>('/publicaciones', { filtro, page: 1 });
                 if (!activo) return;
-                const lista = resp.data?.data ?? resp.data ?? [];
-                const arr = Array.isArray(lista) ? lista : [];
+                const arr = extraerPublicaciones(resp.data);
                 setPublicaciones(arr);
                 setHayMas(arr.length >= PAGE_SIZE);
             } catch {
@@ -96,9 +111,8 @@ export function useComunidadIsland() {
         const nuevaPagina = paginaRef.current + 1;
         setCargandoMas(true);
         try {
-            const resp = await apiGet<{ data: Publicacion[] }>('/publicaciones', { filtro, page: nuevaPagina });
-            const lista = resp.data?.data ?? resp.data ?? [];
-            const arr = Array.isArray(lista) ? lista : [];
+            const resp = await apiGet<RespuestaListadoPublicaciones>('/publicaciones', { filtro, page: nuevaPagina });
+            const arr = extraerPublicaciones(resp.data);
             setPublicaciones(prev => [...prev, ...arr]);
             paginaRef.current = nuevaPagina;
             setHayMas(arr.length >= PAGE_SIZE);
@@ -132,9 +146,8 @@ export function useComunidadIsland() {
         paginaRef.current = 1;
         setHayMas(true);
         try {
-            const resp = await apiGet<{ data: Publicacion[] }>('/publicaciones', { filtro, page: 1 });
-            const lista = resp.data?.data ?? resp.data ?? [];
-            const arr = Array.isArray(lista) ? lista : [];
+            const resp = await apiGet<RespuestaListadoPublicaciones>('/publicaciones', { filtro, page: 1 });
+            const arr = extraerPublicaciones(resp.data);
             setPublicaciones(arr);
             setHayMas(arr.length >= PAGE_SIZE);
         } catch { /* sin-op */ }
