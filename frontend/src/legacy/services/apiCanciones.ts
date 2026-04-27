@@ -15,35 +15,102 @@ import type {
     SeccionMusica,
 } from '@app/types/cancion';
 
+/* [274A-4] Normalizador snake_case → camelCase para respuestas de canciones.
+ * El backend Rust serializa con serde default (snake_case), pero los componentes
+ * legacy esperan camelCase. Tolerante: si ya viene en camelCase, lo respeta. */
+type RawObj = Record<string, unknown>;
+const esObjeto = (v: unknown): v is RawObj =>
+    v !== null && typeof v === 'object' && !Array.isArray(v);
+
+const normalizarCancion = (valor: unknown): Cancion => {
+    const r = esObjeto(valor) ? valor : {};
+    return {
+        id: Number(r.id ?? 0),
+        titulo: String(r.titulo ?? ''),
+        slug: String(r.slug ?? ''),
+        artistaId: Number(r.artistaId ?? r.artista_id ?? 0),
+        album: (r.album ?? null) as string | null,
+        sello: (r.sello ?? null) as string | null,
+        anio: (r.anio ?? null) as number | null,
+        duracionSegundos: (r.duracionSegundos ?? r.duracion_segundos ?? null) as number | null,
+        genero: (r.genero ?? null) as string | null,
+        youtubeId: (r.youtubeId ?? r.youtube_id ?? null) as string | null,
+        spotifyId: (r.spotifyId ?? r.spotify_id ?? null) as string | null,
+        imagenUrl: (r.imagenUrl ?? r.imagen_url ?? null) as string | null,
+        whosampledUrl: (r.whosampledUrl ?? r.whosampled_url ?? null) as string | null,
+        bpm: (r.bpm ?? null) as number | null,
+        tonalidad: (r.tonalidad ?? null) as string | null,
+        metadata: (r.metadata ?? {}) as Record<string, unknown>,
+        totalSampleada: Number(r.totalSampleada ?? r.total_sampleada ?? 0),
+        totalSamplea: Number(r.totalSamplea ?? r.total_samplea ?? 0),
+        creadoAt: String(r.creadoAt ?? r.created_at ?? ''),
+        actualizadoAt: String(r.actualizadoAt ?? r.updated_at ?? ''),
+        artistaNombre: (r.artistaNombre ?? r.artista_nombre ?? undefined) as string | undefined,
+        artistaSlug: (r.artistaSlug ?? r.artista_slug ?? undefined) as string | undefined,
+        liked: (r.liked ?? undefined) as boolean | undefined,
+        totalLikes: (r.totalLikes ?? r.total_likes ?? undefined) as number | undefined,
+        reaccion: (r.reaccion ?? null) as string | null,
+        sampleAdjunto: (r.sampleAdjunto ?? r.sample_adjunto ?? null) as Cancion['sampleAdjunto'],
+    };
+};
+
+const normalizarLista = <T>(
+    resp: RespuestaApi<T[]>,
+    fn: (v: unknown) => T,
+): RespuestaApi<T[]> => ({
+    ...resp,
+    data: resp.data ? resp.data.map(fn) : null,
+});
+
 /* Listar canciones recientes */
-export const listarCanciones = (perPage = 20): Promise<RespuestaApi<Cancion[]>> =>
-    apiGet<Cancion[]>('/canciones', { per_page: perPage });
+export const listarCanciones = async (perPage = 20): Promise<RespuestaApi<Cancion[]>> =>
+    normalizarLista(await apiGet<Cancion[]>('/canciones', { per_page: perPage }), normalizarCancion);
 
 /* Listar canciones paginadas con total (QL21 — admin table) */
-export const listarCancionesPaginado = (
+export const listarCancionesPaginado = async (
     pagina = 1,
     porPagina = 50
 ): Promise<RespuestaApi<Cancion[]>> =>
-    apiGet<Cancion[]>('/canciones', { page: pagina, per_page: porPagina });
+    normalizarLista(
+        await apiGet<Cancion[]>('/canciones', { page: pagina, per_page: porPagina }),
+        normalizarCancion,
+    );
 
 /* Buscar canciones por texto */
-export const buscarCanciones = (
+export const buscarCanciones = async (
     query: string,
     perPage = 20
 ): Promise<RespuestaApi<Cancion[]>> =>
-    apiGet<Cancion[]>('/canciones/buscar', { q: query, per_page: perPage });
+    normalizarLista(
+        await apiGet<Cancion[]>('/canciones/buscar', { q: query, per_page: perPage }),
+        normalizarCancion,
+    );
 
 /* Canciones más sampleadas */
-export const cancionesTopSampleadas = (
+export const cancionesTopSampleadas = async (
     limit = 50
 ): Promise<RespuestaApi<Cancion[]>> =>
-    apiGet<Cancion[]>('/canciones/top', { limit });
+    normalizarLista(
+        await apiGet<Cancion[]>('/canciones/top', { limit }),
+        normalizarCancion,
+    );
 
 /* Detalle de canción con relaciones */
-export const obtenerCancionDetalle = (
+export const obtenerCancionDetalle = async (
     slug: string
-): Promise<RespuestaApi<CancionDetalle>> =>
-    apiGet<CancionDetalle>(`/canciones/${encodeURIComponent(slug)}`);
+): Promise<RespuestaApi<CancionDetalle>> => {
+    const resp = await apiGet<CancionDetalle>(`/canciones/${encodeURIComponent(slug)}`);
+    if (!resp.ok || !resp.data) return resp;
+    const raw = resp.data as unknown as RawObj;
+    const cancionRaw = (raw.cancion ?? raw) as unknown;
+    return {
+        ...resp,
+        data: {
+            ...(raw as object),
+            cancion: normalizarCancion(cancionRaw),
+        } as CancionDetalle,
+    };
+};
 
 /* [223A-4][223A-3-E] Canción aleatoria con detalle completo para modal descubrimiento.
  * Acepta filtros opcionales de género y década (comma-separated). */
@@ -128,18 +195,30 @@ export interface RespuestaFeedCanciones {
     page: number;
 }
 
-export const feedCanciones = (
+export const feedCanciones = async (
     orden: OrdenFeedCanciones = 'inteligente',
     pagina = 1,
     porPagina = 20
 ): Promise<RespuestaApi<Cancion[]>> =>
-    apiGet<Cancion[]>('/canciones/feed', { orden, page: pagina, per_page: porPagina });
+    normalizarLista(
+        await apiGet<Cancion[]>('/canciones/feed', { orden, page: pagina, per_page: porPagina }),
+        normalizarCancion,
+    );
 
 /* QK18/QK22: Secciones estilo Spotify — multiples secciones con dedup en un request */
-export const seccionesCanciones = (
+export const seccionesCanciones = async (
     porSeccion = 15
-): Promise<RespuestaApi<SeccionMusica[]>> =>
-    apiGet<SeccionMusica[]>('/canciones/secciones', { por_seccion: porSeccion });
+): Promise<RespuestaApi<SeccionMusica[]>> => {
+    const resp = await apiGet<SeccionMusica[]>('/canciones/secciones', { por_seccion: porSeccion });
+    if (!resp.ok || !resp.data) return resp;
+    return {
+        ...resp,
+        data: resp.data.map((sec) => ({
+            ...sec,
+            canciones: sec.canciones ? sec.canciones.map(normalizarCancion) : sec.canciones,
+        })),
+    };
+};
 
 /* ── Endpoints de desarrollo (solo disponibles con WP_DEBUG = true) ── */
 

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT r.id,\n                      r.cancion_destino_id,\n                      r.cancion_fuente_id,\n                      r.whosampled_id,\n                      r.tipo_relacion AS \"tipo_relacion!\",\n                      r.tipo_elemento,\n                      COALESCE(r.timings_destino, '[]'::jsonb) AS \"timings_destino!: Json<Vec<i32>>\",\n                      COALESCE(r.timings_fuente, '[]'::jsonb) AS \"timings_fuente!: Json<Vec<i32>>\",\n                      COALESCE(r.aparece_en_todo, FALSE) AS \"aparece_en_todo!\",\n                      r.sample_id,\n                      r.sample_fuente_id,\n                      r.sample_destino_id,\n                      COALESCE(r.votos_total, 0) AS \"votos_total!\",\n                      COALESCE(r.votos_promedio, 0)::double precision AS \"votos_promedio!\",\n                      r.fuente AS \"fuente!\",\n                      r.contribuidor_id,\n                      u.username AS contribuidor_username,\n                      COALESCE(r.verificada, FALSE) AS \"verificada!\",\n                      COALESCE(r.total_likes, 0) AS \"total_likes!\",\n                      COALESCE(r.total_comentarios, 0) AS \"total_comentarios!\",\n                      r.created_at AS \"created_at!\",\n                      r.updated_at AS \"updated_at!\",\n                      c.titulo AS \"cancion_titulo!\",\n                      c.slug AS \"cancion_slug!\",\n                      a.nombre AS \"artista_nombre!\",\n                      a.slug AS \"artista_slug!\",\n                      c.anio AS cancion_anio,\n                      c.imagen_url AS cancion_imagen_url\n               FROM relaciones_sample r\n               INNER JOIN canciones c ON c.id = r.cancion_fuente_id\n               INNER JOIN artistas_musicales a ON a.id = c.artista_id\n               LEFT JOIN usuarios_ext u ON u.id = r.contribuidor_id\n               WHERE r.cancion_destino_id = $1\n               ORDER BY r.created_at DESC, r.id DESC\n               LIMIT $2",
+  "query": "SELECT r.id,\n                      r.cancion_destino_id,\n                      r.cancion_fuente_id,\n                      r.whosampled_id,\n                      r.tipo_relacion AS \"tipo_relacion!\",\n                      r.tipo_elemento,\n                      COALESCE(r.timings_destino, '[]'::jsonb) AS \"timings_destino!: Json<Vec<i32>>\",\n                      COALESCE(r.timings_fuente, '[]'::jsonb) AS \"timings_fuente!: Json<Vec<i32>>\",\n                      COALESCE(r.aparece_en_todo, FALSE) AS \"aparece_en_todo!\",\n                      r.sample_id,\n                      r.sample_fuente_id,\n                      r.sample_destino_id,\n                      COALESCE(r.votos_total, 0) AS \"votos_total!\",\n                      COALESCE(r.votos_promedio, 0)::double precision AS \"votos_promedio!\",\n                      r.fuente AS \"fuente!\",\n                      r.contribuidor_id,\n                      u.username AS \"contribuidor_username?: String\",\n                      COALESCE(r.verificada, FALSE) AS \"verificada!\",\n                      COALESCE(r.total_likes, 0) AS \"total_likes!\",\n                      COALESCE(r.total_comentarios, 0) AS \"total_comentarios!\",\n                      r.created_at AS \"created_at!\",\n                      r.updated_at AS \"updated_at!\",\n                      cf.titulo AS \"cancion_titulo!\",\n                      cf.slug AS \"cancion_slug!\",\n                      af.nombre AS \"artista_nombre!\",\n                      af.slug AS \"artista_slug!\",\n                      cf.anio AS cancion_anio,\n                      cf.imagen_url AS cancion_imagen_url\n               FROM relaciones_sample r\n               INNER JOIN canciones cf ON cf.id = r.cancion_fuente_id\n               INNER JOIN artistas_musicales af ON af.id = cf.artista_id\n               LEFT JOIN usuarios_ext u ON u.id = r.contribuidor_id\n               WHERE r.cancion_destino_id = ANY($1)\n               ORDER BY COALESCE(r.votos_total, 0) DESC, r.id DESC\n               LIMIT $2",
   "describe": {
     "columns": [
       {
@@ -85,7 +85,7 @@
       },
       {
         "ordinal": 16,
-        "name": "contribuidor_username",
+        "name": "contribuidor_username?: String",
         "type_info": "Varchar"
       },
       {
@@ -146,7 +146,7 @@
     ],
     "parameters": {
       "Left": [
-        "Int4",
+        "Int4Array",
         "Int8"
       ]
     },
@@ -181,5 +181,5 @@
       true
     ]
   },
-  "hash": "145035d0d9bffc852050b6f362ce0ec3d92053034abb294baa93c5c53d7c2395"
+  "hash": "4e087c18df47a761a84a3bc40b3cc3a0ef04c24f2230353cedcbeb45d6594a05"
 }
