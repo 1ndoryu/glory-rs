@@ -13,14 +13,57 @@ import type {
     EstadisticaRelaciones,
     RelacionDetalleCompleta,
     SeccionMusica,
+    RelacionSample,
+    CancionArtista,
 } from '@app/types/cancion';
 
 /* [274A-4] Normalizador snake_case → camelCase para respuestas de canciones.
  * El backend Rust serializa con serde default (snake_case), pero los componentes
- * legacy esperan camelCase. Tolerante: si ya viene en camelCase, lo respeta. */
+ * legacy esperan camelCase. Tolerante: si ya viene en camelCase, lo respeta.
+ * [274A-6b] Extendido para normalizar RelacionSample y CancionDetalle completo. */
+
 type RawObj = Record<string, unknown>;
 const esObjeto = (v: unknown): v is RawObj =>
     v !== null && typeof v === 'object' && !Array.isArray(v);
+
+const normalizarRelacion = (valor: unknown): RelacionSample => {
+    const r = esObjeto(valor) ? valor : {};
+    return {
+        id: Number(r.id ?? 0),
+        cancionDestinoId: Number(r.cancionDestinoId ?? r.cancion_destino_id ?? 0),
+        cancionFuenteId: Number(r.cancionFuenteId ?? r.cancion_fuente_id ?? 0),
+        whosampledId: (r.whosampledId ?? r.whosampled_id ?? null) as number | null,
+        tipoRelacion: (r.tipoRelacion ?? r.tipo_relacion ?? 'sample') as RelacionSample['tipoRelacion'],
+        tipoElemento: (r.tipoElemento ?? r.tipo_elemento ?? null) as RelacionSample['tipoElemento'],
+        timingsDestino: (r.timingsDestino ?? r.timings_destino ?? []) as number[],
+        timingsFuente: (r.timingsFuente ?? r.timings_fuente ?? []) as number[],
+        apareceEnTodo: Boolean(r.apareceEnTodo ?? r.aparece_en_todo ?? false),
+        sampleId: (r.sampleId ?? r.sample_id ?? null) as number | null,
+        votosTotal: Number(r.votosTotal ?? r.votos_total ?? 0),
+        votosPromedio: Number(r.votosPromedio ?? r.votos_promedio ?? 0),
+        fuente: (r.fuente ?? 'comunidad') as RelacionSample['fuente'],
+        verificada: Boolean(r.verificada ?? false),
+        creadoAt: String(r.creadoAt ?? r.created_at ?? ''),
+        cancionTitulo: (r.cancionTitulo ?? r.cancion_titulo ?? undefined) as string | undefined,
+        cancionSlug: (r.cancionSlug ?? r.cancion_slug ?? undefined) as string | undefined,
+        artistaNombre: (r.artistaNombre ?? r.artista_nombre ?? undefined) as string | undefined,
+        artistaSlug: (r.artistaSlug ?? r.artista_slug ?? undefined) as string | undefined,
+        cancionAnio: (r.cancionAnio ?? r.cancion_anio ?? undefined) as number | null | undefined,
+        cancionImagenUrl: (r.cancionImagenUrl ?? r.cancion_imagen_url ?? undefined) as string | null | undefined,
+        contribuidorId: (r.contribuidorId ?? r.contribuidor_id ?? undefined) as number | null | undefined,
+        contribuidorUsername: (r.contribuidorUsername ?? r.contribuidor_username ?? undefined) as string | null | undefined,
+    };
+};
+
+const normalizarArtista = (valor: unknown): CancionArtista => {
+    const r = esObjeto(valor) ? valor : {};
+    return {
+        artistaId: Number(r.artistaId ?? r.artista_id ?? 0),
+        nombre: String(r.nombre ?? ''),
+        slug: String(r.slug ?? ''),
+        rol: (r.rol ?? 'principal') as CancionArtista['rol'],
+    };
+};
 
 const normalizarCancion = (valor: unknown): Cancion => {
     const r = esObjeto(valor) ? valor : {};
@@ -102,13 +145,17 @@ export const obtenerCancionDetalle = async (
     const resp = await apiGet<CancionDetalle>(`/canciones/${encodeURIComponent(slug)}`);
     if (!resp.ok || !resp.data) return resp;
     const raw = resp.data as unknown as RawObj;
-    const cancionRaw = (raw.cancion ?? raw) as unknown;
+    const samplesDeRaw = (raw.samplesDe ?? raw.samples_de ?? []) as unknown[];
+    const sampleadaEnRaw = (raw.sampleadaEn ?? raw.sampleada_en ?? []) as unknown[];
+    const artistasRaw = (raw.artistas ?? []) as unknown[];
     return {
         ...resp,
         data: {
-            ...(raw as object),
-            cancion: normalizarCancion(cancionRaw),
-        } as CancionDetalle,
+            cancion: normalizarCancion(raw.cancion ?? raw),
+            artistas: artistasRaw.map(normalizarArtista),
+            samplesDe: samplesDeRaw.map(normalizarRelacion),
+            sampleadaEn: sampleadaEnRaw.map(normalizarRelacion),
+        },
     };
 };
 
