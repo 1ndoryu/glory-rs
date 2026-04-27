@@ -379,4 +379,106 @@ impl BibliotecaRepository {
 
         Ok(result.rows_affected() > 0)
     }
+
+    /* [274A-6] Contexto y exclusiones para sugerencias "Más Ideas".
+     *
+     * Replica DescargasRepository::contextoDescargas/idsDescargados +
+     * ColeccionSamplesRepository::contextoColeccionadosUsuario/idsColeccionadosUsuario
+     * del legacy. El handler de sugerencias agrega ambos contextos para
+     * calcular top tags, BPM promedio y key dominante; los IDs se usan
+     * para excluir lo que el usuario ya conoce. */
+    pub async fn contexto_descargas(
+        pool: &PgPool,
+        user_id: i32,
+    ) -> Result<Vec<SampleContextRow>, AppError> {
+        let rows = sqlx::query_as!(
+            SampleContextRow,
+            r#"
+            SELECT
+                COALESCE(s.tags, ARRAY[]::text[]) AS "tags!: Vec<String>",
+                s.bpm AS "bpm?",
+                s.key AS "music_key?"
+            FROM samples s
+            JOIN descargas d ON d.sample_id = s.id
+            WHERE d.usuario_id = $1
+              AND s.estado = 'activo'
+              AND s.eliminado_en IS NULL
+            "#,
+            user_id
+        )
+        .fetch_all(pool)
+        .await
+        .map_err(AppError::from)?;
+        Ok(rows)
+    }
+
+    pub async fn ids_descargados(
+        pool: &PgPool,
+        user_id: i32,
+    ) -> Result<Vec<i32>, AppError> {
+        let rows = sqlx::query_scalar!(
+            r#"SELECT sample_id AS "sample_id!" FROM descargas WHERE usuario_id = $1"#,
+            user_id
+        )
+        .fetch_all(pool)
+        .await
+        .map_err(AppError::from)?;
+        Ok(rows)
+    }
+
+    pub async fn contexto_coleccionados(
+        pool: &PgPool,
+        user_id: i32,
+    ) -> Result<Vec<SampleContextRow>, AppError> {
+        let rows = sqlx::query_as!(
+            SampleContextRow,
+            r#"
+            SELECT
+                COALESCE(s.tags, ARRAY[]::text[]) AS "tags!: Vec<String>",
+                s.bpm AS "bpm?",
+                s.key AS "music_key?"
+            FROM samples s
+            JOIN coleccion_samples cs ON cs.sample_id = s.id
+            JOIN colecciones c ON c.id = cs.coleccion_id
+            WHERE c.usuario_id = $1
+              AND c.eliminado_en IS NULL
+              AND s.estado = 'activo'
+              AND s.eliminado_en IS NULL
+            "#,
+            user_id
+        )
+        .fetch_all(pool)
+        .await
+        .map_err(AppError::from)?;
+        Ok(rows)
+    }
+
+    pub async fn ids_coleccionados(
+        pool: &PgPool,
+        user_id: i32,
+    ) -> Result<Vec<i32>, AppError> {
+        let rows = sqlx::query_scalar!(
+            r#"
+            SELECT DISTINCT cs.sample_id AS "sample_id!"
+            FROM coleccion_samples cs
+            JOIN colecciones c ON c.id = cs.coleccion_id
+            WHERE c.usuario_id = $1
+              AND c.eliminado_en IS NULL
+            "#,
+            user_id
+        )
+        .fetch_all(pool)
+        .await
+        .map_err(AppError::from)?;
+        Ok(rows)
+    }
+}
+
+/* [274A-6] Tags + BPM + key extraídos de un sample, materia prima del
+ * algoritmo de sugerencias agregadas. */
+#[derive(Debug, Clone)]
+pub struct SampleContextRow {
+    pub tags: Vec<String>,
+    pub bpm: Option<i32>,
+    pub music_key: Option<String>,
 }

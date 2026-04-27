@@ -48,7 +48,8 @@ pub use article::{
     ArticleRepository, ArticleSummary, CreateArticleParams, UpdateArticleParams,
 };
 pub use biblioteca::{
-    BibliotecaRepository, CarpetaRow, ColeccionadosFilters, FiltroReaccion, CARPETA_DEFAULT,
+    BibliotecaRepository, CarpetaRow, ColeccionadosFilters, FiltroReaccion, SampleContextRow,
+    CARPETA_DEFAULT,
 };
 pub use billing::{
     BillingRepository, CompletedDownloadRevenueShareInsert, CompletedSamplePurchaseInsert,

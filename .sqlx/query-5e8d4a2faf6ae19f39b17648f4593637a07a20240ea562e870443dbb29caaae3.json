@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT DISTINCT cs.sample_id AS \"sample_id!\"\n            FROM coleccion_samples cs\n            JOIN colecciones c ON c.id = cs.coleccion_id\n            WHERE c.usuario_id = $1\n              AND c.eliminado_en IS NULL\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "sample_id!",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "5e8d4a2faf6ae19f39b17648f4593637a07a20240ea562e870443dbb29caaae3"
+}

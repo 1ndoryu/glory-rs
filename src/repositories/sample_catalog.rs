@@ -5,6 +5,7 @@ use super::sample::SampleRepository;
 
 mod aggregates;
 mod query;
+mod scoring;
 mod similar;
 
 pub use aggregates::{TagAggregateFilters, TagAggregateItem, TagAggregatesResult};

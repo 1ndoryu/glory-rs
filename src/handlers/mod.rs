@@ -38,6 +38,7 @@ mod scraper_admin;
 mod search;
 mod seo;
 mod social;
+mod suggestions;
 mod sync;
 mod users;
 mod ws;
@@ -199,6 +200,7 @@ impl utoipa::Modify for SecurityAddon {
         downloads::download_limits,
         downloads::list_purchased_samples,
         downloads::stream_download,
+        suggestions::sugerencias_descargas,
         ws::issue_ticket,
         ws::upgrade_connection,
         colecciones::create_coleccion,
@@ -407,6 +409,7 @@ impl utoipa::Modify for SecurityAddon {
         downloads::DownloadResponse,
         downloads::DownloadLimitsResponse,
         downloads::PurchasedSamplesResponse,
+        suggestions::SugerenciasResponse,
         ws::WebSocketTicketResponse,
         glory_rs::websocket::WebSocketEnvelope,
         colecciones::CreateColeccionRequest,
@@ -650,6 +653,7 @@ fn api_routes() -> Router<AppState> {
         .merge(posts::routes())
         .merge(social::routes())
         .merge(downloads::routes())
+        .merge(suggestions::routes())
         .merge(ws::routes())
         .merge(colecciones::routes())
         .merge(users::routes())
