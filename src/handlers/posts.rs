@@ -256,8 +256,8 @@ pub async fn delete_post(
     user: CurrentUser,
     Path(id): Path<i32>,
 ) -> Result<Json<OkResponse>, AppError> {
-    ensure_owner_original_post(&state, id, user.user_id).await?;
-    let deleted = PostRepository::soft_delete(&state.pool, id, user.user_id).await?;
+    let owner_id = ensure_can_delete_original_post(&state, id, &user).await?;
+    let deleted = PostRepository::soft_delete(&state.pool, id, owner_id).await?;
     if !deleted {
         return Err(AppError::Conflict(format!(
             "no se pudo eliminar la publicacion {id}"
@@ -363,6 +363,27 @@ async fn ensure_owner_original_post(
         ));
     }
     Ok(())
+}
+
+async fn ensure_can_delete_original_post(
+    state: &AppState,
+    post_id: i32,
+    user: &CurrentUser,
+) -> Result<i32, AppError> {
+    let (owner_id, repost_id) = PostRepository::fetch_meta(&state.pool, post_id)
+        .await?
+        .ok_or_else(|| AppError::NotFound(format!("publicacion {post_id} no existe")))?;
+    if repost_id.is_some() {
+        return Err(AppError::BadRequest(
+            "la publicacion es un repost; usa el endpoint /repost para quitarlo".into(),
+        ));
+    }
+    if owner_id != user.user_id && user.rol != "admin" {
+        return Err(AppError::Forbidden(
+            "no eres autor de la publicacion".into(),
+        ));
+    }
+    Ok(owner_id)
 }
 
 async fn ensure_samples_exist(state: &AppState, sample_ids: &[i32]) -> Result<(), AppError> {
