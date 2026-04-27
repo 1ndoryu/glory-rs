@@ -7,7 +7,7 @@ use utoipa::{IntoParams, ToSchema};
 
 use crate::errors::AppError;
 use crate::middleware::{CurrentUser, OptionalUser};
-use crate::repositories::{ModerationRepository, PostDetail, PostRepository};
+use crate::repositories::{ModerationRepository, PostDetail, PostRepository, UserRepository};
 use crate::AppState;
 
 const MAX_POST_CONTENT: usize = 5_000;
@@ -378,7 +378,13 @@ async fn ensure_can_delete_original_post(
             "la publicacion es un repost; usa el endpoint /repost para quitarlo".into(),
         ));
     }
-    if owner_id != user.user_id && user.rol != "admin" {
+    /* [274A-5] El claim `rol` del JWT puede quedar viejo si la sesión se emitió antes
+     * de elevar al usuario a admin. Para autorización destructiva, consultar la BD
+     * evita 403 falsos hasta que el usuario vuelva a iniciar sesión. */
+    let is_admin = UserRepository::find_by_id(&state.pool, user.user_id)
+        .await?
+        .is_some_and(|db_user| db_user.rol == "admin");
+    if owner_id != user.user_id && !is_admin {
         return Err(AppError::Forbidden(
             "no eres autor de la publicacion".into(),
         ));
