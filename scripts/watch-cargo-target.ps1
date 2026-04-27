@@ -5,13 +5,19 @@ Problema: `postdev` solo limpia al cerrar la sesión. Si el backend recompila mu
 el target puede seguir creciendo durante horas.
 
 Estrategia:
+- Esperar un margen inicial para no tocar el target durante el arranque de `cargo run`.
 - Revisar el tamaño total del target cada cierto intervalo.
-- Si supera MaxTotalMB y no hay procesos rustc activos, ejecutar limpieza -Hard.
+- Si supera MaxTotalMB y no hay procesos cargo/rustc activos, ejecutar limpieza -Hard.
 - -Hard solo elimina incremental/, así que no mata glory-backend ni tumba el dev server.
+
+[264A-2] Fix de carrera: la primera versión corría la poda inmediatamente al arrancar
+`npm run dev`. Si `cargo` ya había tomado el target pero todavía no aparecía `rustc`,
+la limpieza podía pelearse con `.fingerprint/` y romper la compilación.
 #>
 
 param(
     [int]$IntervalSeconds = 300,
+    [int]$StartupDelaySeconds = 120,
     [int]$MaxTotalMB = 4096,
     [switch]$RunOnce,
     [switch]$DryRun
@@ -28,6 +34,17 @@ function Get-DirSizeMB($path) {
     return [math]::Round(($sum / 1MB), 0)
 }
 
+function Test-CompileRunning {
+    $processNames = @('cargo', 'rustc')
+    foreach ($name in $processNames) {
+        if (Get-Process -Name $name -ErrorAction SilentlyContinue) {
+            return $true
+        }
+    }
+
+    return $false
+}
+
 function Invoke-PruneIfNeeded {
     if (-not (Test-Path $targetDir)) {
         Write-Host "[watch-cargo] $targetDir no existe."
@@ -41,9 +58,8 @@ function Invoke-PruneIfNeeded {
         return
     }
 
-    $rustcRunning = Get-Process -Name 'rustc' -ErrorAction SilentlyContinue
-    if ($rustcRunning) {
-        Write-Host '[watch-cargo] rustc activo; salto esta pasada para no pelear con la compilacion.'
+    if (Test-CompileRunning) {
+        Write-Host '[watch-cargo] cargo/rustc activo; salto esta pasada para no pelear con la compilacion.'
         return
     }
 
@@ -54,6 +70,11 @@ function Invoke-PruneIfNeeded {
 
     Write-Host '[watch-cargo] cap superado; ejecutando limpieza -Hard de incremental/.'
     & powershell @args
+}
+
+if (-not $RunOnce) {
+    Write-Host "[watch-cargo] Esperando $StartupDelaySeconds s antes de la primera pasada."
+    Start-Sleep -Seconds $StartupDelaySeconds
 }
 
 do {

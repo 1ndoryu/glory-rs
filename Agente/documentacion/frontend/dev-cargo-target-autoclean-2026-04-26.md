@@ -15,8 +15,9 @@ En sesiones largas, el target podia crecer varios GB por `incremental/`, `deps/`
   - `-Aggressive` sigue siendo la opcion que mata el backend y borra `deps/`, `build/` y `.fingerprint/`
 - `scripts/watch-cargo-target.ps1`
   - nuevo watcher ligero para sesiones largas
+  - espera 120 s antes de la primera pasada para no tocar el target durante el arranque de `cargo run`
   - revisa el tamaño del target cada 300 s
-  - si supera el tope y no hay `rustc` activo, dispara limpieza `-Hard`
+  - si supera el tope y no hay `cargo` ni `rustc` activos, dispara limpieza `-Hard`
 - `package.json`
   - `predev` ejecuta limpieza segura antes de arrancar
   - `dev` ahora levanta `dev:sweep` junto a backend y frontend
@@ -36,3 +37,4 @@ La solucion evita que el usuario tenga que acordarse de limpiar manualmente, per
 - Si `C:/tmp/glory-target` no existe, ambos scripts salen sin error.
 - El watcher esta pensado para Windows/PowerShell, igual que los scripts npm del proyecto.
 - El tope de 4096 MB es conservador; si el proyecto cambia de escala puede ajustarse sin tocar el flujo.
+- La primera version del watcher corria inmediatamente y solo vigilaba `rustc`; eso permitia una carrera donde `cargo` ya habia abierto el target pero el watcher todavia podia borrar `incremental/` durante la preparacion de `.fingerprint/`.
