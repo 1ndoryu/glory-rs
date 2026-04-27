@@ -45,3 +45,6 @@ glory-rust-template.code-workspace
 .cargo/config.toml
 
 glory-rs/
+
+backups/
+
