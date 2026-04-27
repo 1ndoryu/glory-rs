@@ -26,14 +26,27 @@ const PATH_MAP: Record<string, string> = {
 /* [254A-10] Paths /me/* que NO se transforman a /users/me/* porque tienen su
  * propia ruta en Rust con un shape distinto al de /users/me/*.
  * - /me/bloqueados existe como /api/me/bloqueados (full users) y NO como
- *   /api/users/me/blocked (solo IDs). */
+ *   /api/users/me/blocked (solo IDs).
+ *
+ * [274A-5] Ademas de los paths exactos arriba, ciertos prefijos /me/* tambien
+ * se preservan tal cual porque tienen subrutas dinamicas servidas por handlers
+ * Rust en /api/me/* (no /api/users/me/*). Si el path coincide exactamente con
+ * un prefijo o empieza con `prefijo/`, NO se aplica la regla generica
+ * /me/* -> /users/me/*. Casos:
+ * - /me/coleccionados, /me/coleccionados/carpetas, /me/coleccionados/{id}/carpeta
+ *   -> servidos por handlers/biblioteca.rs en /api/me/coleccionados[/...]. */
 const PATH_MAP_KEEP: Set<string> = new Set([
     '/me/bloqueados',
 ]);
 
+const PATH_KEEP_PREFIXES: string[] = [
+    '/me/coleccionados',
+];
+
 function mapPath(legacyPath: string): string {
     if (PATH_MAP[legacyPath] !== undefined) return PATH_MAP[legacyPath];
     if (PATH_MAP_KEEP.has(legacyPath)) return legacyPath;
+    if (PATH_KEEP_PREFIXES.some(p => legacyPath === p || legacyPath.startsWith(p + '/'))) return legacyPath;
     /* /me/* â†’ /users/me/* */
     if (legacyPath.startsWith('/me/')) return legacyPath.replace('/me/', '/users/me/');
     /* /perfil/{username} â†’ /users/{username} */
