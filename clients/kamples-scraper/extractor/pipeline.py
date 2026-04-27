@@ -88,6 +88,32 @@ def obtener_pendientes(limit: int = 100) -> list[dict]:
         conn.close()
 
 
+# [264A-2] Lectura runtime de app_config para parametros del scraper.
+# El backend Rust expone GET/PUT /api/admin/config/extraccion sobre la misma
+# tabla; ambos lados comparten este contrato sin necesidad de redeploy del
+# scraper para cambiar intervalo, lote_size o pausar la extraccion.
+def leer_app_config_extraccion() -> dict:
+    """Lee las claves extraccion_* desde app_config. Devuelve dict vacio si la
+    tabla no existe (entorno aun no migrado) o si hay error de conexion."""
+    try:
+        conn = get_connection()
+    except Exception as exc:
+        logger.warning("app_config: no se pudo conectar a la BD (%s); usando valores actuales", exc)
+        return {}
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT clave, valor FROM app_config WHERE clave LIKE 'extraccion_%'"
+            )
+            return {fila[0]: fila[1] for fila in cur.fetchall()}
+    except Exception as exc:
+        # Tabla puede no existir aun en entornos viejos.
+        logger.warning("app_config: lectura fallo (%s); usando valores actuales", exc)
+        return {}
+    finally:
+        conn.close()
+
+
 def actualizar_estado_cola(cola_id: int, estado: str, error: str | None = None) -> None:
     """
     Actualizar estado de un elemento en la cola.
@@ -514,14 +540,46 @@ def main():
     )
 
     while True:
-        pendientes = obtener_pendientes(args.limit)
+        # [264A-2] Releer app_config al inicio de cada ciclo. Si la tabla no
+        # existe (entorno viejo) los valores se ignoran y se usan los args.
+        cfg = leer_app_config_extraccion()
+        cfg_intervalo = cfg.get("extraccion_intervalo_seg")
+        cfg_lote = cfg.get("extraccion_lote_size")
+        cfg_enabled = cfg.get("extraccion_enabled", True)
+
+        if isinstance(cfg_intervalo, (int, float)) and cfg_intervalo >= 5:
+            if abs(limiter.intervalo_seg - cfg_intervalo) > 0.01:
+                logger.info(
+                    "app_config: intervalo cambiado %.0fs -> %.0fs",
+                    limiter.intervalo_seg, cfg_intervalo,
+                )
+                limiter.intervalo_seg = float(cfg_intervalo)
+
+        lote_actual = args.limit
+        if isinstance(cfg_lote, int) and 1 <= cfg_lote <= 500:
+            lote_actual = cfg_lote
+            if cfg_lote != args.limit:
+                logger.debug("app_config: lote_size=%d (args.limit=%d)", cfg_lote, args.limit)
+
+        if cfg_enabled is False:
+            if not args.continuo:
+                logger.info("app_config: extraccion_enabled=false; modo lote -> salir")
+                break
+            logger.info(
+                "app_config: extraccion deshabilitada; durmiendo %ds",
+                int(limiter.intervalo_seg),
+            )
+            time.sleep(max(5.0, limiter.intervalo_seg))
+            continue
+
+        pendientes = obtener_pendientes(lote_actual)
 
         if not pendientes:
             # Auto-enqueue: buscar relaciones sin samples y crear entradas en cola
-            encolados = auto_encolar_pendientes(limit=args.limit)
+            encolados = auto_encolar_pendientes(limit=lote_actual)
             if encolados > 0:
                 logger.info("Auto-encolados %d items desde relaciones sin samples", encolados)
-                pendientes = obtener_pendientes(args.limit)
+                pendientes = obtener_pendientes(lote_actual)
 
         if not pendientes:
             if not args.continuo:
