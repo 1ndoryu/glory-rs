@@ -129,6 +129,10 @@ La estructura es idéntica en cada rama. Solo cambia el contenido específico de
 # Comando unificado — verifica todo el proyecto (backend + frontend)
 npm run check
 
+# Desarrollo completo (backend + frontend)
+# Incluye autolimpieza del target de Cargo antes y durante la sesión si crece demasiado.
+npm run dev
+
 # Backend
 cargo run                    # Iniciar servidor
 cargo check                  # Verificar compilación
@@ -136,6 +140,8 @@ cargo clippy                 # Linter (nivel paranoia)
 cargo test                   # Tests
 cargo fmt                    # Formatear código
 npm run check:back           # cargo check + clippy
+npm run clean:cargo          # Limpieza segura del target de Cargo
+npm run clean:cargo:hard     # Limpieza agresiva del target de Cargo
 
 # Frontend
 npm run dev:front            # Dev server con HMR

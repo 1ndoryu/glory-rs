@@ -32,6 +32,8 @@ desktop.ini
 !/scripts/self-check.ps1
 !/scripts/backup-postgres.sh
 !/scripts/backup-postgres-loop.sh
+!/scripts/clean-cargo-target.ps1
+!/scripts/watch-cargo-target.ps1
 /prerendered/
 /node_modules/
 /cliente/
