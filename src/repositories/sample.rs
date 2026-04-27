@@ -392,4 +392,9 @@ impl SampleRepository {
 
         Ok(())
     }
+
 }
+
+/* [254A-8c-refactor] SampleAssetRow / ReplaceAudioAssetsParams /
+ * CreateSegmentoSampleParams + métodos asociados eliminados al refactorizar
+ * extension_recorte para delegar al scraper Python (ver src/services/extension_recorte.rs). */

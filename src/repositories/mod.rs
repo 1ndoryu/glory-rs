@@ -5,6 +5,7 @@ mod article;
 mod biblioteca;
 mod billing;
 mod block;
+mod cola_extraccion;
 mod coleccion;
 mod comment;
 mod conversation;
@@ -52,6 +53,7 @@ pub use billing::{
     SampleCheckoutCandidate, StripeUserProfile, SubscriptionRecord, UpsertStripeSubscriptionRecord,
 };
 pub use block::{BlockRepository, BlockedUser};
+pub use cola_extraccion::{ColaExtraccionRepository, ColaExtraccionRow, EncolarParams};
 pub use coleccion::{
     Coleccion, ColeccionSample, ColeccionSampleFile, ColeccionesRepository,
     LegacyColeccionParentRecord, LegacyColeccionRecord, LegacyColeccionSampleRecord,

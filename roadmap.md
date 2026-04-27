@@ -63,7 +63,10 @@
 
 ### Pendientes derivados de auditorías
 
-- 254A-8c — Implementar `POST /api/samples/:id/extender-recorte` (+ generar-siguiente + restaurar-recorte) en Rust. **Plan:** `Agente/planes/plan-extension-recorte-2026-04-25.md` — bloqueado en port de yt-dlp wrapper; se hace en sesion dedicada.
+- 264A-1 — Tabla `app_config` + endpoints admin para controlar intervalo y tamaño de lote del scraper Python (`extraccion_intervalo_seg`, `extraccion_lote_size`, `extraccion_enabled`). Backend Rust + endpoint stats. Sin UI.
+- 264A-2 — Parchear `clients/kamples-scraper/extractor/pipeline.py` para releer `app_config` cada ciclo y respetar `enabled/intervalo/lote_size` dinámicos.
+- 264A-3 — Implementar el "publicador" Rust (equivalente al legacy `DevController::publicarExtracciones`): convertir filas en estado `'extraido'` con `ruta_audio_extraido` en samples reales, asignando `sample_id` a la cola y disparando el pipeline IA. Bloqueante para que el flujo end-to-end del scraper funcione (extraido → completado actualmente requiere `sample_id IS NOT NULL` que nadie asigna).
+- 264A-4 — Modificar `pipeline.py` para entender `metadata_extraccion.extension_modo` (`extender` / `generar_siguiente` / `restaurar`) y comportarse distinto: reemplazar assets del sample existente vs crear sample nuevo.
 - Remplazar el daw que hicimos, por https://github.com/andremichelle/opendaw, requiere revisar el daw a actual para ver como estaba integrado, y hacer un plan de las integraciones necesaria (como que un sample se pudiera arrastrar y soltar), el daw actual es muy pobre y malo, por eso vamos a cambiar a opendaw, tienes que hacer un fork en mi cuenta 1ndoryu. **Plan:** `Agente/planes/plan-opendaw-2026-04-25.md` — bloqueado en fase 0 (fork manual del usuario en `1ndoryu/opendaw`).
 
 

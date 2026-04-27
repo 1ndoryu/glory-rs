@@ -16,6 +16,7 @@ mod comments;
 mod connect;
 mod dashboard;
 mod downloads;
+mod extension_recorte;
 mod fcm;
 mod feed;
 mod free_codes;
@@ -244,6 +245,9 @@ impl utoipa::Modify for SecurityAddon {
         admin::algo_timing_history,
         scraper_admin::publicar_auto,
         scraper_admin::reporte_lote,
+        extension_recorte::extender_recorte,
+        extension_recorte::generar_siguiente,
+        extension_recorte::restaurar_recorte,
     ),
     components(schemas(
         health::HealthResponse,
@@ -514,6 +518,9 @@ impl utoipa::Modify for SecurityAddon {
         scraper_admin::PublicarAutoResponse,
         scraper_admin::ReporteLoteRequest,
         scraper_admin::ReporteLoteResponse,
+        extension_recorte::ExtenderRecorteRequest,
+        extension_recorte::GenerarSiguienteRequest,
+        crate::services::extension_recorte::EncoladoResult,
     )),
     modifiers(&SecurityAddon),
     info(
@@ -612,6 +619,7 @@ fn api_routes() -> Router<AppState> {
         .merge(feed::routes())
         .merge(sample_catalog::routes())
         .merge(samples::routes())
+        .merge(extension_recorte::routes())
         .merge(plays::routes())
         .merge(likes::routes())
         .merge(messages::routes())

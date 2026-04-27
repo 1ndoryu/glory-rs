@@ -5,6 +5,7 @@ mod audio_pipeline;
 mod auth;
 pub mod download_token;
 mod email;
+pub mod extension_recorte;
 mod fcm;
 mod google_oauth;
 mod ia_queue;
