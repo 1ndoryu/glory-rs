@@ -69,6 +69,36 @@ impl UserRepository {
             .await
     }
 
+    /* [274A-21] Actualiza email del usuario. Asume que la unicidad la valida el caller. */
+    pub async fn update_email(
+        pool: &PgPool,
+        user_id: i32,
+        nuevo_email: &str,
+    ) -> Result<User, sqlx::Error> {
+        let sql = format!(
+            "UPDATE usuarios_ext SET email = $1 WHERE id = $2 RETURNING {USER_COLS}"
+        );
+        sqlx::query_as::<_, User>(&sql)
+            .bind(nuevo_email)
+            .bind(user_id)
+            .fetch_one(pool)
+            .await
+    }
+
+    /* [274A-22] Actualiza password_hash del usuario. */
+    pub async fn update_password(
+        pool: &PgPool,
+        user_id: i32,
+        nuevo_hash: &str,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query("UPDATE usuarios_ext SET password_hash = $1 WHERE id = $2")
+            .bind(nuevo_hash)
+            .bind(user_id)
+            .execute(pool)
+            .await?;
+        Ok(())
+    }
+
     /* [174A-21] Crear usuario sin password (OAuth-only). Genera username unico si colisiona. */
     pub async fn create_oauth(
         pool: &PgPool,

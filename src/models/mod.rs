@@ -77,6 +77,7 @@ pub use sample::{
     UploadSampleRequestDoc, UploadSampleResponse,
 };
 pub use user::{
-    AuthResponse, GoogleAuthRequest, GooglePkceRequest, LoginRequest, LogoutRequest,
-    RefreshRequest, RegisterRequest, User, UserResponse,
+    AuthResponse, ChangeEmailRequest, ChangePasswordRequest, GoogleAuthRequest, GooglePkceRequest,
+    LoginRequest, LogoutRequest, RefreshRequest, RegisterRequest, SimpleOkResponse, User,
+    UserResponse,
 };

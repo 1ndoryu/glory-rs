@@ -9871,6 +9871,146 @@
         ]
       }
     },
+    "/api/users/me/email": {
+      "put": {
+        "tags": [
+          "users"
+        ],
+        "operationId": "update_email",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeEmailRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Email actualizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrivateProfileResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Password actual incorrecta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Email ya registrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/users/me/password": {
+      "put": {
+        "tags": [
+          "users"
+        ],
+        "operationId": "update_password",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Password actualizada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimpleOkResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Password actual incorrecta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
     "/api/users/me/portada": {
       "post": {
         "tags": [
@@ -11453,6 +11593,40 @@
             "items": {
               "$ref": "#/components/schemas/CarpetaItem"
             }
+          }
+        }
+      },
+      "ChangeEmailRequest": {
+        "type": "object",
+        "required": [
+          "nuevo_email",
+          "password_actual"
+        ],
+        "properties": {
+          "nuevo_email": {
+            "type": "string"
+          },
+          "password_actual": {
+            "type": "string"
+          }
+        }
+      },
+      "ChangePasswordRequest": {
+        "type": "object",
+        "required": [
+          "password_actual",
+          "nueva_password",
+          "confirmar_password"
+        ],
+        "properties": {
+          "confirmar_password": {
+            "type": "string"
+          },
+          "nueva_password": {
+            "type": "string"
+          },
+          "password_actual": {
+            "type": "string"
           }
         }
       },
@@ -16722,6 +16896,21 @@
             "items": {
               "$ref": "#/components/schemas/SampleSummary"
             }
+          }
+        }
+      },
+      "SimpleOkResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "ok": {
+            "type": "boolean"
           }
         }
       },

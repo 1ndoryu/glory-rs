@@ -88,6 +88,36 @@ pub struct GooglePkceRequest {
     pub client_id: Option<String>,
 }
 
+/* [274A-21] Cambiar email del usuario autenticado. Requiere password actual. */
+#[derive(Debug, Deserialize, Validate, ToSchema)]
+pub struct ChangeEmailRequest {
+    #[validate(email(message = "Email invalido"))]
+    #[serde(alias = "nuevoEmail")]
+    pub nuevo_email: String,
+    #[validate(length(min = 1, message = "La contrasena actual es requerida"))]
+    #[serde(alias = "passwordActual")]
+    pub password_actual: String,
+}
+
+/* [274A-22] Cambiar password del usuario autenticado. Requiere password actual. */
+#[derive(Debug, Deserialize, Validate, ToSchema)]
+pub struct ChangePasswordRequest {
+    #[validate(length(min = 1, message = "La contrasena actual es requerida"))]
+    #[serde(alias = "passwordActual")]
+    pub password_actual: String,
+    #[validate(length(min = 8, message = "La nueva contrasena debe tener al menos 8 caracteres"))]
+    #[serde(alias = "nuevaPassword")]
+    pub nueva_password: String,
+    #[serde(alias = "confirmarPassword")]
+    pub confirmar_password: String,
+}
+
+#[derive(Debug, Serialize, ToSchema)]
+pub struct SimpleOkResponse {
+    pub ok: bool,
+    pub message: String,
+}
+
 #[derive(Debug, Serialize, ToSchema)]
 pub struct AuthResponse {
     pub token: String,
