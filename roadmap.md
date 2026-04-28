@@ -69,13 +69,6 @@
 
 45 endpoints que el frontend legacy invoca pero el backend Rust no expone. Portar uno por uno desde `glorytemplate/App/Kamples/Api/Controladores/` y `glorytemplate/App/Kamples/Services/`. Cada endpoint es una tarea individual.
 
-**Admin moderacion (5 — listar/historial ya registrados):**
-- 274A-29: POST `/api/admin/moderar`
-- 274A-30: POST `/api/admin/reportes/resolver`
-- 274A-32: POST `/api/admin/moderacion/rechazar-pendientes`
-- 274A-33: POST `/api/admin/moderacion/banear-usuario`
-- 274A-34: POST `/api/admin/moderacion/rechazar-usuario-publicaciones`
-
 **Admin duplicados (1 — listar/contar ya registrados):**
 - 274A-43: POST `/api/admin/duplicados/backfill`
 

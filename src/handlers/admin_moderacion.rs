@@ -12,68 +12,25 @@
  */
 
 use axum::extract::{Query, State};
-use axum::routing::get;
+use axum::routing::{get, post};
 use axum::{Json, Router};
-use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use sqlx::FromRow;
 use utoipa::{IntoParams, ToSchema};
 
 use crate::errors::AppError;
+#[allow(unused_imports)]
+use crate::errors::ErrorResponse;
 use crate::middleware::CurrentUser;
+use crate::repositories::AdminModerationRepository;
+pub use crate::repositories::{ArticuloPendiente, PublicacionPendiente, ReportePendiente};
+use crate::services::admin_moderation::{
+    AdminModerationService, ManualBanInput, ModerateContentInput, ResolveReportInput,
+};
 use crate::AppState;
 
 const PAGE_SIZE: i64 = 20;
 const HISTORIAL_DIAS_DEFAULT: i32 = 7;
 const HISTORIAL_DIAS_MAX: i32 = 90;
-
-#[derive(Debug, Clone, Serialize, ToSchema, FromRow)]
-pub struct PublicacionPendiente {
-    pub id: i32,
-    pub autor_id: i32,
-    pub tipo: String,
-    pub contenido: String,
-    pub imagenes: Vec<String>,
-    pub samples_adjuntos: Vec<i32>,
-    pub moderacion_estado: Option<String>,
-    pub moderacion_detalle: Option<serde_json::Value>,
-    pub moderacion_razon: Option<String>,
-    pub created_at: DateTime<Utc>,
-    pub autor_username: String,
-    pub autor_nombre: String,
-    pub autor_avatar: Option<String>,
-}
-
-#[derive(Debug, Clone, Serialize, ToSchema, FromRow)]
-pub struct ArticuloPendiente {
-    pub id: i32,
-    pub titulo: String,
-    pub slug: String,
-    pub extracto: String,
-    pub categoria: String,
-    pub portada_url: Option<String>,
-    pub moderacion_estado: String,
-    pub moderacion_razon: Option<String>,
-    pub created_at: DateTime<Utc>,
-    pub autor_id: i32,
-    pub autor_username: String,
-    pub autor_nombre: String,
-    pub autor_avatar: Option<String>,
-}
-
-#[derive(Debug, Clone, Serialize, ToSchema, FromRow)]
-pub struct ReportePendiente {
-    pub id: i32,
-    pub tipo: String,
-    pub target_id: i32,
-    pub razon: String,
-    pub detalles: Option<String>,
-    pub estado: String,
-    pub created_at: DateTime<Utc>,
-    pub reportador_id: i32,
-    pub reportador_username: String,
-    pub reportado_id: Option<i32>,
-}
 
 #[derive(Debug, Clone, Deserialize, IntoParams)]
 pub struct ListarQuery {
@@ -117,6 +74,42 @@ pub struct HistorialResponse {
     pub data: HistorialData,
 }
 
+#[derive(Debug, Clone, Deserialize, ToSchema)]
+pub struct ModerarRequest {
+    pub tipo: String,
+    pub id: i32,
+    pub accion: String,
+}
+
+#[derive(Debug, Clone, Deserialize, ToSchema)]
+pub struct ResolverReporteRequest {
+    pub id: i32,
+    pub accion: String,
+}
+
+#[derive(Debug, Clone, Deserialize, ToSchema)]
+pub struct BanearUsuarioRequest {
+    pub usuario_id: i32,
+    pub duracion: String,
+    pub razon: String,
+}
+
+#[derive(Debug, Clone, Deserialize, ToSchema)]
+pub struct RechazarUsuarioPublicacionesRequest {
+    pub autor_id: i32,
+}
+
+#[derive(Debug, Clone, Serialize, ToSchema)]
+pub struct OkResponse {
+    pub ok: bool,
+}
+
+#[derive(Debug, Clone, Serialize, ToSchema)]
+pub struct AffectedResponse {
+    pub ok: bool,
+    pub afectados: i64,
+}
+
 #[utoipa::path(get, path = "/api/admin/moderacion", tag = "admin",
     params(ListarQuery),
     security(("bearer_auth" = [])),
@@ -133,72 +126,18 @@ pub async fn listar(
     let reportes_limit = query.reportes_limit.unwrap_or(20).clamp(1, 50);
     let reportes_offset = (reportes_page - 1) * reportes_limit;
 
-    let publicaciones = sqlx::query_as::<_, PublicacionPendiente>(
-        r"SELECT p.id, p.autor_id, p.tipo, p.contenido,
-                  COALESCE(p.imagenes, '{}')         AS imagenes,
-                  COALESCE(p.samples_adjuntos, '{}') AS samples_adjuntos,
-                  p.moderacion_estado, p.moderacion_detalle, p.moderacion_razon, p.created_at,
-                  u.username AS autor_username,
-                  u.nombre_visible AS autor_nombre,
-                  u.avatar_url AS autor_avatar
-             FROM publicaciones p
-             JOIN usuarios_ext u ON u.id = p.autor_id
-            WHERE p.moderacion_estado IN ('pendiente', 'revision')
-              AND p.eliminado_en IS NULL
-            ORDER BY p.created_at DESC
-            LIMIT $1 OFFSET $2",
-    )
-    .bind(PAGE_SIZE)
-    .bind(offset)
-    .fetch_all(&state.pool)
-    .await?;
-
-    let articulos = sqlx::query_as::<_, ArticuloPendiente>(
-        r"SELECT a.id, a.titulo, a.slug, a.extracto, a.categoria, a.portada_url,
-                  a.moderacion_estado, a.moderacion_razon, a.created_at,
-                  a.autor_id,
-                  u.username AS autor_username,
-                  u.nombre_visible AS autor_nombre,
-                  u.avatar_url AS autor_avatar
-             FROM articulos a
-             JOIN usuarios_ext u ON u.id = a.autor_id
-            WHERE a.moderacion_estado IN ('pendiente', 'revision')
-              AND a.eliminado_en IS NULL
-            ORDER BY a.created_at DESC
-            LIMIT $1 OFFSET $2",
-    )
-    .bind(PAGE_SIZE)
-    .bind(offset)
-    .fetch_all(&state.pool)
-    .await?;
-
-    let reportes = sqlx::query_as::<_, ReportePendiente>(
-        r"SELECT r.id, r.tipo, r.target_id, r.razon, r.detalles, r.estado, r.created_at,
-                  r.reportador_id,
-                  u.username AS reportador_username,
-                  r.reportado_id
-             FROM reportes r
-             JOIN usuarios_ext u ON u.id = r.reportador_id
-            WHERE r.estado = 'pendiente'
-            ORDER BY r.created_at DESC
-            LIMIT $1 OFFSET $2",
-    )
-    .bind(reportes_limit)
-    .bind(reportes_offset)
-    .fetch_all(&state.pool)
-    .await?;
-
-    let reportes_total: (i64,) =
-        sqlx::query_as(r"SELECT COUNT(*)::bigint FROM reportes WHERE estado = 'pendiente'")
-            .fetch_one(&state.pool)
-            .await?;
+        let publicaciones = AdminModerationRepository::list_pending_posts(&state.pool, PAGE_SIZE, offset).await?;
+        let articulos = AdminModerationRepository::list_pending_articles(&state.pool, PAGE_SIZE, offset).await?;
+        let reportes =
+                AdminModerationRepository::list_pending_reports(&state.pool, reportes_limit, reportes_offset).await?;
+        let reportes_total = AdminModerationRepository::count_pending_reports(&state.pool).await?;
 
     Ok(Json(ListarResponse {
         data: ListarData {
             publicaciones,
             articulos,
             reportes,
-            reportes_total: reportes_total.0,
+            reportes_total,
         },
     }))
 }
@@ -218,33 +157,116 @@ pub async fn historial(
         .unwrap_or(HISTORIAL_DIAS_DEFAULT)
         .clamp(1, HISTORIAL_DIAS_MAX);
 
-    let publicaciones = sqlx::query_as::<_, PublicacionPendiente>(
-        r"SELECT p.id, p.autor_id, p.tipo, p.contenido,
-                  COALESCE(p.imagenes, '{}')         AS imagenes,
-                  COALESCE(p.samples_adjuntos, '{}') AS samples_adjuntos,
-                  p.moderacion_estado, p.moderacion_detalle, p.moderacion_razon, p.created_at,
-                  u.username AS autor_username,
-                  u.nombre_visible AS autor_nombre,
-                  u.avatar_url AS autor_avatar
-             FROM publicaciones p
-             JOIN usuarios_ext u ON u.id = p.autor_id
-            WHERE p.moderacion_estado IS NOT NULL
-              AND p.moderacion_estado <> 'pendiente'
-              AND p.created_at >= NOW() - make_interval(days => $1)
-            ORDER BY p.created_at DESC
-            LIMIT 100",
-    )
-    .bind(dias)
-    .fetch_all(&state.pool)
-    .await?;
+        let publicaciones = AdminModerationRepository::list_recent_moderated_posts(&state.pool, dias).await?;
 
     Ok(Json(HistorialResponse {
         data: HistorialData { publicaciones },
     }))
 }
 
+#[utoipa::path(post, path = "/api/admin/moderar", tag = "admin",
+    request_body = ModerarRequest,
+    security(("bearer_auth" = [])),
+    responses((status = 200, body = OkResponse), (status = 400, body = ErrorResponse), (status = 403, body = ErrorResponse), (status = 404, body = ErrorResponse)))]
+pub async fn moderar(
+    State(state): State<AppState>,
+    user: CurrentUser,
+    Json(request): Json<ModerarRequest>,
+) -> Result<Json<OkResponse>, AppError> {
+    user.require_admin()?;
+    AdminModerationService::moderate_content(
+        &state.pool,
+        ModerateContentInput {
+            tipo: request.tipo,
+            id: request.id,
+            accion: request.accion,
+        },
+    )
+    .await?;
+    Ok(Json(OkResponse { ok: true }))
+}
+
+#[utoipa::path(post, path = "/api/admin/reportes/resolver", tag = "admin",
+    request_body = ResolverReporteRequest,
+    security(("bearer_auth" = [])),
+    responses((status = 200, body = OkResponse), (status = 400, body = ErrorResponse), (status = 403, body = ErrorResponse), (status = 404, body = ErrorResponse)))]
+pub async fn resolver_reporte(
+    State(state): State<AppState>,
+    user: CurrentUser,
+    Json(request): Json<ResolverReporteRequest>,
+) -> Result<Json<OkResponse>, AppError> {
+    user.require_admin()?;
+    AdminModerationService::resolve_report(
+        &state.pool,
+        ResolveReportInput {
+            admin_id: user.user_id,
+            id: request.id,
+            accion: request.accion,
+        },
+    )
+    .await?;
+    Ok(Json(OkResponse { ok: true }))
+}
+
+#[utoipa::path(post, path = "/api/admin/moderacion/rechazar-pendientes", tag = "admin",
+    security(("bearer_auth" = [])),
+    responses((status = 200, body = AffectedResponse), (status = 403, body = ErrorResponse)))]
+pub async fn rechazar_todos_pendientes(
+    State(state): State<AppState>,
+    user: CurrentUser,
+) -> Result<Json<AffectedResponse>, AppError> {
+    user.require_admin()?;
+    let afectados = AdminModerationService::reject_pending_posts(&state.pool).await?;
+    Ok(Json(AffectedResponse { ok: true, afectados }))
+}
+
+#[utoipa::path(post, path = "/api/admin/moderacion/banear-usuario", tag = "admin",
+    request_body = BanearUsuarioRequest,
+    security(("bearer_auth" = [])),
+    responses((status = 200, body = OkResponse), (status = 400, body = ErrorResponse), (status = 403, body = ErrorResponse), (status = 404, body = ErrorResponse)))]
+pub async fn banear_usuario(
+    State(state): State<AppState>,
+    user: CurrentUser,
+    Json(request): Json<BanearUsuarioRequest>,
+) -> Result<Json<OkResponse>, AppError> {
+    user.require_admin()?;
+    AdminModerationService::apply_manual_ban(
+        &state.pool,
+        ManualBanInput {
+            admin_id: user.user_id,
+            usuario_id: request.usuario_id,
+            duracion: request.duracion,
+            razon: request.razon,
+        },
+    )
+    .await?;
+    Ok(Json(OkResponse { ok: true }))
+}
+
+#[utoipa::path(post, path = "/api/admin/moderacion/rechazar-usuario-publicaciones", tag = "admin",
+    request_body = RechazarUsuarioPublicacionesRequest,
+    security(("bearer_auth" = [])),
+    responses((status = 200, body = AffectedResponse), (status = 400, body = ErrorResponse), (status = 403, body = ErrorResponse)))]
+pub async fn rechazar_publicaciones_usuario(
+    State(state): State<AppState>,
+    user: CurrentUser,
+    Json(request): Json<RechazarUsuarioPublicacionesRequest>,
+) -> Result<Json<AffectedResponse>, AppError> {
+    user.require_admin()?;
+    let afectados = AdminModerationService::reject_user_posts(&state.pool, request.autor_id).await?;
+    Ok(Json(AffectedResponse { ok: true, afectados }))
+}
+
 pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/admin/moderacion", get(listar))
         .route("/admin/moderacion/historial", get(historial))
+        .route("/admin/moderar", post(moderar))
+        .route("/admin/reportes/resolver", post(resolver_reporte))
+        .route("/admin/moderacion/rechazar-pendientes", post(rechazar_todos_pendientes))
+        .route("/admin/moderacion/banear-usuario", post(banear_usuario))
+        .route(
+            "/admin/moderacion/rechazar-usuario-publicaciones",
+            post(rechazar_publicaciones_usuario),
+        )
 }

@@ -1,6 +1,7 @@
 /* sentinel-disable-file directory-size — raiz legacy de servicios; los nuevos
  * dominios se agregan en subdirectorios (`services/contribuciones`, `services/dev`). */
 mod admin_processes;
+pub mod admin_moderation;
 mod admin_seed;
 pub mod algo_timing;
 mod audio_pipeline;

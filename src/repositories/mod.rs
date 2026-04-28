@@ -1,4 +1,5 @@
 mod admin_ia_queue;
+mod admin_moderation;
 mod admin_panel;
 mod admin_seed;
 mod app_config;
@@ -41,6 +42,9 @@ mod user;
 
 pub use admin_ia_queue::{
     AdminIaQueueItem, AdminIaQueueListParams, AdminIaQueueRepository, AdminIaQueueStats,
+};
+pub use admin_moderation::{
+    AdminModerationRepository, ArticuloPendiente, PublicacionPendiente, ReportePendiente,
 };
 pub use admin_panel::AdminPanelRepository;
 pub use admin_seed::{AdminSeedRepository, InsertSeedUserInput};

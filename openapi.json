@@ -1456,6 +1456,71 @@
         ]
       }
     },
+    "/api/admin/moderacion/banear-usuario": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "operationId": "banear_usuario",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BanearUsuarioRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
     "/api/admin/moderacion/historial": {
       "get": {
         "tags": [
@@ -1487,6 +1552,161 @@
           },
           "403": {
             "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/moderacion/rechazar-pendientes": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "operationId": "rechazar_todos_pendientes",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffectedResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/moderacion/rechazar-usuario-publicaciones": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "operationId": "rechazar_publicaciones_usuario",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RechazarUsuarioPublicacionesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffectedResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/moderar": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "operationId": "moderar",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModerarRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2107,6 +2327,71 @@
           },
           "403": {
             "description": "No admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/reportes/resolver": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "operationId": "resolver_reporte",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolverReporteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
             "content": {
               "application/json": {
                 "schema": {
@@ -12832,6 +13117,22 @@
           }
         }
       },
+      "AffectedResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "afectados"
+        ],
+        "properties": {
+          "afectados": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ok": {
+            "type": "boolean"
+          }
+        }
+      },
       "AppVersionInfo": {
         "type": "object",
         "required": [
@@ -13316,6 +13617,26 @@
           },
           "user": {
             "$ref": "#/components/schemas/UserResponse"
+          }
+        }
+      },
+      "BanearUsuarioRequest": {
+        "type": "object",
+        "required": [
+          "usuario_id",
+          "duracion",
+          "razon"
+        ],
+        "properties": {
+          "duracion": {
+            "type": "string"
+          },
+          "razon": {
+            "type": "string"
+          },
+          "usuario_id": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -17183,6 +17504,26 @@
           }
         }
       },
+      "ModerarRequest": {
+        "type": "object",
+        "required": [
+          "tipo",
+          "id",
+          "accion"
+        ],
+        "properties": {
+          "accion": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tipo": {
+            "type": "string"
+          }
+        }
+      },
       "MoverCarpetaData": {
         "type": "object",
         "required": [
@@ -18289,6 +18630,18 @@
           }
         }
       },
+      "RechazarUsuarioPublicacionesRequest": {
+        "type": "object",
+        "required": [
+          "autor_id"
+        ],
+        "properties": {
+          "autor_id": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "RefreshRequest": {
         "type": "object",
         "required": [
@@ -18691,6 +19044,22 @@
             "format": "int32"
           },
           "total_reposts": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ResolverReporteRequest": {
+        "type": "object",
+        "required": [
+          "id",
+          "accion"
+        ],
+        "properties": {
+          "accion": {
+            "type": "string"
+          },
+          "id": {
             "type": "integer",
             "format": "int32"
           }
