@@ -70,14 +70,6 @@
 45 endpoints que el frontend legacy invoca pero el backend Rust no expone. Portar uno por uno desde `glorytemplate/App/Kamples/Api/Controladores/` y `glorytemplate/App/Kamples/Services/`. Cada endpoint es una tarea individual.
 
 **Usuario activo (alta prioridad):**
-- 274A-15: GET `/api/users/me/descargas` — historial de descargas del usuario
-- 274A-16: GET `/api/users/me/seguidos` — lista de a quien sigo
-- 274A-17: GET `/api/reproducciones/historial` — historial de reproducciones
-- 274A-18: GET `/api/feed/inicio` — feed inicial
-- 274A-19: POST `/api/feed/recargar` — recargar feed
-- 274A-20: GET `/api/me/favoritos/sugerencias` — sugerencias basadas en favoritos
-- 274A-21: PUT `/api/users/me/email` — cambiar email
-- 274A-22: PUT `/api/users/me/password` — cambiar password
 - 274A-23: POST `/api/contribuciones` — crear contribucion
 - 274A-24: POST `/api/contribuciones/edicion` — editar contribucion
 - 274A-25: POST `/api/contribuciones/eliminacion` — eliminar contribucion
