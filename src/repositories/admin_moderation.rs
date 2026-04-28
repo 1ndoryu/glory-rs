@@ -245,8 +245,9 @@ impl AdminModerationRepository {
         )
         .execute(pool)
         .await?;
-        i64::try_from(result.rows_affected())
-            .map_err(|_| AppError::Internal("Cantidad de publicaciones afectadas fuera de rango".into()))
+        i64::try_from(result.rows_affected()).map_err(|_| {
+            AppError::Internal("Cantidad de publicaciones afectadas fuera de rango".into())
+        })
     }
 
     pub async fn reject_user_posts(pool: &PgPool, author_id: i32) -> Result<i64, AppError> {
@@ -261,8 +262,9 @@ impl AdminModerationRepository {
         .bind(author_id)
         .execute(pool)
         .await?;
-        i64::try_from(result.rows_affected())
-            .map_err(|_| AppError::Internal("Cantidad de publicaciones afectadas fuera de rango".into()))
+        i64::try_from(result.rows_affected()).map_err(|_| {
+            AppError::Internal("Cantidad de publicaciones afectadas fuera de rango".into())
+        })
     }
 
     pub async fn resolve_report(

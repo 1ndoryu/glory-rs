@@ -19,8 +19,8 @@ use crate::middleware::CurrentUser;
 pub use crate::repositories::ContribucionPendiente;
 use crate::repositories::{ActualizarContribucionRecord, ContribucionesRepository};
 use crate::services::contribuciones::{
-    ContribucionesService, CrearContribucionInput, ModerarContribucionInput,
-    ProponerEdicionInput, ProponerEliminacionInput,
+    ContribucionesService, CrearContribucionInput, ModerarContribucionInput, ProponerEdicionInput,
+    ProponerEliminacionInput,
 };
 use crate::AppState;
 
@@ -114,8 +114,7 @@ pub struct MisContribucionesResponse {
 }
 
 #[derive(Debug, Clone, Serialize, ToSchema)]
-#[schema(as = AdminContribucionesListarResponse)]
-pub struct ListarResponse {
+pub struct AdminContribucionesListarResponse {
     pub ok: bool,
     pub items: Vec<ContribucionPendiente>,
     pub total: i64,
@@ -157,7 +156,13 @@ pub async fn crear(
         },
     )
     .await?;
-    Ok((StatusCode::CREATED, Json(RespuestaContribucion { ok: true, id: Some(id) })))
+    Ok((
+        StatusCode::CREATED,
+        Json(RespuestaContribucion {
+            ok: true,
+            id: Some(id),
+        }),
+    ))
 }
 
 #[utoipa::path(
@@ -171,7 +176,8 @@ pub async fn mis(
     Query(query): Query<ListarQuery>,
 ) -> Result<Json<MisContribucionesResponse>, AppError> {
     let (page, limit, offset) = pagination(&query);
-    let items = ContribucionesRepository::listar_usuario(&state.pool, user.user_id, limit, offset).await?;
+    let items =
+        ContribucionesRepository::listar_usuario(&state.pool, user.user_id, limit, offset).await?;
     let _ = page;
     Ok(Json(MisContribucionesResponse { ok: true, items }))
 }
@@ -199,9 +205,17 @@ pub async fn actualizar(
         tipo_elemento: request.tipo_elemento,
     };
     if !input.has_changes() {
-        return Err(AppError::Validation("No se enviaron campos para actualizar.".into()));
+        return Err(AppError::Validation(
+            "No se enviaron campos para actualizar.".into(),
+        ));
     }
-    let ok = ContribucionesRepository::actualizar_pendiente_usuario(&state.pool, id, user.user_id, input).await?;
+    let ok = ContribucionesRepository::actualizar_pendiente_usuario(
+        &state.pool,
+        id,
+        user.user_id,
+        input,
+    )
+    .await?;
     if !ok {
         return Err(AppError::Forbidden(
             "No se pudo actualizar. Verifica que la contribucion sea tuya y este pendiente.".into(),
@@ -220,7 +234,8 @@ pub async fn eliminar(
     user: CurrentUser,
     Path(id): Path<i32>,
 ) -> Result<Json<RespuestaOk>, AppError> {
-    let ok = ContribucionesRepository::eliminar_pendiente_usuario(&state.pool, id, user.user_id).await?;
+    let ok =
+        ContribucionesRepository::eliminar_pendiente_usuario(&state.pool, id, user.user_id).await?;
     if !ok {
         return Err(AppError::Forbidden(
             "No se pudo eliminar. Verifica que la contribucion sea tuya y este pendiente.".into(),
@@ -249,7 +264,13 @@ pub async fn proponer_edicion(
         },
     )
     .await?;
-    Ok((StatusCode::CREATED, Json(RespuestaContribucion { ok: true, id: Some(id) })))
+    Ok((
+        StatusCode::CREATED,
+        Json(RespuestaContribucion {
+            ok: true,
+            id: Some(id),
+        }),
+    ))
 }
 
 #[utoipa::path(
@@ -272,24 +293,37 @@ pub async fn proponer_eliminacion(
         },
     )
     .await?;
-    Ok((StatusCode::CREATED, Json(RespuestaContribucion { ok: true, id: Some(id) })))
+    Ok((
+        StatusCode::CREATED,
+        Json(RespuestaContribucion {
+            ok: true,
+            id: Some(id),
+        }),
+    ))
 }
 
 #[utoipa::path(
     get, path = "/api/admin/contribuciones", tag = "admin",
     params(ListarQuery), security(("bearer_auth" = [])),
-    responses((status = 200, body = ListarResponse), (status = 403, body = ErrorResponse))
+    responses((status = 200, body = AdminContribucionesListarResponse), (status = 403, body = ErrorResponse))
 )]
 pub async fn listar(
     State(state): State<AppState>,
     user: CurrentUser,
     Query(query): Query<ListarQuery>,
-) -> Result<Json<ListarResponse>, AppError> {
+) -> Result<Json<AdminContribucionesListarResponse>, AppError> {
     user.require_admin()?;
     let (page, limit, offset) = pagination(&query);
-    let items = ContribucionesRepository::listar_pendientes_admin(&state.pool, limit, offset).await?;
+    let items =
+        ContribucionesRepository::listar_pendientes_admin(&state.pool, limit, offset).await?;
     let total = ContribucionesRepository::contar_pendientes(&state.pool).await?;
-    Ok(Json(ListarResponse { ok: true, items, total, page, limit }))
+    Ok(Json(AdminContribucionesListarResponse {
+        ok: true,
+        items,
+        total,
+        page,
+        limit,
+    }))
 }
 
 #[utoipa::path(
@@ -314,7 +348,10 @@ pub async fn moderar(
         },
     )
     .await?;
-    Ok(Json(ModerarContribucionResponse { ok: true, relacion_id: result.relacion_id }))
+    Ok(Json(ModerarContribucionResponse {
+        ok: true,
+        relacion_id: result.relacion_id,
+    }))
 }
 
 fn pagination(query: &ListarQuery) -> (i64, i64, i64) {

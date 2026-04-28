@@ -85,7 +85,8 @@ pub async fn get_feed(
     )
     .await?;
     let hay_mas = ranked_items.len() == limit;
-    let visible_ranked_items = filter_hidden_samples(&state, current_user.user_id, ranked_items).await?;
+    let visible_ranked_items =
+        filter_hidden_samples(&state, current_user.user_id, ranked_items).await?;
     let sample_ids = visible_ranked_items
         .iter()
         .map(|item| item.id)
@@ -184,12 +185,8 @@ async fn filter_hidden_samples(
     items: Vec<RankedSample>,
 ) -> Result<Vec<RankedSample>, AppError> {
     let sample_ids = items.iter().map(|item| item.id).collect::<Vec<_>>();
-    let pending_counts = ReportRepository::pending_counts_for_targets(
-        &state.pool,
-        "sample",
-        &sample_ids,
-    )
-    .await?;
+    let pending_counts =
+        ReportRepository::pending_counts_for_targets(&state.pool, "sample", &sample_ids).await?;
 
     Ok(items
         .into_iter()

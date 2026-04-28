@@ -63,13 +63,9 @@ pub async fn extender_recorte(
     Json(req): Json<ExtenderRecorteRequest>,
 ) -> Result<axum::response::Response, AppError> {
     user.require_admin()?;
-    let result = extension_recorte::extender(
-        &state.pool,
-        id,
-        req.segundos_antes,
-        req.segundos_despues,
-    )
-    .await?;
+    let result =
+        extension_recorte::extender(&state.pool, id, req.segundos_antes, req.segundos_despues)
+            .await?;
     Ok(ok202(result).into_response())
 }
 
@@ -124,6 +120,12 @@ pub async fn restaurar_recorte(
 pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/api/samples/:id/extender-recorte", post(extender_recorte))
-        .route("/api/samples/:id/generar-siguiente", post(generar_siguiente))
-        .route("/api/samples/:id/restaurar-recorte", post(restaurar_recorte))
+        .route(
+            "/api/samples/:id/generar-siguiente",
+            post(generar_siguiente),
+        )
+        .route(
+            "/api/samples/:id/restaurar-recorte",
+            post(restaurar_recorte),
+        )
 }

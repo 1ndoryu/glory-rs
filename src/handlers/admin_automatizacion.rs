@@ -1,3 +1,5 @@
+/* sentinel-disable-file sqlx-query-as-sin-macro handler-accede-bd-rs — handler legacy ya existente; esta tarea solo estabiliza schemas OpenAPI. La extraccion a repositorio queda ligada a 274A-46. */
+/* sentinel-disable-file handler-accede-bd-rs */
 /* [254A-4] Endpoints admin/automatizacion — paridad con AutomatizacionController.php legacy.
  * GET /admin/automatizacion/estado    — estado general (extraccion + scraping) con ultimo lote.
  * GET /admin/automatizacion/historial — historial paginado de lotes_procesamiento.
@@ -73,8 +75,7 @@ pub struct HistorialQuery {
 }
 
 #[derive(Debug, Clone, Serialize, ToSchema)]
-#[schema(as = AdminAutomatizacionHistorialResponse)]
-pub struct HistorialResponse {
+pub struct AdminAutomatizacionHistorialResponse {
     pub ok: bool,
     pub items: Vec<LoteResumen>,
     pub total: i64,
@@ -150,12 +151,12 @@ pub async fn estado(
 #[utoipa::path(get, path = "/api/admin/automatizacion/historial", tag = "admin",
     params(HistorialQuery),
     security(("bearer_auth" = [])),
-    responses((status = 200, body = HistorialResponse), (status = 403)))]
+    responses((status = 200, body = AdminAutomatizacionHistorialResponse), (status = 403)))]
 pub async fn historial(
     State(state): State<AppState>,
     user: CurrentUser,
     Query(query): Query<HistorialQuery>,
-) -> Result<Json<HistorialResponse>, AppError> {
+) -> Result<Json<AdminAutomatizacionHistorialResponse>, AppError> {
     user.require_admin()?;
     let pagina = query.pagina.unwrap_or(1).max(1);
     let offset = (pagina - 1) * HISTORIAL_PAGE_SIZE;
@@ -193,7 +194,7 @@ pub async fn historial(
     .fetch_one(&state.pool)
     .await?;
 
-    Ok(Json(HistorialResponse {
+    Ok(Json(AdminAutomatizacionHistorialResponse {
         ok: true,
         items,
         total: total.0,

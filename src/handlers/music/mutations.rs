@@ -37,8 +37,14 @@ pub async fn link_sample_to_relation(
     request
         .validate()
         .map_err(|error| AppError::Validation(error.to_string()))?;
-    MusicRepository::link_sample(&state.pool, id, request.sample_id, request.lado, user.user_id)
-        .await?;
+    MusicRepository::link_sample(
+        &state.pool,
+        id,
+        request.sample_id,
+        request.lado,
+        user.user_id,
+    )
+    .await?;
     Ok(Json(MusicMutationResponse { ok: true }))
 }
 

@@ -2,7 +2,9 @@ use sqlx::{PgPool, Postgres, QueryBuilder};
 
 use super::AdminPanelRepository;
 use crate::errors::AppError;
-use crate::models::{AdminActivityPoint, AdminActivityQuery, AdminActivityResponse, AdminSummaryStats};
+use crate::models::{
+    AdminActivityPoint, AdminActivityQuery, AdminActivityResponse, AdminSummaryStats,
+};
 
 impl AdminPanelRepository {
     pub async fn summary(pool: &PgPool) -> Result<AdminSummaryStats, AppError> {

@@ -406,7 +406,8 @@ async fn parse_upload_multipart(mut multipart: Multipart) -> Result<ParsedUpload
             }
             "tags" => tags = normalize_tags(&field.text().await.unwrap_or_default()),
             "permitir_descarga" => {
-                permitir_descarga = parse_bool_field(&field.text().await.unwrap_or_default(), true)?;
+                permitir_descarga =
+                    parse_bool_field(&field.text().await.unwrap_or_default(), true)?;
             }
             "licencia_libre" => {
                 licencia_libre = parse_bool_field(&field.text().await.unwrap_or_default(), false)?;

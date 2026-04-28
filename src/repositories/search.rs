@@ -214,9 +214,9 @@ impl SearchRepository {
                   OR ad.nombre ILIKE $1
                ORDER BY COALESCE(r.votos_total, 0) DESC, r.id DESC
                LIMIT $2"#,
-                like_query,
-                limit,
-          )
+            like_query,
+            limit,
+        )
         .fetch_all(pool)
         .await?;
 

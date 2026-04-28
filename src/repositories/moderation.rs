@@ -54,7 +54,9 @@ impl ModerationRepository {
         let res = sqlx::query!(
             "UPDATE usuarios_ext SET estado = 'en_eliminacion', \
              marcado_eliminacion_en = $2, sera_eliminado_en = $3 WHERE id = $1",
-            user_id, now, sera
+            user_id,
+            now,
+            sera
         )
         .execute(pool)
         .await?;
@@ -91,9 +93,13 @@ impl ModerationRepository {
         target_id: i32,
     ) -> Result<(), AppError> {
         /* [Fase3-sqlx] Convertido a query! para validacion compile-time. */
-        sqlx::query!("DELETE FROM bloqueos WHERE bloqueador_id = $1 AND bloqueado_id = $2", bloqueador_id, target_id)
-            .execute(pool)
-            .await?;
+        sqlx::query!(
+            "DELETE FROM bloqueos WHERE bloqueador_id = $1 AND bloqueado_id = $2",
+            bloqueador_id,
+            target_id
+        )
+        .execute(pool)
+        .await?;
         Ok(())
     }
 

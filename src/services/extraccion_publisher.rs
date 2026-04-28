@@ -453,17 +453,14 @@ async fn vincular_sample_a_relacion(
         "fuente" => ("sample_fuente_id", rel.0),
         "destino" => ("sample_destino_id", rel.1),
         otro => {
-            return Err(AppError::BadRequest(format!(
-                "lado desconocido: {otro}"
-            )));
+            return Err(AppError::BadRequest(format!("lado desconocido: {otro}")));
         }
     };
 
     // Update dinámico del lado (sample_fuente_id o sample_destino_id).
     // El nombre de columna es whitelist (fuente/destino) — sin riesgo de inyección.
-    let sql = format!(
-        "UPDATE relaciones_sample SET {col_lado} = $2, updated_at = NOW() WHERE id = $1"
-    );
+    let sql =
+        format!("UPDATE relaciones_sample SET {col_lado} = $2, updated_at = NOW() WHERE id = $1");
     sqlx::query(&sql)
         .bind(fila.relacion_id)
         .bind(sample_id)

@@ -2,14 +2,13 @@ use chrono::{Duration, Utc};
 use sqlx::{PgPool, Postgres, QueryBuilder};
 
 use super::shared::{
-    like_pattern, normalize_user_order, normalize_user_plan_filter,
-    normalize_user_plan_payload, normalize_user_role_payload, push_user_filters, CountRow,
-    UserOrder,
+    like_pattern, normalize_user_order, normalize_user_plan_filter, normalize_user_plan_payload,
+    normalize_user_role_payload, push_user_filters, CountRow, UserOrder,
 };
 use super::AdminPanelRepository;
 use crate::errors::AppError;
 use crate::models::{
-    AdminUserSuspendRequest, AdminUserUpdateRequest, AdminUserListItem, AdminUsersQuery,
+    AdminUserListItem, AdminUserSuspendRequest, AdminUserUpdateRequest, AdminUsersQuery,
     AdminUsersResponse,
 };
 
@@ -45,9 +44,7 @@ impl AdminPanelRepository {
             }
 
             if matches!(request.ban_hasta, Some(Some(_))) {
-                return Err(AppError::Forbidden(
-                    "No puedes banearte a ti mismo".into(),
-                ));
+                return Err(AppError::Forbidden("No puedes banearte a ti mismo".into()));
             }
         }
 

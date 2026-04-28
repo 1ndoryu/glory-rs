@@ -6,7 +6,10 @@ use crate::errors::AppError;
 use crate::models::{CreateArtistRequest, UpdateArtistRequest};
 
 impl MusicRepository {
-    pub async fn create_artist(pool: &PgPool, request: &CreateArtistRequest) -> Result<i32, AppError> {
+    pub async fn create_artist(
+        pool: &PgPool,
+        request: &CreateArtistRequest,
+    ) -> Result<i32, AppError> {
         let slug = match request.slug.as_deref() {
             Some(value) if !value.trim().is_empty() => value.trim().to_string(),
             _ => Self::generate_unique_artist_slug(pool, &request.nombre, None).await?,

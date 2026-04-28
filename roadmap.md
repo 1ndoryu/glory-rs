@@ -75,16 +75,6 @@
 **Admin automatizacion (1 — estado/historial ya registrados):**
 - 274A-46: POST `/api/admin/automatizacion/reactivar`
 
-**Admin embeddings (2):**
-- 274A-49: POST `/api/admin/embeddings/generar`
-- 274A-50: POST `/api/admin/embeddings/regenerar`
-
-**Admin experimentos (1):**
-- 274A-51: POST `/api/admin/experimentos/generar`
-
-**Admin procesos (1):**
-- 274A-52: POST `/api/admin/procesos/benchmark`
-
 **Admin samples (1):**
 - 274A-53: DELETE `/api/admin/samples/todos`
 

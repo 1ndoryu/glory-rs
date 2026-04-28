@@ -591,10 +591,7 @@ pub fn routes() -> Router<AppState> {
             "/colecciones/:id/combinacion-pendiente",
             get(combinacion_pendiente),
         )
-        .route(
-            "/colecciones/:id/sugerencias",
-            get(sugerencias_coleccion),
-        )
+        .route("/colecciones/:id/sugerencias", get(sugerencias_coleccion))
         .route("/colecciones/:id/merge", post(merge_coleccion))
         .route(
             "/colecciones/:id/save",

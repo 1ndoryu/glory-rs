@@ -123,7 +123,10 @@ impl ReportRepository {
             return Ok(0);
         }
 
-        let tipos = tipos.iter().map(|value| (*value).to_string()).collect::<Vec<_>>();
+        let tipos = tipos
+            .iter()
+            .map(|value| (*value).to_string())
+            .collect::<Vec<_>>();
         let total = sqlx::query_scalar::<_, i64>(
             "SELECT COUNT(*)
              FROM reportes
@@ -166,36 +169,44 @@ impl ReportRepository {
         target_id: i32,
     ) -> Result<bool, AppError> {
         let exists = match tipo {
-            "usuario" => sqlx::query_scalar::<_, bool>(
-                "SELECT EXISTS(SELECT 1 FROM usuarios_ext WHERE id = $1)",
-            )
-            .bind(target_id)
-            .fetch_one(pool)
-            .await?,
+            "usuario" => {
+                sqlx::query_scalar::<_, bool>(
+                    "SELECT EXISTS(SELECT 1 FROM usuarios_ext WHERE id = $1)",
+                )
+                .bind(target_id)
+                .fetch_one(pool)
+                .await?
+            }
             "publicacion" => sqlx::query_scalar::<_, bool>(
                 "SELECT EXISTS(SELECT 1 FROM publicaciones WHERE id = $1 AND eliminado_en IS NULL)",
             )
             .bind(target_id)
             .fetch_one(pool)
             .await?,
-            "comentario" => sqlx::query_scalar::<_, bool>(
-                "SELECT EXISTS(SELECT 1 FROM comentarios WHERE id = $1)",
-            )
-            .bind(target_id)
-            .fetch_one(pool)
-            .await?,
-            "sample" | LEGAL_REPORT_SAMPLE => sqlx::query_scalar::<_, bool>(
-                "SELECT EXISTS(SELECT 1 FROM samples WHERE id = $1 AND eliminado_en IS NULL)",
-            )
-            .bind(target_id)
-            .fetch_one(pool)
-            .await?,
-            LEGAL_REPORT_RELATION => sqlx::query_scalar::<_, bool>(
-                "SELECT EXISTS(SELECT 1 FROM relaciones_sample WHERE id = $1)",
-            )
-            .bind(target_id)
-            .fetch_one(pool)
-            .await?,
+            "comentario" => {
+                sqlx::query_scalar::<_, bool>(
+                    "SELECT EXISTS(SELECT 1 FROM comentarios WHERE id = $1)",
+                )
+                .bind(target_id)
+                .fetch_one(pool)
+                .await?
+            }
+            "sample" | LEGAL_REPORT_SAMPLE => {
+                sqlx::query_scalar::<_, bool>(
+                    "SELECT EXISTS(SELECT 1 FROM samples WHERE id = $1 AND eliminado_en IS NULL)",
+                )
+                .bind(target_id)
+                .fetch_one(pool)
+                .await?
+            }
+            LEGAL_REPORT_RELATION => {
+                sqlx::query_scalar::<_, bool>(
+                    "SELECT EXISTS(SELECT 1 FROM relaciones_sample WHERE id = $1)",
+                )
+                .bind(target_id)
+                .fetch_one(pool)
+                .await?
+            }
             _ => false,
         };
 
@@ -220,8 +231,8 @@ impl ReportRepository {
                AND COALESCE(estado, 'pendiente') = 'pendiente'
                AND target_id = ANY($2)
                          GROUP BY target_id",
-                        tipo,
-                        target_ids,
+            tipo,
+            target_ids,
         )
         .fetch_all(pool)
         .await?;
@@ -264,7 +275,7 @@ impl ReportRepository {
         limit: i64,
         offset: i64,
     ) -> Result<Vec<LegalReportRow>, AppError> {
-                let rows = sqlx::query!(
+        let rows = sqlx::query!(
             "SELECT
                 id,
                 tipo,
@@ -279,8 +290,8 @@ impl ReportRepository {
                AND COALESCE(estado, 'pendiente') = 'pendiente'
              ORDER BY created_at DESC
                          LIMIT $1 OFFSET $2",
-                        limit,
-                        offset,
+            limit,
+            offset,
         )
         .fetch_all(pool)
         .await?;

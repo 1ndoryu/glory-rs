@@ -147,7 +147,10 @@ impl MusicRepository {
         Ok(rows)
     }
 
-    pub async fn find_song_by_slug(pool: &PgPool, slug: &str) -> Result<Option<MusicSong>, AppError> {
+    pub async fn find_song_by_slug(
+        pool: &PgPool,
+        slug: &str,
+    ) -> Result<Option<MusicSong>, AppError> {
         let row = sqlx::query_as!(
             MusicSong,
             r#"SELECT c.id,
@@ -223,7 +226,10 @@ impl MusicRepository {
         Ok(row)
     }
 
-    pub async fn list_song_artists(pool: &PgPool, song_id: i32) -> Result<Vec<SongArtistLink>, AppError> {
+    pub async fn list_song_artists(
+        pool: &PgPool,
+        song_id: i32,
+    ) -> Result<Vec<SongArtistLink>, AppError> {
         let rows = sqlx::query_as!(
             SongArtistLinkRecord,
             r#"SELECT ca.artista_id,

@@ -62,15 +62,20 @@ impl ContribucionesService {
         let nueva_url = trim_optional(input.cancion_nueva_youtube_url);
         let nueva_lado = normalize_new_song_side(input.cancion_nueva_lado.as_deref())?;
 
-        let hay_ambas_existentes = input.cancion_destino_id.is_some() && input.cancion_fuente_id.is_some();
+        let hay_ambas_existentes =
+            input.cancion_destino_id.is_some() && input.cancion_fuente_id.is_some();
         if !hay_ambas_existentes && nueva_titulo.is_none() {
             return Err(AppError::Validation("Faltan datos de canciones.".into()));
         }
         if nueva_titulo.is_some() && nueva_artista.is_none() {
-            return Err(AppError::Validation("Falta artista para la cancion nueva.".into()));
+            return Err(AppError::Validation(
+                "Falta artista para la cancion nueva.".into(),
+            ));
         }
 
-        if let (Some(destino_id), Some(fuente_id)) = (input.cancion_destino_id, input.cancion_fuente_id) {
+        if let (Some(destino_id), Some(fuente_id)) =
+            (input.cancion_destino_id, input.cancion_fuente_id)
+        {
             if ContribucionesRepository::existe_duplicado_nueva(
                 pool,
                 destino_id,
@@ -83,8 +88,17 @@ impl ContribucionesService {
                     "Ya existe una contribucion pendiente para esta relacion.".into(),
                 ));
             }
-            if ContribucionesRepository::existe_relacion(pool, destino_id, fuente_id, &tipo_relacion).await? {
-                return Err(AppError::Conflict("Esta relacion ya esta registrada.".into()));
+            if ContribucionesRepository::existe_relacion(
+                pool,
+                destino_id,
+                fuente_id,
+                &tipo_relacion,
+            )
+            .await?
+            {
+                return Err(AppError::Conflict(
+                    "Esta relacion ya esta registrada.".into(),
+                ));
             }
         }
 
@@ -107,11 +121,20 @@ impl ContribucionesService {
         .await
     }
 
-    pub async fn proponer_edicion(pool: &PgPool, input: ProponerEdicionInput) -> Result<i32, AppError> {
+    pub async fn proponer_edicion(
+        pool: &PgPool,
+        input: ProponerEdicionInput,
+    ) -> Result<i32, AppError> {
         ensure_relation_exists(pool, input.relacion_id).await?;
         ensure_no_pending_relation_proposal(pool, input.relacion_id, input.contribuidor_id).await?;
         let cambios = sanitize_edit_changes(&input.cambios)?;
-        ContribucionesRepository::crear_edicion(pool, input.contribuidor_id, input.relacion_id, cambios).await
+        ContribucionesRepository::crear_edicion(
+            pool,
+            input.contribuidor_id,
+            input.relacion_id,
+            cambios,
+        )
+        .await
     }
 
     pub async fn proponer_eliminacion(
@@ -120,11 +143,19 @@ impl ContribucionesService {
     ) -> Result<i32, AppError> {
         let razon = input.razon.trim().to_string();
         if razon.chars().count() < 10 {
-            return Err(AppError::Validation("La razon debe tener al menos 10 caracteres.".into()));
+            return Err(AppError::Validation(
+                "La razon debe tener al menos 10 caracteres.".into(),
+            ));
         }
         ensure_relation_exists(pool, input.relacion_id).await?;
         ensure_no_pending_relation_proposal(pool, input.relacion_id, input.contribuidor_id).await?;
-        ContribucionesRepository::crear_eliminacion(pool, input.contribuidor_id, input.relacion_id, razon).await
+        ContribucionesRepository::crear_eliminacion(
+            pool,
+            input.contribuidor_id,
+            input.relacion_id,
+            razon,
+        )
+        .await
     }
 
     pub async fn moderar(
@@ -135,7 +166,9 @@ impl ContribucionesService {
             .await?
             .ok_or_else(|| AppError::NotFound("Contribucion no encontrada.".into()))?;
         if contribucion.estado != "pendiente" {
-            return Err(AppError::Conflict("Esta contribucion ya fue moderada.".into()));
+            return Err(AppError::Conflict(
+                "Esta contribucion ya fue moderada.".into(),
+            ));
         }
         match input.accion.as_str() {
             "rechazada" => {
@@ -151,7 +184,8 @@ impl ContribucionesService {
                 Ok(ModerarContribucionOutput { relacion_id: None })
             }
             "aprobada" => {
-                let relacion_id = match contribucion.tipo_contribucion.as_deref().unwrap_or("nueva") {
+                let relacion_id = match contribucion.tipo_contribucion.as_deref().unwrap_or("nueva")
+                {
                     "edicion" => {
                         Self::aplicar_edicion(pool, &contribucion).await?;
                         None
@@ -173,21 +207,33 @@ impl ContribucionesService {
                 .await?;
                 Ok(ModerarContribucionOutput { relacion_id })
             }
-            _ => Err(AppError::Validation("Accion de moderacion invalida.".into())),
+            _ => Err(AppError::Validation(
+                "Accion de moderacion invalida.".into(),
+            )),
         }
     }
 
-    async fn aprobar_nueva(pool: &PgPool, contribucion: &ContribucionModeracion) -> Result<i32, AppError> {
+    async fn aprobar_nueva(
+        pool: &PgPool,
+        contribucion: &ContribucionModeracion,
+    ) -> Result<i32, AppError> {
         let mut destino_id = contribucion.cancion_destino_id;
         let mut fuente_id = contribucion.cancion_fuente_id;
 
-        if let Some(titulo) = contribucion.cancion_nueva_titulo.as_deref().and_then(non_empty) {
+        if let Some(titulo) = contribucion
+            .cancion_nueva_titulo
+            .as_deref()
+            .and_then(non_empty)
+        {
             let artista = contribucion
                 .cancion_nueva_artista
                 .as_deref()
                 .and_then(non_empty)
-                .ok_or_else(|| AppError::Validation("Falta artista para la cancion nueva.".into()))?;
-            let artista_id = ContribucionesRepository::upsert_artista_por_nombre(pool, artista).await?;
+                .ok_or_else(|| {
+                    AppError::Validation("Falta artista para la cancion nueva.".into())
+                })?;
+            let artista_id =
+                ContribucionesRepository::upsert_artista_por_nombre(pool, artista).await?;
             let cancion_id = MusicRepository::create_song(
                 pool,
                 &CreateSongRequest {
@@ -220,9 +266,12 @@ impl ContribucionesService {
             }
         }
 
-        let destino_id = destino_id.ok_or_else(|| AppError::Validation("Falta cancion destino.".into()))?;
-        let fuente_id = fuente_id.ok_or_else(|| AppError::Validation("Falta cancion fuente.".into()))?;
-        let (timings_fuente, timings_destino) = extract_timings(contribucion.cambios_propuestos.as_ref());
+        let destino_id =
+            destino_id.ok_or_else(|| AppError::Validation("Falta cancion destino.".into()))?;
+        let fuente_id =
+            fuente_id.ok_or_else(|| AppError::Validation("Falta cancion fuente.".into()))?;
+        let (timings_fuente, timings_destino) =
+            extract_timings(contribucion.cambios_propuestos.as_ref());
         MusicRepository::create_relation(
             pool,
             &CreateRelationRequest {
@@ -247,15 +296,17 @@ impl ContribucionesService {
         .await
     }
 
-    async fn aplicar_edicion(pool: &PgPool, contribucion: &ContribucionModeracion) -> Result<(), AppError> {
-        let relacion_id = contribucion
-            .relacion_existente_id
-            .ok_or_else(|| AppError::Validation("Contribucion de edicion sin relacion_existente_id.".into()))?;
+    async fn aplicar_edicion(
+        pool: &PgPool,
+        contribucion: &ContribucionModeracion,
+    ) -> Result<(), AppError> {
+        let relacion_id = contribucion.relacion_existente_id.ok_or_else(|| {
+            AppError::Validation("Contribucion de edicion sin relacion_existente_id.".into())
+        })?;
         ensure_relation_exists(pool, relacion_id).await?;
-        let cambios = contribucion
-            .cambios_propuestos
-            .clone()
-            .ok_or_else(|| AppError::Validation("Cambios propuestos vacios o malformados.".into()))?;
+        let cambios = contribucion.cambios_propuestos.clone().ok_or_else(|| {
+            AppError::Validation("Cambios propuestos vacios o malformados.".into())
+        })?;
         let update = update_relation_from_changes(&cambios)?;
         let updated = MusicRepository::update_relation(pool, relacion_id, &update).await?;
         if updated {
@@ -269,9 +320,9 @@ impl ContribucionesService {
         pool: &PgPool,
         contribucion: &ContribucionModeracion,
     ) -> Result<(), AppError> {
-        let relacion_id = contribucion
-            .relacion_existente_id
-            .ok_or_else(|| AppError::Validation("Contribucion de eliminacion sin relacion_existente_id.".into()))?;
+        let relacion_id = contribucion.relacion_existente_id.ok_or_else(|| {
+            AppError::Validation("Contribucion de eliminacion sin relacion_existente_id.".into())
+        })?;
         let deleted = MusicRepository::delete_relation(pool, relacion_id).await?;
         if deleted {
             Ok(())
@@ -293,8 +344,16 @@ async fn ensure_no_pending_relation_proposal(
     relation_id: i32,
     contribuidor_id: i32,
 ) -> Result<(), AppError> {
-    if ContribucionesRepository::existe_propuesta_relacion_usuario(pool, relation_id, contribuidor_id).await? {
-        Err(AppError::Conflict("Ya tienes una propuesta pendiente para esta relacion.".into()))
+    if ContribucionesRepository::existe_propuesta_relacion_usuario(
+        pool,
+        relation_id,
+        contribuidor_id,
+    )
+    .await?
+    {
+        Err(AppError::Conflict(
+            "Ya tienes una propuesta pendiente para esta relacion.".into(),
+        ))
     } else {
         Ok(())
     }
@@ -312,7 +371,9 @@ fn normalize_element_type(value: Option<&str>) -> Result<String, AppError> {
 fn normalize_new_song_side(value: Option<&str>) -> Result<Option<String>, AppError> {
     match value.and_then(non_empty) {
         Some("destino" | "fuente") => Ok(value.map(str::to_string)),
-        Some(_) => Err(AppError::Validation("Lado de cancion nueva invalido.".into())),
+        Some(_) => Err(AppError::Validation(
+            "Lado de cancion nueva invalido.".into(),
+        )),
         None => Ok(None),
     }
 }
@@ -344,10 +405,16 @@ fn parse_element_type(value: Option<&str>) -> Result<SampleRelationElementType, 
 fn build_timings_patch(timing_fuente: Option<i32>, timing_destino: Option<i32>) -> Option<Value> {
     let mut map = Map::new();
     if let Some(value) = timing_fuente.filter(|value| *value >= 0) {
-        map.insert("timings_fuente".into(), Value::Array(vec![Value::from(value)]));
+        map.insert(
+            "timings_fuente".into(),
+            Value::Array(vec![Value::from(value)]),
+        );
     }
     if let Some(value) = timing_destino.filter(|value| *value >= 0) {
-        map.insert("timings_destino".into(), Value::Array(vec![Value::from(value)]));
+        map.insert(
+            "timings_destino".into(),
+            Value::Array(vec![Value::from(value)]),
+        );
     }
     (!map.is_empty()).then_some(Value::Object(map))
 }
@@ -365,7 +432,11 @@ fn sanitize_edit_changes(value: &Value) -> Result<Value, AppError> {
         parse_element_type(Some(value))?;
         out.insert("tipo_elemento".into(), Value::from(value));
     }
-    if let Some(value) = object.get("razon").and_then(Value::as_str).and_then(non_empty) {
+    if let Some(value) = object
+        .get("razon")
+        .and_then(Value::as_str)
+        .and_then(non_empty)
+    {
         out.insert("razon".into(), Value::from(value));
     }
     if let Some(values) = positive_i32_array(object.get("timings_fuente")) {
@@ -378,7 +449,9 @@ fn sanitize_edit_changes(value: &Value) -> Result<Value, AppError> {
         out.insert("verificada".into(), Value::from(value));
     }
     if out.is_empty() {
-        Err(AppError::Validation("No se enviaron cambios validos.".into()))
+        Err(AppError::Validation(
+            "No se enviaron cambios validos.".into(),
+        ))
     } else {
         Ok(Value::Object(out))
     }
@@ -404,7 +477,9 @@ fn update_relation_from_changes(value: &Value) -> Result<UpdateRelationRequest, 
         && update.timings_destino.is_none()
         && update.verificada.is_none()
     {
-        Err(AppError::Validation("Ningun cambio valido para aplicar.".into()))
+        Err(AppError::Validation(
+            "Ningun cambio valido para aplicar.".into(),
+        ))
     } else {
         Ok(update)
     }
@@ -436,7 +511,11 @@ fn positive_i32_vec(value: Option<&Value>) -> Option<Vec<i32>> {
 
 fn extract_youtube_id(url: &str) -> Option<String> {
     let trimmed = url.trim();
-    if trimmed.len() == 11 && trimmed.chars().all(|ch| ch.is_ascii_alphanumeric() || ch == '_' || ch == '-') {
+    if trimmed.len() == 11
+        && trimmed
+            .chars()
+            .all(|ch| ch.is_ascii_alphanumeric() || ch == '_' || ch == '-')
+    {
         return Some(trimmed.to_string());
     }
     for marker in ["v=", "youtu.be/", "embed/"] {

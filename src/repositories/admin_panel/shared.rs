@@ -144,7 +144,12 @@ pub(super) fn normalize_user_role_payload(raw: &str) -> Option<&'static str> {
 }
 
 pub(super) fn normalize_scraper_state_filter(raw: Option<&str>) -> Option<&'static str> {
-    match raw.map(str::trim).unwrap_or_default().to_ascii_lowercase().as_str() {
+    match raw
+        .map(str::trim)
+        .unwrap_or_default()
+        .to_ascii_lowercase()
+        .as_str()
+    {
         "pending" | "pendiente" => Some("pendiente"),
         "scraped" | "procesado" => Some("procesado"),
         "error" => Some("error"),

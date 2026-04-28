@@ -1,12 +1,12 @@
-﻿/* [174A-97] /metrics endpoint Prometheus text. */
+/* [174A-97] /metrics endpoint Prometheus text. */
 
-use std::fmt::Write;
+use crate::AppState;
 use axum::extract::State;
 use axum::http::header;
 use axum::response::IntoResponse;
 use axum::routing::get;
 use axum::Router;
-use crate::AppState;
+use std::fmt::Write;
 
 pub async fn metrics(State(state): State<AppState>) -> impl IntoResponse {
     let pool = &state.pool;
@@ -16,9 +16,21 @@ pub async fn metrics(State(state): State<AppState>) -> impl IntoResponse {
     let redis_enabled = i64::from(state.redis.is_some());
     let stripe_enabled = i64::from(state.stripe_runtime.is_some());
 
-    let ia_pending: i64 = sqlx::query_scalar("SELECT COUNT(*)::bigint FROM ia_queue WHERE estado = 'pendiente'").fetch_one(pool).await.unwrap_or(-1);
-    let scraping_pending: i64 = sqlx::query_scalar("SELECT COUNT(*)::bigint FROM scraping_log WHERE estado = 'pendiente'").fetch_one(pool).await.unwrap_or(-1);
-    let suscripciones_activas: i64 = sqlx::query_scalar("SELECT COUNT(*)::bigint FROM suscripciones WHERE estado = 'activa'").fetch_one(pool).await.unwrap_or(-1);
+    let ia_pending: i64 =
+        sqlx::query_scalar("SELECT COUNT(*)::bigint FROM ia_queue WHERE estado = 'pendiente'")
+            .fetch_one(pool)
+            .await
+            .unwrap_or(-1);
+    let scraping_pending: i64 =
+        sqlx::query_scalar("SELECT COUNT(*)::bigint FROM scraping_log WHERE estado = 'pendiente'")
+            .fetch_one(pool)
+            .await
+            .unwrap_or(-1);
+    let suscripciones_activas: i64 =
+        sqlx::query_scalar("SELECT COUNT(*)::bigint FROM suscripciones WHERE estado = 'activa'")
+            .fetch_one(pool)
+            .await
+            .unwrap_or(-1);
 
     let mut body = String::with_capacity(1024);
     let version = env!("CARGO_PKG_VERSION");

@@ -31,7 +31,10 @@ impl MusicRepository {
         Ok(rows)
     }
 
-    pub async fn find_artist_by_slug(pool: &PgPool, slug: &str) -> Result<Option<MusicArtist>, AppError> {
+    pub async fn find_artist_by_slug(
+        pool: &PgPool,
+        slug: &str,
+    ) -> Result<Option<MusicArtist>, AppError> {
         let row = sqlx::query_as!(
             MusicArtist,
             r#"SELECT id,
@@ -55,7 +58,10 @@ impl MusicRepository {
         Ok(row)
     }
 
-    pub async fn find_artist_by_id(pool: &PgPool, id: i32) -> Result<Option<MusicArtist>, AppError> {
+    pub async fn find_artist_by_id(
+        pool: &PgPool,
+        id: i32,
+    ) -> Result<Option<MusicArtist>, AppError> {
         let row = sqlx::query_as!(
             MusicArtist,
             r#"SELECT id,
@@ -79,7 +85,10 @@ impl MusicRepository {
         Ok(row)
     }
 
-    pub async fn list_artist_songs(pool: &PgPool, artist_id: i32) -> Result<Vec<MusicSong>, AppError> {
+    pub async fn list_artist_songs(
+        pool: &PgPool,
+        artist_id: i32,
+    ) -> Result<Vec<MusicSong>, AppError> {
         let rows = sqlx::query_as!(
             MusicSong,
             r#"SELECT DISTINCT ON (c.id)

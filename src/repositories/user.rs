@@ -75,9 +75,7 @@ impl UserRepository {
         user_id: i32,
         nuevo_email: &str,
     ) -> Result<User, sqlx::Error> {
-        let sql = format!(
-            "UPDATE usuarios_ext SET email = $1 WHERE id = $2 RETURNING {USER_COLS}"
-        );
+        let sql = format!("UPDATE usuarios_ext SET email = $1 WHERE id = $2 RETURNING {USER_COLS}");
         sqlx::query_as::<_, User>(&sql)
             .bind(nuevo_email)
             .bind(user_id)
@@ -187,7 +185,10 @@ impl OAuthRepository {
             "INSERT INTO usuarios_ext_oauth (user_id, provider, provider_sub, email) \
              VALUES ($1, $2, $3, $4) \
              ON CONFLICT (provider, provider_sub) DO UPDATE SET email = EXCLUDED.email",
-            user_id, provider, sub, email
+            user_id,
+            provider,
+            sub,
+            email
         )
         .execute(pool)
         .await?;

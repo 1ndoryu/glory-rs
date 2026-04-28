@@ -3,9 +3,7 @@ use axum::http::StatusCode;
 use axum::Json;
 use validator::Validate;
 
-use super::support::{
-    fetch_relation_detail, fetch_song_detail_by_id, resolve_song_main_artist_id,
-};
+use super::support::{fetch_relation_detail, fetch_song_detail_by_id, resolve_song_main_artist_id};
 use crate::errors::AppError;
 #[allow(unused_imports)]
 use crate::errors::ErrorResponse;
@@ -44,7 +42,9 @@ pub async fn create_artist(
     let artist_id = MusicRepository::create_artist(&state.pool, &request).await?;
     let artist = MusicRepository::find_artist_by_id(&state.pool, artist_id)
         .await?
-        .ok_or_else(|| AppError::Internal(format!("artista {artist_id} recien creado no visible")))?;
+        .ok_or_else(|| {
+            AppError::Internal(format!("artista {artist_id} recien creado no visible"))
+        })?;
     Ok((StatusCode::CREATED, Json(artist)))
 }
 
@@ -135,7 +135,10 @@ pub async fn create_song(
         .validate()
         .map_err(|error| AppError::Validation(error.to_string()))?;
     let song_id = MusicRepository::create_song(&state.pool, &request).await?;
-    Ok((StatusCode::CREATED, Json(fetch_song_detail_by_id(&state, song_id).await?)))
+    Ok((
+        StatusCode::CREATED,
+        Json(fetch_song_detail_by_id(&state, song_id).await?),
+    ))
 }
 
 #[utoipa::path(
@@ -230,7 +233,10 @@ pub async fn create_relation(
         .validate()
         .map_err(|error| AppError::Validation(error.to_string()))?;
     let relation_id = MusicRepository::create_relation(&state.pool, &request).await?;
-    Ok((StatusCode::CREATED, Json(fetch_relation_detail(&state, relation_id).await?)))
+    Ok((
+        StatusCode::CREATED,
+        Json(fetch_relation_detail(&state, relation_id).await?),
+    ))
 }
 
 #[utoipa::path(

@@ -105,7 +105,10 @@ pub struct ChangePasswordRequest {
     #[validate(length(min = 1, message = "La contrasena actual es requerida"))]
     #[serde(alias = "passwordActual")]
     pub password_actual: String,
-    #[validate(length(min = 8, message = "La nueva contrasena debe tener al menos 8 caracteres"))]
+    #[validate(length(
+        min = 8,
+        message = "La nueva contrasena debe tener al menos 8 caracteres"
+    ))]
     #[serde(alias = "nuevaPassword")]
     pub nueva_password: String,
     #[serde(alias = "confirmarPassword")]

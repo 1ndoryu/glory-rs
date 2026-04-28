@@ -140,7 +140,10 @@ pub async fn get_article(
         )));
     }
 
-    Ok(Json(ArticleResponse { ok: true, data: article }))
+    Ok(Json(ArticleResponse {
+        ok: true,
+        data: article,
+    }))
 }
 
 #[utoipa::path(
@@ -172,12 +175,9 @@ pub async fn list_my_articles(
         offset,
     )
     .await?;
-    let total = ArticleRepository::count_by_author(
-        &state.pool,
-        user.user_id,
-        moderacion_estado.as_deref(),
-    )
-    .await?;
+    let total =
+        ArticleRepository::count_by_author(&state.pool, user.user_id, moderacion_estado.as_deref())
+            .await?;
     let hay_mas = offset + i64::try_from(articulos.len()).unwrap_or(i64::MAX) < total;
 
     Ok(Json(ArticleListResponse {
@@ -261,11 +261,16 @@ pub async fn create_article(
 
     let article = ArticleRepository::get_by_id(&state.pool, article_id, Some(user.user_id))
         .await?
-        .ok_or_else(|| AppError::Internal(format!("articulo {article_id} recien creado no visible")))?;
+        .ok_or_else(|| {
+            AppError::Internal(format!("articulo {article_id} recien creado no visible"))
+        })?;
 
     Ok((
         StatusCode::CREATED,
-        Json(ArticleResponse { ok: true, data: article }),
+        Json(ArticleResponse {
+            ok: true,
+            data: article,
+        }),
     ))
 }
 
@@ -303,7 +308,10 @@ pub async fn update_article(
         .await?
         .ok_or_else(|| AppError::NotFound(format!("articulo {article_id} no encontrado")))?;
 
-    Ok(Json(ArticleResponse { ok: true, data: article }))
+    Ok(Json(ArticleResponse {
+        ok: true,
+        data: article,
+    }))
 }
 
 #[utoipa::path(
@@ -327,7 +335,9 @@ pub async fn delete_article(
     let meta = load_manageable_article_meta(&state, &user, article_id).await?;
     let deleted = ArticleRepository::soft_delete(&state.pool, meta.id).await?;
     if !deleted {
-        return Err(AppError::NotFound(format!("articulo {article_id} no encontrado")));
+        return Err(AppError::NotFound(format!(
+            "articulo {article_id} no encontrado"
+        )));
     }
 
     Ok(Json(DeleteArticleResponse {
@@ -357,10 +367,13 @@ pub async fn toggle_like_article(
         .await?
         .ok_or_else(|| AppError::NotFound(format!("articulo {article_id} no encontrado")))?;
     if meta.eliminado_en.is_some() {
-        return Err(AppError::NotFound(format!("articulo {article_id} no encontrado")));
+        return Err(AppError::NotFound(format!(
+            "articulo {article_id} no encontrado"
+        )));
     }
 
-    let (liked, total) = ArticleRepository::toggle_like(&state.pool, user.user_id, article_id).await?;
+    let (liked, total) =
+        ArticleRepository::toggle_like(&state.pool, user.user_id, article_id).await?;
     Ok(Json(ToggleArticleLikeResponse {
         ok: true,
         liked,

@@ -209,13 +209,9 @@ pub async fn play_history(
     let per_page = q.per_page.unwrap_or(20).clamp(1, 100);
     let offset = (page - 1) * per_page;
 
-    let records = BibliotecaRepository::historial_reproducciones(
-        &state.pool,
-        user.user_id,
-        per_page,
-        offset,
-    )
-    .await?;
+    let records =
+        BibliotecaRepository::historial_reproducciones(&state.pool, user.user_id, per_page, offset)
+            .await?;
 
     let public_base = state.public_base_url.as_deref();
     let data: Vec<SampleSummary> = records

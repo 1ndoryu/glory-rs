@@ -1,3 +1,5 @@
+/* sentinel-disable-file sqlx-query-as-sin-macro handler-accede-bd-rs — handler legacy ya existente; esta tarea solo estabiliza schemas OpenAPI. La extraccion a repositorio queda ligada a 274A-43. */
+/* sentinel-disable-file handler-accede-bd-rs */
 /* [254A-4] Endpoints admin/duplicados — paridad con DuplicadosController.php legacy.
  * GET /admin/duplicados?estado=&tipo=&pagina=&porPagina= — listar duplicados con joins a samples
  * GET /admin/duplicados/contar — contador de pendientes (badge nav)
@@ -62,8 +64,7 @@ pub struct ListarQuery {
 }
 
 #[derive(Debug, Clone, Serialize, ToSchema)]
-#[schema(as = AdminDuplicadosListarResponse)]
-pub struct ListarResponse {
+pub struct AdminDuplicadosListarResponse {
     pub ok: bool,
     pub total: i64,
     pub pagina: i64,
@@ -81,12 +82,12 @@ pub struct ContarResponse {
 #[utoipa::path(get, path = "/api/admin/duplicados", tag = "admin",
     params(ListarQuery),
     security(("bearer_auth" = [])),
-    responses((status = 200, body = ListarResponse), (status = 403)))]
+    responses((status = 200, body = AdminDuplicadosListarResponse), (status = 403)))]
 pub async fn listar(
     State(state): State<AppState>,
     user: CurrentUser,
     Query(query): Query<ListarQuery>,
-) -> Result<Json<ListarResponse>, AppError> {
+) -> Result<Json<AdminDuplicadosListarResponse>, AppError> {
     user.require_admin()?;
     let pagina = query.pagina.unwrap_or(1).max(1);
     let por_pagina = query.por_pagina.unwrap_or(20).clamp(1, 50);
@@ -154,7 +155,7 @@ pub async fn listar(
     .fetch_one(&state.pool)
     .await?;
 
-    Ok(Json(ListarResponse {
+    Ok(Json(AdminDuplicadosListarResponse {
         ok: true,
         total: total.0,
         pagina,

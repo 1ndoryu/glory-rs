@@ -5,9 +5,7 @@ use nanoid::nanoid;
 use crate::errors::AppError;
 use crate::middleware::CurrentUser;
 use crate::models::UpdateArticleRequest;
-use crate::repositories::{
-    ArticleEmbed, ArticleMeta, ArticleRepository, UpdateArticleParams,
-};
+use crate::repositories::{ArticleEmbed, ArticleMeta, ArticleRepository, UpdateArticleParams};
 use crate::AppState;
 
 const DEFAULT_PAGE: i64 = 1;
@@ -123,10 +121,14 @@ pub(super) async fn load_manageable_article_meta(
         .ok_or_else(|| AppError::NotFound(format!("articulo {article_id} no encontrado")))?;
 
     if meta.eliminado_en.is_some() {
-        return Err(AppError::NotFound(format!("articulo {article_id} no encontrado")));
+        return Err(AppError::NotFound(format!(
+            "articulo {article_id} no encontrado"
+        )));
     }
     if !can_manage_article(Some(user), meta.autor_id) {
-        return Err(AppError::Forbidden("Sin permisos para editar este artículo".to_string()));
+        return Err(AppError::Forbidden(
+            "Sin permisos para editar este artículo".to_string(),
+        ));
     }
 
     Ok(meta)
@@ -229,7 +231,10 @@ pub(super) async fn resolve_cover_url(
         return Ok(None);
     };
     let storage_key = build_cover_storage_key(user_id, slug, portada.extension);
-    state.storage.put_bytes(&storage_key, &portada.bytes).await?;
+    state
+        .storage
+        .put_bytes(&storage_key, &portada.bytes)
+        .await?;
     Ok(Some(build_upload_url(state, &storage_key)))
 }
 
@@ -238,7 +243,9 @@ async fn handle_portada_field(
     target: &mut Option<ParsedImageUpload>,
 ) -> Result<(), AppError> {
     if target.is_some() {
-        return Err(AppError::BadRequest("solo se permite una portada".to_string()));
+        return Err(AppError::BadRequest(
+            "solo se permite una portada".to_string(),
+        ));
     }
     let filename = field.file_name().map(ToString::to_string);
     let bytes = collect_multipart_bytes(field, MAX_PORTADA_UPLOAD_BYTES).await?;
@@ -359,7 +366,9 @@ fn parse_embeds(raw: &str) -> Result<Vec<ArticleEmbed>, AppError> {
     let parsed: serde_json::Value = serde_json::from_str(trimmed)
         .map_err(|_| AppError::BadRequest("Formato de embeds inválido".to_string()))?;
     let Some(items) = parsed.as_array() else {
-        return Err(AppError::BadRequest("Formato de embeds inválido".to_string()));
+        return Err(AppError::BadRequest(
+            "Formato de embeds inválido".to_string(),
+        ));
     };
 
     let mut normalized = Vec::new();
@@ -379,7 +388,10 @@ fn parse_embeds(raw: &str) -> Result<Vec<ArticleEmbed>, AppError> {
             descarga_publica: item
                 .get("descargaPublica")
                 .and_then(serde_json::Value::as_bool)
-                .or_else(|| item.get("descarga_publica").and_then(serde_json::Value::as_bool)),
+                .or_else(|| {
+                    item.get("descarga_publica")
+                        .and_then(serde_json::Value::as_bool)
+                }),
         });
     }
 
@@ -436,7 +448,9 @@ fn validate_content(raw: &str) -> Result<String, AppError> {
 fn validate_excerpt(raw: &str) -> Result<String, AppError> {
     let excerpt = raw.trim();
     if excerpt.is_empty() {
-        return Err(AppError::BadRequest("El extracto es obligatorio".to_string()));
+        return Err(AppError::BadRequest(
+            "El extracto es obligatorio".to_string(),
+        ));
     }
     if excerpt.chars().count() > MAX_EXCERPT_LEN {
         return Err(AppError::BadRequest(

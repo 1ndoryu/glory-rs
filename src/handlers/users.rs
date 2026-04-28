@@ -91,8 +91,8 @@ pub async fn update_email(
         .password_hash
         .as_deref()
         .ok_or_else(|| AppError::Forbidden("Cuenta sin password local".into()))?;
-    let parsed = PasswordHash::new(stored)
-        .map_err(|e| AppError::Internal(format!("Hash invalido: {e}")))?;
+    let parsed =
+        PasswordHash::new(stored).map_err(|e| AppError::Internal(format!("Hash invalido: {e}")))?;
     Argon2::default()
         .verify_password(req.password_actual.as_bytes(), &parsed)
         .map_err(|_| AppError::Forbidden("La contrasena actual es incorrecta".into()))?;
@@ -150,9 +150,7 @@ pub async fn update_password(
         .map_err(|e| AppError::Validation(e.to_string()))?;
 
     if req.nueva_password != req.confirmar_password {
-        return Err(AppError::Validation(
-            "Las contrasenas no coinciden".into(),
-        ));
+        return Err(AppError::Validation("Las contrasenas no coinciden".into()));
     }
 
     let actual = UserRepository::find_by_id(&state.pool, user.user_id)
@@ -162,8 +160,8 @@ pub async fn update_password(
         .password_hash
         .as_deref()
         .ok_or_else(|| AppError::Forbidden("Cuenta sin password local".into()))?;
-    let parsed = PasswordHash::new(stored)
-        .map_err(|e| AppError::Internal(format!("Hash invalido: {e}")))?;
+    let parsed =
+        PasswordHash::new(stored).map_err(|e| AppError::Internal(format!("Hash invalido: {e}")))?;
     Argon2::default()
         .verify_password(req.password_actual.as_bytes(), &parsed)
         .map_err(|_| AppError::Forbidden("La contrasena actual es incorrecta".into()))?;

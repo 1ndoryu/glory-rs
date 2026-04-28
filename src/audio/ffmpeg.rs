@@ -250,7 +250,14 @@ pub async fn cut_to_mp3(
 
     // -ss antes de -i = fast seek; los extra_args se insertan DESPUÉS de -i
     // Para eso usamos run_ffmpeg_with_input_seek que pasa -ss al principio
-    run_ffmpeg_seek(ffmpeg_path, input_path, output_path, &start_str, &duration_str).await
+    run_ffmpeg_seek(
+        ffmpeg_path,
+        input_path,
+        output_path,
+        &start_str,
+        &duration_str,
+    )
+    .await
 }
 
 async fn run_ffmpeg_seek(

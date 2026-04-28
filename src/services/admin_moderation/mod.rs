@@ -34,7 +34,10 @@ pub struct ManualBanInput {
 }
 
 impl AdminModerationService {
-    pub async fn moderate_content(pool: &PgPool, input: ModerateContentInput) -> Result<(), AppError> {
+    pub async fn moderate_content(
+        pool: &PgPool,
+        input: ModerateContentInput,
+    ) -> Result<(), AppError> {
         if input.id <= 0 {
             return Err(AppError::BadRequest("id requerido".into()));
         }
@@ -42,9 +45,17 @@ impl AdminModerationService {
         let reason = (estado == "rechazado").then_some(REJECTION_REASON);
 
         let author_id = match input.tipo.as_str() {
-            "publicacion" => AdminModerationRepository::set_post_moderation(pool, input.id, estado, reason).await?,
-            "comentario" => AdminModerationRepository::set_comment_moderation(pool, input.id, estado).await?,
-            "articulo" => AdminModerationRepository::set_article_moderation(pool, input.id, estado, reason).await?,
+            "publicacion" => {
+                AdminModerationRepository::set_post_moderation(pool, input.id, estado, reason)
+                    .await?
+            }
+            "comentario" => {
+                AdminModerationRepository::set_comment_moderation(pool, input.id, estado).await?
+            }
+            "articulo" => {
+                AdminModerationRepository::set_article_moderation(pool, input.id, estado, reason)
+                    .await?
+            }
             _ => return Err(AppError::BadRequest("tipo de contenido invalido".into())),
         }
         .ok_or_else(|| AppError::NotFound("Contenido no encontrado".into()))?;
@@ -60,9 +71,13 @@ impl AdminModerationService {
             return Err(AppError::BadRequest("id de reporte requerido".into()));
         }
         let estado = report_state_from_action(&input.accion)?;
-        let updated = AdminModerationRepository::resolve_report(pool, input.id, estado, input.admin_id).await?;
+        let updated =
+            AdminModerationRepository::resolve_report(pool, input.id, estado, input.admin_id)
+                .await?;
         if !updated {
-            return Err(AppError::NotFound("Reporte no encontrado o ya resuelto".into()));
+            return Err(AppError::NotFound(
+                "Reporte no encontrado o ya resuelto".into(),
+            ));
         }
         Ok(())
     }
@@ -102,7 +117,9 @@ impl AdminModerationService {
             return Err(AppError::BadRequest("usuario_id requerido".into()));
         }
         if input.usuario_id == input.admin_id {
-            return Err(AppError::BadRequest("No puedes banear tu propia cuenta".into()));
+            return Err(AppError::BadRequest(
+                "No puedes banear tu propia cuenta".into(),
+            ));
         }
         let clean_reason = trim_required(&input.razon, "razon requerida")?;
         let hours = ban_duration_hours(&input.duracion);
@@ -177,7 +194,11 @@ fn trim_required(value: &str, message: &str) -> Result<String, AppError> {
     }
 }
 
-async fn notify_content_rejected(pool: &PgPool, author_id: i32, content_type: &str) -> Result<(), AppError> {
+async fn notify_content_rejected(
+    pool: &PgPool,
+    author_id: i32,
+    content_type: &str,
+) -> Result<(), AppError> {
     let (title, message) = match content_type {
         "articulo" => (
             "Articulo rechazado",

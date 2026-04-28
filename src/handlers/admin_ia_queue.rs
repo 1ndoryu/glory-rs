@@ -7,8 +7,8 @@ use utoipa::{IntoParams, ToSchema};
 use crate::errors::AppError;
 use crate::middleware::CurrentUser;
 use crate::repositories::{
-    AdminIaQueueItem, AdminIaQueueListParams, AdminIaQueueRepository, ProcessingQueueRepository,
-    QueueFailureDisposition,
+    AdminIaQueueItem, AdminIaQueueListParams, AdminIaQueueRepository, AdminIaQueueStats,
+    ProcessingQueueRepository, QueueFailureDisposition,
 };
 use crate::services::{AudioPipelineRequest, AudioPipelineService};
 use crate::AppState;
@@ -43,7 +43,7 @@ pub struct AdminIaQueueListResponse {
 #[derive(Debug, Serialize, ToSchema)]
 pub struct AdminIaQueueStatsResponse {
     pub ok: bool,
-    pub data: crate::repositories::AdminIaQueueStats,
+    pub data: AdminIaQueueStats,
 }
 
 #[derive(Debug, Deserialize, ToSchema)]

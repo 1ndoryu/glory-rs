@@ -138,12 +138,11 @@ pub async fn restaurar(pool: &PgPool, sample_id: i32) -> Result<EncoladoResult, 
     let cola = require_cola(pool, sample_id).await?;
 
     /* Leer timing_original directamente desde samples.metadata. */
-    let row: Option<(serde_json::Value,)> = sqlx::query_as(
-        "SELECT COALESCE(metadata, '{}'::jsonb) FROM samples WHERE id = $1",
-    )
-    .bind(sample_id)
-    .fetch_optional(pool)
-    .await?;
+    let row: Option<(serde_json::Value,)> =
+        sqlx::query_as("SELECT COALESCE(metadata, '{}'::jsonb) FROM samples WHERE id = $1")
+            .bind(sample_id)
+            .fetch_optional(pool)
+            .await?;
 
     let metadata = row
         .ok_or_else(|| AppError::NotFound(format!("sample {sample_id} no encontrado")))?
@@ -161,7 +160,9 @@ pub async fn restaurar(pool: &PgPool, sample_id: i32) -> Result<EncoladoResult, 
         .and_then(serde_json::Value::as_f64)
         .ok_or_else(|| AppError::BadRequest("timing_original.fin inválido".into()))?;
     if fin <= inicio {
-        return Err(AppError::BadRequest("timing_original con rango inválido".into()));
+        return Err(AppError::BadRequest(
+            "timing_original con rango inválido".into(),
+        ));
     }
 
     ColaExtraccionRepository::encolar_para_scraper(

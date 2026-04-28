@@ -271,8 +271,10 @@ pub async fn get_extraccion_stats(
 /* Helpers ------------------------------------------------------------- */
 
 fn parse_extraccion(entries: &[crate::repositories::AppConfigEntry]) -> ExtraccionConfig {
-    let map: BTreeMap<&str, &serde_json::Value> =
-        entries.iter().map(|e| (e.clave.as_str(), &e.valor)).collect();
+    let map: BTreeMap<&str, &serde_json::Value> = entries
+        .iter()
+        .map(|e| (e.clave.as_str(), &e.valor))
+        .collect();
     ExtraccionConfig {
         intervalo_seg: map.get("extraccion_intervalo_seg").and_then(|v| v.as_i64()),
         lote_size: map.get("extraccion_lote_size").and_then(|v| v.as_i64()),
@@ -281,8 +283,10 @@ fn parse_extraccion(entries: &[crate::repositories::AppConfigEntry]) -> Extracci
 }
 
 fn parse_scraping(entries: &[crate::repositories::AppConfigEntry]) -> ScrapingConfig {
-    let map: BTreeMap<&str, &serde_json::Value> =
-        entries.iter().map(|e| (e.clave.as_str(), &e.valor)).collect();
+    let map: BTreeMap<&str, &serde_json::Value> = entries
+        .iter()
+        .map(|e| (e.clave.as_str(), &e.valor))
+        .collect();
     ScrapingConfig {
         intervalo_seg: map.get("scraping_intervalo_seg").and_then(|v| v.as_i64()),
         lote_size: map.get("scraping_lote_size").and_then(|v| v.as_i64()),

@@ -52,8 +52,7 @@ pub struct ListarData {
 }
 
 #[derive(Debug, Clone, Serialize, ToSchema)]
-#[schema(as = AdminModeracionListarResponse)]
-pub struct ListarResponse {
+pub struct AdminModeracionListarResponse {
     pub data: ListarData,
 }
 
@@ -69,8 +68,7 @@ pub struct HistorialData {
 }
 
 #[derive(Debug, Clone, Serialize, ToSchema)]
-#[schema(as = AdminModeracionHistorialResponse)]
-pub struct HistorialResponse {
+pub struct AdminModeracionHistorialResponse {
     pub data: HistorialData,
 }
 
@@ -113,12 +111,12 @@ pub struct AffectedResponse {
 #[utoipa::path(get, path = "/api/admin/moderacion", tag = "admin",
     params(ListarQuery),
     security(("bearer_auth" = [])),
-    responses((status = 200, body = ListarResponse), (status = 403)))]
+    responses((status = 200, body = AdminModeracionListarResponse), (status = 403)))]
 pub async fn listar(
     State(state): State<AppState>,
     user: CurrentUser,
     Query(query): Query<ListarQuery>,
-) -> Result<Json<ListarResponse>, AppError> {
+) -> Result<Json<AdminModeracionListarResponse>, AppError> {
     user.require_admin()?;
     let page = query.page.unwrap_or(1).max(1);
     let offset = (page - 1) * PAGE_SIZE;
@@ -126,13 +124,19 @@ pub async fn listar(
     let reportes_limit = query.reportes_limit.unwrap_or(20).clamp(1, 50);
     let reportes_offset = (reportes_page - 1) * reportes_limit;
 
-        let publicaciones = AdminModerationRepository::list_pending_posts(&state.pool, PAGE_SIZE, offset).await?;
-        let articulos = AdminModerationRepository::list_pending_articles(&state.pool, PAGE_SIZE, offset).await?;
-        let reportes =
-                AdminModerationRepository::list_pending_reports(&state.pool, reportes_limit, reportes_offset).await?;
-        let reportes_total = AdminModerationRepository::count_pending_reports(&state.pool).await?;
+    let publicaciones =
+        AdminModerationRepository::list_pending_posts(&state.pool, PAGE_SIZE, offset).await?;
+    let articulos =
+        AdminModerationRepository::list_pending_articles(&state.pool, PAGE_SIZE, offset).await?;
+    let reportes = AdminModerationRepository::list_pending_reports(
+        &state.pool,
+        reportes_limit,
+        reportes_offset,
+    )
+    .await?;
+    let reportes_total = AdminModerationRepository::count_pending_reports(&state.pool).await?;
 
-    Ok(Json(ListarResponse {
+    Ok(Json(AdminModeracionListarResponse {
         data: ListarData {
             publicaciones,
             articulos,
@@ -145,21 +149,22 @@ pub async fn listar(
 #[utoipa::path(get, path = "/api/admin/moderacion/historial", tag = "admin",
     params(HistorialQuery),
     security(("bearer_auth" = [])),
-    responses((status = 200, body = HistorialResponse), (status = 403)))]
+    responses((status = 200, body = AdminModeracionHistorialResponse), (status = 403)))]
 pub async fn historial(
     State(state): State<AppState>,
     user: CurrentUser,
     Query(query): Query<HistorialQuery>,
-) -> Result<Json<HistorialResponse>, AppError> {
+) -> Result<Json<AdminModeracionHistorialResponse>, AppError> {
     user.require_admin()?;
     let dias = query
         .dias
         .unwrap_or(HISTORIAL_DIAS_DEFAULT)
         .clamp(1, HISTORIAL_DIAS_MAX);
 
-        let publicaciones = AdminModerationRepository::list_recent_moderated_posts(&state.pool, dias).await?;
+    let publicaciones =
+        AdminModerationRepository::list_recent_moderated_posts(&state.pool, dias).await?;
 
-    Ok(Json(HistorialResponse {
+    Ok(Json(AdminModeracionHistorialResponse {
         data: HistorialData { publicaciones },
     }))
 }
@@ -217,7 +222,10 @@ pub async fn rechazar_todos_pendientes(
 ) -> Result<Json<AffectedResponse>, AppError> {
     user.require_admin()?;
     let afectados = AdminModerationService::reject_pending_posts(&state.pool).await?;
-    Ok(Json(AffectedResponse { ok: true, afectados }))
+    Ok(Json(AffectedResponse {
+        ok: true,
+        afectados,
+    }))
 }
 
 #[utoipa::path(post, path = "/api/admin/moderacion/banear-usuario", tag = "admin",
@@ -253,8 +261,12 @@ pub async fn rechazar_publicaciones_usuario(
     Json(request): Json<RechazarUsuarioPublicacionesRequest>,
 ) -> Result<Json<AffectedResponse>, AppError> {
     user.require_admin()?;
-    let afectados = AdminModerationService::reject_user_posts(&state.pool, request.autor_id).await?;
-    Ok(Json(AffectedResponse { ok: true, afectados }))
+    let afectados =
+        AdminModerationService::reject_user_posts(&state.pool, request.autor_id).await?;
+    Ok(Json(AffectedResponse {
+        ok: true,
+        afectados,
+    }))
 }
 
 pub fn routes() -> Router<AppState> {
@@ -263,7 +275,10 @@ pub fn routes() -> Router<AppState> {
         .route("/admin/moderacion/historial", get(historial))
         .route("/admin/moderar", post(moderar))
         .route("/admin/reportes/resolver", post(resolver_reporte))
-        .route("/admin/moderacion/rechazar-pendientes", post(rechazar_todos_pendientes))
+        .route(
+            "/admin/moderacion/rechazar-pendientes",
+            post(rechazar_todos_pendientes),
+        )
         .route("/admin/moderacion/banear-usuario", post(banear_usuario))
         .route(
             "/admin/moderacion/rechazar-usuario-publicaciones",

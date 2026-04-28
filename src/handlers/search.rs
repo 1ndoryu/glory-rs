@@ -28,8 +28,8 @@ pub async fn global_search(
     State(state): State<AppState>,
     Query(query): Query<GlobalSearchQuery>,
 ) -> Result<Json<GlobalSearchResponse>, AppError> {
-    let response = SearchService::global_search(&state.pool, state.public_base_url.as_deref(), query)
-        .await?;
+    let response =
+        SearchService::global_search(&state.pool, state.public_base_url.as_deref(), query).await?;
     Ok(Json(response))
 }
 

@@ -121,7 +121,7 @@ pub(super) fn push_public_filters(
             AND s.estado = 'activo'
             AND s.mostrar_en_comunidad = TRUE",
     );
-        push_auto_hide_filter(builder, "s.id", "s.creador_id", filters.viewer_id);
+    push_auto_hide_filter(builder, "s.id", "s.creador_id", filters.viewer_id);
 
     if let Some(bpm) = filters.bpm {
         builder.push(" AND s.bpm = ");

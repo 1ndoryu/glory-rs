@@ -12,8 +12,8 @@ use crate::models::{
     DeleteSampleResponse, ListSamplesQuery, ListSamplesResponse, SampleDetailResponse,
     SimilarSamplesQuery, SimilarSamplesResponse, UpdateSampleRequest,
 };
+use crate::repositories::{SampleRepository, TagAggregateFilters, TagAggregatesResult};
 use crate::services::{correct_sample_metadata, AudioIaService, SampleCatalogService};
-use crate::repositories::{TagAggregateFilters, TagAggregatesResult, SampleRepository};
 use crate::AppState;
 
 /* [174A-44] Handler público de catálogo de samples.
@@ -279,7 +279,8 @@ pub async fn correct_sample_ia(
         message: format!("No se pudo inicializar IA: {error}"),
     })?;
 
-    let outcome = correct_sample_metadata(&state.pool, &ia, sample_id, &request.instrucciones).await?;
+    let outcome =
+        correct_sample_metadata(&state.pool, &ia, sample_id, &request.instrucciones).await?;
 
     Ok(Json(CorregirIaResponse {
         ok: outcome.ok,

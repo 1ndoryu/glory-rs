@@ -562,22 +562,24 @@ impl StripeService {
             })?;
 
         let status = response.status();
-        let body = response.text().await.map_err(|error| AppError::ExternalService {
-            service: "stripe.connect.payout".to_string(),
-            message: error.to_string(),
-        })?;
+        let body = response
+            .text()
+            .await
+            .map_err(|error| AppError::ExternalService {
+                service: "stripe.connect.payout".to_string(),
+                message: error.to_string(),
+            })?;
         if !status.is_success() {
             return Err(AppError::ExternalService {
                 service: "stripe.connect.payout".to_string(),
                 message: body,
             });
         }
-        let payout: StripePayoutApiResponse = serde_json::from_str(&body).map_err(|error| {
-            AppError::ExternalService {
+        let payout: StripePayoutApiResponse =
+            serde_json::from_str(&body).map_err(|error| AppError::ExternalService {
                 service: "stripe.connect.payout".to_string(),
                 message: error.to_string(),
-            }
-        })?;
+            })?;
 
         Ok(StripeConnectPayoutSummary {
             id: payout.id,

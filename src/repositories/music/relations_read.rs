@@ -169,7 +169,9 @@ impl MusicRepository {
         row.map(map_relation_detail).transpose()
     }
 
-    pub async fn relation_type_counts(pool: &PgPool) -> Result<Vec<(SampleRelationType, i64)>, AppError> {
+    pub async fn relation_type_counts(
+        pool: &PgPool,
+    ) -> Result<Vec<(SampleRelationType, i64)>, AppError> {
         let rows = sqlx::query_as!(
             RelationTypeCountRecord,
             r#"SELECT tipo_relacion AS "tipo_relacion!", COUNT(*)::bigint AS "total!"

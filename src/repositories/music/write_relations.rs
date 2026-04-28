@@ -1,12 +1,14 @@
 use sqlx::{PgPool, Postgres, Transaction};
 
 use super::support::{
-    dedupe_i32, relation_element_db, relation_source_db, relation_type_db,
-    serialize_json_option, RelationLinkContextRecord, SampleOwnerRecord,
+    dedupe_i32, relation_element_db, relation_source_db, relation_type_db, serialize_json_option,
+    RelationLinkContextRecord, SampleOwnerRecord,
 };
 use super::MusicRepository;
 use crate::errors::AppError;
-use crate::models::{CreateRelationRequest, RelationSampleSide, SampleRelationType, UpdateRelationRequest};
+use crate::models::{
+    CreateRelationRequest, RelationSampleSide, SampleRelationType, UpdateRelationRequest,
+};
 
 impl MusicRepository {
     pub async fn create_relation(
@@ -19,7 +21,11 @@ impl MusicRepository {
             ));
         }
 
-        Self::ensure_songs_exist(pool, &[request.cancion_destino_id, request.cancion_fuente_id]).await?;
+        Self::ensure_songs_exist(
+            pool,
+            &[request.cancion_destino_id, request.cancion_fuente_id],
+        )
+        .await?;
         Self::ensure_relation_unique(
             pool,
             request.cancion_destino_id,
@@ -76,7 +82,11 @@ impl MusicRepository {
         .fetch_one(pool)
         .await?;
 
-        Self::recount_song_sampling_totals(pool, &[request.cancion_destino_id, request.cancion_fuente_id]).await?;
+        Self::recount_song_sampling_totals(
+            pool,
+            &[request.cancion_destino_id, request.cancion_fuente_id],
+        )
+        .await?;
         Ok(relation_id)
     }
 
@@ -92,9 +102,15 @@ impl MusicRepository {
             .await?
             .ok_or_else(|| AppError::NotFound(format!("relacion {relation_id}")))?;
 
-        let final_destino = request.cancion_destino_id.unwrap_or(existing.cancion_destino_id);
-        let final_fuente = request.cancion_fuente_id.unwrap_or(existing.cancion_fuente_id);
-        let final_tipo = request.tipo_relacion.unwrap_or(current_detail.tipo_relacion);
+        let final_destino = request
+            .cancion_destino_id
+            .unwrap_or(existing.cancion_destino_id);
+        let final_fuente = request
+            .cancion_fuente_id
+            .unwrap_or(existing.cancion_fuente_id);
+        let final_tipo = request
+            .tipo_relacion
+            .unwrap_or(current_detail.tipo_relacion);
 
         if final_destino == final_fuente {
             return Err(AppError::Validation(
@@ -103,7 +119,14 @@ impl MusicRepository {
         }
 
         Self::ensure_songs_exist(pool, &[final_destino, final_fuente]).await?;
-        Self::ensure_relation_unique(pool, final_destino, final_fuente, final_tipo, Some(relation_id)).await?;
+        Self::ensure_relation_unique(
+            pool,
+            final_destino,
+            final_fuente,
+            final_tipo,
+            Some(relation_id),
+        )
+        .await?;
 
         let updated = sqlx::query_scalar!(
             r#"UPDATE relaciones_sample
@@ -170,9 +193,12 @@ impl MusicRepository {
             .ok_or_else(|| AppError::NotFound(format!("relacion {relation_id}")))?;
 
         let mut tx = pool.begin().await?;
-        sqlx::query!(r#"DELETE FROM likes WHERE tipo = 'relacion' AND target_id = $1"#, relation_id)
-            .execute(&mut *tx)
-            .await?;
+        sqlx::query!(
+            r#"DELETE FROM likes WHERE tipo = 'relacion' AND target_id = $1"#,
+            relation_id
+        )
+        .execute(&mut *tx)
+        .await?;
         sqlx::query!(
             r#"DELETE FROM comentarios WHERE tipo = 'relacion' AND target_id = $1"#,
             relation_id,
@@ -180,10 +206,13 @@ impl MusicRepository {
         .execute(&mut *tx)
         .await?;
 
-        let deleted = sqlx::query!(r#"DELETE FROM relaciones_sample WHERE id = $1"#, relation_id)
-            .execute(&mut *tx)
-            .await?
-            .rows_affected();
+        let deleted = sqlx::query!(
+            r#"DELETE FROM relaciones_sample WHERE id = $1"#,
+            relation_id
+        )
+        .execute(&mut *tx)
+        .await?
+        .rows_affected();
 
         if deleted == 0 {
             return Ok(false);
@@ -296,7 +325,9 @@ impl MusicRepository {
 
         let (sample_id, song_origin_id) = match side {
             RelationSampleSide::Fuente => (relation.sample_fuente_id, relation.cancion_fuente_id),
-            RelationSampleSide::Destino => (relation.sample_destino_id, relation.cancion_destino_id),
+            RelationSampleSide::Destino => {
+                (relation.sample_destino_id, relation.cancion_destino_id)
+            }
         };
         let Some(sample_id) = sample_id else {
             return Ok(());

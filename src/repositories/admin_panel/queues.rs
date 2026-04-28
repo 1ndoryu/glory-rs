@@ -127,7 +127,10 @@ async fn fetch_scrapers(
     builder.push(" OFFSET ");
     builder.push_bind(offset);
 
-    let rows = builder.build_query_as::<AdminScraperItem>().fetch_all(pool).await?;
+    let rows = builder
+        .build_query_as::<AdminScraperItem>()
+        .fetch_all(pool)
+        .await?;
     Ok(rows)
 }
 
@@ -151,7 +154,10 @@ async fn scraper_state_counts(pool: &PgPool) -> Result<BTreeMap<String, i64>, Ap
         .fetch_all(pool)
         .await?;
 
-    Ok(rows.into_iter().map(|row| (row.estado, row.total)).collect())
+    Ok(rows
+        .into_iter()
+        .map(|row| (row.estado, row.total))
+        .collect())
 }
 
 async fn count_extraction_queue(
@@ -229,7 +235,10 @@ async fn extraction_queue_state_counts(pool: &PgPool) -> Result<BTreeMap<String,
         .fetch_all(pool)
         .await?;
 
-    Ok(rows.into_iter().map(|row| (row.estado, row.total)).collect())
+    Ok(rows
+        .into_iter()
+        .map(|row| (row.estado, row.total))
+        .collect())
 }
 
 #[derive(Debug, sqlx::FromRow)]

@@ -1,8 +1,8 @@
 use sqlx::{PgPool, Postgres, Transaction};
 
 use super::support::{
-    artist_role_db, collect_artist_ids, dedupe_i32, generate_unique_slug,
-    normalize_song_artists, parse_artist_role, to_i16,
+    artist_role_db, collect_artist_ids, dedupe_i32, generate_unique_slug, normalize_song_artists,
+    parse_artist_role, to_i16,
 };
 use super::MusicRepository;
 use crate::errors::AppError;
@@ -11,7 +11,8 @@ use crate::models::{CreateSongRequest, MusicArtistRole, UpdateSongRequest};
 impl MusicRepository {
     pub async fn create_song(pool: &PgPool, request: &CreateSongRequest) -> Result<i32, AppError> {
         let main_artist_id = request.artista_id;
-        Self::ensure_artists_exist(pool, &collect_artist_ids(main_artist_id, &request.artistas)).await?;
+        Self::ensure_artists_exist(pool, &collect_artist_ids(main_artist_id, &request.artistas))
+            .await?;
 
         let slug = match request.slug.as_deref() {
             Some(value) if !value.trim().is_empty() => value.trim().to_string(),
@@ -78,7 +79,8 @@ impl MusicRepository {
             .await?
             .ok_or_else(|| AppError::NotFound(format!("cancion {song_id}")))?;
         let current_assignments = Self::load_song_artist_assignments(pool, song_id).await?;
-        let requested_artist_ids = collect_artist_ids(main_artist_id, request.artistas.as_deref().unwrap_or(&[]));
+        let requested_artist_ids =
+            collect_artist_ids(main_artist_id, request.artistas.as_deref().unwrap_or(&[]));
         Self::ensure_artists_exist(pool, &requested_artist_ids).await?;
 
         let slug = if let Some(value) = request.slug.as_deref() {
@@ -183,12 +185,18 @@ impl MusicRepository {
             .await?;
         }
 
-        sqlx::query!(r#"DELETE FROM likes WHERE tipo = 'cancion' AND target_id = $1"#, song_id)
-            .execute(&mut *tx)
-            .await?;
-        sqlx::query!(r#"DELETE FROM comentarios WHERE tipo = 'cancion' AND target_id = $1"#, song_id)
-            .execute(&mut *tx)
-            .await?;
+        sqlx::query!(
+            r#"DELETE FROM likes WHERE tipo = 'cancion' AND target_id = $1"#,
+            song_id
+        )
+        .execute(&mut *tx)
+        .await?;
+        sqlx::query!(
+            r#"DELETE FROM comentarios WHERE tipo = 'cancion' AND target_id = $1"#,
+            song_id
+        )
+        .execute(&mut *tx)
+        .await?;
         sqlx::query!(
             r#"DELETE FROM relaciones_sample WHERE cancion_fuente_id = $1 OR cancion_destino_id = $1"#,
             song_id,
@@ -224,9 +232,7 @@ impl MusicRepository {
         .await?;
 
         if found != i64::try_from(unique_ids.len()).unwrap_or(i64::MAX) {
-            return Err(AppError::Validation(
-                "Uno o mas artistas no existen".into(),
-            ));
+            return Err(AppError::Validation("Uno o mas artistas no existen".into()));
         }
 
         Ok(())
@@ -253,9 +259,12 @@ impl MusicRepository {
         song_id: i32,
         assignments: &[(i32, MusicArtistRole)],
     ) -> Result<(), AppError> {
-        sqlx::query!(r#"DELETE FROM canciones_artistas WHERE cancion_id = $1"#, song_id)
-            .execute(&mut **tx)
-            .await?;
+        sqlx::query!(
+            r#"DELETE FROM canciones_artistas WHERE cancion_id = $1"#,
+            song_id
+        )
+        .execute(&mut **tx)
+        .await?;
 
         for (artist_id, role) in assignments {
             sqlx::query!(

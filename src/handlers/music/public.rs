@@ -14,8 +14,8 @@ use crate::models::{
     ArtistDetailResponse, LimitQuery, ListSongsQuery, MusicArtist, MusicArtistsResponse,
     MusicPagination, MusicSong, MusicSongsResponse, RelationChainQuery, RelationChainResponse,
     RelationSampleSide, RelationStatsResponse, RelationTypeCount, SampleRelationDetail,
-    SampleRelationLookupResponse, SearchSongsQuery, SongDetailResponse, SongListResponse,
-    SampleSummary,
+    SampleRelationLookupResponse, SampleSummary, SearchSongsQuery, SongDetailResponse,
+    SongListResponse,
 };
 use crate::repositories::{MusicRepository, SampleRepository};
 use crate::services::build_sample_summary;
@@ -398,13 +398,9 @@ pub async fn get_song_samples(
         .await?
         .ok_or_else(|| AppError::NotFound("Canción no encontrada".into()))?;
 
-    let records = SampleRepository::list_by_cancion_id(
-        &state.pool,
-        cancion.id,
-        None,
-    )
-    .await
-    .map_err(AppError::from)?;
+    let records = SampleRepository::list_by_cancion_id(&state.pool, cancion.id, None)
+        .await
+        .map_err(AppError::from)?;
 
     let data = records
         .into_iter()

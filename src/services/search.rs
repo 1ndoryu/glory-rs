@@ -9,8 +9,8 @@ use crate::models::{
     LegacyQuickSearchQuery, LegacyQuickSearchRelationResult, LegacyQuickSearchRelationSide,
     LegacyQuickSearchResponse, LegacyQuickSearchSampleCreator, LegacyQuickSearchSampleResult,
     LegacyQuickSearchSongResult, LegacyQuickSearchTodoItem, LegacyQuickSearchUserResult,
-    SampleCreatorSummary, SearchCollectionOwnerSummary, SearchCollectionResult,
-    SearchSampleResult, SearchSongResult, SearchType, SearchUserResult,
+    SampleCreatorSummary, SearchCollectionOwnerSummary, SearchCollectionResult, SearchSampleResult,
+    SearchSongResult, SearchType, SearchUserResult,
 };
 use crate::repositories::{
     SearchCollectionRecord, SearchRepository, SearchSampleRecord, SearchSampleRelationRecord,
@@ -48,7 +48,8 @@ impl SearchService {
 
         let samples_future = async {
             if include_samples {
-                SearchRepository::search_samples(pool, &text_query.like, DEFAULT_LIMIT_PER_TYPE).await
+                SearchRepository::search_samples(pool, &text_query.like, DEFAULT_LIMIT_PER_TYPE)
+                    .await
             } else {
                 Ok(Vec::new())
             }
@@ -85,8 +86,12 @@ impl SearchService {
             }
         };
 
-        let (samples, users, collections, songs) =
-            tokio::try_join!(samples_future, users_future, collections_future, songs_future)?;
+        let (samples, users, collections, songs) = tokio::try_join!(
+            samples_future,
+            users_future,
+            collections_future,
+            songs_future
+        )?;
 
         Ok(GlobalSearchResponse {
             q: text_query.original,
@@ -131,7 +136,11 @@ impl SearchService {
                 DEFAULT_LIMIT_PER_TYPE,
             ),
             SearchRepository::search_samples(pool, &text_query.like, DEFAULT_LIMIT_PER_TYPE),
-            SearchRepository::search_sample_relations(pool, &text_query.like, DEFAULT_LIMIT_PER_TYPE),
+            SearchRepository::search_sample_relations(
+                pool,
+                &text_query.like,
+                DEFAULT_LIMIT_PER_TYPE
+            ),
             SearchRepository::search_users(pool, &text_query.like, DEFAULT_LIMIT_PER_TYPE),
             SearchRepository::search_collections(pool, &text_query.like, DEFAULT_LIMIT_PER_TYPE),
         )?;
@@ -211,9 +220,7 @@ fn parse_search_types(raw: Option<&str>) -> Result<Vec<SearchType>, AppError> {
         let search_type = match normalized.as_str() {
             "sample" | "samples" => SearchType::Samples,
             "user" | "users" | "usuario" | "usuarios" => SearchType::Users,
-            "collection" | "collections" | "coleccion" | "colecciones" => {
-                SearchType::Collections
-            }
+            "collection" | "collections" | "coleccion" | "colecciones" => SearchType::Collections,
             "song" | "songs" | "cancion" | "canciones" => SearchType::Songs,
             other => {
                 return Err(AppError::Validation(format!(

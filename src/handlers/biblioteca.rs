@@ -258,7 +258,12 @@ pub async fn get_descargas(
     Ok(Json(BibliotecaSamplesResponse {
         data: BibliotecaSamplesData {
             data,
-            pagination: SamplesPagination { page, per_page, total, pages },
+            pagination: SamplesPagination {
+                page,
+                per_page,
+                total,
+                pages,
+            },
         },
     }))
 }
@@ -390,12 +395,9 @@ pub async fn put_mover_carpeta(
         .map(|s| s.trim().to_string())
         .unwrap_or_default();
 
-    let pertenece = BibliotecaRepository::es_coleccionado_por_usuario(
-        &state.pool,
-        sample_id,
-        user.user_id,
-    )
-    .await?;
+    let pertenece =
+        BibliotecaRepository::es_coleccionado_por_usuario(&state.pool, sample_id, user.user_id)
+            .await?;
     if !pertenece {
         return Err(AppError::Forbidden(
             "El sample no esta en tu biblioteca".into(),

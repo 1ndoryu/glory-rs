@@ -404,7 +404,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HistorialResponse"
+                  "$ref": "#/components/schemas/AdminAutomatizacionHistorialResponse"
                 }
               }
             }
@@ -1171,7 +1171,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListarResponse"
+                  "$ref": "#/components/schemas/AdminContribucionesListarResponse"
                 }
               }
             }
@@ -1321,7 +1321,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListarResponse"
+                  "$ref": "#/components/schemas/AdminDuplicadosListarResponse"
                 }
               }
             }
@@ -1356,6 +1356,151 @@
           },
           "403": {
             "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/embeddings/generar": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "operationId": "generar_embeddings",
+        "responses": {
+          "200": {
+            "description": "Embeddings faltantes generados",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmbeddingsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Requiere admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/embeddings/regenerar": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "operationId": "regenerar_embeddings",
+        "responses": {
+          "200": {
+            "description": "Todos los embeddings regenerados",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmbeddingsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Requiere admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/experimentos/generar": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "operationId": "generar_experimento",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerarExperimentoRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Experimento social generado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExperimentoResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Requiere admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1440,7 +1585,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListarResponse"
+                  "$ref": "#/components/schemas/AdminModeracionListarResponse"
                 }
               }
             }
@@ -1545,7 +1690,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HistorialResponse"
+                  "$ref": "#/components/schemas/AdminModeracionHistorialResponse"
                 }
               }
             }
@@ -1729,6 +1874,61 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AdminProcessesResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Requiere admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/procesos/benchmark": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "operationId": "benchmark",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BenchmarkRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Benchmark del algoritmo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BenchmarkResponse"
                 }
               }
             }
@@ -12495,6 +12695,68 @@
           }
         }
       },
+      "AdminIaQueueItem": {
+        "type": "object",
+        "required": [
+          "id",
+          "tipo",
+          "entidad_id",
+          "operacion",
+          "estado",
+          "intentos",
+          "max_intentos",
+          "metadata",
+          "created_at"
+        ],
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "entidad_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "estado": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "intentos": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "max_intentos": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "metadata": {
+            "type": "object"
+          },
+          "operacion": {
+            "type": "string"
+          },
+          "procesado_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "proximo_intento": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "tipo": {
+            "type": "string"
+          },
+          "ultimo_error": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
       "AdminIaQueueListResponse": {
         "type": "object",
         "required": [
@@ -12530,6 +12792,48 @@
           }
         }
       },
+      "AdminIaQueueStats": {
+        "type": "object",
+        "required": [
+          "total",
+          "pendientes",
+          "procesando",
+          "completados_hoy",
+          "en_reintento",
+          "errores",
+          "encolados_hoy"
+        ],
+        "properties": {
+          "completados_hoy": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "en_reintento": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "encolados_hoy": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "errores": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendientes": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "procesando": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
       "AdminIaQueueStatsResponse": {
         "type": "object",
         "required": [
@@ -12538,7 +12842,7 @@
         ],
         "properties": {
           "data": {
-            "$ref": "#/components/schemas/crate.repositories.AdminIaQueueStats"
+            "$ref": "#/components/schemas/AdminIaQueueStats"
           },
           "ok": {
             "type": "boolean"
@@ -13637,6 +13941,49 @@
           "usuario_id": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "BenchmarkRequest": {
+        "type": "object",
+        "properties": {
+          "perPage": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "userId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        }
+      },
+      "BenchmarkResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "output",
+          "stderr",
+          "exitCode"
+        ],
+        "properties": {
+          "error": {
+            "type": "string",
+            "nullable": true
+          },
+          "exitCode": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "output": {
+            "type": "string"
+          },
+          "stderr": {
+            "type": "string"
           }
         }
       },
@@ -15828,6 +16175,31 @@
           }
         }
       },
+      "EmbeddingsResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "actualizados",
+          "tiempoMs",
+          "mensaje"
+        ],
+        "properties": {
+          "actualizados": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "mensaje": {
+            "type": "string"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "tiempoMs": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
       "EncoladoResult": {
         "type": "object",
         "required": [
@@ -15957,6 +16329,21 @@
               }
             ],
             "nullable": true
+          }
+        }
+      },
+      "ExperimentoResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "object"
+          },
+          "ok": {
+            "type": "boolean"
           }
         }
       },
@@ -16138,6 +16525,18 @@
           "sample",
           "coleccion"
         ]
+      },
+      "GenerarExperimentoRequest": {
+        "type": "object",
+        "properties": {
+          "acciones": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          }
+        }
       },
       "GenerarSiguienteRequest": {
         "type": "object",
@@ -16405,6 +16804,36 @@
           },
           "ok": {
             "type": "boolean"
+          }
+        }
+      },
+      "ItemPublicacion": {
+        "type": "object",
+        "description": "Resultado por item en una corrida de publicación.",
+        "required": [
+          "cola_id",
+          "ok",
+          "modo"
+        ],
+        "properties": {
+          "cola_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "error": {
+            "type": "string",
+            "nullable": true
+          },
+          "modo": {
+            "type": "string"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "sample_id": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
           }
         }
       },
@@ -18285,6 +18714,25 @@
           }
         }
       },
+      "ProfileImageUploadResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "data",
+          "url"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/PrivateProfileResponse"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      },
       "ProponerEdicionRequest": {
         "type": "object",
         "required": [
@@ -18488,6 +18936,36 @@
           "reemplazados": {
             "type": "integer",
             "description": "Cantidad de items cuyos assets se reemplazaron sobre un sample existente\n(modos `extender` / `restaurar`).",
+            "minimum": 0
+          }
+        }
+      },
+      "PublicarResultado": {
+        "type": "object",
+        "description": "Resumen de una corrida de `publicar_pendientes`.",
+        "required": [
+          "publicados",
+          "reemplazados",
+          "errores",
+          "items"
+        ],
+        "properties": {
+          "errores": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ItemPublicacion"
+            }
+          },
+          "publicados": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "reemplazados": {
+            "type": "integer",
             "minimum": 0
           }
         }
@@ -20322,6 +20800,53 @@
           },
           "pagination": {
             "$ref": "#/components/schemas/MusicPagination"
+          }
+        }
+      },
+      "SongSection": {
+        "type": "object",
+        "required": [
+          "tipo",
+          "titulo",
+          "canciones",
+          "artistas"
+        ],
+        "properties": {
+          "artistas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MusicArtist"
+            }
+          },
+          "canciones": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MusicSong"
+            }
+          },
+          "genero": {
+            "type": "string",
+            "nullable": true
+          },
+          "tipo": {
+            "type": "string"
+          },
+          "titulo": {
+            "type": "string"
+          }
+        }
+      },
+      "SongSectionsResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SongSection"
+            }
           }
         }
       },

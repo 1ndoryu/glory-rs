@@ -190,7 +190,9 @@ async fn ensure_user_exists(state: &AppState, user_id: i32) -> Result<(), AppErr
     if exists {
         Ok(())
     } else {
-        Err(AppError::NotFound(format!("Usuario {user_id} no encontrado")))
+        Err(AppError::NotFound(format!(
+            "Usuario {user_id} no encontrado"
+        )))
     }
 }
 

@@ -32,7 +32,8 @@ impl SampleRepository {
         limit: i64,
         viewer_id: Option<i32>,
     ) -> Result<Option<Vec<SampleCatalogSummaryRecord>>, sqlx::Error> {
-        let Some(source) = Self::find_public_similarity_source(pool, sample_id, viewer_id).await? else {
+        let Some(source) = Self::find_public_similarity_source(pool, sample_id, viewer_id).await?
+        else {
             return Ok(None);
         };
 
@@ -81,7 +82,10 @@ impl SampleRepository {
              LIMIT 1",
         );
 
-        builder.build_query_as::<SimilaritySourceRow>().fetch_optional(pool).await
+        builder
+            .build_query_as::<SimilaritySourceRow>()
+            .fetch_optional(pool)
+            .await
     }
 
     async fn find_public_similar_samples_by_embedding(
@@ -100,7 +104,7 @@ impl SampleRepository {
                 AND s.id != ",
         );
         builder.push_bind(sample_id);
-                push_auto_hide_filter(&mut builder, "s.id", "s.creador_id", viewer_id);
+        push_auto_hide_filter(&mut builder, "s.id", "s.creador_id", viewer_id);
         builder.push(
             "
                 AND s.embedding IS NOT NULL
@@ -143,7 +147,7 @@ impl SampleRepository {
                 AND s.id != ",
         );
         builder.push_bind(source.id);
-            push_auto_hide_filter(&mut builder, "s.id", "s.creador_id", viewer_id);
+        push_auto_hide_filter(&mut builder, "s.id", "s.creador_id", viewer_id);
 
         builder.push(" ORDER BY (");
         builder.push(format!("{SIMILAR_CONTENT_WEIGHT} * "));

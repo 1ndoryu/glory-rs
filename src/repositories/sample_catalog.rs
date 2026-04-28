@@ -549,6 +549,9 @@ impl SampleRepository {
             .fetch_all(pool)
             .await?;
 
-        Ok(rows.into_iter().map(SampleCatalogSummaryRecord::from).collect())
+        Ok(rows
+            .into_iter()
+            .map(SampleCatalogSummaryRecord::from)
+            .collect())
     }
 }

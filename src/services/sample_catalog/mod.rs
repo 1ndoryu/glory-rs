@@ -7,8 +7,8 @@ use crate::models::{
     SimilarSamplesResponse, UpdateSampleRequest,
 };
 use crate::repositories::{
-    OwnedSampleRecord, SampleCatalogDetailRecord, SampleCatalogSummaryRecord, SampleListFilters,
-    SampleRepository, SampleTextSearch, UpdateSamplePatch, ReportRepository,
+    OwnedSampleRecord, ReportRepository, SampleCatalogDetailRecord, SampleCatalogSummaryRecord,
+    SampleListFilters, SampleRepository, SampleTextSearch, UpdateSamplePatch,
     AUTO_HIDE_SAMPLE_REPORT_THRESHOLD,
 };
 
@@ -162,14 +162,10 @@ impl SampleCatalogService {
             .map_err(|error| AppError::Validation(error.to_string()))?;
 
         let limit = normalize_similar_limit(&query);
-        let records = SampleRepository::find_public_similar_samples(
-            pool,
-            sample_id,
-            limit,
-            current_user_id,
-        )
-        .await?
-            .ok_or_else(|| AppError::NotFound(format!("sample {sample_id}")))?;
+        let records =
+            SampleRepository::find_public_similar_samples(pool, sample_id, limit, current_user_id)
+                .await?
+                .ok_or_else(|| AppError::NotFound(format!("sample {sample_id}")))?;
 
         Ok(SimilarSamplesResponse {
             data: records

@@ -1,9 +1,11 @@
 use axum::http::HeaderMap;
-use axum::{Json, http::StatusCode};
+use axum::{http::StatusCode, Json};
 use chrono::{Duration, Utc};
 
 use crate::errors::AppError;
-use crate::models::{AdminLegalReportItem, GenericReportType, LegalReportDetails, LegalReportType, ReportResponse};
+use crate::models::{
+    AdminLegalReportItem, GenericReportType, LegalReportDetails, LegalReportType, ReportResponse,
+};
 use crate::repositories::{ModerationRepository, ProfileRepository, ReportRepository};
 use crate::AppState;
 
@@ -56,8 +58,13 @@ pub(super) async fn create_content_report(
     }
 
     if tipo.checks_duplicate()
-        && ReportRepository::has_reported_target(&state.pool, tipo.as_str(), target_id, reportador_id)
-            .await?
+        && ReportRepository::has_reported_target(
+            &state.pool,
+            tipo.as_str(),
+            target_id,
+            reportador_id,
+        )
+        .await?
     {
         return Ok((
             StatusCode::OK,
@@ -126,7 +133,9 @@ pub(super) async fn create_user_report_record(
     if !ReportRepository::target_exists(&state.pool, GenericReportType::Usuario.as_str(), target_id)
         .await?
     {
-        return Err(AppError::NotFound(format!("Usuario {target_id} no encontrado")));
+        return Err(AppError::NotFound(format!(
+            "Usuario {target_id} no encontrado"
+        )));
     }
 
     let id = ReportRepository::create_report(
@@ -190,13 +199,9 @@ pub(super) async fn enforce_user_rate_limit(
     window: Duration,
 ) -> Result<(), AppError> {
     let since = Utc::now() - window;
-    let total = ReportRepository::count_by_reporter_and_type_since(
-        &state.pool,
-        reportador_id,
-        tipo,
-        since,
-    )
-    .await?;
+    let total =
+        ReportRepository::count_by_reporter_and_type_since(&state.pool, reportador_id, tipo, since)
+            .await?;
     if total >= max_reports {
         return Err(AppError::TooManyRequests(
             "Se alcanzó el limite de reportes para este tipo".to_string(),
@@ -208,7 +213,9 @@ pub(super) async fn enforce_user_rate_limit(
 pub(super) fn normalize_reason(value: &str, max_len: usize) -> Result<String, AppError> {
     let reason = value.trim();
     if reason.is_empty() {
-        return Err(AppError::Validation("Indica el motivo del reporte".to_string()));
+        return Err(AppError::Validation(
+            "Indica el motivo del reporte".to_string(),
+        ));
     }
     if reason.chars().count() > max_len {
         return Err(AppError::Validation(format!(
@@ -291,7 +298,9 @@ pub(super) fn normalize_required_field(
         return Err(AppError::BadRequest(format!("{field_name}_requerido")));
     }
     if len > max_len {
-        return Err(AppError::BadRequest(format!("{field_name}_demasiado_largo")));
+        return Err(AppError::BadRequest(format!(
+            "{field_name}_demasiado_largo"
+        )));
     }
     Ok(normalized.to_string())
 }
@@ -340,8 +349,8 @@ pub(super) fn client_ip_from_headers(headers: &HeaderMap) -> Option<String> {
 
 async fn maybe_auto_suspend_target_user(state: &AppState, user_id: i32) -> Result<(), AppError> {
     let since = Utc::now() - Duration::hours(AUTO_SUSPEND_WINDOW_HOURS);
-    let total = ReportRepository::count_recent_user_reports_about_user(&state.pool, user_id, since)
-        .await?;
+    let total =
+        ReportRepository::count_recent_user_reports_about_user(&state.pool, user_id, since).await?;
     if total < AUTO_SUSPEND_REPORT_THRESHOLD {
         return Ok(());
     }

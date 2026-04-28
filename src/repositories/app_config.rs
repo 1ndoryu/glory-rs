@@ -68,10 +68,7 @@ impl AppConfigRepository {
     }
 
     /// Lee una clave individual. None si no existe.
-    pub async fn get(
-        pool: &PgPool,
-        clave: &str,
-    ) -> Result<Option<AppConfigEntry>, sqlx::Error> {
+    pub async fn get(pool: &PgPool, clave: &str) -> Result<Option<AppConfigEntry>, sqlx::Error> {
         /* sentinel-disable-next-line sqlx-query-as-sin-macro */
         sqlx::query_as::<_, AppConfigEntry>(
             r"SELECT clave, valor, descripcion, updated_at

@@ -160,13 +160,26 @@ pub async fn list_posts(
      * la UX del perfil cuando alguien navega a un usuario borrado. */
     let author_id = match query.author_id {
         Some(id) => Some(id),
-        None => match query.autor.as_deref().map(str::trim).filter(|s| !s.is_empty()) {
-            Some(username) => match crate::repositories::UserRepository::find_by_username(&state.pool, username).await? {
-                Some(u) => Some(u.id),
-                None => {
-                    return Ok(Json(PostListResponse { items: vec![], page, per_page }));
+        None => match query
+            .autor
+            .as_deref()
+            .map(str::trim)
+            .filter(|s| !s.is_empty())
+        {
+            Some(username) => {
+                match crate::repositories::UserRepository::find_by_username(&state.pool, username)
+                    .await?
+                {
+                    Some(u) => Some(u.id),
+                    None => {
+                        return Ok(Json(PostListResponse {
+                            items: vec![],
+                            page,
+                            per_page,
+                        }));
+                    }
                 }
-            },
+            }
             None => None,
         },
     };

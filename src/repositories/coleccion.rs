@@ -23,9 +23,7 @@ use crate::errors::AppError;
 
 mod legacy;
 
-pub use legacy::{
-    LegacyColeccionParentRecord, LegacyColeccionRecord, LegacyColeccionSampleRecord,
-};
+pub use legacy::{LegacyColeccionParentRecord, LegacyColeccionRecord, LegacyColeccionSampleRecord};
 
 pub struct ColeccionesRepository;
 

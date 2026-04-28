@@ -82,8 +82,8 @@ pub async fn sugerencias_descargas(
     }
 
     /* 2. IDs a excluir: union de descargados + coleccionados. */
-    let mut exclude: Vec<i32> = BibliotecaRepository::ids_descargados(&state.pool, user.user_id)
-        .await?;
+    let mut exclude: Vec<i32> =
+        BibliotecaRepository::ids_descargados(&state.pool, user.user_id).await?;
     exclude.extend(BibliotecaRepository::ids_coleccionados(&state.pool, user.user_id).await?);
     exclude.sort_unstable();
     exclude.dedup();

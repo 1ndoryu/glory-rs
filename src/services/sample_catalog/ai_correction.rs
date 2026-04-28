@@ -134,10 +134,7 @@ pub async fn correct_sample_metadata(
     })
 }
 
-async fn load_sample_for_correction(
-    pool: &PgPool,
-    sample_id: i32,
-) -> Result<SampleRow, AppError> {
+async fn load_sample_for_correction(pool: &PgPool, sample_id: i32) -> Result<SampleRow, AppError> {
     let row = sqlx::query!(
         r#"SELECT
             id,
@@ -215,10 +212,7 @@ fn merge_corrected_metadata(
 }
 
 fn pick_sample_type(raw: &str) -> String {
-    let normalized = raw
-        .trim()
-        .to_ascii_lowercase()
-        .replace(['-', ' '], "");
+    let normalized = raw.trim().to_ascii_lowercase().replace(['-', ' '], "");
     if VALID_SAMPLE_TYPES.contains(&normalized.as_str()) {
         normalized
     } else {

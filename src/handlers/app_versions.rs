@@ -36,10 +36,7 @@ fn build_version_info(prefix: &str, fallback_version: Option<String>) -> Option<
         &format!("APP_{upper}_VERSION"),
     ])
     .or(fallback_version);
-    let url = first_env(&[
-        &format!("KAMPLES_{upper}_URL"),
-        &format!("APP_{upper}_URL"),
-    ]);
+    let url = first_env(&[&format!("KAMPLES_{upper}_URL"), &format!("APP_{upper}_URL")]);
     let notes = first_env(&[
         &format!("KAMPLES_{upper}_NOTES"),
         &format!("APP_{upper}_NOTES"),
@@ -199,9 +196,7 @@ pub async fn get_desktop_updater(
  * versiones del desktop siguen formato MAJOR.MINOR.PATCH (sin pre-release). */
 fn is_newer_than_current(latest: &str, current: &str) -> bool {
     fn parse(v: &str) -> (u32, u32, u32) {
-        let mut iter = v
-            .split(['.', '-'])
-            .filter_map(|p| p.parse::<u32>().ok());
+        let mut iter = v.split(['.', '-']).filter_map(|p| p.parse::<u32>().ok());
         (
             iter.next().unwrap_or(0),
             iter.next().unwrap_or(0),

@@ -73,9 +73,7 @@ impl SampleRepository {
         }
 
         /* BPM scoring: hasta 5 puntos cuanto más cerca esté del promedio. */
-        builder.push(
-            " + CASE WHEN s.bpm IS NOT NULL THEN GREATEST(0, 5 - ABS(s.bpm - ",
-        );
+        builder.push(" + CASE WHEN s.bpm IS NOT NULL THEN GREATEST(0, 5 - ABS(s.bpm - ");
         builder.push_bind(avg_bpm);
         builder.push(") / 10) ELSE 0 END");
 
@@ -90,6 +88,9 @@ impl SampleRepository {
             .fetch_all(pool)
             .await?;
 
-        Ok(rows.into_iter().map(SampleCatalogSummaryRecord::from).collect())
+        Ok(rows
+            .into_iter()
+            .map(SampleCatalogSummaryRecord::from)
+            .collect())
     }
 }

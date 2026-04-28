@@ -19,7 +19,10 @@ pub fn spawn_billing_cleanup_worker(pool: &PgPool) -> JoinHandle<()> {
 }
 
 async fn run_forever(pool: PgPool) {
-    tracing::info!("billing cleanup worker iniciado (intervalo: {:?})", CHECK_INTERVAL);
+    tracing::info!(
+        "billing cleanup worker iniciado (intervalo: {:?})",
+        CHECK_INTERVAL
+    );
 
     loop {
         match expire_due_subscriptions(&pool).await {

@@ -93,7 +93,10 @@ impl ActualizarContribucionRecord {
 }
 
 impl ContribucionesRepository {
-    pub async fn crear_nueva(pool: &PgPool, input: CrearContribucionRecord) -> Result<i32, AppError> {
+    pub async fn crear_nueva(
+        pool: &PgPool,
+        input: CrearContribucionRecord,
+    ) -> Result<i32, AppError> {
         let row: (i32,) = sqlx::query_as(
             "INSERT INTO contribuciones_pendientes (
                 contribuidor_id, cancion_destino_id, cancion_fuente_id,

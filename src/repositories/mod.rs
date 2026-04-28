@@ -1,3 +1,4 @@
+mod admin_experiments;
 mod admin_ia_queue;
 mod admin_moderation;
 mod admin_panel;
@@ -10,8 +11,8 @@ mod block;
 mod cola_extraccion;
 mod coleccion;
 mod comment;
-mod conversation;
 mod contribuciones;
+mod conversation;
 mod creator_dashboard;
 mod dev_tools;
 mod download;
@@ -40,6 +41,7 @@ mod sync_changelog;
 mod sync_full;
 mod user;
 
+pub use admin_experiments::{AdminExperimentsRepository, EmbeddingSampleRow, TestUserRow};
 pub use admin_ia_queue::{
     AdminIaQueueItem, AdminIaQueueListParams, AdminIaQueueRepository, AdminIaQueueStats,
 };
@@ -74,12 +76,12 @@ pub use comment::{
     CommentAuthorSummary, CommentContentKind, CommentContext, CommentDetail, CommentRepository,
     CommentTargetKind, CreateCommentParams,
 };
-pub use conversation::{
-    ConversationParticipantSummary, ConversationRepository, ConversationSummary,
-};
 pub use contribuciones::{
     ActualizarContribucionRecord, ContribucionModeracion, ContribucionPendiente,
     ContribucionesRepository, CrearContribucionRecord,
+};
+pub use conversation::{
+    ConversationParticipantSummary, ConversationRepository, ConversationSummary,
 };
 pub use creator_dashboard::CreatorDashboardRepository;
 pub use dev_tools::{DevToolsRepository, ScrapingPendiente};

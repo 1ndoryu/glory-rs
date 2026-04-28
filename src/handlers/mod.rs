@@ -1,11 +1,12 @@
 #![allow(clippy::needless_for_each)] // Generado por utoipa OpenApi derive
-                                     /* sentinel-disable-file limite-lineas — registro central de rutas y schemas OpenAPI */
+                                     /* sentinel-disable-file limite-lineas directory-size — registro central de rutas y schemas OpenAPI */
 
 mod admin;
 mod admin_automatizacion;
 mod admin_config;
 mod admin_contribuciones;
 mod admin_duplicados;
+mod admin_experiments;
 mod admin_ia_queue;
 mod admin_moderacion;
 mod app_versions;
@@ -274,6 +275,10 @@ impl utoipa::Modify for SecurityAddon {
         admin_contribuciones::moderar,
         admin_duplicados::listar,
         admin_duplicados::contar,
+        admin_experiments::generar_experimento,
+        admin_experiments::generar_embeddings,
+        admin_experiments::regenerar_embeddings,
+        admin_experiments::benchmark,
         admin_moderacion::listar,
         admin_moderacion::historial,
         admin_moderacion::moderar,
@@ -562,6 +567,8 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::SearchSongsQuery,
         crate::models::LimitQuery,
         crate::models::RelationChainQuery,
+        music::public::SongSection,
+        music::public::SongSectionsResponse,
         crate::models::CreateArtistRequest,
         crate::models::UpdateArtistRequest,
         crate::models::SongArtistInput,
@@ -577,6 +584,7 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::SearchSongResult,
         crate::models::SearchType,
         crate::models::SearchUserResult,
+        users::ProfileImageUploadResponse,
         crate::services::algo_timing::TimingEntry,
         crate::services::algo_timing::TimingStage,
         crate::errors::ErrorResponse,
@@ -587,7 +595,7 @@ impl utoipa::Modify for SecurityAddon {
         admin_automatizacion::EstadoAutomatizacion,
         admin_automatizacion::EstadoTipo,
         admin_automatizacion::LoteResumen,
-        admin_automatizacion::HistorialResponse,
+        admin_automatizacion::AdminAutomatizacionHistorialResponse,
         admin_contribuciones::ContribucionPendiente,
         admin_contribuciones::CrearContribucionRequest,
         admin_contribuciones::ActualizarContribucionRequest,
@@ -597,24 +605,33 @@ impl utoipa::Modify for SecurityAddon {
         admin_contribuciones::RespuestaContribucion,
         admin_contribuciones::RespuestaOk,
         admin_contribuciones::MisContribucionesResponse,
-        admin_contribuciones::ListarResponse,
+        admin_contribuciones::AdminContribucionesListarResponse,
         admin_contribuciones::ModerarContribucionResponse,
         admin_duplicados::DuplicadoFila,
-        admin_duplicados::ListarResponse,
+        admin_duplicados::AdminDuplicadosListarResponse,
         admin_duplicados::ContarResponse,
+        admin_experiments::GenerarExperimentoRequest,
+        admin_experiments::BenchmarkRequest,
+        admin_experiments::ExperimentoResponse,
+        admin_experiments::EmbeddingsResponse,
+        admin_experiments::BenchmarkResponse,
         admin_moderacion::PublicacionPendiente,
         admin_moderacion::ArticuloPendiente,
         admin_moderacion::ReportePendiente,
         admin_moderacion::ListarData,
-        admin_moderacion::ListarResponse,
+        admin_moderacion::AdminModeracionListarResponse,
         admin_moderacion::HistorialData,
-        admin_moderacion::HistorialResponse,
+        admin_moderacion::AdminModeracionHistorialResponse,
         admin_moderacion::ModerarRequest,
         admin_moderacion::ResolverReporteRequest,
         admin_moderacion::BanearUsuarioRequest,
         admin_moderacion::RechazarUsuarioPublicacionesRequest,
         admin_moderacion::OkResponse,
         admin_moderacion::AffectedResponse,
+        crate::repositories::AdminIaQueueItem,
+        crate::repositories::AdminIaQueueStats,
+        crate::services::extraccion_publisher::ItemPublicacion,
+        crate::services::extraccion_publisher::PublicarResultado,
         admin_ia_queue::AdminIaQueuePagination,
         admin_ia_queue::AdminIaQueueListResponse,
         admin_ia_queue::AdminIaQueueStatsResponse,
@@ -771,5 +788,6 @@ fn api_routes() -> Router<AppState> {
         .merge(admin_automatizacion::routes())
         .merge(admin_contribuciones::routes())
         .merge(admin_duplicados::routes())
+        .merge(admin_experiments::routes())
         .merge(admin_moderacion::routes())
 }

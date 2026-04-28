@@ -235,4 +235,3 @@ impl ColaExtraccionRepository {
         Ok(())
     }
 }
-

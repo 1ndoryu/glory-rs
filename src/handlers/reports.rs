@@ -9,24 +9,24 @@ use chrono::{Duration, Utc};
 use validator::ValidateEmail;
 
 use self::support::{
-    DEFAULT_CONTENT_REASON, ERROR_REPORT_RATE_LIMIT_PER_DAY, LEGAL_REPORT_RATE_LIMIT_PER_HOUR,
-    MAX_ERROR_REASON_LEN, MAX_REASON_LEN, MIN_NAME_LEN, MIN_WORK_LEN,
-    REPORT_RATE_LIMIT_PER_HOUR, USER_REPORT_RATE_LIMIT_PER_DAY, client_ip_from_headers,
-    create_content_report, create_platform_error_report_record, create_user_report,
-    create_user_report_record, enforce_user_rate_limit, ensure_active_profile,
+    client_ip_from_headers, create_content_report, create_platform_error_report_record,
+    create_user_report, create_user_report_record, enforce_user_rate_limit, ensure_active_profile,
     map_admin_legal_report, normalize_legal_reason, normalize_optional_details,
     normalize_optional_reason, normalize_optional_url, normalize_reason,
-    normalize_required_details, normalize_required_field,
+    normalize_required_details, normalize_required_field, DEFAULT_CONTENT_REASON,
+    ERROR_REPORT_RATE_LIMIT_PER_DAY, LEGAL_REPORT_RATE_LIMIT_PER_HOUR, MAX_ERROR_REASON_LEN,
+    MAX_REASON_LEN, MIN_NAME_LEN, MIN_WORK_LEN, REPORT_RATE_LIMIT_PER_HOUR,
+    USER_REPORT_RATE_LIMIT_PER_DAY,
 };
 use crate::errors::AppError;
 #[allow(unused_imports)]
 use crate::errors::ErrorResponse;
 use crate::middleware::CurrentUser;
 use crate::models::{
-    AdminLegalReportsQuery, AdminLegalReportsResponse,
-    CreateGenericReportRequest, CreateLegalReportRequest, CreatePlatformErrorReportRequest,
-    CreateReportReasonRequest, CreateScopedReportRequest, ErrorReportResponse,
-    GenericReportType, LegalReportDetails, LegalReportResponse, LegalReportType, ReportResponse,
+    AdminLegalReportsQuery, AdminLegalReportsResponse, CreateGenericReportRequest,
+    CreateLegalReportRequest, CreatePlatformErrorReportRequest, CreateReportReasonRequest,
+    CreateScopedReportRequest, ErrorReportResponse, GenericReportType, LegalReportDetails,
+    LegalReportResponse, LegalReportType, ReportResponse,
 };
 use crate::repositories::ReportRepository;
 use crate::AppState;
@@ -67,7 +67,14 @@ pub async fn report_generic(
                 Duration::hours(1),
             )
             .await?;
-            let response = create_user_report(&state, user.user_id, request.target_id, &reason, details.as_deref()).await?;
+            let response = create_user_report(
+                &state,
+                user.user_id,
+                request.target_id,
+                &reason,
+                details.as_deref(),
+            )
+            .await?;
             Ok(response.into_response())
         }
         GenericReportType::Publicacion
@@ -237,7 +244,10 @@ pub async fn report_legal(
     let total = ReportRepository::count_by_ip_and_types_since(
         &state.pool,
         &ip_origen,
-        &[LegalReportType::LegalSample.as_str(), LegalReportType::LegalRelacion.as_str()],
+        &[
+            LegalReportType::LegalSample.as_str(),
+            LegalReportType::LegalRelacion.as_str(),
+        ],
         since,
     )
     .await?;
@@ -296,7 +306,8 @@ pub async fn report_legal(
         Json(LegalReportResponse {
             ok: true,
             reporte_id: report_id,
-            mensaje: "Reclamación registrada. Nuestro equipo la revisará en 72 horas hábiles.".to_string(),
+            mensaje: "Reclamación registrada. Nuestro equipo la revisará en 72 horas hábiles."
+                .to_string(),
         }),
     ))
 }
@@ -358,7 +369,11 @@ pub async fn report_comment(
 ) -> Result<Response, AppError> {
     ensure_active_profile(&state, user.user_id).await?;
     let payload = payload.map(|Json(value)| value).unwrap_or_default();
-    let reason = normalize_optional_reason(payload.razon.as_deref(), DEFAULT_CONTENT_REASON, MAX_REASON_LEN)?;
+    let reason = normalize_optional_reason(
+        payload.razon.as_deref(),
+        DEFAULT_CONTENT_REASON,
+        MAX_REASON_LEN,
+    )?;
     let details = normalize_optional_details(payload.detalles.as_deref())?;
     let response = create_content_report(
         &state,
@@ -395,7 +410,11 @@ pub async fn report_post(
 ) -> Result<Response, AppError> {
     ensure_active_profile(&state, user.user_id).await?;
     let payload = payload.map(|Json(value)| value).unwrap_or_default();
-    let reason = normalize_optional_reason(payload.razon.as_deref(), DEFAULT_CONTENT_REASON, MAX_REASON_LEN)?;
+    let reason = normalize_optional_reason(
+        payload.razon.as_deref(),
+        DEFAULT_CONTENT_REASON,
+        MAX_REASON_LEN,
+    )?;
     let details = normalize_optional_details(payload.detalles.as_deref())?;
     let response = create_content_report(
         &state,
