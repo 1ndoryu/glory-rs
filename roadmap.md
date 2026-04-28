@@ -65,6 +65,76 @@
 
 - Remplazar el daw que hicimos, por https://github.com/andremichelle/opendaw, requiere revisar el daw a actual para ver como estaba integrado, y hacer un plan de las integraciones necesaria (como que un sample se pudiera arrastrar y soltar), el daw actual es muy pobre y malo, por eso vamos a cambiar a opendaw, tienes que hacer un fork en mi cuenta 1ndoryu. **Plan:** `Agente/planes/plan-opendaw-2026-04-25.md` — bloqueado en fase 0 (fork manual del usuario en `1ndoryu/opendaw`).
 
+### Endpoints faltantes detectados por `npm run audit:api` (2026-04-27)
+
+45 endpoints que el frontend legacy invoca pero el backend Rust no expone. Portar uno por uno desde `glorytemplate/App/Kamples/Api/Controladores/` y `glorytemplate/App/Kamples/Services/`. Cada endpoint es una tarea individual.
+
+**Usuario activo (alta prioridad):**
+- 274A-15: GET `/api/users/me/descargas` — historial de descargas del usuario
+- 274A-16: GET `/api/users/me/seguidos` — lista de a quien sigo
+- 274A-17: GET `/api/reproducciones/historial` — historial de reproducciones
+- 274A-18: GET `/api/feed/inicio` — feed inicial
+- 274A-19: POST `/api/feed/recargar` — recargar feed
+- 274A-20: GET `/api/me/favoritos/sugerencias` — sugerencias basadas en favoritos
+- 274A-21: PUT `/api/users/me/email` — cambiar email
+- 274A-22: PUT `/api/users/me/password` — cambiar password
+- 274A-23: POST `/api/contribuciones` — crear contribucion
+- 274A-24: POST `/api/contribuciones/edicion` — editar contribucion
+- 274A-25: POST `/api/contribuciones/eliminacion` — eliminar contribucion
+- 274A-26: GET `/api/contribuciones/mis` — mis contribuciones
+- 274A-27: POST `/api/dashboard/payout` — solicitar payout
+
+**Admin moderacion (7):**
+- 274A-28: GET `/api/admin/moderacion`
+- 274A-29: POST `/api/admin/moderar`
+- 274A-30: POST `/api/admin/reportes/resolver`
+- 274A-31: GET `/api/admin/moderacion/historial`
+- 274A-32: POST `/api/admin/moderacion/rechazar-pendientes`
+- 274A-33: POST `/api/admin/moderacion/banear-usuario`
+- 274A-34: POST `/api/admin/moderacion/rechazar-usuario-publicaciones`
+
+**Admin cola IA (6):**
+- 274A-35: GET `/api/admin/cola-ia`
+- 274A-36: GET `/api/admin/cola-ia/estadisticas`
+- 274A-37: POST `/api/admin/cola-ia/reintentar`
+- 274A-38: POST `/api/admin/cola-ia/reintentar-todos`
+- 274A-39: POST `/api/admin/cola-ia/procesar`
+- 274A-40: GET `/api/admin/cola-ia/cuota-groq` + GET `/api/admin/cola-ia/estado-keys` (relacionados)
+
+**Admin duplicados (3):**
+- 274A-41: GET `/api/admin/duplicados`
+- 274A-42: GET `/api/admin/duplicados/contar`
+- 274A-43: POST `/api/admin/duplicados/backfill`
+
+**Admin automatizacion (3):**
+- 274A-44: GET `/api/admin/automatizacion/estado`
+- 274A-45: GET `/api/admin/automatizacion/historial`
+- 274A-46: POST `/api/admin/automatizacion/reactivar`
+
+**Admin contribuciones (2):**
+- 274A-47: GET `/api/admin/contribuciones`
+- 274A-48: POST `/api/admin/contribuciones/moderar`
+
+**Admin embeddings (2):**
+- 274A-49: POST `/api/admin/embeddings/generar`
+- 274A-50: POST `/api/admin/embeddings/regenerar`
+
+**Admin experimentos (1):**
+- 274A-51: POST `/api/admin/experimentos/generar`
+
+**Admin procesos (1):**
+- 274A-52: POST `/api/admin/procesos/benchmark`
+
+**Admin samples (1):**
+- 274A-53: DELETE `/api/admin/samples/todos`
+
+**Dev/scraper (5):**
+- 274A-54: DELETE `/api/dev/canciones`
+- 274A-55: POST `/api/dev/scraper/run`
+- 274A-56: POST `/api/dev/scraper/cola`
+- 274A-57: POST `/api/dev/recorte/generar`
+- 274A-58: POST `/api/dev/extraccion/publicar`
+
 
 ### Fase 19 â€” Despliegue
 - Nota: un error pasado hizo que se borrara la base de datos, hay que reforzar para que no vuelva a suceder, el error problemente fue causado al desplegar directamente o alguna otra razón, se debe tomar todo los medios necesarios para evitar la perdida de datos, tanto de la base de datos tanto como los archivos fisicos que deben perdurar, esto debe tomarse muy en serio porque ya es un error que se cometio en el pasado.
