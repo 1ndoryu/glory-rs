@@ -10,6 +10,7 @@ mod cola_extraccion;
 mod coleccion;
 mod comment;
 mod conversation;
+mod contribuciones;
 mod creator_dashboard;
 mod dev_tools;
 mod download;
@@ -71,6 +72,10 @@ pub use comment::{
 };
 pub use conversation::{
     ConversationParticipantSummary, ConversationRepository, ConversationSummary,
+};
+pub use contribuciones::{
+    ActualizarContribucionRecord, ContribucionModeracion, ContribucionPendiente,
+    ContribucionesRepository, CrearContribucionRecord,
 };
 pub use creator_dashboard::CreatorDashboardRepository;
 pub use dev_tools::{DevToolsRepository, ScrapingPendiente};

@@ -1,47 +1,91 @@
-/* [254A-4] Endpoints admin/contribuciones — paridad con ContribucionesController.php legacy.
- * GET /admin/contribuciones?page=&limit= — listar contribuciones pendientes (admin).
- *
- * Frontend (apiContribuciones.ts) consume `{ ok, items, total, page, limit }`. El stub
- * wpJsonStub convierte snake_case -> camelCase, asi que aqui usamos los nombres legacy
- * tal cual llegan al frontend.
- */
+/* sentinel-disable-file directory-size — modulo legacy dentro de `handlers/`;
+ * la correccion estructural es migrar handlers a subdirectorios por dominio. */
+/* [274A-23..26+48] Endpoints de contribuciones comunitarias.
+ * Port real de ContribucionesController.php: propuestas de usuario, historial
+ * propio y moderacion admin que aplica relaciones/ediciones/eliminaciones. */
 
-use axum::extract::{Query, State};
-use axum::routing::get;
+use axum::extract::{Path, Query, State};
+use axum::http::StatusCode;
+use axum::routing::{get, post, put};
 use axum::{Json, Router};
-use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use sqlx::FromRow;
+use serde_json::Value;
 use utoipa::{IntoParams, ToSchema};
 
 use crate::errors::AppError;
+#[allow(unused_imports)]
+use crate::errors::ErrorResponse;
 use crate::middleware::CurrentUser;
+pub use crate::repositories::ContribucionPendiente;
+use crate::repositories::{ActualizarContribucionRecord, ContribucionesRepository};
+use crate::services::contribuciones::{
+    ContribucionesService, CrearContribucionInput, ModerarContribucionInput,
+    ProponerEdicionInput, ProponerEliminacionInput,
+};
 use crate::AppState;
 
-#[derive(Debug, Clone, Serialize, ToSchema, FromRow)]
-pub struct ContribucionPendiente {
-    pub id: i32,
-    pub contribuidor_id: i32,
-    pub contribuidor_username: String,
-    pub cancion_destino_id: Option<i32>,
-    pub cancion_fuente_id: Option<i32>,
-    pub cancion_nueva_titulo: Option<String>,
-    pub cancion_nueva_artista: Option<String>,
-    pub cancion_nueva_youtube_url: Option<String>,
-    pub cancion_nueva_lado: Option<String>,
-    pub tipo_relacion: Option<String>,
+#[derive(Debug, Clone, Deserialize, ToSchema)]
+pub struct CrearContribucionRequest {
+    pub tipo_relacion: String,
+    #[serde(default)]
     pub tipo_elemento: Option<String>,
-    pub tipo_contribucion: Option<String>,
-    pub relacion_existente_id: Option<i32>,
-    pub cambios_propuestos: Option<serde_json::Value>,
-    pub estado: String,
-    pub moderador_nota: Option<String>,
-    pub created_at: DateTime<Utc>,
-    pub resuelto_at: Option<DateTime<Utc>>,
-    pub destino_titulo: Option<String>,
-    pub fuente_titulo: Option<String>,
-    pub cancion_destino_slug: Option<String>,
-    pub cancion_fuente_slug: Option<String>,
+    #[serde(default)]
+    pub cancion_destino_id: Option<i32>,
+    #[serde(default)]
+    pub cancion_fuente_id: Option<i32>,
+    #[serde(default)]
+    pub cancion_nueva_titulo: Option<String>,
+    #[serde(default)]
+    pub cancion_nueva_artista: Option<String>,
+    #[serde(default)]
+    pub cancion_nueva_youtube_url: Option<String>,
+    #[serde(default)]
+    pub cancion_nueva_lado: Option<String>,
+    #[serde(default)]
+    pub timing_fuente: Option<i32>,
+    #[serde(default)]
+    pub timing_destino: Option<i32>,
+}
+
+#[derive(Debug, Clone, Deserialize, ToSchema)]
+pub struct ActualizarContribucionRequest {
+    #[serde(default)]
+    pub tipo_relacion: Option<String>,
+    #[serde(default)]
+    pub tipo_elemento: Option<String>,
+    #[serde(default)]
+    pub cancion_destino_id: Option<i32>,
+    #[serde(default)]
+    pub cancion_fuente_id: Option<i32>,
+    #[serde(default)]
+    pub cancion_nueva_titulo: Option<String>,
+    #[serde(default)]
+    pub cancion_nueva_artista: Option<String>,
+    #[serde(default)]
+    pub cancion_nueva_youtube_url: Option<String>,
+    #[serde(default)]
+    pub cancion_nueva_lado: Option<String>,
+}
+
+#[derive(Debug, Clone, Deserialize, ToSchema)]
+pub struct ProponerEdicionRequest {
+    pub relacion_id: i32,
+    #[schema(value_type = Object)]
+    pub cambios: Value,
+}
+
+#[derive(Debug, Clone, Deserialize, ToSchema)]
+pub struct ProponerEliminacionRequest {
+    pub relacion_id: i32,
+    pub razon: String,
+}
+
+#[derive(Debug, Clone, Deserialize, ToSchema)]
+pub struct ModerarContribucionRequest {
+    pub id: i32,
+    pub accion: String,
+    #[serde(default)]
+    pub nota: Option<String>,
 }
 
 #[derive(Debug, Clone, Deserialize, IntoParams)]
@@ -50,6 +94,23 @@ pub struct ListarQuery {
     pub page: Option<i64>,
     #[serde(default)]
     pub limit: Option<i64>,
+}
+
+#[derive(Debug, Clone, Serialize, ToSchema)]
+pub struct RespuestaContribucion {
+    pub ok: bool,
+    pub id: Option<i32>,
+}
+
+#[derive(Debug, Clone, Serialize, ToSchema)]
+pub struct RespuestaOk {
+    pub ok: bool,
+}
+
+#[derive(Debug, Clone, Serialize, ToSchema)]
+pub struct MisContribucionesResponse {
+    pub ok: bool,
+    pub items: Vec<ContribucionPendiente>,
 }
 
 #[derive(Debug, Clone, Serialize, ToSchema)]
@@ -62,71 +123,221 @@ pub struct ListarResponse {
     pub limit: i64,
 }
 
-#[utoipa::path(get, path = "/api/admin/contribuciones", tag = "admin",
-    params(ListarQuery),
+#[derive(Debug, Clone, Serialize, ToSchema)]
+pub struct ModerarContribucionResponse {
+    pub ok: bool,
+    pub relacion_id: Option<i32>,
+}
+
+#[utoipa::path(
+    post, path = "/api/contribuciones", tag = "contribuciones",
+    request_body = CrearContribucionRequest,
     security(("bearer_auth" = [])),
-    responses((status = 200, body = ListarResponse), (status = 403)))]
+    responses((status = 201, body = RespuestaContribucion), (status = 409, body = ErrorResponse), (status = 422, body = ErrorResponse))
+)]
+pub async fn crear(
+    State(state): State<AppState>,
+    user: CurrentUser,
+    Json(request): Json<CrearContribucionRequest>,
+) -> Result<(StatusCode, Json<RespuestaContribucion>), AppError> {
+    let id = ContribucionesService::crear(
+        &state.pool,
+        CrearContribucionInput {
+            contribuidor_id: user.user_id,
+            cancion_destino_id: request.cancion_destino_id,
+            cancion_fuente_id: request.cancion_fuente_id,
+            cancion_nueva_titulo: request.cancion_nueva_titulo,
+            cancion_nueva_artista: request.cancion_nueva_artista,
+            cancion_nueva_youtube_url: request.cancion_nueva_youtube_url,
+            cancion_nueva_lado: request.cancion_nueva_lado,
+            tipo_relacion: request.tipo_relacion,
+            tipo_elemento: request.tipo_elemento,
+            timing_fuente: request.timing_fuente,
+            timing_destino: request.timing_destino,
+        },
+    )
+    .await?;
+    Ok((StatusCode::CREATED, Json(RespuestaContribucion { ok: true, id: Some(id) })))
+}
+
+#[utoipa::path(
+    get, path = "/api/contribuciones/mis", tag = "contribuciones",
+    params(ListarQuery), security(("bearer_auth" = [])),
+    responses((status = 200, body = MisContribucionesResponse))
+)]
+pub async fn mis(
+    State(state): State<AppState>,
+    user: CurrentUser,
+    Query(query): Query<ListarQuery>,
+) -> Result<Json<MisContribucionesResponse>, AppError> {
+    let (page, limit, offset) = pagination(&query);
+    let items = ContribucionesRepository::listar_usuario(&state.pool, user.user_id, limit, offset).await?;
+    let _ = page;
+    Ok(Json(MisContribucionesResponse { ok: true, items }))
+}
+
+#[utoipa::path(
+    put, path = "/api/contribuciones/{id}", tag = "contribuciones",
+    request_body = ActualizarContribucionRequest,
+    security(("bearer_auth" = [])),
+    responses((status = 200, body = RespuestaOk), (status = 403, body = ErrorResponse), (status = 422, body = ErrorResponse))
+)]
+pub async fn actualizar(
+    State(state): State<AppState>,
+    user: CurrentUser,
+    Path(id): Path<i32>,
+    Json(request): Json<ActualizarContribucionRequest>,
+) -> Result<Json<RespuestaOk>, AppError> {
+    let input = ActualizarContribucionRecord {
+        cancion_destino_id: request.cancion_destino_id,
+        cancion_fuente_id: request.cancion_fuente_id,
+        cancion_nueva_titulo: trim_optional(request.cancion_nueva_titulo),
+        cancion_nueva_artista: trim_optional(request.cancion_nueva_artista),
+        cancion_nueva_youtube_url: trim_optional(request.cancion_nueva_youtube_url),
+        cancion_nueva_lado: request.cancion_nueva_lado,
+        tipo_relacion: request.tipo_relacion,
+        tipo_elemento: request.tipo_elemento,
+    };
+    if !input.has_changes() {
+        return Err(AppError::Validation("No se enviaron campos para actualizar.".into()));
+    }
+    let ok = ContribucionesRepository::actualizar_pendiente_usuario(&state.pool, id, user.user_id, input).await?;
+    if !ok {
+        return Err(AppError::Forbidden(
+            "No se pudo actualizar. Verifica que la contribucion sea tuya y este pendiente.".into(),
+        ));
+    }
+    Ok(Json(RespuestaOk { ok: true }))
+}
+
+#[utoipa::path(
+    delete, path = "/api/contribuciones/{id}", tag = "contribuciones",
+    security(("bearer_auth" = [])),
+    responses((status = 200, body = RespuestaOk), (status = 403, body = ErrorResponse))
+)]
+pub async fn eliminar(
+    State(state): State<AppState>,
+    user: CurrentUser,
+    Path(id): Path<i32>,
+) -> Result<Json<RespuestaOk>, AppError> {
+    let ok = ContribucionesRepository::eliminar_pendiente_usuario(&state.pool, id, user.user_id).await?;
+    if !ok {
+        return Err(AppError::Forbidden(
+            "No se pudo eliminar. Verifica que la contribucion sea tuya y este pendiente.".into(),
+        ));
+    }
+    Ok(Json(RespuestaOk { ok: true }))
+}
+
+#[utoipa::path(
+    post, path = "/api/contribuciones/edicion", tag = "contribuciones",
+    request_body = ProponerEdicionRequest,
+    security(("bearer_auth" = [])),
+    responses((status = 201, body = RespuestaContribucion), (status = 404, body = ErrorResponse), (status = 409, body = ErrorResponse), (status = 422, body = ErrorResponse))
+)]
+pub async fn proponer_edicion(
+    State(state): State<AppState>,
+    user: CurrentUser,
+    Json(request): Json<ProponerEdicionRequest>,
+) -> Result<(StatusCode, Json<RespuestaContribucion>), AppError> {
+    let id = ContribucionesService::proponer_edicion(
+        &state.pool,
+        ProponerEdicionInput {
+            contribuidor_id: user.user_id,
+            relacion_id: request.relacion_id,
+            cambios: request.cambios,
+        },
+    )
+    .await?;
+    Ok((StatusCode::CREATED, Json(RespuestaContribucion { ok: true, id: Some(id) })))
+}
+
+#[utoipa::path(
+    post, path = "/api/contribuciones/eliminacion", tag = "contribuciones",
+    request_body = ProponerEliminacionRequest,
+    security(("bearer_auth" = [])),
+    responses((status = 201, body = RespuestaContribucion), (status = 404, body = ErrorResponse), (status = 409, body = ErrorResponse), (status = 422, body = ErrorResponse))
+)]
+pub async fn proponer_eliminacion(
+    State(state): State<AppState>,
+    user: CurrentUser,
+    Json(request): Json<ProponerEliminacionRequest>,
+) -> Result<(StatusCode, Json<RespuestaContribucion>), AppError> {
+    let id = ContribucionesService::proponer_eliminacion(
+        &state.pool,
+        ProponerEliminacionInput {
+            contribuidor_id: user.user_id,
+            relacion_id: request.relacion_id,
+            razon: request.razon,
+        },
+    )
+    .await?;
+    Ok((StatusCode::CREATED, Json(RespuestaContribucion { ok: true, id: Some(id) })))
+}
+
+#[utoipa::path(
+    get, path = "/api/admin/contribuciones", tag = "admin",
+    params(ListarQuery), security(("bearer_auth" = [])),
+    responses((status = 200, body = ListarResponse), (status = 403, body = ErrorResponse))
+)]
 pub async fn listar(
     State(state): State<AppState>,
     user: CurrentUser,
     Query(query): Query<ListarQuery>,
 ) -> Result<Json<ListarResponse>, AppError> {
     user.require_admin()?;
+    let (page, limit, offset) = pagination(&query);
+    let items = ContribucionesRepository::listar_pendientes_admin(&state.pool, limit, offset).await?;
+    let total = ContribucionesRepository::contar_pendientes(&state.pool).await?;
+    Ok(Json(ListarResponse { ok: true, items, total, page, limit }))
+}
+
+#[utoipa::path(
+    post, path = "/api/admin/contribuciones/moderar", tag = "admin",
+    request_body = ModerarContribucionRequest,
+    security(("bearer_auth" = [])),
+    responses((status = 200, body = ModerarContribucionResponse), (status = 403, body = ErrorResponse), (status = 404, body = ErrorResponse), (status = 409, body = ErrorResponse), (status = 422, body = ErrorResponse))
+)]
+pub async fn moderar(
+    State(state): State<AppState>,
+    user: CurrentUser,
+    Json(request): Json<ModerarContribucionRequest>,
+) -> Result<Json<ModerarContribucionResponse>, AppError> {
+    user.require_admin()?;
+    let result = ContribucionesService::moderar(
+        &state.pool,
+        ModerarContribucionInput {
+            moderador_id: user.user_id,
+            id: request.id,
+            accion: request.accion,
+            nota: trim_optional(request.nota),
+        },
+    )
+    .await?;
+    Ok(Json(ModerarContribucionResponse { ok: true, relacion_id: result.relacion_id }))
+}
+
+fn pagination(query: &ListarQuery) -> (i64, i64, i64) {
     let page = query.page.unwrap_or(1).max(1);
     let limit = query.limit.unwrap_or(20).clamp(1, 50);
     let offset = (page - 1) * limit;
+    (page, limit, offset)
+}
 
-    let items = sqlx::query_as::<_, ContribucionPendiente>(
-        r"SELECT cp.id,
-                  cp.contribuidor_id,
-                  u.username AS contribuidor_username,
-                  cp.cancion_destino_id,
-                  cp.cancion_fuente_id,
-                  cp.cancion_nueva_titulo,
-                  cp.cancion_nueva_artista,
-                  cp.cancion_nueva_youtube_url,
-                  cp.cancion_nueva_lado,
-                  cp.tipo_relacion,
-                  cp.tipo_elemento,
-                  cp.tipo_contribucion,
-                  cp.relacion_existente_id,
-                  cp.cambios_propuestos,
-                  cp.estado,
-                  cp.moderador_nota,
-                  cp.created_at,
-                  cp.resuelto_at,
-                  cd.titulo AS destino_titulo,
-                  cf.titulo AS fuente_titulo,
-                  cd.slug   AS cancion_destino_slug,
-                  cf.slug   AS cancion_fuente_slug
-             FROM contribuciones_pendientes cp
-             JOIN usuarios_ext u ON u.id = cp.contribuidor_id
-             LEFT JOIN canciones cd ON cd.id = cp.cancion_destino_id
-             LEFT JOIN canciones cf ON cf.id = cp.cancion_fuente_id
-            WHERE cp.estado = 'pendiente'
-            ORDER BY cp.created_at DESC
-            LIMIT $1 OFFSET $2",
-    )
-    .bind(limit)
-    .bind(offset)
-    .fetch_all(&state.pool)
-    .await?;
-
-    let total: (i64,) = sqlx::query_as(
-        r"SELECT COUNT(*)::bigint FROM contribuciones_pendientes WHERE estado = 'pendiente'",
-    )
-    .fetch_one(&state.pool)
-    .await?;
-
-    Ok(Json(ListarResponse {
-        ok: true,
-        items,
-        total: total.0,
-        page,
-        limit,
-    }))
+fn trim_optional(value: Option<String>) -> Option<String> {
+    value.and_then(|item| {
+        let trimmed = item.trim();
+        (!trimmed.is_empty()).then(|| trimmed.to_string())
+    })
 }
 
 pub fn routes() -> Router<AppState> {
-    Router::new().route("/admin/contribuciones", get(listar))
+    Router::new()
+        .route("/contribuciones", post(crear))
+        .route("/contribuciones/mis", get(mis))
+        .route("/contribuciones/:id", put(actualizar).delete(eliminar))
+        .route("/contribuciones/edicion", post(proponer_edicion))
+        .route("/contribuciones/eliminacion", post(proponer_eliminacion))
+        .route("/admin/contribuciones", get(listar))
+        .route("/admin/contribuciones/moderar", post(moderar))
 }
