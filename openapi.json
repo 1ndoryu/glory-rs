@@ -662,6 +662,183 @@
         ]
       }
     },
+    "/api/admin/config/extraccion": {
+      "get": {
+        "tags": [
+          "admin-config"
+        ],
+        "operationId": "get_extraccion_config",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExtraccionConfig"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "Requiere rol admin"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "admin-config"
+        ],
+        "operationId": "put_extraccion_config",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExtraccionConfig"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExtraccionConfig"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Parametros invalidos"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "Requiere rol admin"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/config/scraping": {
+      "get": {
+        "tags": [
+          "admin-config"
+        ],
+        "operationId": "get_scraping_config",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScrapingConfig"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "Requiere rol admin"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "admin-config"
+        ],
+        "operationId": "put_scraping_config",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScrapingConfig"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScrapingConfig"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Parametros invalidos"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "Requiere rol admin"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/extraccion/stats": {
+      "get": {
+        "tags": [
+          "admin-config"
+        ],
+        "operationId": "get_extraccion_stats",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExtraccionStats"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "Requiere rol admin"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
     "/api/admin/procesos": {
       "get": {
         "tags": [
@@ -3246,6 +3423,38 @@
         }
       }
     },
+    "/api/canciones/secciones": {
+      "get": {
+        "tags": [
+          "music"
+        ],
+        "operationId": "song_sections",
+        "parameters": [
+          {
+            "name": "por_seccion",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Secciones legacy de canciones",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SongSectionsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/canciones/top": {
       "get": {
         "tags": [
@@ -3783,6 +3992,46 @@
         }
       }
     },
+    "/api/colecciones/relevantes/{sample_id}": {
+      "get": {
+        "tags": [
+          "colecciones::legacy"
+        ],
+        "operationId": "list_relevant_for_sample_legacy",
+        "parameters": [
+          {
+            "name": "sample_id",
+            "in": "path",
+            "description": "ID del sample",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LegacyColeccionResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
     "/api/colecciones/{id}": {
       "get": {
         "tags": [
@@ -3921,6 +4170,49 @@
           },
           "403": {
             "description": "No autorizado"
+          },
+          "404": {
+            "description": "No encontrada"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/colecciones/{id}/combinacion-pendiente": {
+      "get": {
+        "tags": [
+          "colecciones"
+        ],
+        "operationId": "combinacion_pendiente",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID de la coleccion",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CombinacionPendienteResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Privada y no es del usuario"
           },
           "404": {
             "description": "No encontrada"
@@ -4266,6 +4558,64 @@
             "bearer_auth": []
           }
         ]
+      }
+    },
+    "/api/colecciones/{id}/sugerencias": {
+      "get": {
+        "tags": [
+          "colecciones"
+        ],
+        "operationId": "sugerencias_coleccion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID de la coleccion",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColeccionSugerenciasResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Privada y no es del usuario"
+          },
+          "404": {
+            "description": "No encontrada"
+          }
+        }
       }
     },
     "/api/comentarios/{commentId}": {
@@ -5168,6 +5518,34 @@
         ]
       }
     },
+    "/api/descargas/comprados": {
+      "get": {
+        "tags": [
+          "downloads"
+        ],
+        "operationId": "list_purchased_samples",
+        "responses": {
+          "200": {
+            "description": "Samples comprados por el usuario",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchasedSamplesResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
     "/api/descargas/limites": {
       "get": {
         "tags": [
@@ -5623,6 +6001,324 @@
         ]
       }
     },
+    "/api/me/coleccionados": {
+      "get": {
+        "tags": [
+          "biblioteca"
+        ],
+        "operationId": "get_coleccionados",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          },
+          {
+            "name": "carpeta",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          {
+            "name": "orden",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          {
+            "name": "busqueda",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          {
+            "name": "solo_encanta",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          {
+            "name": "solo_like",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Samples coleccionados del usuario",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BibliotecaSamplesResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/me/coleccionados/carpetas": {
+      "get": {
+        "tags": [
+          "biblioteca"
+        ],
+        "operationId": "get_carpetas",
+        "responses": {
+          "200": {
+            "description": "Arbol de carpetas con totales",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CarpetasResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/me/coleccionados/{id}/carpeta": {
+      "put": {
+        "tags": [
+          "biblioteca"
+        ],
+        "operationId": "put_mover_carpeta",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID del sample",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MoverCarpetaRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Sample movido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MoverCarpetaResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Carpeta invalida"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "El sample no esta en la biblioteca del usuario"
+          },
+          "404": {
+            "description": "Sample no encontrado"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/me/descargas/sugerencias": {
+      "get": {
+        "tags": [
+          "suggestions"
+        ],
+        "operationId": "sugerencias_descargas",
+        "parameters": [
+          {
+            "name": "pagina",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          },
+          {
+            "name": "limite",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Samples sugeridos a partir de descargas + coleccionados",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SugerenciasResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/me/favoritos": {
+      "get": {
+        "tags": [
+          "biblioteca"
+        ],
+        "operationId": "get_favoritos",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          },
+          {
+            "name": "orden",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          {
+            "name": "busqueda",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          {
+            "name": "solo_encanta",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          {
+            "name": "solo_like",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Samples favoritos del usuario",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BibliotecaSamplesResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
     "/api/me/feed": {
       "get": {
         "tags": [
@@ -5673,6 +6369,94 @@
                 }
               }
             }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/me/sync/colecciones": {
+      "get": {
+        "tags": [
+          "sync"
+        ],
+        "operationId": "get_me_sync_colecciones",
+        "responses": {
+          "200": {
+            "description": "Full sync de colecciones+samples",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeSyncColeccionesResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/me/sync/delta": {
+      "get": {
+        "tags": [
+          "sync"
+        ],
+        "operationId": "get_me_sync_delta",
+        "parameters": [
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          },
+          {
+            "name": "limite",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Delta de cambios envuelta en data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeSyncDeltaResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado"
           }
         },
         "security": [
@@ -6577,6 +7361,15 @@
             "schema": {
               "type": "integer",
               "format": "int32",
+              "nullable": true
+            }
+          },
+          {
+            "name": "autor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
               "nullable": true
             }
           }
@@ -8027,6 +8820,103 @@
         ]
       }
     },
+    "/api/samples/{id}/corregir-ia": {
+      "post": {
+        "tags": [
+          "sample_catalog"
+        ],
+        "operationId": "correct_sample_ia",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID numerico del sample a corregir",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CorregirIaRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Metadata corregida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CorregirIaResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Solo admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Sample no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Instrucciones invalidas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Error en proveedores IA",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
     "/api/samples/{id}/descargar": {
       "post": {
         "tags": [
@@ -8082,6 +8972,160 @@
           },
           "429": {
             "description": "Límite diario excedido"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/samples/{id}/extender-recorte": {
+      "post": {
+        "tags": [
+          "admin-samples"
+        ],
+        "operationId": "extender_recorte",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID del sample",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExtenderRecorteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Encolado para el scraper",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EncoladoResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Sin cola_extraccion o rango inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sin permisos de admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/samples/{id}/generar-siguiente": {
+      "post": {
+        "tags": [
+          "admin-samples"
+        ],
+        "operationId": "generar_siguiente",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID del sample origen",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerarSiguienteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Encolado para el scraper",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EncoladoResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Sin cola_extraccion o duración inválida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sin permisos de admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -8152,6 +9196,73 @@
           },
           "401": {
             "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/samples/{id}/restaurar-recorte": {
+      "post": {
+        "tags": [
+          "admin-samples"
+        ],
+        "operationId": "restaurar_recorte",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID del sample",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Encolado para el scraper",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EncoladoResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "metadata sin timing_original",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sin permisos de admin",
             "content": {
               "application/json": {
                 "schema": {
@@ -8683,6 +9794,51 @@
         ]
       }
     },
+    "/api/users/me/avatar": {
+      "post": {
+        "tags": [
+          "users"
+        ],
+        "operationId": "upload_avatar",
+        "responses": {
+          "200": {
+            "description": "Avatar actualizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileImageUploadResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
     "/api/users/me/blocked": {
       "get": {
         "tags": [
@@ -8706,6 +9862,51 @@
           },
           "401": {
             "description": "no auth"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/users/me/portada": {
+      "post": {
+        "tags": [
+          "users"
+        ],
+        "operationId": "upload_portada",
+        "responses": {
+          "200": {
+            "description": "Portada actualizada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileImageUploadResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -10127,6 +11328,35 @@
           }
         }
       },
+      "BibliotecaSamplesData": {
+        "type": "object",
+        "required": [
+          "data",
+          "pagination"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SampleSummary"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/SamplesPagination"
+          }
+        }
+      },
+      "BibliotecaSamplesResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/BibliotecaSamplesData"
+          }
+        }
+      },
       "BlockRequest": {
         "type": "object",
         "properties": {
@@ -10186,6 +11416,43 @@
           "username": {
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "CarpetaItem": {
+        "type": "object",
+        "required": [
+          "primaria",
+          "total",
+          "subcarpetas"
+        ],
+        "properties": {
+          "primaria": {
+            "type": "string"
+          },
+          "subcarpetas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SubcarpetaItem"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "CarpetasResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CarpetaItem"
+            }
           }
         }
       },
@@ -10357,7 +11624,7 @@
         "type": "object",
         "properties": {
           "incluir_subcolecciones": {
-            "type": "boolean",
+            "type": "string",
             "nullable": true
           },
           "orden": {
@@ -10413,6 +11680,48 @@
             "items": {
               "$ref": "#/components/schemas/ColeccionSample"
             }
+          }
+        }
+      },
+      "ColeccionSugerenciasResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SampleSummary"
+            }
+          }
+        }
+      },
+      "CombinacionPendienteResponse": {
+        "type": "object",
+        "required": [
+          "hayCombinacion"
+        ],
+        "properties": {
+          "combinadoEn": {
+            "type": "string",
+            "nullable": true
+          },
+          "expiraEn": {
+            "type": "string",
+            "nullable": true
+          },
+          "hayCombinacion": {
+            "type": "boolean"
+          },
+          "origenNombre": {
+            "type": "string",
+            "nullable": true
+          },
+          "undoId": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
           }
         }
       },
@@ -10733,6 +12042,37 @@
           },
           "ultimo_mensaje_tipo": {
             "$ref": "#/components/schemas/DirectMessageKind"
+          }
+        }
+      },
+      "CorregirIaRequest": {
+        "type": "object",
+        "required": [
+          "instrucciones"
+        ],
+        "properties": {
+          "instrucciones": {
+            "type": "string"
+          }
+        }
+      },
+      "CorregirIaResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "mensaje",
+          "cambios"
+        ],
+        "properties": {
+          "cambios": {
+            "type": "object",
+            "additionalProperties": {}
+          },
+          "mensaje": {
+            "type": "string"
+          },
+          "ok": {
+            "type": "boolean"
           }
         }
       },
@@ -11664,6 +13004,36 @@
           }
         }
       },
+      "EncoladoResult": {
+        "type": "object",
+        "required": [
+          "cola_id",
+          "estado",
+          "modo",
+          "nuevo_inicio",
+          "nuevo_fin"
+        ],
+        "properties": {
+          "cola_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "estado": {
+            "type": "string"
+          },
+          "modo": {
+            "type": "string"
+          },
+          "nuevo_fin": {
+            "type": "number",
+            "format": "double"
+          },
+          "nuevo_inicio": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
       "ErrorReportResponse": {
         "type": "object",
         "required": [
@@ -11716,6 +13086,91 @@
           }
         }
       },
+      "ExtenderRecorteRequest": {
+        "type": "object",
+        "required": [
+          "segundos_antes",
+          "segundos_despues"
+        ],
+        "properties": {
+          "segundos_antes": {
+            "type": "number",
+            "format": "double",
+            "description": "Segundos a añadir ANTES del inicio actual (>= 0)."
+          },
+          "segundos_despues": {
+            "type": "number",
+            "format": "double",
+            "description": "Segundos a añadir DESPUÉS del fin actual (>= 0)."
+          }
+        }
+      },
+      "ExtraccionConfig": {
+        "type": "object",
+        "description": "Bloque de configuracion de extraccion expuesto al panel admin.",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Si false, el scraper salta los ciclos de extraccion.",
+            "nullable": true
+          },
+          "intervalo_seg": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Segundos entre ciclos del pipeline de extraccion. Minimo 5.",
+            "nullable": true
+          },
+          "lote_size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Items procesados por ciclo. Rango sugerido 1..=200.",
+            "nullable": true
+          }
+        }
+      },
+      "ExtraccionStats": {
+        "type": "object",
+        "description": "Estadisticas agregadas del estado actual de la cola.",
+        "required": [
+          "pendientes",
+          "en_proceso",
+          "revision_humana",
+          "extraido_sin_publicar",
+          "completados_24h",
+          "errores_24h",
+          "total"
+        ],
+        "properties": {
+          "completados_24h": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "en_proceso": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "errores_24h": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "extraido_sin_publicar": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendientes": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "revision_humana": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
       "FcmTokenPlatform": {
         "type": "string",
         "enum": [
@@ -11758,6 +13213,19 @@
           "sample",
           "coleccion"
         ]
+      },
+      "GenerarSiguienteRequest": {
+        "type": "object",
+        "required": [
+          "duracion"
+        ],
+        "properties": {
+          "duracion": {
+            "type": "number",
+            "format": "double",
+            "description": "Duración en segundos del nuevo segmento (> 0)."
+          }
+        }
       },
       "GenerateFreeCodeRequest": {
         "type": "object",
@@ -12005,6 +13473,10 @@
         "properties": {
           "avatar_url": {
             "type": "string",
+            "nullable": true
+          },
+          "contiene_el_sample": {
+            "type": "boolean",
             "nullable": true
           },
           "created_at": {
@@ -12774,6 +14246,28 @@
           }
         }
       },
+      "MeSyncColeccionesResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/SyncColeccionesData"
+          }
+        }
+      },
+      "MeSyncDeltaResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/SyncChangelogDelta"
+          }
+        }
+      },
       "MergeColeccionRequest": {
         "type": "object",
         "required": [
@@ -12833,6 +14327,56 @@
         "properties": {
           "data": {
             "$ref": "#/components/schemas/ConversationMessage"
+          }
+        }
+      },
+      "MoverCarpetaData": {
+        "type": "object",
+        "required": [
+          "movido",
+          "sampleId",
+          "carpetaPrimaria",
+          "carpetaSecundaria"
+        ],
+        "properties": {
+          "carpetaPrimaria": {
+            "type": "string"
+          },
+          "carpetaSecundaria": {
+            "type": "string"
+          },
+          "movido": {
+            "type": "boolean"
+          },
+          "sampleId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "MoverCarpetaRequest": {
+        "type": "object",
+        "required": [
+          "carpeta_primaria"
+        ],
+        "properties": {
+          "carpeta_primaria": {
+            "type": "string"
+          },
+          "carpeta_secundaria": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "MoverCarpetaResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/MoverCarpetaData"
           }
         }
       },
@@ -13582,13 +15126,47 @@
         "type": "object",
         "description": "Resultado de la operación `publicar-auto`.",
         "required": [
-          "publicados"
+          "publicados",
+          "reemplazados",
+          "errores",
+          "detalle"
         ],
         "properties": {
+          "detalle": {
+            "$ref": "#/components/schemas/PublicarResultado"
+          },
+          "errores": {
+            "type": "integer",
+            "description": "Cantidad de items que fallaron y quedaron disponibles para reintento.",
+            "minimum": 0
+          },
           "publicados": {
             "type": "integer",
-            "format": "int64",
-            "description": "Cantidad de items de `cola_extraccion_samples` que pasaron de\n`extraido` → `completado` en esta llamada."
+            "description": "Cantidad de items de `cola_extraccion_samples` que se publicaron como\nsamples nuevos en esta llamada.",
+            "minimum": 0
+          },
+          "reemplazados": {
+            "type": "integer",
+            "description": "Cantidad de items cuyos assets se reemplazaron sobre un sample existente\n(modos `extender` / `restaurar`).",
+            "minimum": 0
+          }
+        }
+      },
+      "PurchasedSamplesResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SampleSummary"
+            }
+          },
+          "ok": {
+            "type": "boolean"
           }
         }
       },
@@ -14934,6 +16512,26 @@
           }
         }
       },
+      "ScrapingConfig": {
+        "type": "object",
+        "description": "Bloque de configuracion del scraper de WhoSampled.",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "intervalo_seg": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "lote_size": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          }
+        }
+      },
       "SearchCollectionOwnerSummary": {
         "type": "object",
         "required": [
@@ -15229,6 +16827,22 @@
           }
         }
       },
+      "SubcarpetaItem": {
+        "type": "object",
+        "required": [
+          "nombre",
+          "total"
+        ],
+        "properties": {
+          "nombre": {
+            "type": "string"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
       "SubscribePushRequest": {
         "type": "object",
         "required": [
@@ -15244,6 +16858,20 @@
           },
           "plataforma": {
             "$ref": "#/components/schemas/PushSubscriptionPlatform"
+          }
+        }
+      },
+      "SugerenciasResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SampleSummary"
+            }
           }
         }
       },
@@ -15330,6 +16958,89 @@
           "collection_deleted",
           "collection_merged"
         ]
+      },
+      "SyncColeccion": {
+        "type": "object",
+        "required": [
+          "id",
+          "nombre",
+          "version",
+          "samples"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "parentId": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "samples": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SyncSample"
+            }
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "SyncColeccionesData": {
+        "type": "object",
+        "required": [
+          "colecciones",
+          "sinColeccion"
+        ],
+        "properties": {
+          "colecciones": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SyncColeccion"
+            }
+          },
+          "sinColeccion": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SyncSample"
+            }
+          }
+        }
+      },
+      "SyncSample": {
+        "type": "object",
+        "required": [
+          "id",
+          "titulo",
+          "formato",
+          "tamano"
+        ],
+        "properties": {
+          "formato": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "imagenUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "tamano": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "titulo": {
+            "type": "string"
+          }
+        }
       },
       "TagAggregateItem": {
         "type": "object",

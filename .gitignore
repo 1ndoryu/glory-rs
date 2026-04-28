@@ -34,6 +34,9 @@ desktop.ini
 !/scripts/backup-postgres-loop.sh
 !/scripts/clean-cargo-target.ps1
 !/scripts/watch-cargo-target.ps1
+!/scripts/audit-api.mjs
+!/scripts/lib/
+!/scripts/lib/*.mjs
 /prerendered/
 /node_modules/
 /cliente/

@@ -17,6 +17,7 @@
     "test": "cargo test",
     "roadmap": "node scripts/check-roadmap.mjs",
     "roadmap:watch": "node scripts/check-roadmap.mjs --watch",
+    "audit:api": "node scripts/audit-api.mjs",
     "self-check": "powershell -ExecutionPolicy Bypass -File scripts/self-check.ps1",
     "clean:cargo": "powershell -ExecutionPolicy Bypass -File scripts/clean-cargo-target.ps1",
     "clean:cargo:hard": "powershell -ExecutionPolicy Bypass -File scripts/clean-cargo-target.ps1 -Aggressive",
