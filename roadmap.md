@@ -104,14 +104,6 @@
 **Admin samples (1):**
 - 274A-53: DELETE `/api/admin/samples/todos`
 
-**Dev/scraper (5):**
-- 274A-54: DELETE `/api/dev/canciones`
-- 274A-55: POST `/api/dev/scraper/run`
-- 274A-56: POST `/api/dev/scraper/cola`
-- 274A-57: POST `/api/dev/recorte/generar`
-- 274A-58: POST `/api/dev/extraccion/publicar`
-
-
 ### Fase 19 â€” Despliegue
 - Nota: un error pasado hizo que se borrara la base de datos, hay que reforzar para que no vuelva a suceder, el error problemente fue causado al desplegar directamente o alguna otra razón, se debe tomar todo los medios necesarios para evitar la perdida de datos, tanto de la base de datos tanto como los archivos fisicos que deben perdurar, esto debe tomarse muy en serio porque ya es un error que se cometio en el pasado.
 - 174A-116 â€” MigraciÃ³n inicial automÃ¡tica + healthcheck (no hacerlo hasta mi confirmacion)

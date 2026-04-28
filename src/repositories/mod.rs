@@ -11,6 +11,7 @@ mod coleccion;
 mod comment;
 mod conversation;
 mod creator_dashboard;
+mod dev_tools;
 mod download;
 mod fcm;
 mod follow;
@@ -72,6 +73,7 @@ pub use conversation::{
     ConversationParticipantSummary, ConversationRepository, ConversationSummary,
 };
 pub use creator_dashboard::CreatorDashboardRepository;
+pub use dev_tools::{DevToolsRepository, ScrapingPendiente};
 pub use download::{DownloadRepository, SampleDownloadInfo, SampleFileInfo, UserDownloadAllowance};
 pub use fcm::{FcmTokenRecord, FcmTokenRepository, RegisterFcmTokenRecord};
 pub use follow::FollowRepository;

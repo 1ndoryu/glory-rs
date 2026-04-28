@@ -6237,6 +6237,241 @@
         }
       }
     },
+    "/api/dev/canciones": {
+      "delete": {
+        "tags": [
+          "dev"
+        ],
+        "operationId": "purgar_canciones",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevPurgarCancionesResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/dev/extraccion/publicar": {
+      "post": {
+        "tags": [
+          "dev"
+        ],
+        "operationId": "publicar_extracciones",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DevExtraccionPublicarRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevExtraccionPublicarResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/dev/recorte/generar": {
+      "post": {
+        "tags": [
+          "dev"
+        ],
+        "operationId": "generar_recorte",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DevRecorteGenerarRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevRecorteGenerarResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/dev/scraper/cola": {
+      "post": {
+        "tags": [
+          "dev"
+        ],
+        "operationId": "procesar_cola_scraper",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevScraperColaResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/dev/scraper/run": {
+      "post": {
+        "tags": [
+          "dev"
+        ],
+        "operationId": "ejecutar_scraper",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DevScraperRunRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevScraperRunResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
     "/api/fcm/eliminar": {
       "post": {
         "tags": [
@@ -14375,6 +14610,197 @@
           },
           "version": {
             "type": "string"
+          }
+        }
+      },
+      "DevExtraccionPublicarRequest": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "DevExtraccionPublicarResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "publicados",
+          "errores",
+          "resultados"
+        ],
+        "properties": {
+          "errores": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "mensaje": {
+            "type": "string",
+            "nullable": true
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "publicados": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "resultados": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ItemPublicacion"
+            }
+          }
+        }
+      },
+      "DevPurgarCancionesResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "mensaje",
+          "tablas"
+        ],
+        "properties": {
+          "mensaje": {
+            "type": "string"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "tablas": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "DevRecorteGenerarRequest": {
+        "type": "object",
+        "required": [
+          "relacion_id"
+        ],
+        "properties": {
+          "relacion_id": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DevRecorteGenerarResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "mensaje",
+          "encolados",
+          "cola_ids"
+        ],
+        "properties": {
+          "cola_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "encolados": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "log": {
+            "type": "string",
+            "nullable": true
+          },
+          "mensaje": {
+            "type": "string"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "pid": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true,
+            "minimum": 0
+          }
+        }
+      },
+      "DevScraperColaResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "cola_vacia",
+          "mensaje"
+        ],
+        "properties": {
+          "cola_vacia": {
+            "type": "boolean"
+          },
+          "mensaje": {
+            "type": "string"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "pid": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true,
+            "minimum": 0
+          },
+          "spider": {
+            "type": "string",
+            "nullable": true
+          },
+          "tipo": {
+            "type": "string",
+            "nullable": true
+          },
+          "url": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "DevScraperRunRequest": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "spider": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "DevScraperRunResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "mensaje"
+        ],
+        "properties": {
+          "log": {
+            "type": "string",
+            "nullable": true
+          },
+          "mensaje": {
+            "type": "string"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "pid": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true,
+            "minimum": 0
           }
         }
       },

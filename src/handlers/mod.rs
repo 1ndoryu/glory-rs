@@ -16,6 +16,7 @@ mod colecciones;
 mod comments;
 mod connect;
 mod dashboard;
+mod dev_tools;
 mod downloads;
 mod extension_recorte;
 mod fcm;
@@ -280,6 +281,11 @@ impl utoipa::Modify for SecurityAddon {
         admin_config::get_scraping_config,
         admin_config::put_scraping_config,
         admin_config::get_extraccion_stats,
+        dev_tools::purgar_canciones,
+        dev_tools::ejecutar_scraper,
+        dev_tools::procesar_cola_scraper,
+        dev_tools::generar_recorte,
+        dev_tools::publicar_extracciones,
         extension_recorte::extender_recorte,
         extension_recorte::generar_siguiente,
         extension_recorte::restaurar_recorte,
@@ -593,6 +599,14 @@ impl utoipa::Modify for SecurityAddon {
         admin_ia_queue::GroqQuotaData,
         admin_ia_queue::GroqKeysStatusResponse,
         admin_ia_queue::GroqKeyStatus,
+        dev_tools::DevPurgarCancionesResponse,
+        dev_tools::DevScraperRunRequest,
+        dev_tools::DevScraperRunResponse,
+        dev_tools::DevScraperColaResponse,
+        dev_tools::DevRecorteGenerarRequest,
+        dev_tools::DevRecorteGenerarResponse,
+        dev_tools::DevExtraccionPublicarRequest,
+        dev_tools::DevExtraccionPublicarResponse,
         admin_config::ExtraccionConfig,
         admin_config::ScrapingConfig,
         admin_config::ExtraccionStats,
@@ -724,6 +738,7 @@ fn api_routes() -> Router<AppState> {
         .merge(metrics::routes())
         .merge(scraper_admin::routes())
         .merge(admin_config::routes())
+        .merge(dev_tools::routes())
         .merge(admin::routes())
         .merge(admin_ia_queue::routes())
         .merge(admin_automatizacion::routes())

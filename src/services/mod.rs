@@ -3,6 +3,7 @@ mod admin_seed;
 pub mod algo_timing;
 mod audio_pipeline;
 mod auth;
+pub mod dev;
 pub mod download_token;
 mod email;
 pub mod extension_recorte;
@@ -64,8 +65,8 @@ pub use push::{
 };
 #[cfg(feature = "s3")]
 pub use s3_storage::S3Storage;
-pub use sample_catalog::{correct_sample_metadata, CorrectionOutcome, SampleCatalogService};
 pub(crate) use sample_catalog::build_sample_summary;
+pub use sample_catalog::{correct_sample_metadata, CorrectionOutcome, SampleCatalogService};
 pub use search::SearchService;
 pub use storage::{FileStorage, LocalFs};
 pub use stripe_service::{
