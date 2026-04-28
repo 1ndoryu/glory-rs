@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            COALESCE(s.tags, ARRAY[]::text[]) AS \"tags!: Vec<String>\",\n            s.bpm AS \"bpm?\",\n            s.key AS \"music_key?\"\n        FROM samples s\n        JOIN coleccion_samples cs ON cs.sample_id = s.id\n        WHERE cs.coleccion_id = $1\n          AND s.estado = 'activo'\n          AND s.eliminado_en IS NULL\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "tags!: Vec<String>",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 1,
+        "name": "bpm?",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "music_key?",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      null,
+      true,
+      true
+    ]
+  },
+  "hash": "1fc0bd6bfd6ae1d14ba83561bdb3b4e8ba746285f76cb03f1fc4d9d851109e07"
+}

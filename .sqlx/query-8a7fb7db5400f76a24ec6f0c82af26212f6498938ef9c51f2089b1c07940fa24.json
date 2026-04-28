@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT sample_id AS \"sample_id!\" FROM coleccion_samples WHERE coleccion_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "sample_id!",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "8a7fb7db5400f76a24ec6f0c82af26212f6498938ef9c51f2089b1c07940fa24"
+}
