@@ -84,35 +84,20 @@
 - 274A-26: GET `/api/contribuciones/mis` — mis contribuciones
 - 274A-27: POST `/api/dashboard/payout` — solicitar payout
 
-**Admin moderacion (7):**
-- 274A-28: GET `/api/admin/moderacion`
+**Admin moderacion (5 — listar/historial ya registrados):**
 - 274A-29: POST `/api/admin/moderar`
 - 274A-30: POST `/api/admin/reportes/resolver`
-- 274A-31: GET `/api/admin/moderacion/historial`
 - 274A-32: POST `/api/admin/moderacion/rechazar-pendientes`
 - 274A-33: POST `/api/admin/moderacion/banear-usuario`
 - 274A-34: POST `/api/admin/moderacion/rechazar-usuario-publicaciones`
 
-**Admin cola IA (6):**
-- 274A-35: GET `/api/admin/cola-ia`
-- 274A-36: GET `/api/admin/cola-ia/estadisticas`
-- 274A-37: POST `/api/admin/cola-ia/reintentar`
-- 274A-38: POST `/api/admin/cola-ia/reintentar-todos`
-- 274A-39: POST `/api/admin/cola-ia/procesar`
-- 274A-40: GET `/api/admin/cola-ia/cuota-groq` + GET `/api/admin/cola-ia/estado-keys` (relacionados)
-
-**Admin duplicados (3):**
-- 274A-41: GET `/api/admin/duplicados`
-- 274A-42: GET `/api/admin/duplicados/contar`
+**Admin duplicados (1 — listar/contar ya registrados):**
 - 274A-43: POST `/api/admin/duplicados/backfill`
 
-**Admin automatizacion (3):**
-- 274A-44: GET `/api/admin/automatizacion/estado`
-- 274A-45: GET `/api/admin/automatizacion/historial`
+**Admin automatizacion (1 — estado/historial ya registrados):**
 - 274A-46: POST `/api/admin/automatizacion/reactivar`
 
-**Admin contribuciones (2):**
-- 274A-47: GET `/api/admin/contribuciones`
+**Admin contribuciones (1 — listar ya registrado):**
 - 274A-48: POST `/api/admin/contribuciones/moderar`
 
 **Admin embeddings (2):**
