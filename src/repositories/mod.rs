@@ -1,8 +1,10 @@
+mod admin_automation;
 mod admin_duplicates;
 mod admin_experiments;
 mod admin_ia_queue;
 mod admin_moderation;
 mod admin_panel;
+mod admin_samples;
 mod admin_seed;
 mod app_config;
 mod article;
@@ -42,6 +44,7 @@ mod sync_changelog;
 mod sync_full;
 mod user;
 
+pub use admin_automation::{AdminAutomationRepository, AutomationBatchRow};
 pub use admin_duplicates::{
     AdminDuplicatesRepository, BackfillSampleRow, DuplicateAdminRow, ExistingHashSampleRow,
 };
@@ -53,6 +56,7 @@ pub use admin_moderation::{
     AdminModerationRepository, ArticuloPendiente, PublicacionPendiente, ReportePendiente,
 };
 pub use admin_panel::AdminPanelRepository;
+pub use admin_samples::{AdminSampleAssetRow, AdminSamplesRepository};
 pub use admin_seed::{AdminSeedRepository, InsertSeedUserInput};
 pub use app_config::{AppConfigEntry, AppConfigRepository};
 pub use article::{

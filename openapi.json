@@ -420,6 +420,47 @@
         ]
       }
     },
+    "/api/admin/automatizacion/reactivar": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "operationId": "reactivar",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReactivarRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReactivarResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": ""
+          },
+          "403": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
     "/api/admin/canciones": {
       "post": {
         "tags": [
@@ -2659,6 +2700,51 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AdminSummaryStats"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Requiere admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/samples/todos": {
+      "delete": {
+        "tags": [
+          "admin"
+        ],
+        "operationId": "delete_all_samples",
+        "responses": {
+          "200": {
+            "description": "Borrado masivo de samples",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminSamplesDeleteAllResponse"
                 }
               }
             }
@@ -13111,6 +13197,27 @@
           }
         }
       },
+      "AdminSamplesDeleteAllResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "eliminados",
+          "errores"
+        ],
+        "properties": {
+          "eliminados": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "errores": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "ok": {
+            "type": "boolean"
+          }
+        }
+      },
       "AdminScraperItem": {
         "type": "object",
         "required": [
@@ -19194,6 +19301,32 @@
             "format": "int32"
           },
           "verificado": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ReactivarRequest": {
+        "type": "object",
+        "required": [
+          "tipo"
+        ],
+        "properties": {
+          "tipo": {
+            "type": "string"
+          }
+        }
+      },
+      "ReactivarResponse": {
+        "type": "object",
+        "required": [
+          "ok"
+        ],
+        "properties": {
+          "mensaje": {
+            "type": "string",
+            "nullable": true
+          },
+          "ok": {
             "type": "boolean"
           }
         }

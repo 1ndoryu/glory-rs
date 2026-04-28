@@ -1,9 +1,11 @@
 /* sentinel-disable-file directory-size — raiz legacy de servicios; los nuevos
  * dominios se agregan en subdirectorios (`services/contribuciones`, `services/dev`). */
+pub mod admin_automation;
 pub mod admin_duplicates;
 pub mod admin_experiments;
 pub mod admin_moderation;
 mod admin_processes;
+pub mod admin_samples;
 mod admin_seed;
 pub mod algo_timing;
 mod audio_pipeline;
@@ -31,9 +33,11 @@ pub mod storage;
 mod stripe_service;
 mod token_store;
 
+pub use admin_automation::AdminAutomationService;
 pub use admin_duplicates::AdminDuplicatesService;
 pub use admin_experiments::AdminExperimentsService;
 pub use admin_processes::AdminProcessService;
+pub use admin_samples::AdminSamplesService;
 pub use admin_seed::AdminSeedService;
 pub use audio_pipeline::{
     AudioPipelineError, AudioPipelineRequest, AudioPipelineResult, AudioPipelineService,

@@ -1,9 +1,9 @@
 use axum::extract::{Path, Query, State};
 use axum::http::StatusCode;
-use axum::routing::{get, post, put};
+use axum::routing::{delete, get, post, put};
 use axum::{Json, Router};
-use serde::Deserialize;
-use utoipa::IntoParams;
+use serde::{Deserialize, Serialize};
+use utoipa::{IntoParams, ToSchema};
 use validator::Validate;
 
 use crate::errors::AppError;
@@ -19,7 +19,7 @@ use crate::models::{
 };
 use crate::repositories::{AdminPanelRepository, ModerationRepository};
 use crate::services::algo_timing::{TimingEntry, ALGO_TIMING};
-use crate::services::AdminProcessService;
+use crate::services::{AdminProcessService, AdminSamplesService};
 use crate::AppState;
 
 /* [174A-25] Endpoints admin: requiere rol admin (validado via require_admin). */
@@ -489,6 +489,38 @@ pub async fn algo_timing_history(
     Ok(Json(ALGO_TIMING.history(limit)))
 }
 
+#[derive(Debug, Clone, Serialize, ToSchema)]
+pub struct AdminSamplesDeleteAllResponse {
+    pub ok: bool,
+    pub eliminados: usize,
+    pub errores: usize,
+}
+
+#[utoipa::path(
+    delete,
+    path = "/api/admin/samples/todos",
+    tag = "admin",
+    security(("bearer_auth" = [])),
+    responses(
+        (status = 200, description = "Borrado masivo de samples", body = AdminSamplesDeleteAllResponse),
+        (status = 401, description = "No autenticado", body = ErrorResponse),
+        (status = 403, description = "Requiere admin", body = ErrorResponse)
+    )
+)]
+pub async fn delete_all_samples(
+    State(state): State<AppState>,
+    user: CurrentUser,
+) -> Result<Json<AdminSamplesDeleteAllResponse>, AppError> {
+    user.require_admin()?;
+    let outcome = AdminSamplesService::delete_all(&state.pool, state.storage.as_ref()).await?;
+
+    Ok(Json(AdminSamplesDeleteAllResponse {
+        ok: true,
+        eliminados: outcome.eliminados,
+        errores: outcome.errores,
+    }))
+}
+
 pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/admin/resumen", get(summary))
@@ -515,6 +547,7 @@ pub fn routes() -> Router<AppState> {
         .route("/admin/procesos/:nombre", get(process_state))
         .route("/admin/procesos/:nombre/start", post(start_process))
         .route("/admin/procesos/:nombre/stop", post(stop_process))
+        .route("/admin/samples/todos", delete(delete_all_samples))
         .route("/admin/users/:id/suspend", post(suspend))
         .route("/admin/users/:id/activate", post(activate))
         .route("/admin/users/:id/delete", post(mark_delete))

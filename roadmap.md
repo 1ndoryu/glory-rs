@@ -65,16 +65,6 @@
 
 - Remplazar el daw que hicimos, por https://github.com/andremichelle/opendaw, requiere revisar el daw a actual para ver como estaba integrado, y hacer un plan de las integraciones necesaria (como que un sample se pudiera arrastrar y soltar), el daw actual es muy pobre y malo, por eso vamos a cambiar a opendaw, tienes que hacer un fork en mi cuenta 1ndoryu. **Plan:** `Agente/planes/plan-opendaw-2026-04-25.md` — bloqueado en fase 0 (fork manual del usuario en `1ndoryu/opendaw`).
 
-### Endpoints faltantes detectados por `npm run audit:api` (2026-04-27)
-
-45 endpoints que el frontend legacy invoca pero el backend Rust no expone. Portar uno por uno desde `glorytemplate/App/Kamples/Api/Controladores/` y `glorytemplate/App/Kamples/Services/`. Cada endpoint es una tarea individual.
-
-**Admin automatizacion (1 — estado/historial ya registrados):**
-- 274A-46: POST `/api/admin/automatizacion/reactivar`
-
-**Admin samples (1):**
-- 274A-53: DELETE `/api/admin/samples/todos`
-
 ### Fase 19 â€” Despliegue
 - Nota: un error pasado hizo que se borrara la base de datos, hay que reforzar para que no vuelva a suceder, el error problemente fue causado al desplegar directamente o alguna otra razón, se debe tomar todo los medios necesarios para evitar la perdida de datos, tanto de la base de datos tanto como los archivos fisicos que deben perdurar, esto debe tomarse muy en serio porque ya es un error que se cometio en el pasado.
 - 174A-116 â€” MigraciÃ³n inicial automÃ¡tica + healthcheck (no hacerlo hasta mi confirmacion)
