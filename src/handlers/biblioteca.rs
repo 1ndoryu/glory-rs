@@ -85,9 +85,9 @@ pub async fn get_coleccionados(
     let page = q.page.unwrap_or(1).max(1);
     let per_page = q.per_page.unwrap_or(20).clamp(1, 100);
 
-    let filtro_reaccion = if q.solo_encanta.as_deref().map(parse_bool).unwrap_or(false) {
+    let filtro_reaccion = if q.solo_encanta.as_deref().is_some_and(parse_bool) {
         Some(FiltroReaccion::Encanta)
-    } else if q.solo_like.as_deref().map(parse_bool).unwrap_or(false) {
+    } else if q.solo_like.as_deref().is_some_and(parse_bool) {
         Some(FiltroReaccion::Like)
     } else {
         None
@@ -112,11 +112,7 @@ pub async fn get_coleccionados(
         .map(|r| build_sample_summary(r, public_base))
         .collect();
 
-    let pages = if per_page > 0 {
-        (total as f64 / per_page as f64).ceil() as i64
-    } else {
-        0
-    };
+    let pages = total_pages(total, per_page);
 
     Ok(Json(BibliotecaSamplesResponse {
         data: BibliotecaSamplesData {
@@ -165,9 +161,9 @@ pub async fn get_favoritos(
     let page = q.page.unwrap_or(1).max(1);
     let per_page = q.per_page.unwrap_or(20).clamp(1, 100);
 
-    let filtro_reaccion = if q.solo_encanta.as_deref().map(parse_bool).unwrap_or(false) {
+    let filtro_reaccion = if q.solo_encanta.as_deref().is_some_and(parse_bool) {
         Some(FiltroReaccion::Encanta)
-    } else if q.solo_like.as_deref().map(parse_bool).unwrap_or(false) {
+    } else if q.solo_like.as_deref().is_some_and(parse_bool) {
         Some(FiltroReaccion::Like)
     } else {
         None
@@ -192,11 +188,7 @@ pub async fn get_favoritos(
         .map(|r| build_sample_summary(r, public_base))
         .collect();
 
-    let pages = if per_page > 0 {
-        (total as f64 / per_page as f64).ceil() as i64
-    } else {
-        0
-    };
+    let pages = total_pages(total, per_page);
 
     Ok(Json(BibliotecaSamplesResponse {
         data: BibliotecaSamplesData {
@@ -261,7 +253,7 @@ pub async fn get_descargas(
         .map(|r| build_sample_summary(r, public_base))
         .collect();
 
-    let pages = if per_page > 0 { (total as f64 / per_page as f64).ceil() as i64 } else { 0 };
+    let pages = total_pages(total, per_page);
 
     Ok(Json(BibliotecaSamplesResponse {
         data: BibliotecaSamplesData {
@@ -269,6 +261,14 @@ pub async fn get_descargas(
             pagination: SamplesPagination { page, per_page, total, pages },
         },
     }))
+}
+
+fn total_pages(total: i64, per_page: i64) -> i64 {
+    if per_page <= 0 || total <= 0 {
+        0
+    } else {
+        (total + per_page - 1) / per_page
+    }
 }
 
 #[derive(Debug, Clone, Serialize, ToSchema)]

@@ -451,6 +451,7 @@ mod tests {
             smtp,
             scraper_secret: None,
             stripe: crate::config::StripeConfig::default(),
+            allow_duplicate_uploads: false,
         }
     }
 }

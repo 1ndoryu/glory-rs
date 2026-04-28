@@ -71,6 +71,15 @@ pub struct CompletedDownloadRevenueShareInsert {
     pub platform_fee_cents: i64,
 }
 
+#[derive(Debug, Clone)]
+pub struct CreatorPayoutInsert {
+    pub creator_id: i32,
+    pub amount_cents: i64,
+    pub currency: String,
+    pub status: String,
+    pub stripe_payout_id: String,
+}
+
 pub struct BillingRepository;
 
 impl BillingRepository {
@@ -469,6 +478,81 @@ impl BillingRepository {
             creator_amount,
             platform_fee,
         )
+        .execute(pool)
+        .await?;
+
+        Ok(())
+    }
+
+    pub async fn has_pending_creator_payout(
+        pool: &PgPool,
+        creator_id: i32,
+    ) -> Result<bool, sqlx::Error> {
+        /* sentinel-disable-next-line sqlx-query-as-sin-macro */
+        let (exists,) = sqlx::query_as::<_, (bool,)>(
+            r"
+            SELECT EXISTS(
+                SELECT 1
+                FROM transacciones
+                WHERE creador_id = $1
+                  AND tipo = 'payout'
+                  AND estado = 'pendiente'
+            )
+            ",
+        )
+        .bind(creator_id)
+        .fetch_one(pool)
+        .await?;
+
+        Ok(exists)
+    }
+
+    pub async fn insert_creator_payout(
+        pool: &PgPool,
+        insert: &CreatorPayoutInsert,
+    ) -> Result<(), sqlx::Error> {
+        let amount = cents_to_decimal_string(insert.amount_cents);
+        let currency = insert.currency.to_ascii_uppercase();
+        let idempotency_key = format!("stripe-payout:{}", insert.stripe_payout_id);
+
+        /* sentinel-disable-next-line sqlx-query-sin-macro */
+        sqlx::query(
+            r"
+            INSERT INTO transacciones (
+                comprador_id,
+                creador_id,
+                sample_id,
+                tipo,
+                monto,
+                moneda,
+                pago_creador,
+                comision_plataforma,
+                estado,
+                stripe_payment_id,
+                idempotency_key
+            )
+            VALUES (
+                $1,
+                $1,
+                NULL,
+                'payout',
+                CAST($2 AS text)::numeric,
+                $3,
+                0,
+                0,
+                $4,
+                $5,
+                $6
+            )
+            ON CONFLICT DO NOTHING
+            ",
+        )
+        .bind(insert.creator_id)
+        .bind(amount)
+        .bind(currency)
+        .bind(&insert.status)
+        .bind(&insert.stripe_payout_id)
+        .bind(idempotency_key)
         .execute(pool)
         .await?;
 

@@ -82,7 +82,6 @@
 - 274A-24: POST `/api/contribuciones/edicion` — editar contribucion
 - 274A-25: POST `/api/contribuciones/eliminacion` — eliminar contribucion
 - 274A-26: GET `/api/contribuciones/mis` — mis contribuciones
-- 274A-27: POST `/api/dashboard/payout` — solicitar payout
 
 **Admin moderacion (5 — listar/historial ya registrados):**
 - 274A-29: POST `/api/admin/moderar`

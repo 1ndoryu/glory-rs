@@ -609,6 +609,7 @@ mod tests {
             smtp: None,
             scraper_secret: None,
             stripe: crate::config::StripeConfig::default(),
+            allow_duplicate_uploads: false,
         };
 
         let runtime = FcmDeliveryRuntime::from_config(&config)
@@ -644,6 +645,7 @@ mod tests {
             smtp: None,
             scraper_secret: None,
             stripe: crate::config::StripeConfig::default(),
+            allow_duplicate_uploads: false,
         };
 
         let error = FcmDeliveryRuntime::from_config(&config)

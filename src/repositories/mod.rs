@@ -53,7 +53,8 @@ pub use biblioteca::{
 };
 pub use billing::{
     BillingRepository, CompletedDownloadRevenueShareInsert, CompletedSamplePurchaseInsert,
-    SampleCheckoutCandidate, StripeUserProfile, SubscriptionRecord, UpsertStripeSubscriptionRecord,
+    CreatorPayoutInsert, SampleCheckoutCandidate, StripeUserProfile, SubscriptionRecord,
+    UpsertStripeSubscriptionRecord,
 };
 pub use block::{BlockRepository, BlockedUser};
 pub use cola_extraccion::{

@@ -106,6 +106,13 @@ pub struct CreatorConnectBalance {
     pub moneda: String,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct CreatorPayoutResponse {
+    pub monto: f64,
+    pub estado: String,
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "lowercase")]
 pub enum FreeCodeTargetType {

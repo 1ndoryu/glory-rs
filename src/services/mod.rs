@@ -70,7 +70,8 @@ pub use search::SearchService;
 pub use storage::{FileStorage, LocalFs};
 pub use stripe_service::{
     StripeCheckoutSessionSummary, StripeConnectAccountSummary, StripeConnectBalanceSummary,
-    StripeConnectLinkSummary, StripePortalSessionSummary, StripePriceCatalog, StripeRuntime,
-    StripeRuntimeError, StripeSampleCheckoutRequest, StripeService, StripeWebhookSecretKind,
+    StripeConnectLinkSummary, StripeConnectPayoutSummary, StripePortalSessionSummary,
+    StripePriceCatalog, StripeRuntime, StripeRuntimeError, StripeSampleCheckoutRequest,
+    StripeService, StripeWebhookSecretKind,
 };
 pub use token_store::TokenStore;

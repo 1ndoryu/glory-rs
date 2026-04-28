@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use stripe::{AccountId, ClientBuilder, RequestStrategy, StripeRequest};
 use stripe_billing::billing_portal_session::CreateBillingPortalSession;
 use stripe_checkout::checkout_session::{CreateCheckoutSession, CreateCheckoutSessionLineItems};
@@ -51,6 +51,7 @@ impl StripePriceCatalog {
 #[derive(Clone)]
 pub struct StripeRuntime {
     client: stripe::Client,
+    secret_key: String,
     publishable_key: Option<String>,
     webhook_secret: Option<String>,
     connect_webhook_secret: Option<String>,
@@ -100,6 +101,22 @@ pub struct StripeConnectBalanceSummary {
 }
 
 #[derive(Debug, Clone)]
+pub struct StripeConnectPayoutSummary {
+    pub id: String,
+    pub amount_cents: i64,
+    pub currency: String,
+    pub status: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct StripePayoutApiResponse {
+    id: String,
+    amount: i64,
+    currency: String,
+    status: String,
+}
+
+#[derive(Debug, Clone)]
 pub struct StripeSampleCheckoutRequest {
     pub sample_id: i32,
     pub creator_id: i32,
@@ -131,13 +148,14 @@ impl StripeRuntime {
             return Ok(None);
         };
 
-        let client = ClientBuilder::new(secret_key)
+        let client = ClientBuilder::new(secret_key.clone())
             .request_strategy(RequestStrategy::Retry(3))
             .build()
             .map_err(|error| StripeRuntimeError::ClientInitialization(error.to_string()))?;
 
         Ok(Some(Self {
             client,
+            secret_key,
             publishable_key: stripe.publishable_key.clone(),
             webhook_secret: stripe.webhook_secret.clone(),
             connect_webhook_secret: stripe.connect_webhook_secret.clone(),
@@ -509,6 +527,63 @@ impl StripeService {
             available_cents,
             pending_cents,
             currency,
+        })
+    }
+
+    pub async fn create_connect_payout(
+        runtime: &StripeRuntime,
+        account_id: &str,
+        amount_cents: i64,
+        currency: &str,
+        creator_id: i32,
+    ) -> AppResult<StripeConnectPayoutSummary> {
+        let currency = currency.to_ascii_lowercase();
+        let amount = amount_cents.to_string();
+        let description = format!("Kamples payout creator {creator_id}");
+        let creator_id = creator_id.to_string();
+        let params = [
+            ("amount", amount.as_str()),
+            ("currency", currency.as_str()),
+            ("description", description.as_str()),
+            ("metadata[creator_id]", creator_id.as_str()),
+            ("metadata[source]", "kamples_dashboard_payout"),
+        ];
+
+        let response = reqwest::Client::new()
+            .post("https://api.stripe.com/v1/payouts")
+            .bearer_auth(&runtime.secret_key)
+            .header("Stripe-Account", account_id)
+            .form(&params)
+            .send()
+            .await
+            .map_err(|error| AppError::ExternalService {
+                service: "stripe.connect.payout".to_string(),
+                message: error.to_string(),
+            })?;
+
+        let status = response.status();
+        let body = response.text().await.map_err(|error| AppError::ExternalService {
+            service: "stripe.connect.payout".to_string(),
+            message: error.to_string(),
+        })?;
+        if !status.is_success() {
+            return Err(AppError::ExternalService {
+                service: "stripe.connect.payout".to_string(),
+                message: body,
+            });
+        }
+        let payout: StripePayoutApiResponse = serde_json::from_str(&body).map_err(|error| {
+            AppError::ExternalService {
+                service: "stripe.connect.payout".to_string(),
+                message: error.to_string(),
+            }
+        })?;
+
+        Ok(StripeConnectPayoutSummary {
+            id: payout.id,
+            amount_cents: payout.amount,
+            currency: payout.currency,
+            status: payout.status,
         })
     }
 

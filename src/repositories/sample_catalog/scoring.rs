@@ -20,6 +20,7 @@ use super::{SampleCatalogSummaryRecord, SampleRepository};
 const MAX_SCORING_TAGS: usize = 10;
 
 impl SampleRepository {
+    #[allow(clippy::too_many_arguments)]
     pub async fn find_samples_by_aggregated_scoring(
         pool: &PgPool,
         top_tags: &[String],

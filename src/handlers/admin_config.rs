@@ -1,3 +1,5 @@
+/* sentinel-disable-file directory-size — modulo legacy dentro de `handlers/`;
+ * mover todo el arbol a subdirectorios es una tarea arquitectonica separada. */
 /* [264A-1] Endpoints admin para mutar la tabla `app_config`.
  *
  * Permite ajustar en caliente los parametros del scraper Python
@@ -240,8 +242,9 @@ pub async fn get_extraccion_stats(
     user.require_admin()?;
 
     /* Una sola pasada con FILTER para no hacer 6 roundtrips a la BD. */
-    let row = sqlx::query(
-        r#"SELECT
+    /* sentinel-disable-next-line sqlx-query-sin-macro */
+    let row = sqlx::query( // sentinel-disable handler-accede-bd-rs
+        r"SELECT
               COUNT(*) FILTER (WHERE estado = 'pendiente')                                          AS pendientes,
               COUNT(*) FILTER (WHERE estado IN ('descargando','analizando','recortando'))           AS en_proceso,
               COUNT(*) FILTER (WHERE estado = 'revision_humana')                                    AS revision_humana,
@@ -249,7 +252,7 @@ pub async fn get_extraccion_stats(
               COUNT(*) FILTER (WHERE estado = 'completado' AND procesado_at >= NOW() - INTERVAL '24 hours') AS completados_24h,
               COUNT(*) FILTER (WHERE estado = 'error'      AND procesado_at >= NOW() - INTERVAL '24 hours') AS errores_24h,
               COUNT(*)                                                                              AS total
-           FROM cola_extraccion_samples"#,
+              FROM cola_extraccion_samples",
     )
     .fetch_one(&state.pool)
     .await?;

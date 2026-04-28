@@ -53,6 +53,7 @@ struct SampleRow {
     metadata: Value,
 }
 
+#[allow(clippy::cast_precision_loss)]
 pub async fn correct_sample_metadata(
     pool: &PgPool,
     ia: &AudioIaService,
@@ -81,7 +82,7 @@ pub async fn correct_sample_metadata(
             musical_key: row.key.clone(),
         })
         .await
-        .map_err(map_ia_error)?;
+        .map_err(|error| map_ia_error(&error))?;
 
     let merged_metadata = merge_corrected_metadata(&row.metadata, &result.metadata, trimmed);
     let new_type = pick_sample_type(&result.metadata.tipo);
@@ -166,7 +167,7 @@ async fn load_sample_for_correction(
     })
 }
 
-fn map_ia_error(error: AudioIaServiceError) -> AppError {
+fn map_ia_error(error: &AudioIaServiceError) -> AppError {
     match error {
         AudioIaServiceError::MissingProviders
         | AudioIaServiceError::ProviderInitialization { .. } => AppError::ExternalService {
@@ -252,8 +253,7 @@ fn compute_new_title_and_slug(
 
     let id_short = id_corto
         .filter(|s| !s.is_empty())
-        .map(ToOwned::to_owned)
-        .unwrap_or_else(|| short_id_from_sample(sample_id));
+        .map_or_else(|| short_id_from_sample(sample_id), ToOwned::to_owned);
 
     let slug = format!("{}-{}", slugify(&titulo), id_short);
     Some((titulo, slug))
@@ -374,7 +374,7 @@ fn title_case(input: &str) -> String {
 fn slugify(input: &str) -> String {
     let mut result = String::with_capacity(input.len());
     let mut last_dash = true;
-    for ch in input.chars().flat_map(|c| c.to_lowercase()) {
+    for ch in input.chars().flat_map(char::to_lowercase) {
         if ch.is_ascii_alphanumeric() {
             result.push(ch);
             last_dash = false;
@@ -394,6 +394,6 @@ fn short_id_from_sample(sample_id: i32) -> String {
     if hex.len() >= 7 {
         hex[..7].to_owned()
     } else {
-        format!("{:0>7}", hex)
+        format!("{hex:0>7}")
     }
 }

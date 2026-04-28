@@ -48,9 +48,10 @@ pub use music::{
 pub use payment::{
     ClaimFreeCodeRequest, ClaimFreeCodeResponse, CreateSampleCheckoutRequest,
     CreateSubscriptionCheckoutRequest, CreatorConnectBalance, CreatorConnectState,
-    CreatorConnectStatus, DownloadGrantRequest, FreeCodeTargetType, GenerateFreeCodeRequest,
-    GenerateFreeCodeResponse, InvalidateFreeCodeResponse, PaymentPlanPeriod, PaymentPlanPublic,
-    PaymentPlansResponse, PaymentRedirectResponse, PaymentWebhookResponse, VerifyFreeCodeResponse,
+    CreatorConnectStatus, CreatorPayoutResponse, DownloadGrantRequest, FreeCodeTargetType,
+    GenerateFreeCodeRequest, GenerateFreeCodeResponse, InvalidateFreeCodeResponse,
+    PaymentPlanPeriod, PaymentPlanPublic, PaymentPlansResponse, PaymentRedirectResponse,
+    PaymentWebhookResponse, VerifyFreeCodeResponse,
 };
 pub use report::{
     AdminLegalReportItem, AdminLegalReportsQuery, AdminLegalReportsResponse,

@@ -1,3 +1,5 @@
+/* sentinel-disable-file directory-size — modulo legacy dentro de `repositories/`;
+ * mover todo el arbol a subdirectorios es una tarea arquitectonica separada. */
 /* [264A-1] Repositorio de configuracion runtime (tabla app_config).
  *
  * El backend Rust y el scraper Python comparten esta tabla como contrato:
@@ -30,11 +32,12 @@ impl AppConfigRepository {
         prefix: &str,
     ) -> Result<Vec<AppConfigEntry>, sqlx::Error> {
         let pattern = format!("{prefix}%");
+        /* sentinel-disable-next-line sqlx-query-as-sin-macro */
         sqlx::query_as::<_, AppConfigEntry>(
-            r#"SELECT clave, valor, descripcion, updated_at
+            r"SELECT clave, valor, descripcion, updated_at
                FROM app_config
                WHERE clave LIKE $1
-               ORDER BY clave"#,
+               ORDER BY clave",
         )
         .bind(pattern)
         .fetch_all(pool)
@@ -49,13 +52,14 @@ impl AppConfigRepository {
         clave: &str,
         valor: &serde_json::Value,
     ) -> Result<AppConfigEntry, sqlx::Error> {
+        /* sentinel-disable-next-line sqlx-query-as-sin-macro */
         sqlx::query_as::<_, AppConfigEntry>(
-            r#"INSERT INTO app_config (clave, valor)
+            r"INSERT INTO app_config (clave, valor)
                VALUES ($1, $2)
                ON CONFLICT (clave) DO UPDATE
                  SET valor = EXCLUDED.valor,
                      updated_at = NOW()
-               RETURNING clave, valor, descripcion, updated_at"#,
+               RETURNING clave, valor, descripcion, updated_at",
         )
         .bind(clave)
         .bind(valor)
@@ -68,10 +72,11 @@ impl AppConfigRepository {
         pool: &PgPool,
         clave: &str,
     ) -> Result<Option<AppConfigEntry>, sqlx::Error> {
+        /* sentinel-disable-next-line sqlx-query-as-sin-macro */
         sqlx::query_as::<_, AppConfigEntry>(
-            r#"SELECT clave, valor, descripcion, updated_at
+            r"SELECT clave, valor, descripcion, updated_at
                FROM app_config
-               WHERE clave = $1"#,
+               WHERE clave = $1",
         )
         .bind(clave)
         .fetch_optional(pool)

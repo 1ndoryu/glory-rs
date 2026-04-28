@@ -394,6 +394,7 @@ mod tests {
             smtp: None,
             scraper_secret: None,
             stripe: crate::config::StripeConfig::default(),
+            allow_duplicate_uploads: false,
         };
 
         let runtime = PushDeliveryRuntime::from_config(&config)

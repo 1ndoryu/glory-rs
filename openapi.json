@@ -5940,6 +5940,61 @@
         ]
       }
     },
+    "/api/dashboard/payout": {
+      "post": {
+        "tags": [
+          "payments"
+        ],
+        "operationId": "request_payout",
+        "responses": {
+          "200": {
+            "description": "Payout solicitado al balance disponible de Stripe Connect",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatorPayoutResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuario no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stripe/Connect no configurado o payout no disponible",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
     "/api/dashboard/stats": {
       "get": {
         "tags": [
@@ -14215,6 +14270,22 @@
           "venta",
           "suscripcion"
         ]
+      },
+      "CreatorPayoutResponse": {
+        "type": "object",
+        "required": [
+          "monto",
+          "estado"
+        ],
+        "properties": {
+          "estado": {
+            "type": "string"
+          },
+          "monto": {
+            "type": "number",
+            "format": "double"
+          }
+        }
       },
       "DeleteArticleData": {
         "type": "object",
