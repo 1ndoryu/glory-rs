@@ -1,3 +1,4 @@
+/* sentinel-disable-file directory-size — hook legacy existente; 284A-1 agrega guardado de config sin mover el arbol completo de hooks. */
 /*
  * Hook: useHistorialLotes — [223A-3] Estado y gestión del historial de lotes automáticos.
  * Carga estado de automatización + historial paginado + reactivación.
@@ -5,15 +6,18 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import {
+    actualizarConfigProceso,
     obtenerEstadoAutomatizacion,
     obtenerHistorialLotes,
     reactivarProceso,
 } from '../services/apiAutomatizacion';
 import type {
+    AutomatizacionConfigProceso,
     EstadoAutomatizacion,
     LoteResumen,
     TipoProceso,
 } from '../services/apiAutomatizacion';
+import { toast } from '../stores/toastStore';
 
 export function useHistorialLotes() {
     const [estado, setEstado] = useState<EstadoAutomatizacion | null>(null);
@@ -22,6 +26,7 @@ export function useHistorialLotes() {
     const [pagina, setPagina] = useState(1);
     const [filtroTipo, setFiltroTipo] = useState<TipoProceso | ''>('');
     const [cargando, setCargando] = useState(false);
+    const [guardandoConfig, setGuardandoConfig] = useState<TipoProceso | null>(null);
     const [error, setError] = useState('');
 
     const cargarEstado = useCallback(async () => {
@@ -59,10 +64,36 @@ export function useHistorialLotes() {
             const resp = await reactivarProceso(tipo);
             if (resp.ok) {
                 await cargarEstado();
+                toast.exito(resp.data?.mensaje ?? 'Proceso reactivado');
+            } else {
+                toast.error(resp.error ?? 'No se pudo reactivar el proceso');
             }
             return resp;
         } catch {
+            toast.error('Error de conexión');
             return { ok: false, error: 'Error de conexión' };
+        }
+    }, [cargarEstado]);
+
+    const guardarConfig = useCallback(async (
+        tipo: TipoProceso,
+        config: Required<AutomatizacionConfigProceso>
+    ) => {
+        setGuardandoConfig(tipo);
+        try {
+            const resp = await actualizarConfigProceso(tipo, config);
+            if (resp.ok) {
+                await cargarEstado();
+                toast.exito('Configuración actualizada');
+            } else {
+                toast.error(resp.error ?? 'No se pudo actualizar la configuración');
+            }
+            return resp;
+        } catch {
+            toast.error('Error de conexión');
+            return { ok: false, error: 'Error de conexión' };
+        } finally {
+            setGuardandoConfig(null);
         }
     }, [cargarEstado]);
 
@@ -80,9 +111,11 @@ export function useHistorialLotes() {
         filtroTipo,
         setFiltroTipo,
         cargando,
+        guardandoConfig,
         error,
         refrescar: cargarHistorial,
         refrescarEstado: cargarEstado,
         reactivar: manejarReactivar,
+        guardarConfig,
     };
 }

@@ -31,6 +31,23 @@ La implementacion usa `app_config` como reemplazo real de las options de WordPre
 
 El estado e historial de automatizacion tambien pasan por `AdminAutomationService`, para que `estado`, `historial` y `reactivar` compartan validacion de tipo y acceso a `lotes_procesamiento`.
 
+## Configuracion desde UI admin
+
+La pestaña de historial de lotes consume tambien los endpoints existentes de `admin_config`:
+
+- `PUT /api/admin/config/extraccion`
+- `PUT /api/admin/config/scraping`
+
+Cada tarjeta de proceso permite guardar:
+
+```json
+{ "enabled": true, "lote_size": 20, "intervalo_seg": 3600 }
+```
+
+La UI usa la palabra `Habilitado` en vez de `Activo`: ese valor significa que el ciclo automatico esta permitido por `app_config`, no que un proceso este corriendo en ese instante. La prueba operativa visual sigue siendo el ultimo lote registrado y el historial de `lotes_procesamiento`.
+
+Al guardar, el hook refresca `GET /api/admin/automatizacion/estado` para rehidratar la tarjeta con los valores persistidos. Los errores de API se muestran con toast.
+
 ## Borrado masivo de samples
 
 `DELETE /api/admin/samples/todos` devuelve:

@@ -1,9 +1,10 @@
+/* sentinel-disable-file directory-size — service legacy existente; 284A-1 solo conecta endpoints ya registrados sin reorganizar toda la carpeta. */
 /*
  * API: apiAutomatizacion — [223A-3] Endpoints para automatización de procesos.
  * Estado, historial de lotes, reactivación.
  */
 
-import { apiGet, apiPost } from './apiCliente';
+import { apiGet, apiPost, apiPut } from './apiCliente';
 
 /* Estado de automatización por tipo */
 export interface EstadoAutoTipo {
@@ -38,6 +39,12 @@ export interface LoteResumen {
 
 export type TipoProceso = 'extraccion' | 'scraping';
 
+export interface AutomatizacionConfigProceso {
+    enabled?: boolean;
+    lote_size?: number;
+    intervalo_seg?: number;
+}
+
 export async function obtenerEstadoAutomatizacion() {
     return apiGet<{ ok: boolean; estado: EstadoAutomatizacion }>('/admin/automatizacion/estado');
 }
@@ -56,4 +63,14 @@ export async function reactivarProceso(tipo: TipoProceso) {
         '/admin/automatizacion/reactivar',
         { tipo }
     );
+}
+
+export async function actualizarConfigProceso(
+    tipo: TipoProceso,
+    config: AutomatizacionConfigProceso
+) {
+    const endpoint = tipo === 'extraccion'
+        ? '/admin/config/extraccion'
+        : '/admin/config/scraping';
+    return apiPut<AutomatizacionConfigProceso>(endpoint, config);
 }

@@ -1,3 +1,4 @@
+
 /*
  * Estilos: adminTablas — QK40
  * Estilos compartidos para las tablas de datos del panel admin
@@ -45,7 +46,6 @@
     display: flex;
     flex-direction: column;
     gap: var(--espacioXs);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .adminColumnasOpcion {
@@ -245,10 +245,11 @@
 
 /* Tarjeta de estado de proceso (extracción / scraper) */
 .tarjetaEstadoProceso {
-    padding: 0.75rem 1rem;
+    padding: var(--espacioMd) var(--espacioLg);
     border-radius: var(--radioMd);
     border: 1px solid var(--bordeSutil);
-    flex: 1 1 200px;
+    flex: 1 1 320px;
+    min-width: min(100%, 280px);
 }
 
 .tarjetaEstadoEncabezado {
@@ -264,16 +265,121 @@
 }
 
 .tarjetaEstadoUltimo {
-    font-size: 0.75rem;
+    font-size: var(--fuenteXs);
     opacity: 0.6;
     margin-top: var(--espacioXs);
+}
+
+.tarjetaEstadoControles {
+    display: grid;
+    grid-template-columns: minmax(130px, 1fr) minmax(96px, 120px) minmax(110px, 130px) auto;
+    gap: var(--espacioSm);
+    align-items: end;
+    margin-top: var(--espacioMd);
+}
+
+.interruptorProceso {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: var(--espacioSm);
+    min-height: 34px;
+    border: 1px solid var(--bordeSutil);
+    border-radius: var(--radioMd);
+    padding: var(--espacioXs) var(--espacioSm);
+    background: var(--fondoElevado2);
+    color: var(--textoSecundario);
+    font-size: var(--fuenteXs);
+    cursor: pointer;
+}
+
+.interruptorProceso:disabled {
+    cursor: default;
+    opacity: 0.65;
+}
+
+.interruptorProcesoActivo {
+    border-color: var(--bordeActivo);
+    color: var(--textoPrimario);
+}
+
+.interruptorProcesoPunto {
+    width: 18px;
+    height: 18px;
+    border-radius: var(--radioFull);
+    background: var(--textoTerciario);
+}
+
+.interruptorProcesoActivo .interruptorProcesoPunto {
+    background: var(--colorExito, #22c55e);
+}
+
+.campoConfigProceso {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioXs);
+    font-size: var(--fuenteXs);
+    color: var(--textoSecundario);
+}
+
+.campoConfigProceso .campTextoInput {
+    min-width: 0;
+    height: 34px;
+    font-size: var(--fuenteSm);
+}
+
+.tarjetaEstadoGuardar,
+.tarjetaEstadoReactivar {
+    min-height: 34px;
 }
 
 .tarjetaEstadoReactivar {
     margin-top: var(--espacioSm);
 }
 
+.iconoEstadoProcesoExito {
+    color: var(--colorExito, #22c55e);
+}
+
+.iconoEstadoProcesoError {
+    color: var(--colorError, #ef4444);
+}
+
+.iconoAlertaLote {
+    vertical-align: middle;
+}
+
 /* Detalles de lote (celda de tabla) */
 .detalleLoteTexto {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--espacioSm);
     font-size: var(--fuenteXs);
+}
+
+.detalleLoteItem {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--espacioXs);
+}
+
+.iconoDetalleLote {
+    color: var(--textoSecundario);
+}
+
+@media (max-width: 768px) {
+    .tarjetaEstadoControles {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .interruptorProceso,
+    .tarjetaEstadoGuardar {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 420px) {
+    .tarjetaEstadoControles {
+        grid-template-columns: 1fr;
+    }
 }
