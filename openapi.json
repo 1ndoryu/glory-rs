@@ -5776,6 +5776,100 @@
         ]
       }
     },
+    "/api/feed/inicio": {
+      "get": {
+        "tags": [
+          "feed"
+        ],
+        "operationId": "get_feed_inicio",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Tamaño de página. Default: 20, máximo: 100.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Offset desde 0. Default: 0.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Alias de /api/feed (compatibilidad cliente legado)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/feed/recargar": {
+      "post": {
+        "tags": [
+          "feed"
+        ],
+        "operationId": "recargar_feed",
+        "responses": {
+          "200": {
+            "description": "Cache fresco invalidado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedRecargarResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
     "/api/follow/{userId}": {
       "post": {
         "tags": [
@@ -6304,6 +6398,56 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/BibliotecaSamplesResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/me/favoritos/sugerencias": {
+      "get": {
+        "tags": [
+          "suggestions"
+        ],
+        "operationId": "sugerencias_favoritos",
+        "parameters": [
+          {
+            "name": "pagina",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          },
+          {
+            "name": "limite",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Samples sugeridos a partir de favoritos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SugerenciasResponse"
                 }
               }
             }
@@ -8400,6 +8544,63 @@
           },
           "429": {
             "description": "Límite excedido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/reproducciones/historial": {
+      "get": {
+        "tags": [
+          "samples"
+        ],
+        "operationId": "play_history",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Historial de reproducciones",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlayHistoryResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
             "content": {
               "application/json": {
                 "schema": {
@@ -13447,6 +13648,17 @@
           "ios"
         ]
       },
+      "FeedRecargarResponse": {
+        "type": "object",
+        "required": [
+          "ok"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          }
+        }
+      },
       "FeedResponse": {
         "type": "object",
         "required": [
@@ -15122,6 +15334,25 @@
           },
           "recibido": {
             "type": "boolean"
+          }
+        }
+      },
+      "PlayHistoryResponse": {
+        "type": "object",
+        "required": [
+          "data",
+          "page"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SampleSummary"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },

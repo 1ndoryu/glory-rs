@@ -274,6 +274,39 @@ impl BibliotecaRepository {
         Ok(row.total)
     }
 
+    /* [274A-17] Historial de reproducciones del usuario, samples completos
+     * ordenados por reproducción más reciente. Port de
+     * ReproduccionesRepository::historialUsuario. */
+    pub async fn historial_reproducciones(
+        pool: &PgPool,
+        user_id: i32,
+        per_page: i64,
+        offset: i64,
+    ) -> Result<Vec<SampleCatalogSummaryRecord>, AppError> {
+        let mut b = QueryBuilder::<Postgres>::new(BIBLIOTECA_SAMPLE_SELECT);
+        b.push(
+            " FROM samples s \
+             INNER JOIN usuarios_ext u ON u.id = s.creador_id \
+             INNER JOIN reproducciones r ON r.sample_id = s.id AND r.usuario_id = "
+        );
+        b.push_bind(user_id);
+        b.push(
+            " WHERE s.estado = 'activo' AND s.eliminado_en IS NULL \
+             GROUP BY s.id, u.id, u.username, u.nombre_visible, u.avatar_url, u.verificado \
+             ORDER BY MAX(r.created_at) DESC LIMIT "
+        );
+        b.push_bind(per_page);
+        b.push(" OFFSET ");
+        b.push_bind(offset);
+
+        let rows = b
+            .build_query_as::<BibliotecaSampleRow>()
+            .fetch_all(pool)
+            .await
+            .map_err(AppError::from)?;
+        Ok(rows.into_iter().map(Into::into).collect())
+    }
+
     pub async fn coleccionados_de_usuario(
         pool: &PgPool,
         f: &ColeccionadosFilters,
@@ -619,9 +652,51 @@ impl BibliotecaRepository {
 
 /* [274A-6] Tags + BPM + key extraídos de un sample, materia prima del
  * algoritmo de sugerencias agregadas. */
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, FromRow)]
 pub struct SampleContextRow {
     pub tags: Vec<String>,
     pub bpm: Option<i32>,
     pub music_key: Option<String>,
+}
+
+/* [274A-20] Contexto + IDs basados en likes (favoritos) para sugerencias.
+ * Port de SugerenciasController::sugerenciasFavoritos + LikesRepository. */
+impl BibliotecaRepository {
+    pub async fn contexto_favoritos(
+        pool: &PgPool,
+        user_id: i32,
+    ) -> Result<Vec<SampleContextRow>, AppError> {
+        let rows: Vec<(Option<Vec<String>>, Option<i32>, Option<String>)> = sqlx::query_as(
+            "SELECT s.tags, s.bpm, s.key \
+             FROM samples s \
+             JOIN likes l ON l.target_id = s.id AND l.tipo = 'sample' \
+             WHERE l.usuario_id = $1 \
+               AND l.reaccion IN ('like','encanta') \
+               AND s.estado = 'activo' AND s.eliminado_en IS NULL"
+        )
+        .bind(user_id)
+        .fetch_all(pool)
+        .await
+        .map_err(AppError::from)?;
+        Ok(rows
+            .into_iter()
+            .map(|(tags, bpm, music_key)| SampleContextRow {
+                tags: tags.unwrap_or_default(),
+                bpm,
+                music_key,
+            })
+            .collect())
+    }
+
+    pub async fn ids_favoritos(pool: &PgPool, user_id: i32) -> Result<Vec<i32>, AppError> {
+        let rows: Vec<(i32,)> = sqlx::query_as(
+            "SELECT target_id FROM likes WHERE usuario_id = $1 AND tipo = 'sample' \
+             AND reaccion IN ('like','encanta')"
+        )
+        .bind(user_id)
+        .fetch_all(pool)
+        .await
+        .map_err(AppError::from)?;
+        Ok(rows.into_iter().map(|(id,)| id).collect())
+    }
 }

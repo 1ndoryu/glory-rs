@@ -1,15 +1,17 @@
-use axum::extract::{Path, State};
+use axum::extract::{Path, Query, State};
 use axum::http::StatusCode;
 use axum::routing::{get, post};
 use axum::{Json, Router};
 use serde::{Deserialize, Serialize};
-use utoipa::ToSchema;
+use utoipa::{IntoParams, ToSchema};
 use validator::Validate;
 
 use crate::algorithm::InteractionKind;
 use crate::errors::AppError;
 use crate::middleware::CurrentUser;
-use crate::repositories::PlayRepository;
+use crate::models::SampleSummary;
+use crate::repositories::{BibliotecaRepository, PlayRepository};
+use crate::services::build_sample_summary;
 use crate::AppState;
 
 /* [174A-58] Tracking de reproducciones (`POST /api/samples/{id}/play`).
@@ -169,4 +171,57 @@ pub fn routes() -> Router<AppState> {
         /* Alias para compatibilidad con clientes legacy que usan /reproduccion */
         .route("/samples/:id/reproduccion", post(register_play))
         .route("/reproducciones/ids", get(list_played_ids))
+        .route("/reproducciones/historial", get(play_history))
+}
+
+/* [274A-17] GET /api/reproducciones/historial — Historial paginado del usuario,
+ * samples completos ordenados por reproducción más reciente. */
+#[derive(Debug, Clone, Deserialize, IntoParams, Default)]
+#[into_params(parameter_in = Query)]
+pub struct PlayHistoryQuery {
+    pub page: Option<i64>,
+    pub per_page: Option<i64>,
+}
+
+#[derive(Debug, Serialize, ToSchema)]
+pub struct PlayHistoryResponse {
+    pub data: Vec<SampleSummary>,
+    pub page: i64,
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/reproducciones/historial",
+    tag = "samples",
+    params(PlayHistoryQuery),
+    security(("bearer_auth" = [])),
+    responses(
+        (status = 200, description = "Historial de reproducciones", body = PlayHistoryResponse),
+        (status = 401, description = "No autenticado", body = ErrorResponse),
+    )
+)]
+pub async fn play_history(
+    State(state): State<AppState>,
+    user: CurrentUser,
+    Query(q): Query<PlayHistoryQuery>,
+) -> Result<Json<PlayHistoryResponse>, AppError> {
+    let page = q.page.unwrap_or(1).max(1);
+    let per_page = q.per_page.unwrap_or(20).clamp(1, 100);
+    let offset = (page - 1) * per_page;
+
+    let records = BibliotecaRepository::historial_reproducciones(
+        &state.pool,
+        user.user_id,
+        per_page,
+        offset,
+    )
+    .await?;
+
+    let public_base = state.public_base_url.as_deref();
+    let data: Vec<SampleSummary> = records
+        .into_iter()
+        .map(|r| build_sample_summary(r, public_base))
+        .collect();
+
+    Ok(Json(PlayHistoryResponse { data, page }))
 }

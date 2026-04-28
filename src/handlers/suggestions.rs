@@ -44,7 +44,9 @@ pub struct SugerenciasResponse {
 }
 
 pub fn routes() -> Router<AppState> {
-    Router::new().route("/me/descargas/sugerencias", get(sugerencias_descargas))
+    Router::new()
+        .route("/me/descargas/sugerencias", get(sugerencias_descargas))
+        .route("/me/favoritos/sugerencias", get(sugerencias_favoritos))
 }
 
 #[utoipa::path(
@@ -90,6 +92,56 @@ pub async fn sugerencias_descargas(
     let (top_tags, avg_bpm, dominant_key) = aggregate_context(&contexto);
 
     /* 4. Scoring + fetch. */
+    let records = SampleRepository::find_samples_by_aggregated_scoring(
+        &state.pool,
+        &top_tags,
+        avg_bpm,
+        dominant_key.as_deref(),
+        &exclude,
+        limite,
+        offset,
+        Some(user.user_id),
+    )
+    .await?;
+
+    let public_base = state.public_base_url.as_deref();
+    let data: Vec<SampleSummary> = records
+        .into_iter()
+        .map(|r| build_sample_summary(r, public_base))
+        .collect();
+
+    Ok(Json(SugerenciasResponse { data }))
+}
+
+/* [274A-20] GET /api/me/favoritos/sugerencias — Misma lógica que sugerencias
+ * de descargas pero usando likes (favoritos) como contexto y excluidos. */
+#[utoipa::path(
+    get,
+    path = "/api/me/favoritos/sugerencias",
+    tag = "suggestions",
+    params(SugerenciasQuery),
+    security(("bearer_auth" = [])),
+    responses(
+        (status = 200, description = "Samples sugeridos a partir de favoritos", body = SugerenciasResponse),
+        (status = 401, description = "No autenticado"),
+    )
+)]
+pub async fn sugerencias_favoritos(
+    State(state): State<AppState>,
+    user: CurrentUser,
+    Query(q): Query<SugerenciasQuery>,
+) -> Result<Json<SugerenciasResponse>, AppError> {
+    let pagina = q.pagina.unwrap_or(1).max(1);
+    let limite = q.limite.unwrap_or(20).clamp(1, MAX_LIMIT);
+    let offset = (pagina - 1) * limite;
+
+    let contexto = BibliotecaRepository::contexto_favoritos(&state.pool, user.user_id).await?;
+    if contexto.is_empty() {
+        return Ok(Json(SugerenciasResponse { data: Vec::new() }));
+    }
+    let exclude = BibliotecaRepository::ids_favoritos(&state.pool, user.user_id).await?;
+    let (top_tags, avg_bpm, dominant_key) = aggregate_context(&contexto);
+
     let records = SampleRepository::find_samples_by_aggregated_scoring(
         &state.pool,
         &top_tags,

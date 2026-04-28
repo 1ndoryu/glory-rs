@@ -14,7 +14,7 @@
  * mover a `AppState::recommender_config`. */
 
 use axum::extract::{Query, State};
-use axum::routing::get;
+use axum::routing::{get, post};
 use axum::{Json, Router};
 use serde::{Deserialize, Serialize};
 use utoipa::{IntoParams, ToSchema};
@@ -124,9 +124,57 @@ pub async fn get_me_feed(
     get_feed(state, current_user, query).await
 }
 
+/* [274A-18] Alias `/feed/inicio` consumido por apiSocial.ts. Comparte
+ * lógica con get_feed; mantiene el contrato del frontend. */
+#[utoipa::path(
+    get,
+    path = "/api/feed/inicio",
+    params(FeedQuery),
+    tag = "feed",
+    security(("bearer_auth" = [])),
+    responses(
+        (status = 200, description = "Alias de /api/feed (compatibilidad cliente legado)", body = FeedResponse),
+        (status = 401, description = "No autenticado", body = ErrorResponse),
+    )
+)]
+pub async fn get_feed_inicio(
+    state: State<AppState>,
+    current_user: CurrentUser,
+    query: Query<FeedQuery>,
+) -> Result<Json<FeedResponse>, AppError> {
+    get_feed(state, current_user, query).await
+}
+
+#[derive(Debug, Serialize, ToSchema)]
+pub struct FeedRecargarResponse {
+    pub ok: bool,
+}
+
+/* [274A-19] POST /feed/recargar — invalida cache fresco del feed para forzar
+ * recálculo en la próxima petición. Port de SamplesController::recargarFeed. */
+#[utoipa::path(
+    post,
+    path = "/api/feed/recargar",
+    tag = "feed",
+    security(("bearer_auth" = [])),
+    responses(
+        (status = 200, description = "Cache fresco invalidado", body = FeedRecargarResponse),
+        (status = 401, description = "No autenticado", body = ErrorResponse),
+    )
+)]
+pub async fn recargar_feed(
+    State(state): State<AppState>,
+    user: CurrentUser,
+) -> Result<Json<FeedRecargarResponse>, AppError> {
+    RecommenderService::invalidate_user_feed(&state.redis, user.user_id).await?;
+    Ok(Json(FeedRecargarResponse { ok: true }))
+}
+
 pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/feed", get(get_feed))
+        .route("/feed/inicio", get(get_feed_inicio))
+        .route("/feed/recargar", post(recargar_feed))
         .route("/me/feed", get(get_me_feed))
 }
 
