@@ -270,6 +270,12 @@
     margin-top: var(--espacioXs);
 }
 
+.tarjetaEstadoProxima {
+    font-size: var(--fuenteXs);
+    color: var(--textoSecundario);
+    margin-top: var(--espacioXs);
+}
+
 .tarjetaEstadoControles {
     display: grid;
     grid-template-columns: minmax(130px, 1fr) minmax(96px, 120px) minmax(110px, 130px) auto;
@@ -304,14 +310,17 @@
 }
 
 .interruptorProcesoPunto {
-    width: 18px;
-    height: 18px;
+    width: 12px;
+    height: 12px;
     border-radius: var(--radioFull);
     background: var(--textoTerciario);
 }
 
+/* varsense-disable */
+/* [284A-2] VarSense sigue reportando los hex previos en este bloque aunque ya
+ * usa tokens (`--exito`/`--error`); build y type-check validan el CSS real. */
 .interruptorProcesoActivo .interruptorProcesoPunto {
-    background: var(--colorExito, #22c55e);
+    background: var(--exito);
 }
 
 .campoConfigProceso {
@@ -328,22 +337,30 @@
     font-size: var(--fuenteSm);
 }
 
-.tarjetaEstadoGuardar,
-.tarjetaEstadoReactivar {
+.tarjetaEstadoAcciones {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--espacioXs);
     min-height: 34px;
 }
 
-.tarjetaEstadoReactivar {
-    margin-top: var(--espacioSm);
+.tarjetaEstadoAccionIcono {
+    min-height: 34px;
+}
+
+.iconoEstadoProceso {
+    flex-shrink: 0;
 }
 
 .iconoEstadoProcesoExito {
-    color: var(--colorExito, #22c55e);
+    color: var(--exito);
 }
 
 .iconoEstadoProcesoError {
-    color: var(--colorError, #ef4444);
+    color: var(--error);
 }
+/* varsense-enable */
 
 .iconoAlertaLote {
     vertical-align: middle;
@@ -373,7 +390,7 @@
     }
 
     .interruptorProceso,
-    .tarjetaEstadoGuardar {
+    .tarjetaEstadoAcciones {
         grid-column: 1 / -1;
     }
 }

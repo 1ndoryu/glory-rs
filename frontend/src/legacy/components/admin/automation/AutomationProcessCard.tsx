@@ -1,13 +1,13 @@
-/* [284A-1] Tarjeta editable de automatizacion admin.
- * Por que: el estado "activo" solo refleja app_config; el admin necesita
- * mutar enabled/lote/intervalo sin ir a herramientas externas. */
+/* [284A-2] Tarjeta editable de automatizacion admin.
+ * Por que: el admin necesita ahorrar ruido visual, ver la proxima corrida
+ * estimada y poder disparar un lote manual sin salir del panel. */
 
-import { type FormEvent, useEffect, useState } from 'react';
-import { AlertTriangle, CheckCircle, Loader2, PauseCircle, Play, Save } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Loader2, PauseCircle, Play, RotateCcw, Save } from 'lucide-react';
 import { Badge } from '../../ui/Badge';
 import { BotonBase } from '../../ui/BotonBase';
 import { Input } from '../../ui/Input';
-import type { AutomatizacionConfigProceso, TipoProceso } from '../../../services/apiAutomatizacion';
+import type { AutomatizacionConfigProceso, LoteResumen, TipoProceso } from '../../../services/apiAutomatizacion';
+import { useAutomationProcessCard } from '../../../hooks/useAutomationProcessCard';
 
 interface AutomationProcessCardProps {
     titulo: string;
@@ -15,32 +15,15 @@ interface AutomationProcessCardProps {
     activo: boolean;
     limiteLote: number;
     intervaloSegundos: number;
-    ultimoLote: { exitosos?: number; fallidos?: number; iniciado_at?: string } | null;
+    ultimoLote: LoteResumen | null;
     fallosConsecutivos?: number;
     reactivando: boolean;
     guardando: boolean;
+    forzando: boolean;
     onReactivar: () => void;
+    onForzarEjecucion: (limiteLote: number) => Promise<unknown>;
     onGuardarConfig: (config: Required<AutomatizacionConfigProceso>) => Promise<unknown>;
 }
-
-const formatearFecha = (fecha: string | null): string => {
-    if (!fecha) return '-';
-    const d = new Date(fecha);
-    return d.toLocaleDateString('es', { day: '2-digit', month: 'short' }) +
-        ' ' + d.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
-};
-
-const formatearIntervalo = (segundos: number): string => {
-    if (segundos >= 3600 && segundos % 3600 === 0) {
-        const horas = segundos / 3600;
-        return horas === 1 ? 'Cada hora' : `Cada ${horas} h`;
-    }
-    if (segundos >= 60 && segundos % 60 === 0) {
-        const minutos = segundos / 60;
-        return minutos === 1 ? 'Cada minuto' : `Cada ${minutos} min`;
-    }
-    return `Cada ${segundos} s`;
-};
 
 export const AutomationProcessCard = ({
     titulo,
@@ -52,43 +35,32 @@ export const AutomationProcessCard = ({
     fallosConsecutivos,
     reactivando,
     guardando,
+    forzando,
     onReactivar,
+    onForzarEjecucion,
     onGuardarConfig,
 }: AutomationProcessCardProps): JSX.Element => {
-    const [enabled, setEnabled] = useState(activo);
-    const [lote, setLote] = useState(String(limiteLote));
-    const [intervalo, setIntervalo] = useState(String(intervaloSegundos));
-
-    useEffect(() => {
-        setEnabled(activo);
-        setLote(String(limiteLote));
-        setIntervalo(String(intervaloSegundos));
-    }, [activo, limiteLote, intervaloSegundos]);
-
-    const limiteMaximo = tipo === 'extraccion' ? 500 : 200;
-    const intervaloMinimo = tipo === 'extraccion' ? 5 : 30;
-
-    const manejarSubmit = async (event: FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        await onGuardarConfig({
-            enabled,
-            lote_size: Number.parseInt(lote, 10),
-            intervalo_seg: Number.parseInt(intervalo, 10),
-        });
-    };
+    const card = useAutomationProcessCard({
+        tipo,
+        activo,
+        limiteLote,
+        intervaloSegundos,
+        ultimoLote,
+        onGuardarConfig,
+    });
 
     return (
-        <form className="tarjetaEstadoProceso" onSubmit={manejarSubmit}>
+        <form className="tarjetaEstadoProceso" onSubmit={card.manejarSubmit}>
             <div className="tarjetaEstadoEncabezado">
                 {activo
-                    ? <CheckCircle size={14} className="iconoEstadoProceso iconoEstadoProcesoExito" />
-                    : <PauseCircle size={14} className="iconoEstadoProceso iconoEstadoProcesoError" />}
+                    ? <CheckCircle size={12} className="iconoEstadoProceso iconoEstadoProcesoExito" />
+                    : <PauseCircle size={12} className="iconoEstadoProceso iconoEstadoProcesoError" />}
                 <strong>{titulo}</strong>
                 <Badge variante={activo ? 'exito' : 'error'}>{activo ? 'Habilitado' : 'Deshabilitado'}</Badge>
             </div>
 
             <div className="tarjetaEstadoInfo">
-                {limiteLote} items/lote · {formatearIntervalo(intervaloSegundos)}
+                {limiteLote} items/lote · {card.intervaloLegible}
                 {fallosConsecutivos !== undefined && fallosConsecutivos > 0 && (
                     <span> · <AlertTriangle size={12} className="iconoAlertaLote" /> {fallosConsecutivos} fallos consecutivos</span>
                 )}
@@ -96,34 +68,38 @@ export const AutomationProcessCard = ({
 
             {ultimoLote ? (
                 <div className="tarjetaEstadoUltimo">
-                    Último: {ultimoLote.exitosos ?? 0} ok / {ultimoLote.fallidos ?? 0} err - {formatearFecha(ultimoLote.iniciado_at ?? null)}
+                    Último: {ultimoLote.exitosos ?? 0} ok / {ultimoLote.fallidos ?? 0} err - {card.ultimoLoteLegible}
                 </div>
             ) : (
                 <div className="tarjetaEstadoUltimo">Último: sin registros</div>
             )}
+
+            <div className="tarjetaEstadoProxima">
+                Próxima: {card.proximaEjecucionLegible}
+            </div>
 
             <div className="tarjetaEstadoControles">
                 <BotonBase
                     type="button"
                     variante="ghost"
                     tamano="ninguno"
-                    className={`interruptorProceso ${enabled ? 'interruptorProcesoActivo' : ''}`}
+                    className={`interruptorProceso ${card.enabled ? 'interruptorProcesoActivo' : ''}`}
                     role="switch"
-                    aria-checked={enabled}
-                    onClick={() => setEnabled(v => !v)}
+                    aria-checked={card.enabled}
+                    onClick={() => card.setEnabled(v => !v)}
                     disabled={guardando}
                 >
                     <span className="interruptorProcesoPunto" />
-                    <span>{enabled ? 'Habilitado' : 'Deshabilitado'}</span>
+                    <span>{card.enabled ? 'Habilitado' : 'Deshabilitado'}</span>
                 </BotonBase>
                 <label className="campoConfigProceso">
                     <span>Items/lote</span>
                     <Input
                         type="number"
                         min={1}
-                        max={limiteMaximo}
-                        value={lote}
-                        onChange={(event) => setLote(event.target.value)}
+                        max={card.limiteMaximo}
+                        value={card.lote}
+                        onChange={(event) => card.setLote(event.target.value)}
                         required
                     />
                 </label>
@@ -131,38 +107,56 @@ export const AutomationProcessCard = ({
                     <span>Intervalo (s)</span>
                     <Input
                         type="number"
-                        min={intervaloMinimo}
+                        min={card.intervaloMinimo}
                         max={86400}
-                        value={intervalo}
-                        onChange={(event) => setIntervalo(event.target.value)}
+                        value={card.intervalo}
+                        onChange={(event) => card.setIntervalo(event.target.value)}
                         required
                     />
                 </label>
-                <BotonBase
-                    variante="secundario"
-                    tamano="sm"
-                    type="submit"
-                    disabled={guardando}
-                    className="tarjetaEstadoGuardar"
-                >
-                    {guardando ? <Loader2 size={14} className="animacionGiro" /> : <Save size={14} />}
-                    Guardar
-                </BotonBase>
+                <div className="tarjetaEstadoAcciones">
+                    <BotonBase
+                        variante="ghost"
+                        tamano="sm"
+                        soloIcono
+                        type="button"
+                        title="Forzar ejecución ahora"
+                        aria-label="Forzar ejecución ahora"
+                        disabled={forzando || guardando || card.configInvalida}
+                        onClick={() => onForzarEjecucion(card.loteActual)}
+                        className="tarjetaEstadoAccionIcono"
+                    >
+                        {forzando ? <Loader2 size={14} className="animacionGiro" /> : <Play size={14} />}
+                    </BotonBase>
+                    <BotonBase
+                        variante="secundario"
+                        tamano="sm"
+                        soloIcono
+                        type="submit"
+                        title="Guardar configuración"
+                        aria-label="Guardar configuración"
+                        disabled={guardando || card.configInvalida || !card.hayCambios}
+                        className="tarjetaEstadoAccionIcono"
+                    >
+                        {guardando ? <Loader2 size={14} className="animacionGiro" /> : <Save size={14} />}
+                    </BotonBase>
+                    {!activo && (
+                        <BotonBase
+                            variante="primario"
+                            tamano="sm"
+                            soloIcono
+                            type="button"
+                            title="Reactivar proceso"
+                            aria-label="Reactivar proceso"
+                            onClick={onReactivar}
+                            disabled={reactivando || guardando || forzando}
+                            className="tarjetaEstadoAccionIcono"
+                        >
+                            {reactivando ? <Loader2 size={14} className="animacionGiro" /> : <RotateCcw size={14} />}
+                        </BotonBase>
+                    )}
+                </div>
             </div>
-
-            {!activo && (
-                <BotonBase
-                    variante="primario"
-                    tamano="sm"
-                    type="button"
-                    onClick={onReactivar}
-                    disabled={reactivando || guardando}
-                    className="tarjetaEstadoReactivar"
-                >
-                    {reactivando ? <Loader2 size={14} className="animacionGiro" /> : <Play size={14} />}
-                    Reactivar
-                </BotonBase>
-            )}
         </form>
     );
 };

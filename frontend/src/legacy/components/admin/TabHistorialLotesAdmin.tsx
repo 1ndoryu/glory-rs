@@ -70,7 +70,9 @@ export const TabHistorialLotesAdmin = (): JSX.Element => {
                         ultimoLote={hist.estado.extraccion.ultimo_lote}
                         reactivando={reactivando === 'extraccion'}
                         guardando={hist.guardandoConfig === 'extraccion'}
+                        forzando={hist.forzandoProceso === 'extraccion'}
                         onReactivar={() => manejarReactivar('extraccion')}
+                        onForzarEjecucion={(limiteLote) => hist.forzarProceso('extraccion', limiteLote)}
                         onGuardarConfig={(config) => hist.guardarConfig('extraccion', config)}
                     />
                     <AutomationProcessCard
@@ -83,7 +85,9 @@ export const TabHistorialLotesAdmin = (): JSX.Element => {
                         fallosConsecutivos={hist.estado.scraping.fallos_consecutivos}
                         reactivando={reactivando === 'scraping'}
                         guardando={hist.guardandoConfig === 'scraping'}
+                        forzando={hist.forzandoProceso === 'scraping'}
                         onReactivar={() => manejarReactivar('scraping')}
+                        onForzarEjecucion={(limiteLote) => hist.forzarProceso('scraping', limiteLote)}
                         onGuardarConfig={(config) => hist.guardarConfig('scraping', config)}
                     />
                 </div>

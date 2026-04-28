@@ -48,6 +48,15 @@ La UI usa la palabra `Habilitado` en vez de `Activo`: ese valor significa que el
 
 Al guardar, el hook refresca `GET /api/admin/automatizacion/estado` para rehidratar la tarjeta con los valores persistidos. Los errores de API se muestran con toast.
 
+La tarjeta admin tambien muestra una estimacion de `Proxima` ejecucion usando `ultimo_lote` + `intervalo_segundos`. Si el lote actual sigue `ejecutando`, la UI informa que el siguiente ciclo correra al terminar el lote actual.
+
+Para forzar una corrida manual, la UI usa el endpoint existente de procesos:
+
+- `POST /api/admin/procesos/extraccion/start`
+- `POST /api/admin/procesos/scraping/start`
+
+Se envia el `limit` actual de la tarjeta para que la ejecucion manual respete el lote configurado.
+
 ## Borrado masivo de samples
 
 `DELETE /api/admin/samples/todos` devuelve:

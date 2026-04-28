@@ -11,6 +11,7 @@ import {
     obtenerHistorialLotes,
     reactivarProceso,
 } from '../services/apiAutomatizacion';
+import { iniciarProceso } from '../services/apiProcesos';
 import type {
     AutomatizacionConfigProceso,
     EstadoAutomatizacion,
@@ -27,6 +28,7 @@ export function useHistorialLotes() {
     const [filtroTipo, setFiltroTipo] = useState<TipoProceso | ''>('');
     const [cargando, setCargando] = useState(false);
     const [guardandoConfig, setGuardandoConfig] = useState<TipoProceso | null>(null);
+    const [forzandoProceso, setForzandoProceso] = useState<TipoProceso | null>(null);
     const [error, setError] = useState('');
 
     const cargarEstado = useCallback(async () => {
@@ -64,6 +66,7 @@ export function useHistorialLotes() {
             const resp = await reactivarProceso(tipo);
             if (resp.ok) {
                 await cargarEstado();
+                await cargarHistorial();
                 toast.exito(resp.data?.mensaje ?? 'Proceso reactivado');
             } else {
                 toast.error(resp.error ?? 'No se pudo reactivar el proceso');
@@ -75,6 +78,26 @@ export function useHistorialLotes() {
         }
     }, [cargarEstado]);
 
+    const forzarProceso = useCallback(async (tipo: TipoProceso, limite?: number) => {
+        setForzandoProceso(tipo);
+        try {
+            const resp = await iniciarProceso(tipo, limite);
+            if (resp.ok && !resp.data?.error) {
+                await cargarEstado();
+                await cargarHistorial();
+                toast.exito(resp.data?.mensaje ?? 'Ejecución iniciada');
+            } else {
+                toast.error(resp.data?.error ?? resp.error ?? 'No se pudo iniciar el proceso');
+            }
+            return resp;
+        } catch {
+            toast.error('Error de conexión');
+            return { ok: false, error: 'Error de conexión' };
+        } finally {
+            setForzandoProceso(null);
+        }
+    }, [cargarEstado, cargarHistorial]);
+
     const guardarConfig = useCallback(async (
         tipo: TipoProceso,
         config: Required<AutomatizacionConfigProceso>
@@ -84,6 +107,7 @@ export function useHistorialLotes() {
             const resp = await actualizarConfigProceso(tipo, config);
             if (resp.ok) {
                 await cargarEstado();
+                await cargarHistorial();
                 toast.exito('Configuración actualizada');
             } else {
                 toast.error(resp.error ?? 'No se pudo actualizar la configuración');
@@ -112,10 +136,12 @@ export function useHistorialLotes() {
         setFiltroTipo,
         cargando,
         guardandoConfig,
+        forzandoProceso,
         error,
         refrescar: cargarHistorial,
         refrescarEstado: cargarEstado,
         reactivar: manejarReactivar,
+        forzarProceso,
         guardarConfig,
     };
 }
