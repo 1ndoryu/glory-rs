@@ -1337,6 +1337,44 @@
         ]
       }
     },
+    "/api/admin/duplicados/backfill": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "operationId": "backfill",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BackfillDuplicadosRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackfillDuplicadosResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
     "/api/admin/duplicados/contar": {
       "get": {
         "tags": [
@@ -13921,6 +13959,58 @@
           },
           "user": {
             "$ref": "#/components/schemas/UserResponse"
+          }
+        }
+      },
+      "BackfillDuplicadosRequest": {
+        "type": "object",
+        "properties": {
+          "batch": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          }
+        }
+      },
+      "BackfillDuplicadosResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "stats"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "stats": {
+            "$ref": "#/components/schemas/BackfillStats"
+          }
+        }
+      },
+      "BackfillStats": {
+        "type": "object",
+        "required": [
+          "procesados",
+          "hasheados",
+          "duplicados",
+          "sin_archivo"
+        ],
+        "properties": {
+          "duplicados": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "hasheados": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "procesados": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sin_archivo": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },

@@ -1,3 +1,4 @@
+mod admin_duplicates;
 mod admin_experiments;
 mod admin_ia_queue;
 mod admin_moderation;
@@ -41,6 +42,9 @@ mod sync_changelog;
 mod sync_full;
 mod user;
 
+pub use admin_duplicates::{
+    AdminDuplicatesRepository, BackfillSampleRow, DuplicateAdminRow, ExistingHashSampleRow,
+};
 pub use admin_experiments::{AdminExperimentsRepository, EmbeddingSampleRow, TestUserRow};
 pub use admin_ia_queue::{
     AdminIaQueueItem, AdminIaQueueListParams, AdminIaQueueRepository, AdminIaQueueStats,

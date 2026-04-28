@@ -1,29 +1,31 @@
-/* sentinel-disable-file sqlx-query-as-sin-macro handler-accede-bd-rs — handler legacy ya existente; esta tarea solo estabiliza schemas OpenAPI. La extraccion a repositorio queda ligada a 274A-43. */
-/* sentinel-disable-file handler-accede-bd-rs */
 /* [254A-4] Endpoints admin/duplicados — paridad con DuplicadosController.php legacy.
  * GET /admin/duplicados?estado=&tipo=&pagina=&porPagina= — listar duplicados con joins a samples
  * GET /admin/duplicados/contar — contador de pendientes (badge nav)
+ * POST /admin/duplicados/backfill — backfill manual de audio_hash exacto
  *
  * Devuelve los samples original/duplicado con titulo, slug, creador, ruta_preview, audio_hash.
  * El frontend usa estos campos para mostrar el preview de audio y agrupar por hash.
  */
 
 use axum::extract::{Query, State};
-use axum::routing::get;
+use axum::routing::{get, post};
 use axum::{Json, Router};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use sqlx::FromRow;
 use utoipa::{IntoParams, ToSchema};
 
 use crate::errors::AppError;
 use crate::middleware::CurrentUser;
+use crate::repositories::{AdminDuplicatesRepository, DuplicateAdminRow};
+use crate::services::AdminDuplicatesService;
 use crate::AppState;
+
+pub use crate::services::admin_duplicates::BackfillStats;
 
 const ESTADOS_VALIDOS: [&str; 4] = ["pendiente", "aprobado", "rechazado", "fusionado"];
 const TIPOS_VALIDOS: [&str; 3] = ["cross_usuario", "mismo_usuario", "backfill"];
 
-#[derive(Debug, Clone, Serialize, ToSchema, FromRow)]
+#[derive(Debug, Clone, Serialize, ToSchema)]
 pub struct DuplicadoFila {
     pub id: i32,
     pub tipo: String,
@@ -49,6 +51,35 @@ pub struct DuplicadoFila {
     pub duplicado_creador_id: i32,
     pub duplicado_slug: Option<String>,
     pub duplicado_hash: Option<String>,
+}
+
+impl From<DuplicateAdminRow> for DuplicadoFila {
+    fn from(row: DuplicateAdminRow) -> Self {
+        Self {
+            id: row.id,
+            tipo: row.tipo,
+            estado: row.estado,
+            created_at: row.created_at,
+            original_id: row.original_id,
+            original_titulo: row.original_titulo,
+            original_subido_at: row.original_subido_at,
+            original_ruta_preview: row.original_ruta_preview,
+            original_ruta_waveform: row.original_ruta_waveform,
+            original_creador: row.original_creador,
+            original_creador_id: row.original_creador_id,
+            original_slug: row.original_slug,
+            original_hash: row.original_hash,
+            duplicado_id: row.duplicado_id,
+            duplicado_titulo: row.duplicado_titulo,
+            duplicado_subido_at: row.duplicado_subido_at,
+            duplicado_ruta_preview: row.duplicado_ruta_preview,
+            duplicado_ruta_waveform: row.duplicado_ruta_waveform,
+            duplicado_creador: row.duplicado_creador,
+            duplicado_creador_id: row.duplicado_creador_id,
+            duplicado_slug: row.duplicado_slug,
+            duplicado_hash: row.duplicado_hash,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Deserialize, IntoParams)]
@@ -77,6 +108,17 @@ pub struct AdminDuplicadosListarResponse {
 pub struct ContarResponse {
     pub ok: bool,
     pub total: i64,
+}
+
+#[derive(Debug, Clone, Deserialize, ToSchema)]
+pub struct BackfillDuplicadosRequest {
+    pub batch: Option<i64>,
+}
+
+#[derive(Debug, Clone, Serialize, ToSchema)]
+pub struct BackfillDuplicadosResponse {
+    pub ok: bool,
+    pub stats: BackfillStats,
 }
 
 #[utoipa::path(get, path = "/api/admin/duplicados", tag = "admin",
@@ -109,55 +151,18 @@ pub async fn listar(
         }
     };
 
-    let duplicados = sqlx::query_as::<_, DuplicadoFila>(
-        r"SELECT d.id,
-                  d.tipo,
-                  d.estado,
-                  d.created_at,
-                  so.id              AS original_id,
-                  so.titulo          AS original_titulo,
-                  so.created_at      AS original_subido_at,
-                  so.ruta_preview    AS original_ruta_preview,
-                  so.ruta_waveform   AS original_ruta_waveform,
-                  uo.username        AS original_creador,
-                  uo.id              AS original_creador_id,
-                  so.slug            AS original_slug,
-                  so.audio_hash      AS original_hash,
-                  sd.id              AS duplicado_id,
-                  sd.titulo          AS duplicado_titulo,
-                  sd.created_at      AS duplicado_subido_at,
-                  sd.ruta_preview    AS duplicado_ruta_preview,
-                  sd.ruta_waveform   AS duplicado_ruta_waveform,
-                  ud.username        AS duplicado_creador,
-                  ud.id              AS duplicado_creador_id,
-                  sd.slug            AS duplicado_slug,
-                  sd.audio_hash      AS duplicado_hash
-             FROM duplicados_pendientes d
-             JOIN samples so       ON so.id = d.sample_original_id
-             JOIN usuarios_ext uo  ON uo.id = so.creador_id
-             JOIN samples sd       ON sd.id = d.sample_duplicado_id
-             JOIN usuarios_ext ud  ON ud.id = sd.creador_id
-            WHERE d.estado = $1
-              AND ($2::text IS NULL OR d.tipo = $2)
-            ORDER BY d.created_at DESC
-            LIMIT $3 OFFSET $4",
-    )
-    .bind(&estado)
-    .bind(tipo.as_deref())
-    .bind(por_pagina)
-    .bind(offset)
-    .fetch_all(&state.pool)
-    .await?;
+    let duplicados =
+        AdminDuplicatesRepository::list(&state.pool, &estado, tipo.as_deref(), por_pagina, offset)
+            .await?
+            .into_iter()
+            .map(DuplicadoFila::from)
+            .collect();
 
-    let total: (i64,) = sqlx::query_as(
-        r"SELECT COUNT(*)::bigint FROM duplicados_pendientes WHERE estado = 'pendiente'",
-    )
-    .fetch_one(&state.pool)
-    .await?;
+    let total = AdminDuplicatesRepository::count_pending(&state.pool).await?;
 
     Ok(Json(AdminDuplicadosListarResponse {
         ok: true,
-        total: total.0,
+        total,
         pagina,
         por_pagina,
         duplicados,
@@ -172,14 +177,27 @@ pub async fn contar(
     user: CurrentUser,
 ) -> Result<Json<ContarResponse>, AppError> {
     user.require_admin()?;
-    let total: (i64,) = sqlx::query_as(
-        r"SELECT COUNT(*)::bigint FROM duplicados_pendientes WHERE estado = 'pendiente'",
-    )
-    .fetch_one(&state.pool)
-    .await?;
-    Ok(Json(ContarResponse {
+    let total = AdminDuplicatesRepository::count_pending(&state.pool).await?;
+    Ok(Json(ContarResponse { ok: true, total }))
+}
+
+#[utoipa::path(post, path = "/api/admin/duplicados/backfill", tag = "admin",
+    request_body = BackfillDuplicadosRequest,
+    security(("bearer_auth" = [])),
+    responses((status = 200, body = BackfillDuplicadosResponse), (status = 403)))]
+pub async fn backfill(
+    State(state): State<AppState>,
+    user: CurrentUser,
+    Json(payload): Json<BackfillDuplicadosRequest>,
+) -> Result<Json<BackfillDuplicadosResponse>, AppError> {
+    user.require_admin()?;
+    let requested_batch = payload.batch.unwrap_or(100).clamp(10, 500);
+    let backfill_stats =
+        AdminDuplicatesService::run_hash_backfill(&state.pool, requested_batch).await?;
+
+    Ok(Json(BackfillDuplicadosResponse {
         ok: true,
-        total: total.0,
+        stats: backfill_stats,
     }))
 }
 
@@ -187,4 +205,5 @@ pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/admin/duplicados", get(listar))
         .route("/admin/duplicados/contar", get(contar))
+        .route("/admin/duplicados/backfill", post(backfill))
 }
