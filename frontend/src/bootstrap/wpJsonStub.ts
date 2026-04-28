@@ -34,13 +34,17 @@ const PATH_MAP: Record<string, string> = {
  * un prefijo o empieza con `prefijo/`, NO se aplica la regla generica
  * /me/* -> /users/me/*. Casos:
  * - /me/coleccionados, /me/coleccionados/carpetas, /me/coleccionados/{id}/carpeta
- *   -> servidos por handlers/biblioteca.rs en /api/me/coleccionados[/...]. */
+ *   -> servidos por handlers/biblioteca.rs en /api/me/coleccionados[/...].
+ * - [274A-8] /me/favoritos -> handlers/biblioteca.rs en /api/me/favoritos.
+ * - [274A-8] /me/descargas/sugerencias -> handlers/suggestions.rs en /api/me/descargas/sugerencias. */
 const PATH_MAP_KEEP: Set<string> = new Set([
     '/me/bloqueados',
 ]);
 
 const PATH_KEEP_PREFIXES: string[] = [
     '/me/coleccionados',
+    '/me/favoritos',
+    '/me/descargas/sugerencias',
 ];
 
 function mapPath(legacyPath: string): string {
