@@ -33,6 +33,8 @@ pub fn routes() -> Router<AppState> {
         .route("/me/coleccionados/carpetas", get(get_carpetas))
         .route("/me/coleccionados/:id/carpeta", put(put_mover_carpeta))
         .route("/me/favoritos", get(get_favoritos))
+        .route("/users/me/descargas", get(get_descargas))
+        .route("/me/descargas", get(get_descargas))
 }
 
 #[derive(Debug, Clone, Deserialize, IntoParams, Default)]
@@ -205,6 +207,66 @@ pub async fn get_favoritos(
                 total,
                 pages,
             },
+        },
+    }))
+}
+
+/* [274A-15] Query simple para descargas (subset de FavoritosQuery sin filtros de reaccion). */
+#[derive(Debug, Clone, Deserialize, IntoParams, Default)]
+#[into_params(parameter_in = Query)]
+pub struct DescargasQuery {
+    pub page: Option<i64>,
+    pub per_page: Option<i64>,
+    pub orden: Option<String>,
+}
+
+/* [274A-15] GET /api/users/me/descargas (alias /me/descargas)
+ * Lista paginada de samples descargados por el usuario.
+ * Migrado desde BibliotecaSamplesController::misDescargas (PHP). */
+#[utoipa::path(
+    get,
+    path = "/api/users/me/descargas",
+    tag = "biblioteca",
+    params(DescargasQuery),
+    security(("bearer_auth" = [])),
+    responses(
+        (status = 200, description = "Samples descargados del usuario", body = BibliotecaSamplesResponse),
+        (status = 401, description = "No autenticado"),
+    )
+)]
+pub async fn get_descargas(
+    State(state): State<AppState>,
+    user: CurrentUser,
+    Query(q): Query<DescargasQuery>,
+) -> Result<Json<BibliotecaSamplesResponse>, AppError> {
+    let page = q.page.unwrap_or(1).max(1);
+    let per_page = q.per_page.unwrap_or(20).clamp(1, 100);
+
+    let filters = ColeccionadosFilters {
+        user_id: user.user_id,
+        page,
+        per_page,
+        carpeta: String::new(),
+        orden: q.orden.unwrap_or_else(|| "recientes".to_string()),
+        busqueda: String::new(),
+        filtro_reaccion: None,
+    };
+
+    let records = BibliotecaRepository::descargados_de_usuario(&state.pool, &filters).await?;
+    let total = BibliotecaRepository::contar_descargados(&state.pool, user.user_id).await?;
+
+    let public_base = state.public_base_url.as_deref();
+    let data: Vec<SampleSummary> = records
+        .into_iter()
+        .map(|r| build_sample_summary(r, public_base))
+        .collect();
+
+    let pages = if per_page > 0 { (total as f64 / per_page as f64).ceil() as i64 } else { 0 };
+
+    Ok(Json(BibliotecaSamplesResponse {
+        data: BibliotecaSamplesData {
+            data,
+            pagination: SamplesPagination { page, per_page, total, pages },
         },
     }))
 }

@@ -76,4 +76,16 @@ impl FollowRepository {
         .await?;
         Ok(r)
     }
+
+    /* [274A-16] IDs de usuarios que el `follower_id` sigue. Migrado desde
+     * FollowsRepository::idsSeguidos (PHP). */
+    pub async fn ids_seguidos(pool: &PgPool, follower_id: i32) -> Result<Vec<i32>, AppError> {
+        let rows: Vec<(i32,)> = sqlx::query_as(
+            "SELECT seguido_id FROM follows WHERE seguidor_id = $1"
+        )
+        .bind(follower_id)
+        .fetch_all(pool)
+        .await?;
+        Ok(rows.into_iter().map(|(id,)| id).collect())
+    }
 }

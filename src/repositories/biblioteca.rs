@@ -225,6 +225,55 @@ impl BibliotecaRepository {
         };
     }
 
+    /* [274A-15] Descargas del usuario: solo samples descargados (no propios).
+     * INNER JOIN con `descargas` filtrado por usuario. Ordena por created_at
+     * de la descarga por defecto. */
+    pub async fn descargados_de_usuario(
+        pool: &PgPool,
+        f: &ColeccionadosFilters,
+    ) -> Result<Vec<SampleCatalogSummaryRecord>, AppError> {
+        let mut b = QueryBuilder::<Postgres>::new(BIBLIOTECA_SAMPLE_SELECT);
+        b.push(" FROM samples s INNER JOIN usuarios_ext u ON u.id = s.creador_id");
+        b.push(" INNER JOIN descargas d ON d.sample_id = s.id AND d.usuario_id = ");
+        b.push_bind(f.user_id);
+        b.push(" WHERE s.estado = 'activo' AND s.eliminado_en IS NULL");
+        match f.orden.as_str() {
+            "antiguas" => { b.push(" ORDER BY d.created_at ASC, s.id ASC"); }
+            "populares" => { b.push(" ORDER BY s.total_likes DESC, s.id DESC"); }
+            "descargas" => { b.push(" ORDER BY s.total_descargas DESC, s.id DESC"); }
+            _ => { b.push(" ORDER BY d.created_at DESC, s.id DESC"); }
+        };
+        b.push(" LIMIT ");
+        b.push_bind(f.per_page);
+        b.push(" OFFSET ");
+        b.push_bind(f.offset());
+
+        let rows = b
+            .build_query_as::<BibliotecaSampleRow>()
+            .fetch_all(pool)
+            .await
+            .map_err(AppError::from)?;
+        Ok(rows.into_iter().map(Into::into).collect())
+    }
+
+    pub async fn contar_descargados(
+        pool: &PgPool,
+        user_id: i32,
+    ) -> Result<i64, AppError> {
+        #[derive(FromRow)]
+        struct CountRow { total: i64 }
+        let row = sqlx::query_as::<_, CountRow>(
+            "SELECT COUNT(*) AS total FROM descargas d \
+             INNER JOIN samples s ON s.id = d.sample_id \
+             WHERE d.usuario_id = $1 AND s.estado = 'activo' AND s.eliminado_en IS NULL"
+        )
+        .bind(user_id)
+        .fetch_one(pool)
+        .await
+        .map_err(AppError::from)?;
+        Ok(row.total)
+    }
+
     pub async fn coleccionados_de_usuario(
         pool: &PgPool,
         f: &ColeccionadosFilters,

@@ -7,6 +7,8 @@ use utoipa::ToSchema;
 
 use crate::algorithm::InteractionKind;
 use crate::errors::AppError;
+#[allow(unused_imports)]
+use crate::errors::ErrorResponse;
 use crate::middleware::CurrentUser;
 use crate::repositories::{BlockRepository, BlockedUser, FollowRepository};
 use crate::services::NotificationFanoutService;
@@ -205,4 +207,34 @@ pub fn routes() -> Router<AppState> {
         .route("/block/:userId", post(block_user))
         .route("/block/:userId", delete(unblock_user))
         .route("/me/bloqueados", get(my_blocks))
+        .route("/users/me/seguidos", get(my_following))
+        .route("/me/seguidos", get(my_following))
+}
+
+#[derive(Debug, Serialize, ToSchema)]
+pub struct FollowedIdItem {
+    pub id: i32,
+}
+
+#[derive(Debug, Serialize, ToSchema)]
+pub struct FollowedListResponse {
+    pub data: Vec<FollowedIdItem>,
+}
+
+/* [274A-16] GET /api/users/me/seguidos (alias /me/seguidos)
+ * Lista de IDs de usuarios que el usuario actual sigue.
+ * Migrado desde SocialController::misSeguidos (PHP). */
+#[utoipa::path(get, path = "/api/users/me/seguidos",
+    security(("bearer_auth" = [])),
+    responses(
+        (status = 200, description = "Lista de IDs seguidos", body = FollowedListResponse),
+        (status = 401, body = ErrorResponse)
+    ))]
+pub async fn my_following(
+    State(state): State<AppState>,
+    user: CurrentUser,
+) -> Result<Json<FollowedListResponse>, AppError> {
+    let ids = FollowRepository::ids_seguidos(&state.pool, user.user_id).await?;
+    let data = ids.into_iter().map(|id| FollowedIdItem { id }).collect();
+    Ok(Json(FollowedListResponse { data }))
 }
