@@ -113,6 +113,9 @@ pub fn routes() -> Router<AppState> {
         .route("/admin/cola-ia/estado-keys", get(groq_keys_status))
 }
 
+#[utoipa::path(get, path = "/api/admin/cola-ia", tag = "admin",
+    params(AdminIaQueueQuery), security(("bearer_auth" = [])),
+    responses((status = 200, body = AdminIaQueueListResponse)))]
 pub async fn list_queue(
     State(state): State<AppState>,
     user: CurrentUser,
@@ -140,6 +143,9 @@ pub async fn list_queue(
     }))
 }
 
+#[utoipa::path(get, path = "/api/admin/cola-ia/estadisticas", tag = "admin",
+    security(("bearer_auth" = [])),
+    responses((status = 200, body = AdminIaQueueStatsResponse)))]
 pub async fn stats_queue(
     State(state): State<AppState>,
     user: CurrentUser,
@@ -149,6 +155,9 @@ pub async fn stats_queue(
     Ok(Json(AdminIaQueueStatsResponse { ok: true, data }))
 }
 
+#[utoipa::path(post, path = "/api/admin/cola-ia/reintentar", tag = "admin",
+    request_body = RetryIaQueueRequest, security(("bearer_auth" = [])),
+    responses((status = 200, body = RetryIaQueueResponse)))]
 pub async fn retry_queue_item(
     State(state): State<AppState>,
     user: CurrentUser,
@@ -165,6 +174,9 @@ pub async fn retry_queue_item(
     }))
 }
 
+#[utoipa::path(post, path = "/api/admin/cola-ia/reintentar-todos", tag = "admin",
+    security(("bearer_auth" = [])),
+    responses((status = 200, body = RetryAllIaQueueResponse)))]
 pub async fn retry_all_queue_items(
     State(state): State<AppState>,
     user: CurrentUser,
@@ -178,6 +190,9 @@ pub async fn retry_all_queue_items(
     }))
 }
 
+#[utoipa::path(post, path = "/api/admin/cola-ia/procesar", tag = "admin",
+    security(("bearer_auth" = [])),
+    responses((status = 200, body = ProcessIaQueueResponse)))]
 pub async fn process_queue_now(
     State(state): State<AppState>,
     user: CurrentUser,
@@ -236,6 +251,9 @@ pub async fn process_queue_now(
     }
 }
 
+#[utoipa::path(get, path = "/api/admin/cola-ia/cuota-groq", tag = "admin",
+    security(("bearer_auth" = [])),
+    responses((status = 200, body = GroqQuotaResponse)))]
 pub async fn groq_quota(user: CurrentUser) -> Result<Json<GroqQuotaResponse>, AppError> {
     user.require_admin()?;
     Ok(Json(GroqQuotaResponse {
@@ -249,6 +267,9 @@ pub async fn groq_quota(user: CurrentUser) -> Result<Json<GroqQuotaResponse>, Ap
     }))
 }
 
+#[utoipa::path(get, path = "/api/admin/cola-ia/estado-keys", tag = "admin",
+    security(("bearer_auth" = [])),
+    responses((status = 200, body = GroqKeysStatusResponse)))]
 pub async fn groq_keys_status(user: CurrentUser) -> Result<Json<GroqKeysStatusResponse>, AppError> {
     user.require_admin()?;
     let key_names = ["GROQ_API_KEY", "GROQ_API_KEY_2", "GROQ_API_KEY_3"];

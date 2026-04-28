@@ -95,6 +95,7 @@ pub struct ListarData {
 }
 
 #[derive(Debug, Clone, Serialize, ToSchema)]
+#[schema(as = AdminModeracionListarResponse)]
 pub struct ListarResponse {
     pub data: ListarData,
 }
@@ -111,6 +112,7 @@ pub struct HistorialData {
 }
 
 #[derive(Debug, Clone, Serialize, ToSchema)]
+#[schema(as = AdminModeracionHistorialResponse)]
 pub struct HistorialResponse {
     pub data: HistorialData,
 }

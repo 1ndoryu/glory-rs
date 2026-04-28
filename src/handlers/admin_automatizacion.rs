@@ -73,6 +73,7 @@ pub struct HistorialQuery {
 }
 
 #[derive(Debug, Clone, Serialize, ToSchema)]
+#[schema(as = AdminAutomatizacionHistorialResponse)]
 pub struct HistorialResponse {
     pub ok: bool,
     pub items: Vec<LoteResumen>,

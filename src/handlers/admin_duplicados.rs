@@ -62,6 +62,7 @@ pub struct ListarQuery {
 }
 
 #[derive(Debug, Clone, Serialize, ToSchema)]
+#[schema(as = AdminDuplicadosListarResponse)]
 pub struct ListarResponse {
     pub ok: bool,
     pub total: i64,

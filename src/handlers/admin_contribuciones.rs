@@ -53,6 +53,7 @@ pub struct ListarQuery {
 }
 
 #[derive(Debug, Clone, Serialize, ToSchema)]
+#[schema(as = AdminContribucionesListarResponse)]
 pub struct ListarResponse {
     pub ok: bool,
     pub items: Vec<ContribucionPendiente>,
