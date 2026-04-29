@@ -1,5 +1,5 @@
 <#
-[224A-1][264A-1] Limpieza inteligente del target dir de cargo (C:\tmp\glory-target).
+[224A-1][264A-1][294A-2] Limpieza inteligente del target dir de cargo (C:\tmp\glory-target).
 
 Problema: el target dir crece sin lí­mite (incremental cache + deps + build scripts).
 Llegó a 11+ GB en este proyecto.
@@ -7,6 +7,10 @@ Llegó a 11+ GB en este proyecto.
 264A-1: la limpieza "safe" original no tocaba incremental/, así que `npm run dev`
 podía seguir acumulando gigas durante compilaciones sucesivas. Ahora el modo por
 defecto aplica poda automática de incremental cuando el target supera un tope.
+
+294A-2: el tope ahora se cumple de verdad. Si borrar incremental/ no baja el
+target por debajo de MaxTotalMB, el script escala a caches regenerables pesados
+como deps/, build/ y .fingerprint/ hasta quedar bajo el limite.
 
 Modos:
     (default)   Safe: borra examples/, doctests/, y artifacts > N dí­as via cargo-sweep.
@@ -51,9 +55,31 @@ if (-not (Test-Path $targetDir)) {
 
 function Get-DirSizeMB($path) {
     if (-not (Test-Path $path)) { return 0 }
-    $sum = (Get-ChildItem $path -Recurse -ErrorAction SilentlyContinue |
+    $sum = (Get-ChildItem $path -Recurse -Force -ErrorAction SilentlyContinue |
             Measure-Object -Property Length -Sum).Sum
     return [math]::Round(($sum / 1MB), 0)
+}
+
+function Test-CompileRunning {
+    $processNames = @('cargo', 'rustc')
+    foreach ($name in $processNames) {
+        if (Get-Process -Name $name -ErrorAction SilentlyContinue) {
+            return $true
+        }
+    }
+
+    return $false
+}
+
+function Remove-TargetPath($path, $reason) {
+    if (-not (Test-Path $path)) { return }
+    $mb = Get-DirSizeMB $path
+    if ($DryRun) {
+        Write-Host "[clean-cargo] DryRun: eliminaria $path ($mb MB) [$reason]"
+    } else {
+        Write-Host "[clean-cargo] Eliminando $path ($mb MB) [$reason]..."
+        Remove-Item $path -Recurse -Force -ErrorAction SilentlyContinue
+    }
 }
 
 function Report($label) {
@@ -112,25 +138,21 @@ if ($needsKill) {
 }
 
 foreach ($p in $toRemove) {
-    if (-not (Test-Path $p)) { continue }
-    $mb = Get-DirSizeMB $p
-    if ($DryRun) {
-        Write-Host "[clean-cargo] DryRun: eliminarí­a $p ($mb MB)"
-    } else {
-        Write-Host "[clean-cargo] Eliminando $p ($mb MB)..."
-        Remove-Item $p -Recurse -Force -ErrorAction SilentlyContinue
-    }
+    Remove-TargetPath $p 'rutina inicial'
 }
 
 # cargo sweep: borra artifacts no usados por builds recientes (>N dí­as).
 # Es la forma "fina" de limpiar deps/ sin perder incremental usable.
-if (-not $DryRun) {
+if ((-not $DryRun) -and ((Get-DirSizeMB $targetDir) -gt $MaxTotalMB)) {
     $sweepCmd = Get-Command 'cargo-sweep' -ErrorAction SilentlyContinue
     if ($sweepCmd) {
         Write-Host "[clean-cargo] cargo sweep --time $SweepDays (artifacts no tocados en >$SweepDays dí­as)..."
         Push-Location (Resolve-Path "$PSScriptRoot\..")
         try {
             & cargo sweep --time $SweepDays 2>&1 | Out-Host
+            if ($LASTEXITCODE -ne 0) {
+                Write-Warning "[clean-cargo] cargo sweep devolvio exit code $LASTEXITCODE; se continuara con limpieza por tamano."
+            }
         } catch {
             Write-Warning "[clean-cargo] cargo sweep fallí³: $_"
         } finally {
@@ -139,7 +161,36 @@ if (-not $DryRun) {
     } else {
         Write-Host "[clean-cargo] (info) Para limpieza fina por edad: cargo install cargo-sweep"
     }
+} elseif (-not $DryRun) {
+    Write-Host '[clean-cargo] Target bajo el tope; salto cargo sweep.'
+}
+
+$afterRoutineTotalMB = Get-DirSizeMB $targetDir
+if ($afterRoutineTotalMB -gt $MaxTotalMB) {
+    if (Test-CompileRunning) {
+        Write-Warning "[clean-cargo] Target sigue sobre el tope ($afterRoutineTotalMB MB > $MaxTotalMB MB), pero cargo/rustc esta activo. Se evita tocar deps/build durante compilacion."
+    } else {
+        Write-Host "[clean-cargo] Target sigue sobre el tope ($afterRoutineTotalMB MB > $MaxTotalMB MB). Escalando a caches regenerables."
+        $capEscalationPaths = @(
+            "$targetDir\debug\deps",
+            "$targetDir\debug\build",
+            "$targetDir\debug\.fingerprint",
+            "$targetDir\release\deps",
+            "$targetDir\release\build",
+            "$targetDir\release\.fingerprint"
+        )
+
+        foreach ($p in $capEscalationPaths) {
+            if ((Get-DirSizeMB $targetDir) -le $MaxTotalMB) { break }
+            Remove-TargetPath $p 'cumplir MaxTotalMB'
+        }
+    }
 }
 
 Report 'AFTER'
-Write-Host '[clean-cargo] OK.'
+$finalTotalMB = Get-DirSizeMB $targetDir
+if ($finalTotalMB -gt $MaxTotalMB) {
+    Write-Warning "[clean-cargo] Target aun supera el tope ($finalTotalMB MB > $MaxTotalMB MB). Puede haber archivos bloqueados por un proceso activo."
+} else {
+    Write-Host '[clean-cargo] OK.'
+}

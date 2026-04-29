@@ -140,7 +140,7 @@ cargo clippy                 # Linter (nivel paranoia)
 cargo test                   # Tests
 cargo fmt                    # Formatear código
 npm run check:back           # cargo check + clippy
-npm run clean:cargo          # Limpieza segura del target de Cargo
+npm run clean:cargo          # Limpieza del target de Cargo hasta el tope de 4 GB
 npm run clean:cargo:hard     # Limpieza agresiva del target de Cargo
 
 # Frontend

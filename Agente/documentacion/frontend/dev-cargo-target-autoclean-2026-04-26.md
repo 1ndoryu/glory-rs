@@ -11,6 +11,7 @@ En sesiones largas, el target podia crecer varios GB por `incremental/`, `deps/`
 - `scripts/clean-cargo-target.ps1`
   - agrega `MaxTotalMB` (default 4096 MB)
   - en modo default, si el target supera el tope, poda `debug/incremental` y `release/incremental`
+  - si el target sigue por encima del tope despues de esa poda, escala a caches regenerables (`deps/`, `build/`, `.fingerprint/`) hasta bajar de `MaxTotalMB`
   - `-Hard` deja de matar `glory-backend`; ahora solo elimina `incremental/`
   - `-Aggressive` sigue siendo la opcion que mata el backend y borra `deps/`, `build/` y `.fingerprint/`
 - `scripts/watch-cargo-target.ps1`
@@ -38,3 +39,4 @@ La solucion evita que el usuario tenga que acordarse de limpiar manualmente, per
 - El watcher esta pensado para Windows/PowerShell, igual que los scripts npm del proyecto.
 - El tope de 4096 MB es conservador; si el proyecto cambia de escala puede ajustarse sin tocar el flujo.
 - La primera version del watcher corria inmediatamente y solo vigilaba `rustc`; eso permitia una carrera donde `cargo` ya habia abierto el target pero el watcher todavia podia borrar `incremental/` durante la preparacion de `.fingerprint/`.
+- El bug de 2026-04-29 fue que `incremental/` podia bajar de 19 GB a 10 GB, pero `deps/` seguia ocupando mas de 8 GB y el script aun imprimia `OK`. El tope ahora se trata como criterio final: si la poda inicial no alcanza, se eliminan caches regenerables mas pesados; si aun asi no baja, se emite warning en vez de exito falso.
