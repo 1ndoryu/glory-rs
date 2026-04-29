@@ -47,6 +47,7 @@ class CurlCffiDownloaderMiddleware:
         middleware.session = curl_requests.Session(impersonate="chrome")
         crawler._curl_session = middleware.session
         crawler._curl_proxies = middleware.proxies
+        middleware._crawler = crawler
         middleware._warmup_ok = False
         middleware._warmup(crawler)
         return middleware
@@ -124,37 +125,111 @@ class CurlCffiDownloaderMiddleware:
         return d
 
     def _fetch(self, request):
-        """Ejecutar request con curl_cffi (sync, en thread separado)."""
-        try:
-            headers = dict(request.headers.to_unicode_dict())
-            if "Referer" not in headers:
-                headers["Referer"] = "https://www.whosampled.com/"
+        """
+        Ejecutar request con curl_cffi (sync, en thread separado).
 
-            resp = self.session.get(
-                request.url,
-                headers=headers,
-                proxies=self.proxies,
-                timeout=30,
-                allow_redirects=True,
+        Si recibe 403 (Cloudflare bloquea la IP actual del proxy rotativo),
+        re-ejecuta el warm-up para conseguir una nueva IP limpia y reintenta
+        hasta REQUEST_MAX_ATTEMPTS veces. Esto es necesario porque DataImpulse
+        rota IPs por CONNECT tunnel, y Cloudflare bloquea cada nueva IP que
+        aparezca sin la cookie de sesion correspondiente.
+        """
+        headers = dict(request.headers.to_unicode_dict())
+        if "Referer" not in headers:
+            headers["Referer"] = "https://www.whosampled.com/"
+
+        last_resp = None
+        for attempt in range(1, self.REQUEST_MAX_ATTEMPTS + 1):
+            try:
+                resp = self.session.get(
+                    request.url,
+                    headers=headers,
+                    proxies=self.proxies,
+                    timeout=30,
+                    allow_redirects=True,
+                )
+                last_resp = resp
+            except Exception:
+                logger.exception(
+                    "curl_cffi error fetching %s (intento %d/%d)",
+                    request.url, attempt, self.REQUEST_MAX_ATTEMPTS,
+                )
+                if attempt == self.REQUEST_MAX_ATTEMPTS:
+                    raise
+                # Reintentar en proxima iteracion (nueva IP probable)
+                self._refresh_session()
+                continue
+
+            if resp.status_code != 403:
+                # Respuesta valida (200, 404, 5xx, etc.) — devolver
+                resp_headers = dict(resp.headers)
+                resp_headers.pop("Content-Encoding", None)
+                resp_headers.pop("content-encoding", None)
+                return HtmlResponse(
+                    url=str(resp.url),
+                    status=resp.status_code,
+                    headers=resp_headers,
+                    body=resp.content,
+                    request=request,
+                )
+
+            # 403: IP bloqueada por Cloudflare. Refrescar sesion (nueva IP) y reintentar.
+            logger.warning(
+                "403 en %s (intento %d/%d) — refrescando sesion para nueva IP",
+                request.url, attempt, self.REQUEST_MAX_ATTEMPTS,
             )
+            self._refresh_session()
 
-            # curl_cffi ya descomprime brotli/gzip, pero deja el header
-            # Content-Encoding intacto. Scrapy's HttpCompressionMiddleware
-            # intentaria descomprimir de nuevo y fallaria.
-            resp_headers = dict(resp.headers)
-            resp_headers.pop("Content-Encoding", None)
-            resp_headers.pop("content-encoding", None)
+        # Agotamos reintentos — devolver el ultimo 403
+        resp_headers = dict(last_resp.headers)
+        resp_headers.pop("Content-Encoding", None)
+        resp_headers.pop("content-encoding", None)
+        return HtmlResponse(
+            url=str(last_resp.url),
+            status=last_resp.status_code,
+            headers=resp_headers,
+            body=last_resp.content,
+            request=request,
+        )
 
-            return HtmlResponse(
-                url=str(resp.url),
-                status=resp.status_code,
-                headers=resp_headers,
-                body=resp.content,
-                request=request,
-            )
-        except Exception:
-            logger.exception("curl_cffi error fetching %s", request.url)
-            raise
+    # Reintentos por request individual cuando hay 403 (cada uno fuerza nueva IP)
+    REQUEST_MAX_ATTEMPTS = 4
+
+    def _refresh_session(self):
+        """
+        Crear sesion fresca curl_cffi (= nueva IP del proxy rotativo) y hacer
+        warm-up para obtener cookie __cf_bm valida. Reemplaza self.session
+        si el warm-up devuelve 200.
+        """
+        for attempt in range(1, self.WARMUP_MAX_ATTEMPTS + 1):
+            session_candidate = curl_requests.Session(impersonate="chrome")
+            try:
+                resp = session_candidate.get(
+                    WARMUP_URL,
+                    proxies=self.proxies,
+                    timeout=30,
+                    allow_redirects=True,
+                )
+                if resp.status_code == 200:
+                    self.session = session_candidate
+                    if hasattr(self, "_crawler"):
+                        self._crawler._curl_session = self.session
+                    logger.info(
+                        "Sesion refrescada OK (intento %d/%d): cookies=%d",
+                        attempt, self.WARMUP_MAX_ATTEMPTS,
+                        len(self.session.cookies),
+                    )
+                    return True
+            except Exception as exc:
+                err_str = str(exc)
+                if "407" in err_str or "ProxyError" in type(exc).__name__:
+                    logger.error("Refresh fallo: proxy 407 (credenciales). Abort.")
+                    return False
+        logger.warning(
+            "Refresh de sesion fallo %d intentos — manteniendo sesion anterior",
+            self.WARMUP_MAX_ATTEMPTS,
+        )
+        return False
 
 
 class BandwidthTrackerMiddleware:
