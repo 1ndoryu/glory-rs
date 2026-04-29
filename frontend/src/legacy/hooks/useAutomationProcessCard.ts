@@ -4,6 +4,7 @@
 
 import { type FormEvent, useEffect, useState } from 'react';
 import type { AutomatizacionConfigProceso, LoteResumen, TipoProceso } from '../services/apiAutomatizacion';
+import type { EstadoProceso } from '../services/apiProcesos';
 
 interface UseAutomationProcessCardParams {
     tipo: TipoProceso;
@@ -11,6 +12,7 @@ interface UseAutomationProcessCardParams {
     limiteLote: number;
     intervaloSegundos: number;
     ultimoLote: LoteResumen | null;
+    proceso: EstadoProceso | undefined;
     onGuardarConfig: (config: Required<AutomatizacionConfigProceso>) => Promise<unknown>;
 }
 
@@ -33,13 +35,43 @@ const formatearIntervalo = (segundos: number): string => {
     return `Cada ${segundos} s`;
 };
 
+const formatearEstadoProceso = (proceso: EstadoProceso | undefined): string => {
+    switch (proceso?.estado) {
+    case 'running':
+        return 'Proceso corriendo';
+    case 'error':
+        return 'Proceso con error';
+    case 'stopped':
+        return 'Proceso detenido';
+    default:
+        return 'Proceso sin diagnóstico';
+    }
+};
+
+const formatearDetalleProceso = (proceso: EstadoProceso | undefined): string | null => {
+    if (!proceso) return null;
+    if (proceso.estado === 'running' && proceso.iniciado_at) {
+        return `desde ${formatearFecha(proceso.iniciado_at)}`;
+    }
+    if (proceso.pid) {
+        return `PID ${proceso.pid}`;
+    }
+    return null;
+};
+
 const formatearProximaEjecucion = (
     activo: boolean,
     intervaloSegundos: number,
-    ultimoLote: LoteResumen | null
+    ultimoLote: LoteResumen | null,
+    proceso: EstadoProceso | undefined
 ): string => {
     if (!activo) return 'Automatización pausada';
-    if (!ultimoLote) return 'Pendiente de primer lote';
+    if (proceso?.estado === 'error') return 'No programada: proceso con error';
+    if (proceso?.estado === 'stopped') return 'No programada: proceso detenido';
+    if (!ultimoLote) {
+        if (proceso?.estado === 'running') return 'Esperando primer lote del proceso en ejecución';
+        return 'Sin lotes todavía; usa ejecutar ahora para probarlo';
+    }
     if (ultimoLote.estado === 'ejecutando') return 'Al terminar el lote actual';
 
     const marcaBase = ultimoLote.completado_at ?? ultimoLote.iniciado_at;
@@ -57,6 +89,7 @@ export function useAutomationProcessCard({
     limiteLote,
     intervaloSegundos,
     ultimoLote,
+    proceso,
     onGuardarConfig,
 }: UseAutomationProcessCardParams) {
     const [enabled, setEnabled] = useState(activo);
@@ -95,9 +128,11 @@ export function useAutomationProcessCard({
         intervaloActual,
         configInvalida,
         hayCambios,
+        estadoProcesoLegible: formatearEstadoProceso(proceso),
+        detalleProcesoLegible: formatearDetalleProceso(proceso),
         intervaloLegible: formatearIntervalo(intervaloSegundos),
         ultimoLoteLegible: formatearFecha(ultimoLote?.iniciado_at ?? null),
-        proximaEjecucionLegible: formatearProximaEjecucion(enabled, intervaloActual, ultimoLote),
+        proximaEjecucionLegible: formatearProximaEjecucion(enabled, intervaloActual, ultimoLote, proceso),
         setEnabled,
         setLote,
         setIntervalo,

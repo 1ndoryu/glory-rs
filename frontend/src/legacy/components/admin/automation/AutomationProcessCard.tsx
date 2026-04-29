@@ -7,6 +7,7 @@ import { Badge } from '../../ui/Badge';
 import { BotonBase } from '../../ui/BotonBase';
 import { Input } from '../../ui/Input';
 import type { AutomatizacionConfigProceso, LoteResumen, TipoProceso } from '../../../services/apiAutomatizacion';
+import type { EstadoProceso } from '../../../services/apiProcesos';
 import { useAutomationProcessCard } from '../../../hooks/useAutomationProcessCard';
 
 interface AutomationProcessCardProps {
@@ -16,6 +17,7 @@ interface AutomationProcessCardProps {
     limiteLote: number;
     intervaloSegundos: number;
     ultimoLote: LoteResumen | null;
+    proceso: EstadoProceso | undefined;
     fallosConsecutivos?: number;
     reactivando: boolean;
     guardando: boolean;
@@ -32,6 +34,7 @@ export const AutomationProcessCard = ({
     limiteLote,
     intervaloSegundos,
     ultimoLote,
+    proceso,
     fallosConsecutivos,
     reactivando,
     guardando,
@@ -46,6 +49,7 @@ export const AutomationProcessCard = ({
         limiteLote,
         intervaloSegundos,
         ultimoLote,
+        proceso,
         onGuardarConfig,
     });
 
@@ -76,6 +80,11 @@ export const AutomationProcessCard = ({
 
             <div className="tarjetaEstadoProxima">
                 Próxima: {card.proximaEjecucionLegible}
+            </div>
+
+            <div className="tarjetaEstadoRuntime">
+                Proceso: {card.estadoProcesoLegible}
+                {card.detalleProcesoLegible ? ` · ${card.detalleProcesoLegible}` : ''}
             </div>
 
             <div className="tarjetaEstadoControles">

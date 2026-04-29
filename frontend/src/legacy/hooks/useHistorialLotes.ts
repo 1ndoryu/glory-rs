@@ -11,7 +11,7 @@ import {
     obtenerHistorialLotes,
     reactivarProceso,
 } from '../services/apiAutomatizacion';
-import { iniciarProceso } from '../services/apiProcesos';
+import { iniciarProceso, listarProcesos, type EstadoProceso } from '../services/apiProcesos';
 import type {
     AutomatizacionConfigProceso,
     EstadoAutomatizacion,
@@ -22,6 +22,7 @@ import { toast } from '../stores/toastStore';
 
 export function useHistorialLotes() {
     const [estado, setEstado] = useState<EstadoAutomatizacion | null>(null);
+    const [procesos, setProcesos] = useState<Partial<Record<TipoProceso, EstadoProceso>>>({});
     const [lotes, setLotes] = useState<LoteResumen[]>([]);
     const [total, setTotal] = useState(0);
     const [pagina, setPagina] = useState(1);
@@ -39,6 +40,23 @@ export function useHistorialLotes() {
             }
         } catch {
             /* silencioso — estado inicial null */
+        }
+    }, []);
+
+    const cargarProcesos = useCallback(async () => {
+        try {
+            const resp = await listarProcesos();
+            if (resp.ok && resp.data?.procesos) {
+                const mapaProcesos = resp.data.procesos.reduce<Partial<Record<TipoProceso, EstadoProceso>>>((acc, proceso) => {
+                    if (proceso.nombre === 'extraccion' || proceso.nombre === 'scraping') {
+                        acc[proceso.nombre] = proceso;
+                    }
+                    return acc;
+                }, {});
+                setProcesos(mapaProcesos);
+            }
+        } catch {
+            /* silencioso — no bloquea historial/config */
         }
     }, []);
 
@@ -67,6 +85,7 @@ export function useHistorialLotes() {
             if (resp.ok) {
                 await cargarEstado();
                 await cargarHistorial();
+                await cargarProcesos();
                 toast.exito(resp.data?.mensaje ?? 'Proceso reactivado');
             } else {
                 toast.error(resp.error ?? 'No se pudo reactivar el proceso');
@@ -76,7 +95,7 @@ export function useHistorialLotes() {
             toast.error('Error de conexión');
             return { ok: false, error: 'Error de conexión' };
         }
-    }, [cargarEstado]);
+    }, [cargarEstado, cargarHistorial, cargarProcesos]);
 
     const forzarProceso = useCallback(async (tipo: TipoProceso, limite?: number) => {
         setForzandoProceso(tipo);
@@ -85,6 +104,7 @@ export function useHistorialLotes() {
             if (resp.ok && !resp.data?.error) {
                 await cargarEstado();
                 await cargarHistorial();
+                await cargarProcesos();
                 toast.exito(resp.data?.mensaje ?? 'Ejecución iniciada');
             } else {
                 toast.error(resp.data?.error ?? resp.error ?? 'No se pudo iniciar el proceso');
@@ -96,7 +116,7 @@ export function useHistorialLotes() {
         } finally {
             setForzandoProceso(null);
         }
-    }, [cargarEstado, cargarHistorial]);
+    }, [cargarEstado, cargarHistorial, cargarProcesos]);
 
     const guardarConfig = useCallback(async (
         tipo: TipoProceso,
@@ -108,6 +128,7 @@ export function useHistorialLotes() {
             if (resp.ok) {
                 await cargarEstado();
                 await cargarHistorial();
+                await cargarProcesos();
                 toast.exito('Configuración actualizada');
             } else {
                 toast.error(resp.error ?? 'No se pudo actualizar la configuración');
@@ -119,15 +140,19 @@ export function useHistorialLotes() {
         } finally {
             setGuardandoConfig(null);
         }
-    }, [cargarEstado]);
+    }, [cargarEstado, cargarHistorial, cargarProcesos]);
+
+    const refrescarTodo = useCallback(async () => {
+        await Promise.all([cargarEstado(), cargarHistorial(), cargarProcesos()]);
+    }, [cargarEstado, cargarHistorial, cargarProcesos]);
 
     useEffect(() => {
-        cargarEstado();
-        cargarHistorial();
-    }, [cargarEstado, cargarHistorial]);
+        refrescarTodo();
+    }, [refrescarTodo]);
 
     return {
         estado,
+        procesos,
         lotes,
         total,
         pagina,
@@ -138,7 +163,7 @@ export function useHistorialLotes() {
         guardandoConfig,
         forzandoProceso,
         error,
-        refrescar: cargarHistorial,
+        refrescar: refrescarTodo,
         refrescarEstado: cargarEstado,
         reactivar: manejarReactivar,
         forzarProceso,

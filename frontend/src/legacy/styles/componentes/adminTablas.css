@@ -276,6 +276,12 @@
     margin-top: var(--espacioXs);
 }
 
+.tarjetaEstadoRuntime {
+    font-size: var(--fuenteXs);
+    color: var(--textoTerciario);
+    margin-top: var(--espacio2xs, 4px);
+}
+
 .tarjetaEstadoControles {
     display: grid;
     grid-template-columns: minmax(130px, 1fr) minmax(96px, 120px) minmax(110px, 130px) auto;

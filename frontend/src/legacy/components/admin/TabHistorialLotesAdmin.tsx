@@ -68,6 +68,7 @@ export const TabHistorialLotesAdmin = (): JSX.Element => {
                         limiteLote={hist.estado.extraccion.limite_por_lote}
                         intervaloSegundos={hist.estado.extraccion.intervalo_segundos}
                         ultimoLote={hist.estado.extraccion.ultimo_lote}
+                        proceso={hist.procesos.extraccion}
                         reactivando={reactivando === 'extraccion'}
                         guardando={hist.guardandoConfig === 'extraccion'}
                         forzando={hist.forzandoProceso === 'extraccion'}
@@ -82,6 +83,7 @@ export const TabHistorialLotesAdmin = (): JSX.Element => {
                         limiteLote={hist.estado.scraping.limite_por_lote}
                         intervaloSegundos={hist.estado.scraping.intervalo_segundos}
                         ultimoLote={hist.estado.scraping.ultimo_lote}
+                        proceso={hist.procesos.scraping}
                         fallosConsecutivos={hist.estado.scraping.fallos_consecutivos}
                         reactivando={reactivando === 'scraping'}
                         guardando={hist.guardandoConfig === 'scraping'}

@@ -57,6 +57,14 @@ Para forzar una corrida manual, la UI usa el endpoint existente de procesos:
 
 Se envia el `limit` actual de la tarjeta para que la ejecucion manual respete el lote configurado.
 
+La UI tambien consulta `GET /api/admin/procesos` para distinguir entre:
+
+- automatizacion habilitada pero proceso detenido,
+- proceso corriendo sin lotes todavia,
+- proceso en error.
+
+Con ese cruce, `Proxima` ya no muestra `Pendiente de primer lote` cuando no hay evidencia suficiente. Si el proceso esta detenido, la tarjeta muestra `No programada: proceso detenido` y una linea adicional `Proceso: ...` para explicar el estado real.
+
 ## Borrado masivo de samples
 
 `DELETE /api/admin/samples/todos` devuelve:
