@@ -683,13 +683,38 @@ impl AdminProcessService {
     }
 
     fn read_log_tail(name: &str, lines: usize) -> Result<String, AppError> {
-        let path = Self::logs_dir().join(format!(
-            "{name}-output-{}.log",
-            Utc::now().format("%Y-%m-%d")
-        ));
-        if !path.exists() {
+        /* [294A-4] Buscar el archivo de log mas reciente que matchee
+         * `{name}-output-*.log` en lugar de depender del UTC date actual.
+         * Esto evita que el tail aparezca vacio cuando el archivo fue creado
+         * en otra fecha (ej: TZ shift, proceso largo cruzando medianoche, o
+         * date mismatch entre Utc::now() y la fecha local del filesystem). */
+        let logs_dir = Self::logs_dir();
+        if !logs_dir.exists() {
             return Ok(String::new());
         }
+        let prefix = format!("{name}-output-");
+        let entries = match fs::read_dir(&logs_dir) {
+            Ok(entries) => entries,
+            Err(_) => return Ok(String::new()),
+        };
+        let mut best: Option<(std::time::SystemTime, PathBuf)> = None;
+        for entry in entries.flatten() {
+            let path = entry.path();
+            let Some(file_name) = path.file_name().and_then(|n| n.to_str()) else {
+                continue;
+            };
+            if !file_name.starts_with(&prefix) || !file_name.ends_with(".log") {
+                continue;
+            }
+            let Ok(meta) = entry.metadata() else { continue };
+            let Ok(modified) = meta.modified() else { continue };
+            if best.as_ref().is_none_or(|(t, _)| modified > *t) {
+                best = Some((modified, path));
+            }
+        }
+        let Some((_, path)) = best else {
+            return Ok(String::new());
+        };
         let content = fs::read_to_string(&path)
             .map_err(|error| AppError::Internal(format!("No se pudo leer log: {error}")))?;
         let tail = content

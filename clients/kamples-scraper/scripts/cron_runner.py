@@ -43,9 +43,44 @@ def adquirir_lock(nombre: str) -> Path | None:
 
     if lock_path.exists():
         edad_seg = time.time() - lock_path.stat().st_mtime
-        if edad_seg > 6 * 3600:
+        # [294A-4] PID liveness check: si el proceso original ya no existe,
+        # el lock es stale aunque sea reciente. Esto evita el problema de que
+        # un proceso que se matara dejaba el lock bloqueando reintentos hasta 6h.
+        pid_vivo = False
+        try:
+            pid_str = lock_path.read_text(encoding="utf-8").strip()
+            if pid_str.isdigit():
+                pid = int(pid_str)
+                if sys.platform == "win32":
+                    import ctypes
+                    PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
+                    handle = ctypes.windll.kernel32.OpenProcess(
+                        PROCESS_QUERY_LIMITED_INFORMATION, False, pid
+                    )
+                    if handle:
+                        ctypes.windll.kernel32.CloseHandle(handle)
+                        pid_vivo = True
+                else:
+                    try:
+                        os.kill(pid, 0)
+                        pid_vivo = True
+                    except (OSError, ProcessLookupError):
+                        pid_vivo = False
+        except Exception:
+            pid_vivo = False
+
+        if not pid_vivo:
+            logger.warning("Lock stale detectado (PID muerto), eliminando: %s", lock_path)
+            try:
+                lock_path.unlink()
+            except OSError:
+                pass
+        elif edad_seg > 6 * 3600:
             logger.warning("Lock stale detectado (%.0fh), eliminando: %s", edad_seg / 3600, lock_path)
-            lock_path.unlink()
+            try:
+                lock_path.unlink()
+            except OSError:
+                pass
         else:
             return None
 

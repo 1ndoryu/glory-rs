@@ -609,6 +609,14 @@ def main():
 
                 if procesar_elemento(item, output_dir):
                     exitosos += 1
+                    # [294A-4] Publicacion incremental: disparar /publicar-auto despues
+                    # de cada item exitoso para que el sample aparezca en el feed
+                    # inmediatamente, en lugar de esperar a que termine el lote completo
+                    # (que puede no terminar si se interrumpe el proceso).
+                    try:
+                        notificar_publicacion(1)
+                    except Exception as exc:
+                        logger.warning("Publicacion incremental fallo: %s", exc)
                 else:
                     fallidos += 1
                     motivo = item.get("_motivo_fallo", "desconocido")
