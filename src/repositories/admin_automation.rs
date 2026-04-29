@@ -24,7 +24,91 @@ pub struct AutomationBatchRow {
     pub metadata: Option<serde_json::Value>,
 }
 
+#[derive(Debug, Clone)]
+pub struct AutomationBatchUpdate {
+    pub estado: String,
+    pub exitosos: i32,
+    pub fallidos: i32,
+    pub recortes: i32,
+    pub samples_publicados: i32,
+    pub canciones_nuevas: i32,
+    pub sampleos_nuevos: i32,
+    pub error_mensaje: Option<String>,
+    pub metadata: Option<serde_json::Value>,
+}
+
 impl AdminAutomationRepository {
+    pub async fn create_batch(
+        pool: &PgPool,
+        process_type: &str,
+        metadata: Option<serde_json::Value>,
+    ) -> Result<AutomationBatchRow, sqlx::Error> {
+        sqlx::query_as::<_, AutomationBatchRow>(
+            r"INSERT INTO lotes_procesamiento (
+                    tipo, estado, metadata
+                )
+                VALUES ($1, 'ejecutando', COALESCE($2, '{}'::jsonb))
+                RETURNING id, tipo, estado, iniciado_at, completado_at,
+                          exitosos, fallidos, recortes, samples_publicados,
+                          canciones_nuevas, sampleos_nuevos, error_mensaje, metadata",
+        )
+        .bind(process_type)
+        .bind(metadata)
+        .fetch_one(pool)
+        .await
+    }
+
+    pub async fn find_batch(
+        pool: &PgPool,
+        batch_id: i64,
+    ) -> Result<Option<AutomationBatchRow>, sqlx::Error> {
+        sqlx::query_as::<_, AutomationBatchRow>(
+            r"SELECT id, tipo, estado, iniciado_at, completado_at,
+                      exitosos, fallidos, recortes, samples_publicados,
+                      canciones_nuevas, sampleos_nuevos, error_mensaje, metadata
+                 FROM lotes_procesamiento
+                WHERE id = $1",
+        )
+        .bind(batch_id)
+        .fetch_optional(pool)
+        .await
+    }
+
+    pub async fn complete_batch(
+        pool: &PgPool,
+        batch_id: i64,
+        update: &AutomationBatchUpdate,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query(
+            r"UPDATE lotes_procesamiento
+                   SET estado = $2,
+                       completado_at = NOW(),
+                       exitosos = $3,
+                       fallidos = $4,
+                       recortes = $5,
+                       samples_publicados = $6,
+                       canciones_nuevas = $7,
+                       sampleos_nuevos = $8,
+                       error_mensaje = $9,
+                       metadata = COALESCE($10, metadata, '{}'::jsonb)
+                     WHERE id = $1",
+        )
+        .bind(batch_id)
+        .bind(&update.estado)
+        .bind(update.exitosos)
+        .bind(update.fallidos)
+        .bind(update.recortes)
+        .bind(update.samples_publicados)
+        .bind(update.canciones_nuevas)
+        .bind(update.sampleos_nuevos)
+        .bind(&update.error_mensaje)
+        .bind(&update.metadata)
+        .execute(pool)
+        .await?;
+
+        Ok(())
+    }
+
     pub async fn latest_batch(
         pool: &PgPool,
         process_type: &str,
@@ -47,8 +131,8 @@ impl AdminAutomationRepository {
         pool: &PgPool,
         process_type: &str,
     ) -> Result<i32, sqlx::Error> {
-        let rows: Vec<(String,)> = sqlx::query_as(
-            r"SELECT estado
+        let rows: Vec<(String, Option<String>)> = sqlx::query_as(
+            r"SELECT estado, error_mensaje
                  FROM lotes_procesamiento
                 WHERE tipo = $1
                 ORDER BY iniciado_at DESC
@@ -59,8 +143,11 @@ impl AdminAutomationRepository {
         .await?;
 
         let mut count = 0_i32;
-        for (status,) in rows {
+        for (status, error_message) in rows {
             if status == "error" {
+                if is_missing_report_error(error_message.as_deref()) {
+                    continue;
+                }
                 count += 1;
             } else {
                 break;
@@ -107,4 +194,11 @@ impl AdminAutomationRepository {
 
         Ok(total.0)
     }
+}
+
+fn is_missing_report_error(error_message: Option<&str>) -> bool {
+    error_message.is_some_and(|message| {
+        message.contains("termino sin reportar cierre")
+            || message.contains("terminó sin reportar cierre")
+    })
 }

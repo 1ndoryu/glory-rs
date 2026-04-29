@@ -21,6 +21,7 @@ use utoipa::ToSchema;
 
 use crate::errors::AppError;
 use crate::services::extraccion_publisher::{ExtraccionPublisherService, PublicarResultado};
+use crate::services::{AdminAutomationService, AutomationBatchReport};
 use crate::AppState;
 
 const HEADER_NAME: &str = "x-kamples-secret";
@@ -49,6 +50,12 @@ pub struct ReporteLoteRequest {
     pub fallidos: i64,
     #[serde(default)]
     pub recortes: Option<i64>,
+    #[serde(default)]
+    pub samples_publicados: Option<i64>,
+    #[serde(default)]
+    pub canciones_nuevas: Option<i64>,
+    #[serde(default)]
+    pub sampleos_nuevos: Option<i64>,
     #[serde(default)]
     pub metadata: Option<serde_json::Value>,
 }
@@ -133,9 +140,8 @@ pub async fn publicar_auto(
     }))
 }
 
-/// Recibe el reporte resumen de un lote del scraper. Por ahora solo
-/// loggea estructuradamente — la persistencia en `automatizacion_lotes`
-/// se implementará cuando esa tabla exista en este repo.
+/// Recibe el reporte resumen de un lote del scraper/extractor y lo persiste
+/// en `lotes_procesamiento`, actualizando tambien el auto-stop si aplica.
 #[utoipa::path(
     post,
     path = "/api/admin/scraper/reporte-lote",
@@ -170,6 +176,21 @@ pub async fn reporte_lote(
         motivos_fallo = ?motivos,
         "scraper reporte-lote recibido",
     );
+
+    AdminAutomationService::record_batch_report(
+        &state.pool,
+        AutomationBatchReport {
+            batch_id: payload.batch_id,
+            exitosos: payload.exitosos,
+            fallidos: payload.fallidos,
+            recortes: payload.recortes,
+            samples_publicados: payload.samples_publicados,
+            canciones_nuevas: payload.canciones_nuevas,
+            sampleos_nuevos: payload.sampleos_nuevos,
+            metadata: payload.metadata,
+        },
+    )
+    .await?;
 
     Ok(Json(ReporteLoteResponse {
         ok: true,

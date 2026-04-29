@@ -33,7 +33,7 @@ pub mod storage;
 mod stripe_service;
 mod token_store;
 
-pub use admin_automation::AdminAutomationService;
+pub use admin_automation::{AdminAutomationService, AutomationBatchReport};
 pub use admin_duplicates::AdminDuplicatesService;
 pub use admin_experiments::AdminExperimentsService;
 pub use admin_processes::AdminProcessService;

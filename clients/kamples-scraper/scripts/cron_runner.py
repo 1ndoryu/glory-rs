@@ -184,7 +184,7 @@ def _leer_spider_stats() -> dict:
 
 def reportar_lote_scraper(stats: dict) -> None:
     """
-    [223A-3] Reporta resultados del lote scraper al endpoint PHP.
+    [223A-3] Reporta resultados del lote scraper al backend Rust.
     Solo reporta si hay KAMPLES_BATCH_ID en env (lote automatico).
     """
     batch_id = os.environ.get("KAMPLES_BATCH_ID", "").strip()
@@ -192,10 +192,12 @@ def reportar_lote_scraper(stats: dict) -> None:
         return
 
     site_url = (
-        os.environ.get("KAMPLES_INTERNAL_URL", "").rstrip("/")
+        os.environ.get("BACKEND_URL", "").rstrip("/")
+        or os.environ.get("PUBLIC_BASE_URL", "").rstrip("/")
+        or os.environ.get("KAMPLES_INTERNAL_URL", "").rstrip("/")
         or os.environ.get("KAMPLES_SITE_URL", "").rstrip("/")
     )
-    secret = os.environ.get("KAMPLES_CRON_SECRET", "")
+    secret = os.environ.get("SCRAPER_SECRET", "") or os.environ.get("KAMPLES_CRON_SECRET", "")
 
     if not site_url or not secret:
         logger.warning("No se puede reportar lote scraper — URL/secret no configurados")
@@ -209,7 +211,7 @@ def reportar_lote_scraper(stats: dict) -> None:
         "sampleos_nuevos": stats.get("sampleos_nuevos", 0),
     }).encode("utf-8")
 
-    endpoint = f"{site_url}/wp-json/kamples/v1/admin/automatizacion/reporte-lote"
+    endpoint = f"{site_url}/api/admin/scraper/reporte-lote"
     try:
         req = urllib.request.Request(endpoint, method="POST", data=payload)
         req.add_header("Content-Type", "application/json")

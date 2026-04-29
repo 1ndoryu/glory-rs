@@ -1,8 +1,12 @@
 use glory_backend::config::AppConfig;
 use glory_backend::handlers;
+use std::sync::Arc;
+use tokio::task::JoinHandle;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 use utoipa::OpenApi;
+
+type AppError = Box<dyn std::error::Error>;
 
 type DeliveryRuntimes = (
     Option<glory_backend::services::PushDeliveryRuntime>,
@@ -10,9 +14,17 @@ type DeliveryRuntimes = (
     Option<glory_backend::services::EmailDeliveryRuntime>,
 );
 
+type BackgroundWorkerHandles = (
+    Vec<JoinHandle<()>>,
+    Vec<JoinHandle<()>>,
+    JoinHandle<()>,
+    JoinHandle<()>,
+    JoinHandle<()>,
+);
+
 #[tokio::main]
 #[allow(clippy::too_many_lines)] // bootstrap secuencial: env + pool + servicios + router
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+async fn main() -> Result<(), AppError> {
     dotenvy::dotenv().ok();
 
     /* [174A-108b] rustls 0.23 ya no auto-instala un CryptoProvider cuando hay
@@ -23,48 +35,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
      * estos clientes ya inicializó otro provider, ignoramos el error. */
     let _ = rustls::crypto::aws_lc_rs::default_provider().install_default();
 
-    /* [174A-6] CLI mínima: --emit-openapi <ruta> escribe el schema a disco
-     * y termina sin arrancar el servidor. Usado por el frontend (Orval)
-     * para regenerar el cliente sin necesidad de un backend corriendo. */
-    let args: Vec<String> = std::env::args().collect();
-    if let Some(idx) = args.iter().position(|a| a == "--emit-openapi") {
-        let path = args
-            .get(idx + 1)
-            .cloned()
-            .unwrap_or_else(|| "openapi.json".to_string());
-        let doc = handlers::ApiDoc::openapi();
-        let json = serde_json::to_string_pretty(&doc)?;
-        std::fs::write(&path, json)?;
-        println!("OpenAPI schema escrito en {path}");
+    if emit_openapi_if_requested()? {
         return Ok(());
     }
 
-    /* [174A-4] Tracing: EnvFilter (RUST_LOG) + formato. JSON si LOG_FORMAT=json,
-     * si no formato compacto con spans para correlacionar request_id. */
-    let env_filter = tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| {
-        tracing_subscriber::EnvFilter::new("glory_backend=debug,tower_http=info,sqlx=warn")
-    });
-
-    let registry = tracing_subscriber::registry().with(env_filter);
-
-    if std::env::var("LOG_FORMAT").as_deref() == Ok("json") {
-        registry
-            .with(
-                tracing_subscriber::fmt::layer()
-                    .json()
-                    .with_current_span(true)
-                    .with_span_list(false),
-            )
-            .init();
-    } else {
-        registry
-            .with(
-                tracing_subscriber::fmt::layer()
-                    .compact()
-                    .with_target(false),
-            )
-            .init();
-    }
+    init_tracing();
 
     let config = AppConfig::from_env()?;
 
@@ -96,10 +71,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     /* [174A-26+174A-27] Storage backend. STORAGE_BACKEND="local" usa LocalFs (default).
      * STORAGE_BACKEND="s3" requiere compilar con `--features s3` y env S3_BUCKET. */
-    let storage: std::sync::Arc<dyn glory_backend::services::FileStorage> = if config
-        .storage_backend
-        == "s3"
-    {
+    let storage: Arc<dyn glory_backend::services::FileStorage> = if config.storage_backend == "s3" {
         #[cfg(feature = "s3")]
         {
             let bucket = config
@@ -116,14 +88,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     } else {
         tracing::info!("Storage LocalFs en {}", config.storage_root);
-        std::sync::Arc::new(glory_backend::services::LocalFs::new(&config.storage_root).await?)
+        Arc::new(glory_backend::services::LocalFs::new(&config.storage_root).await?)
     };
 
-    let _audio_pipeline_workers =
-        glory_backend::workers::spawn_audio_pipeline_workers(&pool, &storage);
-    let _ia_queue_workers = glory_backend::workers::spawn_ia_queue_workers(&pool);
-    let _billing_cleanup_worker = glory_backend::workers::spawn_billing_cleanup_worker(&pool);
-    let _scraping_queue_worker = glory_backend::workers::spawn_scraping_queue_worker(&pool);
+    let _background_workers = spawn_background_workers(&pool, &storage);
 
     /* [174A-93+174A-96] AlgoPlanner periodic loop: refresca mv_trending_samples
      * (precompute_feeds) y recalcula user_tag_scores activos
@@ -132,7 +100,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let algo_planner = glory_backend::algorithm::AlgoPlanner::new(
         glory_backend::algorithm::AlgoPlannerConfig::legacy_defaults(),
     );
-    let _algo_planner_loop = std::sync::Arc::clone(&algo_planner).spawn_periodic_loop(
+    let _algo_planner_loop = Arc::clone(&algo_planner).spawn_periodic_loop(
         pool.clone(),
         redis.clone(),
         tokio_util::sync::CancellationToken::new(),
@@ -174,9 +142,69 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn init_delivery_runtimes(
-    config: &AppConfig,
-) -> Result<DeliveryRuntimes, Box<dyn std::error::Error>> {
+fn emit_openapi_if_requested() -> Result<bool, AppError> {
+    /* [174A-6] CLI mínima: --emit-openapi <ruta> escribe el schema a disco
+     * y termina sin arrancar el servidor. Usado por el frontend (Orval)
+     * para regenerar el cliente sin necesidad de un backend corriendo. */
+    let args: Vec<String> = std::env::args().collect();
+    let Some(idx) = args.iter().position(|a| a == "--emit-openapi") else {
+        return Ok(false);
+    };
+
+    let path = args
+        .get(idx + 1)
+        .cloned()
+        .unwrap_or_else(|| "openapi.json".to_string());
+    let doc = handlers::ApiDoc::openapi();
+    let json = serde_json::to_string_pretty(&doc)?;
+    std::fs::write(&path, json)?;
+    println!("OpenAPI schema escrito en {path}");
+    Ok(true)
+}
+
+fn init_tracing() {
+    /* [174A-4] Tracing: EnvFilter (RUST_LOG) + formato. JSON si LOG_FORMAT=json,
+     * si no formato compacto con spans para correlacionar request_id. */
+    let env_filter = tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| {
+        tracing_subscriber::EnvFilter::new("glory_backend=debug,tower_http=info,sqlx=warn")
+    });
+
+    let registry = tracing_subscriber::registry().with(env_filter);
+
+    if std::env::var("LOG_FORMAT").as_deref() == Ok("json") {
+        registry
+            .with(
+                tracing_subscriber::fmt::layer()
+                    .json()
+                    .with_current_span(true)
+                    .with_span_list(false),
+            )
+            .init();
+    } else {
+        registry
+            .with(
+                tracing_subscriber::fmt::layer()
+                    .compact()
+                    .with_target(false),
+            )
+            .init();
+    }
+}
+
+fn spawn_background_workers(
+    pool: &sqlx::PgPool,
+    storage: &Arc<dyn glory_backend::services::FileStorage>,
+) -> BackgroundWorkerHandles {
+    (
+        glory_backend::workers::spawn_audio_pipeline_workers(pool, storage),
+        glory_backend::workers::spawn_ia_queue_workers(pool),
+        glory_backend::workers::spawn_billing_cleanup_worker(pool),
+        glory_backend::workers::spawn_automation_worker(pool),
+        glory_backend::workers::spawn_scraping_queue_worker(pool),
+    )
+}
+
+fn init_delivery_runtimes(config: &AppConfig) -> Result<DeliveryRuntimes, AppError> {
     let push_runtime = glory_backend::services::PushDeliveryRuntime::from_config(config)?;
     if let Some(runtime) = push_runtime.as_ref() {
         tracing::info!(

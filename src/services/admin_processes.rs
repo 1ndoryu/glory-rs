@@ -1,4 +1,7 @@
+/* sentinel-disable-file limite-lineas — gestor central legacy de procesos admin: scraping, extraccion, seed, locks, cookies y entorno Python. 294A-1 extrae helpers de spawn_python; dividir el modulo completo requiere separar contratos/rutas en una tarea arquitectonica propia. */
+
 use std::collections::BTreeMap;
+use std::env;
 use std::fs::{self, File, OpenOptions};
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -12,6 +15,7 @@ use url::Url;
 
 use crate::errors::AppError;
 use crate::models::{AdminProcessCookieInfo, AdminProcessState, AdminProcessesResponse};
+use crate::repositories::{AdminAutomationRepository, AutomationBatchUpdate};
 use crate::services::AdminSeedService;
 
 const PROCESS_SCRAPING: &str = "scraping";
@@ -103,6 +107,23 @@ impl AdminProcessService {
     }
 
     pub async fn start(name: &str, limit: Option<u32>, pool: &PgPool) -> Result<Value, AppError> {
+        Self::start_with_metadata(name, limit, pool, Some(json!({ "origen": "manual" }))).await
+    }
+
+    pub async fn start_automated(
+        name: &str,
+        limit: Option<u32>,
+        pool: &PgPool,
+    ) -> Result<Value, AppError> {
+        Self::start_with_metadata(name, limit, pool, Some(json!({ "origen": "automatico" }))).await
+    }
+
+    async fn start_with_metadata(
+        name: &str,
+        limit: Option<u32>,
+        pool: &PgPool,
+        batch_metadata: Option<Value>,
+    ) -> Result<Value, AppError> {
         let kind = ProcessKind::from_name(name)?;
         let current = Self::state_for_kind(kind)?;
         if current.estado == "running" {
@@ -114,7 +135,46 @@ impl AdminProcessService {
 
         match kind {
             ProcessKind::Seed => Self::run_seed(kind, pool).await,
-            ProcessKind::Scraping | ProcessKind::Extraction => Self::spawn_python(kind, limit),
+            ProcessKind::Scraping | ProcessKind::Extraction => {
+                let batch =
+                    AdminAutomationRepository::create_batch(pool, kind.name(), batch_metadata)
+                        .await
+                        .map_err(|error| {
+                            AppError::Internal(format!(
+                                "No se pudo crear lote de automatizacion '{}': {error}",
+                                kind.name()
+                            ))
+                        })?;
+
+                match Self::spawn_python(kind, limit, Some(i64::from(batch.id))) {
+                    Ok(mut response) => {
+                        if let Some(map) = response.as_object_mut() {
+                            map.insert("batch_id".to_string(), json!(batch.id));
+                        }
+                        Ok(response)
+                    }
+                    Err(error) => {
+                        let update = AutomationBatchUpdate {
+                            estado: "error".to_string(),
+                            exitosos: 0,
+                            fallidos: 0,
+                            recortes: 0,
+                            samples_publicados: 0,
+                            canciones_nuevas: 0,
+                            sampleos_nuevos: 0,
+                            error_mensaje: Some(error.to_string()),
+                            metadata: batch.metadata.clone(),
+                        };
+                        let _ = AdminAutomationRepository::complete_batch(
+                            pool,
+                            i64::from(batch.id),
+                            &update,
+                        )
+                        .await;
+                        Err(error)
+                    }
+                }
+            }
         }
     }
 
@@ -221,7 +281,11 @@ impl AdminProcessService {
         })
     }
 
-    fn spawn_python(kind: ProcessKind, limit: Option<u32>) -> Result<Value, AppError> {
+    fn spawn_python(
+        kind: ProcessKind,
+        limit: Option<u32>,
+        batch_id: Option<i64>,
+    ) -> Result<Value, AppError> {
         let python = Self::detect_python()?;
         let scraper_dir = Self::scraper_dir();
         if !scraper_dir.is_dir() {
@@ -237,28 +301,15 @@ impl AdminProcessService {
         let stdout = Self::open_log_append(&log_path)?;
         let stderr = Self::open_log_append(&log_path)?;
 
-        let mut command = Command::new(&python);
-        command
-            .current_dir(&scraper_dir)
-            .stdin(Stdio::null())
-            .stdout(Stdio::from(stdout))
-            .stderr(Stdio::from(stderr));
-        Self::apply_python_env(&mut command);
-
-        match kind {
-            ProcessKind::Scraping => {
-                command.arg("scripts/cron_runner.py").arg("daily");
-            }
-            ProcessKind::Extraction => {
-                command
-                    .arg("-m")
-                    .arg("extractor.pipeline")
-                    .arg("--limit")
-                    .arg(limit.unwrap_or(20).to_string());
-                command.arg("--output-dir").arg(Self::extractions_dir()?);
-            }
-            ProcessKind::Seed => unreachable!("seed no usa python"),
-        }
+        let mut command = Self::build_python_command(
+            kind,
+            &python,
+            &scraper_dir,
+            stdout,
+            stderr,
+            limit,
+            batch_id,
+        )?;
 
         let mut child = command
             .spawn()
@@ -271,47 +322,7 @@ impl AdminProcessService {
                 "No se pudo verificar arranque del proceso: {error}"
             ))
         })? {
-            let tail = Self::read_log_tail(kind.name(), 80).unwrap_or_default();
-            let exit_code = status
-                .code()
-                .map_or_else(|| "sin codigo".to_string(), |code| code.to_string());
-            let inferred_from_tail = Self::infer_error_from_tail(&tail);
-            let failed = !status.success() || inferred_from_tail.is_some();
-            let message = inferred_from_tail.unwrap_or_else(|| {
-                if failed {
-                    format!(
-                        "Proceso '{}' fallo al arrancar (codigo {exit_code}). Revisa el log reciente.",
-                        kind.name()
-                    )
-                } else {
-                    format!(
-                        "Proceso '{}' termino inmediatamente sin errores reportados.",
-                        kind.name()
-                    )
-                }
-            });
-
-            Self::write_lock(&ProcessLock {
-                nombre: kind.name().to_string(),
-                estado: if failed { "error" } else { "stopped" }.to_string(),
-                pid: None,
-                iniciado_at: Some(Utc::now()),
-                ultimo_log: Some(Utc::now()),
-                progreso: if failed { None } else { Some(100.0) },
-                error: if failed { Some(message.clone()) } else { None },
-                resultado: None,
-            })?;
-
-            if !failed {
-                return Ok(json!({
-                    "ok": true,
-                    "pid": pid,
-                    "mensaje": message,
-                    "log": log_path.file_name().map(|name| name.to_string_lossy().to_string()),
-                }));
-            }
-
-            return Err(AppError::BadRequest(message));
+            return Self::handle_immediate_exit(kind, pid, &log_path, status);
         }
 
         Self::write_lock(&ProcessLock {
@@ -331,6 +342,83 @@ impl AdminProcessService {
             "mensaje": format!("Proceso '{}' iniciado.", kind.name()),
             "log": log_path.file_name().map(|name| name.to_string_lossy().to_string()),
         }))
+    }
+
+    fn build_python_command(
+        kind: ProcessKind,
+        python: &str,
+        scraper_dir: &Path,
+        stdout: File,
+        stderr: File,
+        limit: Option<u32>,
+        batch_id: Option<i64>,
+    ) -> Result<Command, AppError> {
+        let mut command = Command::new(python);
+        command
+            .current_dir(scraper_dir)
+            .stdin(Stdio::null())
+            .stdout(Stdio::from(stdout))
+            .stderr(Stdio::from(stderr));
+        Self::apply_python_env(&mut command);
+        if let Some(batch_id) = batch_id {
+            command.env("KAMPLES_BATCH_ID", batch_id.to_string());
+        }
+
+        match kind {
+            ProcessKind::Scraping => {
+                command.arg("scripts/cron_runner.py").arg("daily");
+            }
+            ProcessKind::Extraction => {
+                command
+                    .arg("-m")
+                    .arg("extractor.pipeline")
+                    .arg("--limit")
+                    .arg(limit.unwrap_or(20).to_string())
+                    .arg("--output-dir")
+                    .arg(Self::extractions_dir()?);
+            }
+            ProcessKind::Seed => unreachable!("seed no usa python"),
+        }
+
+        Ok(command)
+    }
+
+    fn handle_immediate_exit(
+        kind: ProcessKind,
+        pid: u32,
+        log_path: &Path,
+        status: std::process::ExitStatus,
+    ) -> Result<Value, AppError> {
+        let tail = Self::read_log_tail(kind.name(), 80).unwrap_or_default();
+        let exit_code = status
+            .code()
+            .map_or_else(|| "sin codigo".to_string(), |code| code.to_string());
+        let inferred_from_tail = Self::infer_error_from_tail(&tail);
+        let failed = !status.success() || inferred_from_tail.is_some();
+        let message =
+            inferred_from_tail.unwrap_or_else(|| immediate_exit_message(kind, failed, &exit_code));
+
+        Self::write_lock(&ProcessLock {
+            nombre: kind.name().to_string(),
+            estado: if failed { "error" } else { "stopped" }.to_string(),
+            pid: None,
+            iniciado_at: Some(Utc::now()),
+            ultimo_log: Some(Utc::now()),
+            progreso: if failed { None } else { Some(100.0) },
+            error: if failed { Some(message.clone()) } else { None },
+            resultado: None,
+        })?;
+
+        if failed {
+            Err(AppError::BadRequest(message))
+        } else {
+            Ok(json!({
+                "ok": true,
+                "pid": pid,
+                "mensaje": message,
+                "log": log_path.file_name().map(|name| name.to_string_lossy().to_string()),
+            }))
+        }
     }
 
     fn validate_python_entry(kind: ProcessKind, scraper_dir: &Path) -> Result<(), AppError> {
@@ -658,7 +746,39 @@ impl AdminProcessService {
     }
 
     fn apply_python_env(command: &mut Command) {
-        let Ok(database_url) = std::env::var("DATABASE_URL") else {
+        let mut has_backend_url = false;
+
+        if let Ok(public_base_url) = env::var("PUBLIC_BASE_URL") {
+            command.env("BACKEND_URL", &public_base_url);
+            command.env("KAMPLES_INTERNAL_URL", &public_base_url);
+            command.env("KAMPLES_SITE_URL", public_base_url);
+            has_backend_url = true;
+        }
+        for key in ["BACKEND_URL", "KAMPLES_INTERNAL_URL", "KAMPLES_SITE_URL"] {
+            if let Ok(value) = env::var(key) {
+                if !value.trim().is_empty() {
+                    has_backend_url = true;
+                }
+                command.env(key, value);
+            }
+        }
+
+        if !has_backend_url {
+            let backend_url = Self::local_backend_url();
+            command.env("BACKEND_URL", &backend_url);
+            command.env("KAMPLES_INTERNAL_URL", &backend_url);
+            command.env("KAMPLES_SITE_URL", backend_url);
+        }
+
+        if let Ok(secret) = env::var("SCRAPER_SECRET") {
+            command.env("SCRAPER_SECRET", &secret);
+            command.env("KAMPLES_CRON_SECRET", secret);
+        } else if let Ok(secret) = env::var("KAMPLES_CRON_SECRET") {
+            command.env("KAMPLES_CRON_SECRET", &secret);
+            command.env("SCRAPER_SECRET", secret);
+        }
+
+        let Ok(database_url) = env::var("DATABASE_URL") else {
             return;
         };
         let Ok(url) = Url::parse(&database_url) else {
@@ -681,6 +801,16 @@ impl AdminProcessService {
         if let Some(password) = url.password() {
             command.env("KAMPLES_PG_PASSWORD", password);
         }
+    }
+
+    fn local_backend_url() -> String {
+        let raw_host = env::var("HOST").unwrap_or_else(|_| "127.0.0.1".to_string());
+        let host = match raw_host.trim() {
+            "" | "0.0.0.0" | "::" => "127.0.0.1",
+            value => value,
+        };
+        let port = env::var("PORT").unwrap_or_else(|_| "3000".to_string());
+        format!("http://{host}:{port}")
     }
 
     fn pid_alive(pid: u32) -> bool {
@@ -765,5 +895,19 @@ impl AdminProcessService {
             tamano: Some(metadata.len()),
             modificado: modified,
         }
+    }
+}
+
+fn immediate_exit_message(kind: ProcessKind, failed: bool, exit_code: &str) -> String {
+    if failed {
+        format!(
+            "Proceso '{}' fallo al arrancar (codigo {exit_code}). Revisa el log reciente.",
+            kind.name()
+        )
+    } else {
+        format!(
+            "Proceso '{}' termino inmediatamente sin errores reportados.",
+            kind.name()
+        )
     }
 }

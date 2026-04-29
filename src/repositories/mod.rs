@@ -44,7 +44,7 @@ mod sync_changelog;
 mod sync_full;
 mod user;
 
-pub use admin_automation::{AdminAutomationRepository, AutomationBatchRow};
+pub use admin_automation::{AdminAutomationRepository, AutomationBatchRow, AutomationBatchUpdate};
 pub use admin_duplicates::{
     AdminDuplicatesRepository, BackfillSampleRow, DuplicateAdminRow, ExistingHashSampleRow,
 };

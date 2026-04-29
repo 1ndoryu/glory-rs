@@ -35,23 +35,47 @@ const formatearIntervalo = (segundos: number): string => {
     return `Cada ${segundos} s`;
 };
 
-const formatearEstadoProceso = (proceso: EstadoProceso | undefined): string => {
+const resumirError = (mensaje: string): string => (
+    mensaje.length > 120 ? `${mensaje.slice(0, 117)}...` : mensaje
+);
+
+const formatearEstadoProceso = (
+    activo: boolean,
+    proceso: EstadoProceso | undefined
+): string => {
+    if (!activo) return 'Automatización pausada';
+
     switch (proceso?.estado) {
     case 'running':
-        return 'Proceso corriendo';
+        return 'Lote en ejecución';
     case 'error':
-        return 'Proceso con error';
+        return 'Último arranque con error';
     case 'stopped':
-        return 'Proceso detenido';
+        return 'Sin ejecución en curso';
     default:
-        return 'Proceso sin diagnóstico';
+        return 'Scheduler habilitado';
     }
 };
 
-const formatearDetalleProceso = (proceso: EstadoProceso | undefined): string | null => {
+const formatearDetalleProceso = (
+    activo: boolean,
+    proceso: EstadoProceso | undefined,
+    ultimoLote: LoteResumen | null
+): string | null => {
     if (!proceso) return null;
     if (proceso.estado === 'running' && proceso.iniciado_at) {
         return `desde ${formatearFecha(proceso.iniciado_at)}`;
+    }
+    if (proceso.estado === 'error' && proceso.error) {
+        return resumirError(proceso.error);
+    }
+    if (activo && proceso.estado === 'stopped') {
+        if (proceso.ultimo_log) {
+            return `última salida ${formatearFecha(proceso.ultimo_log)}`;
+        }
+        return ultimoLote
+            ? 'esperando el próximo intervalo configurado'
+            : 'esperando el primer ciclo automático';
     }
     if (proceso.pid) {
         return `PID ${proceso.pid}`;
@@ -66,20 +90,24 @@ const formatearProximaEjecucion = (
     proceso: EstadoProceso | undefined
 ): string => {
     if (!activo) return 'Automatización pausada';
-    if (proceso?.estado === 'error') return 'No programada: proceso con error';
-    if (proceso?.estado === 'stopped') return 'No programada: proceso detenido';
-    if (!ultimoLote) {
-        if (proceso?.estado === 'running') return 'Esperando primer lote del proceso en ejecución';
-        return 'Sin lotes todavía; usa ejecutar ahora para probarlo';
+    if (proceso?.estado === 'running' || ultimoLote?.estado === 'ejecutando') {
+        return 'Al terminar el lote actual';
     }
-    if (ultimoLote.estado === 'ejecutando') return 'Al terminar el lote actual';
+    if (!ultimoLote) {
+        if (proceso?.estado === 'error') return 'Revisar error del último arranque y esperar reintento';
+        return 'Esperando el primer ciclo automático';
+    }
 
     const marcaBase = ultimoLote.completado_at ?? ultimoLote.iniciado_at;
-    if (!marcaBase) return 'Pendiente de próximo ciclo';
+    if (!marcaBase) return 'Pendiente del próximo ciclo automático';
 
     const proximaFecha = new Date(new Date(marcaBase).getTime() + (intervaloSegundos * 1000));
-    if (Number.isNaN(proximaFecha.getTime())) return 'Pendiente de próximo ciclo';
-    if (proximaFecha.getTime() <= Date.now()) return 'Disponible para ejecutar ahora';
+    if (Number.isNaN(proximaFecha.getTime())) return 'Pendiente del próximo ciclo automático';
+    if (proximaFecha.getTime() <= Date.now()) {
+        return proceso?.estado === 'error'
+            ? 'Atrasada: revisar error del último arranque'
+            : 'Disponible para ejecutar ahora';
+    }
     return formatearFecha(proximaFecha.toISOString());
 };
 
@@ -128,11 +156,11 @@ export function useAutomationProcessCard({
         intervaloActual,
         configInvalida,
         hayCambios,
-        estadoProcesoLegible: formatearEstadoProceso(proceso),
-        detalleProcesoLegible: formatearDetalleProceso(proceso),
+        estadoProcesoLegible: formatearEstadoProceso(activo, proceso),
+        detalleProcesoLegible: formatearDetalleProceso(activo, proceso, ultimoLote),
         intervaloLegible: formatearIntervalo(intervaloSegundos),
         ultimoLoteLegible: formatearFecha(ultimoLote?.iniciado_at ?? null),
-        proximaEjecucionLegible: formatearProximaEjecucion(enabled, intervaloActual, ultimoLote, proceso),
+        proximaEjecucionLegible: formatearProximaEjecucion(activo, intervaloSegundos, ultimoLote, proceso),
         setEnabled,
         setLote,
         setIntervalo,

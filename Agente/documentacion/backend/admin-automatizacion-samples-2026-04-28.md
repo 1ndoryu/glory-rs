@@ -63,7 +63,21 @@ La UI tambien consulta `GET /api/admin/procesos` para distinguir entre:
 - proceso corriendo sin lotes todavia,
 - proceso en error.
 
-Con ese cruce, `Proxima` ya no muestra `Pendiente de primer lote` cuando no hay evidencia suficiente. Si el proceso esta detenido, la tarjeta muestra `No programada: proceso detenido` y una linea adicional `Proceso: ...` para explicar el estado real.
+Con ese cruce, `Proxima` ya no muestra `Pendiente de primer lote` cuando no hay evidencia suficiente. Si el proceso no esta corriendo en ese instante pero la automatizacion sigue habilitada, la tarjeta muestra `Sin ejecucion en curso` y explica si esta esperando el siguiente intervalo o el primer ciclo automatico.
+
+## Worker automatico Rust y reporte de lotes
+
+El scheduler real vive en `workers::spawn_automation_worker` y ejecuta `AdminAutomationService::run_due()` cada 15 segundos. Ese metodo revisa `extraccion_enabled`/`scraping_enabled`, el ultimo lote y el intervalo configurado antes de lanzar un proceso nuevo.
+
+Cuando se lanza extracción o scraping desde el scheduler o desde el boton play, `AdminProcessService` crea primero un registro `lotes_procesamiento` en estado `ejecutando` y pasa `KAMPLES_BATCH_ID` al proceso Python. El proceso Python reporta su cierre a:
+
+```text
+POST /api/admin/scraper/reporte-lote
+```
+
+Para que el reporte funcione en local sin configurar URLs duplicadas, Rust deriva automaticamente `BACKEND_URL` desde `HOST`/`PORT` (`http://127.0.0.1:3000` por defecto) cuando no existe `BACKEND_URL`, `KAMPLES_INTERNAL_URL`, `KAMPLES_SITE_URL` o `PUBLIC_BASE_URL`. El secreto se toma de `SCRAPER_SECRET` o `KAMPLES_CRON_SECRET` y se pasa al proceso hijo como ambos nombres para conservar compatibilidad legacy.
+
+Gotcha operacional: si un proceso termina sin reportar cierre, eso indica fallo de telemetria, no necesariamente fallo de scraping/extraccion. Rust marca ese lote como `detenido` cuando el proceso no reporto error, y los lotes historicos con `termino sin reportar cierre` no inflan `fallos_consecutivos`.
 
 ## Borrado masivo de samples
 

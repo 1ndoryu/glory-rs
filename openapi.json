@@ -2810,8 +2810,8 @@
         "tags": [
           "scraper"
         ],
-        "summary": "Recibe el reporte resumen de un lote del scraper. Por ahora solo",
-        "description": "loggea estructuradamente — la persistencia en `automatizacion_lotes`\nse implementará cuando esa tabla exista en este repo.",
+        "summary": "Recibe el reporte resumen de un lote del scraper/extractor y lo persiste",
+        "description": "en `lotes_procesamiento`, actualizando tambien el auto-stop si aplica.",
         "operationId": "reporte_lote",
         "requestBody": {
           "content": {
@@ -19589,6 +19589,11 @@
             "type": "integer",
             "format": "int64"
           },
+          "canciones_nuevas": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
           "exitosos": {
             "type": "integer",
             "format": "int64"
@@ -19601,6 +19606,16 @@
             "nullable": true
           },
           "recortes": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "sampleos_nuevos": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "samples_publicados": {
             "type": "integer",
             "format": "int64",
             "nullable": true
