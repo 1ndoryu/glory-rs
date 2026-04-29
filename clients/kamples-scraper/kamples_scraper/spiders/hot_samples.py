@@ -57,6 +57,15 @@ class HotSamplesSpider(scrapy.Spider):
         entries = response.css("li.listEntry")
         logger.info("Pagina %s: %d entries encontrados", response.url, len(entries))
 
+        # Si la pagina 1 no tiene entries, la IP del proxy probablemente paso CF
+        # con status 403 en el warm-up — WhoSampled sirve pagina vacia para IPs sospechosas.
+        if len(entries) == 0 and "/2" not in response.url and "/3" not in response.url:
+            logger.warning(
+                "AVISO: 0 entries en %s — posible IP de proxy bloqueada por Cloudflare "
+                "(body_size=%d bytes). Warm-up con mala IP devuelve pagina sin contenido.",
+                response.url, len(response.body),
+            )
+
         for entry in entries:
             # Link al detalle (en span.sampleLink > a)
             detail_href = entry.css("span.sampleLink a::attr(href)").get()

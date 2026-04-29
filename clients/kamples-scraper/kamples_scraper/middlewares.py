@@ -43,41 +43,76 @@ class CurlCffiDownloaderMiddleware:
         else:
             middleware.proxies = None
 
+        # Sesion por defecto (puede ser reemplazada por _warmup si obtiene 200)
         middleware.session = curl_requests.Session(impersonate="chrome")
         crawler._curl_session = middleware.session
         crawler._curl_proxies = middleware.proxies
-
+        middleware._warmup_ok = False
         middleware._warmup(crawler)
         return middleware
+
+    # Numero maximo de intentos de warm-up (cada intento usa una nueva IP del proxy)
+    WARMUP_MAX_ATTEMPTS = 5
 
     def _warmup(self, crawler):
         """
         Request inicial a la homepage para establecer cookies de sesion
-        y pasar posibles challenges de Cloudflare antes del scraping real.
+        y pasar el challenge de Cloudflare antes del scraping real.
+
+        Reintenta hasta WARMUP_MAX_ATTEMPTS veces con nuevas sesiones (= nuevas IPs
+        del proxy rotativo DataImpulse) hasta obtener HTTP 200 limpio.
+        Solo cuando obtiene 200 fija self.session para que los requests del spider
+        reutilicen la misma conexion (y por tanto la misma IP del proxy).
         """
-        try:
-            resp = self.session.get(
-                WARMUP_URL,
-                proxies=self.proxies,
-                timeout=30,
-                allow_redirects=True,
-            )
-            if resp.status_code == 200:
-                logger.info(
-                    "Warm-up OK: status=%d, cookies=%d",
-                    resp.status_code,
-                    len(self.session.cookies),
+        for attempt in range(1, self.WARMUP_MAX_ATTEMPTS + 1):
+            session_candidate = curl_requests.Session(impersonate="chrome")
+            try:
+                resp = session_candidate.get(
+                    WARMUP_URL,
+                    proxies=self.proxies,
+                    timeout=30,
+                    allow_redirects=True,
                 )
-            else:
+                if resp.status_code == 200:
+                    self.session = session_candidate
+                    crawler._curl_session = self.session
+                    crawler._curl_proxies = self.proxies
+                    self._warmup_ok = True
+                    logger.info(
+                        "Warm-up OK (intento %d/%d): status=200, cookies=%d",
+                        attempt, self.WARMUP_MAX_ATTEMPTS,
+                        len(self.session.cookies),
+                    )
+                    return
+                else:
+                    logger.warning(
+                        "Warm-up intento %d/%d: status=%d (posible CF challenge, "
+                        "probando nueva IP...)",
+                        attempt, self.WARMUP_MAX_ATTEMPTS, resp.status_code,
+                    )
+            except Exception as exc:
+                # [294A-3] Detectar 407 — credenciales proxy invalidas, no reintentar
+                err_str = str(exc)
+                if "407" in err_str or "ProxyError" in type(exc).__name__:
+                    logger.error(
+                        "Proxy auth 407 — credenciales DataImpulse invalidas o expiradas. "
+                        "Regenerar en https://dataimpulse.com. Error: %s",
+                        exc,
+                    )
+                    return  # 407 no se resuelve reintentando
                 logger.warning(
-                    "Warm-up con status inesperado: %d. "
-                    "Posible problema de proxy o Cloudflare challenge.",
-                    resp.status_code,
+                    "Warm-up intento %d/%d fallo: %s",
+                    attempt, self.WARMUP_MAX_ATTEMPTS, exc,
                 )
-        except Exception:
-            logger.exception(
-                "Warm-up fallo. Verificar proxy y conectividad."
-            )
+
+        # Todos los intentos fallaron — usar session de ultimo intento de todas formas
+        logger.error(
+            "Warm-up fallo %d intentos. El spider puede no obtener contenido de las listas. "
+            "Verifique la calidad del pool de IPs en DataImpulse.",
+            self.WARMUP_MAX_ATTEMPTS,
+        )
+        # self.session queda como fue creado en from_crawler (sin inicializar a warmup)
+        # Los requests del spider seguiran pero probablemente obtendran paginas vacias
 
     def process_request(self, request):
         """

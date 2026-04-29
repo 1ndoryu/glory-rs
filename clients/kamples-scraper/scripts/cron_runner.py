@@ -15,6 +15,7 @@ import argparse
 import json
 import logging
 import os
+import socket
 import subprocess
 import sys
 import time
@@ -61,6 +62,40 @@ def liberar_lock(lock_path: Path) -> None:
         logger.exception("Error eliminando lock %s", lock_path)
 
 
+def verificar_proxy() -> tuple[bool, str]:
+    """
+    [294A-3] Health-check rapido del proxy antes de lanzar scrapy.
+    Hace un CONNECT HTTP/1.1 al gateway y comprueba que no devuelva 407.
+    Evita lanzar 18 requests fallidas y deja el error claro en el log.
+    """
+    host = os.environ.get("PROXY_HOST", "")
+    port = int(os.environ.get("PROXY_PORT", "823"))
+    user = os.environ.get("PROXY_USER", "")
+    password = os.environ.get("PROXY_PASSWORD", "")
+
+    if not host or not user or not password:
+        return True, ""  # Sin proxy configurado — modo directo
+
+    try:
+        import base64
+        credentials = base64.b64encode(f"{user}:{password}".encode()).decode()
+        connect_req = (
+            f"CONNECT www.whosampled.com:443 HTTP/1.1\r\n"
+            f"Host: www.whosampled.com:443\r\n"
+            f"Proxy-Authorization: Basic {credentials}\r\n"
+            f"Proxy-Connection: Keep-Alive\r\n\r\n"
+        )
+        with socket.create_connection((host, port), timeout=15) as sock:
+            sock.sendall(connect_req.encode())
+            response = sock.recv(1024).decode(errors="replace")
+        if "200" in response:
+            return True, ""
+        first_line = response.split("\r\n")[0] if response else "sin respuesta"
+        return False, f"Proxy rechazo CONNECT: {first_line}"
+    except Exception as exc:
+        return False, f"Proxy no alcanzable: {exc}"
+
+
 def ejecutar_daily() -> int:
     """Ejecutar spider de scraping diario."""
     LOGS_DIR.mkdir(exist_ok=True)
@@ -83,6 +118,29 @@ def ejecutar_daily() -> int:
         f"--logfile={log_file}",
         "-s", "LOG_LEVEL=INFO",
     ]
+
+    # [294A-3] Verificar proxy antes de lanzar scrapy; abortar limpio en 407
+    proxy_ok, proxy_err = verificar_proxy()
+    if not proxy_ok:
+        logger.error(
+            "Proxy no disponible — scrapy abortado. %s"
+            " Regenerar credenciales en DataImpulse.",
+            proxy_err,
+        )
+        # Escribir stats con entries_total=0 para que contar_stats_scraper
+        # lo registre como fallo y reporte al backend correctamente
+        try:
+            stats_file.write_text(
+                json.dumps({
+                    'entries_total': 0, 'entries_skipped': 0,
+                    'entries_new': 0, 'close_reason': 'proxy_error',
+                    'proxy_error': proxy_err,
+                }),
+                encoding='utf-8',
+            )
+        except OSError:
+            pass
+        return 1
 
     logger.info("Ejecutando: %s", " ".join(cmd))
     result = subprocess.run(cmd, cwd=str(PROJECT_DIR), timeout=3600, env=env)
@@ -153,11 +211,18 @@ def contar_stats_scraper(desde: datetime) -> dict:
                 entries_total,
             )
         elif entries_total == 0:
-            # Spider no encontró entries — posible cambio de selectores o bloqueo
+            # Spider no encontró entries — posible cambio de selectores, bloqueo o proxy inválido
             fallidos = 1
-            logger.warning(
-                "Spider no encontró ningún entry en las páginas de listas"
-            )
+            proxy_err = spider_stats.get('proxy_error', '')
+            if spider_stats.get('close_reason') == 'proxy_error' or proxy_err:
+                logger.error(
+                    "Proxy auth fallida — %s. Regenerar credenciales DataImpulse.",
+                    proxy_err or 'ver log del spider',
+                )
+            else:
+                logger.warning(
+                    "Spider no encontró ningún entry en las páginas de listas"
+                )
 
     return {
         "canciones_nuevas": canciones,
