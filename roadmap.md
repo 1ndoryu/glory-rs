@@ -61,7 +61,10 @@
 7. Newtypes para IDs de dominio (`SampleId`, `UserId`, `ColeccionId`...).
 8. Cero parches: si el diseÃ±o PHP era subÃ³ptimo, rediseÃ±ar â€” no portar deuda tÃ©cnica.
 
-### Pendientes derivados de auditorías
+## Pendiente
+
+- admin/panel/ al recargar debería abrir la tab que estaba abierta no regresar al principio
+- 
 
 - Remplazar el daw que hicimos, por https://github.com/andremichelle/opendaw, requiere revisar el daw a actual para ver como estaba integrado, y hacer un plan de las integraciones necesaria (como que un sample se pudiera arrastrar y soltar), el daw actual es muy pobre y malo, por eso vamos a cambiar a opendaw, tienes que hacer un fork en mi cuenta 1ndoryu. **Plan:** `Agente/planes/plan-opendaw-2026-04-25.md` — bloqueado en fase 0 (fork manual del usuario en `1ndoryu/opendaw`).
 

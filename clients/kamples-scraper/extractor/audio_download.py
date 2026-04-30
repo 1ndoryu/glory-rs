@@ -879,6 +879,7 @@ def _descargar_youtube(
         "--file-access-retries", "3",
         "--no-check-certificates",
         "--socket-timeout", "30",
+        "--remote-components", "ejs:github",
         "--js-runtimes", "node",
     ]
 
@@ -1066,6 +1067,7 @@ def _ejecutar_ytsearch(
             "--extractor-retries", "2",
             "--no-check-certificates",
             "--socket-timeout", "30",
+            "--remote-components", "ejs:github",
             "--js-runtimes", "node",
             *(cookies_args),
             *(["--proxy", proxy_url] if proxy_url else []),

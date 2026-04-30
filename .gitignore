@@ -51,3 +51,13 @@ glory-rs/
 
 backups/
 
+# Locks de procesos en runtime (estado volatile, no versionar)
+logs/*.lock
+
+# Scraper: temporales de debug, estado runtime y credenciales
+clients/kamples-scraper/_*.py
+clients/kamples-scraper/_*.html
+clients/kamples-scraper/cookies.txt
+clients/kamples-scraper/.last_spider_stats.json
+clients/kamples-scraper/extractor/.rate_limiter_state
+
