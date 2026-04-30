@@ -89,7 +89,7 @@ async fn procesar_una(pool: &PgPool, client: &reqwest::Client) -> Result<bool, s
          LIMIT 1
         ",
     )
-    .bind(f64::from(COOLDOWN_DAYS))
+    .bind(COOLDOWN_DAYS)
     .fetch_optional(pool)
     .await?;
 
