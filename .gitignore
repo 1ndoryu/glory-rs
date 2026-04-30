@@ -46,3 +46,6 @@ prerendered/
 # Directorios de otras ramas del repo que viven en el mismo directorio físico
 /clients
 /backups
+
+# Junction local que apunta a colors del tema WP — solo existe en dev (de kamples)
+/frontend/public/legacy-assets/colors/
