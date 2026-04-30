@@ -1,6 +1,7 @@
 mod audio_pipeline_worker;
 mod automation_worker;
 mod billing_cleanup_worker;
+mod cancion_image_enricher_worker;
 mod ia_queue_worker;
 mod scraping_queue_worker;
 
@@ -13,5 +14,6 @@ mod scraping_queue_worker;
 pub use audio_pipeline_worker::{spawn_audio_pipeline_workers, AudioPipelineWorker};
 pub use automation_worker::spawn_automation_worker;
 pub use billing_cleanup_worker::spawn_billing_cleanup_worker;
+pub use cancion_image_enricher_worker::spawn_cancion_image_enricher_worker;
 pub use ia_queue_worker::{spawn_ia_queue_workers, IaQueueWorker};
 pub use scraping_queue_worker::spawn_scraping_queue_worker;

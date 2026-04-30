@@ -20,6 +20,7 @@ type BackgroundWorkerHandles = (
     JoinHandle<()>,
     JoinHandle<()>,
     JoinHandle<()>,
+    JoinHandle<()>,
 );
 
 #[tokio::main]
@@ -201,6 +202,7 @@ fn spawn_background_workers(
         glory_backend::workers::spawn_billing_cleanup_worker(pool),
         glory_backend::workers::spawn_automation_worker(pool),
         glory_backend::workers::spawn_scraping_queue_worker(pool),
+        glory_backend::workers::spawn_cancion_image_enricher_worker(pool),
     )
 }
 

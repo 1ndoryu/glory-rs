@@ -82,6 +82,21 @@ pub async fn register_play(
     body.validate()
         .map_err(|err| AppError::Validation(err.to_string()))?;
 
+    /* [304A-1] Validar existencia del sample antes de tocar `reproducciones`.
+     * Sin esto, el INSERT explota con `reproducciones_sample_id_fkey` y devuelve
+     * 500 al frontend, que cachea IDs de samples ya borrados (p. ej. tras un wipe
+     * de la cola de extraccion). 404 es la respuesta correcta. */
+    let exists: Option<(i32,)> =
+        sqlx::query_as("SELECT id FROM samples WHERE id = $1 AND eliminado_en IS NULL")
+            .bind(sample_id)
+            .fetch_optional(&state.pool)
+            .await?;
+    if exists.is_none() {
+        return Err(AppError::NotFound(format!(
+            "sample {sample_id} no existe"
+        )));
+    }
+
     /* TODO(174A-58 follow-up): rate limit 60/min por usuario cuando exista
      * RateLimiter global. Mientras tanto el debounce de 3s mitiga abuso. */
 
