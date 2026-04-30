@@ -1,4 +1,5 @@
 use crate::audio::ia::json_repairer::AudioCreativeMetadata;
+use crate::audio::ia::prompts::AudioExtractionContext;
 use crate::repositories::{ApplyAudioIaMetadataParams, AudioIaSample, SampleRepository};
 use crate::services::{
     AudioIaAnalysisRequest, AudioIaAnalysisResult, AudioIaProvider, AudioIaService,
@@ -147,7 +148,34 @@ fn build_analysis_request(sample: &AudioIaSample, job_metadata: &Value) -> Audio
         duration_seconds: Some(sample.duration_seconds),
         upload_origin: metadata_string(job_metadata, "origen_subida")
             .or_else(|| metadata_string(&sample.metadata, "origen_subida")),
-        extraction_context: None,
+        extraction_context: build_extraction_context(&sample.metadata),
+    }
+}
+
+/* [294A-6] Reconstruye el contexto de extraccion (fuente/destino/tipo) que el
+ * scraper Python guardo en `samples.metadata.extraccion`. El legacy PHP usaba
+ * exactamente este bloque para enriquecer el prompt del LLM y producir titulos
+ * y descripciones especificas del sampleo (ver PromptsIA::construirAnalisis). */
+fn build_extraction_context(metadata: &Value) -> Option<AudioExtractionContext> {
+    let raw = metadata.get("extraccion").filter(|v| v.is_object())?;
+    let context = AudioExtractionContext {
+        source_title: metadata_string(raw, "fuente_titulo"),
+        source_artist: metadata_string(raw, "fuente_artista"),
+        destination_title: metadata_string(raw, "destino_titulo"),
+        destination_artist: metadata_string(raw, "destino_artista"),
+        element_type: metadata_string(raw, "tipo_elemento"),
+        vote_count: raw
+            .get("votos_total")
+            .and_then(Value::as_u64)
+            .and_then(|value| u32::try_from(value).ok()),
+    };
+    if context.source_title.is_some()
+        || context.destination_title.is_some()
+        || context.element_type.is_some()
+    {
+        Some(context)
+    } else {
+        None
     }
 }
 

@@ -693,9 +693,8 @@ impl AdminProcessService {
             return Ok(String::new());
         }
         let prefix = format!("{name}-output-");
-        let entries = match fs::read_dir(&logs_dir) {
-            Ok(entries) => entries,
-            Err(_) => return Ok(String::new()),
+        let Ok(entries) = fs::read_dir(&logs_dir) else {
+            return Ok(String::new());
         };
         let mut best: Option<(std::time::SystemTime, PathBuf)> = None;
         for entry in entries.flatten() {
@@ -703,7 +702,11 @@ impl AdminProcessService {
             let Some(file_name) = path.file_name().and_then(|n| n.to_str()) else {
                 continue;
             };
-            if !file_name.starts_with(&prefix) || !file_name.ends_with(".log") {
+            if !file_name.starts_with(&prefix)
+                || !Path::new(file_name)
+                    .extension()
+                    .is_some_and(|ext| ext.eq_ignore_ascii_case("log"))
+            {
                 continue;
             }
             let Ok(meta) = entry.metadata() else { continue };

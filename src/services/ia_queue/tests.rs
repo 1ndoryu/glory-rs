@@ -74,3 +74,39 @@ fn prepared_update_preserves_existing_manual_folders() {
     assert_eq!(update.metadata["ia_carpeta_secundaria"], json!("House"));
     assert_eq!(update.metadata["ia_pending"], json!(false));
 }
+
+#[test]
+fn extraction_context_builds_from_metadata_block() {
+    let metadata = json!({
+        "origen_subida": "Extracciones",
+        "extraccion": {
+            "fuente_titulo": "Strings of Life",
+            "fuente_artista": "Derrick May",
+            "destino_titulo": "Inner City",
+            "destino_artista": "Big Fun",
+            "tipo_elemento": "drums",
+            "votos_total": 17,
+        }
+    });
+
+    let context = build_extraction_context(&metadata).expect("context should be built");
+
+    assert_eq!(context.source_title.as_deref(), Some("Strings of Life"));
+    assert_eq!(context.source_artist.as_deref(), Some("Derrick May"));
+    assert_eq!(context.destination_title.as_deref(), Some("Inner City"));
+    assert_eq!(context.destination_artist.as_deref(), Some("Big Fun"));
+    assert_eq!(context.element_type.as_deref(), Some("drums"));
+    assert_eq!(context.vote_count, Some(17));
+}
+
+#[test]
+fn extraction_context_is_none_without_extraccion_block() {
+    let metadata = json!({ "origen_subida": "Packs/House" });
+    assert!(build_extraction_context(&metadata).is_none());
+}
+
+#[test]
+fn extraction_context_is_none_when_block_lacks_useful_fields() {
+    let metadata = json!({ "extraccion": { "votos_total": 5 } });
+    assert!(build_extraction_context(&metadata).is_none());
+}
