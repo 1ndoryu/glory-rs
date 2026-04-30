@@ -149,7 +149,19 @@ pub async fn inspect_audio_file(
     let binaries = binaries.cloned().unwrap_or_else(FFmpegBinaries::detect);
     let format = detect_audio_format(input_path, format_hint)?;
     let file_size_bytes = std::fs::metadata(input_path)?.len();
-    let mut symphonia_probe = probe_with_symphonia(input_path, format_hint)?;
+
+    /* [294A-5] Symphonia decode/probe es CPU-bound y bloquea el runtime
+     * tokio cuando se invoca directamente desde un async fn. Eso causa
+     * starvation del reactor: ffprobe/ffmpeg lanzados antes/despues fallan
+     * con "task was cancelled" porque sus tareas I/O no avanzan.
+     * Solucion: ejecutar Symphonia siempre en spawn_blocking. */
+    let mut symphonia_probe = {
+        let path = input_path.to_path_buf();
+        let hint = format_hint.map(str::to_owned);
+        tokio::task::spawn_blocking(move || probe_with_symphonia(&path, hint.as_deref()))
+            .await
+            .map_err(|error| AudioError::Symphonia(format!("join probe: {error}")))??
+    };
 
     if let Some(ffprobe_path) = binaries.ffprobe() {
         match probe_duration_with_ffprobe(ffprobe_path, input_path).await {
@@ -168,11 +180,23 @@ pub async fn inspect_audio_file(
             Ok(peaks) => peaks,
             Err(error) => {
                 tracing::warn!(path = %input_path.display(), ?error, "ffmpeg no pudo generar waveform; se usa Symphonia");
-                waveform_peaks_with_symphonia(input_path, format_hint, DEFAULT_WAVEFORM_BARS)?
+                let path = input_path.to_path_buf();
+                let hint = format_hint.map(str::to_owned);
+                tokio::task::spawn_blocking(move || {
+                    waveform_peaks_with_symphonia(&path, hint.as_deref(), DEFAULT_WAVEFORM_BARS)
+                })
+                .await
+                .map_err(|error| AudioError::Symphonia(format!("join waveform: {error}")))??
             }
         }
     } else {
-        waveform_peaks_with_symphonia(input_path, format_hint, DEFAULT_WAVEFORM_BARS)?
+        let path = input_path.to_path_buf();
+        let hint = format_hint.map(str::to_owned);
+        tokio::task::spawn_blocking(move || {
+            waveform_peaks_with_symphonia(&path, hint.as_deref(), DEFAULT_WAVEFORM_BARS)
+        })
+        .await
+        .map_err(|error| AudioError::Symphonia(format!("join waveform: {error}")))??
     };
 
     Ok(AudioMetadata {
@@ -510,8 +534,10 @@ async fn waveform_peaks_with_ffmpeg(
     let samples_per_bar = usize::max(1, total_samples.div_ceil(bars));
 
     for (index, chunk) in bytes.chunks_exact(2).enumerate() {
-        let amplitude =
-            f32::from(i16::from_le_bytes([chunk[0], chunk[1]]).abs()) / f32::from(i16::MAX);
+        // [294A-5] i16::MIN.abs() overflowa (panic en debug, UB conceptual en
+        // release). unsigned_abs() devuelve u16 y cubre todo el rango.
+        let raw = i16::from_le_bytes([chunk[0], chunk[1]]);
+        let amplitude = f32::from(raw.unsigned_abs()) / f32::from(i16::MAX);
         let bucket = usize::min(index / samples_per_bar, bars - 1);
         peaks[bucket] = peaks[bucket].max(amplitude.min(1.0_f32));
     }

@@ -392,6 +392,32 @@ impl SampleRepository {
 
         Ok(())
     }
+
+    /// [294A-5] Marca un sample como duplicado (soft-delete) cuando se detecta
+    /// conflicto de `audio_hash` durante la activación. El audio_hash es UNIQUE
+    /// en samples activos/en_supervisión, así que el scraper puede generar
+    /// duplicados que no son errores reales: simplemente ya existe el sample.
+    pub async fn mark_sample_as_duplicate(
+        pool: &PgPool,
+        sample_id: i32,
+        metadata: serde_json::Value,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query!(
+            "UPDATE samples
+             SET estado = 'eliminado',
+                 eliminado_en = NOW(),
+                 metadata = COALESCE(metadata, '{}'::jsonb) || $2,
+                 updated_at = NOW()
+             WHERE id = $1
+               AND eliminado_en IS NULL",
+            sample_id,
+            metadata,
+        )
+        .execute(pool)
+        .await?;
+
+        Ok(())
+    }
 }
 
 /* [254A-8c-refactor] SampleAssetRow / ReplaceAudioAssetsParams /

@@ -234,21 +234,30 @@ impl AudioPipelineService {
         workspace: &Path,
         progress: &mut PipelineProgress,
     ) -> Result<AudioPipelineResult, AudioPipelineError> {
+        // [294A-5] Logs por etapa para diagnostico de cuellos de botella.
+        let started = std::time::Instant::now();
+        tracing::debug!(sample_id = sample.id, "pipeline: materialize_original");
         let input_path = self
             .materialize_original(sample, workspace, progress)
             .await?;
+        tracing::debug!(sample_id = sample.id, elapsed_secs = started.elapsed().as_secs_f64(), "pipeline: analyze_original");
         let (inspected, bpm_analysis, key_analysis) =
             self.analyze_original(sample, &input_path, progress).await?;
+        tracing::debug!(sample_id = sample.id, elapsed_secs = started.elapsed().as_secs_f64(), "pipeline: persist_analysis");
         let analysis =
             build_technical_analysis(&inspected, bpm_analysis.as_ref(), key_analysis.as_ref());
         progress.analysis = Some(analysis.clone());
         self.persist_analysis(sample, progress, &analysis).await?;
+        tracing::debug!(sample_id = sample.id, elapsed_secs = started.elapsed().as_secs_f64(), "pipeline: waveform");
         self.generate_and_store_waveform(sample, progress, &inspected)
             .await?;
+        tracing::debug!(sample_id = sample.id, elapsed_secs = started.elapsed().as_secs_f64(), "pipeline: optimized_mp3");
         self.generate_and_store_optimized_mp3(sample, &input_path, workspace, progress)
             .await?;
+        tracing::debug!(sample_id = sample.id, elapsed_secs = started.elapsed().as_secs_f64(), "pipeline: activate_sample");
         let embedding = Self::build_embedding(sample, &analysis, progress);
         self.activate_sample(sample, progress, &embedding).await?;
+        tracing::info!(sample_id = sample.id, elapsed_secs = started.elapsed().as_secs_f64(), "pipeline: completado");
 
         Ok(AudioPipelineResult {
             sample_id: sample.id,
@@ -482,7 +491,7 @@ impl AudioPipelineService {
             object.insert("ia_enqueued_at".to_owned(), json!(Utc::now()));
         }
 
-        SampleRepository::complete_audio_pipeline(
+        let result = SampleRepository::complete_audio_pipeline(
             &self.pool,
             CompleteAudioPipelineParams {
                 sample_id: sample.id,
@@ -494,10 +503,42 @@ impl AudioPipelineService {
                 }),
             },
         )
-        .await
-        .map_err(|error| map_activation_error(&error))
-    }
-}
+        .await;
+
+        match result {
+            Ok(()) => Ok(()),
+            Err(error) if is_unique_violation(&error) => {
+                /* [294A-5] El scraper genera samples con audio_hash duplicado
+                 * (mismo source ya procesado). En lugar de marcar error_final,
+                 * lo soft-deleteamos y cerramos el job como completado: no es
+                 * un fallo real, simplemente el contenido ya existe. */
+                let dup_meta = json!({
+                    "audio_pipeline_duplicate": true,
+                    "duplicate_detected_at": Utc::now(),
+                    "duplicate_reason": "audio_hash_conflict",
+                });
+                if let Err(err) = SampleRepository::mark_sample_as_duplicate(
+                    &self.pool,
+                    sample.id,
+                    dup_meta,
+                )
+                .await
+                {
+                    tracing::warn!(
+                        sample_id = sample.id,
+                        error = %err,
+                        "no se pudo marcar sample duplicado tras conflicto de audio_hash"
+                    );
+                }
+                tracing::info!(
+                    sample_id = sample.id,
+                    "pipeline: sample marcado como duplicado por audio_hash"
+                );
+                Ok(())
+            }
+            Err(error) => Err(map_activation_error(&error)),
+        }
+    }}
 
 fn build_technical_analysis(
     inspected: &AudioMetadata,

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE samples\n             SET estado = 'eliminado',\n                 eliminado_en = NOW(),\n                 metadata = COALESCE(metadata, '{}'::jsonb) || $2,\n                 updated_at = NOW()\n             WHERE id = $1\n               AND eliminado_en IS NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "cb9093545186acff7fd2eb80a018e76b2a674e3ec33ba0f626a6336f7e805734"
+}

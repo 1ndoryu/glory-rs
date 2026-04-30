@@ -66,6 +66,12 @@ ITEM_PIPELINES = {
 RETRY_TIMES = 5
 RETRY_HTTP_CODES = [403, 429, 500, 502, 503, 520]
 
+# --- [294A-5] Spider auto-close: previene que el subprocess se cuelgue mas
+# de 1h por proxy lento o CF challenges. Cierre suave a los 50min, dejando
+# 10min al subprocess para reportar. ---
+CLOSESPIDER_TIMEOUT = int(os.getenv("SCRAPY_CLOSESPIDER_TIMEOUT", "3000"))
+DOWNLOAD_TIMEOUT = int(os.getenv("SCRAPY_DOWNLOAD_TIMEOUT", "60"))
+
 # --- Dedup ---
 DUPEFILTER_CLASS = "scrapy.dupefilters.RFPDupeFilter"
 

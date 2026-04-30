@@ -52,7 +52,36 @@ impl AudioPipelineWorker {
 
         loop {
             match ProcessingQueueRepository::claim_next_audio_analysis(&self.pool).await {
-                Ok(Some(job)) => self.process_job(job).await,
+                Ok(Some(job)) => {
+                    /* [294A-5] Aislamos process_job en una tarea spawn para que un
+                     * panic dentro del pipeline (p.ej. overflow en analisis de audio)
+                     * no mate al worker. JoinError se traduce a un fallo retryable. */
+                    let job_id = job.id;
+                    let sample_id = job.sample_id;
+                    let worker = self.clone();
+                    let join = tokio::spawn(async move { worker.process_job(job).await });
+                    if let Err(error) = join.await {
+                        tracing::error!(
+                            worker = self.worker_index,
+                            job_id,
+                            sample_id,
+                            ?error,
+                            "panic en process_job; reagendando job",
+                        );
+                        if let Err(repo_error) =
+                            ProcessingQueueRepository::reset_audio_job_to_pending(&self.pool, job_id)
+                                .await
+                        {
+                            tracing::error!(
+                                worker = self.worker_index,
+                                job_id,
+                                %repo_error,
+                                "no se pudo reagendar job tras panic"
+                            );
+                            sleep(ERROR_POLL_INTERVAL).await;
+                        }
+                    }
+                }
                 Ok(None) => sleep(IDLE_POLL_INTERVAL).await,
                 Err(error) => {
                     tracing::error!(worker = self.worker_index, %error, "error reclamando job de audio pipeline");

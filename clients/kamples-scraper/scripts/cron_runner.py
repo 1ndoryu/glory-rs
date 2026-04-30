@@ -178,7 +178,10 @@ def ejecutar_daily() -> int:
         return 1
 
     logger.info("Ejecutando: %s", " ".join(cmd))
-    result = subprocess.run(cmd, cwd=str(PROJECT_DIR), timeout=3600, env=env)
+    # [294A-5] timeout 2h (antes 1h): scrapy con proxy lento + reintentos CF
+    # puede tardar mas de una hora en lotes con muchas paginas. El spider
+    # tiene su propio CLOSESPIDER_TIMEOUT (settings.py) como freno suave.
+    result = subprocess.run(cmd, cwd=str(PROJECT_DIR), timeout=7200, env=env)
     return result.returncode
 
 

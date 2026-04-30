@@ -23,6 +23,13 @@ impl ProcessingQueueRepository {
     pub async fn claim_next_audio_analysis(
         pool: &PgPool,
     ) -> Result<Option<QueuedAudioProcessingJob>, sqlx::Error> {
+        /* [294A-5] Recuperacion de jobs zombie: si un job queda en 'procesando'
+         * por mas de 15 minutos sin actualizar `procesado_at` (heartbeat), el
+         * backend probablemente fue matado a mitad del job. Lo reclamamos para
+         * reintentar. El claim ahora setea `procesado_at = NOW()` como
+         * heartbeat inicial, asi otro worker no lo roba mientras el primero
+         * lo procesa legitimamente (los jobs largos rara vez exceden 15m;
+         * ajustar si fuera necesario). */
         sqlx::query_as!(
             QueuedAudioProcessingJob,
             "WITH picked AS (
@@ -33,13 +40,15 @@ impl ProcessingQueueRepository {
                   AND (
                     estado = 'pendiente'
                     OR (estado = 'error_reintento' AND (proximo_intento IS NULL OR proximo_intento <= NOW()))
+                    OR (estado = 'procesando' AND procesado_at IS NOT NULL AND procesado_at < NOW() - INTERVAL '15 minutes')
                   )
                 ORDER BY created_at ASC
                 FOR UPDATE SKIP LOCKED
                 LIMIT 1
             )
             UPDATE cola_procesamiento_ia AS cola
-            SET estado = 'procesando'
+            SET estado = 'procesando',
+                procesado_at = NOW()
             FROM picked
             WHERE cola.id = picked.id
             RETURNING
@@ -64,6 +73,27 @@ impl ProcessingQueueRepository {
                  ultimo_error = NULL,
                  proximo_intento = NULL,
                  procesado_at = NOW()
+             WHERE id = $1",
+            job_id,
+        )
+        .execute(pool)
+        .await?;
+
+        Ok(())
+    }
+
+    /* [294A-5] Reagendar un job que fue interrumpido por un panic. No incrementa
+     * intentos para no penalizar al sample por un bug del worker. */
+    pub async fn reset_audio_job_to_pending(
+        pool: &PgPool,
+        job_id: i32,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query!(
+            "UPDATE cola_procesamiento_ia
+             SET estado = 'pendiente',
+                 procesado_at = NULL,
+                 ultimo_error = 'reagendado tras panic del worker',
+                 proximo_intento = NOW() + INTERVAL '30 seconds'
              WHERE id = $1",
             job_id,
         )
