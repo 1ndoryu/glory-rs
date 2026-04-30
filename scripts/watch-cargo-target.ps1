@@ -1,5 +1,5 @@
 <#
-[264A-1] Vigilante liviano del target de Cargo para sesiones largas de `npm run dev`.
+[264A-1][304A-2] Vigilante liviano de los target dirs de Cargo para sesiones largas de `npm run dev`.
 
 Problema: `postdev` solo limpia al cerrar la sesión. Si el backend recompila muchas veces,
 el target puede seguir creciendo durante horas.
@@ -13,6 +13,9 @@ Estrategia:
 [264A-2] Fix de carrera: la primera versión corría la poda inmediatamente al arrancar
 `npm run dev`. Si `cargo` ya había tomado el target pero todavía no aparecía `rustc`,
 la limpieza podía pelearse con `.fingerprint/` y romper la compilación.
+
+[304A-2] Ya no observa solo `C:\tmp\glory-target`: ahora descubre también target dirs
+auxiliares como `C:\tmp\glory-openapi-target`, que antes crecían sin ningún límite.
 #>
 
 param(
@@ -20,12 +23,31 @@ param(
     [int]$StartupDelaySeconds = 120,
     [int]$MaxTotalMB = 4096,
     [switch]$RunOnce,
-    [switch]$DryRun
+    [switch]$DryRun,
+    [string[]]$TargetDirs
 )
 
 $ErrorActionPreference = 'Continue'
-$targetDir = 'C:\tmp\glory-target'
 $cleanScript = Join-Path $PSScriptRoot 'clean-cargo-target.ps1'
+
+function Get-ManagedTargetDirs {
+    $defaults = @(
+        'C:\tmp\glory-target',
+        'C:\tmp\glory-openapi-target'
+    )
+
+    $discovered = @()
+    if (Test-Path 'C:\tmp') {
+        $discovered = Get-ChildItem 'C:\tmp' -Directory -ErrorAction SilentlyContinue |
+            Where-Object { $_.Name -like 'glory*-target' } |
+            Select-Object -ExpandProperty FullName
+    }
+
+    return @($TargetDirs + $defaults + $discovered) |
+        Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
+        ForEach-Object { $_.TrimEnd('\') } |
+        Select-Object -Unique
+}
 
 function Get-DirSizeMB($path) {
     if (-not (Test-Path $path)) { return 0 }
@@ -46,30 +68,33 @@ function Test-CompileRunning {
 }
 
 function Invoke-PruneIfNeeded {
-    if (-not (Test-Path $targetDir)) {
-        Write-Host "[watch-cargo] $targetDir no existe."
+    $managedTargetDirs = Get-ManagedTargetDirs | Where-Object { Test-Path $_ }
+    if (-not $managedTargetDirs) {
+        Write-Host '[watch-cargo] No hay target dirs gestionados activos.'
         return
     }
 
-    $totalMB = Get-DirSizeMB $targetDir
-    Write-Host "[watch-cargo] target=$totalMB MB (cap=$MaxTotalMB MB)"
+    foreach ($targetDir in $managedTargetDirs) {
+        $totalMB = Get-DirSizeMB $targetDir
+        Write-Host "[watch-cargo] $targetDir = $totalMB MB (cap=$MaxTotalMB MB)"
 
-    if ($totalMB -le $MaxTotalMB) {
-        return
+        if ($totalMB -le $MaxTotalMB) {
+            continue
+        }
+
+        if (Test-CompileRunning) {
+            Write-Host '[watch-cargo] cargo/rustc activo; salto esta pasada para no pelear con la compilacion.'
+            return
+        }
+
+        $args = @('-ExecutionPolicy', 'Bypass', '-File', $cleanScript, '-Hard', '-MaxTotalMB', $MaxTotalMB, '-TargetDirs', $targetDir)
+        if ($DryRun) {
+            $args += '-DryRun'
+        }
+
+        Write-Host "[watch-cargo] cap superado en $targetDir; ejecutando limpieza -Hard de incremental/."
+        & powershell @args
     }
-
-    if (Test-CompileRunning) {
-        Write-Host '[watch-cargo] cargo/rustc activo; salto esta pasada para no pelear con la compilacion.'
-        return
-    }
-
-    $args = @('-ExecutionPolicy', 'Bypass', '-File', $cleanScript, '-Hard', '-MaxTotalMB', $MaxTotalMB)
-    if ($DryRun) {
-        $args += '-DryRun'
-    }
-
-    Write-Host '[watch-cargo] cap superado; ejecutando limpieza -Hard de incremental/.'
-    & powershell @args
 }
 
 if (-not $RunOnce) {

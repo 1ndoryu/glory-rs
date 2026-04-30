@@ -126,3 +126,53 @@ pedantic = { level = "warn", priority = -1 }
 module_name_repetitions = "allow"
 missing_errors_doc = "allow"
 missing_panics_doc = "allow"
+
+# [294A-1] Perfiles afinados para acelerar compilaciones.
+# Dev: minimizar trabajo del backend del compilador y del linker.
+#  - opt-level=0 nuestro código (compila instantáneo).
+#  - debug=1 (line tables only) en vez de "true" (=2): -50% tamaño binario,
+#    linker mucho más rápido. Stack traces siguen siendo útiles.
+#  - split-debuginfo=unpacked: el linker no embebe los .pdb, los deja aparte
+#    (en Windows MSVC reduce mucho el tiempo de link).
+#  - incremental=true ya es el default en dev, lo dejamos explícito.
+[profile.dev]
+opt-level = 0
+debug = 1
+debug-assertions = true
+overflow-checks = true
+incremental = true
+codegen-units = 256
+split-debuginfo = "unpacked"
+
+# Dependencias en dev compiladas con opt-level=1: se compilan UNA vez y
+# corren mucho más rápido en runtime (sqlx, tokio, hashing). Solo afecta a
+# crates externos, no a nuestro código (que sigue en opt=0).
+[profile.dev.package."*"]
+opt-level = 1
+debug = false
+
+# Tests: igual que dev pero deshabilita incremental para evitar invalidaciones
+# falsas cuando se mezcla `cargo test` con `cargo run`.
+[profile.test]
+opt-level = 0
+debug = 1
+
+# Release: LTO thin (+~5% perf, mucho más rápido que LTO=true), 16 codegen
+# units para paralelizar mejor el backend, strip de símbolos para imagen
+# Docker más pequeña.
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 16
+strip = "symbols"
+debug = false
+incremental = false
+
+# Perfil intermedio para builds CI/Docker rápidos sin renunciar a optimización
+# básica. Útil para staging o smoke-tests de imagen Docker.
+# Uso: `cargo build --profile release-fast --bin glory-backend`.
+[profile.release-fast]
+inherits = "release"
+lto = false
+codegen-units = 256
+opt-level = 2

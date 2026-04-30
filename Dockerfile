@@ -33,20 +33,49 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         cmake \
         perl \
         build-essential \
+        lld \
     && rm -rf /var/lib/apt/lists/*
 
-# Copiar manifests y vendored sources primero para cachear deps
+# [294A-1] Linker rápido (lld) para Linux. Reduce 30-60s en cada link de
+# release. Compatible con todas las deps actuales.
+ENV RUSTFLAGS="-C link-arg=-fuse-ld=lld"
+
+# ---------------------------------------------------------------------------
+# [294A-1] Capa 1: build solo de dependencias (cacheable).
+# Truco "cargo-chef manual": copiamos únicamente los Cargo.toml + un main.rs
+# vacío, hacemos build de release, y luego invalidamos sólo nuestro código.
+# Cuando solo cambia src/, esta capa se reutiliza y el rebuild tarda
+# minutos en lugar de 10+ minutos (compilar ~600 crates).
+# ---------------------------------------------------------------------------
 COPY Cargo.toml Cargo.lock rust-toolchain.toml ./
+COPY glory-rs/backend/Cargo.toml ./glory-rs/backend/Cargo.toml
+
+# Stub mínimo para que `cargo build` resuelva el grafo y compile deps.
+RUN mkdir -p src glory-rs/backend/src && \
+    echo 'fn main() { println!("stub"); }' > src/main.rs && \
+    echo '' > glory-rs/backend/src/lib.rs
+
+ENV SQLX_OFFLINE=true
+ENV CARGO_TERM_COLOR=always
+
+# Build de dependencias. Cacheamos registry y git de cargo, NO el target/
+# (lección: deploy-lessons.md "Docker BuildKit Mount Cache CRITICAL").
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/usr/local/cargo/git \
+    cargo build --release --bin glory-backend ; \
+    rm -rf src glory-rs/backend/src
+
+# ---------------------------------------------------------------------------
+# Capa 2: build real con nuestro código fuente.
+# ---------------------------------------------------------------------------
 COPY .sqlx ./.sqlx
 COPY glory-rs ./glory-rs
 COPY migrations ./migrations
 COPY src ./src
 
-# SQLX_OFFLINE=true fuerza a las macros sqlx::query! a leer .sqlx/*.json
-# en lugar de conectarse a la BD durante el build. Sin esto, el build
-# fallaría porque el contenedor de build no tiene DATABASE_URL.
-ENV SQLX_OFFLINE=true
-ENV CARGO_TERM_COLOR=always
+# touch para forzar a cargo a recompilar SOLO nuestros crates (las deps
+# precompiladas en la capa anterior siguen cacheadas en target/).
+RUN find src glory-rs/backend/src -name '*.rs' -exec touch {} +
 
 RUN --mount=type=cache,target=/usr/local/cargo/registry \
     --mount=type=cache,target=/usr/local/cargo/git \
