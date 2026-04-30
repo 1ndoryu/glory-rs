@@ -42,3 +42,7 @@ extracted/
 !/scripts/run-cargo.mjs
 prerendered/
 .cargo/config.toml
+
+# Directorios de otras ramas del repo que viven en el mismo directorio físico
+/clients
+/backups
