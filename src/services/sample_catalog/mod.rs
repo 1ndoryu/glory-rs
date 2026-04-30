@@ -8,7 +8,7 @@ use crate::models::{
 };
 use crate::repositories::{
     OwnedSampleRecord, ReportRepository, SampleCatalogDetailRecord, SampleCatalogSummaryRecord,
-    SampleListFilters, SampleRepository, SampleTextSearch, UpdateSamplePatch,
+    SampleListFilters, SampleRepository, SampleSortOrder, SampleTextSearch, UpdateSamplePatch,
     AUTO_HIDE_SAMPLE_REPORT_THRESHOLD,
 };
 
@@ -401,6 +401,7 @@ fn normalize_filters(
         tags,
         premium: query.premium,
         creator,
+        sort: SampleSortOrder::Smart,
     })
 }
 

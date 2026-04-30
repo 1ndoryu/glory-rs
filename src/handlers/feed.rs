@@ -25,8 +25,12 @@ use crate::errors::AppError;
 use crate::errors::ErrorResponse;
 use crate::middleware::CurrentUser;
 use crate::models::SampleSummary;
-use crate::repositories::{ReportRepository, AUTO_HIDE_SAMPLE_REPORT_THRESHOLD};
+use crate::repositories::{
+    ReportRepository, SampleListFilters, SampleRepository, SampleSortOrder, SampleTextSearch,
+    AUTO_HIDE_SAMPLE_REPORT_THRESHOLD,
+};
 use crate::services::SampleCatalogService;
+use crate::services::build_sample_summary;
 use crate::AppState;
 
 #[derive(Debug, Clone, Deserialize, IntoParams)]
@@ -35,6 +39,16 @@ pub struct FeedQuery {
     pub limit: Option<i64>,
     /// Offset desde 0. Default: 0.
     pub offset: Option<i64>,
+    /// Pagina 1-based (legacy). Si se envia, gana sobre `offset`.
+    pub page: Option<i64>,
+    /// Alias legado de `limit`.
+    pub per_page: Option<i64>,
+    /// Modo del feed: `descubrir` (default), `recientes`, `trending`.
+    pub tipo: Option<String>,
+    /// Busqueda full-text (legado).
+    pub busqueda: Option<String>,
+    /// Variante normalizada de la busqueda (sinonimos del frontend).
+    pub busqueda_norm: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, ToSchema)]
@@ -50,12 +64,57 @@ const DEFAULT_LIMIT_USIZE: usize = 20;
 const MAX_LIMIT: i64 = 100;
 
 fn normalize_pagination(query: &FeedQuery) -> (usize, usize) {
-    let limit = query.limit.unwrap_or(DEFAULT_LIMIT).clamp(1, MAX_LIMIT);
-    let offset = query.offset.unwrap_or(0).max(0);
+    /* Acepta `limit` o `per_page` (alias legacy). */
+    let raw_limit = query.limit.or(query.per_page).unwrap_or(DEFAULT_LIMIT);
+    let limit = raw_limit.clamp(1, MAX_LIMIT);
+    /* `page` (1-based) tiene precedencia sobre `offset` para paridad con el
+     * cliente legacy que envia ambos en la misma request. */
+    let offset = match query.page {
+        Some(page) if page >= 1 => (page - 1) * limit,
+        _ => query.offset.unwrap_or(0).max(0),
+    };
     (
         usize::try_from(limit).unwrap_or(DEFAULT_LIMIT_USIZE),
         usize::try_from(offset).unwrap_or(0),
     )
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum FeedMode {
+    Descubrir,
+    Recientes,
+    Trending,
+}
+
+fn parse_feed_mode(raw: Option<&str>) -> FeedMode {
+    match raw.map(str::trim).map(str::to_ascii_lowercase).as_deref() {
+        Some("recientes") => FeedMode::Recientes,
+        Some("trending" | "destacados") => FeedMode::Trending,
+        _ => FeedMode::Descubrir,
+    }
+}
+
+fn build_text_search(
+    query: &FeedQuery,
+) -> Result<Option<SampleTextSearch>, AppError> {
+    let Some(raw) = query.busqueda.as_ref() else {
+        return Ok(None);
+    };
+    let trimmed = raw.trim();
+    if trimmed.is_empty() {
+        return Ok(None);
+    }
+    if trimmed.chars().count() < 2 {
+        return Err(AppError::Validation(
+            "busqueda debe tener al menos 2 caracteres".into(),
+        ));
+    }
+    let normalized = query
+        .busqueda_norm
+        .as_ref()
+        .map(|v| v.trim().to_ascii_lowercase())
+        .filter(|v| !v.is_empty() && v != &trimmed.to_ascii_lowercase());
+    Ok(Some(SampleTextSearch::new(trimmed.to_string(), normalized)))
 }
 
 #[utoipa::path(
@@ -74,30 +133,82 @@ pub async fn get_feed(
     Query(query): Query<FeedQuery>,
 ) -> Result<Json<FeedResponse>, AppError> {
     let (limit, offset) = normalize_pagination(&query);
-    let config = RecommenderConfig::legacy_defaults();
-    let ranked_items = RecommenderService::feed(
-        state.pool.clone(),
-        state.redis.clone(),
-        current_user.user_id,
-        limit,
-        offset,
-        &config,
-    )
-    .await?;
-    let hay_mas = ranked_items.len() == limit;
-    let visible_ranked_items =
-        filter_hidden_samples(&state, current_user.user_id, ranked_items).await?;
-    let sample_ids = visible_ranked_items
-        .iter()
-        .map(|item| item.id)
-        .collect::<Vec<_>>();
-    let items = SampleCatalogService::list_public_samples_by_ids(
-        &state.pool,
-        state.public_base_url.as_deref(),
-        Some(current_user.user_id),
-        &sample_ids,
-    )
-    .await?;
+    let mode = parse_feed_mode(query.tipo.as_deref());
+    let search = build_text_search(&query)?;
+
+    /* [304A-2] Solo el modo "descubrir" sin busqueda activa pasa por el motor
+     * de recomendacion. Recientes/trending y cualquier busqueda usan el listado
+     * publico estandar con ordenamiento explicito. Antes este handler ignoraba
+     * `tipo` por completo y los 3 botones del UI devolvian lo mismo. */
+    let use_recommender = matches!(mode, FeedMode::Descubrir) && search.is_none();
+
+    if use_recommender {
+        let config = RecommenderConfig::legacy_defaults();
+        let ranked_items = RecommenderService::feed(
+            state.pool.clone(),
+            state.redis.clone(),
+            current_user.user_id,
+            limit,
+            offset,
+            &config,
+        )
+        .await?;
+        let hay_mas = ranked_items.len() == limit;
+        let visible_ranked_items =
+            filter_hidden_samples(&state, current_user.user_id, ranked_items).await?;
+        let sample_ids = visible_ranked_items
+            .iter()
+            .map(|item| item.id)
+            .collect::<Vec<_>>();
+        let items = SampleCatalogService::list_public_samples_by_ids(
+            &state.pool,
+            state.public_base_url.as_deref(),
+            Some(current_user.user_id),
+            &sample_ids,
+        )
+        .await?;
+        return Ok(Json(FeedResponse {
+            items,
+            limit: i64::try_from(limit).unwrap_or(DEFAULT_LIMIT),
+            offset: i64::try_from(offset).unwrap_or(0),
+            hay_mas,
+        }));
+    }
+
+    /* Recientes / trending / busqueda → SampleListFilters con sort explicito.
+     * `page` se calcula desde el offset normalizado para reusar la paginacion
+     * 1-based del repositorio sin duplicar logica. */
+    let page = (i64::try_from(offset).unwrap_or(0) / i64::try_from(limit).unwrap_or(DEFAULT_LIMIT))
+        + 1;
+    let sort = match mode {
+        FeedMode::Trending => SampleSortOrder::Trending,
+        FeedMode::Recientes => SampleSortOrder::Recent,
+        FeedMode::Descubrir => SampleSortOrder::Smart,
+    };
+    let filters = SampleListFilters {
+        page,
+        per_page: i64::try_from(limit).unwrap_or(DEFAULT_LIMIT),
+        viewer_id: Some(current_user.user_id),
+        search,
+        bpm: None,
+        music_key: None,
+        sample_type: None,
+        tags: Vec::new(),
+        premium: None,
+        creator: None,
+        sort,
+    };
+    let result = SampleRepository::list_public_samples(&state.pool, &filters).await?;
+    let total = result.total;
+    let items: Vec<SampleSummary> = result
+        .items
+        .into_iter()
+        .map(|record| {
+            build_sample_summary(record, state.public_base_url.as_deref())
+        })
+        .collect();
+    let hay_mas = (i64::try_from(offset).unwrap_or(0) + i64::try_from(items.len()).unwrap_or(0))
+        < total;
 
     Ok(Json(FeedResponse {
         items,

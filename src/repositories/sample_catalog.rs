@@ -20,6 +20,24 @@ use query::{
  * concentra upload, deduplicación y pipeline. El query queda encapsulado acá
  * porque comparte joins, filtros base y ordenamiento estable. */
 
+/* [304A-2] Modos de ordenamiento del feed publico.
+ * - `Smart`: equivalente al "inteligente" del legacy cuando NO hay busqueda
+ *   (publicado_at DESC con tiebreakers); cuando hay busqueda, ranking FTS.
+ * - `Recent`: estricto por `publicado_at DESC` — boton "Recientes" del UI.
+ * - `Trending`: por engagement (descargas + likes*2 + reproducciones) DESC —
+ *   boton "Destacados" del UI.
+ *
+ * Antes del 304A-2 el handler `/api/feed` ignoraba el parametro `tipo` y los
+ * tres botones del frontend (Inteligente/Recientes/Destacados) devolvian
+ * exactamente lo mismo. Esto restaura paridad con el legacy PHP. */
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub enum SampleSortOrder {
+    #[default]
+    Smart,
+    Recent,
+    Trending,
+}
+
 #[derive(Debug, Clone)]
 pub struct SampleListFilters {
     pub page: i64,
@@ -32,6 +50,7 @@ pub struct SampleListFilters {
     pub tags: Vec<String>,
     pub premium: Option<bool>,
     pub creator: Option<String>,
+    pub sort: SampleSortOrder,
 }
 
 #[derive(Debug, Clone)]

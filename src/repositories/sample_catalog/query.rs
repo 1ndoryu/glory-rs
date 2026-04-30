@@ -2,7 +2,7 @@ use chrono::{DateTime, Utc};
 use serde_json::Value;
 use sqlx::{FromRow, Postgres, QueryBuilder};
 
-use super::{SampleCatalogSummaryRecord, SampleListFilters, SampleTextSearch};
+use super::{SampleCatalogSummaryRecord, SampleListFilters, SampleSortOrder, SampleTextSearch};
 use crate::repositories::AUTO_HIDE_SAMPLE_REPORT_THRESHOLD;
 
 pub(super) const SAMPLE_SUMMARY_SELECT: &str = "SELECT
@@ -313,6 +313,21 @@ pub(super) fn push_public_order(
             s.id DESC",
         );
     } else {
-        builder.push(" ORDER BY s.publicado_at DESC NULLS LAST, s.created_at DESC, s.id DESC");
+        /* [304A-2] Soporte de los 3 modos cuando no hay busqueda. */
+        match filters.sort {
+            SampleSortOrder::Trending => {
+                builder.push(
+                    " ORDER BY (COALESCE(s.total_descargas, 0) \
+                       + COALESCE(s.total_likes, 0) * 2 \
+                       + COALESCE(s.total_reproducciones, 0)) DESC, \
+                       s.publicado_at DESC NULLS LAST, s.id DESC",
+                );
+            }
+            SampleSortOrder::Recent | SampleSortOrder::Smart => {
+                builder.push(
+                    " ORDER BY s.publicado_at DESC NULLS LAST, s.created_at DESC, s.id DESC",
+                );
+            }
+        }
     }
 }
