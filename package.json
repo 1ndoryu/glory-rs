@@ -3,7 +3,7 @@
   "private": true,
   "description": "Comandos unificados para el monorepo Rust + React",
   "scripts": {
-    "dev": "concurrently --names BACK,FRONT --prefix-colors blue,green \"node scripts/run-cargo.mjs run --bin glory-backend\" \"npm --prefix frontend run dev\"",
+    "dev": "node scripts/dev.mjs",
     "check": "node scripts/run-cargo.mjs check && node scripts/run-cargo.mjs clippy && npm --prefix frontend run type-check",
     "check:back": "node scripts/run-cargo.mjs check && node scripts/run-cargo.mjs clippy",
     "check:front": "npm --prefix frontend run type-check",

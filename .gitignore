@@ -40,6 +40,7 @@ extracted/
 /scripts/*
 !/scripts/check-roadmap.mjs
 !/scripts/run-cargo.mjs
+!/scripts/dev.mjs
 prerendered/
 .cargo/config.toml
 
