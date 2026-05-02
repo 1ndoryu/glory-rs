@@ -14,7 +14,7 @@
     "dev:front": "npm --prefix frontend run dev",
     "codegen": "npm --prefix frontend run codegen",
     "test": "node scripts/run-cargo.mjs test",
-    "seed": "node scripts/run-cargo.mjs run --bin seed",
+    "seed": "node scripts/run-with-db.mjs run --bin seed",
     "self-check": "powershell -ExecutionPolicy Bypass -File scripts/self-check.ps1"
   },
   "devDependencies": {

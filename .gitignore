@@ -41,6 +41,8 @@ extracted/
 !/scripts/check-roadmap.mjs
 !/scripts/run-cargo.mjs
 !/scripts/dev.mjs
+!/scripts/branch-db.mjs
+!/scripts/run-with-db.mjs
 prerendered/
 .cargo/config.toml
 
