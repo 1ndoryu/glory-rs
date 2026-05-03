@@ -10,9 +10,54 @@ import { readFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
 import { getBranchDbUrl } from './branch-db.mjs';
 
+const backgroundChildren = [];
+
+function cleanup() {
+  for (const child of backgroundChildren) {
+    if (!child.killed) {
+      child.kill();
+    }
+  }
+}
+
+function spawnCargoTargetWatcher(env, cargoTargetRoot) {
+  if (process.platform !== 'win32') {
+    return;
+  }
+
+  const watcherScript = path.resolve('scripts/watch-cargo-target.ps1');
+  if (!existsSync(watcherScript)) {
+    return;
+  }
+
+  const watcher = spawn(
+    'powershell',
+    [
+      '-ExecutionPolicy',
+      'Bypass',
+      '-File',
+      watcherScript,
+      '-TargetDirs',
+      cargoTargetRoot,
+    ],
+    { stdio: 'ignore', env, shell: false },
+  );
+
+  watcher.on('error', (err) => {
+    console.error('[cargo-target-watch] Error:', err.message);
+  });
+  backgroundChildren.push(watcher);
+}
+
+process.on('SIGINT', cleanup);
+process.on('SIGTERM', cleanup);
+
 console.log('');
 const { dbUrl, cargoTargetDir } = getBranchDbUrl();
 console.log('');
+
+const childEnv = { ...process.env, DATABASE_URL: dbUrl, CARGO_TARGET_DIR: cargoTargetDir };
+spawnCargoTargetWatcher(childEnv, path.dirname(cargoTargetDir));
 
 /* Encontrar el entry point JS de concurrently para invocarlo con node directamente.
  * Esto evita dependencia de shell y problemas con .cmd en Windows. */
@@ -34,8 +79,11 @@ const child = spawn(
     'node scripts/run-cargo.mjs run --bin glory-backend',
     'npm --prefix frontend run dev',
   ],
-  { stdio: 'inherit', env: { ...process.env, DATABASE_URL: dbUrl, CARGO_TARGET_DIR: cargoTargetDir }, shell: false },
+  { stdio: 'inherit', env: childEnv, shell: false },
 );
 
 child.on('error', (err) => { console.error('[dev] Error:', err.message); process.exit(1); });
-child.on('exit', (code) => process.exit(code ?? 0));
+child.on('exit', (code) => {
+  cleanup();
+  process.exit(code ?? 0);
+});
