@@ -4,14 +4,14 @@
   "description": "Comandos unificados para el monorepo Rust + React",
   "scripts": {
     "dev": "node scripts/dev.mjs",
-    "check": "cargo check && cargo clippy && npm --prefix frontend run type-check",
-    "check:back": "cargo check && cargo clippy",
+    "check": "npm run check:back && npm run check:front",
+    "check:back": "node scripts/run-with-db.mjs check && node scripts/run-with-db.mjs clippy",
     "check:front": "npm --prefix frontend run type-check",
     "fmt": "cargo fmt",
     "fmt:check": "cargo fmt --check",
     "dev:back": "node scripts/run-with-db.mjs run",
     "dev:front": "npm --prefix frontend run dev",
     "codegen": "npm --prefix frontend run codegen",
-    "test": "cargo test"
+    "test": "node scripts/run-with-db.mjs test"
   }
 }
