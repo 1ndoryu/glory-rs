@@ -16,12 +16,12 @@ if (cargoArgs.length === 0) {
 }
 
 console.log('');
-const { dbUrl } = getBranchDbUrl();
+const { dbUrl, cargoTargetDir } = getBranchDbUrl();
 console.log('');
 
 const child = spawn('node', ['scripts/run-cargo.mjs', ...cargoArgs], {
   stdio: 'inherit',
-  env: { ...process.env, DATABASE_URL: dbUrl },
+  env: { ...process.env, DATABASE_URL: dbUrl, CARGO_TARGET_DIR: cargoTargetDir },
   shell: false,
 });
 

@@ -11,7 +11,7 @@ import path from 'node:path';
 import { getBranchDbUrl } from './branch-db.mjs';
 
 console.log('');
-const { dbUrl } = getBranchDbUrl();
+const { dbUrl, cargoTargetDir } = getBranchDbUrl();
 console.log('');
 
 /* Encontrar el entry point JS de concurrently para invocarlo con node directamente.
@@ -34,7 +34,7 @@ const child = spawn(
     'node scripts/run-cargo.mjs run --bin glory-backend',
     'npm --prefix frontend run dev',
   ],
-  { stdio: 'inherit', env: { ...process.env, DATABASE_URL: dbUrl }, shell: false },
+  { stdio: 'inherit', env: { ...process.env, DATABASE_URL: dbUrl, CARGO_TARGET_DIR: cargoTargetDir }, shell: false },
 );
 
 child.on('error', (err) => { console.error('[dev] Error:', err.message); process.exit(1); });

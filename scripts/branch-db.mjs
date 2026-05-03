@@ -6,7 +6,25 @@
 
 import { execSync, execFileSync } from 'node:child_process';
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const projectRoot = path.resolve(__dirname, '..');
+
+/** Lee el nombre del paquete desde Cargo.toml (sin hardcodes). */
+function readPackageName() {
+  const cargoToml = path.join(projectRoot, 'Cargo.toml');
+  if (!existsSync(cargoToml)) return 'glory';
+  const toml = readFileSync(cargoToml, 'utf8');
+  const m = toml.match(/^name\s*=\s*"([^"]+)"/m);
+  return (m ? m[1] : 'glory').replace(/-/g, '_');
+}
+
+const cargoTargetBase =
+  process.env.CARGO_TARGET_DIR_BASE ||
+  (process.platform === 'win32' ? 'C:\\tmp\\glory-target' : path.join(tmpdir(), 'glory-target'));
 
 function parseEnvFile(content) {
   const vars = {};
@@ -54,19 +72,27 @@ export function getBranchDbUrl({ verbose = true } = {}) {
   const baseDbUrl = envVars.DATABASE_URL;
   if (!baseDbUrl) throw new Error('DATABASE_URL no encontrado en .env');
 
-  /* 3. Parsear URL */
+  /* 3. Parsear URL — solo necesitamos user/pass/host/port */
   const m = baseDbUrl.match(/^postgres(?:ql)?:\/\/([^:]+):([^@]+)@([^:/]+):(\d+)\/(.+)$/);
   if (!m) throw new Error(`No se pudo parsear DATABASE_URL: ${baseDbUrl}`);
-  const [, dbUser, dbPass, dbHost, dbPort, baseDbName] = m;
+  const [, dbUser, dbPass, dbHost, dbPort] = m;
 
-  /* 4. Nombre de BD por rama */
+  /* 4. Nombre de BD y cargo target derivados de Cargo.toml + rama (sin hardcodes) */
+  const pkgName = readPackageName();
   const isDefault = branch === 'main' || branch === 'master';
-  const dbName = isDefault ? baseDbName : `${baseDbName}_${branchSlug}`;
+  const dbName = isDefault ? pkgName : `${pkgName}_${branchSlug}`;
   const dbUrl = `postgres://${dbUser}:${dbPass}@${dbHost}:${dbPort}/${dbName}`;
+  /* GLORY_CARGO_TARGET_DIR es el override manual; CARGO_TARGET_DIR esta fijado a nivel
+   * global en config.toml y se ignora aqui para que el subdirectorio por proyecto+rama
+   * siempre se calcule correctamente. */
+  const cargoTargetDir =
+    process.env.GLORY_CARGO_TARGET_DIR ||
+    path.join(cargoTargetBase, `${pkgName}_${branchSlug}`);
 
   if (verbose) {
-    console.log(`\x1b[36m[db] Rama:         \x1b[0m ${branch}`);
-    console.log(`\x1b[36m[db] Base de datos:\x1b[0m ${dbName}`);
+    console.log(`\x1b[36m[db] Rama:          \x1b[0m ${branch}`);
+    console.log(`\x1b[36m[db] Base de datos: \x1b[0m ${dbName}`);
+    console.log(`\x1b[36m[db] Cargo target:  \x1b[0m ${cargoTargetDir}`);
   }
 
   /* 5. Crear BD si no existe */
@@ -87,5 +113,5 @@ export function getBranchDbUrl({ verbose = true } = {}) {
     if (verbose) console.log(`\x1b[32m[db] BD creada: ${dbName}\x1b[0m`);
   }
 
-  return { dbUrl, dbName, branch };
+  return { dbUrl, dbName, branch, cargoTargetDir };
 }
