@@ -25,7 +25,21 @@ desktop.ini
 # Logs
 *.log
 
-/scripts/
+# Python local envs / caches
+**/.venv/
+**/__pycache__/
+*.pyc
+
+/scripts/*
+!/scripts/branch-db.mjs
+!/scripts/run-with-db.mjs
+!/scripts/dev.mjs
+!/scripts/watch-cargo-target.ps1
+!/scripts/clean-cargo-target.ps1
+/backups/
+/clients/
+/frontend/public/legacy-assets/
+/glory-rs/
 /prerendered/
 /node_modules/
 /cliente/
