@@ -3,7 +3,7 @@
 > **URL producción:** http://restaurante.wandori.us (Swagger UI: /swagger-ui/)
 > **URL legacy (no funcional):** ~~http://app-b8s0cks444o0sogo8kg8wcgw.66.94.100.241.sslip.io~~
 > **Servidor:** 66.94.100.241 (Coolify, servicio UUID: b8s0cks444o0sogo8kg8wcgw)
-> **Deploy:** `.\scripts\deploy.ps1` — wrapper que invoca coolify-manager-rs deploy-service (zero-downtime)
+> **Deploy:** usar `coolify-manager-rs` directamente, sin wrapper local: `cd "c:\Users\Owner\OneDrive\Documentos\WP\app\public\wp-content\themes\glorytemplate\.agent\coolify-manager-rs" ; .\target\release\coolify-manager.exe deploy --name glory-rest --update --skip-backup`
 > **Repositorio:** 1ndoryu/glory-rs, rama glory-rs-rest
 
 ## Stack
@@ -31,3 +31,4 @@
 ## Tareas pendientes
 
 - 065A-1 — Probar marketing WhatsApp real y recordatorios con número propio: el sistema ya está cableado a proveedores reales, pero falta validarlo con Meta/WhatsApp en entorno real. Usar el número del usuario como contacto destinatario, configurar credenciales reales solo en UI/secret manager, no copiar tokens al repo, enviar campaña real, validar historial/contadores/errores, probar recordatorio automático por WhatsApp con reserva/control temporal y documentar resultado. No enviar a clientes reales hasta confirmar el circuito completo.
+- 065A-4 — Validar BDP/WebLink contra PC real del restaurante: cuando exista acceso al servidor BDP, confirmar BDP-NET activo, WebLink REST contratado, puerto/firewall/NAT abiertos, URL publica alcanzable, credenciales e integrador reales; ejecutar diagnostico Health/Login/GetVersion desde Configuracion y ajustar el header de sesion si BDP no acepta `Authorization: Bearer`.

@@ -14,6 +14,19 @@ use serde_json::Value;
 use tracing::warn;
 
 use crate::models::ConfiguracionRestaurante;
+use crate::services::bdp_weblink_catalog::{
+    BdpAddOrderPaymentRequest, BdpCancelOrderRequest, BdpCreateCustomerRequest,
+    BdpCreateOrderRequest, BdpDepartmentsExportFromProfileRequest, BdpEmptyRequest,
+    BdpExportArticlesRequest, BdpExportCustomersRequest, BdpExportDepartmentsRequest,
+    BdpGetEmployeeRequest, BdpGetEmployeesRequest, BdpGetOrderRequest, BdpGetPosArticlesRequest,
+    BdpGetPosEmployeesRequest, BdpGetPosRequest, BdpGetPosTendersRequest, BdpInvoiceOrderRequest,
+    BDP_PATH_CANCEL_ORDER, BDP_PATH_CREATE_CUSTOMER, BDP_PATH_CREATE_ORDER,
+    BDP_PATH_EXPORT_ARTICLES, BDP_PATH_EXPORT_CUSTOMERS, BDP_PATH_EXPORT_DEPARTMENTS,
+    BDP_PATH_EXPORT_DEPARTMENTS_FROM_PROFILE, BDP_PATH_GET_EMPLOYEE, BDP_PATH_GET_EMPLOYEES,
+    BDP_PATH_GET_ORDER, BDP_PATH_GET_POS, BDP_PATH_GET_POSES, BDP_PATH_GET_POS_ARTICLES,
+    BDP_PATH_GET_POS_EMPLOYEES, BDP_PATH_GET_POS_TENDERS, BDP_PATH_GET_TENDERS,
+    BDP_PATH_INVOICE_ORDER, BDP_PATH_ORDER_PAYMENT_ADD,
+};
 
 const BDP_SESSION_MINUTES: u8 = 59;
 
@@ -128,6 +141,156 @@ impl<'a> BdpWeblinkClient<'a> {
             )
             .await?;
         ensure_no_remote_error(&response.error_message)?;
+        Ok(response)
+    }
+
+    pub async fn export_articles(
+        &self,
+        request: &BdpExportArticlesRequest,
+    ) -> Result<Value, BdpWeblinkError> {
+        self.post_authenticated_json(BDP_PATH_EXPORT_ARTICLES, request)
+            .await
+    }
+
+    pub async fn get_pos_articles(
+        &self,
+        request: &BdpGetPosArticlesRequest,
+    ) -> Result<Value, BdpWeblinkError> {
+        self.post_authenticated_json(BDP_PATH_GET_POS_ARTICLES, request)
+            .await
+    }
+
+    pub async fn export_customers(
+        &self,
+        request: &BdpExportCustomersRequest,
+    ) -> Result<Value, BdpWeblinkError> {
+        self.post_authenticated_json(BDP_PATH_EXPORT_CUSTOMERS, request)
+            .await
+    }
+
+    pub async fn create_customer(
+        &self,
+        request: &BdpCreateCustomerRequest,
+    ) -> Result<Value, BdpWeblinkError> {
+        self.post_authenticated_json(BDP_PATH_CREATE_CUSTOMER, request)
+            .await
+    }
+
+    pub async fn create_order(
+        &self,
+        request: &BdpCreateOrderRequest,
+    ) -> Result<Value, BdpWeblinkError> {
+        self.post_authenticated_json(BDP_PATH_CREATE_ORDER, request)
+            .await
+    }
+
+    pub async fn get_order(&self, request: &BdpGetOrderRequest) -> Result<Value, BdpWeblinkError> {
+        self.post_authenticated_json(BDP_PATH_GET_ORDER, request)
+            .await
+    }
+
+    pub async fn cancel_order(
+        &self,
+        request: &BdpCancelOrderRequest,
+    ) -> Result<Value, BdpWeblinkError> {
+        self.post_authenticated_json(BDP_PATH_CANCEL_ORDER, request)
+            .await
+    }
+
+    pub async fn add_order_payment(
+        &self,
+        request: &BdpAddOrderPaymentRequest,
+    ) -> Result<Value, BdpWeblinkError> {
+        self.post_authenticated_json(BDP_PATH_ORDER_PAYMENT_ADD, request)
+            .await
+    }
+
+    pub async fn invoice_order(
+        &self,
+        request: &BdpInvoiceOrderRequest,
+    ) -> Result<Value, BdpWeblinkError> {
+        self.post_authenticated_json(BDP_PATH_INVOICE_ORDER, request)
+            .await
+    }
+
+    pub async fn export_departments(
+        &self,
+        request: &BdpExportDepartmentsRequest,
+    ) -> Result<Value, BdpWeblinkError> {
+        self.post_authenticated_json(BDP_PATH_EXPORT_DEPARTMENTS, request)
+            .await
+    }
+
+    pub async fn export_departments_from_profile(
+        &self,
+        request: &BdpDepartmentsExportFromProfileRequest,
+    ) -> Result<Value, BdpWeblinkError> {
+        self.post_authenticated_json(BDP_PATH_EXPORT_DEPARTMENTS_FROM_PROFILE, request)
+            .await
+    }
+
+    pub async fn get_pos(&self, request: &BdpGetPosRequest) -> Result<Value, BdpWeblinkError> {
+        self.post_authenticated_json(BDP_PATH_GET_POS, request)
+            .await
+    }
+
+    pub async fn get_poses(&self) -> Result<Value, BdpWeblinkError> {
+        self.post_authenticated_json(BDP_PATH_GET_POSES, &BdpEmptyRequest)
+            .await
+    }
+
+    pub async fn get_employee(
+        &self,
+        request: &BdpGetEmployeeRequest,
+    ) -> Result<Value, BdpWeblinkError> {
+        self.post_authenticated_json(BDP_PATH_GET_EMPLOYEE, request)
+            .await
+    }
+
+    pub async fn get_employees(
+        &self,
+        request: &BdpGetEmployeesRequest,
+    ) -> Result<Value, BdpWeblinkError> {
+        self.post_authenticated_json(BDP_PATH_GET_EMPLOYEES, request)
+            .await
+    }
+
+    pub async fn get_pos_employees(
+        &self,
+        request: &BdpGetPosEmployeesRequest,
+    ) -> Result<Value, BdpWeblinkError> {
+        self.post_authenticated_json(BDP_PATH_GET_POS_EMPLOYEES, request)
+            .await
+    }
+
+    pub async fn get_tenders(&self) -> Result<Value, BdpWeblinkError> {
+        self.post_authenticated_json(BDP_PATH_GET_TENDERS, &BdpEmptyRequest)
+            .await
+    }
+
+    pub async fn get_pos_tenders(
+        &self,
+        request: &BdpGetPosTendersRequest,
+    ) -> Result<Value, BdpWeblinkError> {
+        self.post_authenticated_json(BDP_PATH_GET_POS_TENDERS, request)
+            .await
+    }
+
+    async fn post_authenticated_json<P>(
+        &self,
+        path: &str,
+        payload: &P,
+    ) -> Result<Value, BdpWeblinkError>
+    where
+        P: Serialize + ?Sized,
+    {
+        let session = self.login().await?;
+        let response: Value = self
+            .post_authenticated(path, payload, &session.token)
+            .await?;
+        if let Some(message) = response_error_message(&response) {
+            return Err(BdpWeblinkError::Remote(message));
+        }
         Ok(response)
     }
 
@@ -356,6 +519,50 @@ mod tests {
             .unwrap();
 
         assert_eq!(response_error_message(&response), None);
+    }
+
+    #[tokio::test]
+    async fn export_articles_logs_in_and_posts_catalog_request() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/Auth/Login"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "ErrorMessage": "",
+                "AuthSession": {
+                    "Token": "token-bdp",
+                    "ExpiresIn_InSecconds": 3540
+                }
+            })))
+            .mount(&server)
+            .await;
+
+        Mock::given(method("POST"))
+            .and(path("/API/Articles/Export"))
+            .and(header("authorization", "Bearer token-bdp"))
+            .and(body_json(serde_json::json!({
+                "Dept1": 1,
+                "Dept2": 999,
+                "Art1": 1,
+                "Art2": 9999999999999_i64,
+                "Modified": false,
+                "TypePrice": 1,
+                "Disc": 0
+            })))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "ErrorMessage": "",
+                "Articles": []
+            })))
+            .mount(&server)
+            .await;
+
+        let config = config(server.uri());
+        let client = BdpWeblinkClient::new(&config);
+        let response = client
+            .export_articles(&BdpExportArticlesRequest::all_web_articles(1))
+            .await
+            .unwrap();
+
+        assert!(response["Articles"].is_array());
     }
 
     #[test]

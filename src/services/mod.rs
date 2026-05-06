@@ -1,6 +1,7 @@
 mod api_key;
 mod auth;
 pub mod bdp_weblink;
+pub mod bdp_weblink_catalog;
 mod campana;
 mod canal_reserva;
 mod chatbot;

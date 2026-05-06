@@ -216,3 +216,10 @@ Cada lección debe ser concisa y accionable.
 **Causa raíz:** Orval usa el tag para nombres de carpeta y el pipe/codepage de Windows puede corromper caracteres no ASCII.
 **Solución:** Usar tags ASCII (`resenas`) para codegen, activar `clean: true` en Orval y actualizar imports/barrel generados.
 **Prevención:** Mantener tags OpenAPI de Orval en ASCII y hacer grep de `rese├`, `Rese├` o carpetas con caracteres raros tras regenerar.
+
+## 2026-05-06 — Deploy local sin wrappers opacos
+
+**Problema:** El wrapper `scripts/deploy.ps1` fallo en el backup previo y oculto el flujo real de `coolify-manager-rs`.
+**Causa raíz:** El proyecto ya depende de `coolify-manager-rs`, pero el roadmap apuntaba a un wrapper local con supuestos de backup no validos para este servicio.
+**Solución:** Eliminar el wrapper y documentar el comando directo desde el workspace de `coolify-manager-rs` con `--skip-backup` cuando el usuario lo indique.
+**Prevención:** No introducir wrappers de deploy por proyecto si duplican `coolify-manager-rs`; actualizar el roadmap con el comando exacto que debe ejecutarse.
