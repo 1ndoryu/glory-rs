@@ -1,5 +1,5 @@
-mod auth;
 pub mod api_key_auth;
+mod auth;
 
-pub use auth::AuthUser;
 pub use api_key_auth::ApiKeyAuth;
+pub use auth::AuthUser;

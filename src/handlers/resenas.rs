@@ -13,8 +13,8 @@ use validator::Validate;
 use crate::errors::AppError;
 use crate::middleware::AuthUser;
 use crate::models::{
-    ResenaPublicaResponse, ResenasQuery, ResenasPaginadas,
-    ResponderResenaRequest, ResponderResenaResponse,
+    ResenaPublicaResponse, ResenasPaginadas, ResenasQuery, ResponderResenaRequest,
+    ResponderResenaResponse,
 };
 use crate::repositories::{ConfiguracionRepository, ResenaRepository};
 use crate::AppState;
@@ -24,7 +24,7 @@ use crate::AppState;
 #[utoipa::path(
     get,
     path = "/api/resenas",
-    tag = "Reseñas",
+    tag = "resenas",
     params(
         ("page" = Option<i64>, Query, description = "Página"),
         ("per_page" = Option<i64>, Query, description = "Ítems por página"),
@@ -61,7 +61,7 @@ pub async fn listar_resenas(
 #[utoipa::path(
     post,
     path = "/api/resenas/solicitar",
-    tag = "Reseñas",
+    tag = "resenas",
     params(
         ("reserva_id" = Option<Uuid>, Query, description = "ID de la reserva asociada"),
         ("cliente_id" = Option<Uuid>, Query, description = "ID del cliente")
@@ -126,7 +126,7 @@ pub async fn solicitar_resena(
 #[utoipa::path(
     get,
     path = "/api/public/resenas/{token}",
-    tag = "Reseñas",
+    tag = "resenas",
     params(("token" = String, Path, description = "Token único de la reseña")),
     responses(
         (status = 200, description = "Info de la reseña", body = ResenaPublicaResponse),
@@ -155,7 +155,7 @@ pub async fn obtener_resena_publica(
 #[utoipa::path(
     post,
     path = "/api/public/resenas/{token}",
-    tag = "Reseñas",
+    tag = "resenas",
     params(("token" = String, Path, description = "Token único")),
     request_body = ResponderResenaRequest,
     responses(
@@ -182,8 +182,7 @@ pub async fn responder_resena(
 
     /* Si puntuación >= 4, buscar google_review_url */
     let redirect_url = if req.puntuacion >= 4 {
-        let config =
-            ConfiguracionRepository::obtener_o_crear(&state.pool, resena.user_id).await?;
+        let config = ConfiguracionRepository::obtener_o_crear(&state.pool, resena.user_id).await?;
         if config.google_review_url.is_empty() {
             None
         } else {
@@ -239,6 +238,8 @@ pub fn routes() -> Router<AppState> {
 
 /* Rutas públicas (sin auth) — se montan por separado */
 pub fn public_routes() -> Router<AppState> {
-    Router::new()
-        .route("/public/resenas/:token", get(obtener_resena_publica).post(responder_resena))
+    Router::new().route(
+        "/public/resenas/:token",
+        get(obtener_resena_publica).post(responder_resena),
+    )
 }

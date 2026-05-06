@@ -1,9 +1,9 @@
 /* 253A-5: Servicio de reservas
-   263A-6: Filtros turno/estado, num_mesa, apellidos_cliente, resumen mensual
-   283A-4: Validación de colisiones — impide crear/actualizar reservas que excedan
-   capacidad (mesas/personas) o que dupliquen una mesa ya ocupada en la franja.
-   014A-1: Auto-venta al completar reserva (configurable).
-   014A-2: Upsert cliente al crear reserva. */
+263A-6: Filtros turno/estado, num_mesa, apellidos_cliente, resumen mensual
+283A-4: Validación de colisiones — impide crear/actualizar reservas que excedan
+capacidad (mesas/personas) o que dupliquen una mesa ya ocupada en la franja.
+014A-1: Auto-venta al completar reserva (configurable).
+014A-2: Upsert cliente al crear reserva. */
 
 use chrono::{NaiveDate, NaiveTime, Timelike};
 use rust_decimal::Decimal;
@@ -114,22 +114,18 @@ impl ReservaService {
          * una mesa concreta.  Reservas sin mesa especifica solo se validan
          * por capacidad de personas (siguiente check). */
         if mesa_id.is_some() && mesas_asignadas >= total_mesas {
-            return Err(AppError::Conflict(
-                format!(
-                    "No hay mesas disponibles en la franja de {hora}. \
+            return Err(AppError::Conflict(format!(
+                "No hay mesas disponibles en la franja de {hora}. \
                      Todas las {total_mesas} mesas están asignadas a reservas."
-                ),
-            ));
+            )));
         }
 
         if personas_reservadas + num_personas > capacidad_total {
             let disponible = capacidad_total - personas_reservadas;
-            return Err(AppError::Conflict(
-                format!(
-                    "Capacidad insuficiente en la franja de {hora}. \
+            return Err(AppError::Conflict(format!(
+                "Capacidad insuficiente en la franja de {hora}. \
                      Disponible: {disponible} personas, solicitado: {num_personas}."
-                ),
-            ));
+            )));
         }
 
         Ok(())
@@ -165,15 +161,8 @@ impl ReservaService {
         /* [014A-2] Upsert cliente: buscar por teléfono/email y vincular o crear */
         let telefono = req.telefono.as_deref().unwrap_or("");
         let apellidos = req.apellidos_cliente.as_deref().unwrap_or("");
-        let cliente_id = Self::upsert_cliente(
-            pool,
-            user_id,
-            &req.nombre_cliente,
-            apellidos,
-            telefono,
-            "",
-        )
-        .await;
+        let cliente_id =
+            Self::upsert_cliente(pool, user_id, &req.nombre_cliente, apellidos, telefono, "").await;
 
         let data = NuevaReserva {
             user_id,
@@ -234,10 +223,14 @@ impl ReservaService {
         /* [263A-20] Normalizar filtros vacíos a None.
          * Orval puede enviar estado="" o turno="" como query param
          * en vez de omitirlo, lo que causa que el SQL busque estado = '' */
-        let estado_normalizado = query.estado.as_deref()
+        let estado_normalizado = query
+            .estado
+            .as_deref()
             .filter(|s| !s.is_empty())
             .map(String::from);
-        let busqueda_normalizada = query.busqueda.as_deref()
+        let busqueda_normalizada = query
+            .busqueda
+            .as_deref()
             .filter(|s| !s.is_empty())
             .map(String::from);
 
@@ -347,8 +340,8 @@ impl ReservaService {
 
         /* [014A-1] Solo crear venta automática si el estado CAMBIÓ a "completada"
          * (no si ya era "completada" antes). Evita ventas duplicadas. */
-        let cambio_a_completada = estado_str.as_deref() == Some("completada")
-            && estado_anterior != "completada";
+        let cambio_a_completada =
+            estado_str.as_deref() == Some("completada") && estado_anterior != "completada";
 
         /* [094A-1] Si la reserva SALE de "completada" (a cualquier otro estado),
          * eliminar las ventas auto-generadas (importe_base = 0) vinculadas. */
@@ -359,10 +352,16 @@ impl ReservaService {
         if salio_de_completada {
             match VentaRepository::delete_by_reserva_id(pool, reserva.id, user_id).await {
                 Ok(n) if n > 0 => {
-                    tracing::info!("[094A-1] Eliminadas {n} ventas auto-generadas al descompletar reserva {}", reserva.id);
+                    tracing::info!(
+                        "[094A-1] Eliminadas {n} ventas auto-generadas al descompletar reserva {}",
+                        reserva.id
+                    );
                 }
                 Err(e) => {
-                    warn!("[094A-1] Error eliminando ventas al descompletar reserva {}: {e}", reserva.id);
+                    warn!(
+                        "[094A-1] Error eliminando ventas al descompletar reserva {}: {e}",
+                        reserva.id
+                    );
                 }
                 _ => {}
             }
@@ -442,7 +441,9 @@ impl ReservaService {
 
         let ratio_porcentaje = if total_reservas > 0 {
             #[allow(clippy::cast_precision_loss)] // conteos de reservas nunca excederán 2^52
-            { (total_no_shows as f64 / total_reservas as f64) * 100.0 }
+            {
+                (total_no_shows as f64 / total_reservas as f64) * 100.0
+            }
         } else {
             0.0
         };
@@ -530,7 +531,9 @@ impl ReservaService {
                 return;
             }
             Err(e) => {
-                warn!("[094A-1] Error verificando venta existente: {e} — continuando por seguridad");
+                warn!(
+                    "[094A-1] Error verificando venta existente: {e} — continuando por seguridad"
+                );
             }
             _ => {}
         }
@@ -563,7 +566,10 @@ impl ReservaService {
             user_id,
             fecha: reserva.fecha,
             comensales: Some(reserva.num_personas),
-            descripcion: &format!("Generada automáticamente desde reserva de {}", reserva.nombre_cliente),
+            descripcion: &format!(
+                "Generada automáticamente desde reserva de {}",
+                reserva.nombre_cliente
+            ),
             iva_porcentaje: config.iva_por_defecto,
             turno,
             canal: "comedor",
@@ -584,11 +590,15 @@ impl ReservaService {
                 let config_clone = config.clone();
                 let pool_clone = pool.clone();
                 tokio::spawn(async move {
-                    super::HaddockService::sync_order(&pool_clone, &venta, &config_clone, false).await;
+                    super::HaddockService::sync_order(&pool_clone, &venta, &config_clone, false)
+                        .await;
                 });
             }
             Err(e) => {
-                warn!("[014A-1] Error creando venta automática para reserva {}: {e}", reserva.id);
+                warn!(
+                    "[014A-1] Error creando venta automática para reserva {}: {e}",
+                    reserva.id
+                );
             }
         }
     }

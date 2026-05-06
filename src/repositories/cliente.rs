@@ -1,6 +1,6 @@
 /* 263A-1: Repositorio de clientes — CRM con búsqueda y paginación.
-   Rendimiento crítico: debe manejar ~43k clientes con índices adecuados.
-   [094A-5] Convertido a queries dinámicas para soportar nueva columna ultima_visita. */
+Rendimiento crítico: debe manejar ~43k clientes con índices adecuados.
+[094A-5] Convertido a queries dinámicas para soportar nueva columna ultima_visita. */
 
 use sqlx::PgPool;
 use uuid::Uuid;
@@ -84,13 +84,11 @@ impl ClienteRepository {
         id: Uuid,
         user_id: Uuid,
     ) -> Result<Option<Cliente>, sqlx::Error> {
-        sqlx::query_as::<_, Cliente>(
-            "SELECT * FROM clientes WHERE id = $1 AND user_id = $2",
-        )
-        .bind(id)
-        .bind(user_id)
-        .fetch_optional(pool)
-        .await
+        sqlx::query_as::<_, Cliente>("SELECT * FROM clientes WHERE id = $1 AND user_id = $2")
+            .bind(id)
+            .bind(user_id)
+            .fetch_optional(pool)
+            .await
     }
 
     /* [014A-2] Buscar cliente existente por teléfono o email para evitar duplicados.
@@ -137,8 +135,16 @@ impl ClienteRepository {
             Some("empresa") => "empresa",
             _ => "apellidos",
         };
-        let order_dir = if sort_order == Some("asc") { "ASC" } else { "DESC" };
-        let secondary = if order_col == "apellidos" { ", nombre ASC" } else { "" };
+        let order_dir = if sort_order == Some("asc") {
+            "ASC"
+        } else {
+            "DESC"
+        };
+        let secondary = if order_col == "apellidos" {
+            ", nombre ASC"
+        } else {
+            ""
+        };
 
         let query_str = format!(
             "SELECT * FROM clientes WHERE user_id = $1 \
@@ -224,13 +230,11 @@ impl ClienteRepository {
     }
 
     pub async fn delete(pool: &PgPool, id: Uuid, user_id: Uuid) -> Result<bool, sqlx::Error> {
-        let result = sqlx::query(
-            "DELETE FROM clientes WHERE id = $1 AND user_id = $2",
-        )
-        .bind(id)
-        .bind(user_id)
-        .execute(pool)
-        .await?;
+        let result = sqlx::query("DELETE FROM clientes WHERE id = $1 AND user_id = $2")
+            .bind(id)
+            .bind(user_id)
+            .execute(pool)
+            .await?;
         Ok(result.rows_affected() > 0)
     }
 
@@ -346,12 +350,10 @@ impl ClienteRepository {
         pool: &PgPool,
         cliente_id: Uuid,
     ) -> Result<(), sqlx::Error> {
-        sqlx::query(
-            "UPDATE clientes SET ultima_visita = NOW() WHERE id = $1",
-        )
-        .bind(cliente_id)
-        .execute(pool)
-        .await?;
+        sqlx::query("UPDATE clientes SET ultima_visita = NOW() WHERE id = $1")
+            .bind(cliente_id)
+            .execute(pool)
+            .await?;
         Ok(())
     }
 }

@@ -30,4 +30,4 @@
 
 ## Tareas pendientes
 
-(sin tareas pendientes)
+- 065A-1 — Probar marketing WhatsApp real y recordatorios con número propio: el sistema ya está cableado a proveedores reales, pero falta validarlo con Meta/WhatsApp en entorno real. Usar el número del usuario como contacto destinatario, configurar credenciales reales solo en UI/secret manager, no copiar tokens al repo, enviar campaña real, validar historial/contadores/errores, probar recordatorio automático por WhatsApp con reserva/control temporal y documentar resultado. No enviar a clientes reales hasta confirmar el circuito completo.

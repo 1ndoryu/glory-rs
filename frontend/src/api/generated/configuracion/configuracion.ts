@@ -27,6 +27,7 @@ import type {
 import type {
   ActualizarConfiguracionRequest,
   ActualizarIntegracionesRequest,
+  BdpDiagnosticoResponse,
   ConfiguracionRestaurante,
   ErrorResponse,
   IntegracionMarketingPublica
@@ -251,6 +252,123 @@ export const useActualizarConfiguracion = <TError = ErrorResponse,
       return useMutation(getActualizarConfiguracionMutationOptions(options), queryClient);
     }
     /**
+ * @summary Diagnosticar conexión BDP/WebLink sin exponer credenciales
+ */
+export type diagnosticarBdpResponse200 = {
+  data: BdpDiagnosticoResponse
+  status: 200
+}
+
+export type diagnosticarBdpResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type diagnosticarBdpResponseSuccess = (diagnosticarBdpResponse200) & {
+  headers: Headers;
+};
+export type diagnosticarBdpResponseError = (diagnosticarBdpResponse401) & {
+  headers: Headers;
+};
+
+export type diagnosticarBdpResponse = (diagnosticarBdpResponseSuccess | diagnosticarBdpResponseError)
+
+export const getDiagnosticarBdpUrl = () => {
+
+
+
+
+  return `/api/configuracion/bdp/diagnostico`
+}
+
+export const diagnosticarBdp = async ( options?: RequestInit): Promise<diagnosticarBdpResponse> => {
+
+  return customInstance<diagnosticarBdpResponse>(getDiagnosticarBdpUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getDiagnosticarBdpQueryKey = () => {
+    return [
+    `/api/configuracion/bdp/diagnostico`
+    ] as const;
+    }
+
+
+export const getDiagnosticarBdpQueryOptions = <TData = Awaited<ReturnType<typeof diagnosticarBdp>>, TError = ErrorResponse>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof diagnosticarBdp>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getDiagnosticarBdpQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof diagnosticarBdp>>> = ({ signal }) => diagnosticarBdp({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof diagnosticarBdp>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type DiagnosticarBdpQueryResult = NonNullable<Awaited<ReturnType<typeof diagnosticarBdp>>>
+export type DiagnosticarBdpQueryError = ErrorResponse
+
+
+export function useDiagnosticarBdp<TData = Awaited<ReturnType<typeof diagnosticarBdp>>, TError = ErrorResponse>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof diagnosticarBdp>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof diagnosticarBdp>>,
+          TError,
+          Awaited<ReturnType<typeof diagnosticarBdp>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useDiagnosticarBdp<TData = Awaited<ReturnType<typeof diagnosticarBdp>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof diagnosticarBdp>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof diagnosticarBdp>>,
+          TError,
+          Awaited<ReturnType<typeof diagnosticarBdp>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useDiagnosticarBdp<TData = Awaited<ReturnType<typeof diagnosticarBdp>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof diagnosticarBdp>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Diagnosticar conexión BDP/WebLink sin exponer credenciales
+ */
+
+export function useDiagnosticarBdp<TData = Awaited<ReturnType<typeof diagnosticarBdp>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof diagnosticarBdp>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getDiagnosticarBdpQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+/**
  * @summary Obtener estado de integraciones (sin exponer credentials)
  */
 export type obtenerIntegracionesResponse200 = {

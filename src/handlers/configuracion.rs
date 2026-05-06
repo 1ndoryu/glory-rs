@@ -6,6 +6,8 @@
 use axum::extract::State;
 use axum::routing::get;
 use axum::{Json, Router};
+use serde::Serialize;
+use utoipa::ToSchema;
 use validator::Validate;
 
 use crate::errors::AppError;
@@ -14,8 +16,87 @@ use crate::models::{
     ActualizarConfiguracionRequest, ActualizarIntegracionesRequest, ConfiguracionRestaurante,
     IntegracionMarketingPublica,
 };
+use crate::services::bdp_weblink::{BdpVersionResponse, BdpWeblinkClient};
 use crate::services::{ConfiguracionService, IntegracionMarketingService};
 use crate::AppState;
+
+#[allow(clippy::struct_excessive_bools)]
+#[derive(Debug, Serialize, ToSchema)]
+pub struct BdpDiagnosticoResponse {
+    pub configurado: bool,
+    pub sync_habilitado: bool,
+    pub health_ok: bool,
+    pub login_ok: bool,
+    pub session_expires_in_seconds: Option<i64>,
+    pub version: Option<i32>,
+    pub sub_version: Option<i32>,
+    pub application: Option<String>,
+    pub application_description: Option<String>,
+    pub mensaje: String,
+}
+
+impl BdpDiagnosticoResponse {
+    fn sin_configurar(sync_habilitado: bool) -> Self {
+        Self::base(false, sync_habilitado, "BDP no esta configurado")
+    }
+
+    fn health_error(sync_habilitado: bool, mensaje: impl Into<String>) -> Self {
+        Self::base(true, sync_habilitado, mensaje)
+    }
+
+    fn login_error(sync_habilitado: bool, mensaje: impl Into<String>) -> Self {
+        Self {
+            health_ok: true,
+            ..Self::base(true, sync_habilitado, mensaje)
+        }
+    }
+
+    fn version_error(
+        sync_habilitado: bool,
+        expires_in_seconds: i64,
+        mensaje: impl Into<String>,
+    ) -> Self {
+        Self {
+            health_ok: true,
+            login_ok: true,
+            session_expires_in_seconds: Some(expires_in_seconds),
+            ..Self::base(true, sync_habilitado, mensaje)
+        }
+    }
+
+    fn version_ok(
+        sync_habilitado: bool,
+        expires_in_seconds: i64,
+        version: BdpVersionResponse,
+    ) -> Self {
+        Self {
+            health_ok: true,
+            login_ok: true,
+            session_expires_in_seconds: Some(expires_in_seconds),
+            version: Some(version.version),
+            sub_version: Some(version.sub_version),
+            application: Some(version.application),
+            application_description: Some(version.application_description),
+            mensaje: "BDP WebLink REST API conectado correctamente".to_string(),
+            ..Self::base(true, sync_habilitado, "")
+        }
+    }
+
+    fn base(configurado: bool, sync_habilitado: bool, mensaje: impl Into<String>) -> Self {
+        Self {
+            configurado,
+            sync_habilitado,
+            health_ok: false,
+            login_ok: false,
+            session_expires_in_seconds: None,
+            version: None,
+            sub_version: None,
+            application: None,
+            application_description: None,
+            mensaje: mensaje.into(),
+        }
+    }
+}
 
 /// Obtener la configuración del restaurante (crea defaults si es primera vez)
 #[utoipa::path(
@@ -70,6 +151,99 @@ pub fn routes() -> Router<AppState> {
             "/configuracion/integraciones",
             get(obtener_integraciones).put(actualizar_integraciones),
         )
+        .route("/configuracion/bdp/diagnostico", get(diagnosticar_bdp))
+}
+
+/// Diagnosticar conexión BDP/WebLink sin exponer credenciales
+#[utoipa::path(
+    get,
+    path = "/api/configuracion/bdp/diagnostico",
+    tag = "Configuracion",
+    responses(
+        (status = 200, description = "Diagnóstico BDP", body = BdpDiagnosticoResponse),
+        (status = 401, description = "No autorizado", body = ErrorResponse)
+    ),
+    security(("bearer_auth" = []))
+)]
+pub async fn diagnosticar_bdp(
+    State(state): State<AppState>,
+    auth: AuthUser,
+) -> Result<Json<BdpDiagnosticoResponse>, AppError> {
+    let config = ConfiguracionService::obtener(&state.pool, auth.user_id).await?;
+    let configurado = bdp_configurado(&config);
+
+    if !configurado {
+        return Ok(Json(BdpDiagnosticoResponse::sin_configurar(
+            config.bdp_sync_enabled,
+        )));
+    }
+
+    let client = BdpWeblinkClient::new(&config);
+    match client.health().await {
+        Ok(health) if health.is_alive => {}
+        Ok(_) => {
+            return Ok(Json(BdpDiagnosticoResponse::health_error(
+                config.bdp_sync_enabled,
+                "BDP respondio Health pero IsAlive=false",
+            )));
+        }
+        Err(error) => {
+            return Ok(Json(BdpDiagnosticoResponse::health_error(
+                config.bdp_sync_enabled,
+                format!("No se pudo contactar BDP Health: {error}"),
+            )));
+        }
+    }
+
+    let session = match client.login().await {
+        Ok(session) => session,
+        Err(error) => {
+            return Ok(Json(BdpDiagnosticoResponse::login_error(
+                config.bdp_sync_enabled,
+                format!("BDP Health OK, Login fallo: {error}"),
+            )));
+        }
+    };
+
+    let version: Result<BdpVersionResponse, _> = client
+        .post_authenticated(
+            "/Service/GetVersion",
+            &serde_json::json!({}),
+            &session.token,
+        )
+        .await;
+
+    match version {
+        Ok(version) if version.error_message.trim().is_empty() => {
+            Ok(Json(BdpDiagnosticoResponse::version_ok(
+                config.bdp_sync_enabled,
+                session.expires_in_seconds,
+                version,
+            )))
+        }
+        Ok(version) => Ok(Json(BdpDiagnosticoResponse {
+            ..BdpDiagnosticoResponse::version_error(
+                config.bdp_sync_enabled,
+                session.expires_in_seconds,
+                format!(
+                    "Login OK, GetVersion devolvio error: {}",
+                    version.error_message
+                ),
+            )
+        })),
+        Err(error) => Ok(Json(BdpDiagnosticoResponse::version_error(
+            config.bdp_sync_enabled,
+            session.expires_in_seconds,
+            format!("Login OK, GetVersion fallo: {error}"),
+        ))),
+    }
+}
+
+fn bdp_configurado(config: &ConfiguracionRestaurante) -> bool {
+    !config.bdp_base_url.trim().is_empty()
+        && !config.bdp_login.trim().is_empty()
+        && !config.bdp_password.trim().is_empty()
+        && !config.bdp_integrator_code.trim().is_empty()
 }
 
 /* ========== Integraciones de marketing ========== */
@@ -113,7 +287,6 @@ pub async fn actualizar_integraciones(
 ) -> Result<Json<IntegracionMarketingPublica>, AppError> {
     req.validate()
         .map_err(|e| AppError::Validation(e.to_string()))?;
-    let integ =
-        IntegracionMarketingService::actualizar(&state.pool, auth.user_id, &req).await?;
+    let integ = IntegracionMarketingService::actualizar(&state.pool, auth.user_id, &req).await?;
     Ok(Json(integ))
 }

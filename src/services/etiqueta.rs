@@ -59,18 +59,14 @@ impl EtiquetaService {
         .await?;
 
         /* Retornar con datos de categoría para consistencia con la lista */
-        let tags = EtiquetaRepository::list_etiquetas(pool, user_id, Some(etiqueta.categoria_id))
-            .await?;
+        let tags =
+            EtiquetaRepository::list_etiquetas(pool, user_id, Some(etiqueta.categoria_id)).await?;
         tags.into_iter()
             .find(|t| t.id == etiqueta.id)
             .ok_or_else(|| AppError::Internal("Etiqueta creada pero no encontrada".into()))
     }
 
-    pub async fn delete_etiqueta(
-        pool: &PgPool,
-        id: Uuid,
-        user_id: Uuid,
-    ) -> Result<(), AppError> {
+    pub async fn delete_etiqueta(pool: &PgPool, id: Uuid, user_id: Uuid) -> Result<(), AppError> {
         if !EtiquetaRepository::delete_etiqueta(pool, id, user_id).await? {
             return Err(AppError::NotFound(
                 "Etiqueta no encontrada o es de sistema".into(),

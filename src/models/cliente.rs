@@ -1,6 +1,6 @@
 /* 263A-1: Modelo de cliente para el CRM.
-   Basado en Data II (Video 9): listado paginado, búsqueda, campos completos.
-   El restaurante maneja ~43k clientes, la paginación es crítica. */
+Basado en Data II (Video 9): listado paginado, búsqueda, campos completos.
+El restaurante maneja ~43k clientes, la paginación es crítica. */
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};

@@ -176,19 +176,16 @@ impl DigitalizacionService {
             .choices
             .first()
             .and_then(|c| c.message.content.as_ref())
-            .ok_or_else(|| {
-                AppError::Internal("Respuesta vacía del servicio de IA".to_string())
-            })?;
+            .ok_or_else(|| AppError::Internal("Respuesta vacía del servicio de IA".to_string()))?;
 
         /* Parsear el JSON devuelto por la IA */
-        let datos: DatosDocumentoExtraidos =
-            serde_json::from_str(content).map_err(|e| {
-                tracing::error!("Error al parsear JSON de Groq: {e}, contenido: {content}");
-                AppError::Internal(
-                    "El servicio de IA devolvió un formato inesperado. Intenta con otra imagen."
-                        .to_string(),
-                )
-            })?;
+        let datos: DatosDocumentoExtraidos = serde_json::from_str(content).map_err(|e| {
+            tracing::error!("Error al parsear JSON de Groq: {e}, contenido: {content}");
+            AppError::Internal(
+                "El servicio de IA devolvió un formato inesperado. Intenta con otra imagen."
+                    .to_string(),
+            )
+        })?;
 
         Ok(datos)
     }

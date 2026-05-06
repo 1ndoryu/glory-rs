@@ -2,7 +2,8 @@
  * Campos obligatorios al reservar + IVA por defecto + nombre restaurante.
  * [014A-1] auto_venta_reserva: al completar reserva, crear venta automáticamente.
  * [014A-4] Turnos configurables: horas de desayuno, comida, cena.
- * [034A-3] url_haddock: enlace configurable a plataforma externa Haddock. */
+ * [034A-3] url_haddock: enlace configurable a plataforma externa Haddock.
+ * [065A-2] bdp_*: credenciales y parametros operativos de WebLink REST API. */
 
 use chrono::{DateTime, NaiveTime, Utc};
 use serde::{Deserialize, Serialize};
@@ -43,6 +44,18 @@ pub struct ConfiguracionRestaurante {
     pub haddock_api_token: String,
     /* [064A-5] Toggle para activar/desactivar la sincronización de ventas con Haddock */
     pub haddock_sync_enabled: bool,
+    /* [065A-2] Base publica del WebLink REST API instalado en el PC del restaurante. */
+    pub bdp_base_url: String,
+    #[serde(skip_serializing)]
+    pub bdp_login: String,
+    #[serde(skip_serializing)]
+    pub bdp_password: String,
+    #[serde(skip_serializing)]
+    pub bdp_integrator_code: String,
+    pub bdp_sync_enabled: bool,
+    pub bdp_pos_id: i32,
+    pub bdp_employee_id: i32,
+    pub bdp_items_profile_id: i32,
     /* [094A-4] URL de Google Business para redirigir reseñas positivas */
     pub google_review_url: String,
     /* [094A-6] Datos para botones CTA en mensajes WhatsApp */
@@ -83,6 +96,22 @@ pub struct ActualizarConfiguracionRequest {
     pub haddock_api_token: Option<String>,
     /* [064A-5] Activar sincronización de ventas con Haddock */
     pub haddock_sync_enabled: Option<bool>,
+    /* [065A-2] Configuracion BDP WebLink REST API */
+    #[validate(length(max = 500))]
+    pub bdp_base_url: Option<String>,
+    #[validate(length(max = 100))]
+    pub bdp_login: Option<String>,
+    #[validate(length(max = 200))]
+    pub bdp_password: Option<String>,
+    #[validate(length(max = 100))]
+    pub bdp_integrator_code: Option<String>,
+    pub bdp_sync_enabled: Option<bool>,
+    #[validate(range(min = 1, max = 999_999))]
+    pub bdp_pos_id: Option<i32>,
+    #[validate(range(min = 1, max = 999_999))]
+    pub bdp_employee_id: Option<i32>,
+    #[validate(range(min = 1, max = 999_999))]
+    pub bdp_items_profile_id: Option<i32>,
     /* [094A-4] URL de Google Business para reseñas positivas */
     #[validate(length(max = 500))]
     pub google_review_url: Option<String>,

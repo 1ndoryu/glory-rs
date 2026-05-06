@@ -136,17 +136,16 @@ pub async fn stream_notificaciones(
 
     let rx = state.notif_tx.subscribe();
 
-    let stream = BroadcastStream::new(rx)
-        .filter_map(move |result| {
-            match result {
-                Ok(event) if event.user_id == user_id => {
-                    let json = serde_json::to_string(&event.notificacion).ok()?;
-                    Some(Ok(Event::default().event("notificacion").data(json)))
-                }
-                /* Filtrar eventos de otros usuarios o errores de lag */
-                _ => None,
+    let stream = BroadcastStream::new(rx).filter_map(move |result| {
+        match result {
+            Ok(event) if event.user_id == user_id => {
+                let json = serde_json::to_string(&event.notificacion).ok()?;
+                Some(Ok(Event::default().event("notificacion").data(json)))
             }
-        });
+            /* Filtrar eventos de otros usuarios o errores de lag */
+            _ => None,
+        }
+    });
 
     Ok(Sse::new(stream).keep_alive(
         axum::response::sse::KeepAlive::new()

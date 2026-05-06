@@ -80,9 +80,9 @@ pub async fn eliminar_canal(
 
 pub fn routes() -> Router<AppState> {
     Router::new()
+        .route("/canales-reserva", get(listar_canales).post(crear_canal))
         .route(
-            "/canales-reserva",
-            get(listar_canales).post(crear_canal),
+            "/canales-reserva/:id",
+            axum::routing::delete(eliminar_canal),
         )
-        .route("/canales-reserva/:id", axum::routing::delete(eliminar_canal))
 }

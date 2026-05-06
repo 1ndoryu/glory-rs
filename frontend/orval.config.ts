@@ -11,6 +11,7 @@ export default defineConfig({
       target: './src/api/generated',
       client: 'react-query',
       mode: 'tags-split',
+      clean: true,
       override: {
         mutator: {
           path: './src/api/axios-instance.ts',

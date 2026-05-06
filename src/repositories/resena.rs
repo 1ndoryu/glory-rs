@@ -112,16 +112,12 @@ impl ResenaRepository {
     }
 
     /* ¿Ya se solicitó reseña para esta reserva? */
-    pub async fn existe_para_reserva(
-        pool: &PgPool,
-        reserva_id: Uuid,
-    ) -> Result<bool, sqlx::Error> {
-        let row: (bool,) = sqlx::query_as(
-            "SELECT EXISTS(SELECT 1 FROM resenas WHERE reserva_id = $1)",
-        )
-        .bind(reserva_id)
-        .fetch_one(pool)
-        .await?;
+    pub async fn existe_para_reserva(pool: &PgPool, reserva_id: Uuid) -> Result<bool, sqlx::Error> {
+        let row: (bool,) =
+            sqlx::query_as("SELECT EXISTS(SELECT 1 FROM resenas WHERE reserva_id = $1)")
+                .bind(reserva_id)
+                .fetch_one(pool)
+                .await?;
         Ok(row.0)
     }
 }

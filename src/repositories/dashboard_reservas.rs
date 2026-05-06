@@ -16,7 +16,11 @@ use crate::models::{
 
 pub struct DashboardReservasRepository;
 
-#[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss, clippy::cast_precision_loss)]
+#[allow(
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss,
+    clippy::cast_precision_loss
+)]
 impl DashboardReservasRepository {
     /// Total de reservas no canceladas en un rango de fechas
     pub async fn total_reservas(
@@ -88,7 +92,15 @@ impl DashboardReservasRepository {
         .fetch_all(pool)
         .await?;
 
-        let dias = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+        let dias = [
+            "Domingo",
+            "Lunes",
+            "Martes",
+            "Miércoles",
+            "Jueves",
+            "Viernes",
+            "Sábado",
+        ];
         Ok(rows
             .into_iter()
             .map(|r| AgrupacionDiaSemana {

@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import {
   useListarResenas,
   useSolicitarResena,
-} from '../api/generated/reseñas/reseñas';
+} from '../api/generated/resenas/resenas';
 import type { ResenaAdmin } from '../api/generated/gestionRestauranteAPI.schemas';
 
 function extraerError(err: unknown): string {

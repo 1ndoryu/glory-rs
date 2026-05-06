@@ -25,7 +25,8 @@ fn verificar_demo_mode() -> Result<(), AppError> {
     let demo = std::env::var("DEMO_MODE").unwrap_or_default();
     if demo != "true" && demo != "1" {
         return Err(AppError::BadRequest(
-            "Los endpoints de administración solo están disponibles en modo demo (DEMO_MODE=true)".to_string(),
+            "Los endpoints de administración solo están disponibles en modo demo (DEMO_MODE=true)"
+                .to_string(),
         ));
     }
     Ok(())

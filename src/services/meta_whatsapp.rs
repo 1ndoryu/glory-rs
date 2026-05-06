@@ -25,7 +25,10 @@ impl MetaWhatsappService {
         cuerpo: &str,
     ) -> Result<bool, MetaWhatsappError> {
         if !integ.meta_configurado() {
-            tracing::warn!("Meta WhatsApp no configurado — mensaje a {} omitido", destinatario);
+            tracing::warn!(
+                "Meta WhatsApp no configurado — mensaje a {} omitido",
+                destinatario
+            );
             return Ok(false);
         }
 
@@ -73,7 +76,10 @@ impl MetaWhatsappService {
         template_idioma: &str,
     ) -> Result<bool, MetaWhatsappError> {
         if !integ.meta_configurado() {
-            tracing::warn!("Meta WhatsApp no configurado — template a {} omitido", destinatario);
+            tracing::warn!(
+                "Meta WhatsApp no configurado — template a {} omitido",
+                destinatario
+            );
             return Ok(false);
         }
 
@@ -108,7 +114,11 @@ impl MetaWhatsappService {
             return Err(MetaWhatsappError::Api { status, body });
         }
 
-        tracing::info!("WhatsApp template '{}' enviado a {} via Meta", template_nombre, destinatario);
+        tracing::info!(
+            "WhatsApp template '{}' enviado a {} via Meta",
+            template_nombre,
+            destinatario
+        );
         Ok(true)
     }
 
@@ -125,7 +135,10 @@ impl MetaWhatsappService {
         telefono_restaurante: Option<&str>,
     ) -> Result<bool, MetaWhatsappError> {
         if !integ.meta_configurado() {
-            tracing::warn!("Meta WhatsApp no configurado — CTA a {} omitido", destinatario);
+            tracing::warn!(
+                "Meta WhatsApp no configurado — CTA a {} omitido",
+                destinatario
+            );
             return Ok(false);
         }
 

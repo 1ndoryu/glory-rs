@@ -18,8 +18,8 @@ mod notificaciones;
 mod plano_sala;
 mod plantillas_whatsapp;
 mod recordatorios;
-mod reservas;
 mod resenas;
+mod reservas;
 mod trabajadores;
 mod ventas;
 
@@ -135,6 +135,7 @@ impl utoipa::Modify for SecurityAddon {
         configuracion::actualizar_configuracion,
         configuracion::obtener_integraciones,
         configuracion::actualizar_integraciones,
+        configuracion::diagnosticar_bdp,
         campanas::crear_campana,
         campanas::obtener_campana,
         campanas::listar_campanas,
@@ -266,6 +267,7 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::ReservaMesa,
         crate::models::ConfiguracionRestaurante,
         crate::models::ActualizarConfiguracionRequest,
+        configuracion::BdpDiagnosticoResponse,
         crate::models::IntegracionMarketingPublica,
         crate::models::ActualizarIntegracionesRequest,
         crate::models::Campana,
@@ -370,7 +372,8 @@ pub fn create_router(pool: sqlx::PgPool, config: crate::config::AppConfig) -> Ro
     /* [263A-20] En produccion, servir el frontend SPA desde ./static.
      * El fallback_service reenvía rutas no-API al index.html para client-side routing. */
     let spa_dir = std::env::var("STATIC_DIR").unwrap_or_else(|_| "static".to_string());
-    let spa_fallback = ServeDir::new(&spa_dir).fallback(ServeFile::new(format!("{spa_dir}/index.html")));
+    let spa_fallback =
+        ServeDir::new(&spa_dir).fallback(ServeFile::new(format!("{spa_dir}/index.html")));
 
     Router::new()
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))

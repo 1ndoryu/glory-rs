@@ -8,7 +8,7 @@ use argon2::{
 };
 use axum::extract::{Path, State};
 use axum::http::StatusCode;
-use axum::routing::{get, post, patch};
+use axum::routing::{get, patch, post};
 use axum::{Json, Router};
 use uuid::Uuid;
 use validator::Validate;
@@ -314,9 +314,7 @@ pub async fn login_trabajador(
     ),
     security(("bearer_auth" = []))
 )]
-pub async fn listar_secciones(
-    _auth: AuthUser,
-) -> Json<Vec<&'static str>> {
+pub async fn listar_secciones(_auth: AuthUser) -> Json<Vec<&'static str>> {
     Json(SECCIONES_VALIDAS.to_vec())
 }
 
@@ -326,10 +324,7 @@ pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/trabajadores", get(listar).post(crear))
         .route("/trabajadores/secciones", get(listar_secciones))
-        .route(
-            "/trabajadores/:id",
-            patch(actualizar).delete(eliminar),
-        )
+        .route("/trabajadores/:id", patch(actualizar).delete(eliminar))
         /* Login público (sin auth) — se monta en el router de auth */
         .route("/auth/login-trabajador", post(login_trabajador))
 }

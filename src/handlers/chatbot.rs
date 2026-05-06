@@ -201,7 +201,9 @@ pub async fn cancelar_reserva(
     )
     .await;
 
-    Ok(Json(serde_json::json!({ "ok": true, "message": "Reserva cancelada" })))
+    Ok(Json(
+        serde_json::json!({ "ok": true, "message": "Reserva cancelada" }),
+    ))
 }
 
 pub fn routes() -> Router<AppState> {

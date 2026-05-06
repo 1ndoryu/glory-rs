@@ -30,9 +30,7 @@ impl TwilioService {
         let auth_token = integ.twilio_auth_token.as_deref().unwrap_or_default();
         let from = integ.twilio_from_number.as_deref().unwrap_or_default();
 
-        let url = format!(
-            "https://api.twilio.com/2010-04-01/Accounts/{account_sid}/Messages.json"
-        );
+        let url = format!("https://api.twilio.com/2010-04-01/Accounts/{account_sid}/Messages.json");
 
         let client = reqwest::Client::new();
         let resp = client

@@ -4,7 +4,9 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::errors::AppError;
-use crate::models::{ActualizarGastoRequest, CategoriaGasto, CrearGastoRequest, Gasto, GastosPaginados};
+use crate::models::{
+    ActualizarGastoRequest, CategoriaGasto, CrearGastoRequest, Gasto, GastosPaginados,
+};
 use crate::repositories::gasto::{ActualizarGastoData, NuevoGasto};
 use crate::repositories::{CategoriaGastoRepository, GastoRepository};
 
@@ -21,7 +23,8 @@ impl GastoService {
             .and_then(|v| v.as_str().map(String::from))
             .unwrap_or_else(|| "ticket".into());
         /* 253A-21: metodo_pago es opcional — se almacena cadena vacía si no se proporciona */
-        let metodo = req.metodo_pago
+        let metodo = req
+            .metodo_pago
             .as_ref()
             .and_then(|m| serde_json::to_value(m).ok())
             .and_then(|v| v.as_str().map(String::from))
@@ -67,13 +70,21 @@ impl GastoService {
         sort_by: Option<String>,
         sort_order: Option<String>,
     ) -> Result<GastosPaginados, AppError> {
-        let (items, total) =
-            GastoRepository::list(
-                pool, user_id, page, per_page, desde, hasta, categoria_id,
-                busqueda.as_deref(), tipo_documento.as_deref(), metodo_pago.as_deref(),
-                sort_by.as_deref(), sort_order.as_deref(),
-            )
-                .await?;
+        let (items, total) = GastoRepository::list(
+            pool,
+            user_id,
+            page,
+            per_page,
+            desde,
+            hasta,
+            categoria_id,
+            busqueda.as_deref(),
+            tipo_documento.as_deref(),
+            metodo_pago.as_deref(),
+            sort_by.as_deref(),
+            sort_order.as_deref(),
+        )
+        .await?;
         Ok(GastosPaginados {
             items,
             total,

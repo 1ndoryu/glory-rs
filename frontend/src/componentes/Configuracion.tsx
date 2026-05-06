@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { useConfiguracion } from '../hooks/useConfiguracion';
 import IntegracionesMarketing from './IntegracionesMarketing';
 import ConfigChatbot from './ConfigChatbot';
+import ConfigBdp from './ConfigBdp';
 import axios from '@/api/axios-instance';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -252,6 +253,8 @@ function Configuracion() {
           </div>
         </CardContent>
       </Card>
+
+      <ConfigBdp config={config} cambiarCampo={cambiarCampo} />
 
       {/* [134A-4] Reseñas y CTA WhatsApp — configuración para review gating y botones CTA */}
       <Card>

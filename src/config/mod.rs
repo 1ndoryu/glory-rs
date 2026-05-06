@@ -49,7 +49,8 @@ impl AppConfig {
                 .unwrap_or_else(|_| "3000".to_string())
                 .parse()?,
             smtp,
-            app_url: std::env::var("APP_URL").unwrap_or_else(|_| "http://localhost:5173".to_string()),
+            app_url: std::env::var("APP_URL")
+                .unwrap_or_else(|_| "http://localhost:5173".to_string()),
             error_report_email: std::env::var("ERROR_REPORT_EMAIL").ok(),
         })
     }

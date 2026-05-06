@@ -10,7 +10,11 @@ use validator::Validate;
 #[derive(Debug, Deserialize, Validate, ToSchema)]
 pub struct DigitalizarDocumentoRequest {
     /// Imagen codificada en base64 (JPEG, PNG, WebP)
-    #[validate(length(min = 100, max = 10_000_000, message = "Imagen base64 inválida o demasiado grande (máx ~7MB)"))]
+    #[validate(length(
+        min = 100,
+        max = 10_000_000,
+        message = "Imagen base64 inválida o demasiado grande (máx ~7MB)"
+    ))]
     pub imagen_base64: String,
     /// MIME type de la imagen (image/jpeg, image/png, image/webp)
     #[validate(length(max = 30))]

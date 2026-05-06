@@ -182,10 +182,7 @@ pub async fn enviar_campana(
 pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/campanas", post(crear_campana).get(listar_campanas))
-        .route(
-            "/campanas/segmentos/preview",
-            get(preview_segmento),
-        )
+        .route("/campanas/segmentos/preview", get(preview_segmento))
         .route(
             "/campanas/:id",
             get(obtener_campana)

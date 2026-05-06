@@ -36,13 +36,11 @@ impl TrabajadorRepository {
         id: Uuid,
         user_id: Uuid,
     ) -> Result<Option<Trabajador>, sqlx::Error> {
-        sqlx::query_as::<_, Trabajador>(
-            "SELECT * FROM trabajadores WHERE id = $1 AND user_id = $2",
-        )
-        .bind(id)
-        .bind(user_id)
-        .fetch_optional(pool)
-        .await
+        sqlx::query_as::<_, Trabajador>("SELECT * FROM trabajadores WHERE id = $1 AND user_id = $2")
+            .bind(id)
+            .bind(user_id)
+            .fetch_optional(pool)
+            .await
     }
 
     /* Login: buscar por email dentro de los trabajadores del propietario */
@@ -58,10 +56,7 @@ impl TrabajadorRepository {
         .await
     }
 
-    pub async fn list(
-        pool: &PgPool,
-        user_id: Uuid,
-    ) -> Result<Vec<Trabajador>, sqlx::Error> {
+    pub async fn list(pool: &PgPool, user_id: Uuid) -> Result<Vec<Trabajador>, sqlx::Error> {
         sqlx::query_as::<_, Trabajador>(
             "SELECT * FROM trabajadores WHERE user_id = $1 ORDER BY nombre",
         )
@@ -102,18 +97,12 @@ impl TrabajadorRepository {
         .await
     }
 
-    pub async fn delete(
-        pool: &PgPool,
-        id: Uuid,
-        user_id: Uuid,
-    ) -> Result<bool, sqlx::Error> {
-        let result = sqlx::query(
-            "DELETE FROM trabajadores WHERE id = $1 AND user_id = $2",
-        )
-        .bind(id)
-        .bind(user_id)
-        .execute(pool)
-        .await?;
+    pub async fn delete(pool: &PgPool, id: Uuid, user_id: Uuid) -> Result<bool, sqlx::Error> {
+        let result = sqlx::query("DELETE FROM trabajadores WHERE id = $1 AND user_id = $2")
+            .bind(id)
+            .bind(user_id)
+            .execute(pool)
+            .await?;
         Ok(result.rows_affected() > 0)
     }
 

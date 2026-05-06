@@ -11,11 +11,10 @@ use validator::Validate;
 use crate::errors::AppError;
 use crate::middleware::AuthUser;
 use crate::models::{
-    ActualizarMesaRequest, ActualizarParedRequest, ActualizarPosicionesRequest,
-    ActualizarPosicionesParedesRequest, ActualizarZonaRequest,
-    CombinacionMesas, CrearCombinacionRequest, CrearMesaRequest, CrearParedRequest,
-    CrearZonaRequest, Mesa, ParedSala, PlanoExport, PlanoOcupacion, PlanoOcupacionQuery,
-    PlanoSala, ZonaSala,
+    ActualizarMesaRequest, ActualizarParedRequest, ActualizarPosicionesParedesRequest,
+    ActualizarPosicionesRequest, ActualizarZonaRequest, CombinacionMesas, CrearCombinacionRequest,
+    CrearMesaRequest, CrearParedRequest, CrearZonaRequest, Mesa, ParedSala, PlanoExport,
+    PlanoOcupacion, PlanoOcupacionQuery, PlanoSala, ZonaSala,
 };
 use crate::services::PlanoSalaService;
 use crate::AppState;
@@ -86,8 +85,7 @@ pub async fn actualizar_zona(
 ) -> Result<Json<ZonaSala>, AppError> {
     req.validate()
         .map_err(|e| AppError::Validation(e.to_string()))?;
-    let zona =
-        PlanoSalaService::actualizar_zona(&state.pool, id, auth.user_id, req).await?;
+    let zona = PlanoSalaService::actualizar_zona(&state.pool, id, auth.user_id, req).await?;
     Ok(Json(zona))
 }
 
@@ -232,8 +230,7 @@ pub async fn crear_combinacion(
 ) -> Result<(StatusCode, Json<CombinacionMesas>), AppError> {
     req.validate()
         .map_err(|e| AppError::Validation(e.to_string()))?;
-    let combo =
-        PlanoSalaService::crear_combinacion(&state.pool, auth.user_id, req).await?;
+    let combo = PlanoSalaService::crear_combinacion(&state.pool, auth.user_id, req).await?;
     Ok((StatusCode::CREATED, Json(combo)))
 }
 
@@ -294,8 +291,7 @@ pub async fn importar_plano(
     auth: AuthUser,
     Json(data): Json<PlanoExport>,
 ) -> Result<Json<PlanoSala>, AppError> {
-    let plano =
-        PlanoSalaService::importar(&state.pool, auth.user_id, data).await?;
+    let plano = PlanoSalaService::importar(&state.pool, auth.user_id, data).await?;
     Ok(Json(plano))
 }
 
@@ -345,12 +341,10 @@ pub async fn obtener_ocupacion(
     Query(query): Query<PlanoOcupacionQuery>,
 ) -> Result<Json<PlanoOcupacion>, AppError> {
     /* [014A-4] Obtener config de turnos para rangos horarios configurables */
-    let config = crate::repositories::ConfiguracionRepository::obtener_o_crear(
-        &state.pool,
-        auth.user_id,
-    )
-    .await
-    .ok();
+    let config =
+        crate::repositories::ConfiguracionRepository::obtener_o_crear(&state.pool, auth.user_id)
+            .await
+            .ok();
 
     let (hora_desde, hora_hasta) = query
         .turno
@@ -517,7 +511,10 @@ pub fn routes() -> Router<AppState> {
         .route("/plano-sala/import", post(importar_plano))
         /* [094A-7] Rutas de paredes */
         .route("/plano-sala/paredes", post(crear_pared))
-        .route("/plano-sala/paredes/posiciones", patch(actualizar_posiciones_paredes))
+        .route(
+            "/plano-sala/paredes/posiciones",
+            patch(actualizar_posiciones_paredes),
+        )
         .route(
             "/plano-sala/paredes/:id",
             patch(actualizar_pared).delete(eliminar_pared),

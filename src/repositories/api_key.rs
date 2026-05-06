@@ -33,7 +33,10 @@ impl ApiKeyRepository {
         .await
     }
 
-    pub async fn find_by_hash(pool: &PgPool, key_hash: &str) -> Result<Option<ApiKey>, sqlx::Error> {
+    pub async fn find_by_hash(
+        pool: &PgPool,
+        key_hash: &str,
+    ) -> Result<Option<ApiKey>, sqlx::Error> {
         sqlx::query_as!(
             ApiKey,
             "SELECT id, user_id, nombre, key_hash, key_prefix, permisos, activa, last_used_at, created_at \

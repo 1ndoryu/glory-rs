@@ -86,13 +86,11 @@ impl InactividadRepository {
     }
 
     pub async fn delete(pool: &PgPool, id: Uuid, user_id: Uuid) -> Result<bool, sqlx::Error> {
-        let r = sqlx::query(
-            "DELETE FROM reglas_inactividad WHERE id = $1 AND user_id = $2",
-        )
-        .bind(id)
-        .bind(user_id)
-        .execute(pool)
-        .await?;
+        let r = sqlx::query("DELETE FROM reglas_inactividad WHERE id = $1 AND user_id = $2")
+            .bind(id)
+            .bind(user_id)
+            .execute(pool)
+            .await?;
         Ok(r.rows_affected() > 0)
     }
 

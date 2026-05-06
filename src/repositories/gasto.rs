@@ -104,11 +104,13 @@ impl GastoRepository {
             Some("metodo_pago") => "metodo_pago",
             _ => "fecha",
         };
-        let order_dir = if matches!(sort_order, Some("asc")) { "ASC" } else { "DESC" };
+        let order_dir = if matches!(sort_order, Some("asc")) {
+            "ASC"
+        } else {
+            "DESC"
+        };
 
-        let busqueda_pattern = busqueda
-            .filter(|b| !b.is_empty())
-            .map(|b| format!("%{b}%"));
+        let busqueda_pattern = busqueda.filter(|b| !b.is_empty()).map(|b| format!("%{b}%"));
 
         /* Normalizar filtros vacíos a None */
         let tipo_doc_filter = tipo_documento.filter(|t| !t.is_empty());

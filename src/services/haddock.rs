@@ -131,7 +131,10 @@ impl HaddockService {
                     return;
                 }
                 Ok(None) => {
-                    warn!("[064A-7] Venta {} no encontrada en BD, abortando sync", venta.id);
+                    warn!(
+                        "[064A-7] Venta {} no encontrada en BD, abortando sync",
+                        venta.id
+                    );
                     Self::cleanup_lock(venta.id);
                     return;
                 }
@@ -145,8 +148,13 @@ impl HaddockService {
 
         match Self::send_order_http(venta, config, url).await {
             Ok(()) => {
-                if let Err(e) = VentaRepository::update_haddock_status(pool, venta.id, true, None).await {
-                    warn!("[064A-6] Error actualizando status sync de venta {}: {e}", venta.id);
+                if let Err(e) =
+                    VentaRepository::update_haddock_status(pool, venta.id, true, None).await
+                {
+                    warn!(
+                        "[064A-6] Error actualizando status sync de venta {}: {e}",
+                        venta.id
+                    );
                 }
             }
             Err(error_msg) => {
@@ -155,11 +163,20 @@ impl HaddockService {
                  * (nombres de merchant, tokens parciales). Solo guardamos
                  * el código HTTP o tipo de error genérico. */
                 let safe_msg = Self::sanitize_error_msg(&error_msg);
-                if let Err(e) = VentaRepository::update_haddock_status(pool, venta.id, false, Some(&safe_msg)).await {
-                    warn!("[064A-6] Error actualizando status sync fallido de venta {}: {e}", venta.id);
+                if let Err(e) =
+                    VentaRepository::update_haddock_status(pool, venta.id, false, Some(&safe_msg))
+                        .await
+                {
+                    warn!(
+                        "[064A-6] Error actualizando status sync fallido de venta {}: {e}",
+                        venta.id
+                    );
                 }
                 /* El error completo solo vive en logs del servidor */
-                warn!("[064A-15] Error completo de sync venta {}: {error_msg}", venta.id);
+                warn!(
+                    "[064A-15] Error completo de sync venta {}: {error_msg}",
+                    venta.id
+                );
             }
         }
 
@@ -233,10 +250,7 @@ impl HaddockService {
                  * para no desperdiciar requests contra la API de Haddock. */
                 Ok(status) if status.as_u16() == 401 || status.as_u16() == 403 => {
                     let msg = format!("Haddock rechazó credenciales (HTTP {status})");
-                    warn!(
-                        "[064A-15] {msg} para venta {} — no se reintenta",
-                        venta.id
-                    );
+                    warn!("[064A-15] {msg} para venta {} — no se reintenta", venta.id);
                     return Err(msg);
                 }
                 Ok(status) => {
@@ -272,7 +286,8 @@ impl HaddockService {
 
     /// Mapea una Venta de nuestra plataforma al formato que espera Haddock
     fn map_venta_to_order(venta: &Venta) -> HaddockOrder {
-        let total = Self::decimal_to_f64(&venta.importe_base) + Self::decimal_to_f64(&venta.importe_iva);
+        let total =
+            Self::decimal_to_f64(&venta.importe_base) + Self::decimal_to_f64(&venta.importe_iva);
 
         /* Hora estimada por turno (Haddock requiere ISO 8601 con hora) */
         let hora = match venta.turno.as_str() {
@@ -424,6 +439,17 @@ mod tests {
             url_haddock: String::new(),
             haddock_api_token: token.to_string(),
             haddock_sync_enabled: enabled,
+            bdp_base_url: String::new(),
+            bdp_login: String::new(),
+            bdp_password: String::new(),
+            bdp_integrator_code: String::new(),
+            bdp_sync_enabled: false,
+            bdp_pos_id: 1,
+            bdp_employee_id: 1,
+            bdp_items_profile_id: 1,
+            google_review_url: String::new(),
+            telefono_restaurante: String::new(),
+            url_reservas: String::new(),
             created_at: Utc::now(),
             updated_at: Utc::now(),
         }
@@ -533,7 +559,10 @@ mod tests {
 
         /* Verificar que NO se hizo ningún request */
         let received = server.received_requests().await.unwrap();
-        assert!(received.is_empty(), "No debería enviar requests con sync desactivado");
+        assert!(
+            received.is_empty(),
+            "No debería enviar requests con sync desactivado"
+        );
     }
 
     #[tokio::test]
@@ -546,7 +575,10 @@ mod tests {
         let _ = HaddockService::send_order_http(&venta, &config, &url).await;
 
         let received = server.received_requests().await.unwrap();
-        assert!(received.is_empty(), "No debería enviar requests con token vacío");
+        assert!(
+            received.is_empty(),
+            "No debería enviar requests con token vacío"
+        );
     }
 
     #[tokio::test]
@@ -559,7 +591,10 @@ mod tests {
         let _ = HaddockService::send_order_http(&venta, &config, &url).await;
 
         let received = server.received_requests().await.unwrap();
-        assert!(received.is_empty(), "No debería enviar requests con ambos desactivados");
+        assert!(
+            received.is_empty(),
+            "No debería enviar requests con ambos desactivados"
+        );
     }
 
     #[tokio::test]
@@ -623,7 +658,9 @@ mod tests {
         let server = MockServer::start().await;
         Mock::given(method("POST"))
             .and(path("/orders/"))
-            .respond_with(ResponseTemplate::new(401).set_body_string(r#"{"error":"Invalid credentials"}"#))
+            .respond_with(
+                ResponseTemplate::new(401).set_body_string(r#"{"error":"Invalid credentials"}"#),
+            )
             .expect(1) /* [064A-15] 1 request, no 3 */
             .mount(&server)
             .await;
@@ -727,10 +764,19 @@ mod tests {
         let json = serde_json::to_string(&payload).unwrap();
 
         /* Haddock exige "externalID" con ID en mayúsculas */
-        assert!(json.contains("externalID"), "Debe usar externalID (capital ID): {json}");
-        assert!(json.contains("pricePerUnit"), "Debe usar camelCase: pricePerUnit");
+        assert!(
+            json.contains("externalID"),
+            "Debe usar externalID (capital ID): {json}"
+        );
+        assert!(
+            json.contains("pricePerUnit"),
+            "Debe usar camelCase: pricePerUnit"
+        );
         /* No debe contener las variantes incorrectas */
-        assert!(!json.contains("\"externalId\""), "No debe usar externalId (lowercase d)");
+        assert!(
+            !json.contains("\"externalId\""),
+            "No debe usar externalId (lowercase d)"
+        );
         assert!(!json.contains("external_id"), "No debe usar snake_case");
         assert!(!json.contains("price_per_unit"), "No debe usar snake_case");
     }
@@ -747,7 +793,10 @@ mod tests {
             orders: vec![order],
         };
         let json = serde_json::to_string(&payload).unwrap();
-        assert!(!json.contains("seats"), "seats=null no debería serializarse");
+        assert!(
+            !json.contains("seats"),
+            "seats=null no debería serializarse"
+        );
     }
 
     #[tokio::test]
@@ -800,7 +849,10 @@ mod tests {
         let result = HaddockService::send_order_http(&venta, &config, &url).await;
         assert!(result.is_err(), "3 fallos deben retornar Err");
         let msg = result.unwrap_err();
-        assert!(msg.contains("500"), "Mensaje de error debe incluir código HTTP: {msg}");
+        assert!(
+            msg.contains("500"),
+            "Mensaje de error debe incluir código HTTP: {msg}"
+        );
     }
 
     /* Test 3: Token inválido → 401 → error con mensaje que incluye "401".
@@ -822,7 +874,10 @@ mod tests {
         let result = HaddockService::send_order_http(&venta, &config, &url).await;
         assert!(result.is_err());
         let msg = result.unwrap_err();
-        assert!(msg.contains("401"), "Error de auth debe reportar 401: {msg}");
+        assert!(
+            msg.contains("401"),
+            "Error de auth debe reportar 401: {msg}"
+        );
     }
 
     /* Test 4: Error de red retorna Err con "Error de red" en el mensaje.
@@ -832,7 +887,8 @@ mod tests {
         let venta = mock_venta();
         let config = mock_config("dG9rZW46c2VjcmV0", true);
 
-        let result = HaddockService::send_order_http(&venta, &config, "http://127.0.0.1:1/orders/").await;
+        let result =
+            HaddockService::send_order_http(&venta, &config, "http://127.0.0.1:1/orders/").await;
         assert!(result.is_err());
         let msg = result.unwrap_err();
         assert!(msg.contains("Error de red"), "Debe ser error de red: {msg}");
@@ -845,7 +901,9 @@ mod tests {
         let venta = mock_venta();
         let config = mock_config("dG9rZW46c2VjcmV0", false);
 
-        let result = HaddockService::send_order_http(&venta, &config, "http://should-not-be-called/orders/").await;
+        let result =
+            HaddockService::send_order_http(&venta, &config, "http://should-not-be-called/orders/")
+                .await;
         assert!(result.is_ok(), "Config deshabilitada → Ok, no Err");
     }
 
@@ -856,7 +914,9 @@ mod tests {
         let venta = mock_venta();
         let config = mock_config("", true);
 
-        let result = HaddockService::send_order_http(&venta, &config, "http://should-not-be-called/orders/").await;
+        let result =
+            HaddockService::send_order_http(&venta, &config, "http://should-not-be-called/orders/")
+                .await;
         assert!(result.is_ok(), "Token vacío → Ok, no Err");
     }
 
@@ -889,14 +949,31 @@ mod tests {
         venta.haddock_sync_error = Some("error previo".to_string());
 
         let order = HaddockService::map_venta_to_order(&venta);
-        let payload = HaddockOrdersPayload { orders: vec![order] };
+        let payload = HaddockOrdersPayload {
+            orders: vec![order],
+        };
         let json = serde_json::to_string(&payload).unwrap();
 
-        assert!(!json.contains("haddock_synced"), "haddock_synced no debe filtrarse al payload");
-        assert!(!json.contains("haddockSynced"), "haddockSynced no debe filtrarse al payload");
-        assert!(!json.contains("sync_error"), "sync_error no debe filtrarse al payload");
-        assert!(!json.contains("syncError"), "syncError no debe filtrarse al payload");
-        assert!(!json.contains("error previo"), "Contenido de sync_error no debe filtrarse");
+        assert!(
+            !json.contains("haddock_synced"),
+            "haddock_synced no debe filtrarse al payload"
+        );
+        assert!(
+            !json.contains("haddockSynced"),
+            "haddockSynced no debe filtrarse al payload"
+        );
+        assert!(
+            !json.contains("sync_error"),
+            "sync_error no debe filtrarse al payload"
+        );
+        assert!(
+            !json.contains("syncError"),
+            "syncError no debe filtrarse al payload"
+        );
+        assert!(
+            !json.contains("error previo"),
+            "Contenido de sync_error no debe filtrarse"
+        );
     }
 
     /* Test 9: Payload NO incluye reserva_id, cliente_id ni user_id.
@@ -908,7 +985,9 @@ mod tests {
         venta.cliente_id = Some(Uuid::new_v4());
 
         let order = HaddockService::map_venta_to_order(&venta);
-        let payload = HaddockOrdersPayload { orders: vec![order] };
+        let payload = HaddockOrdersPayload {
+            orders: vec![order],
+        };
         let json = serde_json::to_string(&payload).unwrap();
 
         assert!(!json.contains("reserva_id"), "reserva_id no debe filtrarse");
@@ -934,7 +1013,10 @@ mod tests {
         /* Verificar que existe */
         {
             let map = SYNC_LOCKS.lock().expect("SYNC_LOCKS poisoned");
-            assert!(map.contains_key(&venta_id), "Lock debe existir tras inserción");
+            assert!(
+                map.contains_key(&venta_id),
+                "Lock debe existir tras inserción"
+            );
         }
 
         /* Cleanup debe eliminarlo (strong_count = 1, solo el HashMap lo tiene) */
@@ -942,7 +1024,10 @@ mod tests {
 
         {
             let map = SYNC_LOCKS.lock().expect("SYNC_LOCKS poisoned");
-            assert!(!map.contains_key(&venta_id), "Lock debe eliminarse tras cleanup con 1 referencia");
+            assert!(
+                !map.contains_key(&venta_id),
+                "Lock debe eliminarse tras cleanup con 1 referencia"
+            );
         }
     }
 
@@ -968,7 +1053,10 @@ mod tests {
         assert!(result.is_err());
         let msg = result.unwrap_err();
         assert!(msg.contains("401"), "Error debe contener código: {msg}");
-        assert!(msg.contains("credenciales"), "Error debe mencionar credenciales: {msg}");
+        assert!(
+            msg.contains("credenciales"),
+            "Error debe mencionar credenciales: {msg}"
+        );
     }
 
     /* Test 064A-15-2: 403 no se reintenta — aborta inmediatamente. */
@@ -1018,7 +1106,10 @@ mod tests {
         let sanitized = HaddockService::sanitize_error_msg(raw);
         assert!(sanitized.contains("401"), "Debe incluir código");
         assert!(sanitized.contains("autenticación"), "Debe ser genérico");
-        assert!(!sanitized.contains("Unauthorized"), "No debe filtrar detalle HTTP");
+        assert!(
+            !sanitized.contains("Unauthorized"),
+            "No debe filtrar detalle HTTP"
+        );
     }
 
     /* Test 064A-15-5: Sanitización de errores — 500 genera mensaje genérico. */
@@ -1027,7 +1118,10 @@ mod tests {
         let raw = "Haddock respondió HTTP 500 Internal Server Error con body: {\"detail\":\"merchant xyz\"}";
         let sanitized = HaddockService::sanitize_error_msg(raw);
         assert!(sanitized.contains("servidor"), "Debe ser genérico");
-        assert!(!sanitized.contains("merchant"), "No debe filtrar info del merchant");
+        assert!(
+            !sanitized.contains("merchant"),
+            "No debe filtrar info del merchant"
+        );
     }
 
     /* Test 064A-15-6: Sanitización trunca errores desconocidos a 120 chars. */
@@ -1035,7 +1129,11 @@ mod tests {
     fn test_sanitize_error_truncates_unknown() {
         let raw = "X".repeat(300);
         let sanitized = HaddockService::sanitize_error_msg(&raw);
-        assert!(sanitized.len() <= 150, "Debe estar truncado: {} chars", sanitized.len());
+        assert!(
+            sanitized.len() <= 150,
+            "Debe estar truncado: {} chars",
+            sanitized.len()
+        );
     }
 
     /* ── [064A-13] Tests de flujo completo con BD real ─────────── */
@@ -1062,14 +1160,27 @@ mod tests {
         token: &str,
         enabled: bool,
     ) -> ConfiguracionRestaurante {
-        use crate::repositories::ConfiguracionRepository;
         use crate::models::ActualizarConfiguracionRequest;
+        use crate::repositories::ConfiguracionRepository;
 
-        ConfiguracionRepository::obtener_o_crear(pool, user_id).await.unwrap();
+        ConfiguracionRepository::obtener_o_crear(pool, user_id)
+            .await
+            .unwrap();
         let req = ActualizarConfiguracionRequest {
             haddock_sync_enabled: Some(enabled),
             haddock_api_token: Some(token.to_string()),
             url_haddock: None,
+            bdp_base_url: None,
+            bdp_login: None,
+            bdp_password: None,
+            bdp_integrator_code: None,
+            bdp_sync_enabled: None,
+            bdp_pos_id: None,
+            bdp_employee_id: None,
+            bdp_items_profile_id: None,
+            google_review_url: None,
+            telefono_restaurante: None,
+            url_reservas: None,
             reserva_email_obligatorio: None,
             reserva_telefono_obligatorio: None,
             reserva_nombre_obligatorio: None,
@@ -1085,7 +1196,9 @@ mod tests {
             hora_cena_inicio: None,
             hora_cena_fin: None,
         };
-        ConfiguracionRepository::actualizar(pool, user_id, &req).await.unwrap()
+        ConfiguracionRepository::actualizar(pool, user_id, &req)
+            .await
+            .unwrap()
     }
 
     async fn create_test_venta(pool: &sqlx::PgPool, user_id: Uuid) -> Venta {
@@ -1129,9 +1242,14 @@ mod tests {
         HaddockService::sync_order_to_url(&pool, &venta, &config, &url, false).await;
 
         let updated = VentaRepository::find_by_id(&pool, venta.id, user_id)
-            .await.unwrap().unwrap();
+            .await
+            .unwrap()
+            .unwrap();
         assert!(updated.haddock_synced, "sync exitoso → synced=true en BD");
-        assert!(updated.haddock_synced_at.is_some(), "Debe persistir timestamp");
+        assert!(
+            updated.haddock_synced_at.is_some(),
+            "Debe persistir timestamp"
+        );
         assert!(updated.haddock_sync_error.is_none(), "Sin error en BD");
     }
 
@@ -1155,13 +1273,22 @@ mod tests {
         HaddockService::sync_order_to_url(&pool, &venta, &config, &url, false).await;
 
         let updated = VentaRepository::find_by_id(&pool, venta.id, user_id)
-            .await.unwrap().unwrap();
+            .await
+            .unwrap()
+            .unwrap();
         assert!(!updated.haddock_synced, "sync fallido → synced=false");
-        assert!(updated.haddock_sync_error.is_some(), "Debe registrar error en BD");
+        assert!(
+            updated.haddock_sync_error.is_some(),
+            "Debe registrar error en BD"
+        );
         /* [064A-15] El error ahora está sanitizado — no contiene código HTTP crudo,
          * sino un mensaje genérico. Verificamos que menciona "servidor". */
         assert!(
-            updated.haddock_sync_error.as_deref().unwrap().contains("servidor"),
+            updated
+                .haddock_sync_error
+                .as_deref()
+                .unwrap()
+                .contains("servidor"),
             "Error sanitizado debe mencionar 'servidor': {:?}",
             updated.haddock_sync_error
         );

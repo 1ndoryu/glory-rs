@@ -47,7 +47,11 @@ impl DashboardService {
     }
 
     /// Dashboard completo de reservas: resumen + ocupacion + analisis
-    #[allow(clippy::too_many_lines, clippy::cast_precision_loss, clippy::items_after_statements)]
+    #[allow(
+        clippy::too_many_lines,
+        clippy::cast_precision_loss,
+        clippy::items_after_statements
+    )]
     pub async fn dashboard_reservas(
         pool: &PgPool,
         user_id: Uuid,

@@ -111,11 +111,13 @@ impl VentaRepository {
             Some("nombre_cliente") => "nombre_cliente",
             _ => "v.fecha",
         };
-        let order_dir = if matches!(sort_order, Some("asc")) { "ASC" } else { "DESC" };
+        let order_dir = if matches!(sort_order, Some("asc")) {
+            "ASC"
+        } else {
+            "DESC"
+        };
 
-        let busqueda_pattern = busqueda
-            .filter(|b| !b.is_empty())
-            .map(|b| format!("%{b}%"));
+        let busqueda_pattern = busqueda.filter(|b| !b.is_empty()).map(|b| format!("%{b}%"));
 
         /* Normalizar filtros vacíos a None */
         let turno_filter = turno.filter(|t| !t.is_empty());
@@ -174,7 +176,10 @@ impl VentaRepository {
 
         /* COUNT con los mismos filtros */
         let has_text_filter = busqueda_pattern.is_some();
-        let has_column_filters = turno_filter.is_some() || canal_filter.is_some() || metodo_filter.is_some() || haddock_filter.is_some();
+        let has_column_filters = turno_filter.is_some()
+            || canal_filter.is_some()
+            || metodo_filter.is_some()
+            || haddock_filter.is_some();
 
         let count = if has_text_filter || has_column_filters {
             let rec = sqlx::query_scalar::<_, Option<i64>>(
@@ -246,7 +251,7 @@ impl VentaRepository {
         reserva_id: Uuid,
     ) -> Result<bool, sqlx::Error> {
         let rec = sqlx::query_scalar::<_, bool>(
-            "SELECT EXISTS(SELECT 1 FROM ventas WHERE reserva_id = $1)"
+            "SELECT EXISTS(SELECT 1 FROM ventas WHERE reserva_id = $1)",
         )
         .bind(reserva_id)
         .fetch_one(pool)
@@ -262,7 +267,7 @@ impl VentaRepository {
         user_id: Uuid,
     ) -> Result<u64, sqlx::Error> {
         let result = sqlx::query(
-            "DELETE FROM ventas WHERE reserva_id = $1 AND user_id = $2 AND importe_base = 0"
+            "DELETE FROM ventas WHERE reserva_id = $1 AND user_id = $2 AND importe_base = 0",
         )
         .bind(reserva_id)
         .bind(user_id)

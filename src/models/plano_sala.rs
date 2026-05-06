@@ -24,7 +24,11 @@ pub struct ZonaSala {
 
 #[derive(Debug, Deserialize, Validate, ToSchema)]
 pub struct CrearZonaRequest {
-    #[validate(length(min = 1, max = 100, message = "El nombre de la zona es obligatorio (máx 100)"))]
+    #[validate(length(
+        min = 1,
+        max = 100,
+        message = "El nombre de la zona es obligatorio (máx 100)"
+    ))]
     pub nombre: String,
     pub orden: Option<i32>,
     #[validate(range(min = 200, max = 3000, message = "Ancho entre 200 y 3000 px"))]

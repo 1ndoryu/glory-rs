@@ -3,14 +3,17 @@
  * enviar notificaciones, registrar envíos.
  * [283A-23] Envío real de email via SMTP (integraciones_marketing). */
 
+use std::collections::HashMap;
+
 use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::errors::AppError;
 use crate::models::{
-    ActualizarReglaRequest, CrearReglaRequest, HistorialRecordatorios, ReglaRecordatorio,
-    ReglasPaginadas, CANALES_RECORDATORIO,
+    ActualizarReglaRequest, CrearReglaRequest, HistorialRecordatorios, IntegracionMarketing,
+    ReglaRecordatorio, ReglasPaginadas, CANALES_RECORDATORIO,
 };
+use crate::repositories::inactividad::{ClienteInactivo, InactividadRepository};
 use crate::repositories::recordatorio::{ActualizarReglaData, NuevaRegla, RecordatorioRepository};
 use crate::repositories::IntegracionMarketingRepository;
 use crate::services::email::EmailService;
@@ -53,7 +56,9 @@ impl RecordatorioService {
         RecordatorioRepository::find_by_id(pool, id, user_id)
             .await
             .map_err(AppError::Database)?
-            .ok_or(AppError::NotFound("Regla de recordatorio no encontrada".into()))
+            .ok_or(AppError::NotFound(
+                "Regla de recordatorio no encontrada".into(),
+            ))
     }
 
     pub async fn listar_reglas(
@@ -108,20 +113,20 @@ impl RecordatorioService {
         RecordatorioRepository::update(pool, id, user_id, data)
             .await
             .map_err(AppError::Database)?
-            .ok_or(AppError::NotFound("Regla de recordatorio no encontrada".into()))
+            .ok_or(AppError::NotFound(
+                "Regla de recordatorio no encontrada".into(),
+            ))
     }
 
-    pub async fn eliminar_regla(
-        pool: &PgPool,
-        id: Uuid,
-        user_id: Uuid,
-    ) -> Result<(), AppError> {
+    pub async fn eliminar_regla(pool: &PgPool, id: Uuid, user_id: Uuid) -> Result<(), AppError> {
         let deleted = RecordatorioRepository::delete(pool, id, user_id)
             .await
             .map_err(AppError::Database)?;
 
         if !deleted {
-            return Err(AppError::NotFound("Regla de recordatorio no encontrada".into()));
+            return Err(AppError::NotFound(
+                "Regla de recordatorio no encontrada".into(),
+            ));
         }
         Ok(())
     }
@@ -139,7 +144,12 @@ impl RecordatorioService {
             .await
             .map_err(AppError::Database)?;
 
-        Ok(HistorialRecordatorios { items, total, page: p, per_page: pp })
+        Ok(HistorialRecordatorios {
+            items,
+            total,
+            page: p,
+            per_page: pp,
+        })
     }
 
     /* [283A-23] Ejecuta un ciclo del scheduler: busca reservas pendientes y envía recordatorios.
@@ -200,21 +210,33 @@ fn validar_canal(canal: &str) -> Result<(), AppError> {
 }
 
 /* [014A-3] Valida coherencia entre tipo y campos horas_antes/horas_despues */
-fn validar_tipo_y_horas(tipo: &str, horas_antes: Option<i32>, horas_despues: Option<i32>) -> Result<(), AppError> {
+fn validar_tipo_y_horas(
+    tipo: &str,
+    horas_antes: Option<i32>,
+    horas_despues: Option<i32>,
+) -> Result<(), AppError> {
     match tipo {
         "antes" => {
             let h = horas_antes.unwrap_or(0);
             if h <= 0 {
-                return Err(AppError::Validation("Tipo 'antes' requiere horas_antes > 0".into()));
+                return Err(AppError::Validation(
+                    "Tipo 'antes' requiere horas_antes > 0".into(),
+                ));
             }
         }
         "despues" => {
             let h = horas_despues.unwrap_or(0);
             if h <= 0 {
-                return Err(AppError::Validation("Tipo 'despues' requiere horas_despues > 0".into()));
+                return Err(AppError::Validation(
+                    "Tipo 'despues' requiere horas_despues > 0".into(),
+                ));
             }
         }
-        _ => return Err(AppError::Validation("Tipo debe ser 'antes' o 'despues'".into())),
+        _ => {
+            return Err(AppError::Validation(
+                "Tipo debe ser 'antes' o 'despues'".into(),
+            ))
+        }
     }
     Ok(())
 }
@@ -277,12 +299,29 @@ async fn enviar_recordatorio(
             /* [303A-1] Componer número E.164 con prefijo del cliente */
             let numero = format!("{}{}", p.prefijo_telefono, p.telefono);
             /* [094A-6] Enviar con botones CTA si están configurados */
-            let config = crate::repositories::ConfiguracionRepository::obtener_o_crear(pool, p.user_id)
-                .await
-                .map_err(|e| format!("Error config CTA: {e}"))?;
-            let url_reservas = if config.url_reservas.is_empty() { None } else { Some(config.url_reservas.as_str()) };
-            let tel_rest = if config.telefono_restaurante.is_empty() { None } else { Some(config.telefono_restaurante.as_str()) };
-            match MetaWhatsappService::enviar_mensaje_con_cta(&integ, &numero, &mensaje, url_reservas, tel_rest).await {
+            let config =
+                crate::repositories::ConfiguracionRepository::obtener_o_crear(pool, p.user_id)
+                    .await
+                    .map_err(|e| format!("Error config CTA: {e}"))?;
+            let url_reservas = if config.url_reservas.is_empty() {
+                None
+            } else {
+                Some(config.url_reservas.as_str())
+            };
+            let tel_rest = if config.telefono_restaurante.is_empty() {
+                None
+            } else {
+                Some(config.telefono_restaurante.as_str())
+            };
+            match MetaWhatsappService::enviar_mensaje_con_cta(
+                &integ,
+                &numero,
+                &mensaje,
+                url_reservas,
+                tel_rest,
+            )
+            .await
+            {
                 Ok(true) => Ok(()),
                 Ok(false) => Err("Meta WhatsApp no configurado".to_string()),
                 Err(e) => Err(format!("Error Meta: {e}")),
@@ -296,8 +335,6 @@ async fn enviar_recordatorio(
  * Consulta todas las reglas activas, busca clientes que cumplen el criterio,
  * envía el mensaje y registra el envío para no repetir. */
 async fn procesar_inactividad(pool: &PgPool) -> usize {
-    use crate::repositories::InactividadRepository;
-
     let pendientes = match InactividadRepository::clientes_inactivos_pendientes(pool).await {
         Ok(p) => p,
         Err(e) => {
@@ -310,93 +347,32 @@ async fn procesar_inactividad(pool: &PgPool) -> usize {
         return 0;
     }
 
-    let mut cache_integ: std::collections::HashMap<Uuid, crate::models::IntegracionMarketing> =
-        std::collections::HashMap::new();
+    let mut cache_integ: HashMap<Uuid, IntegracionMarketing> = HashMap::new();
     let mut procesados = 0;
 
     for ci in &pendientes {
-        /* Renderizar mensaje con placeholders */
         let mensaje = ci.mensaje_plantilla.replace("{nombre}", &ci.nombre);
+        let integ = match obtener_integracion_inactividad(pool, ci.user_id, &mut cache_integ).await
+        {
+            Ok(integ) => integ,
+            Err(error) => {
+                tracing::error!("{error}");
+                registrar_envio_inactividad(pool, ci, "fallido").await;
+                continue;
+            }
+        };
 
-        /* Obtener integraciones del usuario */
-        let integ = if let Some(cached) = cache_integ.get(&ci.user_id) {
-            cached.clone()
+        let resultado = enviar_inactividad(pool, ci, &integ, &mensaje).await;
+        let estado = if resultado.is_ok() {
+            "enviado"
         } else {
-            match IntegracionMarketingRepository::obtener_o_crear(pool, ci.user_id).await {
-                Ok(i) => {
-                    cache_integ.insert(ci.user_id, i.clone());
-                    i
-                }
-                Err(e) => {
-                    tracing::error!("Error integraciones para inactividad: {e}");
-                    let _ = InactividadRepository::registrar_envio(
-                        pool, ci.regla_id, ci.cliente_id, "fallido",
-                    )
-                    .await;
-                    continue;
-                }
-            }
+            "fallido"
         };
-
-        let resultado = match ci.canal.as_str() {
-            "email" => {
-                if ci.email.is_empty() {
-                    Err("Sin email".into())
-                } else {
-                    let asunto = "¡Te echamos de menos!".to_string();
-                    EmailService::enviar_campana(&integ, &ci.email, &asunto, &mensaje)
-                        .await
-                        .map(|_| ())
-                        .map_err(|e| format!("SMTP: {e}"))
-                }
-            }
-            "sms" => {
-                if ci.telefono.is_empty() {
-                    Err("Sin teléfono".into())
-                } else {
-                    TwilioService::enviar_sms(&integ, &ci.telefono, &mensaje)
-                        .await
-                        .map(|_| ())
-                        .map_err(|e| format!("Twilio: {e}"))
-                }
-            }
-            "whatsapp" => {
-                if ci.telefono.is_empty() {
-                    Err("Sin teléfono".into())
-                } else {
-                    /* [094A-6] Botones CTA en mensajes de inactividad */
-                    let (url_r, tel_r) = match crate::repositories::ConfiguracionRepository::obtener_o_crear(pool, ci.user_id).await {
-                        Ok(c) => {
-                            let u: Option<String> = if c.url_reservas.is_empty() { None } else { Some(c.url_reservas) };
-                            let t: Option<String> = if c.telefono_restaurante.is_empty() { None } else { Some(c.telefono_restaurante) };
-                            (u, t)
-                        }
-                        Err(e) => {
-                            tracing::warn!("Config CTA error: {e}");
-                            (None, None)
-                        }
-                    };
-                    MetaWhatsappService::enviar_mensaje_con_cta(
-                        &integ, &ci.telefono, &mensaje,
-                        url_r.as_deref(), tel_r.as_deref(),
-                    )
-                        .await
-                        .map(|_| ())
-                        .map_err(|e| format!("Meta: {e}"))
-                }
-            }
-            otro => Err(format!("Canal desconocido: {otro}")),
-        };
-
-        let estado = if resultado.is_ok() { "enviado" } else { "fallido" };
         if let Err(ref e) = resultado {
             tracing::warn!("Inactividad envío fallido cliente={}: {e}", ci.cliente_id);
         }
 
-        let _ = InactividadRepository::registrar_envio(
-            pool, ci.regla_id, ci.cliente_id, estado,
-        )
-        .await;
+        registrar_envio_inactividad(pool, ci, estado).await;
         procesados += 1;
     }
 
@@ -404,4 +380,101 @@ async fn procesar_inactividad(pool: &PgPool) -> usize {
         tracing::info!("Mensajes de inactividad procesados: {procesados}");
     }
     procesados
+}
+
+async fn obtener_integracion_inactividad(
+    pool: &PgPool,
+    user_id: Uuid,
+    cache: &mut HashMap<Uuid, IntegracionMarketing>,
+) -> Result<IntegracionMarketing, String> {
+    if let Some(cached) = cache.get(&user_id) {
+        return Ok(cached.clone());
+    }
+
+    let integ = IntegracionMarketingRepository::obtener_o_crear(pool, user_id)
+        .await
+        .map_err(|e| format!("Error integraciones para inactividad: {e}"))?;
+    cache.insert(user_id, integ.clone());
+    Ok(integ)
+}
+
+async fn enviar_inactividad(
+    pool: &PgPool,
+    ci: &ClienteInactivo,
+    integ: &IntegracionMarketing,
+    mensaje: &str,
+) -> Result<(), String> {
+    match ci.canal.as_str() {
+        "email" => enviar_email_inactividad(ci, integ, mensaje).await,
+        "sms" => enviar_sms_inactividad(ci, integ, mensaje).await,
+        "whatsapp" => enviar_whatsapp_inactividad(pool, ci, integ, mensaje).await,
+        otro => Err(format!("Canal desconocido: {otro}")),
+    }
+}
+
+async fn enviar_email_inactividad(
+    ci: &ClienteInactivo,
+    integ: &IntegracionMarketing,
+    mensaje: &str,
+) -> Result<(), String> {
+    if ci.email.is_empty() {
+        return Err("Sin email".into());
+    }
+    EmailService::enviar_campana(integ, &ci.email, "¡Te echamos de menos!", mensaje)
+        .await
+        .map(|_| ())
+        .map_err(|e| format!("SMTP: {e}"))
+}
+
+async fn enviar_sms_inactividad(
+    ci: &ClienteInactivo,
+    integ: &IntegracionMarketing,
+    mensaje: &str,
+) -> Result<(), String> {
+    if ci.telefono.is_empty() {
+        return Err("Sin teléfono".into());
+    }
+    TwilioService::enviar_sms(integ, &ci.telefono, mensaje)
+        .await
+        .map(|_| ())
+        .map_err(|e| format!("Twilio: {e}"))
+}
+
+async fn enviar_whatsapp_inactividad(
+    pool: &PgPool,
+    ci: &ClienteInactivo,
+    integ: &IntegracionMarketing,
+    mensaje: &str,
+) -> Result<(), String> {
+    if ci.telefono.is_empty() {
+        return Err("Sin teléfono".into());
+    }
+    let (url_reservas, telefono_restaurante) = obtener_cta_inactividad(pool, ci.user_id).await;
+    MetaWhatsappService::enviar_mensaje_con_cta(
+        integ,
+        &ci.telefono,
+        mensaje,
+        url_reservas.as_deref(),
+        telefono_restaurante.as_deref(),
+    )
+    .await
+    .map(|_| ())
+    .map_err(|e| format!("Meta: {e}"))
+}
+
+async fn obtener_cta_inactividad(pool: &PgPool, user_id: Uuid) -> (Option<String>, Option<String>) {
+    match crate::repositories::ConfiguracionRepository::obtener_o_crear(pool, user_id).await {
+        Ok(config) => (
+            (!config.url_reservas.is_empty()).then_some(config.url_reservas),
+            (!config.telefono_restaurante.is_empty()).then_some(config.telefono_restaurante),
+        ),
+        Err(error) => {
+            tracing::warn!("Config CTA error: {error}");
+            (None, None)
+        }
+    }
+}
+
+async fn registrar_envio_inactividad(pool: &PgPool, ci: &ClienteInactivo, estado: &str) {
+    let _ = InactividadRepository::registrar_envio(pool, ci.regla_id, ci.cliente_id, estado).await;
 }

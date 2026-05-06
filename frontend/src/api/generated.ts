@@ -2,7 +2,7 @@
  * Este archivo mantiene compatibilidad con imports existentes.
  * Para imports nuevos, importar directamente: '../api/generated/ventas/ventas'
  * [044A-2] Tags renombrados a ASCII para evitar encoding corrupta en Windows.
- * Campañas → Campanas, Gestión → Gestion */
+ * Campañas → Campanas, Gestión → Gestion, Reseñas → resenas */
 export * from './generated/gestionRestauranteAPI.schemas';
 export * from './generated/auth/auth';
 export * from './generated/ventas/ventas';
@@ -24,5 +24,5 @@ export * from './generated/notificaciones/notificaciones';
 export * from './generated/errores/errores';
 export * from './generated/admin/admin';
 export * from './generated/trabajadores/trabajadores';
-export * from './generated/reseñas/reseñas';
+export * from './generated/resenas/resenas';
 export * from './generated/inactividad/inactividad';

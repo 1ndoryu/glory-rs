@@ -7,6 +7,7 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::errors::AppError;
+use crate::models::IntegracionMarketing;
 use crate::models::{
     ActualizarCampanaRequest, Campana, CampanasPaginadas, CampanasQuery, CrearCampanaRequest,
     SegmentoPreview, CANALES_VALIDOS, SEGMENTOS_VALIDOS,
@@ -14,10 +15,9 @@ use crate::models::{
 use crate::repositories::campana::{
     ActualizarCampanaData, ClienteSegmentado, NuevaCampana, NuevoDestinatario,
 };
-use crate::models::IntegracionMarketing;
+use crate::repositories::plantilla_whatsapp::PlantillaRepository;
 use crate::repositories::CampanaRepository;
 use crate::repositories::IntegracionMarketingRepository;
-use crate::repositories::plantilla_whatsapp::PlantillaRepository;
 use crate::services::email::EmailService;
 
 pub struct CampanaService;
@@ -67,8 +67,7 @@ impl CampanaService {
         let page = query.page;
         let per_page = query.per_page;
         let (items, total) =
-            CampanaRepository::list(pool, user_id, page, per_page, query.estado.as_deref())
-                .await?;
+            CampanaRepository::list(pool, user_id, page, per_page, query.estado.as_deref()).await?;
         Ok(CampanasPaginadas {
             items,
             total,
@@ -106,9 +105,7 @@ impl CampanaService {
         CampanaRepository::update(pool, &data)
             .await?
             .ok_or_else(|| {
-                AppError::NotFound(
-                    "Campaña no encontrada o no editable (solo borradores)".into(),
-                )
+                AppError::NotFound("Campaña no encontrada o no editable (solo borradores)".into())
             })
     }
 
@@ -176,9 +173,7 @@ impl CampanaService {
                     "sms" | "whatsapp" => {
                         cliente.consentimiento_comercial_sms && !cliente.telefono.is_empty()
                     }
-                    "email" => {
-                        cliente.consentimiento_comercial_email && !cliente.email.is_empty()
-                    }
+                    "email" => cliente.consentimiento_comercial_email && !cliente.email.is_empty(),
                     _ => false,
                 };
                 if aplica {
@@ -196,18 +191,32 @@ impl CampanaService {
         /* [283A-23] Envío real delegado a función libre para cumplir límite de líneas.
          * [303A-1] Ahora retorna contadores reales y actualiza cada destinatario. */
         let integ_mkt = IntegracionMarketingRepository::obtener_o_crear(pool, user_id).await?;
-        let (enviados, fallidos) = enviar_por_canales(pool, id, &integ_mkt, &clientes, &campana).await;
+        let (enviados, fallidos) =
+            enviar_por_canales(pool, id, &integ_mkt, &clientes, &campana).await;
 
-        tracing::info!("Campaña '{}' ({}) — {} destinatarios, {} enviados, {} fallidos",
-            campana.nombre, id, total, enviados, fallidos);
+        tracing::info!(
+            "Campaña '{}' ({}) — {} destinatarios, {} enviados, {} fallidos",
+            campana.nombre,
+            id,
+            total,
+            enviados,
+            fallidos
+        );
 
         let total_enviados = i32::try_from(enviados).unwrap_or(0);
         let total_fallidos = i32::try_from(fallidos).unwrap_or(0);
 
-        let campana_actualizada =
-            CampanaRepository::set_estado(pool, id, user_id, "enviada", total, total_enviados, total_fallidos)
-                .await?
-                .ok_or_else(|| AppError::NotFound("Error actualizando estado".into()))?;
+        let campana_actualizada = CampanaRepository::set_estado(
+            pool,
+            id,
+            user_id,
+            "enviada",
+            total,
+            total_enviados,
+            total_fallidos,
+        )
+        .await?
+        .ok_or_else(|| AppError::NotFound("Error actualizando estado".into()))?;
 
         Ok(campana_actualizada)
     }
@@ -244,7 +253,8 @@ impl CampanaService {
     ) -> Result<(), AppError> {
         let id = plantilla_id.ok_or_else(|| {
             AppError::Validation(
-                "Se requiere seleccionar una plantilla aprobada por Meta para enviar por WhatsApp".into(),
+                "Se requiere seleccionar una plantilla aprobada por Meta para enviar por WhatsApp"
+                    .into(),
             )
         })?;
         let plantilla = PlantillaRepository::find_by_id(pool, id, user_id)
@@ -282,7 +292,9 @@ async fn enviar_por_canales(
     /* [024A-1] Si hay plantilla WhatsApp, cargar nombre e idioma para template API */
     let plantilla_info = if let Some(pid) = campana.plantilla_whatsapp_id {
         crate::repositories::plantilla_whatsapp::PlantillaRepository::find_by_id(
-            pool, pid, campana.user_id,
+            pool,
+            pid,
+            campana.user_id,
         )
         .await
         .ok()
@@ -296,9 +308,14 @@ async fn enviar_por_canales(
         for canal in &campana.canales {
             let resultado = match canal.as_str() {
                 "email" if cliente.consentimiento_comercial_email && !cliente.email.is_empty() => {
-                    EmailService::enviar_campana(integ, &cliente.email, &campana.nombre, &campana.cuerpo_mensaje)
-                        .await
-                        .map_err(|e| e.to_string())
+                    EmailService::enviar_campana(
+                        integ,
+                        &cliente.email,
+                        &campana.nombre,
+                        &campana.cuerpo_mensaje,
+                    )
+                    .await
+                    .map_err(|e| e.to_string())
                 }
                 "sms" if cliente.consentimiento_comercial_sms && !cliente.telefono.is_empty() => {
                     let numero = format!("{}{}", cliente.prefijo_telefono, cliente.telefono);
@@ -308,7 +325,9 @@ async fn enviar_por_canales(
                 }
                 /* [024A-1] WhatsApp: si hay plantilla aprobada usa template API,
                  * si no, fallback a texto libre (ej: dentro de ventana 24h). */
-                "whatsapp" if cliente.consentimiento_comercial_sms && !cliente.telefono.is_empty() => {
+                "whatsapp"
+                    if cliente.consentimiento_comercial_sms && !cliente.telefono.is_empty() =>
+                {
                     let numero = format!("{}{}", cliente.prefijo_telefono, cliente.telefono);
                     if let Some((ref nombre_tpl, ref idioma_tpl)) = plantilla_info {
                         MetaWhatsappService::enviar_template(integ, &numero, nombre_tpl, idioma_tpl)
@@ -329,7 +348,8 @@ async fn enviar_por_canales(
                     /* [303A-1] Marcar destinatario como enviado */
                     let _ = CampanaRepository::actualizar_estado_destinatario(
                         pool, campana_id, cliente.id, canal, "enviado",
-                    ).await;
+                    )
+                    .await;
                 }
                 Ok(false) => {} /* no configurado — ya logueado en el servicio */
                 Err(e) => {
@@ -338,12 +358,17 @@ async fn enviar_por_canales(
                     /* [303A-1] Marcar destinatario como fallido */
                     let _ = CampanaRepository::actualizar_estado_destinatario(
                         pool, campana_id, cliente.id, canal, "fallido",
-                    ).await;
+                    )
+                    .await;
                 }
             }
         }
     }
 
-    tracing::info!("Envío completado: {} enviados, {} errores", enviados, errores);
+    tracing::info!(
+        "Envío completado: {} enviados, {} errores",
+        enviados,
+        errores
+    );
     (enviados, errores)
 }

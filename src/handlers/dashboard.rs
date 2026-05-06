@@ -61,13 +61,9 @@ pub async fn dashboard_reservas(
     auth: AuthUser,
     Query(params): Query<ResumenQuery>,
 ) -> Result<Json<DashboardReservas>, AppError> {
-    let data = DashboardService::dashboard_reservas(
-        &state.pool,
-        auth.user_id,
-        params.year,
-        params.month,
-    )
-    .await?;
+    let data =
+        DashboardService::dashboard_reservas(&state.pool, auth.user_id, params.year, params.month)
+            .await?;
     Ok(Json(data))
 }
 

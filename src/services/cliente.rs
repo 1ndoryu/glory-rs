@@ -5,8 +5,8 @@ use uuid::Uuid;
 
 use crate::errors::AppError;
 use crate::models::{
-    ActualizarClienteRequest, ClientesPaginados, ClientesQuery, CrearClienteRequest,
-    Cliente, MergeClientesRequest, MergeClientesResponse,
+    ActualizarClienteRequest, Cliente, ClientesPaginados, ClientesQuery, CrearClienteRequest,
+    MergeClientesRequest, MergeClientesResponse,
 };
 use crate::repositories::cliente::{ActualizarClienteData, NuevoCliente};
 use crate::repositories::ClienteRepository;
@@ -54,17 +54,16 @@ impl ClienteService {
     ) -> Result<ClientesPaginados, AppError> {
         let page = query.page;
         let per_page = query.per_page;
-        let (items, total) =
-            ClienteRepository::list(
-                pool,
-                user_id,
-                page,
-                per_page,
-                query.busqueda.as_deref(),
-                query.sort_by.as_deref(),
-                query.sort_order.as_deref(),
-            )
-                .await?;
+        let (items, total) = ClienteRepository::list(
+            pool,
+            user_id,
+            page,
+            per_page,
+            query.busqueda.as_deref(),
+            query.sort_by.as_deref(),
+            query.sort_order.as_deref(),
+        )
+        .await?;
         Ok(ClientesPaginados {
             items,
             total,

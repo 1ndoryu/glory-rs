@@ -8,8 +8,8 @@ use crate::errors::AppError;
 use crate::models::{
     ActualizarMesaRequest, ActualizarZonaRequest, CombinacionConMesas, CombinacionExport,
     CombinacionMesas, CrearCombinacionRequest, CrearMesaRequest, CrearZonaRequest, Mesa,
-    MesaExport, MesaOcupacion, PlanoExport, PlanoOcupacion, PlanoSala, ReservaMesa,
-    ZonaConMesas, ZonaExport, ZonaOcupacion, ZonaSala,
+    MesaExport, MesaOcupacion, PlanoExport, PlanoOcupacion, PlanoSala, ReservaMesa, ZonaConMesas,
+    ZonaExport, ZonaOcupacion, ZonaSala,
 };
 use crate::repositories::PlanoSalaRepository;
 
@@ -28,7 +28,11 @@ impl PlanoSalaService {
             let mesas = Repo::listar_mesas_zona(pool, zona.id).await?;
             /* [094A-7] Cargar paredes de cada zona */
             let paredes = Repo::listar_paredes_zona(pool, zona.id).await?;
-            zonas_con_mesas.push(ZonaConMesas { zona, mesas, paredes });
+            zonas_con_mesas.push(ZonaConMesas {
+                zona,
+                mesas,
+                paredes,
+            });
         }
 
         let combos = Repo::listar_combinaciones(pool, user_id).await?;
@@ -86,11 +90,7 @@ impl PlanoSalaService {
         .map_err(|_| AppError::NotFound("Zona no encontrada".into()))
     }
 
-    pub async fn eliminar_zona(
-        pool: &PgPool,
-        id: Uuid,
-        user_id: Uuid,
-    ) -> Result<(), AppError> {
+    pub async fn eliminar_zona(pool: &PgPool, id: Uuid, user_id: Uuid) -> Result<(), AppError> {
         if !Repo::eliminar_zona(pool, id, user_id).await? {
             return Err(AppError::NotFound("Zona no encontrada".into()));
         }
@@ -99,10 +99,7 @@ impl PlanoSalaService {
 
     /* ========== Mesas ========== */
 
-    pub async fn crear_mesa(
-        pool: &PgPool,
-        req: CrearMesaRequest,
-    ) -> Result<Mesa, AppError> {
+    pub async fn crear_mesa(pool: &PgPool, req: CrearMesaRequest) -> Result<Mesa, AppError> {
         /* [283A-17+283A-24] Catch unique constraint (zona_id, numero) para devolver
          * Conflict en vez de 500 cuando el número de mesa ya existe en la zona.
          * Se chequea code 23505 + fallback por mensaje para robustez ante diferencias de driver. */

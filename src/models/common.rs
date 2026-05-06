@@ -1,6 +1,6 @@
 /* 253A-7: Enums compartidos entre ventas y gastos.
-   Movidos aquí para evitar referencia cruzada super::venta:: que genera
-   schema OpenAPI con nombre "super.venta.MetodoPago" inválido. */
+Movidos aquí para evitar referencia cruzada super::venta:: que genera
+schema OpenAPI con nombre "super.venta.MetodoPago" inválido. */
 
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;

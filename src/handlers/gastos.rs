@@ -1,5 +1,5 @@
 /* 253A-5: Handlers de gastos — CRUD + categorías
-   283A-8: + digitalización de documentos vía Groq IA */
+283A-8: + digitalización de documentos vía Groq IA */
 
 use axum::extract::{Path, Query, State};
 use axum::http::StatusCode;
@@ -221,5 +221,10 @@ pub fn routes() -> Router<AppState> {
         .route("/gastos/proveedores", get(listar_proveedores))
         .route("/gastos/digitalizar", post(digitalizar_documento))
         .route("/gastos", post(crear_gasto).get(listar_gastos))
-        .route("/gastos/:id", get(obtener_gasto).put(actualizar_gasto).delete(eliminar_gasto))
+        .route(
+            "/gastos/:id",
+            get(obtener_gasto)
+                .put(actualizar_gasto)
+                .delete(eliminar_gasto),
+        )
 }

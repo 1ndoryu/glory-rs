@@ -25,10 +25,7 @@ impl IntegracionMarketingService {
     }
 
     /// Obtiene las integraciones completas (con credentials, para uso interno)
-    pub async fn obtener(
-        pool: &PgPool,
-        user_id: Uuid,
-    ) -> Result<IntegracionMarketing, AppError> {
+    pub async fn obtener(pool: &PgPool, user_id: Uuid) -> Result<IntegracionMarketing, AppError> {
         let integ = Repo::obtener_o_crear(pool, user_id).await?;
         Ok(integ)
     }

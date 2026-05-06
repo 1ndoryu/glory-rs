@@ -25,8 +25,9 @@ impl ApiKeyService {
         let key_prefix = raw_key.chars().take(12).collect::<String>();
         let id = Uuid::new_v4();
 
-        let api_key = ApiKeyRepository::create(pool, id, user_id, &req.nombre, &key_hash, &key_prefix)
-            .await?;
+        let api_key =
+            ApiKeyRepository::create(pool, id, user_id, &req.nombre, &key_hash, &key_prefix)
+                .await?;
 
         Ok(ApiKeyCreatedResponse {
             id: api_key.id,

@@ -48,7 +48,13 @@ impl EmailService {
             from_email: &cfg.from_email,
             from_name: &cfg.from_name,
         };
-        enviar_smtp(&params, destinatario, "Recuperar contraseña", &body_reset_password(enlace)).await
+        enviar_smtp(
+            &params,
+            destinatario,
+            "Recuperar contraseña",
+            &body_reset_password(enlace),
+        )
+        .await
     }
 
     /// Envía un email genérico usando credentials de integraciones de marketing.
@@ -60,7 +66,10 @@ impl EmailService {
         cuerpo_html: &str,
     ) -> Result<bool, EmailError> {
         if !integ.smtp_configurado() {
-            tracing::warn!("SMTP marketing no configurado — email a {} no enviado", destinatario);
+            tracing::warn!(
+                "SMTP marketing no configurado — email a {} no enviado",
+                destinatario
+            );
             return Ok(false);
         }
 

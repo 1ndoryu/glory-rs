@@ -5,7 +5,10 @@ use axum::{Json, Router};
 use validator::Validate;
 
 use crate::errors::AppError;
-use crate::models::{AuthResponse, ForgotPasswordRequest, LoginRequest, MessageResponse, RegisterRequest, ResetPasswordRequest};
+use crate::models::{
+    AuthResponse, ForgotPasswordRequest, LoginRequest, MessageResponse, RegisterRequest,
+    ResetPasswordRequest,
+};
 use crate::services::AuthService;
 use crate::AppState;
 

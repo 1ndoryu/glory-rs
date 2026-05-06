@@ -1,7 +1,8 @@
 /* [263A-17] Repositorio de configuración del restaurante.
  * Upsert: si no existe, crea con defaults; si existe, actualiza parcialmente.
  * [094A-4] Convertido a queries dinámicas para evitar problemas con SQLX_OFFLINE
- * al agregar google_review_url. */
+ * al agregar google_review_url.
+ * [065A-2] Agrega credenciales y parametros operativos BDP/WebLink. */
 
 use sqlx::PgPool;
 use uuid::Uuid;
@@ -63,9 +64,17 @@ impl ConfiguracionRepository {
                 url_haddock = COALESCE($16, url_haddock), \
                 haddock_api_token = COALESCE($17, haddock_api_token), \
                 haddock_sync_enabled = COALESCE($18, haddock_sync_enabled), \
-                google_review_url = COALESCE($19, google_review_url), \
-                telefono_restaurante = COALESCE($20, telefono_restaurante), \
-                url_reservas = COALESCE($21, url_reservas), \
+                     bdp_base_url = COALESCE($19, bdp_base_url), \
+                     bdp_login = COALESCE($20, bdp_login), \
+                     bdp_password = COALESCE($21, bdp_password), \
+                     bdp_integrator_code = COALESCE($22, bdp_integrator_code), \
+                     bdp_sync_enabled = COALESCE($23, bdp_sync_enabled), \
+                     bdp_pos_id = COALESCE($24, bdp_pos_id), \
+                     bdp_employee_id = COALESCE($25, bdp_employee_id), \
+                     bdp_items_profile_id = COALESCE($26, bdp_items_profile_id), \
+                     google_review_url = COALESCE($27, google_review_url), \
+                     telefono_restaurante = COALESCE($28, telefono_restaurante), \
+                     url_reservas = COALESCE($29, url_reservas), \
                 updated_at = NOW() \
              WHERE user_id = $1 RETURNING *",
         )
@@ -87,6 +96,14 @@ impl ConfiguracionRepository {
         .bind(req.url_haddock.as_deref())
         .bind(req.haddock_api_token.as_deref())
         .bind(req.haddock_sync_enabled)
+        .bind(req.bdp_base_url.as_deref())
+        .bind(req.bdp_login.as_deref())
+        .bind(req.bdp_password.as_deref())
+        .bind(req.bdp_integrator_code.as_deref())
+        .bind(req.bdp_sync_enabled)
+        .bind(req.bdp_pos_id)
+        .bind(req.bdp_employee_id)
+        .bind(req.bdp_items_profile_id)
         .bind(req.google_review_url.as_deref())
         .bind(req.telefono_restaurante.as_deref())
         .bind(req.url_reservas.as_deref())

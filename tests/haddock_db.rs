@@ -95,7 +95,10 @@ async fn test_update_haddock_status_marca_synced(pool: PgPool) {
 
     let updated = find_venta(&pool, &venta).await;
     assert!(updated.haddock_synced, "Debe quedar synced=true");
-    assert!(updated.haddock_synced_at.is_some(), "Debe tener timestamp de sync");
+    assert!(
+        updated.haddock_synced_at.is_some(),
+        "Debe tener timestamp de sync"
+    );
     assert!(updated.haddock_sync_error.is_none(), "Sin error");
 }
 
@@ -106,13 +109,21 @@ async fn test_update_haddock_status_registra_error(pool: PgPool) {
         .await
         .unwrap();
 
-    VentaRepository::update_haddock_status(&pool, venta.id, false, Some("Haddock respondió HTTP 500"))
-        .await
-        .expect("update_haddock_status debe funcionar");
+    VentaRepository::update_haddock_status(
+        &pool,
+        venta.id,
+        false,
+        Some("Haddock respondió HTTP 500"),
+    )
+    .await
+    .expect("update_haddock_status debe funcionar");
 
     let updated = find_venta(&pool, &venta).await;
     assert!(!updated.haddock_synced, "Debe quedar synced=false");
-    assert!(updated.haddock_synced_at.is_none(), "Nunca sincronizada, sin timestamp");
+    assert!(
+        updated.haddock_synced_at.is_none(),
+        "Nunca sincronizada, sin timestamp"
+    );
     assert_eq!(
         updated.haddock_sync_error.as_deref(),
         Some("Haddock respondió HTTP 500")
@@ -142,8 +153,14 @@ async fn test_update_haddock_status_error_luego_exito(pool: PgPool) {
 
     let after_success = find_venta(&pool, &venta).await;
     assert!(after_success.haddock_synced, "Retry exitoso → synced=true");
-    assert!(after_success.haddock_synced_at.is_some(), "Debe registrar timestamp de sync");
-    assert!(after_success.haddock_sync_error.is_none(), "Error limpiado tras éxito");
+    assert!(
+        after_success.haddock_synced_at.is_some(),
+        "Debe registrar timestamp de sync"
+    );
+    assert!(
+        after_success.haddock_sync_error.is_none(),
+        "Error limpiado tras éxito"
+    );
 }
 
 #[sqlx::test(migrations = "./migrations")]
@@ -196,8 +213,14 @@ async fn test_configuracion_defaults_haddock_desactivado(pool: PgPool) {
         .expect("obtener_o_crear debe funcionar");
 
     assert_eq!(config.user_id, user_id);
-    assert!(!config.haddock_sync_enabled, "Haddock sync desactivado por defecto");
-    assert!(config.haddock_api_token.is_empty(), "Token vacío por defecto");
+    assert!(
+        !config.haddock_sync_enabled,
+        "Haddock sync desactivado por defecto"
+    );
+    assert!(
+        config.haddock_api_token.is_empty(),
+        "Token vacío por defecto"
+    );
     assert!(config.url_haddock.is_empty(), "URL vacía por defecto");
 }
 
@@ -205,22 +228,42 @@ async fn test_configuracion_defaults_haddock_desactivado(pool: PgPool) {
 async fn test_configuracion_obtener_idempotente(pool: PgPool) {
     let user_id = create_test_user(&pool).await;
 
-    let primera = ConfiguracionRepository::obtener_o_crear(&pool, user_id).await.unwrap();
-    let segunda = ConfiguracionRepository::obtener_o_crear(&pool, user_id).await.unwrap();
+    let primera = ConfiguracionRepository::obtener_o_crear(&pool, user_id)
+        .await
+        .unwrap();
+    let segunda = ConfiguracionRepository::obtener_o_crear(&pool, user_id)
+        .await
+        .unwrap();
 
-    assert_eq!(primera.id, segunda.id, "Dos llamadas retornan la misma configuración");
+    assert_eq!(
+        primera.id, segunda.id,
+        "Dos llamadas retornan la misma configuración"
+    );
 }
 
 #[sqlx::test(migrations = "./migrations")]
 async fn test_configuracion_actualizar_haddock_fields(pool: PgPool) {
     let user_id = create_test_user(&pool).await;
-    ConfiguracionRepository::obtener_o_crear(&pool, user_id).await.unwrap();
+    ConfiguracionRepository::obtener_o_crear(&pool, user_id)
+        .await
+        .unwrap();
 
     /* Activar Haddock con token y URL */
     let req = glory_backend::models::ActualizarConfiguracionRequest {
         haddock_sync_enabled: Some(true),
         haddock_api_token: Some("dG9rZW46c2VjcmV0".to_string()),
         url_haddock: Some("https://pos-api.haddock.app".to_string()),
+        bdp_base_url: None,
+        bdp_login: None,
+        bdp_password: None,
+        bdp_integrator_code: None,
+        bdp_sync_enabled: None,
+        bdp_pos_id: None,
+        bdp_employee_id: None,
+        bdp_items_profile_id: None,
+        google_review_url: None,
+        telefono_restaurante: None,
+        url_reservas: None,
         reserva_email_obligatorio: None,
         reserva_telefono_obligatorio: None,
         reserva_nombre_obligatorio: None,

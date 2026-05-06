@@ -59,9 +59,9 @@ pub async fn listar_reglas(
     auth: AuthUser,
     Query(query): Query<ReglasQuery>,
 ) -> Result<Json<ReglasPaginadas>, AppError> {
-    let reglas = RecordatorioService::listar_reglas(
-        &state.pool, auth.user_id, query.page, query.per_page,
-    ).await?;
+    let reglas =
+        RecordatorioService::listar_reglas(&state.pool, auth.user_id, query.page, query.per_page)
+            .await?;
     Ok(Json(reglas))
 }
 
@@ -147,18 +147,23 @@ pub async fn historial_recordatorios(
     auth: AuthUser,
     Query(query): Query<ReglasQuery>,
 ) -> Result<Json<HistorialRecordatorios>, AppError> {
-    let historial = RecordatorioService::historial(
-        &state.pool, auth.user_id, query.page, query.per_page,
-    ).await?;
+    let historial =
+        RecordatorioService::historial(&state.pool, auth.user_id, query.page, query.per_page)
+            .await?;
     Ok(Json(historial))
 }
 
 pub fn routes() -> Router<AppState> {
     Router::new()
-        .route("/recordatorios/reglas", get(listar_reglas).post(crear_regla))
+        .route(
+            "/recordatorios/reglas",
+            get(listar_reglas).post(crear_regla),
+        )
         .route(
             "/recordatorios/reglas/:id",
-            get(obtener_regla).put(actualizar_regla).delete(eliminar_regla),
+            get(obtener_regla)
+                .put(actualizar_regla)
+                .delete(eliminar_regla),
         )
         .route("/recordatorios/historial", get(historial_recordatorios))
 }

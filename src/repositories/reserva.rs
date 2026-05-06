@@ -1,6 +1,6 @@
 /* 253A-5: Repositorio de reservas
-   263A-6: Filtros turno/estado, num_mesa, apellidos_cliente, resumen mensual
-   263A-8: Estadísticas de no-shows por canal */
+263A-6: Filtros turno/estado, num_mesa, apellidos_cliente, resumen mensual
+263A-8: Estadísticas de no-shows por canal */
 
 use chrono::NaiveDate;
 use sqlx::PgPool;
@@ -112,7 +112,9 @@ impl ReservaRepository {
         let offset = (filtros.page - 1) * filtros.per_page;
 
         /* [283A-28] Búsqueda ILIKE por nombre_cliente/apellidos_cliente */
-        let patron = filtros.busqueda.as_deref()
+        let patron = filtros
+            .busqueda
+            .as_deref()
             .filter(|s| !s.is_empty())
             .map(|b| format!("%{b}%"));
 
@@ -125,9 +127,17 @@ impl ReservaRepository {
             Some("num_mesa") => "num_mesa",
             _ => "fecha",
         };
-        let order_dir = if filtros.sort_order.as_deref() == Some("asc") { "ASC" } else { "DESC" };
+        let order_dir = if filtros.sort_order.as_deref() == Some("asc") {
+            "ASC"
+        } else {
+            "DESC"
+        };
         /* Si se ordena por fecha, añadir hora como criterio secundario */
-        let secondary = if order_col == "fecha" { ", hora ASC" } else { "" };
+        let secondary = if order_col == "fecha" {
+            ", hora ASC"
+        } else {
+            ""
+        };
 
         /* [303A-4] Cuando no hay filtro explícito de estado, excluir canceladas.
          * [303A-15] Soporte rango de fechas.
@@ -374,11 +384,7 @@ impl ReservaRepository {
     }
 
     /// Cancela una reserva (cambia estado a 'cancelada')
-    pub async fn cancelar(
-        pool: &PgPool,
-        id: Uuid,
-        user_id: Uuid,
-    ) -> Result<bool, sqlx::Error> {
+    pub async fn cancelar(pool: &PgPool, id: Uuid, user_id: Uuid) -> Result<bool, sqlx::Error> {
         let result = sqlx::query!(
             "UPDATE reservas SET estado = 'cancelada', updated_at = NOW() \
              WHERE id = $1 AND user_id = $2",

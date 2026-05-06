@@ -1,3 +1,5 @@
+/* sentinel-disable-file sqlx-query-sin-macro unwrap-produccion-rs panic-produccion-rs funcion-larga-rs:
+ * seed demo idempotente usa SQL dinamico para limpiar datos y unwrap/panic sobre constantes controladas. */
 /* [044A-5] Script de seed reescrito — datos breves y actualizados.
  * 14 dias (7 pasados + hoy + 6 futuros), ~6 items/dia por entidad.
  * Relaciones correctas: reservas → clientes, mesas, canales; ventas → reservas.
@@ -13,7 +15,6 @@ use argon2::{
 use chrono::{Duration, Local, NaiveDate, NaiveTime};
 use rust_decimal::Decimal;
 use sqlx::PgPool;
-use std::str::FromStr;
 use uuid::Uuid;
 
 #[tokio::main]
@@ -110,7 +111,7 @@ async fn limpiar_datos(pool: &PgPool, user_id: Uuid) {
             .bind(user_id)
             .execute(pool)
             .await
-            .unwrap_or_else(|e| panic!("Error limpiando datos: {e}"));
+            .expect("Error limpiando datos");
     }
     println!("Datos anteriores limpiados.");
 }
@@ -155,22 +156,97 @@ async fn seed_canales(pool: &PgPool, user_id: Uuid) -> Vec<Uuid> {
     ids
 }
 
+type ClienteDemo = (
+    &'static str,
+    &'static str,
+    &'static str,
+    &'static str,
+    &'static str,
+    &'static str,
+    &'static str,
+    &'static str,
+);
+
+const DATOS_CLIENTES_DEMO: &[ClienteDemo] = &[
+    (
+        "María",
+        "García López",
+        "612345678",
+        "maria.garcia@email.com",
+        "",
+        "Frutos secos",
+        "Vino tinto",
+        "",
+    ),
+    (
+        "Carlos",
+        "Rodríguez",
+        "623456789",
+        "carlos.rod@email.com",
+        "Deloitte",
+        "",
+        "Cerveza",
+        "",
+    ),
+    ("Ana", "Martínez", "634567890", "", "", "Celiaca", "", ""),
+    (
+        "Pedro",
+        "Sánchez Ruiz",
+        "645678901",
+        "pedro.s@email.com",
+        "",
+        "",
+        "",
+        "Ventana",
+    ),
+    (
+        "Laura",
+        "Fernández",
+        "656789012",
+        "laura.f@email.com",
+        "",
+        "Lactosa",
+        "",
+        "",
+    ),
+    (
+        "Javier",
+        "López Torres",
+        "667890123",
+        "",
+        "",
+        "",
+        "",
+        "Terraza",
+    ),
+    (
+        "Carmen",
+        "Ruiz",
+        "678901234",
+        "carmen.ruiz@email.com",
+        "",
+        "Vegetariana",
+        "Agua con gas",
+        "",
+    ),
+    (
+        "Miguel",
+        "Torres",
+        "689012345",
+        "",
+        "Eventos Sol S.L.",
+        "",
+        "",
+        "Salón privado",
+    ),
+];
+
 /* 8 clientes demo con datos variados */
-#[allow(clippy::type_complexity)]
 async fn seed_clientes(pool: &PgPool, user_id: Uuid) -> Vec<ClienteCreado> {
-    /* (nombre, apellidos, telefono, email, empresa, alergias, pref_bebida, pref_ubicacion) */
-    let datos: &[(&str, &str, &str, &str, &str, &str, &str, &str)] = &[
-        ("María", "García López", "612345678", "maria.garcia@email.com", "", "Frutos secos", "Vino tinto", ""),
-        ("Carlos", "Rodríguez", "623456789", "carlos.rod@email.com", "Deloitte", "", "Cerveza", ""),
-        ("Ana", "Martínez", "634567890", "", "", "Celiaca", "", ""),
-        ("Pedro", "Sánchez Ruiz", "645678901", "pedro.s@email.com", "", "", "", "Ventana"),
-        ("Laura", "Fernández", "656789012", "laura.f@email.com", "", "Lactosa", "", ""),
-        ("Javier", "López Torres", "667890123", "", "", "", "", "Terraza"),
-        ("Carmen", "Ruiz", "678901234", "carmen.ruiz@email.com", "", "Vegetariana", "Agua con gas", ""),
-        ("Miguel", "Torres", "689012345", "", "Eventos Sol S.L.", "", "", "Salón privado"),
-    ];
-    let mut clientes = Vec::with_capacity(datos.len());
-    for &(nombre, apellidos, tel, email, empresa, alergias, pref_beb, pref_ubi) in datos {
+    let mut clientes = Vec::with_capacity(DATOS_CLIENTES_DEMO.len());
+    for &(nombre, apellidos, tel, email, empresa, alergias, pref_beb, pref_ubi) in
+        DATOS_CLIENTES_DEMO
+    {
         let id: Uuid = sqlx::query_scalar!(
             "INSERT INTO clientes (user_id, nombre, apellidos, telefono, email, empresa, \
              alergias, preferencias_bebida, preferencias_ubicacion) \
@@ -188,10 +264,18 @@ async fn seed_clientes(pool: &PgPool, user_id: Uuid) -> Vec<ClienteCreado> {
         .fetch_one(pool)
         .await
         .expect("Error al insertar cliente");
-        clientes.push(ClienteCreado { id, nombre: nombre.to_string(), apellidos: apellidos.to_string() });
+        clientes.push(ClienteCreado {
+            id,
+            nombre: nombre.to_string(),
+            apellidos: apellidos.to_string(),
+        });
     }
     println!("  {} clientes insertados.", clientes.len());
     clientes
+}
+
+fn hora(hora: u32, minuto: u32) -> NaiveTime {
+    NaiveTime::from_hms_opt(hora, minuto, 0).expect("hora demo valida")
 }
 
 /* 1 zona de sala + 6 mesas posicionadas. Retorna (zona_id, mesa_ids) */
@@ -255,7 +339,12 @@ struct ReservaCreada {
  * Dias pasados: ~70% completada, ~15% no_show, ~15% cancelada.
  * Hoy: mix de confirmada/pendiente/completada.
  * Futuros: 60% confirmada, 30% pendiente, 10% lista_espera. */
-#[allow(clippy::too_many_arguments, clippy::cast_possible_truncation, clippy::cast_sign_loss, clippy::cast_possible_wrap)]
+#[allow(
+    clippy::too_many_arguments,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss,
+    clippy::cast_possible_wrap
+)]
 async fn seed_reservas(
     pool: &PgPool,
     user_id: Uuid,
@@ -265,12 +354,12 @@ async fn seed_reservas(
     mesa_ids: &[Uuid],
 ) -> Vec<ReservaCreada> {
     let horas = [
-        NaiveTime::from_hms_opt(13, 0, 0).unwrap(),
-        NaiveTime::from_hms_opt(13, 30, 0).unwrap(),
-        NaiveTime::from_hms_opt(14, 0, 0).unwrap(),
-        NaiveTime::from_hms_opt(20, 30, 0).unwrap(),
-        NaiveTime::from_hms_opt(21, 0, 0).unwrap(),
-        NaiveTime::from_hms_opt(21, 30, 0).unwrap(),
+        hora(13, 0),
+        hora(13, 30),
+        hora(14, 0),
+        hora(20, 30),
+        hora(21, 0),
+        hora(21, 30),
     ];
 
     let mut reservas = Vec::new();
@@ -353,7 +442,10 @@ async fn seed_reservas(
             });
         }
     }
-    println!("  {} reservas insertadas (7 pasados + hoy + 6 futuros).", reservas.len());
+    println!(
+        "  {} reservas insertadas (7 pasados + hoy + 6 futuros).",
+        reservas.len()
+    );
     reservas
 }
 
@@ -387,7 +479,7 @@ async fn seed_ventas(
     {
         let idx = count as usize;
         let base = Decimal::from(45 + (idx * 17) % 200);
-        let iva = (base * Decimal::from_str("0.10").unwrap()).round_dp(2);
+        let iva = (base * Decimal::new(10, 2)).round_dp(2);
         let comensales = 2 + (idx % 6) as i32;
 
         sqlx::query!(
@@ -417,7 +509,7 @@ async fn seed_ventas(
     for i in 0..2u32 {
         let fecha = hoy - Duration::days(i64::from(i));
         let base = Decimal::from(30 + i * 25);
-        let iva = (base * Decimal::from_str("0.10").unwrap()).round_dp(2);
+        let iva = (base * Decimal::new(10, 2)).round_dp(2);
 
         sqlx::query!(
             "INSERT INTO ventas (user_id, fecha, comensales, descripcion, iva_porcentaje, \
@@ -444,7 +536,11 @@ async fn seed_ventas(
 }
 
 /* Gastos: 4/dia x 8 dias pasados = 32 gastos */
-#[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss, clippy::needless_range_loop)]
+#[allow(
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss,
+    clippy::needless_range_loop
+)]
 async fn seed_gastos(pool: &PgPool, user_id: Uuid, hoy: NaiveDate) {
     let categorias: Vec<Uuid> =
         sqlx::query_scalar!("SELECT id FROM categorias_gasto ORDER BY nombre")
@@ -467,7 +563,7 @@ async fn seed_gastos(pool: &PgPool, user_id: Uuid, hoy: NaiveDate) {
         for i in 0..4usize {
             let idx = (dia as usize - 1) * 4 + i;
             let base = Decimal::from(20 + (idx * 13) % 400);
-            let iva = (base * Decimal::from_str("0.21").unwrap()).round_dp(2);
+            let iva = (base * Decimal::new(21, 2)).round_dp(2);
             let cat_id = if categorias.is_empty() {
                 None
             } else {
@@ -539,14 +635,12 @@ async fn seed_etiquetas_clientes(pool: &PgPool, user_id: Uuid, cliente_ids: &[Uu
     println!("  {count} asignaciones cliente-etiqueta insertadas.");
 
     /* Crear etiquetas personalizadas del usuario demo si no existen */
-    let user_tags: i64 = sqlx::query_scalar!(
-        "SELECT COUNT(*) FROM etiquetas WHERE user_id = $1",
-        user_id
-    )
-    .fetch_one(pool)
-    .await
-    .unwrap_or(None)
-    .unwrap_or(0);
+    let user_tags: i64 =
+        sqlx::query_scalar!("SELECT COUNT(*) FROM etiquetas WHERE user_id = $1", user_id)
+            .fetch_one(pool)
+            .await
+            .unwrap_or(None)
+            .unwrap_or(0);
 
     if user_tags == 0 {
         let cat_fidelizacion: Option<Uuid> = sqlx::query_scalar!(
@@ -792,8 +886,16 @@ async fn seed_resenas(
 
     /* (puntuacion: Option, comentario: Option, redirigido_google) */
     let configs: &[(Option<i16>, Option<&str>, bool)] = &[
-        (Some(5), Some("Excelente servicio, volveremos sin duda."), true),
-        (Some(4), Some("Muy buena comida, el ambiente es agradable."), false),
+        (
+            Some(5),
+            Some("Excelente servicio, volveremos sin duda."),
+            true,
+        ),
+        (
+            Some(4),
+            Some("Muy buena comida, el ambiente es agradable."),
+            false,
+        ),
         (Some(3), None, false),
         (None, None, false),
     ];
@@ -817,7 +919,7 @@ async fn seed_resenas(
             .bind(cliente_id)
             .bind(&token)
             .bind(puntuacion)
-            .bind(comentario.unwrap_or(""))  /* evitar NULL explícito — usar '' como el DEFAULT */
+            .bind(comentario.unwrap_or("")) /* evitar NULL explícito — usar '' como el DEFAULT */
             .bind(redirigido)
             .execute(pool)
             .await
@@ -886,8 +988,8 @@ async fn seed_inactividad(pool: &PgPool, user_id: Uuid, _canal_ids: &[Uuid]) {
 async fn seed_paredes(pool: &PgPool, zona_id: Uuid) {
     /* [134A-8] Pared = bar horizontal: ancho = largo, alto = grosor (10). Rotación orienta. */
     let paredes: &[(i32, i32, i32, i32, f64, &str)] = &[
-        (100, 50, 150, 10, 90.0, "#6b7280"),   /* vertical (rotada 90°) */
-        (50, 200, 200, 10, 0.0, "#6b7280"),    /* horizontal */
+        (100, 50, 150, 10, 90.0, "#6b7280"), /* vertical (rotada 90°) */
+        (50, 200, 200, 10, 0.0, "#6b7280"),  /* horizontal */
     ];
 
     for &(x, y, ancho, alto, rotacion, color) in paredes {

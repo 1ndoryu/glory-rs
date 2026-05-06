@@ -9,7 +9,9 @@ use validator::Validate;
 
 use crate::errors::AppError;
 use crate::middleware::AuthUser;
-use crate::models::{ActualizarVentaRequest, CrearVentaRequest, Venta, VentasPaginadas, VentasQuery};
+use crate::models::{
+    ActualizarVentaRequest, CrearVentaRequest, Venta, VentasPaginadas, VentasQuery,
+};
 use crate::services::VentaService;
 use crate::AppState;
 
@@ -173,6 +175,11 @@ pub async fn reintentar_sync_haddock(
 pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/ventas", post(crear_venta).get(listar_ventas))
-        .route("/ventas/:id", get(obtener_venta).put(actualizar_venta).delete(eliminar_venta))
+        .route(
+            "/ventas/:id",
+            get(obtener_venta)
+                .put(actualizar_venta)
+                .delete(eliminar_venta),
+        )
         .route("/ventas/:id/haddock-sync", post(reintentar_sync_haddock))
 }

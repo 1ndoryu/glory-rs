@@ -1,7 +1,8 @@
 /* [263A-17] Hook para el formulario de configuración del restaurante.
  * Gestiona estado local, carga inicial y guardado vía API.
  * [283A-8] Añadido groq_api_key para digitalización de documentos.
- * [064A-5] Añadidos haddock_api_token y haddock_sync_enabled para sincronización con Haddock POS API. */
+ * [064A-5] Añadidos haddock_api_token y haddock_sync_enabled para sincronización con Haddock POS API.
+ * [065A-2] Añadida configuración BDP/WebLink REST API. */
 
 import { useState, useEffect, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
@@ -12,7 +13,7 @@ import {
 } from '../api/generated/configuracion/configuracion';
 import type { ActualizarConfiguracionRequest } from '../api/generated/gestionRestauranteAPI.schemas';
 
-interface EstadoConfiguracion {
+export interface EstadoConfiguracion {
   reserva_email_obligatorio: boolean;
   reserva_telefono_obligatorio: boolean;
   reserva_nombre_obligatorio: boolean;
@@ -34,6 +35,15 @@ interface EstadoConfiguracion {
   /* [064A-5] Token API y toggle de sincronización Haddock */
   haddock_api_token: string;
   haddock_sync_enabled: boolean;
+  /* [065A-2] BDP WebLink REST API */
+  bdp_base_url: string;
+  bdp_login: string;
+  bdp_password: string;
+  bdp_integrator_code: string;
+  bdp_sync_enabled: boolean;
+  bdp_pos_id: number;
+  bdp_employee_id: number;
+  bdp_items_profile_id: number;
   /* [134A-4] Reseñas y CTA WhatsApp */
   google_review_url: string;
   telefono_restaurante: string;
@@ -58,6 +68,14 @@ const DEFAULTS: EstadoConfiguracion = {
   url_haddock: '',
   haddock_api_token: '',
   haddock_sync_enabled: false,
+  bdp_base_url: '',
+  bdp_login: '',
+  bdp_password: '',
+  bdp_integrator_code: '',
+  bdp_sync_enabled: false,
+  bdp_pos_id: 1,
+  bdp_employee_id: 1,
+  bdp_items_profile_id: 1,
   google_review_url: '',
   telefono_restaurante: '',
   url_reservas: '',
@@ -75,6 +93,7 @@ export function useConfiguracion() {
   useEffect(() => {
     if (datos && datos.status === 200) {
       const d = datos.data;
+      const raw = d as unknown as Record<string, string | number | boolean>;
       setConfig({
         reserva_email_obligatorio: d.reserva_email_obligatorio,
         reserva_telefono_obligatorio: d.reserva_telefono_obligatorio,
@@ -99,9 +118,17 @@ export function useConfiguracion() {
          * mantener valor local si ya fue editado */
         haddock_api_token: config.haddock_api_token || '',
         haddock_sync_enabled: d.haddock_sync_enabled,
-        google_review_url: (d as unknown as Record<string, string>).google_review_url ?? '',
-        telefono_restaurante: (d as unknown as Record<string, string>).telefono_restaurante ?? '',
-        url_reservas: (d as unknown as Record<string, string>).url_reservas ?? '',
+        bdp_base_url: String(raw.bdp_base_url ?? ''),
+        bdp_login: config.bdp_login || '',
+        bdp_password: config.bdp_password || '',
+        bdp_integrator_code: config.bdp_integrator_code || '',
+        bdp_sync_enabled: Boolean(raw.bdp_sync_enabled ?? false),
+        bdp_pos_id: Number(raw.bdp_pos_id ?? 1),
+        bdp_employee_id: Number(raw.bdp_employee_id ?? 1),
+        bdp_items_profile_id: Number(raw.bdp_items_profile_id ?? 1),
+        google_review_url: String(raw.google_review_url ?? ''),
+        telefono_restaurante: String(raw.telefono_restaurante ?? ''),
+        url_reservas: String(raw.url_reservas ?? ''),
       });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -139,6 +166,15 @@ export function useConfiguracion() {
       /* [064A-5] Haddock POS API sync */
       ...(config.haddock_api_token ? { haddock_api_token: config.haddock_api_token } : {}),
       haddock_sync_enabled: config.haddock_sync_enabled,
+      /* [065A-2] BDP WebLink REST API */
+      bdp_base_url: config.bdp_base_url || undefined,
+      ...(config.bdp_login ? { bdp_login: config.bdp_login } : {}),
+      ...(config.bdp_password ? { bdp_password: config.bdp_password } : {}),
+      ...(config.bdp_integrator_code ? { bdp_integrator_code: config.bdp_integrator_code } : {}),
+      bdp_sync_enabled: config.bdp_sync_enabled,
+      bdp_pos_id: config.bdp_pos_id,
+      bdp_employee_id: config.bdp_employee_id,
+      bdp_items_profile_id: config.bdp_items_profile_id,
       /* [134A-4] Reseñas y CTA WhatsApp */
       google_review_url: config.google_review_url || undefined,
       telefono_restaurante: config.telefono_restaurante || undefined,

@@ -32,7 +32,10 @@ pub struct ActualizarPlantillaData {
 pub struct PlantillaRepository;
 
 impl PlantillaRepository {
-    pub async fn create(pool: &PgPool, p: NuevaPlantilla) -> Result<PlantillaWhatsapp, sqlx::Error> {
+    pub async fn create(
+        pool: &PgPool,
+        p: NuevaPlantilla,
+    ) -> Result<PlantillaWhatsapp, sqlx::Error> {
         sqlx::query_as!(
             PlantillaWhatsapp,
             "INSERT INTO plantillas_whatsapp \
@@ -54,7 +57,11 @@ impl PlantillaRepository {
         .await
     }
 
-    pub async fn find_by_id(pool: &PgPool, id: Uuid, user_id: Uuid) -> Result<Option<PlantillaWhatsapp>, sqlx::Error> {
+    pub async fn find_by_id(
+        pool: &PgPool,
+        id: Uuid,
+        user_id: Uuid,
+    ) -> Result<Option<PlantillaWhatsapp>, sqlx::Error> {
         sqlx::query_as!(
             PlantillaWhatsapp,
             "SELECT * FROM plantillas_whatsapp WHERE id = $1 AND user_id = $2",
@@ -122,7 +129,12 @@ impl PlantillaRepository {
             (items, total)
         };
 
-        Ok(PlantillasPaginadas { items, total, page, per_page })
+        Ok(PlantillasPaginadas {
+            items,
+            total,
+            page,
+            per_page,
+        })
     }
 
     pub async fn update(

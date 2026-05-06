@@ -7,11 +7,11 @@ use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use uuid::Uuid;
 
+use crate::config::AppConfig;
 use crate::errors::AppError;
 use crate::models::{AuthResponse, LoginRequest, RegisterRequest};
 use crate::repositories::UserRepository;
 use crate::services::email::EmailService;
-use crate::config::AppConfig;
 
 /// Claims del JWT — `sub` es el `user_id`, `exp` la expiración Unix
 /// [094A-3] `tid` opcional = `trabajador_id` (si el token es de un trabajador)
@@ -158,9 +158,7 @@ impl AuthService {
     ) -> Result<(), AppError> {
         let user = UserRepository::find_by_reset_token(pool, token)
             .await?
-            .ok_or(AppError::BadRequest(
-                "Token inválido o expirado".into(),
-            ))?;
+            .ok_or(AppError::BadRequest("Token inválido o expirado".into()))?;
 
         let salt = SaltString::generate(&mut OsRng);
         let new_hash = Argon2::default()

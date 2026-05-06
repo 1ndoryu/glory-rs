@@ -12,8 +12,8 @@ use validator::Validate;
 use crate::errors::AppError;
 use crate::middleware::AuthUser;
 use crate::models::{
-    ActualizarPlantillaRequest, CrearPlantillaRequest, PlantillaWhatsapp,
-    PlantillasPaginadas, PlantillasQuery,
+    ActualizarPlantillaRequest, CrearPlantillaRequest, PlantillaWhatsapp, PlantillasPaginadas,
+    PlantillasQuery,
 };
 use crate::services::PlantillaService;
 use crate::AppState;

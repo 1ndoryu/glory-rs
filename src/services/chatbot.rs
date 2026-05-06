@@ -8,8 +8,8 @@ use uuid::Uuid;
 
 use crate::errors::AppError;
 use crate::models::{
-    CamposObligatorios, ChatbotCrearReservaRequest, ChatbotReservaResponse,
-    DisponibilidadResponse, FranjaDisponibilidad, Reserva, RestauranteInfoResponse, ZonaResumen,
+    CamposObligatorios, ChatbotCrearReservaRequest, ChatbotReservaResponse, DisponibilidadResponse,
+    FranjaDisponibilidad, Reserva, RestauranteInfoResponse, ZonaResumen,
 };
 use crate::repositories::reserva::{FiltrosReserva, NuevaReserva};
 use crate::repositories::{ConfiguracionRepository, PlanoSalaRepository, ReservaRepository};
@@ -49,7 +49,8 @@ impl ChatbotService {
         let capacidad_total: i32 = todas_mesas.iter().map(|m| m.max_personas).sum();
 
         /* Obtener reservas del día (excluyendo canceladas) */
-        let reservas = ReservaRepository::listar_por_fecha(pool, user_id, fecha).await
+        let reservas = ReservaRepository::listar_por_fecha(pool, user_id, fecha)
+            .await
             .unwrap_or_default();
 
         /* Generar franjas de 30 min */
@@ -197,15 +198,18 @@ impl ChatbotService {
         let resultado = ReservaRepository::list(pool, &filtros).await?;
 
         /* Filtrar en memoria por teléfono/nombre si se proporcionan */
-        let reservas: Vec<ChatbotReservaResponse> = resultado.0
+        let reservas: Vec<ChatbotReservaResponse> = resultado
+            .0
             .into_iter()
             .filter(|r| {
-                let pasa_telefono = telefono
-                    .is_none_or(|t| !t.is_empty() && r.telefono.contains(t));
+                let pasa_telefono =
+                    telefono.is_none_or(|t| !t.is_empty() && r.telefono.contains(t));
                 let pasa_nombre = nombre.is_none_or(|n| {
                     !n.is_empty()
                         && (r.nombre_cliente.to_lowercase().contains(&n.to_lowercase())
-                            || r.apellidos_cliente.to_lowercase().contains(&n.to_lowercase()))
+                            || r.apellidos_cliente
+                                .to_lowercase()
+                                .contains(&n.to_lowercase()))
                 });
                 pasa_telefono && pasa_nombre
             })
@@ -251,11 +255,7 @@ impl ChatbotService {
     }
 
     /// Cancela una reserva (cambia estado a "cancelada")
-    pub async fn cancelar_reserva(
-        pool: &PgPool,
-        id: Uuid,
-        user_id: Uuid,
-    ) -> Result<(), AppError> {
+    pub async fn cancelar_reserva(pool: &PgPool, id: Uuid, user_id: Uuid) -> Result<(), AppError> {
         let reserva = ReservaRepository::find_by_id(pool, id, user_id)
             .await?
             .ok_or_else(|| AppError::NotFound("Reserva no encontrada".into()))?;

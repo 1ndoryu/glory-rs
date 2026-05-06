@@ -80,12 +80,22 @@ impl VentaService {
         sort_by: Option<String>,
         sort_order: Option<String>,
     ) -> Result<VentasPaginadas, AppError> {
-        let (items, total) =
-            VentaRepository::list(
-                pool, user_id, page, per_page, desde, hasta,
-                busqueda.as_deref(), turno.as_deref(), canal.as_deref(), metodo_pago.as_deref(),
-                estado_haddock.as_deref(), sort_by.as_deref(), sort_order.as_deref(),
-            ).await?;
+        let (items, total) = VentaRepository::list(
+            pool,
+            user_id,
+            page,
+            per_page,
+            desde,
+            hasta,
+            busqueda.as_deref(),
+            turno.as_deref(),
+            canal.as_deref(),
+            metodo_pago.as_deref(),
+            estado_haddock.as_deref(),
+            sort_by.as_deref(),
+            sort_order.as_deref(),
+        )
+        .await?;
         Ok(VentasPaginadas {
             items,
             total,
@@ -167,7 +177,8 @@ impl VentaService {
         if config.haddock_sync_enabled {
             return Err(AppError::Conflict(
                 "No se pueden eliminar ventas mientras la sincronización con Haddock está activa. \
-                 Desactívela primero en Configuración.".into()
+                 Desactívela primero en Configuración."
+                    .into(),
             ));
         }
 
@@ -181,7 +192,11 @@ impl VentaService {
      * A diferencia del spawn automático, este se ejecuta sincrónicamente
      * y retorna la venta actualizada con el nuevo estado sync.
      * Falla si sync deshabilitado o token vacío. */
-    pub async fn retry_haddock_sync(pool: &PgPool, id: Uuid, user_id: Uuid) -> Result<Venta, AppError> {
+    pub async fn retry_haddock_sync(
+        pool: &PgPool,
+        id: Uuid,
+        user_id: Uuid,
+    ) -> Result<Venta, AppError> {
         let venta = VentaRepository::find_by_id(pool, id, user_id)
             .await?
             .ok_or_else(|| AppError::NotFound("Venta no encontrada".into()))?;

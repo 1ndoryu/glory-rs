@@ -65,6 +65,22 @@ export interface ActualizarConfiguracionRequest {
   /** @nullable */
   auto_venta_reserva?: boolean | null;
   /** @nullable */
+  bdp_base_url?: string | null;
+  /** @nullable */
+  bdp_employee_id?: number | null;
+  /** @nullable */
+  bdp_integrator_code?: string | null;
+  /** @nullable */
+  bdp_items_profile_id?: number | null;
+  /** @nullable */
+  bdp_login?: string | null;
+  /** @nullable */
+  bdp_password?: string | null;
+  /** @nullable */
+  bdp_pos_id?: number | null;
+  /** @nullable */
+  bdp_sync_enabled?: boolean | null;
+  /** @nullable */
   google_review_url?: string | null;
   /** @nullable */
   groq_api_key?: string | null;
@@ -493,6 +509,24 @@ export interface AuthResponse {
   user_id: string;
 }
 
+export interface BdpDiagnosticoResponse {
+  /** @nullable */
+  application?: string | null;
+  /** @nullable */
+  application_description?: string | null;
+  configurado: boolean;
+  health_ok: boolean;
+  login_ok: boolean;
+  mensaje: string;
+  /** @nullable */
+  session_expires_in_seconds?: number | null;
+  /** @nullable */
+  sub_version?: number | null;
+  sync_habilitado: boolean;
+  /** @nullable */
+  version?: number | null;
+}
+
 export interface Campana {
   canales: string[];
   created_at: string;
@@ -695,6 +729,11 @@ export interface CombinacionExport {
  */
 export interface ConfiguracionRestaurante {
   auto_venta_reserva: boolean;
+  bdp_base_url: string;
+  bdp_employee_id: number;
+  bdp_items_profile_id: number;
+  bdp_pos_id: number;
+  bdp_sync_enabled: boolean;
   created_at: string;
   google_review_url: string;
   haddock_sync_enabled: boolean;
@@ -1328,7 +1367,6 @@ export interface ZonaSala {
  */
 export type ZonaOcupacion = ZonaSala & {
   mesas: MesaOcupacion[];
-  /* [134A-12] Paredes visibles en reservas */
   paredes: ParedSala[];
 };
 
@@ -1450,7 +1488,8 @@ export interface ReportarErrorResponse {
 export interface ResenaAdmin {
   /** @nullable */
   cliente_nombre?: string | null;
-  comentario: string;
+  /** @nullable */
+  comentario?: string | null;
   created_at: string;
   id: string;
   /** @nullable */

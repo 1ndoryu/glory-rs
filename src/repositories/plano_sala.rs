@@ -4,7 +4,9 @@
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::models::{ActualizarMesaRequest, CombinacionMesas, CrearMesaRequest, Mesa, ParedSala, ZonaSala};
+use crate::models::{
+    ActualizarMesaRequest, CombinacionMesas, CrearMesaRequest, Mesa, ParedSala, ZonaSala,
+};
 
 /* [263A-16] Struct auxiliar para las reservas asociadas a mesas (query raw) */
 #[derive(Debug, sqlx::FromRow)]
@@ -117,10 +119,7 @@ impl PlanoSalaRepository {
 
     /* ========== Mesas ========== */
 
-    pub async fn listar_mesas_zona(
-        pool: &PgPool,
-        zona_id: Uuid,
-    ) -> Result<Vec<Mesa>, sqlx::Error> {
+    pub async fn listar_mesas_zona(pool: &PgPool, zona_id: Uuid) -> Result<Vec<Mesa>, sqlx::Error> {
         sqlx::query_as!(
             Mesa,
             "SELECT * FROM mesas WHERE zona_id = $1 ORDER BY numero",
@@ -130,10 +129,7 @@ impl PlanoSalaRepository {
         .await
     }
 
-    pub async fn crear_mesa(
-        pool: &PgPool,
-        req: &CrearMesaRequest,
-    ) -> Result<Mesa, sqlx::Error> {
+    pub async fn crear_mesa(pool: &PgPool, req: &CrearMesaRequest) -> Result<Mesa, sqlx::Error> {
         let id = Uuid::new_v4();
         sqlx::query_as!(
             Mesa,
@@ -333,22 +329,16 @@ impl PlanoSalaRepository {
     }
 
     /* Elimina todo el plano de un usuario (para import limpio) */
-    pub async fn eliminar_plano_completo(
-        pool: &PgPool,
-        user_id: Uuid,
-    ) -> Result<(), sqlx::Error> {
+    pub async fn eliminar_plano_completo(pool: &PgPool, user_id: Uuid) -> Result<(), sqlx::Error> {
         sqlx::query!(
             "DELETE FROM combinaciones_mesas WHERE user_id = $1",
             user_id
         )
         .execute(pool)
         .await?;
-        sqlx::query!(
-            "DELETE FROM zonas_sala WHERE user_id = $1",
-            user_id
-        )
-        .execute(pool)
-        .await?;
+        sqlx::query!("DELETE FROM zonas_sala WHERE user_id = $1", user_id)
+            .execute(pool)
+            .await?;
         Ok(())
     }
 
@@ -423,7 +413,7 @@ impl PlanoSalaRepository {
         zona_id: Uuid,
     ) -> Result<Vec<ParedSala>, sqlx::Error> {
         sqlx::query_as::<_, ParedSala>(
-            "SELECT * FROM paredes_sala WHERE zona_id = $1 ORDER BY created_at"
+            "SELECT * FROM paredes_sala WHERE zona_id = $1 ORDER BY created_at",
         )
         .bind(zona_id)
         .fetch_all(pool)
@@ -444,7 +434,7 @@ impl PlanoSalaRepository {
         let id = Uuid::new_v4();
         sqlx::query_as::<_, ParedSala>(
             "INSERT INTO paredes_sala (id, zona_id, pos_x, pos_y, ancho, alto, rotacion, color) \
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *"
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *",
         )
         .bind(id)
         .bind(zona_id)
@@ -478,7 +468,7 @@ impl PlanoSalaRepository {
              rotacion = COALESCE($6, rotacion), \
              color = COALESCE($7, color), \
              updated_at = NOW() \
-             WHERE id = $1 RETURNING *"
+             WHERE id = $1 RETURNING *",
         )
         .bind(id)
         .bind(pos_x)
@@ -506,7 +496,7 @@ impl PlanoSalaRepository {
         let mut total = 0u64;
         for (id, x, y) in posiciones {
             let result = sqlx::query(
-                "UPDATE paredes_sala SET pos_x = $2, pos_y = $3, updated_at = NOW() WHERE id = $1"
+                "UPDATE paredes_sala SET pos_x = $2, pos_y = $3, updated_at = NOW() WHERE id = $1",
             )
             .bind(id)
             .bind(x)

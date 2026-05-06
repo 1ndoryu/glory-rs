@@ -8,8 +8,8 @@ use uuid::Uuid;
 
 use crate::errors::AppError;
 use crate::models::{
-    ActualizarPlantillaRequest, CrearPlantillaRequest, PlantillaWhatsapp,
-    PlantillasPaginadas, PlantillasQuery, CATEGORIAS_PLANTILLA,
+    ActualizarPlantillaRequest, CrearPlantillaRequest, PlantillaWhatsapp, PlantillasPaginadas,
+    PlantillasQuery, CATEGORIAS_PLANTILLA,
 };
 use crate::repositories::plantilla_whatsapp::{
     ActualizarPlantillaData, NuevaPlantilla, PlantillaRepository,
@@ -135,7 +135,8 @@ impl PlantillaService {
             ));
         }
 
-        let integ = IntegracionMarketingRepository::obtener_o_crear(pool, user_id).await
+        let integ = IntegracionMarketingRepository::obtener_o_crear(pool, user_id)
+            .await
             .map_err(AppError::Database)?;
 
         if !integ.meta_templates_configurado() {
@@ -147,9 +148,7 @@ impl PlantillaService {
         let waba_id = integ.meta_waba_id.as_deref().unwrap_or_default();
         let access_token = integ.meta_access_token.as_deref().unwrap_or_default();
 
-        let meta_template_id = enviar_template_a_meta(
-            waba_id, access_token, &plantilla,
-        ).await?;
+        let meta_template_id = enviar_template_a_meta(waba_id, access_token, &plantilla).await?;
 
         PlantillaRepository::set_enviada(pool, id, user_id, &meta_template_id)
             .await
@@ -176,9 +175,7 @@ async fn enviar_template_a_meta(
     access_token: &str,
     plantilla: &PlantillaWhatsapp,
 ) -> Result<String, AppError> {
-    let url = format!(
-        "https://graph.facebook.com/v23.0/{waba_id}/message_templates"
-    );
+    let url = format!("https://graph.facebook.com/v23.0/{waba_id}/message_templates");
 
     /* Construir componentes: al menos un BODY es obligatorio */
     let mut components = vec![serde_json::json!({
@@ -235,10 +232,7 @@ async fn enviar_template_a_meta(
     let parsed: serde_json::Value = serde_json::from_str(&body)
         .map_err(|e| AppError::Internal(format!("Respuesta Meta no válida: {e}")))?;
 
-    let meta_id = parsed["id"]
-        .as_str()
-        .unwrap_or("unknown")
-        .to_string();
+    let meta_id = parsed["id"].as_str().unwrap_or("unknown").to_string();
 
     tracing::info!(
         plantilla = %plantilla.nombre,

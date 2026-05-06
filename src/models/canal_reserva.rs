@@ -1,5 +1,5 @@
 /* 263A-9: Modelo de canal de reserva — por dónde llegan las reservas
-   (WhatsApp, Instagram, teléfono, web, etc.) */
+(WhatsApp, Instagram, teléfono, web, etc.) */
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};

@@ -73,7 +73,9 @@ pub async fn revocar_api_key(
     Path(id): Path<Uuid>,
 ) -> Result<Json<serde_json::Value>, AppError> {
     ApiKeyService::revoke(&state.pool, id, auth.user_id).await?;
-    Ok(Json(serde_json::json!({ "ok": true, "message": "API key revocada" })))
+    Ok(Json(
+        serde_json::json!({ "ok": true, "message": "API key revocada" }),
+    ))
 }
 
 pub fn routes() -> Router<AppState> {

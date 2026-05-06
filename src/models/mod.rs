@@ -1,8 +1,8 @@
-pub mod common;
 mod api_key;
 mod campana;
 mod canal_reserva;
 mod cliente;
+pub mod common;
 mod configuracion;
 mod dashboard;
 mod dashboard_reservas;
@@ -19,8 +19,7 @@ mod venta;
 
 pub use campana::{
     ActualizarCampanaRequest, Campana, CampanaDestinatario, CampanasPaginadas, CampanasQuery,
-    CrearCampanaRequest, SegmentoPreview, SegmentoPreviewQuery, CANALES_VALIDOS,
-    SEGMENTOS_VALIDOS,
+    CrearCampanaRequest, SegmentoPreview, SegmentoPreviewQuery, CANALES_VALIDOS, SEGMENTOS_VALIDOS,
 };
 pub use canal_reserva::{CanalReserva, CrearCanalReservaRequest};
 pub use cliente::{
@@ -38,13 +37,29 @@ pub use etiqueta::{
     EtiquetaConCategoria, EtiquetasQuery,
 };
 pub use gasto::{
-    ActualizarGastoRequest, CategoriaGasto, CrearGastoRequest, Gasto, GastosPaginados,
-    GastosQuery, ProveedoresQuery, TipoDocumento,
+    ActualizarGastoRequest, CategoriaGasto, CrearGastoRequest, Gasto, GastosPaginados, GastosQuery,
+    ProveedoresQuery, TipoDocumento,
+};
+pub use plano_sala::{
+    ActualizarMesaRequest, ActualizarParedRequest, ActualizarPosicionesParedesRequest,
+    ActualizarPosicionesRequest, ActualizarZonaRequest, CombinacionConMesas, CombinacionExport,
+    CombinacionMesas, CrearCombinacionRequest, CrearMesaRequest, CrearParedRequest,
+    CrearZonaRequest, Mesa, MesaExport, MesaOcupacion, ParedSala, PlanoExport, PlanoOcupacion,
+    PlanoOcupacionQuery, PlanoSala, PosicionMesa, PosicionPared, ReservaMesa, ZonaConMesas,
+    ZonaExport, ZonaOcupacion, ZonaSala,
+};
+pub use plantilla_whatsapp::{
+    ActualizarPlantillaRequest, CrearPlantillaRequest, PlantillaWhatsapp, PlantillasPaginadas,
+    PlantillasQuery, CATEGORIAS_PLANTILLA,
 };
 pub use reserva::{
     ActualizarReservaRequest, CrearReservaRequest, EstadoReserva, NoShowPorCanal, NoShowQuery,
     NoShowStats, Reserva, ReservasConteo, ReservasPaginadas, ReservasQuery, ResumenDiario,
     ResumenMesQuery,
+};
+pub use trabajador::{
+    ActualizarTrabajadorRequest, CrearTrabajadorRequest, LoginTrabajadorRequest, PermisoSeccion,
+    Trabajador, TrabajadorAuthResponse, TrabajadorResponse, SECCIONES_VALIDAS,
 };
 pub use user::{
     AuthResponse, ForgotPasswordRequest, LoginRequest, MessageResponse, RegisterRequest,
@@ -54,44 +69,26 @@ pub use venta::{
     ActualizarVentaRequest, CanalVenta, CrearVentaRequest, MetodoPago, Turno, Venta,
     VentaConCliente, VentasPaginadas, VentasQuery,
 };
-pub use trabajador::{
-    ActualizarTrabajadorRequest, CrearTrabajadorRequest, LoginTrabajadorRequest,
-    PermisoSeccion, Trabajador, TrabajadorAuthResponse, TrabajadorResponse,
-    SECCIONES_VALIDAS,
-};
-pub use plano_sala::{
-    ActualizarMesaRequest, ActualizarParedRequest, ActualizarPosicionesRequest,
-    ActualizarPosicionesParedesRequest, ActualizarZonaRequest,
-    CombinacionConMesas, CombinacionExport, CombinacionMesas, CrearCombinacionRequest,
-    CrearMesaRequest, CrearParedRequest, CrearZonaRequest, Mesa, MesaExport, MesaOcupacion,
-    ParedSala, PlanoExport, PlanoOcupacion, PlanoOcupacionQuery, PlanoSala, PosicionMesa,
-    PosicionPared, ReservaMesa, ZonaConMesas, ZonaExport, ZonaOcupacion, ZonaSala,
-};
-pub use plantilla_whatsapp::{
-    ActualizarPlantillaRequest, CrearPlantillaRequest, PlantillaWhatsapp,
-    PlantillasPaginadas, PlantillasQuery, CATEGORIAS_PLANTILLA,
-};
 mod recordatorio;
+pub use api_key::{
+    ApiKey, ApiKeyCreatedResponse, ApiKeyResponse, CamposObligatorios, ChatbotBuscarReservasQuery,
+    ChatbotCrearReservaRequest, ChatbotReservaResponse, CrearApiKeyRequest, DisponibilidadResponse,
+    FranjaDisponibilidad, RestauranteInfoResponse, ZonaResumen,
+};
+pub use digitalizacion::{DatosDocumentoExtraidos, DigitalizarDocumentoRequest};
+pub use notificacion::{Notificacion, NotificacionEvent};
 pub use recordatorio::{
     ActualizarReglaRequest, CrearReglaRequest, HistorialRecordatorios, RecordatorioEnviado,
     RecordatorioEnviadoDetalle, ReglaRecordatorio, ReglasPaginadas, ReglasQuery,
     CANALES_RECORDATORIO,
 };
-pub use api_key::{
-    ApiKey, ApiKeyCreatedResponse, ApiKeyResponse, CamposObligatorios,
-    ChatbotBuscarReservasQuery, ChatbotCrearReservaRequest, ChatbotReservaResponse,
-    CrearApiKeyRequest, DisponibilidadResponse, FranjaDisponibilidad, RestauranteInfoResponse,
-    ZonaResumen,
-};
-pub use digitalizacion::{DatosDocumentoExtraidos, DigitalizarDocumentoRequest};
-pub use notificacion::{Notificacion, NotificacionEvent};
 mod integracion_marketing;
 pub use integracion_marketing::{
     ActualizarIntegracionesRequest, IntegracionMarketing, IntegracionMarketingPublica,
 };
 mod resena;
 pub use resena::{
-    Resena, ResenaAdmin, ResenaPublicaResponse, ResenasQuery, ResenasPaginadas,
+    Resena, ResenaAdmin, ResenaPublicaResponse, ResenasPaginadas, ResenasQuery,
     ResponderResenaRequest, ResponderResenaResponse,
 };
 mod inactividad;

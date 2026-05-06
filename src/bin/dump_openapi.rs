@@ -5,5 +5,10 @@ use glory_backend::handlers::ApiDoc;
 use utoipa::OpenApi;
 
 fn main() {
-    print!("{}", ApiDoc::openapi().to_json().expect("Error serializando OpenAPI"));
+    print!(
+        "{}",
+        ApiDoc::openapi()
+            .to_json()
+            .expect("Error serializando OpenAPI")
+    );
 }

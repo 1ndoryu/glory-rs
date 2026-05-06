@@ -1,5 +1,6 @@
-mod auth;
 mod api_key;
+mod auth;
+pub mod bdp_weblink;
 mod campana;
 mod canal_reserva;
 mod chatbot;
@@ -19,8 +20,8 @@ pub(crate) mod reserva;
 pub mod twilio;
 mod venta;
 
-pub use auth::AuthService;
 pub use api_key::ApiKeyService;
+pub use auth::AuthService;
 pub use campana::CampanaService;
 pub use canal_reserva::CanalReservaService;
 pub use chatbot::ChatbotService;

@@ -1,5 +1,5 @@
 /* 253A-5: Handlers de reservas — CRUD + conteo para Home
-   263A-6: Filtros turno/estado para vista día, resumen mensual para vista mes */
+263A-6: Filtros turno/estado para vista día, resumen mensual para vista mes */
 
 use axum::extract::{Path, Query, State};
 use axum::http::StatusCode;
@@ -169,8 +169,7 @@ pub async fn resumen_mensual(
     Query(params): Query<ResumenMesQuery>,
 ) -> Result<Json<Vec<ResumenDiario>>, AppError> {
     let resumen =
-        ReservaService::resumen_mensual(&state.pool, auth.user_id, params.anio, params.mes)
-            .await?;
+        ReservaService::resumen_mensual(&state.pool, auth.user_id, params.anio, params.mes).await?;
     Ok(Json(resumen))
 }
 

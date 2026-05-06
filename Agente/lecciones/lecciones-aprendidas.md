@@ -209,3 +209,10 @@ Cada lección debe ser concisa y accionable.
 **Causa raíz:** Los scripts npm llamaban `cargo` directamente desde `cmd.exe`/`concurrently`, sin resolver la ruta estándar `~/.cargo/bin` ni mostrar una instrucción accionable.
 **Solución:** Centralizar todas las llamadas a Rust en `scripts/run-cargo.mjs`, hacer que busque `cargo` en PATH y en la ruta estándar de rustup, y reutilizarlo también en `self-check.ps1`.
 **Prevención:** En este template, nunca invocar `cargo` directamente desde `package.json`; siempre pasar por el wrapper para que el fallo de prerrequisitos sea claro y consistente.
+
+## 2026-05-06 — Orval tags no ASCII generan carpetas corruptas en Windows
+
+**Problema:** El tag OpenAPI `Reseñas` produjo carpetas generadas `rese├▒as`, dejando duplicados junto a la carpeta correcta.
+**Causa raíz:** Orval usa el tag para nombres de carpeta y el pipe/codepage de Windows puede corromper caracteres no ASCII.
+**Solución:** Usar tags ASCII (`resenas`) para codegen, activar `clean: true` en Orval y actualizar imports/barrel generados.
+**Prevención:** Mantener tags OpenAPI de Orval en ASCII y hacer grep de `rese├`, `Rese├` o carpetas con caracteres raros tras regenerar.

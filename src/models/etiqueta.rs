@@ -1,6 +1,6 @@
 /* 263A-1: Modelo de etiquetas para clientes y reservas.
-   Basado en Data II (Videos 10-11): gestor de etiquetas con categorías,
-   preestablecidas del sistema + custom del dueño. */
+Basado en Data II (Videos 10-11): gestor de etiquetas con categorías,
+preestablecidas del sistema + custom del dueño. */
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};

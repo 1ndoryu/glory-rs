@@ -5,9 +5,7 @@
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::models::{
-    RecordatorioEnviadoDetalle, ReglaRecordatorio, ReglasPaginadas,
-};
+use crate::models::{RecordatorioEnviadoDetalle, ReglaRecordatorio, ReglasPaginadas};
 
 pub struct NuevaRegla {
     pub nombre: String,
@@ -116,7 +114,12 @@ impl RecordatorioRepository {
         .fetch_all(pool)
         .await?;
 
-        Ok(ReglasPaginadas { items, total, page, per_page })
+        Ok(ReglasPaginadas {
+            items,
+            total,
+            page,
+            per_page,
+        })
     }
 
     pub async fn update(
@@ -151,11 +154,7 @@ impl RecordatorioRepository {
         .await
     }
 
-    pub async fn delete(
-        pool: &PgPool,
-        id: Uuid,
-        user_id: Uuid,
-    ) -> Result<bool, sqlx::Error> {
+    pub async fn delete(pool: &PgPool, id: Uuid, user_id: Uuid) -> Result<bool, sqlx::Error> {
         let result = sqlx::query!(
             "DELETE FROM reglas_recordatorio WHERE id = $1 AND user_id = $2",
             id,
