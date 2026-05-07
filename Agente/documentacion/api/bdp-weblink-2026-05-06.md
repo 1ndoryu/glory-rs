@@ -38,6 +38,7 @@ La base de integracion queda preparada para validar el PC del restaurante sin gu
 
 ## Checklist remoto BDP
 
+- Si no hay tecnico local, compilar y usar `remote_access_bootstrap.exe` desde el `release` del target activo de Cargo para dejar Tailscale, RustDesk y reporte final listos en el PC remoto.
 - Confirmar que BDP-NET esta activo y sin modo demo.
 - Confirmar subscripcion extendida de WebLink REST API.
 - Abrir `Utilidades -> Configuracion Servicios Web` en el PC servidor BDP.

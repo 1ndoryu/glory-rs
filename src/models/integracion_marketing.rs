@@ -6,9 +6,16 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
+#[cfg(test)]
+use std::sync::{LazyLock, Mutex};
 use utoipa::ToSchema;
 use uuid::Uuid;
 use validator::Validate;
+
+const META_ENV_WABA_ID: &str = "META_WABA_ID";
+const META_ENV_BUSINESS_APP_ID: &str = "META_BUSINESS_APP_ID";
+const META_ENV_ACCESS_TOKEN: &str = "META_ACCESS_TOKEN";
+const META_ENV_PHONE_NUMBER_ID: &str = "META_PHONE_NUMBER_ID";
 
 /// Integraciones de marketing almacenadas por usuario
 #[derive(Debug, Clone, FromRow, Serialize, ToSchema)]
@@ -55,6 +62,15 @@ pub struct IntegracionMarketing {
 }
 
 impl IntegracionMarketing {
+    #[must_use]
+    pub fn with_env_fallback(mut self) -> Self {
+        self.meta_waba_id = prefer_env(self.meta_waba_id, META_ENV_WABA_ID);
+        self.meta_business_app_id = prefer_env(self.meta_business_app_id, META_ENV_BUSINESS_APP_ID);
+        self.meta_access_token = prefer_env(self.meta_access_token, META_ENV_ACCESS_TOKEN);
+        self.meta_phone_number_id = prefer_env(self.meta_phone_number_id, META_ENV_PHONE_NUMBER_ID);
+        self
+    }
+
     /// Indica si SMTP está configurado (`host` + `user` + `password` presentes)
     #[must_use]
     pub fn smtp_configurado(&self) -> bool {
@@ -117,6 +133,22 @@ impl From<&IntegracionMarketing> for IntegracionMarketingPublica {
     }
 }
 
+fn prefer_env(current: Option<String>, env_name: &str) -> Option<String> {
+    match current.and_then(non_empty_string) {
+        Some(value) => Some(value),
+        None => std::env::var(env_name).ok().and_then(non_empty_string),
+    }
+}
+
+fn non_empty_string(value: String) -> Option<String> {
+    let trimmed = value.trim();
+    if trimmed.is_empty() {
+        None
+    } else {
+        Some(trimmed.to_string())
+    }
+}
+
 /// Request para actualizar integraciones de marketing
 #[derive(Debug, Deserialize, Validate, ToSchema)]
 pub struct ActualizarIntegracionesRequest {
@@ -147,4 +179,95 @@ pub struct ActualizarIntegracionesRequest {
     /* [303A-1] Phone Number ID de Meta — requerido para enviar mensajes */
     #[validate(length(max = 100))]
     pub meta_phone_number_id: Option<String>,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    static ENV_LOCK: LazyLock<Mutex<()>> = LazyLock::new(|| Mutex::new(()));
+
+    fn integracion_vacia() -> IntegracionMarketing {
+        IntegracionMarketing {
+            id: Uuid::new_v4(),
+            user_id: Uuid::new_v4(),
+            smtp_host: None,
+            smtp_port: None,
+            smtp_user: None,
+            smtp_password: None,
+            smtp_from_email: None,
+            smtp_from_name: None,
+            twilio_account_sid: None,
+            twilio_auth_token: None,
+            twilio_from_number: None,
+            meta_waba_id: None,
+            meta_business_app_id: None,
+            meta_access_token: None,
+            meta_phone_number_id: None,
+            created_at: Utc::now(),
+            updated_at: Utc::now(),
+        }
+    }
+
+    fn snapshot_meta_env() -> [Option<String>; 4] {
+        [
+            std::env::var(META_ENV_WABA_ID).ok(),
+            std::env::var(META_ENV_BUSINESS_APP_ID).ok(),
+            std::env::var(META_ENV_ACCESS_TOKEN).ok(),
+            std::env::var(META_ENV_PHONE_NUMBER_ID).ok(),
+        ]
+    }
+
+    fn restore_meta_env(values: [Option<String>; 4]) {
+        for (name, value) in [
+            (META_ENV_WABA_ID, values[0].clone()),
+            (META_ENV_BUSINESS_APP_ID, values[1].clone()),
+            (META_ENV_ACCESS_TOKEN, values[2].clone()),
+            (META_ENV_PHONE_NUMBER_ID, values[3].clone()),
+        ] {
+            match value {
+                Some(existing) => std::env::set_var(name, existing),
+                None => std::env::remove_var(name),
+            }
+        }
+    }
+
+    #[test]
+    fn env_fallback_completa_meta_si_bd_esta_vacia() {
+        let _guard = ENV_LOCK.lock().unwrap();
+        let previous = snapshot_meta_env();
+
+        std::env::set_var(META_ENV_WABA_ID, "1330208045872639");
+        std::env::set_var(META_ENV_BUSINESS_APP_ID, "2109664896264441");
+        std::env::set_var(META_ENV_ACCESS_TOKEN, "token-meta");
+        std::env::set_var(META_ENV_PHONE_NUMBER_ID, "1023208230887075");
+
+        let effective = integracion_vacia().with_env_fallback();
+
+        assert_eq!(effective.meta_waba_id.as_deref(), Some("1330208045872639"));
+        assert_eq!(effective.meta_business_app_id.as_deref(), Some("2109664896264441"));
+        assert_eq!(effective.meta_access_token.as_deref(), Some("token-meta"));
+        assert_eq!(effective.meta_phone_number_id.as_deref(), Some("1023208230887075"));
+        assert!(effective.meta_configurado());
+
+        restore_meta_env(previous);
+    }
+
+    #[test]
+    fn env_fallback_no_pisa_valores_ya_guardados() {
+        let _guard = ENV_LOCK.lock().unwrap();
+        let previous = snapshot_meta_env();
+
+        std::env::set_var(META_ENV_WABA_ID, "desde-env");
+
+        let effective = IntegracionMarketing {
+            meta_waba_id: Some("desde-bd".to_string()),
+            ..integracion_vacia()
+        }
+        .with_env_fallback();
+
+        assert_eq!(effective.meta_waba_id.as_deref(), Some("desde-bd"));
+
+        restore_meta_env(previous);
+    }
 }

@@ -24,7 +24,7 @@ impl IntegracionMarketingRepository {
         .await?;
 
         if let Some(integ) = existente {
-            return Ok(integ);
+            return Ok(integ.with_env_fallback());
         }
 
         let id = Uuid::new_v4();
@@ -36,6 +36,7 @@ impl IntegracionMarketingRepository {
         )
         .fetch_one(pool)
         .await
+        .map(IntegracionMarketing::with_env_fallback)
     }
 
     /// Actualiza parcialmente las integraciones del usuario.
@@ -79,5 +80,6 @@ impl IntegracionMarketingRepository {
         )
         .fetch_one(pool)
         .await
+        .map(IntegracionMarketing::with_env_fallback)
     }
 }
