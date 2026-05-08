@@ -1,0 +1,5 @@
+# Lecciones aprendidas
+
+## 2026-05-08 — Core editor-agnostico en extensiones
+- Para extraer un core real no basta cambiar tipos: hay que eliminar imports indirectos de servicios del editor, como `configService`, `vscode.workspace` o registries que lean settings globales.
+- Si una regla aun necesita workspace/watchers, aislarla como callback/adaptador permite avanzar el core sin romper el provider existente.

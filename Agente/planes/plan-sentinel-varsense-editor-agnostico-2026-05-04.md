@@ -230,6 +230,16 @@ Criterio de cierre:
 - VarSense validado con `npm test`: 26 passing.
 - Se corrigieron bloqueos preexistentes de VarSense que impedian ejecutar la suite completa: reglas ESLint `curly`, resolucion runtime de alias `@/` en tests compilados y ID de extension incorrecto en smoke tests.
 
+## Avance 2026-05-08
+
+- `085A-1`: Sentinel avanzo a Fase 1 parcial/operativa: `core/analyzeDocument.ts` coordina reglas static/PHP/React/Rust sobre `CoreTextDocument`, `core/violacionAdapter.ts` convierte `Violacion` a `CoreFinding`, y `diagnosticProvider` publica diagnostics desde el adaptador VS Code.
+- `085A-1`: Sentinel elimino `vscode` de `types/index.ts`, `config/ruleRegistry.ts`, `staticAnalyzer`, reglas estaticas, fachadas PHP/React/Rust y helpers compartidos. Las reglas Glory/API que aun requieren watchers/workspace quedan inyectadas como `extraAnalyzers` desde VS Code.
+- `085A-1`: VarSense avanzo en Fase 2: `types/index.ts` usa `CoreRange`, los parsers CSS/value operan sobre `CoreTextDocument`, `cssParser` ya no importa `configService`, y providers/scanner convierten documentos/rangos en el borde VS Code.
+- `085A-1`: Agregadas pruebas core nuevas: Sentinel analiza un documento sin abrir VS Code; VarSense parsea CSS con rangos serializables.
+- Validacion: Sentinel `npm run compile` y `npm run test:unit` pasaron (`283 passing`, `1 pending`). VarSense `npm test` paso (`27 passing`) e incluye compile, compile:tests y lint.
+- Gap detectado: `npm run lint` en Sentinel falla porque el repo no declara/configura ESLint (`eslint` no se reconoce). No se corrigio en este bloque para evitar mezclar tooling nuevo con el refactor core; queda como pendiente de Fase 7/CI.
+- Pendiente tecnico: Fase 1 aun no tiene `core/report.ts`; Fase 2 aun no extrae `VariableIndexBuilder`, `DocumentProvider`, `WorkspaceFileProvider` ni `FileWatcher`; Fase 3+ dependen de esos pasos.
+
 ## Riesgos y mitigaciones
 
 - Riesgo: duplicar reglas entre CLI y VS Code. Mitigacion: VS Code debe llamar core, nunca al reves.
