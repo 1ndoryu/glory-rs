@@ -3,16 +3,15 @@
   "private": true,
   "description": "Comandos unificados para el monorepo Rust + React",
   "scripts": {
-    "predev": "powershell -ExecutionPolicy Bypass -File scripts/clean-cargo-target.ps1",
     "check": "cargo check && cargo clippy && npm --prefix frontend run type-check",
     "check:back": "cargo check && cargo clippy",
     "check:front": "npm --prefix frontend run type-check",
     "fmt": "cargo fmt",
     "fmt:check": "cargo fmt --check",
-    "dev": "concurrently --kill-others-on-fail --names \"BACK,FRONT,CLEAN\" --prefix-colors \"blue.bold,magenta.bold,cyan.bold\" \"npm:dev:back\" \"npm:dev:front\" \"npm:dev:sweep\"",
+    "dev": "node glory-rs/scripts/dev.mjs --skip-migrations",
     "dev:back": "cargo run",
     "dev:front": "npm --prefix frontend run dev",
-    "dev:sweep": "powershell -ExecutionPolicy Bypass -File scripts/watch-cargo-target.ps1",
+    "dev:sweep": "powershell -ExecutionPolicy Bypass -File glory-rs/scripts/watch-cargo-target.ps1",
     "emit:openapi": "powershell -ExecutionPolicy Bypass -File scripts/emit-openapi.ps1",
     "codegen": "npm run emit:openapi && npm --prefix frontend run codegen",
     "test": "cargo test",
@@ -20,9 +19,8 @@
     "roadmap:watch": "node scripts/check-roadmap.mjs --watch",
     "audit:api": "node scripts/audit-api.mjs",
     "self-check": "powershell -ExecutionPolicy Bypass -File scripts/self-check.ps1",
-    "clean:cargo": "powershell -ExecutionPolicy Bypass -File scripts/clean-cargo-target.ps1",
-    "clean:cargo:hard": "powershell -ExecutionPolicy Bypass -File scripts/clean-cargo-target.ps1 -Aggressive",
-    "dev:clean": "npm run clean:cargo:hard && npm run dev",
-    "postdev": "powershell -ExecutionPolicy Bypass -File scripts/clean-cargo-target.ps1"
+    "clean:cargo": "powershell -ExecutionPolicy Bypass -File glory-rs/scripts/clean-cargo-target.ps1",
+    "clean:cargo:hard": "powershell -ExecutionPolicy Bypass -File glory-rs/scripts/clean-cargo-target.ps1 -Force",
+    "dev:clean": "npm run clean:cargo:hard && npm run dev"
   }
 }

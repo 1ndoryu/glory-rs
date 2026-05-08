@@ -28,12 +28,11 @@ desktop.ini
 *.log
 
 /scripts/*
+!/scripts/dev.mjs
 !/scripts/check-roadmap.mjs
 !/scripts/self-check.ps1
 !/scripts/backup-postgres.sh
 !/scripts/backup-postgres-loop.sh
-!/scripts/clean-cargo-target.ps1
-!/scripts/watch-cargo-target.ps1
 !/scripts/audit-api.mjs
 !/scripts/lib/
 !/scripts/lib/*.mjs
