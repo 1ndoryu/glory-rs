@@ -240,6 +240,15 @@ Criterio de cierre:
 - Gap detectado: `npm run lint` en Sentinel falla porque el repo no declara/configura ESLint (`eslint` no se reconoce). No se corrigio en este bloque para evitar mezclar tooling nuevo con el refactor core; queda como pendiente de Fase 7/CI.
 - Pendiente tecnico: Fase 1 aun no tiene `core/report.ts`; Fase 2 aun no extrae `VariableIndexBuilder`, `DocumentProvider`, `WorkspaceFileProvider` ni `FileWatcher`; Fase 3+ dependen de esos pasos.
 
+## Avance 2026-05-08 - continuacion
+
+- `085A-2`: Sentinel completo el hueco principal de Fase 1: `core/report.ts` genera Markdown desde `CoreFinding` sin filesystem ni VS Code. `providers/reportGenerator.ts` quedo como adaptador que convierte `vscode.Diagnostic` a core y escribe/abre el archivo en VS Code.
+- `085A-2`: Sentinel agrego conversion inversa `diagnosticToFinding` en el adaptador VS Code y prueba core de reporte Markdown serializable.
+- `085A-2`: VarSense avanzo Fase 2 con `core/workspaceProviders.ts`, `core/variableIndexBuilder.ts` y `core/classIndexBuilder.ts`. Los builders reciben `DocumentProvider`/`WorkspaceFileProvider`; los tests usan providers en memoria sin objetos VS Code.
+- `085A-2`: `VariableScanner` conserva singleton/watchers de VS Code, pero delega construccion e invalidacion de indice al builder core. `classScanner` quedo como adaptador fino sobre `ClassIndexBuilder`.
+- Validacion: Sentinel `npm run compile` y `npm run test:unit` pasaron (`284 passing`, `1 pending`). VarSense `npm test` paso (`29 passing`) e incluye compile, compile:tests y lint.
+- Pendiente tecnico: Fase 2 aun mantiene watchers y singleton en `VariableScanner`; falta extraer `FileWatcherProvider` real para eventos y preparar config Node/CLI. Fase 3 CLI queda desbloqueada parcialmente por `core/report.ts` y los builders, pero aun necesita providers Node y parser de config.
+
 ## Riesgos y mitigaciones
 
 - Riesgo: duplicar reglas entre CLI y VS Code. Mitigacion: VS Code debe llamar core, nunca al reves.
