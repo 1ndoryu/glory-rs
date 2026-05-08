@@ -36,8 +36,6 @@ desktop.ini
 !/scripts/dev.mjs
 !/scripts/check-roadmap.mjs
 !/scripts/self-check.ps1
-!/scripts/watch-cargo-target.ps1
-!/scripts/clean-cargo-target.ps1
 /backups/
 /clients/
 /frontend/public/legacy-assets/
