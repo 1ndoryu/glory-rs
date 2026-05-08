@@ -249,6 +249,16 @@ Criterio de cierre:
 - Validacion: Sentinel `npm run compile` y `npm run test:unit` pasaron (`284 passing`, `1 pending`). VarSense `npm test` paso (`29 passing`) e incluye compile, compile:tests y lint.
 - Pendiente tecnico: Fase 2 aun mantiene watchers y singleton en `VariableScanner`; falta extraer `FileWatcherProvider` real para eventos y preparar config Node/CLI. Fase 3 CLI queda desbloqueada parcialmente por `core/report.ts` y los builders, pero aun necesita providers Node y parser de config.
 
+## Avance 2026-05-08 - CLI Sentinel
+
+- `085A-3`: Sentinel avanzo Fase 3 con `src/cli/index.ts` y binario `sentinel` en `package.json`.
+- El comando soporta `sentinel analyze --workspace . --format markdown --output .sentinel-report.md` y `sentinel analyze --file path --format json`.
+- La CLI lee `sentinel.config.json` cuando existe, acepta `includePatterns`, `excludePatterns`, `directoryExceptions` y overrides `rules` compatibles con `ConfigReglaUsuario`.
+- Codigos de salida implementados: `0` sin errores, `1` con hallazgos de severidad error, `2` fallo de ejecucion/config.
+- Durante el smoke test aparecio una fuga indirecta de `vscode`: `reactAnalyzer` cargaba `apiContractRules`, que cargaba `apiContractIndexer`. Se separo `apiFallbackRules.ts` para que la CLI pueda arrancar en Node puro.
+- Validacion: Sentinel `npm run compile` y `npm run test:unit` pasaron (`287 passing`, `1 pending`). Smoke CLI JSON y Markdown pasaron sobre fixtures temporales con `hardcoded-secret` y exit `1` esperado.
+- Pendiente tecnico: el indexador de contratos Glory/API sigue atado a VS Code y queda fuera del core CLI hasta extraer providers Node/workspace. La Fase 4 debe agregar fixtures de equivalencia CLI/core para evitar regresiones.
+
 ## Riesgos y mitigaciones
 
 - Riesgo: duplicar reglas entre CLI y VS Code. Mitigacion: VS Code debe llamar core, nunca al reves.
