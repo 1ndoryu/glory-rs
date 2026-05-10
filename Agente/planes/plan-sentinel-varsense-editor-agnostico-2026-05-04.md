@@ -259,6 +259,18 @@ Criterio de cierre:
 - Validacion: Sentinel `npm run compile` y `npm run test:unit` pasaron (`287 passing`, `1 pending`). Smoke CLI JSON y Markdown pasaron sobre fixtures temporales con `hardcoded-secret` y exit `1` esperado.
 - Pendiente tecnico: el indexador de contratos Glory/API sigue atado a VS Code y queda fuera del core CLI hasta extraer providers Node/workspace. La Fase 4 debe agregar fixtures de equivalencia CLI/core para evitar regresiones.
 
+## Avance 2026-05-10 - LSP, Zed y CI operativo
+
+- `105A-1`: Sentinel agrego `src/lsp/server.ts` y `src/lsp/diagnostics.ts`. El servidor LSP publica `textDocument/publishDiagnostics` desde `CoreFinding` usando el mismo `analyzeDocument` que CLI y VS Code.
+- `105A-1`: Sentinel movio defaults y overrides compartidos a `src/core/config.ts` para que CLI y LSP no diverjan en `includePatterns`, `excludePatterns`, `directoryExceptions` ni `rules`.
+- `105A-1`: Sentinel agrego binario `sentinel-lsp`, scripts `lsp`, `smoke:lsp`, `check:zed`, dependencias LSP y smoke stdio contra la fixture `language-selector-design-spec`.
+- `105A-1`: Sentinel agrego integracion Zed minima en `integrations/zed/` y tareas `.zed/tasks.json`; la extension solo localiza/lanza `sentinel-lsp` via `SENTINEL_LSP_PATH`, PATH u `out/lsp/server.js`.
+- `105A-1`: Sentinel dejo `npm run lint` operativo con ESLint TypeScript. Se corrigieron escapes regex que bloqueaban lint y quedo una excepcion local documentada para el rango Unicode de emojis compuestos.
+- VarSense no requirio cambios en este bloque: ya contaba con CLI, LSP, equivalencia, smoke LSP, check core y Zed. Se valido completo con `npm test`.
+- Validacion Sentinel: `npm run lint` paso con 14 warnings preexistentes y 0 errors; `npm run test:unit` paso (`294 passing`, `1 pending`) incluyendo `check:core` y `smoke:lsp`; `npm run check:zed` paso.
+- Validacion VarSense: `npm test` paso (`36 passing`) incluyendo compile, compile:tests, lint, `check:core`, `smoke:lsp`, fixtures de equivalencia y pruebas VS Code.
+- Pendiente tecnico restante: Sentinel todavia tiene reglas Glory/API acopladas a watchers/cache de VS Code (`gloryAnalyzer`, `apiEndpointAnalyzer`, indexadores de schema/islas/contratos/tipos/constantes). El LSP cubre las reglas core puras; para que absolutamente todas las reglas lleguen a CLI/LSP/Zed falta extraer providers Node/workspace de esa familia.
+
 ## Riesgos y mitigaciones
 
 - Riesgo: duplicar reglas entre CLI y VS Code. Mitigacion: VS Code debe llamar core, nunca al reves.
