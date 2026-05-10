@@ -271,6 +271,19 @@ Criterio de cierre:
 - Validacion VarSense: `npm test` paso (`36 passing`) incluyendo compile, compile:tests, lint, `check:core`, `smoke:lsp`, fixtures de equivalencia y pruebas VS Code.
 - Pendiente tecnico restante: Sentinel todavia tiene reglas Glory/API acopladas a watchers/cache de VS Code (`gloryAnalyzer`, `apiEndpointAnalyzer`, indexadores de schema/islas/contratos/tipos/constantes). El LSP cubre las reglas core puras; para que absolutamente todas las reglas lleguen a CLI/LSP/Zed falta extraer providers Node/workspace de esa familia.
 
+## Avance 2026-05-10 - cierre Glory/API, watchers y crash de fixtures
+
+- `105A-2`: Sentinel extrajo la familia Glory/API del runtime VS Code: `gloryAnalyzer`, `apiEndpointAnalyzer`, `schemaLoader`, `islandTracker`, `apiContractIndexer`, `phpConstantIndexer` y `tsTypeResolver` cargan indices desde raices inyectadas por CLI/LSP/VS Code.
+- `105A-2`: Sentinel movio los watchers reales a `src/platform/vscode/gloryAnalyzerAdapter.ts`; el provider VS Code ya no inyecta Glory/API como `extraAnalyzers`, sino que todo pasa por `core/analyzeDocument.ts`.
+- `105A-2`: Sentinel agrego `src/core/language.ts` y `src/core/workspaceRoots.ts` para compartir resolucion de lenguajes y raices sin importar la CLI ni `vscode`.
+- `105A-2`: Sentinel amplio equivalencia con fixtures PHP, Rust y React. El crash de `npm run compile` se corrigio limitando `tsconfig.json` a `src/**/*.ts`, evitando que TypeScript compile fixtures `.tsx` fuera de `rootDir`.
+- `105A-2`: Sentinel agrego CI con `npm ci`, lint, `test:unit` y `check:zed`; tambien agrego SCSS a activacion/defaults/Zed.
+- `105A-2`: VarSense completo el pendiente de Fase 2: `VariableScanner` recibe watchers por `FileWatcherProvider` y el adaptador VS Code implementa `VscodeFileWatcherProvider`.
+- `105A-2`: VarSense agrego CI con `npm ci`, `xvfb-run -a npm test` y `check:zed`.
+- Validacion Sentinel: `npm run compile`, `npm run lint` (0 errores, 11 warnings), `npm run test:unit` (`297 passing`, `1 pending`, incluye `check:core` y `smoke:lsp`) y `npm run check:zed` pasaron.
+- Validacion VarSense: `npm test` (`36 passing`, incluye compile, compile:tests, lint, `check:core`, `smoke:lsp`, equivalencia y pruebas VS Code) y `npm run check:zed` pasaron.
+- Estado global: VS Code, CLI, LSP y Zed consumen el mismo core para las familias implementadas, incluyendo Glory/API; los pendientes restantes son publicar/instalar empaquetados y seguir ampliando fixtures por cada regla nueva.
+
 ## Riesgos y mitigaciones
 
 - Riesgo: duplicar reglas entre CLI y VS Code. Mitigacion: VS Code debe llamar core, nunca al reves.

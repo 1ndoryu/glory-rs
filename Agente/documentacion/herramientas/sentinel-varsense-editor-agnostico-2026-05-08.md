@@ -10,6 +10,8 @@ El bloque `085A-3` agrego la primera CLI real de Sentinel sobre el core.
 
 El bloque `105A-1` agrego LSP y Zed a Sentinel, dejo lint operativo y valido el estado completo de VarSense.
 
+El bloque `105A-2` cerro la extraccion Glory/API de Sentinel, movio watchers a adaptadores, completo watchers core de VarSense, agrego CI y corrigio el crash de `tsc` con fixtures fuera de `src`.
+
 ## Sentinel
 
 - `src/core/analyzeDocument.ts` es la entrada core para analizar un `CoreTextDocument` sin abrir VS Code.
@@ -22,9 +24,10 @@ El bloque `105A-1` agrego LSP y Zed a Sentinel, dejo lint operativo y valido el 
 - `src/core/config.ts` centraliza defaults y overrides compartidos por CLI y LSP.
 - `integrations/zed/` registra una extension Zed minima que solo localiza y lanza `sentinel-lsp`.
 - `.zed/tasks.json` contiene tareas de ejemplo para reportes CLI desde Zed.
-- Las reglas Glory/API siguen inyectadas desde VS Code como `extraAnalyzers` porque aun dependen de workspace/watchers.
+- Las reglas Glory/API se ejecutan desde el core: los indices reciben raices de workspace por CLI/LSP/VS Code y los watchers quedaron en `src/platform/vscode/gloryAnalyzerAdapter.ts`.
 - `ruleRegistry` ya no importa `vscode`; recibe overrides por proveedor inyectado.
 - `analyzers/glory/apiFallbackRules.ts` contiene la regla pura `acceso-api-sin-fallback`, separada de `apiContractRules.ts` para que la CLI no cargue el indexador `vscode` indirectamente.
+- `tsconfig.json` limita el compile a `src/**/*.ts`; las fixtures `.tsx` de equivalencia no deben entrar al proyecto TS ni generar artefactos.
 
 ### CLI Sentinel
 
@@ -69,15 +72,16 @@ Resolucion en Zed:
 - `core/classIndexBuilder.ts` cruza clases definidas y tokens de consumo desde providers core.
 - Providers y scanner convierten documentos/rangos en el borde VS Code.
 - `services/classScanner.ts` quedo como adaptador fino sobre `ClassIndexBuilder`.
+- `services/variableScanner.ts` usa `FileWatcherProvider`; `VscodeFileWatcherProvider` queda como adaptador de eventos reales de VS Code.
 - `src/cli/index.ts`, `src/lsp/server.ts`, `scripts/smoke-lsp-stdio.mjs`, `.zed/tasks.json` e `integrations/zed/` ya existen y estan validados.
 
 ## Validacion
 
-- Sentinel: `npm run lint` (0 errores, 14 warnings preexistentes), `npm run test:unit` (`294 passing`, `1 pending`, incluye `check:core` y `smoke:lsp`) y `npm run check:zed`.
-- VarSense: `npm test` (`36 passing`, incluye compile, compile:tests, lint, `check:core`, `smoke:lsp`, equivalencia y pruebas VS Code).
+- Sentinel: `npm run compile`, `npm run lint` (0 errores, 11 warnings), `npm run test:unit` (`297 passing`, `1 pending`, incluye `check:core` y `smoke:lsp`) y `npm run check:zed`.
+- VarSense: `npm test` (`36 passing`, incluye compile, compile:tests, lint, `check:core`, `smoke:lsp`, equivalencia y pruebas VS Code) y `npm run check:zed`.
 
 ## Pendientes
 
-- Sentinel: desacoplar Glory/API/watchers internos (`gloryAnalyzer`, `apiEndpointAnalyzer`, schema/islas/contratos/tipos/constantes) y mover `vscodeAdapter.ts` a `platform/vscode` cuando la estructura se consolide.
-- VarSense: extraer watchers reales a `FileWatcherProvider` y mantener singleton solo en adaptador VS Code.
-- Equivalencia: ampliar fixtures Sentinel a familias PHP/Rust/React ademas de la fixture CSS actual.
+- Sentinel: mover `vscodeAdapter.ts` a `platform/vscode` cuando la estructura se consolide y agregar fixtures para cada regla nueva.
+- VarSense: mantener el singleton solo como adaptador VS Code y ampliar pruebas si se agregan nuevas fuentes de archivos.
+- Publicacion: empaquetar versiones VS Code/Zed y documentar versionado cuando se prepare release.
