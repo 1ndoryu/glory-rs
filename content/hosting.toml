@@ -9,6 +9,7 @@ id_field = "domain"
 depends_on = ["users"]
 
 [meta.casts]
+domain_verified_at = "timestamptz"
 
 # Hosting activo — simula un hosting comprado, provisionado y funcionando.
 # server_ip y coolify_site_name permiten que las tabs de DNS, acceso SSH
