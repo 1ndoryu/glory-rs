@@ -1,9 +1,10 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { fileURLToPath, URL } from 'node:url';
+import { colorsPlaceholderPlugin } from './vite-plugins/colors-placeholder';
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), colorsPlaceholderPlugin()],
   /* [204A-1] Aliases que replican exactamente los del frontend WordPress legacy.
    * Ver glorytemplate/App/React/tsconfig.json. */
   resolve: {

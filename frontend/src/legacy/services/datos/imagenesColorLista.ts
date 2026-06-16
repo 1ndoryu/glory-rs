@@ -2,7 +2,7 @@
  * Datos: Lista de archivos de imagen en colors/.
  * GENERADO AUTOMATICAMENTE por scripts/gen-colors-list.mjs
  * No editar manualmente. Cambios se pierden en el siguiente build.
- * Ultima generacion: 2026-04-25T00:53:12.427Z
+ * Ultima generacion: 2026-06-16T20:56:09.813Z
  */
 
 export const IMAGENES_COLOR: string[] = [
