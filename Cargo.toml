@@ -67,6 +67,9 @@ stripe_product = { package = "async-stripe-product", version = "1.0.0-rc.5", def
 stripe_types = { package = "async-stripe-types", version = "1.0.0-rc.5" }
 stripe_webhook = { package = "async-stripe-webhook", version = "1.0.0-rc.5", default-features = false, features = ["async-stripe-billing", "async-stripe-checkout", "async-stripe-core", "deserialize"] }
 
+# CLI argumentos
+clap = { version = "4", features = ["derive"] }
+
 # Crypto / hashes / IDs
 sha2 = "0.10"
 crc32fast = "1.4"

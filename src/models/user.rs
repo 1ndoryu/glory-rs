@@ -47,7 +47,7 @@ pub struct RegisterRequest {
     pub username: String,
     #[validate(email(message = "Email invalido"))]
     pub email: String,
-    #[validate(length(min = 8, message = "Contrasena minimo 8 caracteres"))]
+    #[validate(length(min = 4, message = "Contrasena minimo 4 caracteres"))]
     pub password: String,
     #[validate(length(max = 100))]
     pub nombre_visible: Option<String>,

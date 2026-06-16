@@ -56,6 +56,7 @@ pub struct FeedResponse {
     pub items: Vec<SampleSummary>,
     pub limit: i64,
     pub offset: i64,
+    pub total: i64,
     pub hay_mas: bool,
 }
 
@@ -167,10 +168,20 @@ pub async fn get_feed(
             &sample_ids,
         )
         .await?;
+        /* [166B-1] Total activo para el contador del frontend.
+         * En modo recomendador no hay filtros, así que contamos todos los samples
+         * activos públicos de una pasada. */
+        let total: i64 = sqlx::query_scalar(
+            "SELECT COUNT(*) FROM samples WHERE eliminado_en IS NULL AND estado = 'activo' AND mostrar_en_comunidad = TRUE",
+        )
+        .fetch_one(&state.pool)
+        .await?;
+
         return Ok(Json(FeedResponse {
             items,
             limit: i64::try_from(limit).unwrap_or(DEFAULT_LIMIT),
             offset: i64::try_from(offset).unwrap_or(0),
+            total,
             hay_mas,
         }));
     }
@@ -214,6 +225,7 @@ pub async fn get_feed(
         items,
         limit: i64::try_from(limit).unwrap_or(DEFAULT_LIMIT),
         offset: i64::try_from(offset).unwrap_or(0),
+        total,
         hay_mas,
     }))
 }

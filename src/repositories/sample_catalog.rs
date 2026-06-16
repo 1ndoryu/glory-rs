@@ -356,34 +356,34 @@ impl SampleRepository {
                 s.relacion_sampleo_id,
 
                 -- [166A-1] QQ51: Datos enriquecidos de cancion origen
-                co.titulo AS cancion_origen_titulo,
-                co.slug AS cancion_origen_slug,
-                a.nombre AS cancion_origen_artista,
-                co.whosampled_url AS cancion_origen_whosampled_url,
-                co.bpm::smallint AS cancion_origen_bpm,
+                co.titulo AS \"cancion_origen_titulo?\",
+                co.slug AS \"cancion_origen_slug?\",
+                a.nombre AS \"cancion_origen_artista?\",
+                co.whosampled_url AS \"cancion_origen_whosampled_url?\",
+                co.bpm::smallint AS \"cancion_origen_bpm?\",
 
                 -- [166A-1] QQ51: Datos de relacion sampleo
-                rs.whosampled_id AS relacion_sampleo_whosampled_id,
+                rs.whosampled_id AS \"relacion_sampleo_whosampled_id?\",
 
                 -- [166A-1] QQ117: Extraccion via cola_extraccion_samples (ultima fila)
-                ces.youtube_id AS extraccion_youtube_id,
-                ces.spotify_id AS extraccion_spotify_id,
-                ces.timing_inicio_seg::int AS extraccion_timing_inicio_seg,
-                ces.bpm_detectado::int AS extraccion_bpm_detectado,
-                ces.duracion_compas_seg::float8 AS extraccion_duracion_compas_seg,
-                ces.compas_inicio_seg::float8 AS extraccion_compas_inicio_seg,
-                ces.compas_fin_seg::float8 AS extraccion_compas_fin_seg,
-                ces.lado AS extraccion_lado,
-                ces.estado AS extraccion_estado,
-                ces.ruta_audio_extraido AS extraccion_ruta_audio,
-                ces.ruta_audio_completo AS extraccion_ruta_audio_completo,
+                ces.youtube_id AS \"extraccion_youtube_id?\",
+                ces.spotify_id AS \"extraccion_spotify_id?\",
+                ces.timing_inicio_seg::int AS \"extraccion_timing_inicio_seg?\",
+                ces.bpm_detectado::int AS \"extraccion_bpm_detectado?\",
+                ces.duracion_compas_seg::float8 AS \"extraccion_duracion_compas_seg?\",
+                ces.compas_inicio_seg::float8 AS \"extraccion_compas_inicio_seg?\",
+                ces.compas_fin_seg::float8 AS \"extraccion_compas_fin_seg?\",
+                ces.lado AS \"extraccion_lado?\",
+                ces.estado AS \"extraccion_estado?\",
+                ces.ruta_audio_extraido AS \"extraccion_ruta_audio?\",
+                ces.ruta_audio_completo AS \"extraccion_ruta_audio_completo?\",
                 ces.metadata_extraccion AS \"extraccion_metadata?: serde_json::Value\",
 
                 -- [166A-1] Slug/album de canciones fuente y destino via relaciones_sample
-                cf.slug AS extraccion_fuente_slug,
-                cf.album AS extraccion_fuente_album,
-                cd.slug AS extraccion_destino_slug,
-                cd.album AS extraccion_destino_album,
+                cf.slug AS \"extraccion_fuente_slug?\",
+                cf.album AS \"extraccion_fuente_album?\",
+                cd.slug AS \"extraccion_destino_slug?\",
+                cd.album AS \"extraccion_destino_album?\",
 
                 u.id AS \"creator_id!\",
                 u.username AS \"creator_username!\",
@@ -458,34 +458,36 @@ impl SampleRepository {
                 s.relacion_sampleo_id,
 
                 -- [166A-1] QQ51: Datos enriquecidos de cancion origen
-                co.titulo AS cancion_origen_titulo,
-                co.slug AS cancion_origen_slug,
-                a.nombre AS cancion_origen_artista,
-                co.whosampled_url AS cancion_origen_whosampled_url,
-                co.bpm::smallint AS cancion_origen_bpm,
+                co.titulo AS \"cancion_origen_titulo?\",
+                co.slug AS \"cancion_origen_slug?\",
+                a.nombre AS \"cancion_origen_artista?\",
+                co.whosampled_url AS \"cancion_origen_whosampled_url?\",
+                co.bpm::smallint AS \"cancion_origen_bpm?\",
 
                 -- [166A-1] QQ51: Datos de relacion sampleo
-                rs.whosampled_id AS relacion_sampleo_whosampled_id,
+                rs.whosampled_id AS \"relacion_sampleo_whosampled_id?\",
 
                 -- [166A-1] QQ117: Extraccion via cola_extraccion_samples (ultima fila)
-                ces.youtube_id AS extraccion_youtube_id,
-                ces.spotify_id AS extraccion_spotify_id,
-                ces.timing_inicio_seg::int AS extraccion_timing_inicio_seg,
-                ces.bpm_detectado::int AS extraccion_bpm_detectado,
-                ces.duracion_compas_seg::float8 AS extraccion_duracion_compas_seg,
-                ces.compas_inicio_seg::float8 AS extraccion_compas_inicio_seg,
-                ces.compas_fin_seg::float8 AS extraccion_compas_fin_seg,
-                ces.lado AS extraccion_lado,
-                ces.estado AS extraccion_estado,
-                ces.ruta_audio_extraido AS extraccion_ruta_audio,
-                ces.ruta_audio_completo AS extraccion_ruta_audio_completo,
+                ces.youtube_id AS \"extraccion_youtube_id?\",
+                ces.spotify_id AS \"extraccion_spotify_id?\",
+                ces.timing_inicio_seg::int AS \"extraccion_timing_inicio_seg?\",
+                ces.bpm_detectado::int AS \"extraccion_bpm_detectado?\",
+                ces.duracion_compas_seg::float8 AS \"extraccion_duracion_compas_seg?\",
+                ces.compas_inicio_seg::float8 AS \"extraccion_compas_inicio_seg?\",
+                ces.compas_fin_seg::float8 AS \"extraccion_compas_fin_seg?\",
+                ces.lado AS \"extraccion_lado?\",
+                ces.estado AS \"extraccion_estado?\",
+                ces.ruta_audio_extraido AS \"extraccion_ruta_audio?\",
+                ces.ruta_audio_completo AS \"extraccion_ruta_audio_completo?\",
+
+                -- [166A-1] QQ117: Extraccion via cola_extraccion_samples (ultima fila)
                 ces.metadata_extraccion AS \"extraccion_metadata?: serde_json::Value\",
 
                 -- [166A-1] Slug/album de canciones fuente y destino via relaciones_sample
-                cf.slug AS extraccion_fuente_slug,
-                cf.album AS extraccion_fuente_album,
-                cd.slug AS extraccion_destino_slug,
-                cd.album AS extraccion_destino_album,
+                cf.slug AS \"extraccion_fuente_slug?\",
+                cf.album AS \"extraccion_fuente_album?\",
+                cd.slug AS \"extraccion_destino_slug?\",
+                cd.album AS \"extraccion_destino_album?\",
 
                 u.id AS \"creator_id!\",
                 u.username AS \"creator_username!\",

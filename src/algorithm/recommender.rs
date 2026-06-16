@@ -67,6 +67,11 @@ const CACHE_PREFIX_STALE: &str = "kamples_feed_stale_";
 const WARM_LOCK_PREFIX: &str = "kamples_warm_feed_";
 const PAGINAS_BULK: usize = 3;
 
+/* [166A-X] Umbral de samples activos para activar cache distribuido.
+ * Por debajo (entorno local/pruebas) se salta Redis para que los
+ * samples nuevos aparezcan inmediatamente sin refresh manual. */
+const MIN_CACHE_SAMPLES: i64 = 200;
+
 static MEMORY_CACHE: LazyLock<Arc<DashMap<String, (Vec<RankedSample>, Instant)>>> =
     LazyLock::new(|| Arc::new(DashMap::new()));
 static MEMORY_LOCKS: LazyLock<Arc<DashMap<String, Instant>>> =
@@ -193,32 +198,39 @@ impl RecommenderService {
         /* [174A-57] Profiling fino para usuario QA. No-op para el resto. */
         crate::services::algo_timing::ALGO_TIMING.start(user_id);
 
-        let cache_key = fresh_cache_key(user_id, limit, offset);
-        if let Some(hit) = cache_get(&redis, &cache_key).await? {
-            debug!(target: "kamples.feed", "cache hit fresh: {}", cache_key);
-            crate::services::algo_timing::ALGO_TIMING.mark(user_id, "cache_fresh_hit");
-            crate::services::algo_timing::ALGO_TIMING.save(
-                user_id,
-                serde_json::json!({"source": "cache_fresh", "items": hit.len()}),
-            );
-            return Ok(hit);
-        }
-        crate::services::algo_timing::ALGO_TIMING.mark(user_id, "cache_fresh_miss");
+        /* [166A-X] Con pocos samples (local/pruebas) saltamos el cache
+         * para que el sample nuevo aparezca sin refresh manual. */
+        let total_active = CandidatesService::count_active(&pool, &redis).await?;
+        let usar_cache = total_active >= MIN_CACHE_SAMPLES;
 
-        let stale_key = stale_cache_key(user_id, limit, offset);
-        if let Some(stale) = cache_get(&redis, &stale_key).await? {
-            debug!(target: "kamples.feed", "cache hit stale: {}", stale_key);
-            crate::services::algo_timing::ALGO_TIMING.mark(user_id, "cache_stale_hit");
-            spawn_warm(pool.clone(), redis.clone(), user_id, limit, offset, *config);
-            crate::services::algo_timing::ALGO_TIMING.save(
-                user_id,
-                serde_json::json!({"source": "cache_stale", "items": stale.len()}),
-            );
-            return Ok(stale);
-        }
-        crate::services::algo_timing::ALGO_TIMING.mark(user_id, "cache_stale_miss");
+        if usar_cache {
+            let cache_key = fresh_cache_key(user_id, limit, offset);
+            if let Some(hit) = cache_get(&redis, &cache_key).await? {
+                debug!(target: "kamples.feed", "cache hit fresh: {}", cache_key);
+                crate::services::algo_timing::ALGO_TIMING.mark(user_id, "cache_fresh_hit");
+                crate::services::algo_timing::ALGO_TIMING.save(
+                    user_id,
+                    serde_json::json!({"source": "cache_fresh", "items": hit.len()}),
+                );
+                return Ok(hit);
+            }
+            crate::services::algo_timing::ALGO_TIMING.mark(user_id, "cache_fresh_miss");
 
-        let items = compute_and_cache(&pool, &redis, user_id, limit, offset, config).await?;
+            let stale_key = stale_cache_key(user_id, limit, offset);
+            if let Some(stale) = cache_get(&redis, &stale_key).await? {
+                debug!(target: "kamples.feed", "cache hit stale: {}", stale_key);
+                crate::services::algo_timing::ALGO_TIMING.mark(user_id, "cache_stale_hit");
+                spawn_warm(pool.clone(), redis.clone(), user_id, limit, offset, *config);
+                crate::services::algo_timing::ALGO_TIMING.save(
+                    user_id,
+                    serde_json::json!({"source": "cache_stale", "items": stale.len()}),
+                );
+                return Ok(stale);
+            }
+            crate::services::algo_timing::ALGO_TIMING.mark(user_id, "cache_stale_miss");
+        }
+
+        let items = compute_and_cache(&pool, &redis, user_id, limit, offset, config, usar_cache).await?;
         crate::services::algo_timing::ALGO_TIMING.mark(user_id, "compute_and_cache");
         crate::services::algo_timing::ALGO_TIMING.save(
             user_id,
@@ -342,6 +354,7 @@ async fn compute_and_cache(
     limit: usize,
     offset: usize,
     config: &RecommenderConfig,
+    guardar_cache: bool,
 ) -> Result<Vec<RankedSample>, AppError> {
     let max_bulk_offset = limit * (PAGINAS_BULK - 1);
     let usar_bulk = offset <= max_bulk_offset;
@@ -358,20 +371,22 @@ async fn compute_and_cache(
         if page_offset == offset {
             response.clone_from(&page);
         }
-        cache_set(
-            redis,
-            &fresh_cache_key(user_id, limit, page_offset),
-            &page,
-            fresh_ttl(config, page_offset),
-        )
-        .await?;
-        cache_set(
-            redis,
-            &stale_cache_key(user_id, limit, page_offset),
-            &page,
-            config.stale_ttl,
-        )
-        .await?;
+        if guardar_cache {
+            cache_set(
+                redis,
+                &fresh_cache_key(user_id, limit, page_offset),
+                &page,
+                fresh_ttl(config, page_offset),
+            )
+            .await?;
+            cache_set(
+                redis,
+                &stale_cache_key(user_id, limit, page_offset),
+                &page,
+                config.stale_ttl,
+            )
+            .await?;
+        }
     }
     Ok(response)
 }
@@ -1260,7 +1275,8 @@ fn spawn_warm(
                 return;
             }
         }
-        let result = compute_and_cache(&pool, &redis, user_id, limit, offset, &config).await;
+        /* Warm async siempre guarda en cache (ya supero el umbral). */
+        let result = compute_and_cache(&pool, &redis, user_id, limit, offset, &config, true).await;
         if let Err(error) = result {
             warn!(target: "kamples.feed", "warm async fallo user={user_id} limit={limit} offset={offset}: {error}");
         }
