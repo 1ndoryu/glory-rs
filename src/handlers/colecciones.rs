@@ -537,7 +537,7 @@ fn aggregate_coleccion_context(
     }
 
     let mut tag_vec: Vec<(&str, usize)> = tag_counts.into_iter().collect();
-    tag_vec.sort_by(|a, b| b.1.cmp(&a.1));
+    tag_vec.sort_by_key(|a| std::cmp::Reverse(a.1));
     let top_tags: Vec<String> = tag_vec
         .into_iter()
         .take(SUGERENCIAS_TOP_TAGS)

@@ -104,8 +104,8 @@ export interface Sample {
     /* QQ51: Info de origen — cancion y relacion de sampleo si es un recorte */
     cancionOrigenId?: number | null;
     relacionSampleoId?: number | null;
-    /* QQ79: Datos enriquecidos de la cancion de origen */
-    cancionOrigen?: { titulo: string; slug: string } | null;
+    /* [166A-1] QQ51: Datos enriquecidos de canción origen (LEFT JOIN canciones) */
+    cancionOrigen?: CancionOrigenInspector | null;
     /* [173A-5] Coleccion original del creador que contiene este sample, si existe
      * [183A-55] imagenUrl agregado para portada en panel lateral */
     coleccionOriginal?: { id: number; nombre: string; slug: string | null; imagenUrl?: string | null } | null;
@@ -149,6 +149,17 @@ export interface ExtraccionSample {
     fuenteAlbum: string | null;
     destinoSlug: string | null;
     destinoAlbum: string | null;
+}
+
+/* [166A-1] QQ51: Datos enriquecidos de canción origen para el inspector.
+ * Viene del LEFT JOIN s.cancion_origen_id → canciones + artistas_musicales. */
+export interface CancionOrigenInspector {
+    id: number;
+    titulo: string;
+    slug: string;
+    artista: string | null;
+    whosampledUrl: string | null;
+    bpm: number | null;
 }
 
 /* Tipos de reaccion — derivado del schema (CHECK en tabla likes) */

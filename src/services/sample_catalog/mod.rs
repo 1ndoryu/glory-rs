@@ -2,9 +2,9 @@ use validator::Validate;
 
 use crate::errors::AppError;
 use crate::models::{
-    DeleteSampleResponse, ListSamplesQuery, ListSamplesResponse, SampleCreatorSummary,
-    SampleDetailResponse, SampleSummary, SamplesPagination, SimilarSamplesQuery,
-    SimilarSamplesResponse, UpdateSampleRequest,
+    CancionOrigenResumen, DeleteSampleResponse, ExtraccionSampleResponse, ListSamplesQuery,
+    ListSamplesResponse, SampleCreatorSummary, SampleDetailResponse, SampleSummary,
+    SamplesPagination, SimilarSamplesQuery, SimilarSamplesResponse, UpdateSampleRequest,
 };
 use crate::repositories::{
     OwnedSampleRecord, ReportRepository, SampleCatalogDetailRecord, SampleCatalogSummaryRecord,
@@ -281,12 +281,103 @@ pub(crate) fn build_sample_summary(
     }
 }
 
+/* [clippy] Refactorizar no aporta valor: es mapeo puro record->response. */
+#[allow(clippy::too_many_lines)]
 fn build_sample_detail(
     record: SampleCatalogDetailRecord,
     public_base_url: Option<&str>,
     current_user_id: Option<i32>,
 ) -> SampleDetailResponse {
     let is_owner = current_user_id.is_some_and(|user_id| user_id == record.creator_id);
+
+    /* [166A-1] QQ51: Construir cancion_origen enriquecido si hay datos */
+    let cancion_origen = record.cancion_origen_id.and_then(|_| {
+        let titulo = record.cancion_origen_titulo.as_deref()?;
+        let slug = record.cancion_origen_slug.as_deref()?;
+        Some(CancionOrigenResumen {
+            id: record.cancion_origen_id?,
+            titulo: titulo.to_string(),
+            slug: slug.to_string(),
+            artista: record.cancion_origen_artista.clone(),
+            whosampled_url: record.cancion_origen_whosampled_url.clone(),
+            bpm: record.cancion_origen_bpm,
+        })
+    });
+
+    /* [166A-1] QQ117: Construir extraccion si existe al menos una fila */
+    let has_extraccion = record.extraccion_youtube_id.is_some()
+        || record.extraccion_bpm_detectado.is_some()
+        || record.extraccion_estado.is_some();
+    let extraccion = if has_extraccion {
+        /* QQ23: Extraer campos del JSONB metadata_extraccion */
+        let (
+            fuente_titulo, fuente_artista,
+            dest_titulo, dest_artista,
+            tipo_elemento, recorte_por_compas, formato,
+            descarga_metodo,
+            descarga_fuente_url, descarga_fuente_titulo, descarga_fuente_artista,
+            votos_total, duracion_extraida, tamano_bytes
+        ) = record.extraccion_metadata.as_ref()
+            .and_then(|v| v.as_object())
+            .map_or((None, None, None, None, None, None, None, None, None, None, None, None, None, None), |obj| {
+                #[allow(clippy::cast_possible_truncation, clippy::redundant_closure_for_method_calls)]
+                let i = |k: &str| obj.get(k).and_then(|v| v.as_i64()).map(|n| n as i32);
+                (
+                    obj.get("fuente_titulo").and_then(|v| v.as_str()).map(std::string::ToString::to_string),
+                    obj.get("fuente_artista").and_then(|v| v.as_str()).map(std::string::ToString::to_string),
+                    obj.get("destino_titulo").and_then(|v| v.as_str()).map(std::string::ToString::to_string),
+                    obj.get("destino_artista").and_then(|v| v.as_str()).map(std::string::ToString::to_string),
+                    obj.get("tipo_elemento").and_then(|v| v.as_str()).map(std::string::ToString::to_string),
+                    obj.get("recorte_por_compas").and_then(|v| v.as_str()).map(std::string::ToString::to_string),
+                    obj.get("formato").and_then(|v| v.as_str()).map(std::string::ToString::to_string),
+                    obj.get("descarga_metodo").and_then(|v| v.as_str()).map(std::string::ToString::to_string),
+                    obj.get("descarga_fuente_url").and_then(|v| v.as_str()).map(std::string::ToString::to_string),
+                    obj.get("descarga_fuente_titulo").and_then(|v| v.as_str()).map(std::string::ToString::to_string),
+                    obj.get("descarga_fuente_artista").and_then(|v| v.as_str()).map(std::string::ToString::to_string),
+                    i("votos_total"),
+                    obj.get("duracion").and_then(serde_json::Value::as_f64),
+                    i("tamano_bytes"),
+                )
+            });
+
+        Some(ExtraccionSampleResponse {
+            youtube_id: record.extraccion_youtube_id.clone(),
+            spotify_id: record.extraccion_spotify_id.clone(),
+            timing_inicio_seg: record.extraccion_timing_inicio_seg,
+            bpm_detectado: record.extraccion_bpm_detectado,
+            duracion_compas_seg: record.extraccion_duracion_compas_seg,
+            compas_inicio_seg: record.extraccion_compas_inicio_seg,
+            compas_fin_seg: record.extraccion_compas_fin_seg,
+            lado: record.extraccion_lado.clone(),
+            estado: record.extraccion_estado.clone(),
+            ruta_audio_extraido: record.extraccion_ruta_audio.clone(),
+            tiene_audio_completo: record.extraccion_ruta_audio_completo.is_some(),
+            fuente_url: descarga_fuente_url,
+            fuente_titulo: descarga_fuente_titulo,
+            fuente_artista: descarga_fuente_artista,
+            descarga_metodo,
+            sampleo_fuente_titulo: fuente_titulo,
+            sampleo_fuente_artista: fuente_artista,
+            sampleo_destino_titulo: dest_titulo,
+            sampleo_destino_artista: dest_artista,
+            fuente_slug: record.extraccion_fuente_slug.clone(),
+            fuente_album: record.extraccion_fuente_album.clone(),
+            destino_slug: record.extraccion_destino_slug.clone(),
+            destino_album: record.extraccion_destino_album.clone(),
+            votos_total,
+            tipo_elemento,
+            recorte_por_compas,
+            duracion_extraida,
+            formato_extraido: formato,
+            tamano_bytes: tamano_bytes.map(i64::from),
+        })
+    } else {
+        None
+    };
+
+    /* [166A-1] Construir URL de WhoSampled desde whosampled_id */
+    let whosampled_url = record.relacion_sampleo_whosampled_id
+        .map(|id| format!("https://www.whosampled.com/sample/{id}/"));
 
     SampleDetailResponse {
         id: record.id,
@@ -332,6 +423,9 @@ fn build_sample_detail(
         created_at: record.created_at,
         cancion_origen_id: record.cancion_origen_id,
         relacion_sampleo_id: record.relacion_sampleo_id,
+        cancion_origen,
+        extraccion,
+        whosampled_url,
         creador: build_creator_summary(
             record.creator_id,
             record.creator_username,

@@ -8,8 +8,8 @@ use tokio::time::{sleep, Duration};
  * ya pasó: las marca como `estado='pendiente'` para que el scraper Python las
  * recoja en su próximo poll. Reemplaza al cron PHP `process_scraping_queue`. */
 
-const CHECK_INTERVAL: Duration = Duration::from_secs(900);
-const ERROR_INTERVAL: Duration = Duration::from_secs(120);
+const CHECK_INTERVAL: Duration = Duration::from_mins(15);
+const ERROR_INTERVAL: Duration = Duration::from_mins(2);
 
 pub fn spawn_scraping_queue_worker(pool: &PgPool) -> JoinHandle<()> {
     let pool = pool.clone();

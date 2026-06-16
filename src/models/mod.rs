@@ -58,10 +58,10 @@ pub use report::{
     LegalReportDetails, LegalReportResponse, LegalReportType, LegalRightType, ReportResponse,
 };
 pub use sample::{
-    CheckDuplicateRequest, CheckDuplicateResponse, DeleteSampleResponse, ListSamplesQuery,
-    ListSamplesResponse, SampleCreatorSummary, SampleDetailResponse, SampleSummary,
-    SamplesPagination, SimilarSamplesQuery, SimilarSamplesResponse, UpdateSampleRequest,
-    UploadSampleRequestDoc, UploadSampleResponse,
+    CancionOrigenResumen, CheckDuplicateRequest, CheckDuplicateResponse, DeleteSampleResponse,
+    ExtraccionSampleResponse, ListSamplesQuery, ListSamplesResponse, SampleCreatorSummary,
+    SampleDetailResponse, SampleSummary, SamplesPagination, SimilarSamplesQuery,
+    SimilarSamplesResponse, UpdateSampleRequest, UploadSampleRequestDoc, UploadSampleResponse,
 };
 pub use search::{
     GlobalSearchQuery, GlobalSearchResponse, LegacyQuickSearchCollectionResult,

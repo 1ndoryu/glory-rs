@@ -118,8 +118,7 @@ pub const fn kamples_plan_config(plan: KamplesPlanId) -> &'static KamplesPlanCon
 
 pub fn kamples_plan_config_from_str(plan: &str) -> &'static KamplesPlanConfig {
     plan.parse::<KamplesPlanId>()
-        .map(kamples_plan_config)
-        .unwrap_or(&FREE_PLAN)
+        .map_or(&FREE_PLAN, kamples_plan_config)
 }
 
 pub fn calculate_sample_revenue_share(

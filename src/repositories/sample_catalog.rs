@@ -161,6 +161,37 @@ pub struct SampleCatalogDetailRecord {
     pub created_at: Option<DateTime<Utc>>,
     pub cancion_origen_id: Option<i32>,
     pub relacion_sampleo_id: Option<i32>,
+
+    /* [166A-1] Datos enriquecidos de cancion origen via LEFT JOIN canciones */
+    pub cancion_origen_titulo: Option<String>,
+    pub cancion_origen_slug: Option<String>,
+    pub cancion_origen_artista: Option<String>,
+    pub cancion_origen_whosampled_url: Option<String>,
+    pub cancion_origen_bpm: Option<i16>,
+
+    /* [166A-1] Datos de relacion sampleo via LEFT JOIN relaciones_sample */
+    pub relacion_sampleo_whosampled_id: Option<i32>,
+
+    /* [166A-1] Datos de extraccion via LEFT JOIN LATERAL cola_extraccion_samples */
+    pub extraccion_youtube_id: Option<String>,
+    pub extraccion_spotify_id: Option<String>,
+    pub extraccion_timing_inicio_seg: Option<i32>,
+    pub extraccion_bpm_detectado: Option<i32>,
+    pub extraccion_duracion_compas_seg: Option<f64>,
+    pub extraccion_compas_inicio_seg: Option<f64>,
+    pub extraccion_compas_fin_seg: Option<f64>,
+    pub extraccion_lado: Option<String>,
+    pub extraccion_estado: Option<String>,
+    pub extraccion_ruta_audio: Option<String>,
+    pub extraccion_ruta_audio_completo: Option<String>,
+    pub extraccion_metadata: Option<serde_json::Value>,
+
+    /* [166A-1] Slug/album de canciones fuente/destino via relaciones_sample -> canciones */
+    pub extraccion_fuente_slug: Option<String>,
+    pub extraccion_fuente_album: Option<String>,
+    pub extraccion_destino_slug: Option<String>,
+    pub extraccion_destino_album: Option<String>,
+
     pub creator_id: i32,
     pub creator_username: String,
     pub creator_nombre_visible: Option<String>,
@@ -323,6 +354,37 @@ impl SampleRepository {
                 s.created_at,
                 s.cancion_origen_id,
                 s.relacion_sampleo_id,
+
+                -- [166A-1] QQ51: Datos enriquecidos de cancion origen
+                co.titulo AS cancion_origen_titulo,
+                co.slug AS cancion_origen_slug,
+                a.nombre AS cancion_origen_artista,
+                co.whosampled_url AS cancion_origen_whosampled_url,
+                co.bpm::smallint AS cancion_origen_bpm,
+
+                -- [166A-1] QQ51: Datos de relacion sampleo
+                rs.whosampled_id AS relacion_sampleo_whosampled_id,
+
+                -- [166A-1] QQ117: Extraccion via cola_extraccion_samples (ultima fila)
+                ces.youtube_id AS extraccion_youtube_id,
+                ces.spotify_id AS extraccion_spotify_id,
+                ces.timing_inicio_seg::int AS extraccion_timing_inicio_seg,
+                ces.bpm_detectado::int AS extraccion_bpm_detectado,
+                ces.duracion_compas_seg::float8 AS extraccion_duracion_compas_seg,
+                ces.compas_inicio_seg::float8 AS extraccion_compas_inicio_seg,
+                ces.compas_fin_seg::float8 AS extraccion_compas_fin_seg,
+                ces.lado AS extraccion_lado,
+                ces.estado AS extraccion_estado,
+                ces.ruta_audio_extraido AS extraccion_ruta_audio,
+                ces.ruta_audio_completo AS extraccion_ruta_audio_completo,
+                ces.metadata_extraccion AS \"extraccion_metadata?: serde_json::Value\",
+
+                -- [166A-1] Slug/album de canciones fuente y destino via relaciones_sample
+                cf.slug AS extraccion_fuente_slug,
+                cf.album AS extraccion_fuente_album,
+                cd.slug AS extraccion_destino_slug,
+                cd.album AS extraccion_destino_album,
+
                 u.id AS \"creator_id!\",
                 u.username AS \"creator_username!\",
                 u.nombre_visible AS \"creator_nombre_visible?\",
@@ -330,6 +392,19 @@ impl SampleRepository {
                 COALESCE(u.verificado, FALSE) AS \"creator_verificado!\"
              FROM samples s
              INNER JOIN usuarios_ext u ON u.id = s.creador_id
+             -- [166A-1] QQ51: LEFT JOINs para datos enriquecidos
+             LEFT JOIN canciones co ON co.id = s.cancion_origen_id
+             LEFT JOIN artistas_musicales a ON a.id = co.artista_id
+             LEFT JOIN relaciones_sample rs ON rs.id = s.relacion_sampleo_id
+             LEFT JOIN canciones cf ON cf.id = rs.cancion_fuente_id
+             LEFT JOIN canciones cd ON cd.id = rs.cancion_destino_id
+             -- [166A-1] QQ117: Left join lateral para traer la ultima fila de extraccion
+             LEFT JOIN LATERAL (
+                 SELECT * FROM cola_extraccion_samples
+                 WHERE sample_id = s.id
+                 ORDER BY created_at DESC
+                 LIMIT 1
+             ) ces ON TRUE
              WHERE s.eliminado_en IS NULL
                AND (LOWER(s.slug) = LOWER($1) OR s.id_corto = $1)
              ORDER BY CASE WHEN LOWER(s.slug) = LOWER($1) THEN 0 ELSE 1 END, s.id DESC
@@ -381,6 +456,37 @@ impl SampleRepository {
                 s.created_at,
                 s.cancion_origen_id,
                 s.relacion_sampleo_id,
+
+                -- [166A-1] QQ51: Datos enriquecidos de cancion origen
+                co.titulo AS cancion_origen_titulo,
+                co.slug AS cancion_origen_slug,
+                a.nombre AS cancion_origen_artista,
+                co.whosampled_url AS cancion_origen_whosampled_url,
+                co.bpm::smallint AS cancion_origen_bpm,
+
+                -- [166A-1] QQ51: Datos de relacion sampleo
+                rs.whosampled_id AS relacion_sampleo_whosampled_id,
+
+                -- [166A-1] QQ117: Extraccion via cola_extraccion_samples (ultima fila)
+                ces.youtube_id AS extraccion_youtube_id,
+                ces.spotify_id AS extraccion_spotify_id,
+                ces.timing_inicio_seg::int AS extraccion_timing_inicio_seg,
+                ces.bpm_detectado::int AS extraccion_bpm_detectado,
+                ces.duracion_compas_seg::float8 AS extraccion_duracion_compas_seg,
+                ces.compas_inicio_seg::float8 AS extraccion_compas_inicio_seg,
+                ces.compas_fin_seg::float8 AS extraccion_compas_fin_seg,
+                ces.lado AS extraccion_lado,
+                ces.estado AS extraccion_estado,
+                ces.ruta_audio_extraido AS extraccion_ruta_audio,
+                ces.ruta_audio_completo AS extraccion_ruta_audio_completo,
+                ces.metadata_extraccion AS \"extraccion_metadata?: serde_json::Value\",
+
+                -- [166A-1] Slug/album de canciones fuente y destino via relaciones_sample
+                cf.slug AS extraccion_fuente_slug,
+                cf.album AS extraccion_fuente_album,
+                cd.slug AS extraccion_destino_slug,
+                cd.album AS extraccion_destino_album,
+
                 u.id AS \"creator_id!\",
                 u.username AS \"creator_username!\",
                 u.nombre_visible AS \"creator_nombre_visible?\",
@@ -388,6 +494,19 @@ impl SampleRepository {
                 COALESCE(u.verificado, FALSE) AS \"creator_verificado!\"
              FROM samples s
              INNER JOIN usuarios_ext u ON u.id = s.creador_id
+             -- [166A-1] QQ51: LEFT JOINs para datos enriquecidos
+             LEFT JOIN canciones co ON co.id = s.cancion_origen_id
+             LEFT JOIN artistas_musicales a ON a.id = co.artista_id
+             LEFT JOIN relaciones_sample rs ON rs.id = s.relacion_sampleo_id
+             LEFT JOIN canciones cf ON cf.id = rs.cancion_fuente_id
+             LEFT JOIN canciones cd ON cd.id = rs.cancion_destino_id
+             -- [166A-1] QQ117: Left join lateral para traer la ultima fila de extraccion
+             LEFT JOIN LATERAL (
+                 SELECT * FROM cola_extraccion_samples
+                 WHERE sample_id = s.id
+                 ORDER BY created_at DESC
+                 LIMIT 1
+             ) ces ON TRUE
              WHERE s.id IN (
                  SELECT id
                  FROM samples

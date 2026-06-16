@@ -23,7 +23,7 @@ const MAX_PIPELINE_CONCURRENCY: usize = 2;
 const INSPECT_TIMEOUT: Duration = Duration::from_secs(30);
 const BPM_TIMEOUT: Duration = Duration::from_secs(20);
 const KEY_TIMEOUT: Duration = Duration::from_secs(20);
-const MP3_TIMEOUT: Duration = Duration::from_secs(60);
+const MP3_TIMEOUT: Duration = Duration::from_mins(1);
 static AUDIO_PIPELINE_SEMAPHORE: Semaphore = Semaphore::const_new(MAX_PIPELINE_CONCURRENCY);
 const MUSIC_KEY_LABELS: [&str; 12] = [
     "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B",

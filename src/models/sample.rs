@@ -163,6 +163,59 @@ pub struct SimilarSamplesResponse {
     pub data: Vec<SampleSummary>,
 }
 
+/* [166A-1] QQ51: Datos enriquecidos de canción origen para un sample.
+ * Se popula via LEFT JOIN con canciones + artistas_musicales.
+ * Solo presente si el sample es un recorte (cancion_origen_id != NULL). */
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct CancionOrigenResumen {
+    pub id: i32,
+    pub titulo: String,
+    pub slug: String,
+    pub artista: Option<String>,
+    pub whosampled_url: Option<String>,
+    pub bpm: Option<i16>,
+}
+
+/* [166A-1] QQ117: Metadata de extracción para un sample.
+ * Se popula via LEFT JOIN LATERAL con cola_extraccion_samples.
+ * Contiene datos de la fuente (YouTube/Spotify), timestamps de corte,
+ * BPM detectado y los campos QQ23 del JSONB metadata_extraccion. */
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ExtraccionSampleResponse {
+    pub youtube_id: Option<String>,
+    pub spotify_id: Option<String>,
+    pub timing_inicio_seg: Option<i32>,
+    pub bpm_detectado: Option<i32>,
+    pub duracion_compas_seg: Option<f64>,
+    pub compas_inicio_seg: Option<f64>,
+    pub compas_fin_seg: Option<f64>,
+    pub lado: Option<String>,
+    pub estado: Option<String>,
+    pub ruta_audio_extraido: Option<String>,
+    pub tiene_audio_completo: bool,
+    /* QQ23: Campos extraidos del JSONB metadata_extraccion */
+    pub fuente_url: Option<String>,
+    pub fuente_titulo: Option<String>,
+    pub fuente_artista: Option<String>,
+    pub descarga_metodo: Option<String>,
+    pub sampleo_fuente_titulo: Option<String>,
+    pub sampleo_fuente_artista: Option<String>,
+    pub sampleo_destino_titulo: Option<String>,
+    pub sampleo_destino_artista: Option<String>,
+    pub fuente_slug: Option<String>,
+    pub fuente_album: Option<String>,
+    pub destino_slug: Option<String>,
+    pub destino_album: Option<String>,
+    pub votos_total: Option<i32>,
+    pub tipo_elemento: Option<String>,
+    pub recorte_por_compas: Option<String>,
+    pub duracion_extraida: Option<f64>,
+    pub formato_extraido: Option<String>,
+    pub tamano_bytes: Option<i64>,
+}
+
 /// Respuesta de `GET /api/samples/{slug}` y `GET /api/samples/random`.
 #[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 #[allow(clippy::struct_excessive_bools)]
@@ -206,6 +259,19 @@ pub struct SampleDetailResponse {
     pub created_at: Option<chrono::DateTime<chrono::Utc>>,
     pub cancion_origen_id: Option<i32>,
     pub relacion_sampleo_id: Option<i32>,
+
+    /* [166A-1] QQ51: Datos enriquecidos de canción origen */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cancion_origen: Option<CancionOrigenResumen>,
+
+    /* [166A-1] QQ117: Metadata de extracción */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub extraccion: Option<ExtraccionSampleResponse>,
+
+    /* [166A-1] URL de WhoSampled construida desde relaciones_sample.whosampled_id */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub whosampled_url: Option<String>,
+
     pub creador: SampleCreatorSummary,
 }
 

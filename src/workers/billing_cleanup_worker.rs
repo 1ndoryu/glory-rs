@@ -8,8 +8,8 @@ use tokio::time::{sleep, Duration};
  * del legacy. No toca Stripe (esa cancelacion la dispara el webhook); este worker
  * solo refleja en BD las suscripciones cuyo periodo ya termino sin renovacion. */
 
-const CHECK_INTERVAL: Duration = Duration::from_secs(3600);
-const ERROR_INTERVAL: Duration = Duration::from_secs(120);
+const CHECK_INTERVAL: Duration = Duration::from_hours(1);
+const ERROR_INTERVAL: Duration = Duration::from_mins(2);
 
 pub fn spawn_billing_cleanup_worker(pool: &PgPool) -> JoinHandle<()> {
     let pool = pool.clone();

@@ -108,6 +108,8 @@ export const normalizarSampleDetalle = (valor: unknown): Sample => {
         mostrarEnComunidad: (raw.mostrarEnComunidad ?? raw.mostrar_en_comunidad ?? resumen.mostrarEnComunidad) as boolean | undefined,
         cancionOrigenId: (raw.cancionOrigenId ?? raw.cancion_origen_id ?? resumen.cancionOrigenId ?? null) as number | null | undefined,
         relacionSampleoId: (raw.relacionSampleoId ?? raw.relacion_sampleo_id ?? resumen.relacionSampleoId ?? null) as number | null | undefined,
+        /* [166A-1] QQ51: Objeto enriquecido de cancion origen (o null si no hay JOIN) */
+        cancionOrigen: (raw.cancionOrigen ?? raw.cancion_origen ?? null) as Sample['cancionOrigen'],
         verificado: Boolean(raw.verificado ?? resumen.verificado ?? false),
     };
 };

@@ -18,7 +18,7 @@ use crate::AppState;
 const DEFAULT_GOOGLE_TOKEN_URL: &str = "https://oauth2.googleapis.com/token";
 const FIREBASE_MESSAGING_SCOPE: &str = "https://www.googleapis.com/auth/firebase.messaging";
 const DEFAULT_ACCESS_TOKEN_TTL_SECS: u64 = 3600;
-const ACCESS_TOKEN_REFRESH_MARGIN: Duration = Duration::from_secs(300);
+const ACCESS_TOKEN_REFRESH_MARGIN: Duration = Duration::from_mins(5);
 
 #[derive(Debug, Clone)]
 pub struct FcmNotificationPayload {

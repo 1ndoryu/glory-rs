@@ -12,7 +12,7 @@ use crate::errors::AppError;
 
 const GOOGLE_JWKS_URL: &str = "https://www.googleapis.com/oauth2/v3/certs";
 const GOOGLE_ISSUERS: &[&str] = &["https://accounts.google.com", "accounts.google.com"];
-const JWKS_TTL: Duration = Duration::from_secs(3600);
+const JWKS_TTL: Duration = Duration::from_hours(1);
 
 #[derive(Debug, Deserialize, Clone)]
 struct Jwk {

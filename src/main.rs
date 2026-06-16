@@ -203,8 +203,7 @@ fn spawn_background_workers(
     let workers_enabled = std::env::var("KAMPLES_WORKERS_ENABLED")
         .ok()
         .as_deref()
-        .map(|v| v != "false" && v != "0")
-        .unwrap_or(true);
+        .is_none_or(|v| v != "false" && v != "0");
 
     if workers_enabled {
         (

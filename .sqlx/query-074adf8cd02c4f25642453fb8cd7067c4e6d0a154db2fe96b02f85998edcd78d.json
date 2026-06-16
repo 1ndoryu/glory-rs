@@ -1,0 +1,388 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n                s.id,\n                s.id_corto,\n                s.slug AS \"slug!\",\n                s.titulo AS \"titulo!\",\n                s.descripcion AS \"descripcion!\",\n                s.bpm,\n                s.key AS \"music_key?\",\n                s.escala,\n                s.duracion,\n                s.formato AS \"formato!\",\n                s.tamano,\n                COALESCE(s.tags, ARRAY[]::text[]) AS \"tags!: Vec<String>\",\n                s.tipo AS \"tipo!\",\n                s.estado AS \"estado!\",\n                COALESCE(s.es_premium, FALSE) AS \"es_premium!\",\n                CAST(s.precio AS double precision) AS \"precio?\",\n                COALESCE(s.metadata, '{}'::jsonb) AS \"metadata!: serde_json::Value\",\n                s.ruta_preview,\n                s.ruta_waveform,\n                s.ruta_original,\n                s.ruta_optimizada,\n                COALESCE(s.permitir_descarga, TRUE) AS \"permitir_descarga!\",\n                COALESCE(s.licencia_libre, FALSE) AS \"licencia_libre!\",\n                s.imagen_url,\n                COALESCE(s.total_descargas, 0) AS \"total_descargas!\",\n                COALESCE(s.total_likes, 0) AS \"total_likes!\",\n                COALESCE(s.total_reproducciones, 0) AS \"total_reproducciones!\",\n                COALESCE(s.total_comentarios, 0) AS \"total_comentarios!\",\n                s.audio_hash,\n                COALESCE(s.verificado, FALSE) AS \"verificado!\",\n                COALESCE(s.mostrar_en_comunidad, TRUE) AS \"mostrar_en_comunidad!\",\n                s.publicado_at,\n                s.created_at,\n                s.cancion_origen_id,\n                s.relacion_sampleo_id,\n\n                -- [166A-1] QQ51: Datos enriquecidos de cancion origen\n                co.titulo AS cancion_origen_titulo,\n                co.slug AS cancion_origen_slug,\n                a.nombre AS cancion_origen_artista,\n                co.whosampled_url AS cancion_origen_whosampled_url,\n                co.bpm::smallint AS cancion_origen_bpm,\n\n                -- [166A-1] QQ51: Datos de relacion sampleo\n                rs.whosampled_id AS relacion_sampleo_whosampled_id,\n\n                -- [166A-1] QQ117: Extraccion via cola_extraccion_samples (ultima fila)\n                ces.youtube_id AS extraccion_youtube_id,\n                ces.spotify_id AS extraccion_spotify_id,\n                ces.timing_inicio_seg::int AS extraccion_timing_inicio_seg,\n                ces.bpm_detectado::int AS extraccion_bpm_detectado,\n                ces.duracion_compas_seg::float8 AS extraccion_duracion_compas_seg,\n                ces.compas_inicio_seg::float8 AS extraccion_compas_inicio_seg,\n                ces.compas_fin_seg::float8 AS extraccion_compas_fin_seg,\n                ces.lado AS extraccion_lado,\n                ces.estado AS extraccion_estado,\n                ces.ruta_audio_extraido AS extraccion_ruta_audio,\n                ces.ruta_audio_completo AS extraccion_ruta_audio_completo,\n                ces.metadata_extraccion AS \"extraccion_metadata?: serde_json::Value\",\n\n                -- [166A-1] Slug/album de canciones fuente y destino via relaciones_sample\n                cf.slug AS extraccion_fuente_slug,\n                cf.album AS extraccion_fuente_album,\n                cd.slug AS extraccion_destino_slug,\n                cd.album AS extraccion_destino_album,\n\n                u.id AS \"creator_id!\",\n                u.username AS \"creator_username!\",\n                u.nombre_visible AS \"creator_nombre_visible?\",\n                u.avatar_url AS \"creator_avatar_url?\",\n                COALESCE(u.verificado, FALSE) AS \"creator_verificado!\"\n             FROM samples s\n             INNER JOIN usuarios_ext u ON u.id = s.creador_id\n             -- [166A-1] QQ51: LEFT JOINs para datos enriquecidos\n             LEFT JOIN canciones co ON co.id = s.cancion_origen_id\n             LEFT JOIN artistas_musicales a ON a.id = co.artista_id\n             LEFT JOIN relaciones_sample rs ON rs.id = s.relacion_sampleo_id\n             LEFT JOIN canciones cf ON cf.id = rs.cancion_fuente_id\n             LEFT JOIN canciones cd ON cd.id = rs.cancion_destino_id\n             -- [166A-1] QQ117: Left join lateral para traer la ultima fila de extraccion\n             LEFT JOIN LATERAL (\n                 SELECT * FROM cola_extraccion_samples\n                 WHERE sample_id = s.id\n                 ORDER BY created_at DESC\n                 LIMIT 1\n             ) ces ON TRUE\n             WHERE s.eliminado_en IS NULL\n               AND (LOWER(s.slug) = LOWER($1) OR s.id_corto = $1)\n             ORDER BY CASE WHEN LOWER(s.slug) = LOWER($1) THEN 0 ELSE 1 END, s.id DESC\n             LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "id_corto",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "slug!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "titulo!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "descripcion!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "bpm",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 6,
+        "name": "music_key?",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 7,
+        "name": "escala",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 8,
+        "name": "duracion",
+        "type_info": "Float4"
+      },
+      {
+        "ordinal": 9,
+        "name": "formato!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 10,
+        "name": "tamano",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 11,
+        "name": "tags!: Vec<String>",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 12,
+        "name": "tipo!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 13,
+        "name": "estado!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 14,
+        "name": "es_premium!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 15,
+        "name": "precio?",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 16,
+        "name": "metadata!: serde_json::Value",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 17,
+        "name": "ruta_preview",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 18,
+        "name": "ruta_waveform",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 19,
+        "name": "ruta_original",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 20,
+        "name": "ruta_optimizada",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 21,
+        "name": "permitir_descarga!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 22,
+        "name": "licencia_libre!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 23,
+        "name": "imagen_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 24,
+        "name": "total_descargas!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 25,
+        "name": "total_likes!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 26,
+        "name": "total_reproducciones!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 27,
+        "name": "total_comentarios!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 28,
+        "name": "audio_hash",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 29,
+        "name": "verificado!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 30,
+        "name": "mostrar_en_comunidad!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 31,
+        "name": "publicado_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 32,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 33,
+        "name": "cancion_origen_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 34,
+        "name": "relacion_sampleo_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 35,
+        "name": "cancion_origen_titulo",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 36,
+        "name": "cancion_origen_slug",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 37,
+        "name": "cancion_origen_artista",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 38,
+        "name": "cancion_origen_whosampled_url",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 39,
+        "name": "cancion_origen_bpm",
+        "type_info": "Int2"
+      },
+      {
+        "ordinal": 40,
+        "name": "relacion_sampleo_whosampled_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 41,
+        "name": "extraccion_youtube_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 42,
+        "name": "extraccion_spotify_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 43,
+        "name": "extraccion_timing_inicio_seg",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 44,
+        "name": "extraccion_bpm_detectado",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 45,
+        "name": "extraccion_duracion_compas_seg",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 46,
+        "name": "extraccion_compas_inicio_seg",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 47,
+        "name": "extraccion_compas_fin_seg",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 48,
+        "name": "extraccion_lado",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 49,
+        "name": "extraccion_estado",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 50,
+        "name": "extraccion_ruta_audio",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 51,
+        "name": "extraccion_ruta_audio_completo",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 52,
+        "name": "extraccion_metadata?: serde_json::Value",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 53,
+        "name": "extraccion_fuente_slug",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 54,
+        "name": "extraccion_fuente_album",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 55,
+        "name": "extraccion_destino_slug",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 56,
+        "name": "extraccion_destino_album",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 57,
+        "name": "creator_id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 58,
+        "name": "creator_username!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 59,
+        "name": "creator_nombre_visible?",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 60,
+        "name": "creator_avatar_url?",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 61,
+        "name": "creator_verificado!",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      false,
+      null,
+      false,
+      false,
+      null,
+      null,
+      null,
+      true,
+      true,
+      true,
+      true,
+      null,
+      null,
+      true,
+      null,
+      null,
+      null,
+      null,
+      true,
+      null,
+      null,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      null,
+      null,
+      null,
+      null,
+      null,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      true,
+      false,
+      true,
+      false,
+      false,
+      false,
+      true,
+      null
+    ]
+  },
+  "hash": "074adf8cd02c4f25642453fb8cd7067c4e6d0a154db2fe96b02f85998edcd78d"
+}

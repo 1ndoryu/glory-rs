@@ -275,10 +275,8 @@ fn apply_text_field(
         "contenido" => builder.contenido = Some(value),
         "extracto" => builder.extracto = Some(value),
         "categoria" => builder.categoria = Some(value),
-        "portada_url" => {
-            if !value.is_empty() {
-                builder.portada_url = Some(value);
-            }
+        "portada_url" if !value.is_empty() => {
+            builder.portada_url = Some(value);
         }
         "embeds" => builder.embeds = Some(parse_embeds(raw_value)?),
         "descarga_publica" => {

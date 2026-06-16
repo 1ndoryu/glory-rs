@@ -41,7 +41,7 @@ async fn invalidate_count_without_redis_is_safe() {
     /* Asegura que el cleanup en memoria no panicquea cuando la entrada no existe. */
     MEMORY_COUNT_CACHE.insert(
         COUNT_CACHE_KEY.to_owned(),
-        (42, Instant::now() + Duration::from_secs(60)),
+        (42, Instant::now() + Duration::from_mins(1)),
     );
     CandidatesService::invalidate_count(&None)
         .await

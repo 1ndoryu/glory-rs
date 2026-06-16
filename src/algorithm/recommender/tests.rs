@@ -117,11 +117,11 @@ async fn invalidate_user_feed_without_redis_clears_memory_cache() {
     /* Pre-poblar la cache en memoria con dos usuarios. */
     MEMORY_CACHE.insert(
         fresh_cache_key(99, 20, 0),
-        (vec![], Instant::now() + Duration::from_secs(60)),
+        (vec![], Instant::now() + Duration::from_mins(1)),
     );
     MEMORY_CACHE.insert(
         fresh_cache_key(100, 20, 0),
-        (vec![], Instant::now() + Duration::from_secs(60)),
+        (vec![], Instant::now() + Duration::from_mins(1)),
     );
 
     RecommenderService::invalidate_user_feed(&None, 99)

@@ -769,8 +769,7 @@ impl AdminProcessService {
         Command::new(candidate)
             .arg("--version")
             .output()
-            .map(|output| output.status.success())
-            .unwrap_or(false)
+            .is_ok_and(|output| output.status.success())
     }
 
     fn apply_python_env(command: &mut Command) {
@@ -846,14 +845,12 @@ impl AdminProcessService {
             Command::new("tasklist")
                 .args(["/FI", &format!("PID eq {pid}"), "/NH"])
                 .output()
-                .map(|output| String::from_utf8_lossy(&output.stdout).contains(&pid.to_string()))
-                .unwrap_or(false)
+                .is_ok_and(|output| String::from_utf8_lossy(&output.stdout).contains(&pid.to_string()))
         } else {
             Command::new("kill")
                 .args(["-0", &pid.to_string()])
                 .status()
-                .map(|status| status.success())
-                .unwrap_or(false)
+                .is_ok_and(|status| status.success())
         }
     }
 

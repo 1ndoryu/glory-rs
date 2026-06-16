@@ -116,8 +116,7 @@ impl AdminDuplicatesService {
 async fn audio_file_exists(path: &str) -> bool {
     tokio::fs::metadata(path)
         .await
-        .map(|metadata| metadata.is_file())
-        .unwrap_or(false)
+        .is_ok_and(|metadata| metadata.is_file())
 }
 
 async fn hash_file_sha256(path: &str) -> Result<String, std::io::Error> {

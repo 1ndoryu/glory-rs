@@ -141,8 +141,7 @@ impl AppConfig {
             stripe: load_optional_stripe(),
             scraper_secret: first_env(&["SCRAPER_SECRET", "KAMPLES_CRON_SECRET"]),
             allow_duplicate_uploads: std::env::var("ALLOW_DUPLICATE_UPLOADS")
-                .map(|v| matches!(v.trim().to_ascii_lowercase().as_str(), "1" | "true" | "yes"))
-                .unwrap_or(false),
+                .is_ok_and(|v| matches!(v.trim().to_ascii_lowercase().as_str(), "1" | "true" | "yes")),
         })
     }
 }

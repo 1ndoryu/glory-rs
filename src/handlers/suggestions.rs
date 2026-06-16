@@ -186,7 +186,7 @@ fn aggregate_context(contexto: &[SampleContextRow]) -> (Vec<String>, i32, Option
 
     /* Top N tags por frecuencia descendente. */
     let mut tag_vec: Vec<(&str, usize)> = tag_counts.into_iter().collect();
-    tag_vec.sort_by(|a, b| b.1.cmp(&a.1));
+    tag_vec.sort_by_key(|b| std::cmp::Reverse(b.1));
     let top_tags: Vec<String> = tag_vec
         .into_iter()
         .take(TOP_TAGS_LIMIT)

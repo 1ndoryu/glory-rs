@@ -27,7 +27,7 @@ use tokio::task::JoinHandle;
 use tokio::time::{sleep, Duration};
 
 const TICK_INTERVAL: Duration = Duration::from_secs(30);
-const ERROR_INTERVAL: Duration = Duration::from_secs(120);
+const ERROR_INTERVAL: Duration = Duration::from_mins(2);
 const HTTP_TIMEOUT: Duration = Duration::from_secs(15);
 const COOLDOWN_DAYS: i32 = 30;
 
@@ -61,7 +61,7 @@ async fn run_forever(pool: PgPool) {
             Ok(true) => sleep(TICK_INTERVAL).await,
             Ok(false) => {
                 /* Sin candidatos: dormir mas para no martillar la BD. */
-                sleep(Duration::from_secs(600)).await;
+                sleep(Duration::from_mins(10)).await;
             }
             Err(e) => {
                 tracing::error!(%e, "error en cancion image enricher tick");
