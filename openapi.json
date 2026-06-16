@@ -16668,6 +16668,7 @@
           "items",
           "limit",
           "offset",
+          "total",
           "hay_mas"
         ],
         "properties": {
@@ -16685,6 +16686,10 @@
             "format": "int64"
           },
           "offset": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "total": {
             "type": "integer",
             "format": "int64"
           }

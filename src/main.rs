@@ -196,14 +196,36 @@ fn spawn_background_workers(
     pool: &sqlx::PgPool,
     storage: &Arc<dyn glory_backend::services::FileStorage>,
 ) -> BackgroundWorkerHandles {
-    (
-        glory_backend::workers::spawn_audio_pipeline_workers(pool, storage),
-        glory_backend::workers::spawn_ia_queue_workers(pool),
-        glory_backend::workers::spawn_billing_cleanup_worker(pool),
-        glory_backend::workers::spawn_automation_worker(pool),
-        glory_backend::workers::spawn_scraping_queue_worker(pool),
-        glory_backend::workers::spawn_cancion_image_enricher_worker(pool),
-    )
+    /* [A] En local (KAMPLES_WORKERS_ENABLED=false) se omiten workers pesados:
+     * audio pipeline, scraping queue y automation (orquesta scraping/extraccion).
+     * ia_queue ya se auto-deshabilita sin API keys. Billing e image_enricher
+     * siguen activos siempre por ser ligeros. */
+    let workers_enabled = std::env::var("KAMPLES_WORKERS_ENABLED")
+        .ok()
+        .as_deref()
+        .map(|v| v != "false" && v != "0")
+        .unwrap_or(true);
+
+    if workers_enabled {
+        (
+            glory_backend::workers::spawn_audio_pipeline_workers(pool, storage),
+            glory_backend::workers::spawn_ia_queue_workers(pool),
+            glory_backend::workers::spawn_billing_cleanup_worker(pool),
+            glory_backend::workers::spawn_automation_worker(pool),
+            glory_backend::workers::spawn_scraping_queue_worker(pool),
+            glory_backend::workers::spawn_cancion_image_enricher_worker(pool),
+        )
+    } else {
+        tracing::info!("KAMPLES_WORKERS_ENABLED=false — workers pesados desactivados (audio, scraping, automation)");
+        (
+            Vec::new(),
+            glory_backend::workers::spawn_ia_queue_workers(pool),
+            glory_backend::workers::spawn_billing_cleanup_worker(pool),
+            tokio::spawn(async {}),
+            tokio::spawn(async {}),
+            glory_backend::workers::spawn_cancion_image_enricher_worker(pool),
+        )
+    }
 }
 
 fn init_delivery_runtimes(config: &AppConfig) -> Result<DeliveryRuntimes, AppError> {
