@@ -230,7 +230,8 @@ impl RecommenderService {
             crate::services::algo_timing::ALGO_TIMING.mark(user_id, "cache_stale_miss");
         }
 
-        let items = compute_and_cache(&pool, &redis, user_id, limit, offset, config, usar_cache).await?;
+        let items =
+            compute_and_cache(&pool, &redis, user_id, limit, offset, config, usar_cache).await?;
         crate::services::algo_timing::ALGO_TIMING.mark(user_id, "compute_and_cache");
         crate::services::algo_timing::ALGO_TIMING.save(
             user_id,

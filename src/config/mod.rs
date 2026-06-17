@@ -140,8 +140,9 @@ impl AppConfig {
             smtp: load_optional_smtp()?,
             stripe: load_optional_stripe(),
             scraper_secret: first_env(&["SCRAPER_SECRET", "KAMPLES_CRON_SECRET"]),
-            allow_duplicate_uploads: std::env::var("ALLOW_DUPLICATE_UPLOADS")
-                .is_ok_and(|v| matches!(v.trim().to_ascii_lowercase().as_str(), "1" | "true" | "yes")),
+            allow_duplicate_uploads: std::env::var("ALLOW_DUPLICATE_UPLOADS").is_ok_and(|v| {
+                matches!(v.trim().to_ascii_lowercase().as_str(), "1" | "true" | "yes")
+            }),
         })
     }
 }

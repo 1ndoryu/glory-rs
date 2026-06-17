@@ -24,6 +24,7 @@ mod fcm;
 mod feed;
 mod free_codes;
 mod health;
+mod image_proxy;
 mod likes;
 mod messages;
 mod metrics;
@@ -728,6 +729,7 @@ pub fn create_router(
         algo_planner,
         scraper_secret: config.scraper_secret,
         allow_duplicate_uploads: config.allow_duplicate_uploads,
+        static_dir: Some("frontend/public".to_string()),
     };
 
     /* CORS: en desarrollo se permite todo. En producción, restringir orígenes */
@@ -756,6 +758,7 @@ pub fn create_router(
 
 fn api_routes() -> Router<AppState> {
     Router::new()
+        .merge(image_proxy::routes())
         .merge(health::routes())
         .merge(auth::routes())
         .merge(app_versions::routes())

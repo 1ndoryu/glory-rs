@@ -710,7 +710,9 @@ impl AdminProcessService {
                 continue;
             }
             let Ok(meta) = entry.metadata() else { continue };
-            let Ok(modified) = meta.modified() else { continue };
+            let Ok(modified) = meta.modified() else {
+                continue;
+            };
             if best.as_ref().is_none_or(|(t, _)| modified > *t) {
                 best = Some((modified, path));
             }
@@ -845,7 +847,9 @@ impl AdminProcessService {
             Command::new("tasklist")
                 .args(["/FI", &format!("PID eq {pid}"), "/NH"])
                 .output()
-                .is_ok_and(|output| String::from_utf8_lossy(&output.stdout).contains(&pid.to_string()))
+                .is_ok_and(|output| {
+                    String::from_utf8_lossy(&output.stdout).contains(&pid.to_string())
+                })
         } else {
             Command::new("kill")
                 .args(["-0", &pid.to_string()])

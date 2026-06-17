@@ -24,18 +24,21 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::{env, fs};
 
-/// Rescata archivos de audio del servidor kamples caído (desastre PostgreSQL).
+/// Rescata archivos de audio del servidor kamples caído (desastre `PostgreSQL`).
 /// Descarga 1 archivo vía SSH, lo importa en la BD local y lo coloca en el storage
 /// del proyecto para verificar que el flujo de rescate funciona.
 #[derive(Parser)]
-#[command(name = "rescatar", about = "Rescata 1 sample del servidor caído al entorno local")]
+#[command(
+    name = "rescatar",
+    about = "Rescata 1 sample del servidor caído al entorno local"
+)]
 struct Args {
     /// Ruta remota del archivo dentro del volumen uploads-data
     /// Ej: "kamples/0/2026/04/Vocals-Electronic-C-89bpm-kraftwerk-vocoder-phrase-kamples-oYxPk9V.mp3"
     #[arg(short, long)]
     archivo: String,
 
-    /// ID del creador (usuarios_ext.id) al que asignar el sample
+    /// ID del creador (`usuarios_ext.id`) al que asignar el sample
     #[arg(short = 'u', long, default_value = "2")]
     creador_id: i32,
 
@@ -43,7 +46,7 @@ struct Args {
     #[arg(short = 'H', long, default_value = "66.94.100.241")]
     host: String,
 
-    /// Ruta a la clave SSH privada. Por defecto busca en ~/.ssh/ y SSH_KEY_PATH
+    /// Ruta a la clave SSH privada. Por defecto busca en ~/.ssh/ y `SSH_KEY_PATH`
     #[arg(short = 'k', long)]
     ssh_key: Option<String>,
 
@@ -60,6 +63,7 @@ struct Args {
     yes: bool,
 }
 
+#[allow(clippy::too_many_lines)]
 fn main() -> Result<()> {
     dotenvy::dotenv().ok();
     let args = Args::parse();
@@ -73,7 +77,7 @@ fn main() -> Result<()> {
 
     println!("=== Rescate de Sample ===");
     println!("  Archivo remoto:  {}", args.archivo);
-    println!("  Nombre:          {}", filename);
+    println!("  Nombre:          {filename}");
     println!("  Creador ID:      {}", args.creador_id);
     println!("  Host:            {}", args.host);
 
@@ -90,25 +94,21 @@ fn main() -> Result<()> {
     }
 
     // ─── 1. Resolver SSH key ────────────────────────────────────────────────
-    let ssh_key = resolve_ssh_key(&args.ssh_key)?;
-    println!("  SSH key:         {}", ssh_key);
+    let ssh_key = resolve_ssh_key(args.ssh_key.as_ref())?;
+    println!("  SSH key:         {ssh_key}");
 
     // ─── 2. Ruta remota absoluta ────────────────────────────────────────────
-    let volume_uploads =
-        "/var/lib/docker/volumes/mo4so4440c488g8woow4cow0_uploads-data/_data";
+    let volume_uploads = "/var/lib/docker/volumes/mo4so4440c488g8woow4cow0_uploads-data/_data";
     let remote_full = format!("{}/{}", volume_uploads, args.archivo);
 
     // ─── 3. Verificar existencia ────────────────────────────────────────────
     let check = ssh_exec(
         &args.host,
         &ssh_key,
-        &format!("test -f '{}' && echo 'EXISTS' || echo 'NOT_FOUND'", remote_full),
+        &format!("test -f '{remote_full}' && echo 'EXISTS' || echo 'NOT_FOUND'"),
     )?;
     if check.trim() != "EXISTS" {
-        anyhow::bail!(
-            "El archivo remoto no existe o no es accesible:\n  {}",
-            remote_full
-        );
+        anyhow::bail!("El archivo remoto no existe o no es accesible:\n  {remote_full}");
     }
     println!("  ✓ Archivo existe en el servidor");
 
@@ -116,31 +116,30 @@ fn main() -> Result<()> {
     let remote_size = ssh_exec(
         &args.host,
         &ssh_key,
-        &format!("stat --format='%s' '{}'", remote_full),
+        &format!("stat --format='%s' '{remote_full}'"),
     )?;
     let remote_size = remote_size.trim().parse::<u64>().unwrap_or(0);
-    println!("  Tamaño remoto:   {:.2} MB", remote_size as f64 / 1_048_576.0);
+    #[allow(clippy::cast_precision_loss)]
+    let remote_size_mb = remote_size as f64 / 1_048_576.0;
+    println!("  Tamaño remoto:   {remote_size_mb:.2} MB");
 
     // ─── 5. Descargar vía base64 ────────────────────────────────────────────
     println!("  ↓ Descargando...");
-    let b64_output = ssh_exec(
-        &args.host,
-        &ssh_key,
-        &format!("base64 -w0 '{}'", remote_full),
-    )?;
+    let b64_output = ssh_exec(&args.host, &ssh_key, &format!("base64 -w0 '{remote_full}'"))?;
     let audio_bytes = base64::engine::general_purpose::STANDARD
         .decode(b64_output.trim())
         .context("Error al decodificar base64 del archivo remoto")?;
-    println!("  ✓ Descargado: {} bytes ({:.2} MB)", audio_bytes.len(), audio_bytes.len() as f64 / 1_048_576.0);
+    #[allow(clippy::cast_precision_loss)]
+    let downloaded_mb = audio_bytes.len() as f64 / 1_048_576.0;
+    println!(
+        "  ✓ Descargado: {} bytes ({downloaded_mb:.2} MB)",
+        audio_bytes.len()
+    );
 
     // ─── 6. Parsear filename ────────────────────────────────────────────────
     let metadata = parse_filename(&filename);
     let titulo = args.titulo.clone().unwrap_or(metadata.titulo.clone());
-    let extension = filename
-        .rsplit('.')
-        .next()
-        .unwrap_or("mp3")
-        .to_string();
+    let extension = filename.rsplit('.').next().unwrap_or("mp3").to_string();
 
     // ─── 7. Generar id_corto y slug ─────────────────────────────────────────
     let id_corto = generate_short_id();
@@ -170,8 +169,7 @@ fn main() -> Result<()> {
     println!("  ✓ Archivo guardado: {}", storage_path.display());
 
     // ─── 9. Insertar en BD ──────────────────────────────────────────────────
-    let database_url = env::var("DATABASE_URL")
-        .context("DATABASE_URL no definida en .env")?;
+    let database_url = env::var("DATABASE_URL").context("DATABASE_URL no definida en .env")?;
     println!("  🗄  Conectando a BD...");
 
     let rt = tokio::runtime::Runtime::new()?;
@@ -190,14 +188,11 @@ fn main() -> Result<()> {
         };
 
         let formato = extension.to_uppercase();
+        #[allow(clippy::cast_possible_wrap)]
         let tamano = audio_bytes.len() as i64;
 
         // Tags como array PostgreSQL
-        let tags: Vec<String> = args
-            .tags
-            .split(',')
-            .map(|s| s.trim().to_string())
-            .collect();
+        let tags: Vec<String> = args.tags.split(',').map(|s| s.trim().to_string()).collect();
 
         // Metadata con info del rescate
         let mut meta = serde_json::json!({
@@ -220,15 +215,11 @@ fn main() -> Result<()> {
         }
 
         // Mapear tipo desde filename (Vocals → "vocal", Loop → "loop", etc.)
-        let tipo_sample = metadata
-            .tipo
-            .as_deref()
-            .and_then(map_tipo)
-            .unwrap_or("loop");
+        let tipo_sample = metadata.tipo.as_deref().map_or("loop", map_tipo);
 
         // INSERT con todos los campos relevantes
         let row: (i32,) = sqlx::query_as(
-            r#"
+            r"
             INSERT INTO samples (
                 creador_id, titulo, slug, id_corto, descripcion,
                 formato, tamano, tags, audio_hash,
@@ -244,7 +235,7 @@ fn main() -> Result<()> {
                     0.0, true, $11,
                     $12, $13, $14, 0.0)
             RETURNING id
-            "#,
+            ",
         )
         .bind(args.creador_id)
         .bind(&titulo)
@@ -279,8 +270,12 @@ fn main() -> Result<()> {
             .await
             .context("Error al inspeccionar archivo de audio")?;
         let duracion = audio_meta.duration_seconds;
-        println!("     Duración: {:.2}s | Formato: {} | Peaks: {}",
-            duracion, audio_meta.format, audio_meta.waveform_peaks.len());
+        println!(
+            "     Duración: {:.2}s | Formato: {} | Peaks: {}",
+            duracion,
+            audio_meta.format,
+            audio_meta.waveform_peaks.len()
+        );
 
         // Guardar waveform como JSON en storage
         let waveform_key = {
@@ -296,13 +291,12 @@ fn main() -> Result<()> {
         }
         let waveform_bytes = serde_json::to_vec(&audio_meta.waveform_peaks)
             .context("Error al serializar waveform")?;
-        fs::write(&waveform_storage_path, &waveform_bytes)
-            .context("Error al guardar waveform")?;
+        fs::write(&waveform_storage_path, &waveform_bytes).context("Error al guardar waveform")?;
 
         // Actualizar sample con duración, ruta_optimizada (mismo archivo, ya es MP3),
         // waveform y publicado_at para que aparezca primero en "Recientes"
         sqlx::query(
-            r#"
+            r"
             UPDATE samples
             SET duracion = $1,
                 ruta_optimizada = $2,
@@ -310,10 +304,10 @@ fn main() -> Result<()> {
                 publicado_at = $4,
                 formato = $5
             WHERE id = $6
-            "#,
+            ",
         )
         .bind(duracion)
-        .bind(&storage_key)          // ruta_optimizada = misma que original (ya es MP3)
+        .bind(&storage_key) // ruta_optimizada = misma que original (ya es MP3)
         .bind(&waveform_key)
         .bind(Utc::now())
         .bind(&formato)
@@ -325,10 +319,10 @@ fn main() -> Result<()> {
         // Encolar análisis IA técnico (cola_procesamiento_ia) para workers
         // que procesan embedding vectorial cuando estén habilitados.
         sqlx::query(
-            r#"
+            r"
             INSERT INTO cola_procesamiento_ia (tipo, entidad_id, operacion, metadata)
             VALUES ('sample', $1, 'analisis_audio', $2)
-            "#,
+            ",
         )
         .bind(row.0)
         .bind(serde_json::json!({"prioridad": "baja", "origen": "rescate"}))
@@ -342,12 +336,12 @@ fn main() -> Result<()> {
         // Usamos ON CONFLICT sobre el índice parcial para no duplicar si ya existe
         // una entrada activa para este sample.
         sqlx::query(
-            r#"
+            r"
             INSERT INTO ia_queue (sample_id, status, metadata)
             VALUES ($1, 'pending', $2)
             ON CONFLICT (sample_id) WHERE status IN ('pending', 'processing', 'retry_scheduled')
             DO NOTHING
-            "#,
+            ",
         )
         .bind(row.0)
         .bind(serde_json::json!({"origen": "rescate"}))
@@ -369,15 +363,15 @@ fn main() -> Result<()> {
 
     println!();
     println!("🎉 ¡RESCATE COMPLETADO!");
-    println!("   ID:            {}", sample_id);
-    println!("   ID corto:      {}", id_corto);
-    println!("   Slug:          {}", slug);
-    println!("   Storage key:   {}", storage_key);
+    println!("   ID:            {sample_id}");
+    println!("   ID corto:      {id_corto}");
+    println!("   Slug:          {slug}");
+    println!("   Storage key:   {storage_key}");
     println!("   Archivo local: {}", storage_path.display());
-    println!("   URL pública:   {}", upload_url);
+    println!("   URL pública:   {upload_url}");
     println!();
     println!("   Para verlo:  cargo run --bin glory-backend");
-    println!("   Y luego:     curl http://127.0.0.1:3000/api/samples/{}", sample_id);
+    println!("   Y luego:     curl http://127.0.0.1:3000/api/samples/{sample_id}");
 
     Ok(())
 }
@@ -387,8 +381,8 @@ fn main() -> Result<()> {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 /// Resuelve la ruta a la clave SSH privada.
-/// Busca en: --ssh-key > SSH_KEY_PATH > ~/.ssh/id_ed25519 > ~/.ssh/id_rsa
-fn resolve_ssh_key(cli_key: &Option<String>) -> Result<String> {
+/// Busca en: --ssh-key > `SSH_KEY_PATH` > ~/.`ssh/id_ed25519` > ~/.`ssh/id_rsa`
+fn resolve_ssh_key(cli_key: Option<&String>) -> Result<String> {
     // Si se pasó por CLI, usarla directamente
     if let Some(path) = cli_key {
         if Path::new(path).exists() {
@@ -476,13 +470,12 @@ struct FileMetadata {
 ///
 /// El parser busca:
 ///   - El sufijo "bpm" para extraer BPM y deducir tonalidad + género.
-///   - La palabra "kamples" como separador entre título e id_corto.
+///   - La palabra "kamples" como separador entre título e `id_corto`.
 ///   - El primer token como tipo de sample (Vocals, Loop, FX, etc.).
 fn parse_filename(filename: &str) -> FileMetadata {
     let stem = Path::new(filename)
         .file_stem()
-        .map(|s| s.to_string_lossy().to_string())
-        .unwrap_or_else(|| filename.to_string());
+        .map_or_else(|| filename.to_string(), |s| s.to_string_lossy().to_string());
 
     let titulo_fallback = stem.clone();
     let parts: Vec<&str> = stem.split('-').collect();
@@ -557,19 +550,19 @@ fn parse_filename(filename: &str) -> FileMetadata {
 
 /// Mapea el tipo detectado en el filename al CHECK constraint de samples.tipo.
 /// Los valores permitidos son: loop, oneshot, fx, vocal, stem, otro.
-fn map_tipo(tipo: &str) -> Option<&'static str> {
+fn map_tipo(tipo: &str) -> &'static str {
     let lower = tipo.to_lowercase();
     match lower.as_str() {
-        "vocals" | "vocal" | "voice" => Some("vocal"),
-        "loop" | "loops" | "music" => Some("loop"),
-        "oneshot" | "one_shot" | "one-shot" | "hit" => Some("oneshot"),
-        "fx" | "effects" | "effect" | "sfx" => Some("fx"),
-        "stem" | "stems" | "drums" | "bass" | "melody" | "chords" => Some("stem"),
-        _ => Some("otro"),
+        "vocals" | "vocal" | "voice" => "vocal",
+        "loop" | "loops" | "music" => "loop",
+        "oneshot" | "one_shot" | "one-shot" | "hit" => "oneshot",
+        "fx" | "effects" | "effect" | "sfx" => "fx",
+        "stem" | "stems" | "drums" | "bass" | "melody" | "chords" => "stem",
+        _ => "otro",
     }
 }
 
-/// Genera un id_corto de 8 caracteres alfanuméricos (a-z, 0-9) usando nanoid.
+/// Genera un `id_corto` de 8 caracteres alfanuméricos (a-z, 0-9) usando nanoid.
 fn generate_short_id() -> String {
     const ALPHABET: [char; 36] = [
         'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r',

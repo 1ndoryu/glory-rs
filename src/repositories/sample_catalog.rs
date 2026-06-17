@@ -415,6 +415,7 @@ impl SampleRepository {
         .await
     }
 
+    #[allow(clippy::too_many_lines)]
     pub async fn find_random_public_sample(
         pool: &PgPool,
     ) -> Result<Option<SampleCatalogDetailRecord>, sqlx::Error> {

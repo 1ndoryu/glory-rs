@@ -1,9 +1,9 @@
 {
   "nombre": "scraping",
-  "estado": "stopped",
-  "pid": null,
-  "iniciado_at": "2026-04-25T08:10:30.543602200Z",
-  "ultimo_log": "2026-04-25T08:10:30.980049400Z",
+  "estado": "running",
+  "pid": 21324,
+  "iniciado_at": "2026-06-16T16:29:43.849589600Z",
+  "ultimo_log": "2026-06-16T16:29:43.849590200Z",
   "progreso": null,
   "error": null,
   "resultado": null

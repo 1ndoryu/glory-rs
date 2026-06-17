@@ -109,6 +109,10 @@ pub struct CreateUploadSampleParams<'a> {
     pub mostrar_en_comunidad: bool,
     pub metadata: serde_json::Value,
     pub sync_upload: bool,
+    /* [166A-6] Campos relacionales y portada. */
+    pub cancion_origen_id: Option<i32>,
+    pub relacion_sampleo_id: Option<i32>,
+    pub imagen_url: Option<&'a str>,
 }
 
 impl SampleRepository {
@@ -171,12 +175,14 @@ impl SampleRepository {
             "INSERT INTO samples (
                 creador_id, titulo, slug, id_corto, descripcion, formato, tamano,
                 tags, audio_hash, estado, ruta_original, permitir_descarga,
-                licencia_libre, es_premium, precio, mostrar_en_comunidad, metadata
+                licencia_libre, es_premium, precio, mostrar_en_comunidad, metadata,
+                cancion_origen_id, relacion_sampleo_id, imagen_url
              )
              VALUES (
                 $1, $2, $3, $4, $5, $6, $7,
                 $8, $9, 'procesando', $10, $11,
-                     $12, $13, ROUND(CAST($14 AS double precision)::numeric, 2), $15, $16
+                     $12, $13, ROUND(CAST($14 AS double precision)::numeric, 2), $15, $16,
+                     $17, $18, $19
              )
              RETURNING id, id_corto as \"id_corto!\", slug, estado, ruta_original as \"ruta_original!\"",
             params.creador_id,
@@ -195,6 +201,9 @@ impl SampleRepository {
             params.precio,
             params.mostrar_en_comunidad,
             params.metadata,
+            params.cancion_origen_id,
+            params.relacion_sampleo_id,
+            params.imagen_url,
         )
         .fetch_one(&mut *tx)
         .await?;
@@ -416,6 +425,62 @@ impl SampleRepository {
         .execute(pool)
         .await?;
 
+        Ok(())
+    }
+
+    /* [166A-6] Vincular un sample recien creado a una relacion_sample.
+     * Actualiza el sample_fuente_id o sample_destino_id segun lado_relacion,
+     * y opcionalmente tipo_elemento y timings. timings_{fuente,destino} es JSONB.
+     *
+     * Usamos sqlx::query (runtime) en vez de query! porque Option<i32> en CASE
+     * + to_jsonb confunde la inferencia de tipos del macro. */
+    pub async fn update_relacion_sample_link(
+        pool: &PgPool,
+        relacion_id: i32,
+        sample_id: i32,
+        lado_relacion: &str,
+        inicio_segundos: Option<i32>,
+        tipo_elemento: Option<&str>,
+    ) -> Result<(), sqlx::Error> {
+        match lado_relacion {
+            "fuente" => {
+                sqlx::query(
+                    "UPDATE relaciones_sample
+                     SET sample_fuente_id = $2,
+                         tipo_elemento = COALESCE($3, tipo_elemento),
+                         timings_fuente = CASE WHEN $4 IS NOT NULL
+                             THEN COALESCE(timings_fuente, '[]'::jsonb) || to_jsonb($4::integer)
+                             ELSE timings_fuente END,
+                         updated_at = NOW()
+                     WHERE id = $1",
+                )
+                .bind(relacion_id)
+                .bind(sample_id)
+                .bind(tipo_elemento)
+                .bind(inicio_segundos)
+                .execute(pool)
+                .await?;
+            }
+            "destino" => {
+                sqlx::query(
+                    "UPDATE relaciones_sample
+                     SET sample_destino_id = $2,
+                         tipo_elemento = COALESCE($3, tipo_elemento),
+                         timings_destino = CASE WHEN $4 IS NOT NULL
+                             THEN COALESCE(timings_destino, '[]'::jsonb) || to_jsonb($4::integer)
+                             ELSE timings_destino END,
+                         updated_at = NOW()
+                     WHERE id = $1",
+                )
+                .bind(relacion_id)
+                .bind(sample_id)
+                .bind(tipo_elemento)
+                .bind(inicio_segundos)
+                .execute(pool)
+                .await?;
+            }
+            _ => { /* lado_relacion invalido no deberia llegar aca, pero seguro. */ }
+        }
         Ok(())
     }
 }

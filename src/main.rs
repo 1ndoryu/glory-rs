@@ -92,7 +92,7 @@ async fn main() -> Result<(), AppError> {
         Arc::new(glory_backend::services::LocalFs::new(&config.storage_root).await?)
     };
 
-    let _background_workers = spawn_background_workers(&pool, &storage);
+    let _background_workers = spawn_background_workers(&pool, &storage, &config.storage_root);
 
     /* [174A-93+174A-96] AlgoPlanner periodic loop: refresca mv_trending_samples
      * (precompute_feeds) y recalcula user_tag_scores activos
@@ -195,6 +195,7 @@ fn init_tracing() {
 fn spawn_background_workers(
     pool: &sqlx::PgPool,
     storage: &Arc<dyn glory_backend::services::FileStorage>,
+    storage_root: &str,
 ) -> BackgroundWorkerHandles {
     /* [A] En local (KAMPLES_WORKERS_ENABLED=false) se omiten workers pesados:
      * audio pipeline, scraping queue y automation (orquesta scraping/extraccion).
@@ -212,7 +213,7 @@ fn spawn_background_workers(
             glory_backend::workers::spawn_billing_cleanup_worker(pool),
             glory_backend::workers::spawn_automation_worker(pool),
             glory_backend::workers::spawn_scraping_queue_worker(pool),
-            glory_backend::workers::spawn_cancion_image_enricher_worker(pool),
+            glory_backend::workers::spawn_cancion_image_enricher_worker(pool, storage_root),
         )
     } else {
         tracing::info!("KAMPLES_WORKERS_ENABLED=false — workers pesados desactivados (audio, scraping, automation)");
@@ -222,7 +223,7 @@ fn spawn_background_workers(
             glory_backend::workers::spawn_billing_cleanup_worker(pool),
             tokio::spawn(async {}),
             tokio::spawn(async {}),
-            glory_backend::workers::spawn_cancion_image_enricher_worker(pool),
+            glory_backend::workers::spawn_cancion_image_enricher_worker(pool, storage_root),
         )
     }
 }

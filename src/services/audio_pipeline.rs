@@ -240,24 +240,48 @@ impl AudioPipelineService {
         let input_path = self
             .materialize_original(sample, workspace, progress)
             .await?;
-        tracing::debug!(sample_id = sample.id, elapsed_secs = started.elapsed().as_secs_f64(), "pipeline: analyze_original");
+        tracing::debug!(
+            sample_id = sample.id,
+            elapsed_secs = started.elapsed().as_secs_f64(),
+            "pipeline: analyze_original"
+        );
         let (inspected, bpm_analysis, key_analysis) =
             self.analyze_original(sample, &input_path, progress).await?;
-        tracing::debug!(sample_id = sample.id, elapsed_secs = started.elapsed().as_secs_f64(), "pipeline: persist_analysis");
+        tracing::debug!(
+            sample_id = sample.id,
+            elapsed_secs = started.elapsed().as_secs_f64(),
+            "pipeline: persist_analysis"
+        );
         let analysis =
             build_technical_analysis(&inspected, bpm_analysis.as_ref(), key_analysis.as_ref());
         progress.analysis = Some(analysis.clone());
         self.persist_analysis(sample, progress, &analysis).await?;
-        tracing::debug!(sample_id = sample.id, elapsed_secs = started.elapsed().as_secs_f64(), "pipeline: waveform");
+        tracing::debug!(
+            sample_id = sample.id,
+            elapsed_secs = started.elapsed().as_secs_f64(),
+            "pipeline: waveform"
+        );
         self.generate_and_store_waveform(sample, progress, &inspected)
             .await?;
-        tracing::debug!(sample_id = sample.id, elapsed_secs = started.elapsed().as_secs_f64(), "pipeline: optimized_mp3");
+        tracing::debug!(
+            sample_id = sample.id,
+            elapsed_secs = started.elapsed().as_secs_f64(),
+            "pipeline: optimized_mp3"
+        );
         self.generate_and_store_optimized_mp3(sample, &input_path, workspace, progress)
             .await?;
-        tracing::debug!(sample_id = sample.id, elapsed_secs = started.elapsed().as_secs_f64(), "pipeline: activate_sample");
+        tracing::debug!(
+            sample_id = sample.id,
+            elapsed_secs = started.elapsed().as_secs_f64(),
+            "pipeline: activate_sample"
+        );
         let embedding = Self::build_embedding(sample, &analysis, progress);
         self.activate_sample(sample, progress, &embedding).await?;
-        tracing::info!(sample_id = sample.id, elapsed_secs = started.elapsed().as_secs_f64(), "pipeline: completado");
+        tracing::info!(
+            sample_id = sample.id,
+            elapsed_secs = started.elapsed().as_secs_f64(),
+            "pipeline: completado"
+        );
 
         Ok(AudioPipelineResult {
             sample_id: sample.id,
@@ -517,12 +541,9 @@ impl AudioPipelineService {
                     "duplicate_detected_at": Utc::now(),
                     "duplicate_reason": "audio_hash_conflict",
                 });
-                if let Err(err) = SampleRepository::mark_sample_as_duplicate(
-                    &self.pool,
-                    sample.id,
-                    dup_meta,
-                )
-                .await
+                if let Err(err) =
+                    SampleRepository::mark_sample_as_duplicate(&self.pool, sample.id, dup_meta)
+                        .await
                 {
                     tracing::warn!(
                         sample_id = sample.id,
@@ -538,7 +559,8 @@ impl AudioPipelineService {
             }
             Err(error) => Err(map_activation_error(&error)),
         }
-    }}
+    }
+}
 
 fn build_technical_analysis(
     inspected: &AudioMetadata,

@@ -21,6 +21,7 @@ mod google_oauth;
 mod ia_queue;
 mod ia_service;
 mod idempotency;
+pub mod image_processing;
 mod moderation;
 mod notification;
 mod notification_fanout;

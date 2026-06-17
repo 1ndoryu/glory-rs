@@ -1,14 +1,15 @@
 /*
- * ImgOptimizada — [183A-40]
- * Wrapper de <img> que pasa la URL por Jetpack Photon CDN automáticamente.
- * Equivalente React de ImageUtility::optimizar() de Glory.
+ * ImgOptimizada — [183A-40] actualizado [166A-5]
+ * Wrapper de <img> que pasa la URL por nuestro proxy /api/img/ para
+ * optimización on-demand (resize, compresión, conversión a WebP).
+ * Reemplaza el anterior uso de Jetpack Photon CDN.
  *
  * Uso: <ImgOptimizada src={url} alt="texto" w={300} quality={75} />
- * Gotcha: Si src es relativo o data: URI, se usa sin modificar.
- * Gotcha: En localhost no aplica Photon (URLs del servidor local no son accesibles externamente).
+ * Gotcha: En localhost, Vite proxy redirige /api/img/ al backend Rust.
+ * Gotcha: URLs externas (http://, data:) se pasan sin modificar.
  */
 
-import { photonUrl } from '@app/services/photonUrl';
+import { optimizedUrl } from '@app/utils/imageUtils';
 
 interface ImgOptimizadaProps extends React.ImgHTMLAttributes<HTMLImageElement> {
     src: string;
@@ -29,7 +30,9 @@ export const ImgOptimizada = ({
     loading = 'lazy',
     ...rest
 }: ImgOptimizadaProps): JSX.Element => {
-    const srcOptimizado = photonUrl(src, { w, h, quality, fit });
+    /* [166A-5] Usar optimizedUrl en vez de photonUrl para rutas locales.
+     * External URLs (data:, http) pasan sin modificar por optimizedUrl. */
+    const srcOptimizado = optimizedUrl(src, { width: w, quality, format: 'webp' });
 
     return (
         <img

@@ -2,11 +2,12 @@
  * TarjetaSampleCuadricula — Kamples (C291, C326)
  * Versión compacta tipo cuadrícula: portada con play overlay, nombre 2 líneas.
  * C326: Click reproduce audio, right-click abre menú contextual.
- */
+ * [166A-5] Usa ImgOptimizada para resize automático vía /api/img/. */
 
 import { useCallback, type MouseEvent } from 'react';
 import { Play, Pause } from 'lucide-react';
 import { obtenerImagenColor } from '../../services/imagenesColor';
+import { ImgOptimizada } from './ImgOptimizada';
 import { useSamplePreview } from '../../hooks/useSamplePreview';
 import { useNavigationStore } from '@/core/router';
 import type { SampleResumen } from '../../types';
@@ -52,11 +53,12 @@ export const TarjetaSampleCuadricula = ({ sample, onClickTitulo, onMenu }: Props
             tabIndex={0}
         >
             <div className="tarjetaCuadriculaPortada">
-                <img
+                <ImgOptimizada
                     className="tarjetaCuadriculaImg"
                     src={imagenPortada}
                     alt={sample.titulo}
-                    loading="lazy"
+                    w={150}
+                    quality={75}
                     draggable={false}
                 />
                 {/* Overlay play/pause visible en hover y durante reproducción */}

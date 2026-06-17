@@ -53,6 +53,20 @@ pub struct UploadSampleRequestDoc {
     pub sync_upload: Option<bool>,
     pub origen_subida: Option<String>,
     pub precio: Option<f64>,
+    /* [166A-6] Campos relacionales y portada. */
+    /// ID de la cancion de origen (para "subir sample de esta cancion").
+    pub cancion_origen_id: Option<i32>,
+    /// ID de la relacion de sampleo a vincular.
+    pub relacion_id: Option<i32>,
+    /// Lado de la relacion: `fuente` o `destino`.
+    pub lado_relacion: Option<String>,
+    /// Segundo de inicio del sample en la cancion.
+    pub inicio_segundos: Option<i32>,
+    /// Tipo de elemento sampleado (hook_riff, vocals_lyrics, drums, etc.).
+    pub tipo_elemento: Option<String>,
+    /// Imagen de portada del sample.
+    #[schema(value_type = String, format = Binary)]
+    pub portada: Option<Vec<u8>>,
 }
 
 /// Respuesta de `POST /api/samples/upload`.

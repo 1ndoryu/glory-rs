@@ -3,11 +3,14 @@
  * Asigna imagen de portada determinista desde la carpeta colors/.
  * Se usa en TarjetaSample y TarjetaColeccion cuando no hay imagen propia.
  * Array de imágenes extraído a datos/imagenesColorLista.ts para cumplir SRP.
- */
+ *
+ * [166A-5] Se eliminó photonUrl de aquí porque imgOptimizada ya aplica
+ * optimización a través del proxy /api/img/ del backend (resize + WebP).
+ * La URL cruda permite que el componente decida el tamaño según el contexto. */
 
 import { IMAGENES_COLOR } from './datos/imagenesColorLista';
 import { resolverRutaAsset } from '@app/utils/resolverRutaAsset';
-import { photonUrl } from './photonUrl';
+import { optimizedUrl } from '@app/utils/imageUtils';
 
 const RUTA_RELATIVA = '/wp-content/themes/glorytemplate/colors/';
 const TOTAL = IMAGENES_COLOR.length;
@@ -23,15 +26,16 @@ function obtenerRutaBase(): string {
 /*
  * Obtiene la URL de una imagen de color determinista basada en un ID numérico.
  * Siempre devuelve la misma imagen para el mismo ID.
- */
+ * [166A-5] Ya no pasa por photonUrl; el componente que la usa (ImgOptimizada)
+ * aplica optimización vía /api/img/ con el tamaño adecuado al contexto. */
 export const obtenerImagenColor = (id: number): string => {
     const base = obtenerRutaBase();
     /* Guard: si id es NaN/undefined o no hay imágenes, devolver placeholder */
     if (!Number.isFinite(id) || TOTAL === 0) {
-        return photonUrl(`${base}${IMAGENES_COLOR[0] ?? 'placeholder.jpg'}`, { quality: 75 });
+        return `${base}${IMAGENES_COLOR[0] ?? 'placeholder.jpg'}`;
     }
     const indice = ((id % TOTAL) + TOTAL) % TOTAL;
-    return photonUrl(`${base}${IMAGENES_COLOR[indice]}`, { quality: 75 });
+    return `${base}${IMAGENES_COLOR[indice]}`;
 };
 
 /*
@@ -59,5 +63,5 @@ export const obtenerImagenColorPorTexto = (texto: string): string => {
         hash |= 0;
     }
     const indice = ((hash % TOTAL) + TOTAL) % TOTAL;
-    return photonUrl(`${base}${IMAGENES_COLOR[indice]}`, { quality: 75 });
+    return `${base}${IMAGENES_COLOR[indice]}`;
 };

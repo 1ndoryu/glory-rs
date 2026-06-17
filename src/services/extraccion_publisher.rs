@@ -237,6 +237,9 @@ impl ExtraccionPublisherService {
                 mostrar_en_comunidad: true,
                 metadata: metadata_sample,
                 sync_upload: false,
+                cancion_origen_id: None,
+                relacion_sampleo_id: None,
+                imagen_url: None,
             },
         )
         .await

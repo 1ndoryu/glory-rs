@@ -29,8 +29,8 @@ use crate::repositories::{
     ReportRepository, SampleListFilters, SampleRepository, SampleSortOrder, SampleTextSearch,
     AUTO_HIDE_SAMPLE_REPORT_THRESHOLD,
 };
-use crate::services::SampleCatalogService;
 use crate::services::build_sample_summary;
+use crate::services::SampleCatalogService;
 use crate::AppState;
 
 #[derive(Debug, Clone, Deserialize, IntoParams)]
@@ -95,9 +95,7 @@ fn parse_feed_mode(raw: Option<&str>) -> FeedMode {
     }
 }
 
-fn build_text_search(
-    query: &FeedQuery,
-) -> Result<Option<SampleTextSearch>, AppError> {
+fn build_text_search(query: &FeedQuery) -> Result<Option<SampleTextSearch>, AppError> {
     let Some(raw) = query.busqueda.as_ref() else {
         return Ok(None);
     };
@@ -189,8 +187,8 @@ pub async fn get_feed(
     /* Recientes / trending / busqueda → SampleListFilters con sort explicito.
      * `page` se calcula desde el offset normalizado para reusar la paginacion
      * 1-based del repositorio sin duplicar logica. */
-    let page = (i64::try_from(offset).unwrap_or(0) / i64::try_from(limit).unwrap_or(DEFAULT_LIMIT))
-        + 1;
+    let page =
+        (i64::try_from(offset).unwrap_or(0) / i64::try_from(limit).unwrap_or(DEFAULT_LIMIT)) + 1;
     let sort = match mode {
         FeedMode::Trending => SampleSortOrder::Trending,
         FeedMode::Recientes => SampleSortOrder::Recent,
@@ -214,12 +212,10 @@ pub async fn get_feed(
     let items: Vec<SampleSummary> = result
         .items
         .into_iter()
-        .map(|record| {
-            build_sample_summary(record, state.public_base_url.as_deref())
-        })
+        .map(|record| build_sample_summary(record, state.public_base_url.as_deref()))
         .collect();
-    let hay_mas = (i64::try_from(offset).unwrap_or(0) + i64::try_from(items.len()).unwrap_or(0))
-        < total;
+    let hay_mas =
+        (i64::try_from(offset).unwrap_or(0) + i64::try_from(items.len()).unwrap_or(0)) < total;
 
     Ok(Json(FeedResponse {
         items,

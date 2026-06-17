@@ -4,8 +4,8 @@ use serde::{Deserialize, Serialize};
 use validator::Validate;
 
 use super::support::{
-    fetch_artist_detail_by_slug, fetch_relation_detail, fetch_song_detail_by_slug,
-    DEFAULT_CHAIN_DEPTH, DEFAULT_LIMIT, DEFAULT_PAGE, DEFAULT_PER_PAGE,
+    fetch_artist_detail_by_slug, fetch_relation_detail, fetch_song_detail_by_id,
+    fetch_song_detail_by_slug, DEFAULT_CHAIN_DEPTH, DEFAULT_LIMIT, DEFAULT_PAGE, DEFAULT_PER_PAGE,
 };
 use crate::errors::AppError;
 #[allow(unused_imports)]
@@ -408,4 +408,76 @@ pub async fn get_song_samples(
         .collect();
 
     Ok(Json(SongSamplesResponse { data }))
+}
+
+/* [166A-6] GET /canciones/aleatorio — canción aleatoria con detalle completo.
+ * Acepta filtros opcionales: generos (comma-separated), decadas (años, ej: 1960=decada 60s).
+ * Útil para el modal de descubrimiento en frontend. */
+#[derive(Debug, Deserialize, utoipa::IntoParams)]
+pub struct RandomSongQuery {
+    pub generos: Option<String>,
+    pub decadas: Option<String>,
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/canciones/aleatorio",
+    tag = "music",
+    params(RandomSongQuery),
+    responses(
+        (status = 200, description = "Canción aleatoria con detalle completo", body = SongDetailResponse),
+        (status = 404, description = "No hay canciones que coincidan", body = ErrorResponse)
+    )
+)]
+pub async fn get_random_song(
+    State(state): State<AppState>,
+    Query(query): Query<RandomSongQuery>,
+) -> Result<Json<SongDetailResponse>, AppError> {
+    let generos: Vec<String> = query
+        .generos
+        .as_deref()
+        .map(|s| {
+            s.split(',')
+                .map(str::trim)
+                .filter(|g| !g.is_empty())
+                .map(String::from)
+                .collect()
+        })
+        .unwrap_or_default();
+
+    let decadas: Vec<i32> = query
+        .decadas
+        .as_deref()
+        .map(|s| {
+            s.split(',')
+                .filter_map(|d| d.trim().parse::<i32>().ok())
+                .collect()
+        })
+        .unwrap_or_default();
+
+    let song = MusicRepository::find_random_song(&state.pool, &generos, &decadas)
+        .await?
+        .ok_or_else(|| AppError::NotFound("No se encontraron canciones con esos filtros".into()))?;
+
+    fetch_song_detail_by_id(&state, song.id).await.map(Json)
+}
+
+/* [166A-6] GET /canciones/generos — lista de géneros distintos del catálogo.
+ * Usado por el modal de descubrimiento para poblar el selector de filtros. */
+#[derive(Debug, Serialize, utoipa::ToSchema)]
+pub struct GenresResponse {
+    pub data: Vec<String>,
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/canciones/generos",
+    tag = "music",
+    responses((status = 200, description = "Géneros disponibles", body = GenresResponse))
+)]
+pub async fn get_song_genres(
+    State(state): State<AppState>,
+) -> Result<Json<GenresResponse>, AppError> {
+    let data = MusicRepository::list_genres(&state.pool).await?;
+    Ok(Json(GenresResponse { data }))
 }

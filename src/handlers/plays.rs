@@ -92,9 +92,7 @@ pub async fn register_play(
             .fetch_optional(&state.pool)
             .await?;
     if exists.is_none() {
-        return Err(AppError::NotFound(format!(
-            "sample {sample_id} no existe"
-        )));
+        return Err(AppError::NotFound(format!("sample {sample_id} no existe")));
     }
 
     /* TODO(174A-58 follow-up): rate limit 60/min por usuario cuando exista

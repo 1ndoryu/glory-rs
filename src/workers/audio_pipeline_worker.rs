@@ -69,8 +69,10 @@ impl AudioPipelineWorker {
                             "panic en process_job; reagendando job",
                         );
                         if let Err(repo_error) =
-                            ProcessingQueueRepository::reset_audio_job_to_pending(&self.pool, job_id)
-                                .await
+                            ProcessingQueueRepository::reset_audio_job_to_pending(
+                                &self.pool, job_id,
+                            )
+                            .await
                         {
                             tracing::error!(
                                 worker = self.worker_index,

@@ -1,5 +1,6 @@
 use sqlx::types::Json;
 use sqlx::PgPool;
+use std::fmt::Write;
 
 use super::support::{
     map_relation_chain_node, map_relation_summary, map_song_artist_link, RelationChainNodeRecord,
@@ -407,5 +408,76 @@ impl MusicRepository {
         .await?;
 
         rows.into_iter().map(map_relation_chain_node).collect()
+    }
+
+    pub async fn list_genres(pool: &PgPool) -> Result<Vec<String>, AppError> {
+        let rows = sqlx::query_scalar!(
+            r#"SELECT DISTINCT genero
+                 FROM canciones
+                WHERE genero IS NOT NULL AND genero != ''
+                ORDER BY genero"#
+        )
+        .fetch_all(pool)
+        .await?;
+        Ok(rows.into_iter().flatten().collect())
+    }
+
+    pub async fn find_random_song(
+        pool: &PgPool,
+        generos: &[String],
+        decadas: &[i32],
+    ) -> Result<Option<MusicSong>, AppError> {
+        let base_select = r"
+            SELECT c.id, c.titulo, c.slug, c.artista_id,
+                   c.album, c.sello, c.anio, c.duracion_segundos,
+                   c.genero, c.youtube_id, c.spotify_id,
+                   c.imagen_url, c.whosampled_url, c.bpm, c.tonalidad,
+                   COALESCE(c.metadata, '{}'::jsonb) AS metadata,
+                   COALESCE(c.total_sampleada, 0) AS total_sampleada,
+                   COALESCE(c.total_samplea, 0) AS total_samplea,
+                   COALESCE(c.total_likes, 0) AS total_likes,
+                   COALESCE(c.total_comentarios, 0) AS total_comentarios,
+                   c.created_at, c.updated_at,
+                   a.nombre AS artista_nombre, a.slug AS artista_slug
+              FROM canciones c
+              INNER JOIN artistas_musicales a ON a.id = c.artista_id
+              WHERE 1=1
+        ";
+
+        let mut sql = base_select.trim().to_string();
+        let mut param_idx = 0u32;
+
+        if !generos.is_empty() {
+            param_idx += 1;
+            let _ = write!(sql, " AND c.genero = ANY(${param_idx})");
+        }
+
+        if !decadas.is_empty() {
+            let mut parts = Vec::new();
+            for _ in decadas {
+                param_idx += 2;
+                parts.push(format!(
+                    "(c.anio >= ${} AND c.anio < ${})",
+                    param_idx - 1,
+                    param_idx
+                ));
+            }
+            let _ = write!(sql, " AND ({})", parts.join(" OR "));
+        }
+
+        sql.push_str(" ORDER BY RANDOM() LIMIT 1");
+
+        let mut query = sqlx::query_as::<_, MusicSong>(&sql);
+
+        if !generos.is_empty() {
+            query = query.bind(generos.to_vec());
+        }
+
+        for &d in decadas {
+            query = query.bind(i16::try_from(d).unwrap_or(0));
+            query = query.bind(i16::try_from(d + 10).unwrap_or(0));
+        }
+
+        query.fetch_optional(pool).await.map_err(AppError::from)
     }
 }

@@ -165,7 +165,8 @@ pub async fn image_proxy(
 }
 
 fn resolve_source_path(state: &AppState, path: &str) -> (PathBuf, PathBuf) {
-    if path.starts_with("assets/") {
+    /* assets/ y legacy-assets/ se sirven desde el directorio estático (frontend/public) */
+    if path.starts_with("assets/") || path.starts_with("legacy-assets/") {
         let root = state
             .static_dir
             .as_deref()
@@ -173,10 +174,12 @@ fn resolve_source_path(state: &AppState, path: &str) -> (PathBuf, PathBuf) {
         return (root.clone(), root.join(path));
     }
 
+    /* El resto (uploads/) se sirve desde el directorio de uploads */
     let root = PathBuf::from("uploads");
     (root.clone(), root.join(path))
 }
 
 pub fn routes() -> Router<AppState> {
-    Router::new().route("/api/img/*path", get(image_proxy))
+    /* [166A-5] Sin prefijo /api porque api_routes() ya está anidada bajo .nest("/api", ...) */
+    Router::new().route("/img/*path", get(image_proxy))
 }

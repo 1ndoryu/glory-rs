@@ -65,7 +65,7 @@ pub struct MusicArtist {
     pub updated_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema, sqlx::FromRow)]
 pub struct MusicSong {
     pub id: i32,
     pub titulo: String,

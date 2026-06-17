@@ -90,6 +90,10 @@ symphonia = { version = "0.5", features = ["all-codecs", "all-formats"] }
 rustfft = "6"
 ndarray = "0.16"
 
+# Image processing (on-demand optimization, 104A-5)
+image = { version = "0.25", default-features = false, features = ["jpeg", "png", "webp", "gif"] }
+webp = { version = "0.2", default-features = false }
+
 # Concurrencia
 dashmap = "6"
 parking_lot = "0.12"

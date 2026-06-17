@@ -84,10 +84,7 @@ impl ProcessingQueueRepository {
 
     /* [294A-5] Reagendar un job que fue interrumpido por un panic. No incrementa
      * intentos para no penalizar al sample por un bug del worker. */
-    pub async fn reset_audio_job_to_pending(
-        pool: &PgPool,
-        job_id: i32,
-    ) -> Result<(), sqlx::Error> {
+    pub async fn reset_audio_job_to_pending(pool: &PgPool, job_id: i32) -> Result<(), sqlx::Error> {
         sqlx::query!(
             "UPDATE cola_procesamiento_ia
              SET estado = 'pendiente',

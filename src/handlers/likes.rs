@@ -1,10 +1,10 @@
-use axum::extract::{Query, State};
+use axum::extract::State;
 use axum::http::StatusCode;
 use axum::routing::{delete, post};
 use axum::{Json, Router};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
-use utoipa::{IntoParams, ToSchema};
+use utoipa::ToSchema;
 
 use crate::algorithm::InteractionKind;
 use crate::errors::AppError;
@@ -37,8 +37,8 @@ pub struct LikeRequest {
     pub reaccion: Option<String>,
 }
 
-#[derive(Debug, Clone, Deserialize, IntoParams)]
-pub struct UnlikeQuery {
+#[derive(Debug, Clone, Deserialize, ToSchema)]
+pub struct UnlikeRequest {
     pub tipo: String,
     pub target_id: i32,
 }
@@ -123,7 +123,7 @@ pub async fn create_like(
     delete,
     path = "/api/like",
     tag = "social",
-    params(UnlikeQuery),
+    request_body = UnlikeRequest,
     security(("bearer_auth" = [])),
     responses(
         (status = 200, description = "Reacción eliminada", body = LikeResponse),
@@ -134,7 +134,7 @@ pub async fn create_like(
 pub async fn delete_like(
     State(state): State<AppState>,
     user: CurrentUser,
-    Query(q): Query<UnlikeQuery>,
+    Json(q): Json<UnlikeRequest>,
 ) -> Result<(StatusCode, Json<LikeResponse>), AppError> {
     let kind = LikeKind::from_str(&q.tipo)?;
     LikeRepository::delete_reaction(&state.pool, user.user_id, kind, q.target_id).await?;

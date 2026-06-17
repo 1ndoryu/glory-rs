@@ -58,4 +58,8 @@ pub struct AppState {
     /* [224A-2] Flag de dev: bypasa check-duplicate para permitir re-subida
      * del mismo audio. Solo activar con ALLOW_DUPLICATE_UPLOADS=true en local. */
     pub allow_duplicate_uploads: bool,
+    /* [104A-5] Directorio raíz de assets estáticos (frontend/public).
+     * El proxy de imágenes lo usa para servir archivos fuera de uploads/
+     * (assets/, legacy-assets/). */
+    pub static_dir: Option<String>,
 }

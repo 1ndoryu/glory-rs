@@ -311,34 +311,75 @@ fn build_sample_detail(
     let extraccion = if has_extraccion {
         /* QQ23: Extraer campos del JSONB metadata_extraccion */
         let (
-            fuente_titulo, fuente_artista,
-            dest_titulo, dest_artista,
-            tipo_elemento, recorte_por_compas, formato,
+            fuente_titulo,
+            fuente_artista,
+            dest_titulo,
+            dest_artista,
+            tipo_elemento,
+            recorte_por_compas,
+            formato,
             descarga_metodo,
-            descarga_fuente_url, descarga_fuente_titulo, descarga_fuente_artista,
-            votos_total, duracion_extraida, tamano_bytes
-        ) = record.extraccion_metadata.as_ref()
+            descarga_fuente_url,
+            descarga_fuente_titulo,
+            descarga_fuente_artista,
+            votos_total,
+            duracion_extraida,
+            tamano_bytes,
+        ) = record
+            .extraccion_metadata
+            .as_ref()
             .and_then(|v| v.as_object())
-            .map_or((None, None, None, None, None, None, None, None, None, None, None, None, None, None), |obj| {
-                #[allow(clippy::cast_possible_truncation, clippy::redundant_closure_for_method_calls)]
-                let i = |k: &str| obj.get(k).and_then(|v| v.as_i64()).map(|n| n as i32);
+            .map_or(
                 (
-                    obj.get("fuente_titulo").and_then(|v| v.as_str()).map(std::string::ToString::to_string),
-                    obj.get("fuente_artista").and_then(|v| v.as_str()).map(std::string::ToString::to_string),
-                    obj.get("destino_titulo").and_then(|v| v.as_str()).map(std::string::ToString::to_string),
-                    obj.get("destino_artista").and_then(|v| v.as_str()).map(std::string::ToString::to_string),
-                    obj.get("tipo_elemento").and_then(|v| v.as_str()).map(std::string::ToString::to_string),
-                    obj.get("recorte_por_compas").and_then(|v| v.as_str()).map(std::string::ToString::to_string),
-                    obj.get("formato").and_then(|v| v.as_str()).map(std::string::ToString::to_string),
-                    obj.get("descarga_metodo").and_then(|v| v.as_str()).map(std::string::ToString::to_string),
-                    obj.get("descarga_fuente_url").and_then(|v| v.as_str()).map(std::string::ToString::to_string),
-                    obj.get("descarga_fuente_titulo").and_then(|v| v.as_str()).map(std::string::ToString::to_string),
-                    obj.get("descarga_fuente_artista").and_then(|v| v.as_str()).map(std::string::ToString::to_string),
-                    i("votos_total"),
-                    obj.get("duracion").and_then(serde_json::Value::as_f64),
-                    i("tamano_bytes"),
-                )
-            });
+                    None, None, None, None, None, None, None, None, None, None, None, None, None,
+                    None,
+                ),
+                |obj| {
+                    #[allow(
+                        clippy::cast_possible_truncation,
+                        clippy::redundant_closure_for_method_calls
+                    )]
+                    let i = |k: &str| obj.get(k).and_then(|v| v.as_i64()).map(|n| n as i32);
+                    (
+                        obj.get("fuente_titulo")
+                            .and_then(|v| v.as_str())
+                            .map(std::string::ToString::to_string),
+                        obj.get("fuente_artista")
+                            .and_then(|v| v.as_str())
+                            .map(std::string::ToString::to_string),
+                        obj.get("destino_titulo")
+                            .and_then(|v| v.as_str())
+                            .map(std::string::ToString::to_string),
+                        obj.get("destino_artista")
+                            .and_then(|v| v.as_str())
+                            .map(std::string::ToString::to_string),
+                        obj.get("tipo_elemento")
+                            .and_then(|v| v.as_str())
+                            .map(std::string::ToString::to_string),
+                        obj.get("recorte_por_compas")
+                            .and_then(|v| v.as_str())
+                            .map(std::string::ToString::to_string),
+                        obj.get("formato")
+                            .and_then(|v| v.as_str())
+                            .map(std::string::ToString::to_string),
+                        obj.get("descarga_metodo")
+                            .and_then(|v| v.as_str())
+                            .map(std::string::ToString::to_string),
+                        obj.get("descarga_fuente_url")
+                            .and_then(|v| v.as_str())
+                            .map(std::string::ToString::to_string),
+                        obj.get("descarga_fuente_titulo")
+                            .and_then(|v| v.as_str())
+                            .map(std::string::ToString::to_string),
+                        obj.get("descarga_fuente_artista")
+                            .and_then(|v| v.as_str())
+                            .map(std::string::ToString::to_string),
+                        i("votos_total"),
+                        obj.get("duracion").and_then(serde_json::Value::as_f64),
+                        i("tamano_bytes"),
+                    )
+                },
+            );
 
         Some(ExtraccionSampleResponse {
             youtube_id: record.extraccion_youtube_id.clone(),
@@ -376,7 +417,8 @@ fn build_sample_detail(
     };
 
     /* [166A-1] Construir URL de WhoSampled desde whosampled_id */
-    let whosampled_url = record.relacion_sampleo_whosampled_id
+    let whosampled_url = record
+        .relacion_sampleo_whosampled_id
         .map(|id| format!("https://www.whosampled.com/sample/{id}/"));
 
     SampleDetailResponse {

@@ -19,6 +19,8 @@ use crate::repositories::{CreateUploadSampleParams, ProfileRepository, SampleRep
 use crate::services::IdempotencyStore;
 use crate::AppState;
 
+const MAX_PORTADA_BYTES: usize = 5 * 1024 * 1024; // 5 MB
+
 const MAX_JSON_HASH_BODY_BYTES: usize = 8 * 1024;
 const MAX_HASH_STREAM_BYTES: u64 = 256 * 1024 * 1024;
 const MAX_AUDIO_UPLOAD_BYTES: usize = 50 * 1024 * 1024;
@@ -209,12 +211,39 @@ pub async fn upload(
         .put_bytes(&storage_key, &parsed.audio_bytes)
         .await?;
 
-    let metadata = serde_json::json!({
+    /* [166A-6] Subir portada si se proporciono. */
+    let imagen_url = if let Some(portada_bytes) = &parsed.portada_bytes {
+        let ext = parsed
+            .portada_filename
+            .as_deref()
+            .and_then(|name| std::path::Path::new(name).extension())
+            .and_then(|ext| ext.to_str())
+            .unwrap_or("jpg");
+        let portada_key = format!(
+            "samples/{user}/portadas/{slug}.{ext}",
+            user = user.user_id,
+            slug = slug,
+            ext = ext
+        );
+        state.storage.put_bytes(&portada_key, portada_bytes).await?;
+        Some(build_upload_url(&state, &portada_key))
+    } else {
+        None
+    };
+
+    let mut metadata = serde_json::json!({
         "filename_original": parsed.original_filename,
         "mime_type": parsed.formato.mime(),
         "sync_upload": parsed.sync_upload,
         "origen_subida": parsed.origen_subida,
     });
+    /* Preservar relacion_id en metadata como el legado hace. */
+    if let Some(ref relacion_id) = parsed.relacion_id {
+        metadata["relacion_id"] = serde_json::json!(relacion_id);
+    }
+    if let Some(ref lado_relacion) = parsed.lado_relacion {
+        metadata["lado_extraccion"] = serde_json::json!(lado_relacion);
+    }
 
     let created = match SampleRepository::create_upload_sample(
         &state.pool,
@@ -236,6 +265,9 @@ pub async fn upload(
             mostrar_en_comunidad: parsed.mostrar_en_comunidad,
             metadata,
             sync_upload: parsed.sync_upload,
+            cancion_origen_id: parsed.cancion_origen_id,
+            relacion_sampleo_id: parsed.relacion_id,
+            imagen_url: imagen_url.as_deref(),
         },
     )
     .await
@@ -246,6 +278,20 @@ pub async fn upload(
             return Err(AppError::from(error));
         }
     };
+
+    /* [166A-6] Si hay relacion_id + lado_relacion, vincular el sample a la relacion. */
+    if let (Some(relacion_id), Some(ref lado_relacion)) = (parsed.relacion_id, parsed.lado_relacion)
+    {
+        SampleRepository::update_relacion_sample_link(
+            &state.pool,
+            relacion_id,
+            created.id,
+            lado_relacion,
+            parsed.inicio_segundos,
+            parsed.tipo_elemento.as_deref(),
+        )
+        .await?;
+    }
 
     let response = UploadSampleResponse {
         ok: true,
@@ -333,6 +379,14 @@ struct ParsedUpload {
     precio: Option<f64>,
     formato: AudioUploadFormat,
     audio_bytes: Vec<u8>,
+    /* [166A-6] Campos relacionales y portada para el flujo "subir sample de esta cancion". */
+    cancion_origen_id: Option<i32>,
+    relacion_id: Option<i32>,
+    lado_relacion: Option<String>,
+    inicio_segundos: Option<i32>,
+    tipo_elemento: Option<String>,
+    portada_bytes: Option<Vec<u8>>,
+    portada_filename: Option<String>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -381,6 +435,14 @@ async fn parse_upload_multipart(mut multipart: Multipart) -> Result<ParsedUpload
     let mut precio: Option<f64> = None;
     let mut formato: Option<AudioUploadFormat> = None;
     let mut audio_bytes: Option<Vec<u8>> = None;
+    /* [166A-6] Campos relacionales y portada. */
+    let mut cancion_origen_id: Option<i32> = None;
+    let mut relacion_id: Option<i32> = None;
+    let mut lado_relacion: Option<String> = None;
+    let mut inicio_segundos: Option<i32> = None;
+    let mut tipo_elemento: Option<String> = None;
+    let mut portada_bytes: Option<Vec<u8>> = None;
+    let mut portada_filename: Option<String> = None;
 
     while let Some(field) = multipart
         .next_field()
@@ -442,6 +504,69 @@ async fn parse_upload_multipart(mut multipart: Multipart) -> Result<ParsedUpload
                     precio = Some(parsed);
                 }
             }
+            /* [166A-6] Campos relacionales para "subir sample de esta cancion". */
+            "cancion_origen_id" => {
+                let raw = field.text().await.unwrap_or_default().trim().to_string();
+                if !raw.is_empty() {
+                    cancion_origen_id =
+                        Some(raw.parse::<i32>().map_err(|_| {
+                            AppError::BadRequest("cancion_origen_id invalido".into())
+                        })?);
+                }
+            }
+            "relacion_id" => {
+                let raw = field.text().await.unwrap_or_default().trim().to_string();
+                if !raw.is_empty() {
+                    relacion_id = Some(
+                        raw.parse::<i32>()
+                            .map_err(|_| AppError::BadRequest("relacion_id invalido".into()))?,
+                    );
+                }
+            }
+            "lado_relacion" => {
+                let value = field.text().await.unwrap_or_default().trim().to_string();
+                if !value.is_empty() {
+                    if value != "fuente" && value != "destino" {
+                        return Err(AppError::BadRequest(
+                            "lado_relacion debe ser 'fuente' o 'destino'".into(),
+                        ));
+                    }
+                    lado_relacion = Some(value);
+                }
+            }
+            "inicio_segundos" => {
+                let raw = field.text().await.unwrap_or_default().trim().to_string();
+                if !raw.is_empty() {
+                    let segundos = raw
+                        .parse::<i32>()
+                        .map_err(|_| AppError::BadRequest("inicio_segundos invalido".into()))?;
+                    if segundos < 0 {
+                        return Err(AppError::BadRequest(
+                            "inicio_segundos no puede ser negativo".into(),
+                        ));
+                    }
+                    inicio_segundos = Some(segundos);
+                }
+            }
+            "tipo_elemento" => {
+                let value = field.text().await.unwrap_or_default().trim().to_string();
+                if !value.is_empty() {
+                    tipo_elemento = Some(value);
+                }
+            }
+            /* [166A-6] Portada del sample (imagen opcional). */
+            "portada" => {
+                if portada_bytes.is_some() {
+                    return Err(AppError::BadRequest(
+                        "solo se permite una imagen de portada".into(),
+                    ));
+                }
+                portada_filename = field.file_name().map(ToString::to_string);
+                let bytes = collect_multipart_bytes(field, MAX_PORTADA_BYTES).await?;
+                if !bytes.is_empty() {
+                    portada_bytes = Some(bytes);
+                }
+            }
             _ => {}
         }
     }
@@ -483,6 +608,14 @@ async fn parse_upload_multipart(mut multipart: Multipart) -> Result<ParsedUpload
         precio,
         formato,
         audio_bytes,
+        /* [166A-6] Campos relacionales y portada. */
+        cancion_origen_id,
+        relacion_id,
+        lado_relacion,
+        inicio_segundos,
+        tipo_elemento,
+        portada_bytes,
+        portada_filename,
     })
 }
 

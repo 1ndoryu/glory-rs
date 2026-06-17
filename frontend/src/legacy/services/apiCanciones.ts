@@ -16,7 +16,57 @@ import type {
     RelacionSample,
     CancionArtista,
 } from '@app/types/cancion';
-
+/* [166A-6] Llamada directa a la API Rust (/api/) sin pasar por WordPress REST.
+ * Útil para endpoints migrados que ya no existen en el backend PHP. */
+async function apiGetRust<T>(
+    endpoint: string,
+    params?: Record<string, string>,
+): Promise<RespuestaApi<T>> {
+    const queryStr =
+        params && Object.keys(params).length > 0
+            ? '?' + new URLSearchParams(params).toString()
+            : '';
+    try {
+        const res = await fetch(`/api${endpoint}${queryStr}`, {
+            credentials: 'same-origin',
+            cache: 'no-store',
+            headers: { Accept: 'application/json' },
+        });
+        const status = res.status;
+        const text = await res.text();
+        if (!text.trim()) {
+            return { ok: false, data: null, error: 'Respuesta vacía', status };
+        }
+        let json: unknown;
+        try {
+            json = JSON.parse(text);
+        } catch {
+            return {
+                ok: false,
+                data: null,
+                error: `JSON inválido: ${text.slice(0, 200)}`,
+                status,
+            };
+        }
+        if (!res.ok) {
+            const errObj = json as Record<string, unknown> | undefined;
+            return {
+                ok: false,
+                data: null,
+                error: (errObj?.error as string) ?? `Error ${status}`,
+                status,
+            };
+        }
+        return { ok: true, data: json as T, error: null, status };
+    } catch (err) {
+        return {
+            ok: false,
+            data: null,
+            error: err instanceof Error ? err.message : 'Error de red',
+            status: 0,
+        };
+    }
+}
 /* [274A-4] Normalizador snake_case → camelCase para respuestas de canciones.
  * El backend Rust serializa con serde default (snake_case), pero los componentes
  * legacy esperan camelCase. Tolerante: si ya viene en camelCase, lo respeta.
@@ -159,21 +209,40 @@ export const obtenerCancionDetalle = async (
     };
 };
 
-/* [223A-4][223A-3-E] Canción aleatoria con detalle completo para modal descubrimiento.
- * Acepta filtros opcionales de género y década (comma-separated). */
-export const obtenerCancionAleatoria = (
+/* [223A-4][223A-3-E][166A-6] Canción aleatoria con detalle completo para modal descubrimiento.
+ * Migrado a Rust API. Acepta filtros opcionales de género y década (comma-separated).
+ * Normaliza snake_case → camelCase para samplesDe/sampleadaEn. */
+export const obtenerCancionAleatoria = async (
     generos?: string[],
     decadas?: number[]
 ): Promise<RespuestaApi<CancionDetalle>> => {
     const params: Record<string, string> = {};
     if (generos && generos.length > 0) params.generos = generos.join(',');
     if (decadas && decadas.length > 0) params.decadas = decadas.join(',');
-    return apiGet<CancionDetalle>('/canciones/aleatorio', params);
+    const resp = await apiGetRust<CancionDetalle>(
+        '/canciones/aleatorio',
+        Object.keys(params).length > 0 ? params : undefined,
+    );
+    if (!resp.ok || !resp.data) return resp;
+    const raw = resp.data as unknown as RawObj;
+    const samplesDeRaw = (raw.samplesDe ?? raw.samples_de ?? []) as unknown[];
+    const sampleadaEnRaw = (raw.sampleadaEn ?? raw.sampleada_en ?? []) as unknown[];
+    const artistasRaw = (raw.artistas ?? []) as unknown[];
+    return {
+        ...resp,
+        data: {
+            cancion: normalizarCancion(raw.cancion ?? raw),
+            artistas: artistasRaw.map(normalizarArtista),
+            samplesDe: samplesDeRaw.map(normalizarRelacion),
+            sampleadaEn: sampleadaEnRaw.map(normalizarRelacion),
+        },
+    };
 };
 
-/* [223A-3-E] Géneros distintos disponibles en el catálogo de canciones */
+/* [223A-3-E][166A-6] Géneros distintos disponibles en el catálogo de canciones.
+ * Migrado a Rust API. */
 export const obtenerGenerosCanciones = (): Promise<RespuestaApi<string[]>> =>
-    apiGet<string[]>('/canciones/generos');
+    apiGetRust<string[]>('/canciones/generos');
 
 /* Top artistas por canciones */
 export const artistasTop = (

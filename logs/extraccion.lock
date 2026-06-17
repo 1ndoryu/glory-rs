@@ -1,10 +1,10 @@
 {
   "nombre": "extraccion",
-  "estado": "stopped",
-  "pid": null,
-  "iniciado_at": "2026-04-25T08:10:39.388689200Z",
-  "ultimo_log": "2026-04-25T08:10:39.388691400Z",
-  "progreso": 100.0,
+  "estado": "running",
+  "pid": 29204,
+  "iniciado_at": "2026-06-16T16:30:01.173372300Z",
+  "ultimo_log": "2026-06-16T16:30:01.173373Z",
+  "progreso": null,
   "error": null,
   "resultado": null
 }

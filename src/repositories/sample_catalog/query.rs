@@ -324,9 +324,8 @@ pub(super) fn push_public_order(
                 );
             }
             SampleSortOrder::Recent | SampleSortOrder::Smart => {
-                builder.push(
-                    " ORDER BY s.publicado_at DESC NULLS LAST, s.created_at DESC, s.id DESC",
-                );
+                builder
+                    .push(" ORDER BY s.publicado_at DESC NULLS LAST, s.created_at DESC, s.id DESC");
             }
         }
     }
