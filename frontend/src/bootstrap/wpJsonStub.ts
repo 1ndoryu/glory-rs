@@ -193,6 +193,97 @@ function adaptarBody(rustPath: string, bodyText: string): string {
     return bodyText;
 }
 
+/* Adapta SampleRelationDetail (Rust, snake_case) a RelacionDetalleCompleta (frontend, naming mixto).
+ * La mayoria de campos de canciones se mantienen en snake_case (fuente_titulo, destino_slug, etc.)
+ * mientras que campos relacionales/contadores van en camelCase (timingsDestino, totalLikes, etc.)
+ * y algunos tienen nombre distinto (fuente_imagen_url → fuente_imagen). */
+function adaptarRelacionDetalle(rust: Record<string, unknown>): Record<string, unknown> {
+    const r: Record<string, unknown> = {};
+
+    /* Mapeo directo: snake_case en Rust → nombre exacto que espera el frontend */
+    const MAP: Record<string, string> = {
+        /* Igual (se usa el mismo nombre en Rust y frontend) */
+        'id': 'id',
+        'fuente': 'fuente',
+        'verificada': 'verificada',
+        'fuente_titulo': 'fuente_titulo',
+        'fuente_slug': 'fuente_slug',
+        'fuente_anio': 'fuente_anio',
+        'fuente_album': 'fuente_album',
+        'fuente_genero': 'fuente_genero',
+        'fuente_artista': 'fuente_artista',
+        'destino_titulo': 'destino_titulo',
+        'destino_slug': 'destino_slug',
+        'destino_anio': 'destino_anio',
+        'destino_album': 'destino_album',
+        'destino_genero': 'destino_genero',
+        'destino_artista': 'destino_artista',
+
+        /* CamelCase puro (snake_case → camelCase standard) */
+        'cancion_destino_id': 'cancionDestinoId',
+        'cancion_fuente_id': 'cancionFuenteId',
+        'whosampled_id': 'whosampledId',
+        'tipo_relacion': 'tipoRelacion',
+        'tipo_elemento': 'tipoElemento',
+        'timings_destino': 'timingsDestino',
+        'timings_fuente': 'timingsFuente',
+        'aparece_en_todo': 'apareceEnTodo',
+        'sample_id': 'sampleId',
+        'sample_fuente_id': 'sampleFuenteId',
+        'sample_destino_id': 'sampleDestinoId',
+        'votos_total': 'votosTotal',
+        'votos_promedio': 'votosPromedio',
+        'contribuidor_id': 'contribuidorId',
+        'contribuidor_username': 'contribuidorUsername',
+        'lado_extraccion': 'ladoExtraccion',
+        'total_likes': 'totalLikes',
+        'total_comentarios': 'totalComentarios',
+        'total_samples': 'totalSamples',
+        'updated_at': 'updatedAt',
+        'destino_samples_de': 'destinoSamplesDe',
+        'destino_sampleada_en': 'destinoSampleadaEn',
+        'fuente_samples_de': 'fuenteSamplesDe',
+        'fuente_sampleada_en': 'fuenteSampleadaEn',
+
+        /* Naming mixto: parte snake_case, parte camelCase (ej: fuente_youtubeId) */
+        'fuente_youtube_id': 'fuente_youtubeId',
+        'fuente_spotify_id': 'fuente_spotifyId',
+        'fuente_artista_slug': 'fuente_artistaSlug',
+        'destino_youtube_id': 'destino_youtubeId',
+        'destino_spotify_id': 'destino_spotifyId',
+        'destino_artista_slug': 'destino_artistaSlug',
+        'destino_imagen_url': 'destino_imagen',
+        'fuente_imagen_url': 'fuente_imagen',
+
+        /* Custom */
+        'created_at': 'creadoAt',
+    };
+
+    for (const [k, v] of Object.entries(rust)) {
+        const targetKey = MAP[k] ?? k;
+
+        /* Los arrays de SampleRelationSummary (destino_samples_de, etc.) necesitan
+         * conversion snake_case → camelCase en cada item */
+        if (Array.isArray(v) && (
+            k === 'destino_samples_de' || k === 'destino_sampleada_en' ||
+            k === 'fuente_samples_de' || k === 'fuente_sampleada_en'
+        )) {
+            r[targetKey] = v.map((item: unknown) =>
+                item !== null && typeof item === 'object' && !Array.isArray(item)
+                    ? convertKeys(item)
+                    : item
+            );
+        } else {
+            r[targetKey] = v;
+        }
+    }
+
+    /* liked y reaccion no estan en SampleRelationDetail de Rust — se dejan como undefined,
+     * que es coherente con el tipo opcional en RelacionDetalleCompleta. */
+
+    return r;
+}
+
 /* Adapta la respuesta Rust para endpoints con diferencia de estructura.
  * Devuelve el objeto modificado o el original si no necesita cambios. */
 function adaptarRespuesta(rustPath: string, json: unknown): unknown {
@@ -251,7 +342,10 @@ function adaptarRespuesta(rustPath: string, json: unknown): unknown {
             return adaptarUsuario(obj);
         }
     }
-
+    /* /relaciones/{id}: SampleRelationDetail (snake_case) → RelacionDetalleCompleta (naming mixto) */
+    if (rustPath.startsWith('/relaciones/')) {
+        return adaptarRelacionDetalle(obj);
+    }
     /* Listas de usuarios en respuestas paginadas ({ data: [], total: N })
      * que el backend admin devuelve */
     if (obj.data && Array.isArray(obj.data) && typeof obj.total === 'number') {
@@ -361,7 +455,8 @@ window.fetch = async (input, init) => {
         rustPath === '/auth/register' ||
         rustPath.startsWith('/auth/google') ||
         rustPath === '/users/me' ||
-        rustPath.startsWith('/users/');
+        rustPath.startsWith('/users/') ||
+        rustPath.startsWith('/relaciones/');
 
     if (!needsAdaptation) {
         return resp;

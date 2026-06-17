@@ -91,10 +91,10 @@ export const LadoCancionRelacion = ({
                     {genero && <Badge variante="neutro" tamano="xs">{genero}</Badge>}
                     {album && <Badge variante="neutro" tamano="xs">{album}</Badge>}
                 </div>
-                {timings.length > 0 && (
+                {(timings?.length ?? 0) > 0 && (
                     <div className="relacionDetalleTiming">
                         <ArrowRight size={14} />
-                        {formatearTimings(timings)}
+                        {formatearTimings(timings ?? [])}
                     </div>
                 )}
             </div>
