@@ -145,6 +145,13 @@ impl AlgoTimingLogger {
         )
     }
 
+    /// Vacía el historial completo.
+    pub fn clear(&self) {
+        if let Ok(mut hist) = self.history.write() {
+            hist.clear();
+        }
+    }
+
     #[must_use]
     pub const fn target_user_id(&self) -> i32 {
         self.target_user_id

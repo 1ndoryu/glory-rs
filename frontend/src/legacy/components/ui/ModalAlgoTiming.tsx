@@ -13,11 +13,14 @@ import '../../styles/componentes/modalAlgoTiming.css';
 
 type TabTiming = 'ultima' | 'promedio' | 'historial';
 
-/* Etiquetas legibles por etapa — extensible sin cambiar el modal */
+/* Etiquetas legibles por etapa — extensible sin cambiar el modal.
+ * Los nombres de etapa provienen del RecommenderService de Rust. */
 const ETIQUETAS: Record<string, string> = {
-    perfilUsuario: 'Perfil usuario',
-    generacionSQL: 'Generación SQL (PHP)',
-    sqlFeed: 'Query CTE feed (SQL)',
+    cache_fresh_hit: 'Cache fresco (hit)',
+    cache_fresh_miss: 'Cache fresco (miss)',
+    cache_stale_hit: 'Cache stale (hit)',
+    cache_stale_miss: 'Cache stale (miss)',
+    compute_and_cache: 'Cómputo + cache',
 };
 
 function etiquetaEtapa(clave: string): string {
