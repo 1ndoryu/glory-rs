@@ -13,6 +13,11 @@
 
 import { esDesktop } from './desktopService';
 import { obtenerToken } from './authDesktopService';
+/* [256A-1c] Import estático del adaptador Rust. Antes era import() dinámico, lo que causaba
+ * race condition: las requests de auth/sync se disparaban antes de que el .then() instalara
+ * el wrapper de fetch, resultando en requests a /wp-json/kamples/v1/* (500).
+ * Con import estático, instalarRustAdapter() se llama síncronamente en configurarApiDesktop(). */
+import { instalarRustAdapter } from './wpJsonRustAdapter';
 
 /*
  * URL base del servidor Kamples.
@@ -65,10 +70,12 @@ export function configurarApiDesktop(): void {
      * comportamiento legacy, pero el default es 'rust'.
      * Se instala ANTES de inyectarAuthHeader para que el orden de wrappers
      * sea: app fetch → desktop auth wrapper → rust adapter wrapper → real fetch. */
+    /* [256A-1c] Adaptador instalado síncronamente (import estático arriba).
+     * Elimina race condition donde requests a /wp-json/* se disparaban antes
+     * de que el import() dinámico resolviera su .then(). */
     const backend = (import.meta.env.VITE_KAMPLES_BACKEND as string | undefined)?.toLowerCase() || 'rust';
     if (backend === 'rust') {
-        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-        import('./wpJsonRustAdapter').then(({ instalarRustAdapter }) => instalarRustAdapter());
+        instalarRustAdapter();
     }
 
     const token = obtenerToken();
