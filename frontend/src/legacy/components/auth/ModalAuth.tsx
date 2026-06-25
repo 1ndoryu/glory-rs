@@ -208,7 +208,9 @@ export const ModalAuth = (): JSX.Element | null => {
         <div className={`authPantallaCompleta${puedesCerrar ? '' : ' authSoloFormulario'}`} role="dialog" aria-modal="true">
             {puedesCerrar && (
                 <aside className="authPanelImagen">
-                    <img src={imagenAuth} alt="Kamples" className="authImagen" loading="lazy" />
+                    {/* [256A-1c] Sin loading=lazy para evitar intervention del browser que pospone
+                     * la carga de la imagen en Tauri WebView. Se carga eager (por defecto). */}
+                    <img src={imagenAuth} alt="Kamples" className="authImagen" />
                 </aside>
             )}
             <section className="authPanelContenido">

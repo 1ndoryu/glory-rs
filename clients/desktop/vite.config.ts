@@ -33,6 +33,17 @@ export default defineConfig({
     /* Tauri espera un index.html estático servido por Vite */
     root: '.',
 
+    /*
+     * [256A-1c] Servir tanto el public/ del desktop como el de la SPA Rust.
+     * Esto permite que /legacy-assets/* (imagenes, SVGs, CSS del tema legacy)
+     * estén disponibles en el dev server de Tauri sin copiar archivos.
+     * Vite 6+ soporta arrays en publicDir.
+     */
+    publicDir: [
+        resolve(__dirname, 'public'),
+        resolve(__dirname, '../../frontend/public'),
+    ],
+
     build: {
         outDir: 'dist',
         emptyOutDir: true,
@@ -92,12 +103,16 @@ export default defineConfig({
         /*
          * [256A-1a] Permitir servir archivos del SPA Rust (frontend/src/).
          * Los paths del tema WordPress ya no son necesarios.
+         * [256A-1c] Incluir frontend/public para que Vite sirva legacy-assets
+         * y auth/ como estaticos en dev. Sin esto, resolverRutaAsset no puede
+         * cargar imagenes legacy en Tauri dev mode.
          */
         fs: {
             allow: [
                 '.',
                 '..',
                 '../../frontend/src',
+                '../../frontend/public',
             ],
         },
         hmr: {

@@ -50,7 +50,16 @@ function rebaseAsset(ruta: string): string {
  */
 export const resolverRutaAsset = (rutaRelativa: string): string => {
     if (esEntornoTauri()) {
-        /* En Tauri, si ya es absoluta con el dominio correcto, devolverla tal cual */
+        /* [256A-1c] En Tauri dev mode, usar el Vite dev server local que ahora
+         * sirve /legacy-assets/ gracias a publicDir extendido en vite.config.ts.
+         * En producción Tauri (APK/paquete), prefijar con servidor de producción. */
+        if (import.meta.env.DEV) {
+            const rutaNormalizada = rutaRelativa.startsWith(SERVIDOR_PROD)
+                ? rutaRelativa.slice(SERVIDOR_PROD.length)
+                : rutaRelativa;
+            return rebaseAsset(rutaNormalizada);
+        }
+        /* En producción Tauri, si ya es absoluta con el dominio correcto, devolverla tal cual */
         if (rutaRelativa.startsWith(SERVIDOR_PROD)) return rutaRelativa;
         return `${SERVIDOR_PROD}${rutaRelativa}`;
     }

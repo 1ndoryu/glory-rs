@@ -57,11 +57,15 @@ declare const __GOOGLE_CLIENT_ID__: string;
 export function configurarApiDesktop(): void {
     if (!esDesktop()) return;
 
-    /* [254A-7d] Si la build apunta a un backend Rust, instalar el adaptador
-     * que reescribe /wp-json/kamples/v1/* → /api/* y adapta los contratos.
+    /* [256A-1c] Instalar adaptador Rust siempre en desktop.
+     * El desktop siempre apunta al backend Rust (localhost:3000 en dev).
+     * El adaptador reescribe /wp-json/kamples/v1/* → /api/* y adapta
+     * los contratos (camelCase↔snake_case, email↔identifier).
+     * VITE_KAMPLES_BACKEND permite forzar 'wp' si alguien necesita el
+     * comportamiento legacy, pero el default es 'rust'.
      * Se instala ANTES de inyectarAuthHeader para que el orden de wrappers
      * sea: app fetch → desktop auth wrapper → rust adapter wrapper → real fetch. */
-    const backend = (import.meta.env.VITE_KAMPLES_BACKEND as string | undefined)?.toLowerCase();
+    const backend = (import.meta.env.VITE_KAMPLES_BACKEND as string | undefined)?.toLowerCase() || 'rust';
     if (backend === 'rust') {
         /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
         import('./wpJsonRustAdapter').then(({ instalarRustAdapter }) => instalarRustAdapter());
