@@ -107,19 +107,19 @@ Header `X-Kamples-Secret: <secret>` — comparar contra
 - `services/apiDesktopAdmin.ts`, `googleAuthMobile.ts`, `syncGuards.ts`,
   `sync.tsx` apuntan a `wp-json/`.
 
-### Plan
-1. Añadir submódulo o symlink que comparta `frontend/src/api/generated/`
-   con la SPA principal (evita duplicar cliente Orval).
-2. Reemplazar `apiDesktopAdmin` por hooks Orval correspondientes.
-3. Google OAuth: usar `useGooglePkce` ya generado (más seguro que el
-   flujo `googleAuthMobile` actual).
-4. `sync.tsx`: reemplazar polling cada 5min por WebSocket (`useWebSocket`
-   ya existe).
-5. Auto-updates Tauri:
-   - Endpoint `GET /api/desktop/latest` en backend que devuelva manifest
-     firmado (`{ version, url, signature }`).
-   - Configurar `tauri.conf.json → updater.endpoints`.
-6. Smoke test: build Windows + macOS.
+### ⚠️ PROBLEMA DETECTADO (2026-06-25): Aliases rotos
+Los aliases `@` → `../Glory/assets/react/src` y `@app` → `../App/React` apuntan a rutas del tema WordPress que **no existen** en el proyecto Rust. La SPA frontend (`frontend/src/`) ya tiene el código equivalente en `glory-core/` y `legacy/`.
+
+**Ver plan dedicado:** `Agente/planes/plan-portar-desktop-app-2026-06-25.md`
+
+### Plan original (actualizado)
+1. ✅ ~~Añadir submódulo~~ — Se implementó alias `@api` que apunta a `frontend/src/api/generated` (174A-111b).
+2. ⏳ **Repuntar aliases `@` y `@app`** al SPA Rust — BLOQUEANTE, plan dedicado.
+3. ⏳ Reemplazar `apiDesktopAdmin` por hooks Orval correspondientes (post-aliases).
+4. ⏳ Google OAuth: usar `useGooglePkce` ya generado (post-aliases).
+5. ⏳ `sync.tsx`: reemplazar polling cada 5min por WebSocket (`useWebSocket` ya existe).
+6. ⏳ Auto-updates Tauri — endpoint backend ya implementado (174A-111b).
+7. ⏳ Smoke test: build Windows + macOS.
 
 ### Riesgos
 - Tauri 2 firma de updates: requiere generar par de llaves

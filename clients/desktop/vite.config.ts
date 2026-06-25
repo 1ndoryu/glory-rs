@@ -1,62 +1,19 @@
-import { defineConfig, loadEnv, type Plugin } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { resolve } from 'path';
-import { existsSync } from 'fs';
 
 /*
  * Vite config para Kamples Desktop (Tauri 2.0)
- * [174A-111b] Migrado del backend WP a backend Axum (Rust). Reutiliza el
- * cliente Orval del SPA principal (frontend/src/api/generated) en vez de
- * re-generarlo. Los servicios legacy en src/services/* siguen apuntando a
- * `wp-json/` y deben migrarse a hooks Orval — ver TODO en cada archivo.
+ * [256A-1a] Aliases repuntados del tema WordPress al SPA Rust.
+ * @  → frontend/src/glory-core
+ * @app → frontend/src/legacy
  *
  * El proxy de dev redirige /api a KAMPLES_API_TARGET (env) o
  * http://localhost:3000 por defecto (backend Rust local).
  */
 
 const apiTarget = process.env.KAMPLES_API_TARGET || 'http://localhost:3000';
-
-/*
- * Raiz del tema (glorytemplate/) — los assets del tema estan aqui.
- * En dev, las rutas /wp-content/themes/glorytemplate/... deben servirse
- * del filesystem local, no proxiarse al servidor remoto.
- * Solo /wp-content/uploads/ (imagenes subidas por usuarios) va al proxy remoto.
- */
-const THEME_ROOT = resolve(__dirname, '..');
-const THEME_URL_PREFIX = '/wp-content/themes/glorytemplate/';
-
-/*
- * Plugin Vite para servir assets locales del tema.
- * Intercepta requests a /wp-content/themes/glorytemplate/... y los sirve
- * del filesystem local. Todo lo demas (/wp-content/uploads/, etc.) va al proxy.
- */
-function servirAssetsLocales(): Plugin {
-    return {
-        name: 'servir-assets-tema-local',
-        configureServer(server) {
-            server.middlewares.use((req, res, next) => {
-                if (!req.url?.startsWith(THEME_URL_PREFIX)) {
-                    next();
-                    return;
-                }
-                /* Extraer ruta relativa dentro del tema y buscar en filesystem */
-                const rutaRelativa = req.url.slice(THEME_URL_PREFIX.length).split('?')[0];
-                const rutaLocal = resolve(THEME_ROOT, rutaRelativa ?? '');
-
-                /* Seguridad: verificar que la ruta no escapa del tema (path traversal) */
-                if (!rutaLocal.startsWith(THEME_ROOT) || !existsSync(rutaLocal)) {
-                    next();
-                    return;
-                }
-
-                /* Dejar que el middleware statico de Vite sirva el archivo */
-                req.url = '/@fs/' + rutaLocal.replace(/\\/g, '/');
-                next();
-            });
-        },
-    };
-}
 
 /*
  * Cargar variables del .env del proyecto raiz (../) para reutilizar
@@ -66,7 +23,7 @@ function servirAssetsLocales(): Plugin {
 const envRaiz = loadEnv('production', resolve(__dirname, '..'), '');
 
 export default defineConfig({
-    plugins: [react(), tailwindcss(), servirAssetsLocales()],
+    plugins: [react(), tailwindcss()],
 
     /* Inyectar config publica del proyecto en el bundle (build time) */
     define: {
@@ -117,8 +74,8 @@ export default defineConfig({
                 changeOrigin: true,
                 secure: false,
             },
-            /* Compatibilidad transicional con servicios legacy aún apuntando a wp-json.
-             * TODO 174A-111b: eliminar cuando todos los services migren a Orval. */
+            /* [256A-1e] Proxy wp-json mantenido — apiDesktopAdapter.ts y wpJsonRustAdapter.ts
+             * aún lo usan. Eliminar cuando esos services migren a Orval (tarea separada). */
             '/wp-json': {
                 target: apiTarget,
                 changeOrigin: true,
@@ -133,18 +90,14 @@ export default defineConfig({
             },
         },
         /*
-         * Permitir servir archivos del proyecto principal
-         * (App/React, Glory/assets/react/src, Mezclador)
+         * [256A-1a] Permitir servir archivos del SPA Rust (frontend/src/).
+         * Los paths del tema WordPress ya no son necesarios.
          */
         fs: {
             allow: [
                 '.',
                 '..',
-                '../App/React',
-                '../App/Assets',
-                '../Glory/assets/react/src',
-                '../Glory/assets/react/node_modules',
-                '../Mezclador',
+                '../../frontend/src',
             ],
         },
         hmr: {
@@ -158,26 +111,19 @@ export default defineConfig({
 
     resolve: {
         alias: {
-            /* Framework Glory (core) */
-            '@': resolve(__dirname, '../Glory/assets/react/src'),
-            /* Islas y componentes del proyecto Kamples */
-            '@app': resolve(__dirname, '../App/React'),
-            /* DAW / Mezclador */
-            '@mezclador': resolve(__dirname, '../Mezclador'),
+            /* [256A-1a] Framework Glory — ahora apunta al SPA Rust en vez del tema WP */
+            '@': resolve(__dirname, '../../frontend/src/glory-core'),
+            /* [256A-1a] Código Kamples (stores, services, componentes) — ahora apunta a legacy/ */
+            '@app': resolve(__dirname, '../../frontend/src/legacy'),
             /* Desktop-specific code */
             '@desktop': resolve(__dirname, 'src'),
-            /* [174A-111b] Cliente Orval compartido con la SPA Rust principal —
-             * evita duplicar la generación. Cualquier import de '@api/...'
-             * resuelve a frontend/src/api/generated del proyecto Axum. */
+            /* Cliente Orval compartido con la SPA Rust principal */
             '@api': resolve(__dirname, '../../frontend/src/api/generated'),
-            /* Dependencias compartidas: resolver desde node_modules del desktop */
+            /* Dependencias: usar node_modules local del desktop */
             'soundtouchjs': resolve(__dirname, 'node_modules/soundtouchjs'),
-            /* QL17: Plugin notification vive en desktop/node_modules pero se importa
-             * desde App/React/ (fuera del root). Vite no lo encuentra sin alias explicito. */
+            /* Plugins Tauri — importados desde @app (legacy/) que necesita estos alias */
             '@tauri-apps/plugin-notification': resolve(__dirname, 'node_modules/@tauri-apps/plugin-notification'),
-            /* QL34: Plugin FS — mismo caso, importado desde App/React/services/fcmToken.ts */
             '@tauri-apps/plugin-fs': resolve(__dirname, 'node_modules/@tauri-apps/plugin-fs'),
-            /* QL49: Plugin shell + API app — usados desde App/React/utils/plataforma.ts */
             '@tauri-apps/plugin-shell': resolve(__dirname, 'node_modules/@tauri-apps/plugin-shell'),
             '@tauri-apps/api/app': resolve(__dirname, 'node_modules/@tauri-apps/api/app'),
         },

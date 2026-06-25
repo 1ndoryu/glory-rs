@@ -1,8 +1,8 @@
 # Adaptación cliente Desktop (Tauri 2) al backend Axum
 
-> **Fecha:** 2026-04-22
-> **Tarea:** 174A-111b
-> **Estado:** Base estructural lista. Migración granular de services pendiente.
+> **Fecha:** 2026-04-22 (actualizado 2026-06-25)
+> **Tarea:** 174A-111b, 256A-1
+> **Estado:** Base estructural lista. **Aliases legacy reparados (256A-1).** Type check 0 errores, Vite compila. Próximo: migrar services a Orval.
 
 ## Objetivo
 
@@ -73,7 +73,11 @@ legacy aún funcionen mientras se migran.
 
 Cada bloque = 1 tarea futura, 1 commit independiente.
 
+> ⚠️ **NOVEDAD (2026-06-25):** Se detectó que los aliases `@` y `@app` apuntan a rutas del tema WordPress que **no existen** en el proyecto Rust. Esto **bloquea** toda la migración granular de services. El plan detallado para arreglarlo está en `Agente/planes/plan-portar-desktop-app-2026-06-25.md`.
+
 ### A. Migrar `services/apiDesktopAdapter.ts` y derivados
+
+Los 38 archivos de `clients/desktop/src/services/` apuntan a `wp-json/`.
 
 Los 38 archivos de `clients/desktop/src/services/` apuntan a `wp-json/`.
 Migrarlos uno a uno reemplazando fetchs manuales por hooks Orval del

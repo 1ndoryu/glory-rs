@@ -64,7 +64,23 @@
 ## Pendiente
 
 - admin/panel/ al recargar debería abrir la tab que estaba abierta no regresar al principio
-- 
+
+### ~~256A-1 — Portar Desktop App (Tauri 2) al stack Rust~~ ✅
+
+**Problema:** Los aliases `@` y `@app` apuntaban al tema WordPress que no existe en este proyecto. La SPA frontend ya tenía el código equivalente en `glory-core/` y `legacy/`.
+
+**Plan ejecutado:** `Agente/planes/plan-portar-desktop-app-2026-06-25.md` → `Agente/planes/completados/`
+
+| Subtarea | Descripción | Estado |
+|---|---|---|
+| 256A-1a | Arreglar aliases en `vite.config.ts` + `tsconfig.json` | ✅ |
+| 256A-1b | Instalar dependencias faltantes (zustand, lucide-react, soundtouchjs) | ✅ |
+| 256A-1c | Type check + stubs para Capacitor/Mezclador/Tauri | ✅ |
+| 256A-1d | Smoke test Vite dev server (compila y resuelve imports) | ✅ |
+| 256A-1e | Limpieza (`clients/Glory/` eliminado, TODO proxy actualizado) | ✅ |
+| 256A-1f | Documentación actualizada (3 MDs) | ✅ |
+
+**Resultado:** `npx tsc --noEmit` → 0 errores. `npx vite --port 1420` → servidor listo en 326ms. Todos los imports `@/core`, `@/core/hydration`, `@app/appIslands` resuelven correctamente.
 
 - Remplazar el daw que hicimos, por https://github.com/andremichelle/opendaw, requiere revisar el daw a actual para ver como estaba integrado, y hacer un plan de las integraciones necesaria (como que un sample se pudiera arrastrar y soltar), el daw actual es muy pobre y malo, por eso vamos a cambiar a opendaw, tienes que hacer un fork en mi cuenta 1ndoryu. **Plan:** `Agente/planes/plan-opendaw-2026-04-25.md` — bloqueado en fase 0 (fork manual del usuario en `1ndoryu/opendaw`).
 

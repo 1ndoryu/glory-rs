@@ -16,28 +16,24 @@
         "noUnusedParameters": false,
         "noFallthroughCasesInSwitch": true,
         "types": ["vite/client", "node"],
+        /* [256A-1a] Aliases repuntados del tema WP al SPA Rust */
         "paths": {
-            "@/*": ["../Glory/assets/react/src/*"],
-            "@app/*": ["../App/React/*"],
-            "@mezclador/*": ["../Mezclador/*"],
+            "@/*": ["../../frontend/src/glory-core/*"],
+            "@app/*": ["../../frontend/src/legacy/*"],
             "@desktop/*": ["./src/*"],
             "react": ["./node_modules/@types/react"],
             "react/*": ["./node_modules/@types/react/*"],
             "react/jsx-runtime": ["./node_modules/@types/react/jsx-runtime"],
             "react-dom": ["./node_modules/@types/react-dom"],
-            "lucide-react": ["../Glory/assets/react/node_modules/lucide-react"],
-            "zustand": ["../Glory/assets/react/node_modules/zustand"],
-            "zustand/*": ["../Glory/assets/react/node_modules/zustand/*"],
-            "soundtouchjs": ["../Glory/assets/react/node_modules/soundtouchjs"]
+            "lucide-react": ["./node_modules/lucide-react"],
+            "zustand": ["./node_modules/zustand"],
+            "zustand/*": ["./node_modules/zustand/*"],
+            "soundtouchjs": ["./node_modules/soundtouchjs"]
         }
     },
     "include": [
         "src/**/*.ts",
         "src/**/*.tsx",
-        "src/**/*.d.ts",
-        "../App/React/**/*.ts",
-        "../App/React/**/*.tsx",
-        "../Mezclador/**/*.ts",
-        "../Mezclador/**/*.tsx"
+        "src/**/*.d.ts"
     ]
 }

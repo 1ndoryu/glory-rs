@@ -1,7 +1,26 @@
 # Sync Desktop — Estado Actual (junio 2026)
 
-> **Última actualización:** 2026-06-24
-> **Relacionado:** `auditoria-sync-desktop-2026-04-25.md` (audit original), tareas 254A-7a..7d
+> **Última actualización:** 2026-06-25
+> **Relacionado:** `auditoria-sync-desktop-2026-04-25.md` (audit original), tareas 254A-7a..7d, 256A-1 (plan aliases)
+
+---
+
+## 0. Portabilidad Desktop App (junio 2026)
+
+> **Problema detectado:** La desktop app (`clients/desktop/`) se construyó originalmente dentro del tema WordPress y sus imports apuntan a rutas que **no existen** en el proyecto Rust template (`../Glory/assets/react/src`, `../App/React`).
+>
+> **Estado: ✅ RESUELTO (256A-1, 2026-06-25).** Aliases `@` y `@app` repuntados al SPA Rust. Type check pasa con 0 errores. Vite dev server compila correctamente.
+>
+> **Plan detallado:** `Agente/planes/plan-portar-desktop-app-2026-06-25.md`
+
+### Mapeo de aliases (target)
+
+| Alias | Tema WP (roto) | Rust SPA (correcto) | Estado |
+|---|---|---|---|
+| `@` | `../Glory/assets/react/src` | `../../frontend/src/glory-core` | ✅ |
+| `@app` | `../App/React` | `../../frontend/src/legacy` | ✅ |
+| `@api` | — | `../../frontend/src/api/generated` (ya funciona) | ✅ |
+| `@desktop` | `./src` | `./src` (sin cambios) | ✅ |
 
 ---
 
