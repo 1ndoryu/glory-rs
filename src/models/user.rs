@@ -55,7 +55,10 @@ pub struct RegisterRequest {
 
 #[derive(Debug, Deserialize, Validate, ToSchema)]
 pub struct LoginRequest {
+    /* [256A-1k] alias="email" para compatibilidad con frontend legacy
+     * que envía { email, password } en vez de { identifier, password } */
     #[validate(length(min = 3))]
+    #[serde(alias = "email")]
     pub identifier: String,
     pub password: String,
 }
