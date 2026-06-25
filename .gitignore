@@ -60,3 +60,6 @@ clients/kamples-scraper/cookies.txt
 clients/kamples-scraper/.last_spider_stats.json
 clients/kamples-scraper/extractor/.rate_limiter_state
 
+
+# Symlinks creados por setup local (junctions Windows)
+clients/desktop/public/
