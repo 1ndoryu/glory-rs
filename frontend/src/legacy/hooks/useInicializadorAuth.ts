@@ -3,6 +3,9 @@
  * Lógica extraída de InicializadorAuth (SRP).
  * Lee GLORY_CONTEXT para detectar sesión de WordPress y sincroniza el authStore.
  * Preserva patrón cancelado/cleanup de sesión anterior.
+ * [256A-1c] Cuando autenticado=true desde store persistido, verifica /me para
+ * detectar backend caído. Si falla, limpia auth para mostrar login en vez de
+ * pantalla rota sin datos.
  */
 
 import { useEffect } from 'react';
@@ -10,6 +13,7 @@ import { useAuthStore } from '@app/stores/authStore';
 import { obtenerUsuarioActual } from '@app/services/apiAuth';
 import { crearLogger } from '@app/services/logger';
 import { esNativo } from '@app/utils/plataforma';
+import { esEscritorio } from '@app/utils/plataforma';
 
 const log = crearLogger('InicializadorAuth');
 const LS_KEY_TOKEN = 'kamples_auth_token';
@@ -118,6 +122,26 @@ export const useInicializadorAuth = (): void => {
             inicializar();
         } else {
             setCargando(false);
+            /*
+             * [256A-1c] Store persistido dice autenticado=true. Verificar /me en
+             * segundo plano para detectar backend caído o token inválido.
+             * Si falla, limpia auth para mostrar login en vez de pantalla rota.
+             * Solo en desktop/nativo — en web GLORY_CONTEXT manda.
+             */
+            if (esNativo() || esEscritorio()) {
+                (async () => {
+                    try {
+                        const resp = await obtenerUsuarioActual();
+                        if (cancelado) return;
+                        if (!resp.ok || !resp.data) {
+                            if (!cancelado) setUsuario(null);
+                            return;
+                        }
+                    } catch {
+                        if (!cancelado) setUsuario(null);
+                    }
+                })();
+            }
         }
         return () => { cancelado = true; };
     }, []);

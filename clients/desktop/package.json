@@ -10,7 +10,10 @@
         "tauri": "tauri",
         "tauri:dev": "tauri dev",
         "tauri:build": "tauri build",
-        "type-check": "tsc --noEmit"
+        "type-check": "tsc --noEmit",
+        "clean:cargo": "powershell -ExecutionPolicy Bypass -File ../../glory-rs/scripts/clean-cargo-target.ps1",
+        "clean:cargo:hard": "powershell -ExecutionPolicy Bypass -File ../../glory-rs/scripts/clean-cargo-target.ps1 -Force",
+        "dev:sweep": "powershell -ExecutionPolicy Bypass -File ../../glory-rs/scripts/watch-cargo-target.ps1"
     },
     "dependencies": {
         "@crabnebula/tauri-plugin-drag": "^2.1.0",
