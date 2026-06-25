@@ -111,6 +111,22 @@ async function inicializar(): Promise<void> {
     /* Restaurar token JWT del store de Tauri → sin esto, fetch no tiene Authorization header */
     await inicializarAuthDesktop();
 
+    /* [256A-1e] Verificar token con /me. Sin esto, si el token expiró o el backend
+     * rechaza la sesión, el sync panel muestra "logueado" indefinidamente porque
+     * inicializarAuthDesktop() confía ciegamente en el Tauri Store. La ventana principal
+     * hace esta verificación en useInicializadorAuth, pero el sync panel no monta ese hook. */
+    try {
+        const { obtenerUsuarioActual } = await import('@app/services/apiAuth');
+        const resp = await obtenerUsuarioActual();
+        if (!resp.ok || !resp.data) {
+            const { cerrarSesionDesktop } = await import('@desktop/services/authDesktopService');
+            await cerrarSesionDesktop();
+            console.info('[Sync] Token inválido — sesión cerrada');
+        }
+    } catch {
+        /* Backend no disponible — no limpiar auth, puede ser temporal */
+    }
+
     /* Escuchar cambios de auth de la ventana principal (login/logout cross-window) */
     escucharCambiosAuth();
 
