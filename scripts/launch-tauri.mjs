@@ -5,7 +5,7 @@
  * acumulando +7GB de artefactos Cargo. */
 
 import { spawn, spawnSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, mkdirSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createConnection } from 'node:net';
@@ -46,6 +46,33 @@ function waitForPort(port, timeoutMs = 120_000) {
         };
         tryConnect();
     });
+}
+
+/* Crear junctions en clients/desktop/public/ apuntando a frontend/public/
+ * Necesario para que Vite sirva assets legacy (fonts, images, SVGs). */
+function ensureDesktopPublicJunctions() {
+    if (!isWin) return; // En Linux/Mac se usarían symlinks reales
+    const desktopPublic = resolve(desktopDir, 'public');
+    const frontendPublic = resolve(projectRoot, 'frontend', 'public');
+    if (!existsSync(frontendPublic)) return;
+
+    if (!existsSync(desktopPublic)) {
+        mkdirSync(desktopPublic, { recursive: true });
+    }
+
+    const links = ['legacy-assets', 'auth', 'landing'];
+    for (const name of links) {
+        const src = resolve(frontendPublic, name);
+        const dst = resolve(desktopPublic, name);
+        if (existsSync(src) && !existsSync(dst)) {
+            const r = spawnSync('cmd', ['/c', 'mklink', '/J', dst, src], { stdio: 'inherit' });
+            if (r.status === 0) {
+                console.log(`[launch-tauri] Junction: public/${name} → frontend/public/${name}`);
+            } else {
+                console.warn(`[launch-tauri] Junction fallo para ${name}`);
+            }
+        }
+    }
 }
 
 /* Pre-limpieza: forzar antes de iniciar (no hay build activo) */
@@ -91,6 +118,7 @@ function cleanup() {
 
 /* Ejecutar */
 async function main() {
+    ensureDesktopPublicJunctions();
     runPreClean();
     startWatcher();
 
@@ -111,7 +139,7 @@ async function main() {
 
     /* Esperar a que el backend esté listo */
     try {
-        await waitForPort(backendPort, 120_000);
+        await waitForPort(backendPort, 600_000); // 10 min — compilación completa puede ser larga
         console.log(`[launch-tauri] Backend listo en puerto ${backendPort}`);
     } catch (err) {
         console.error(`[launch-tauri] ${err.message}. Continuando de todas formas...`);

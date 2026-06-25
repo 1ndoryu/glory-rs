@@ -34,15 +34,14 @@ export default defineConfig({
     root: '.',
 
     /*
-     * [256A-1c] Servir tanto el public/ del desktop como el de la SPA Rust.
-     * Esto permite que /legacy-assets/* (imagenes, SVGs, CSS del tema legacy)
-     * estén disponibles en el dev server de Tauri sin copiar archivos.
-     * Vite 6+ soporta arrays en publicDir.
+     * [256A-1c] Servir assets del SPA Rust via symlink junctions en public/.
+     * clients/desktop/public/legacy-assets → frontend/public/legacy-assets
+     * clients/desktop/public/auth → frontend/public/auth
+     * clients/desktop/public/landing → frontend/public/landing
+     * Usamos string simple (no array) para compatibilidad con todas las
+     * versiones de Vite 6+. Los junctions se crean en el setup del workspace.
      */
-    publicDir: [
-        resolve(__dirname, 'public'),
-        resolve(__dirname, '../../frontend/public'),
-    ],
+    publicDir: resolve(__dirname, 'public'),
 
     build: {
         outDir: 'dist',
@@ -85,12 +84,14 @@ export default defineConfig({
                 changeOrigin: true,
                 secure: false,
             },
-            /* [256A-1e] Proxy wp-json mantenido — apiDesktopAdapter.ts y wpJsonRustAdapter.ts
-             * aún lo usan. Eliminar cuando esos services migren a Orval (tarea separada). */
+            /* [256A-1e] Proxy wp-json con rewrite a /api/.
+             * El frontend legacy envía /wp-json/kamples/v1/... pero el backend
+             * Rust solo tiene /api/.... El rewrite traduce la ruta. */
             '/wp-json': {
                 target: apiTarget,
                 changeOrigin: true,
                 secure: false,
+                rewrite: (path) => path.replace(/^\/wp-json\/kamples\/v1/, '/api'),
             },
             /* Solo proxiar uploads (contenido subido por usuarios) al servidor.
              * Los assets del tema se sirven localmente via servirAssetsLocales(). */
