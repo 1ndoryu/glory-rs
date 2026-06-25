@@ -126,6 +126,13 @@ export default defineConfig({
             '@tauri-apps/plugin-fs': resolve(__dirname, 'node_modules/@tauri-apps/plugin-fs'),
             '@tauri-apps/plugin-shell': resolve(__dirname, 'node_modules/@tauri-apps/plugin-shell'),
             '@tauri-apps/api/app': resolve(__dirname, 'node_modules/@tauri-apps/api/app'),
+            /* [256A-1c] Stub para @mezclador (DAW) — no disponible en desktop */
+            '@mezclador': resolve(__dirname, 'src/stubs/mezclador'),
+            /* [256A-1c] Stubs para Capacitor — no instalado en desktop (solo mobile) */
+            '@capacitor/app': resolve(__dirname, 'src/stubs/capacitor/app.ts'),
+            '@capacitor/browser': resolve(__dirname, 'src/stubs/capacitor/browser.ts'),
+            '@capacitor/push-notifications': resolve(__dirname, 'src/stubs/capacitor/push-notifications.ts'),
+            '@capacitor/filesystem': resolve(__dirname, 'src/stubs/capacitor/filesystem.ts'),
         },
         dedupe: [
             'react',
