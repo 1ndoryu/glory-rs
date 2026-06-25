@@ -134,11 +134,28 @@ export const useInicializadorAuth = (): void => {
                         const resp = await obtenerUsuarioActual();
                         if (cancelado) return;
                         if (!resp.ok || !resp.data) {
-                            if (!cancelado) setUsuario(null);
+                            if (!cancelado) {
+                                setUsuario(null);
+                                /* [256A-1c] En desktop, limpiar Tauri Store y emitir logout
+                                 * cross-window para que la ventana sync también se deslogee.
+                                 * Sin esto, el sync panel quedaba "logeado" con token inválido. */
+                                if (esEscritorio()) {
+                                    import('@desktop/services/authDesktopService')
+                                        .then(({ cerrarSesionDesktop }) => cerrarSesionDesktop())
+                                        .catch(() => { /* noop */ });
+                                }
+                            }
                             return;
                         }
                     } catch {
-                        if (!cancelado) setUsuario(null);
+                        if (!cancelado) {
+                            setUsuario(null);
+                            if (esEscritorio()) {
+                                import('@desktop/services/authDesktopService')
+                                    .then(({ cerrarSesionDesktop }) => cerrarSesionDesktop())
+                                    .catch(() => { /* noop */ });
+                            }
+                        }
                     }
                 })();
             }
