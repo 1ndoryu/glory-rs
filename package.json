@@ -21,6 +21,9 @@
     "self-check": "powershell -ExecutionPolicy Bypass -File scripts/self-check.ps1",
     "clean:cargo": "powershell -ExecutionPolicy Bypass -File glory-rs/scripts/clean-cargo-target.ps1",
     "clean:cargo:hard": "powershell -ExecutionPolicy Bypass -File glory-rs/scripts/clean-cargo-target.ps1 -Force",
-    "dev:clean": "npm run clean:cargo:hard && npm run dev"
+    "dev:clean": "npm run clean:cargo:hard && npm run dev",
+    "tauri:dev": "npm --prefix clients/desktop run tauri:dev",
+    "tauri:build": "npm --prefix clients/desktop run tauri:build",
+    "tauri:type-check": "npm --prefix clients/desktop run type-check"
   }
 }
