@@ -1,6 +1,6 @@
 @font-face {
     font-family: 'Junicode Landing';
-    src: url('../../../Assets/fonts/JunicodeVF-Roman-subset.woff2') format('woff2');
+    src: url('/legacy-assets/fonts/JunicodeVF-Roman-subset.woff2') format('woff2');
     font-style: normal;
     font-weight: 300 700;
     font-display: swap;
@@ -8,7 +8,7 @@
 
 @font-face {
     font-family: 'Bricolage Landing';
-    src: url('../../../Assets/fonts/bricolage-grotesque-latin-400-normal.A6LyuA6R.woff2') format('woff2');
+    src: url('/legacy-assets/fonts/bricolage-grotesque-latin-400-normal.A6LyuA6R.woff2') format('woff2');
     font-style: normal;
     font-weight: 400;
     font-display: swap;
@@ -16,7 +16,7 @@
 
 @font-face {
     font-family: 'Bricolage Landing';
-    src: url('../../../Assets/fonts/bricolage-grotesque-latin-500-normal.DEDBoLFO.woff2') format('woff2');
+    src: url('/legacy-assets/fonts/bricolage-grotesque-latin-500-normal.DEDBoLFO.woff2') format('woff2');
     font-style: normal;
     font-weight: 500;
     font-display: swap;
@@ -24,7 +24,7 @@
 
 @font-face {
     font-family: 'Bricolage Landing';
-    src: url('../../../Assets/fonts/bricolage-grotesque-latin-600-normal.nxTgbNFE.woff2') format('woff2');
+    src: url('/legacy-assets/fonts/bricolage-grotesque-latin-600-normal.nxTgbNFE.woff2') format('woff2');
     font-style: normal;
     font-weight: 600;
     font-display: swap;

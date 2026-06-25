@@ -96,7 +96,7 @@ async function main() {
 
     /* Arrancar backend Rust en background */
     console.log(`[launch-tauri] Iniciando backend Rust (puerto ${backendPort})...`);
-    backendProc = spawn(cmdName('cargo'), ['run'], {
+    backendProc = spawn('cargo run --bin glory-backend', {
         cwd: projectRoot,
         stdio: 'inherit',
         shell: isWin,
