@@ -15,7 +15,7 @@ const projectRoot = resolve(__dirname, '..');
 const desktopDir = resolve(projectRoot, 'clients', 'desktop');
 const frameworkScripts = resolve(projectRoot, 'glory-rs', 'scripts');
 const cargoTargetBase = process.env.CARGO_TARGET_DIR_BASE || (process.platform === 'win32' ? 'C:\\tmp\\glory-target' : '/tmp/glory-target');
-const maxMb = process.env.GLORY_CARGO_TARGET_MAX_MB || '4096';
+const maxMb = process.env.GLORY_CARGO_TARGET_MAX_MB || '15000';
 const intervalSeconds = process.env.GLORY_CARGO_CLEAN_INTERVAL_SECONDS || '120';
 const isWin = process.platform === 'win32';
 const backendPort = parseInt(process.env.KAMPLES_BACKEND_PORT || '3000', 10);
@@ -86,7 +86,6 @@ function runPreClean() {
         '-File', script,
         '-TargetDirs', cargoTargetBase,
         '-MaxTotalMB', maxMb,
-        '-Force',
     ], { stdio: 'inherit', timeout: 60000 });
 
     if (r.status != null && r.status !== 0) {
