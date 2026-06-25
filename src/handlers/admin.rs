@@ -500,9 +500,7 @@ pub async fn algo_timing_history(
         (status = 403, description = "no admin")
     )
 )]
-pub async fn algo_timing_clear(
-    user: CurrentUser,
-) -> Result<Json<serde_json::Value>, AppError> {
+pub async fn algo_timing_clear(user: CurrentUser) -> Result<Json<serde_json::Value>, AppError> {
     user.require_admin()?;
     ALGO_TIMING.clear();
     Ok(Json(serde_json::json!({"ok": true})))
@@ -570,5 +568,8 @@ pub fn routes() -> Router<AppState> {
         .route("/admin/users/:id/suspend", post(suspend))
         .route("/admin/users/:id/activate", post(activate))
         .route("/admin/users/:id/delete", post(mark_delete))
-        .route("/admin/algo-timing", get(algo_timing_history).delete(algo_timing_clear))
+        .route(
+            "/admin/algo-timing",
+            get(algo_timing_history).delete(algo_timing_clear),
+        )
 }

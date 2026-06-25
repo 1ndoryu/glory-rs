@@ -12,10 +12,13 @@ use crate::errors::AppError;
 #[allow(unused_imports)]
 use crate::errors::ErrorResponse;
 use crate::middleware::CurrentUser;
+use crate::models::SyncChangelogTipo;
 #[allow(unused_imports)]
 use crate::models::UploadSampleRequestDoc;
 use crate::models::{CheckDuplicateRequest, CheckDuplicateResponse, UploadSampleResponse};
-use crate::repositories::{CreateUploadSampleParams, ProfileRepository, SampleRepository};
+use crate::repositories::{
+    CreateUploadSampleParams, ProfileRepository, SampleRepository, SyncChangelogRepository,
+};
 use crate::services::IdempotencyStore;
 use crate::AppState;
 
@@ -301,6 +304,17 @@ pub async fn upload(
         url: build_upload_url(&state, &created.ruta_original),
         estado: created.estado,
     };
+
+    /* [246A-1] Registrar en changelog para delta sync del desktop. */
+    SyncChangelogRepository::insert_entry(
+        &state.pool,
+        user.user_id,
+        SyncChangelogTipo::SampleAdded,
+        created.id,
+        serde_json::json!({"origen": "upload"}),
+    )
+    .await
+    .ok();
 
     if let Some(key) = &idempotency_key {
         IdempotencyStore::set_json(

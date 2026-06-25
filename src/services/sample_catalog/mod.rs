@@ -4,12 +4,13 @@ use crate::errors::AppError;
 use crate::models::{
     CancionOrigenResumen, DeleteSampleResponse, ExtraccionSampleResponse, ListSamplesQuery,
     ListSamplesResponse, SampleCreatorSummary, SampleDetailResponse, SampleSummary,
-    SamplesPagination, SimilarSamplesQuery, SimilarSamplesResponse, UpdateSampleRequest,
+    SamplesPagination, SimilarSamplesQuery, SimilarSamplesResponse, SyncChangelogTipo,
+    UpdateSampleRequest,
 };
 use crate::repositories::{
     OwnedSampleRecord, ReportRepository, SampleCatalogDetailRecord, SampleCatalogSummaryRecord,
-    SampleListFilters, SampleRepository, SampleSortOrder, SampleTextSearch, UpdateSamplePatch,
-    AUTO_HIDE_SAMPLE_REPORT_THRESHOLD,
+    SampleListFilters, SampleRepository, SampleSortOrder, SampleTextSearch,
+    SyncChangelogRepository, UpdateSamplePatch, AUTO_HIDE_SAMPLE_REPORT_THRESHOLD,
 };
 
 #[cfg(test)]
@@ -191,6 +192,17 @@ impl SampleCatalogService {
 
         SampleRepository::update_sample_metadata(pool, sample.id, &patch).await?;
 
+        /* [246A-1] Registrar en changelog para delta sync del desktop. */
+        SyncChangelogRepository::insert_entry(
+            pool,
+            current_user_id,
+            SyncChangelogTipo::SampleUpdated,
+            sample.id,
+            serde_json::json!({}),
+        )
+        .await
+        .ok();
+
         let lookup_key = sample.id_corto.as_deref().unwrap_or(sample.slug.as_str());
         let updated = SampleRepository::find_sample_by_slug_or_short_id(pool, lookup_key)
             .await?
@@ -215,6 +227,17 @@ impl SampleCatalogService {
         if !deleted {
             return Err(AppError::NotFound(format!("sample {slug_or_short_id}")));
         }
+
+        /* [246A-1] Registrar en changelog para delta sync del desktop. */
+        SyncChangelogRepository::insert_entry(
+            pool,
+            current_user_id,
+            SyncChangelogTipo::SampleRemoved,
+            sample.id,
+            serde_json::json!({}),
+        )
+        .await
+        .ok();
 
         Ok(DeleteSampleResponse {
             ok: true,

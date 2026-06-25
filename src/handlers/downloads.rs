@@ -11,9 +11,10 @@ use crate::algorithm::InteractionKind;
 use crate::domain::{calculate_subscription_download_revenue_share, KamplesPlanId};
 use crate::errors::AppError;
 use crate::middleware::CurrentUser;
-use crate::models::{DownloadGrantRequest, SampleSummary};
+use crate::models::{DownloadGrantRequest, SampleSummary, SyncChangelogTipo};
 use crate::repositories::{
     BillingRepository, CompletedDownloadRevenueShareInsert, DownloadRepository, FreeCodeRepository,
+    SyncChangelogRepository,
 };
 use crate::services::download_token;
 use crate::services::SampleCatalogService;
@@ -111,6 +112,7 @@ const PURCHASED_SAMPLES_LIMIT: i64 = 50;
         (status = 429, description = "Límite diario excedido"),
     )
 )]
+#[allow(clippy::too_many_lines)]
 pub async fn register_download(
     State(state): State<AppState>,
     user: CurrentUser,
@@ -197,6 +199,17 @@ pub async fn register_download(
             InteractionKind::Descarga,
         )
         .await?;
+
+    /* [246A-1] Registrar en changelog para delta sync del desktop. */
+    SyncChangelogRepository::insert_entry(
+        &state.pool,
+        user.user_id,
+        SyncChangelogTipo::SampleAdded,
+        sample_id,
+        serde_json::json!({"origen": "download"}),
+    )
+    .await
+    .ok();
 
     if plan != "free" && !es_propietario {
         if let Err(error) =

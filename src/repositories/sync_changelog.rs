@@ -1,7 +1,11 @@
-/* [174A-91] Repositorio de sync_changelog: replica obtenerDelta() del legacy.
+/* [246A-1] Repositorio de sync_changelog: replica obtenerDelta() del legacy.
  * Contrato cursor-based con detección de purge (cursor < MIN(id)) → fullSyncRequired,
  * y caso primera conexión (cursor <= 0) → fullSyncRequired con cursor inicial = MAX(id).
- * Usa query! para validar SQL en compile-time contra el schema actual. */
+ * Usa query! para validar SQL en compile-time contra el schema actual.
+ *
+ * [246A-1] Agregado insert_entry() — el lado escritura faltante desde el port a Rust.
+ * Ahora los 12 handlers mutantes escriben en sync_changelog para que el delta sync
+ * del desktop reciba cambios incrementales en vez de full sync siempre. */
 
 use sqlx::PgPool;
 
@@ -11,6 +15,31 @@ use crate::models::{SyncChangelogDelta, SyncChangelogEntry, SyncChangelogTipo};
 pub struct SyncChangelogRepository;
 
 impl SyncChangelogRepository {
+    /* [246A-1] Inserta una entrada en sync_changelog.
+     * Se llama desde los handlers mutantes después de la operación exitosa.
+     * Retorna el ID insertado, pero los callers deben ignorar errores con .ok()
+     * para no bloquear la respuesta al usuario. */
+    pub async fn insert_entry(
+        pool: &PgPool,
+        usuario_id: i32,
+        tipo: SyncChangelogTipo,
+        entidad_id: i32,
+        metadata: serde_json::Value,
+    ) -> Result<i64, AppError> {
+        let row = sqlx::query!(
+            r"INSERT INTO sync_changelog (usuario_id, tipo, entidad_id, metadata)
+             VALUES ($1, $2, $3, $4)
+             RETURNING id",
+            usuario_id,
+            tipo.as_db_str(),
+            entidad_id,
+            metadata,
+        )
+        .fetch_one(pool)
+        .await?;
+        Ok(row.id)
+    }
+
     pub async fn delta(
         pool: &PgPool,
         usuario_id: i32,
