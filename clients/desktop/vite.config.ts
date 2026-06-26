@@ -86,12 +86,18 @@ export default defineConfig({
             },
             /* [256A-1e] Proxy wp-json con rewrite a /api/.
              * El frontend legacy envía /wp-json/kamples/v1/... pero el backend
-             * Rust solo tiene /api/.... El rewrite traduce la ruta. */
+             * Rust solo tiene /api/.... El rewrite traduce la ruta.
+             * [256A-1l] /me → /users/me: el legacy esperaba WP REST /me,
+             * pero Rust lo expone como /api/users/me. */
             '/wp-json': {
                 target: apiTarget,
                 changeOrigin: true,
                 secure: false,
-                rewrite: (path) => path.replace(/^\/wp-json\/kamples\/v1/, '/api'),
+                rewrite: (path) => {
+                    let p = path.replace(/^\/wp-json\/kamples\/v1/, '/api');
+                    if (p === '/api/me') return '/api/users/me';
+                    return p;
+                },
             },
             /* Solo proxiar uploads (contenido subido por usuarios) al servidor.
              * Los assets del tema se sirven localmente via servirAssetsLocales(). */
