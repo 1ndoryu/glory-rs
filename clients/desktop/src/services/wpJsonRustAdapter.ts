@@ -84,6 +84,33 @@ function adaptarBody(rustPath: string, bodyText: string): string {
             }
             return JSON.stringify(payload);
         }
+        /* PATCH /users/me: convertir camelCase del frontend a snake_case que Rust espera */
+        if (rustPath === '/users/me') {
+            if (payload.nombreVisible !== undefined && payload.nombre_visible === undefined) {
+                payload.nombre_visible = payload.nombreVisible;
+                delete payload.nombreVisible;
+            }
+            if (payload.sitioWeb !== undefined && payload.sitio_web === undefined) {
+                payload.sitio_web = payload.sitioWeb;
+                delete payload.sitioWeb;
+            }
+            if (payload.avatarUrl !== undefined && payload.avatar_url === undefined) {
+                payload.avatar_url = payload.avatarUrl;
+                delete payload.avatarUrl;
+            }
+            if (payload.portadaUrl !== undefined && payload.portada_url === undefined) {
+                payload.portada_url = payload.portadaUrl;
+                delete payload.portadaUrl;
+            }
+            if (payload.generosPreferidos !== undefined && payload.generos_favoritos === undefined) {
+                payload.generos_favoritos = payload.generosPreferidos;
+                delete payload.generosPreferidos;
+            }
+            /* Campos no soportados por UpdateProfileRequest: evitar que viajen como ruido. */
+            delete payload.username;
+            delete payload.paypalEmail;
+            return JSON.stringify(payload);
+        }
     } catch { /* JSON invalido — pasar tal cual */ }
     return bodyText;
 }
