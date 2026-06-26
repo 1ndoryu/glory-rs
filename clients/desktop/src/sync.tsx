@@ -143,7 +143,13 @@ async function inicializar(): Promise<void> {
      *
      * DEBE ir ANTES de configurarApiDesktop() — si no, obtenerServidorUrl()
      * no encuentra __KAMPLES_CONFIG__ y usa fallback relativo /wp-json
-     * que falla en contexto Tauri (resuelve contra tauri://localhost).
+     * que falla en contexto Tauri prod (resuelve contra tauri://localhost).
+     *
+     * [256A-3d] En DEV NO forzar kamples.com — las URLs relativas (/wp-json/...)
+     * pasan por el proxy de Vite y llegan al backend local. Forzar la URL de
+     * producción hacía que las imágenes del sync panel apuntaran a kamples.com
+     * (servidor inactivo en dev) y que los uploads se resolvieran contra el
+     * host equivocado.
      */
     const gloryCtx = window.GLORY_CONTEXT as { apiUrl?: string } | undefined;
     const apiUrl = gloryCtx?.apiUrl ?? '';
@@ -154,12 +160,23 @@ async function inicializar(): Promise<void> {
         try { origenServidor = new URL(apiUrl).origin; } catch { /* fallback abajo */ }
     }
 
-    /* Fallback: en dev, el proxy local redirige a kamples.com (via KAMPLES_API_TARGET) */
     if (!origenServidor) {
-        origenServidor = 'https://kamples.com';
+        /* DEV: NO forzar producción — usar URL relativa para que Vite proxy
+         * maneje las peticiones. En prod, GLORY_CONTEXT.apiUrl ya es absoluta. */
+        if (import.meta.env.DEV) {
+            /* En dev, __KAMPLES_CONFIG__ solo se necesita para que VentanaSincPanel
+             * no resuelva URLs contra tauri://localhost. Usamos la URL del dev server. */
+            window.__KAMPLES_CONFIG__ = { serverUrl: '/wp-json' };
+        } else {
+            /* Producción: extraer origin de la URL de producción */
+            try {
+                origenServidor = new URL('https://kamples.com').origin;
+            } catch { /* noop */ }
+            window.__KAMPLES_CONFIG__ = { serverUrl: `${origenServidor}/wp-json` };
+        }
+    } else {
+        window.__KAMPLES_CONFIG__ = { serverUrl: `${origenServidor}/wp-json` };
     }
-
-    window.__KAMPLES_CONFIG__ = { serverUrl: `${origenServidor}/wp-json` };
 
     /* Configurar API con token ya en memoria + URL del servidor resuelta */
     configurarApiDesktop();
