@@ -125,6 +125,10 @@ function adaptarRespuesta(rustPath: string, json: unknown): unknown {
             };
         }
     }
+    /* /users/me: PrivateProfileResponse (snake_case) → UsuarioAutenticado (camelCase) */
+    if (rustPath === '/users/me') {
+        return adaptarUsuario(obj);
+    }
     return obj;
 }
 
@@ -194,11 +198,12 @@ export function instalarRustAdapter(): void {
             return Promise.reject(err);
         }
 
-        /* Adaptar respuestas de auth (user → usuario) */
+        /* Adaptar respuestas de auth (user → usuario) y perfil propio (snake_case → camelCase) */
         const needsAdaptation =
             reescrita.rustPath === '/auth/login' ||
             reescrita.rustPath === '/auth/register' ||
-            reescrita.rustPath.startsWith('/auth/google');
+            reescrita.rustPath.startsWith('/auth/google') ||
+            reescrita.rustPath === '/users/me';
 
         if (!needsAdaptation) return resp;
 
