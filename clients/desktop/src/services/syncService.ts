@@ -615,5 +615,23 @@ export async function generarReporteSync(ventana = 'desconocida'): Promise<SyncR
     });
 
     reporte.diagnosticos = diagnosticos;
+
+    /* Persistir a disco para que el agente pueda leerlo luego con read_file */
+    try {
+        const { writeTextFile, BaseDirectory } = await import('@tauri-apps/plugin-fs');
+        const contenido = JSON.stringify(reporte, null, 2);
+        const timestamp = new Date(ahora).toISOString().replace(/[:.]/g, '-');
+        /* Archivo único con timestamp para trazabilidad histórica */
+        await writeTextFile(`sync-report-${timestamp}.json`, contenido, {
+            baseDir: BaseDirectory.AppData,
+        });
+        /* Archivo "latest" siempre sobrescrito — fácil de leer desde el agente */
+        await writeTextFile('sync-report-latest.json', contenido, {
+            baseDir: BaseDirectory.AppData,
+        });
+    } catch {
+        /* FS no disponible (no Tauri, permisos, etc.) — el reporte se retorna igual */
+    }
+
     return reporte;
 }

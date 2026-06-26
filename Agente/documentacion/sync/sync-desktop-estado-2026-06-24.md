@@ -197,10 +197,28 @@ Añadido en 256A-2. Expone una `async function` que recolecta estado de todos lo
 - `window.__KAMPLES_SYNC_REPORT__()` en panel sync (`sync.tsx`)
 - Consola del agente: `await window.__KAMPLES_SYNC_REPORT__()`
 
+**Persistencia a disco:** Cada vez que se llama, el reporte se guarda automáticamente en el directorio `AppData` de Tauri:
+- `sync-report-{timestamp}.json` — copia única por fecha (histórico)
+- `sync-report-latest.json` — siempre sobrescrito, fácil de leer desde el agente
+
+**Ruta en Windows:**
+```
+C:\Users\{usuario}\AppData\Roaming\{bundle-id}\sync-report-latest.json
+```
+
+Para leerlo desde el agente (una vez que el usuario ejecuta `__KAMPLES_SYNC_REPORT__()`):
+```js
+// Si el agente tiene acceso al filesystem:
+read_file('C:/Users/{user}/AppData/Roaming/com.kamples.desktop/sync-report-latest.json')
+
+// O desde Playwright en la app:
+const report = await page.evaluate(() => window.__KAMPLES_SYNC_REPORT__())
+```
+
 **Uso para verificación:**
 1. Abrir la app desktop → consola DevTools (Ctrl+Shift+I).
 2. Ejecutar `const r = await window.__KAMPLES_SYNC_REPORT__(); console.table(r.diagnosticos);`
-3. El agente puede usar Playwright para evaluar: `const report = await page.evaluate(() => window.__KAMPLES_SYNC_REPORT__());`
+3. El agente puede leer `sync-report-latest.json` directamente desde el FS.
 4. El reporte incluye detección automática de problemas: auth faltante, carpeta no seleccionada, circuit breaker abierto, backend caído, errores en cola de subida.
 
 ---
