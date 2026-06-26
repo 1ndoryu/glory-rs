@@ -239,6 +239,14 @@ async function manejarSesionExpirada(): Promise<void> {
 }
 
 export function inyectarAuthHeader(token: string): void {
+    /* [256A-3c] Capturar window.fetch ACTUAL (que ya incluye el Rust adapter si se llamó
+     * instalarRustAdapter() antes). Antes se usaba fetchOriginal del módulo, capturado al
+     * import — eso se saltaba el adapter y las respuestas llegaban en snake_case al frontend.
+     * Cadena correcta: auth wrapper → rust adapter wrapper → browser fetch. */
+    const wrappedFetch = window.fetch.bind(window);
+    /* Guardar referencia para limpiarAuthApi (logout) */
+    fetchSinAuth = () => wrappedFetch;
+
     window.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
         let url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
 
@@ -252,35 +260,43 @@ export function inyectarAuthHeader(token: string): void {
         /* Preparar headers */
         const headers = new Headers(init?.headers);
 
-        /* Inyectar auth en peticiones a la API Kamples */
-        if (url.includes('/wp-json/')) {
+        /* Inyectar auth en peticiones a la API Kamples (wp-json legacy o /api/ Rust) */
+        if (url.includes('/wp-json/') || url.includes('/api/')) {
             headers.set('Authorization', `Bearer ${token}`);
             /* Fallback para nginx/LocalWP que no pasan Authorization a PHP-FPM */
             headers.set('X-Kamples-Auth', `Bearer ${token}`);
         }
 
-        const response = await fetchOriginal(input, {
+        /* Llamar al siguiente wrapper en la cadena (Rust adapter o browser fetch) */
+        const response = await wrappedFetch(input, {
             ...init,
             headers,
         });
 
         /* QK16: Token expirado/invalido — auto-logout y redireccion.
          * Se dispara async para que el caller reciba el 401 normalmente. */
-        if (response.status === 401 && url.includes('/wp-json/')) {
+        if (response.status === 401 && (url.includes('/wp-json/') || url.includes('/api/'))) {
             manejarSesionExpirada();
         }
 
-        /* Interceptar respuestas JSON para reescribir URLs del backend (solo desktop dev) */
-        if (import.meta.env.DEV && !esAndroid && url.includes('/wp-json/')) {
+        /* Reescribir URLs absolutas del backend en respuestas JSON (solo desktop dev).
+         * Convierte https://kamples.com/uploads/... → /uploads/... para que pasen
+         * por el proxy de Vite. El Rust adapter ya hizo la conversión snake→camel. */
+        if (import.meta.env.DEV && !esAndroid && (url.includes('/wp-json/') || url.includes('/api/'))) {
             const contentType = response.headers.get('content-type') ?? '';
             if (contentType.includes('application/json')) {
-                const json = await response.json();
-                const jsonReescrito = reescribirUrlsEnObjeto(json);
-                return new Response(JSON.stringify(jsonReescrito), {
-                    status: response.status,
-                    statusText: response.statusText,
-                    headers: response.headers,
-                });
+                const text = await response.text();
+                try {
+                    const json = JSON.parse(text);
+                    const jsonReescrito = reescribirUrlsEnObjeto(json);
+                    return new Response(JSON.stringify(jsonReescrito), {
+                        status: response.status,
+                        statusText: response.statusText,
+                        headers: response.headers,
+                    });
+                } catch {
+                    return new Response(text, { status: response.status, headers: response.headers });
+                }
             }
         }
 
@@ -297,24 +313,32 @@ export function inyectarAuthHeader(token: string): void {
 export function configurarProxyFetch(): void {
     if (!import.meta.env.DEV) return;
 
+    /* [256A-3c] Capturar window.fetch actual (puede incluir Rust adapter). */
+    const wrappedFetch = window.fetch.bind(window);
+
     window.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
         const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
         const urlResuelta = resolverUrlParaEntorno(url);
         const targetInput = urlResuelta !== url ? urlResuelta : input;
 
-        const response = await fetchOriginal(targetInput, init);
+        const response = await wrappedFetch(targetInput, init);
 
         /* Reescribir URLs en respuestas JSON (solo desktop dev; Android usa URLs absolutas directas) */
-        if (!esAndroid && url.includes('/wp-json/')) {
+        if (!esAndroid && (url.includes('/wp-json/') || url.includes('/api/'))) {
             const contentType = response.headers.get('content-type') ?? '';
             if (contentType.includes('application/json')) {
-                const json = await response.json();
-                const jsonReescrito = reescribirUrlsEnObjeto(json);
-                return new Response(JSON.stringify(jsonReescrito), {
-                    status: response.status,
-                    statusText: response.statusText,
-                    headers: response.headers,
-                });
+                const text = await response.text();
+                try {
+                    const json = JSON.parse(text);
+                    const jsonReescrito = reescribirUrlsEnObjeto(json);
+                    return new Response(JSON.stringify(jsonReescrito), {
+                        status: response.status,
+                        statusText: response.statusText,
+                        headers: response.headers,
+                    });
+                } catch {
+                    return new Response(text, { status: response.status, headers: response.headers });
+                }
             }
         }
 
@@ -330,8 +354,19 @@ export function actualizarTokenApi(nuevoToken: string): void {
 }
 
 /*
- * Restaura fetch original (para logout).
+ * [256A-3c] Guardar referencia al fetch sin auth (Rust adapter o browser original)
+ * para poder restaurarlo en logout. Se actualiza cada vez que inyectarAuthHeader
+ * captura window.fetch antes de envolver.
+ */
+let fetchSinAuth: (() => typeof window.fetch) | null = null;
+
+/*
+ * Restaura fetch al estado sin auth header (Rust adapter si estaba instalado).
  */
 export function limpiarAuthApi(): void {
-    window.fetch = fetchOriginal;
+    if (fetchSinAuth) {
+        window.fetch = fetchSinAuth();
+    } else {
+        window.fetch = fetchOriginal;
+    }
 }
