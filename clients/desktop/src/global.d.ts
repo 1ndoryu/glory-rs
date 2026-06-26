@@ -69,6 +69,8 @@ interface Window {
     __KAMPLES_CONFIG__?: {
         serverUrl?: string;
     };
+    /** Informe estructurado de verificación de sync para el agente */
+    __KAMPLES_SYNC_REPORT__?: (ventana?: string) => Promise<import('./services/syncService').SyncReport>;
 }
 
 /* Declaraciones para @crabnebula/tauri-plugin-drag */

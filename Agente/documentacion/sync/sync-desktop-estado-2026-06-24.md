@@ -1,7 +1,7 @@
 # Sync Desktop — Estado Actual (junio 2026)
 
 > **Última actualización:** 2026-06-25
-> **Relacionado:** `auditoria-sync-desktop-2026-04-25.md` (audit original), tareas 254A-7a..7d, 256A-1 (plan aliases)
+> **Relacionado:** `auditoria-sync-desktop-2026-04-25.md` (audit original), tareas 254A-7a..7d, 256A-1 (plan aliases), 256A-2 (sync report + doc)
 
 ---
 
@@ -94,21 +94,21 @@ CREATE INDEX idx_sync_changelog_created ON sync_changelog (created_at);
 
 ---
 
-## 3. 🔴 PROBLEMA CRÍTICO: sync_changelog nunca se escribe
+## 3. 🔴 PROBLEMA CRÍTICO: sync_changelog nunca se inserta desde handlers
 
 ### Descripción
 
-El repositorio `SyncChangelogRepository` **solo tiene métodos de lectura** (`delta()` y `ultimo_cursor()`). No existe ningún método `insert()` ni `insert_entry()`.
+El repositorio `SyncChangelogRepository` **sí tiene** `insert_entry()` (implementado en tarea 246A-1), pero **ninguno de los 12 handlers que mutan datos lo llama**.
 
-Ninguno de los handlers que mutan datos del usuario escriben entradas en `sync_changelog`. Esto significa que:
+Esto significa que:
 
 - **El delta sync siempre devuelve vacío** o `full_sync_required: true` (si el cursor es 0 o fue purgado).
 - **El desktop nunca recibe cambios incrementales** — cada sync es un full sync costoso.
-- **Los 7 tipos de `SyncChangelogTipo` existen en el modelo pero nunca se insertan.**
+- **Los 7 tipos de `SyncChangelogTipo` existen en el modelo y el método de inserción está listo, pero nunca se invoca.**
 
 ### Puntos de escritura faltantes (12 handlers)
 
-Los siguientes handlers necesitan llamar a `SyncChangelogRepository::insert()` después de su operación exitosa:
+Los siguientes handlers necesitan llamar a `SyncChangelogRepository::insert_entry()` después de su operación exitosa:
 
 | # | Handler | Operación | Tipo changelog | Entidad |
 |---|---|---|---|---|
@@ -176,11 +176,49 @@ Activado cuando `VITE_KAMPLES_BACKEND === 'rust'` o en builds Tauri nativas.
 | Sync panel | `sync.html` | Panel de sincronización dedicado |
 | Config sync | `config-sync.html` | Configuración avanzada de sync |
 
+### 4.4 Reporte de verificación sync (`window.__KAMPLES_SYNC_REPORT__`)
+
+Añadido en 256A-2. Expone una `async function` que recolecta estado de todos los subsistemas y retorna un `SyncReport` estructurado:
+
+| Campo | Descripción |
+|---|---|
+| `entorno` | Desktop mode, versión, ventana actual |
+| `auth` | Estado de login (`logueado`, `userId`, `tokenValido`) |
+| `config` | Carpeta seleccionada, sync activa, cursor delta, polling |
+| `backend` | Conectividad HTTP, cursor delta remoto, `fullSyncRequired` |
+| `tracking` | Archivos/colecciones locales, espacio ocupado |
+| `uploadQueue` | Items pendientes, subiendo, con error |
+| `journal` | Estado del journal de operaciones |
+| `circuitBreaker` | Estado del circuito (abierto/medio/cerrado), fallos |
+| `diagnosticos` | Array de `{nivel, componente, mensaje}` — auto-diagnóstico con alertas |
+
+**Disponible desde:**
+- `window.__KAMPLES_SYNC_REPORT__()` en ventana principal (`main.tsx`)
+- `window.__KAMPLES_SYNC_REPORT__()` en panel sync (`sync.tsx`)
+- Consola del agente: `await window.__KAMPLES_SYNC_REPORT__()`
+
+**Uso para verificación:**
+1. Abrir la app desktop → consola DevTools (Ctrl+Shift+I).
+2. Ejecutar `const r = await window.__KAMPLES_SYNC_REPORT__(); console.table(r.diagnosticos);`
+3. El agente puede usar Playwright para evaluar: `const report = await page.evaluate(() => window.__KAMPLES_SYNC_REPORT__());`
+4. El reporte incluye detección automática de problemas: auth faltante, carpeta no seleccionada, circuit breaker abierto, backend caído, errores en cola de subida.
+
 ---
 
 ## 5. Historial de Implementación
 
-### Tareas completadas (254A-7 serie — 2026-04-25)
+### Tareas completadas
+
+#### 256A-2 — Sync report + documentación (2026-06-25)
+
+| Tarea | Descripción | Estado |
+|---|---|---|
+| 256A-2a | `generarReporteSync()` + `SyncReport` interface en `syncService.ts` | ✅ |
+| 256A-2b | `__KAMPLES_SYNC_REPORT__` en `Window` interface (`global.d.ts`) | ✅ |
+| 256A-2c | Exposición en `main.tsx` y `sync.tsx` | ✅ |
+| 256A-2d | Documentación actualizada | ✅ |
+
+#### 254A-7 serie — 2026-04-25
 
 | Tarea | Descripción | Estado |
 |---|---|---|
@@ -271,6 +309,7 @@ SyncChangelogRepository::insert_entry(
 | Desktop sync services | ✅ | 30+ archivos completos |
 | Desktop upload queue | ✅ | Cola con reintentos y batching |
 | Desktop file watcher | ✅ | Tauri FS plugin + polling |
-| **Changelog population** | ❌ | **Bloqueante: sin esto, delta sync es inútil** |
+| Desktop sync report | ✅ | `window.__KAMPLES_SYNC_REPORT__()` (256A-2) |
+| **Changelog population** | ❌ | **Bloqueante: sin esto, delta sync es inútil. `insert_entry()` existe pero handlers no lo llaman (12 puntos).** |
 
-**El único bloqueante real es la escritura de `sync_changelog`.** Todo lo demás está implementado y funcional.
+**El único bloqueante real es la escritura de `sync_changelog` desde los handlers.** Todo lo demás está implementado y funcional. El reporte de verificación permite diagnosticar el estado actual de cada subsistema.

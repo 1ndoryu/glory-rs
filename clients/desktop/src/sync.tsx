@@ -54,6 +54,7 @@ import {
     limpiarHistorialSync,
     recargarHistorialDesdeStore,
     rehidratarImagenesPendientesSync,
+    generarReporteSync,
 } from '@desktop/services/syncService';
 
 /* Cola de subidas — expuesto en window para feedback de uploads */
@@ -103,6 +104,9 @@ function configurarEntorno(): void {
         reintentarItem,
         eliminarItemCola,
     };
+
+    /* Informe de verificación sync para el agente */
+    window.__KAMPLES_SYNC_REPORT__ = (ventana?: string) => generarReporteSync(ventana ?? 'sync');
 }
 
 async function inicializar(): Promise<void> {

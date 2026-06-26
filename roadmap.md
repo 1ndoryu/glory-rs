@@ -65,6 +65,19 @@
 
 - admin/panel/ al recargar debería abrir la tab que estaba abierta no regresar al principio
 
+### ~~256A-2 — Reporte de verificación sync + documentación~~ ✅
+
+**Problema:** No había forma estructurada para que el agente (o el usuario) verificara el estado completo del sistema de sincronización en una sola llamada.
+
+| Subtarea | Descripción | Estado |
+|---|---|---|
+| 256A-2a | `generarReporteSync()` + `SyncReport` interface en `syncService.ts` | ✅ |
+| 256A-2b | `__KAMPLES_SYNC_REPORT__` en `Window` interface (`global.d.ts`) | ✅ |
+| 256A-2c | Exposición en `main.tsx` y `sync.tsx` | ✅ |
+| 256A-2d | Documentación actualizada (doc sync + roadmap + archivado) | ✅ |
+
+**Resultado:** `await window.__KAMPLES_SYNC_REPORT__()` retorna un objeto con auth, config, backend, tracking, uploadQueue, journal, circuitBreaker y auto-diagnósticos. Disponible en consola DevTools de ambas ventanas. Uso: `const r = await window.__KAMPLES_SYNC_REPORT__(); console.table(r.diagnosticos);`
+
 ### ~~256A-1 — Portar Desktop App (Tauri 2) al stack Rust~~ ✅
 
 **Problema:** Los aliases `@` y `@app` apuntaban al tema WordPress que no existe en este proyecto. La SPA frontend ya tenía el código equivalente en `glory-core/` y `legacy/`.

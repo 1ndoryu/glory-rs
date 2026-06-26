@@ -66,6 +66,7 @@ import {
     limpiarHistorialSync,
     recargarHistorialDesdeStore,
     rehidratarImagenesPendientesSync,
+    generarReporteSync,
 } from '@desktop/services/syncService';
 
 /* C341: Upload queue — estado de subidas automáticas */
@@ -215,6 +216,8 @@ async function marcarEntornoDesktop(): Promise<void> {    window.__KAMPLES_DESKT
         estaListoParaDrag,
         generarPreviewDrag,
     };
+    /* Informe de verificación sync para el agente */
+    window.__KAMPLES_SYNC_REPORT__ = (ventana?: string) => generarReporteSync(ventana ?? 'main');
     /* Pre-calentar icono de drag para que el primer arrastre sea instantáneo */
     void preCachearIconoDrag();
 
