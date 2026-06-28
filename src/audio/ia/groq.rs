@@ -37,6 +37,8 @@ pub struct GroqChatRequest {
     pub temperature: f32,
     pub max_tokens: u32,
     pub require_json_object: bool,
+    /* URLs o data-URLs base64 de imágenes para análisis multimodal (visión). */
+    pub images: Vec<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -86,6 +88,7 @@ impl GroqChatRequest {
             temperature: 0.2,
             max_tokens: 1_500,
             require_json_object: true,
+            images: Vec::new(),
         }
     }
 }
@@ -215,18 +218,31 @@ impl GroqClient {
         api_key: &str,
         request: &GroqChatRequest,
     ) -> Result<String, GroqAttemptFailure> {
+        let system_msg = GroqMessagePayloadMultimodal {
+            role: "system",
+            content: GroqMessageContent::Text(&request.system_prompt),
+        };
+        let user_msg = if request.images.is_empty() {
+            GroqMessagePayloadMultimodal {
+                role: "user",
+                content: GroqMessageContent::Text(&request.user_prompt),
+            }
+        } else {
+            let mut parts: Vec<GroqContentPart<'_>> =
+                vec![GroqContentPart::Text { text: &request.user_prompt }];
+            for url in &request.images {
+                parts.push(GroqContentPart::ImageUrl {
+                    image_url: GroqImageUrl { url },
+                });
+            }
+            GroqMessagePayloadMultimodal {
+                role: "user",
+                content: GroqMessageContent::Parts(parts),
+            }
+        };
         let payload = GroqChatPayload {
             model,
-            messages: [
-                GroqMessagePayload {
-                    role: "system",
-                    content: &request.system_prompt,
-                },
-                GroqMessagePayload {
-                    role: "user",
-                    content: &request.user_prompt,
-                },
-            ],
+            messages: vec![system_msg, user_msg],
             temperature: request.temperature,
             max_tokens: request.max_tokens,
             response_format: request.require_json_object.then_some(GroqResponseFormat {
@@ -367,7 +383,7 @@ fn push_unique_key(keys: &mut Vec<String>, value: String) {
 #[derive(Debug, Serialize)]
 struct GroqChatPayload<'a> {
     model: &'a str,
-    messages: [GroqMessagePayload<'a>; 2],
+    messages: Vec<GroqMessagePayloadMultimodal<'a>>,
     temperature: f32,
     max_tokens: u32,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -375,9 +391,30 @@ struct GroqChatPayload<'a> {
 }
 
 #[derive(Debug, Serialize)]
-struct GroqMessagePayload<'a> {
+struct GroqMessagePayloadMultimodal<'a> {
     role: &'a str,
-    content: &'a str,
+    content: GroqMessageContent<'a>,
+}
+
+/* El campo `content` de un mensaje puede ser texto plano (str) o un array
+ * de partes (texto + image_url) para análisis multimodal. */
+#[derive(Debug, Serialize)]
+#[serde(untagged)]
+enum GroqMessageContent<'a> {
+    Text(&'a str),
+    Parts(Vec<GroqContentPart<'a>>),
+}
+
+#[derive(Debug, Serialize)]
+#[serde(tag = "type", rename_all = "snake_case")]
+enum GroqContentPart<'a> {
+    Text { text: &'a str },
+    ImageUrl { image_url: GroqImageUrl<'a> },
+}
+
+#[derive(Debug, Serialize)]
+struct GroqImageUrl<'a> {
+    url: &'a str,
 }
 
 #[derive(Debug, Serialize)]

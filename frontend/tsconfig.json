@@ -3,7 +3,8 @@
     "paths": {
       "@app/*": ["./src/legacy/*"],
       "@/*": ["./src/glory-core/*"],
-      "@mezclador/*": ["./src/mezclador/*"]
+      "@mezclador/*": ["./src/mezclador/*"],
+      "@desktop/*": ["../clients/desktop/src/*"]
     },
     "target": "ES2020",
     "useDefineForClassFields": true,

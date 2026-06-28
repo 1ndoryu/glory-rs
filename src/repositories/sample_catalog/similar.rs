@@ -73,8 +73,7 @@ impl SampleRepository {
         builder.push(
             "
                AND s.eliminado_en IS NULL
-               AND s.estado = 'activo'
-               AND s.mostrar_en_comunidad = TRUE",
+               AND s.estado = 'activo'",
         );
         push_auto_hide_filter(&mut builder, "s.id", "s.creador_id", viewer_id);
         builder.push(
@@ -100,7 +99,6 @@ impl SampleRepository {
               INNER JOIN usuarios_ext u ON u.id = s.creador_id
               WHERE s.eliminado_en IS NULL
                 AND s.estado = 'activo'
-                AND s.mostrar_en_comunidad = TRUE
                 AND s.id != ",
         );
         builder.push_bind(sample_id);
@@ -143,7 +141,6 @@ impl SampleRepository {
               INNER JOIN usuarios_ext u ON u.id = s.creador_id
               WHERE s.eliminado_en IS NULL
                 AND s.estado = 'activo'
-                AND s.mostrar_en_comunidad = TRUE
                 AND s.id != ",
         );
         builder.push_bind(source.id);
@@ -294,7 +291,6 @@ fn similarity_trending_score_sql() -> &'static str {
                     FROM samples base
                     WHERE base.eliminado_en IS NULL
                       AND base.estado = 'activo'
-                      AND base.mostrar_en_comunidad = TRUE
                 ),
                 1.0
             )

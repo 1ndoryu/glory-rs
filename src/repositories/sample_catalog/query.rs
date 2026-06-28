@@ -114,12 +114,14 @@ pub(super) fn push_public_filters(
     builder: &mut QueryBuilder<'_, Postgres>,
     filters: &SampleListFilters,
 ) {
+    /* [266A-1] El feed/catálogo muestra todos los samples activos publicados.
+     * mostrar_en_comunidad es un flag separado para el área de comunidad,
+     * NO debe filtrar el feed principal ni la búsqueda. */
     builder.push(
         " FROM samples s
           INNER JOIN usuarios_ext u ON u.id = s.creador_id
           WHERE s.eliminado_en IS NULL
-            AND s.estado = 'activo'
-            AND s.mostrar_en_comunidad = TRUE",
+            AND s.estado = 'activo'",
     );
     push_auto_hide_filter(builder, "s.id", "s.creador_id", filters.viewer_id);
 
@@ -142,6 +144,21 @@ pub(super) fn push_public_filters(
         builder.push(" AND s.tags_enriquecidos && ");
         builder.push_bind(filters.tags.clone());
         builder.push("::text[]");
+    }
+
+    /* [266A-1] Exclude samples with any of the negative tags.
+     * Both tags_enriquecidos and original tags are checked. */
+    if !filters.exclude_tags.is_empty() {
+        builder.push(
+            " AND NOT (s.tags_enriquecidos && ",
+        );
+        builder.push_bind(filters.exclude_tags.clone());
+        builder.push("::text[])");
+        builder.push(
+            " AND NOT (COALESCE(s.tags, ARRAY[]::text[]) && ",
+        );
+        builder.push_bind(filters.exclude_tags.clone());
+        builder.push("::text[])");
     }
 
     if let Some(premium) = filters.premium {

@@ -184,7 +184,6 @@ impl AdminExperimentsRepository {
             "SELECT id
              FROM samples
              WHERE estado = 'activo'
-               AND mostrar_en_comunidad = TRUE
                AND eliminado_en IS NULL
              ORDER BY publicado_at DESC NULLS LAST, id DESC
              LIMIT $1",

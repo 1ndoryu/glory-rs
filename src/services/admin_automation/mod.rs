@@ -192,7 +192,7 @@ impl AdminAutomationService {
             AdminAutomationRepository::consecutive_failures(pool, process_type).await?;
 
         Ok(AutomationTypeStatus {
-            activo: bool_value(&values, enabled_config_key(process_type), true),
+            activo: bool_value(&values, enabled_config_key(process_type), false),
             limite_por_lote: i32_value(
                 &values,
                 limit_config_key(process_type),

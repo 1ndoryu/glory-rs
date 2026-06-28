@@ -1,9 +1,12 @@
 mod local_rules;
 mod types;
 
-use crate::audio::ia::groq::{GroqChatRequest, GroqClient, GroqClientError};
+use crate::audio::ia::groq::{
+    load_groq_api_keys, GroqAttemptFailure, GroqChatRequest, GroqClient, GroqClientError,
+};
 use crate::audio::ia::json_repairer::JsonRepairer;
 use crate::audio::ia::openai::{OpenAiChatRequest, OpenAiClient, OpenAiClientError};
+use base64::{engine::general_purpose::STANDARD as BASE64, Engine as _};
 use serde::Deserialize;
 use serde_json::Value;
 use thiserror::Error;
@@ -18,12 +21,24 @@ pub use types::{
 use local_rules::inspect_request;
 
 const MODERATION_SYSTEM_PROMPT: &str = "You moderate user-generated metadata for Kamples, a music platform. Return JSON only. Prefer 'revision' when uncertain. Harmless profanity alone is not enough to reject. Focus on spam, scams, explicit sexual content, violent threats, hate, doxxing, illegal activity, copyright risk, and misleading metadata.";
+
+const VISION_SYSTEM_PROMPT: &str = "You are an image content moderator for Kamples, a music production community. Analyze this image and return ONLY a JSON object with this exact format:\n{\"safe\": true/false, \"category\": \"safe|sexual|violence|illegal|spam|other\", \"confidence\": 0.0-1.0, \"summary\": \"brief description\"}\n\nBe STRICT about: explicit sexual content, graphic violence, illegal content, gore.\nBe PERMISSIVE about: artistic nudity, album art, music production screenshots, concert photos, mild language in images.\nWhen uncertain, set safe=true with lower confidence.";
+
 const DEFAULT_MODERATION_GROQ_MODEL_CHAIN: [&str; 4] = [
     "openai/gpt-oss-safeguard-20b",
     "openai/gpt-oss-120b",
     "moonshotai/kimi-k2-instruct-0905",
     "llama-3.3-70b-versatile",
 ];
+
+/* Modelos con capacidad de visión (multimodal) — mismos que usa el legacy PHP. */
+const VISION_GROQ_MODEL_CHAIN: [&str; 2] = [
+    "meta-llama/llama-4-scout-17b-16e-instruct",
+    "meta-llama/llama-4-maverick-17b-128e-instruct",
+];
+
+/* Máximo 3 MB por imagen para data URL (límite de Groq). */
+const MAX_VISION_IMAGE_BYTES: usize = 3 * 1024 * 1024;
 
 /* [174A-43] Servicio de moderación reusable.
  * Separa cuatro capas explícitas: pre-filtro local, categorización IA,
@@ -109,15 +124,138 @@ impl ModerationService {
         } else {
             self.execute_ai_layer(request).await
         };
-        let decision = build_decision(request, &local_findings, &ai);
+
+        /* Capa de visión: analizar imágenes si hay y el texto pasó. */
+        let vision = if !request.image_urls.is_empty()
+            && !matches!(ai.assessment.as_ref().map(|a| a.verdict), Some(ModerationVerdict::Rejected))
+        {
+            self.execute_vision_layer(&request.image_urls).await
+        } else {
+            AiExecutionOutcome::default()
+        };
+
+        let decision = build_decision(request, &local_findings, &ai, &vision);
         let admin_panel = build_admin_panel(request, &decision, &local_findings, &ai);
 
         ModerationResult {
             local_findings,
             ai_assessment: ai.assessment,
-            provider_failures: ai.failures,
+            provider_failures: {
+                let mut all = ai.failures;
+                all.extend(vision.failures);
+                all
+            },
             decision,
             admin_panel,
+        }
+    }
+
+    /* Analiza imágenes con modelos vision (Llama 4 Scout/Maverick).
+     * Replica la capa 2 del legacy PHP: por cada imagen, consulta Groq Vision
+     * y devuelve el veredicto más restrictivo. */
+    async fn execute_vision_layer(&self, image_urls: &[String]) -> AiExecutionOutcome {
+        if self.groq.is_none() {
+            return AiExecutionOutcome::default();
+        }
+
+        let mut worst_verdict = ModerationVerdict::Approved;
+        let mut worst_category = ModerationCategory::Safe;
+        let mut worst_summary = String::new();
+        let mut worst_confidence: f32 = 0.0;
+        let mut failures = Vec::new();
+
+        let vision_chain: Vec<String> =
+            VISION_GROQ_MODEL_CHAIN.iter().map(ToString::to_string).collect();
+        let vision_client = match GroqClient::with_model_chain(
+            load_groq_api_keys(),
+            vision_chain,
+        ) {
+            Ok(c) => c,
+            Err(_) => return AiExecutionOutcome::default(),
+        };
+
+        for image_url in image_urls {
+            let data_url = match resolve_image_data_url(image_url).await {
+                Ok(url) => url,
+                Err(message) => {
+                    failures.push(ModerationProviderFailure::Groq(GroqAttemptFailure {
+                        model: "vision-resolver".into(),
+                        key_index: 0,
+                        status_code: None,
+                        retry_after_seconds: None,
+                        retryable: false,
+                        message,
+                    }));
+                    continue;
+                }
+            };
+
+            let request = GroqChatRequest {
+                user_prompt: format!(
+                    "Analiza esta imagen para moderación en una comunidad musical. {}",
+                    VISION_SYSTEM_PROMPT
+                ),
+                system_prompt: "Eres un moderador de imágenes para una comunidad musical.".into(),
+                temperature: 0.1,
+                max_tokens: 400,
+                require_json_object: true,
+                images: vec![data_url],
+            };
+
+            match vision_client.chat_completion(&request).await {
+                Ok(success) => match parse_ai_payload(&success.content) {
+                    Ok(payload) => {
+                        let category =
+                            ModerationCategory::from_raw(payload.category.as_deref().unwrap_or("safe"));
+                        let confidence = payload.confidence.unwrap_or(0.5).clamp(0.0, 1.0);
+                        let verdict = normalize_verdict(
+                            payload.recommended_level.as_deref(),
+                            payload.safe,
+                            confidence,
+                        );
+                        let summary = payload.summary.unwrap_or_default();
+
+                        if verdict_order(verdict) > verdict_order(worst_verdict) {
+                            worst_verdict = verdict;
+                            worst_category = category;
+                            worst_confidence = confidence;
+                            worst_summary = summary;
+                        }
+                    }
+                    Err(message) => failures.push(ModerationProviderFailure::Parse(
+                        ModerationParseFailure {
+                            provider: ModerationProvider::Groq,
+                            model: success.model,
+                            message,
+                        },
+                    )),
+                },
+                Err(GroqClientError::Exhausted {
+                    failures: inner, ..
+                }) => failures
+                    .extend(inner.into_iter().map(ModerationProviderFailure::Groq)),
+                Err(_) => {}
+            }
+        }
+
+        if worst_verdict == ModerationVerdict::Approved {
+            AiExecutionOutcome { failures, ..Default::default() }
+        } else {
+            AiExecutionOutcome {
+                assessment: Some(ModerationAiAssessment {
+                    provider: ModerationProvider::Groq,
+                    model: "vision".into(),
+                    category: worst_category,
+                    verdict: worst_verdict,
+                    confidence: worst_confidence,
+                    reason_code: format!("vision_{}", worst_category.as_str()),
+                    summary: worst_summary,
+                    attempt_count: image_urls.len(),
+                    provider_key_index: None,
+                }),
+                failures,
+                providers_configured: true,
+            }
         }
     }
 
@@ -139,6 +277,7 @@ impl ModerationService {
                 temperature: 0.1,
                 max_tokens: 400,
                 require_json_object: true,
+                images: Vec::new(),
             };
 
             match groq.chat_completion(&request).await {
@@ -246,6 +385,7 @@ fn build_decision(
     request: &ModerationRequest,
     local_findings: &[ModerationLocalFinding],
     ai: &AiExecutionOutcome,
+    vision: &AiExecutionOutcome,
 ) -> ModerationDecision {
     if let Some(local) = strongest_local_finding(local_findings) {
         if local.verdict == ModerationVerdict::Rejected {
@@ -259,7 +399,21 @@ fn build_decision(
         }
     }
 
-    if let Some(assessment) = &ai.assessment {
+    /* El veredicto más restrictivo entre texto IA y visión IA prevalece. */
+    let best_ai = match (&ai.assessment, &vision.assessment) {
+        (Some(text), Some(vis)) => {
+            if verdict_order(vis.verdict) > verdict_order(text.verdict) {
+                vision
+            } else {
+                ai
+            }
+        }
+        (Some(_), None) => ai,
+        (None, Some(_)) => vision,
+        (None, None) => ai,
+    };
+
+    if let Some(assessment) = &best_ai.assessment {
         let verdict = match assessment.verdict {
             ModerationVerdict::Rejected if assessment.confidence >= 0.85 => {
                 ModerationVerdict::Rejected
@@ -434,6 +588,65 @@ fn summarize_failure(failure: &ModerationProviderFailure) -> String {
         ModerationProviderFailure::OpenAi(failure) => format!("openai:{}", failure.message),
         ModerationProviderFailure::Parse(failure) => format!("parse:{}", failure.message),
     }
+}
+
+fn verdict_order(verdict: ModerationVerdict) -> u8 {
+    match verdict {
+        ModerationVerdict::Approved => 0,
+        ModerationVerdict::Review => 1,
+        ModerationVerdict::Rejected => 2,
+    }
+}
+
+/* Convierte una URL de imagen (local `/uploads/...` o HTTP) a data URL base64
+ * para el API de Groq Vision. Máximo 3 MB. */
+async fn resolve_image_data_url(image_url: &str) -> Result<String, String> {
+    if image_url.starts_with("data:") {
+        return Ok(image_url.to_owned());
+    }
+
+    let bytes = if image_url.starts_with("http://") || image_url.starts_with("https://") {
+        reqwest::get(image_url)
+            .await
+            .map_err(|e| format!("HTTP fetch failed: {e}"))?
+            .bytes()
+            .await
+            .map_err(|e| format!("HTTP read failed: {e}"))?
+            .to_vec()
+    } else {
+        /* Ruta local: resolver relativo a UPLOADS_DIR o directorio de trabajo. */
+        let path = if image_url.starts_with('/') {
+            std::path::PathBuf::from(image_url.trim_start_matches('/'))
+        } else {
+            std::path::PathBuf::from(image_url)
+        };
+        tokio::fs::read(&path)
+            .await
+            .map_err(|e| format!("Local read failed for {}: {e}", path.display()))?
+    };
+
+    if bytes.len() > MAX_VISION_IMAGE_BYTES {
+        return Err(format!(
+            "Image too large: {} bytes (max {} bytes)",
+            bytes.len(),
+            MAX_VISION_IMAGE_BYTES
+        ));
+    }
+
+    let mime = if bytes.starts_with(&[0xFF, 0xD8, 0xFF]) {
+        "image/jpeg"
+    } else if bytes.starts_with(&[0x89, 0x50, 0x4E, 0x47]) {
+        "image/png"
+    } else if bytes.len() > 4 && &bytes[0..4] == b"RIFF" && &bytes[8..12] == b"WEBP" {
+        "image/webp"
+    } else {
+        return Err("Unknown image format (expected JPEG, PNG, or WebP)".into());
+    };
+
+    Ok(format!(
+        "data:{mime};base64,{}",
+        BASE64.encode(&bytes)
+    ))
 }
 
 fn map_openai_error(error: OpenAiClientError) -> ModerationOpenAiFailure {

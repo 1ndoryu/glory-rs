@@ -7,6 +7,7 @@
 import { apiGet, apiPut } from './apiCliente';
 import type { RespuestaApi } from './apiCliente';
 import type { SampleResumen } from '../types';
+import { normalizarListaSamples } from './normalizers/sampleNormalizer';
 import { crearLogger } from './logger';
 
 const log = crearLogger('apiExplorador');
@@ -57,7 +58,14 @@ export const obtenerColeccionados = async (
         if (busqueda) params.busqueda = busqueda;
         if (soloEncanta) params.solo_encanta = true;
         if (soloLike) params.solo_like = true;
-        return await apiGet<RespuestaColeccionados>('/me/coleccionados', params);
+        const resp = await apiGet<RespuestaColeccionados>('/me/coleccionados', params);
+        /* Normalizar samples para que rutaWaveform (camelCase) exista —
+         * el backend devuelve ruta_waveform (snake_case).
+         * Sin esto, waveform no se dibuja en Descargas. */
+        if (resp.ok && resp.data?.data) {
+            resp.data.data = normalizarListaSamples(resp.data.data);
+        }
+        return resp;
     } catch (err) {
         log.error('Error obteniendo coleccionados', err);
         return { ok: false, data: null, error: 'Error de red', status: 500 };

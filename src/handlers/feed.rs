@@ -95,15 +95,26 @@ fn parse_feed_mode(raw: Option<&str>) -> FeedMode {
     }
 }
 
-fn build_text_search(query: &FeedQuery) -> Result<Option<SampleTextSearch>, AppError> {
+fn build_text_search(query: &FeedQuery) -> Result<(Option<SampleTextSearch>, Vec<String>), AppError> {
     let Some(raw) = query.busqueda.as_ref() else {
-        return Ok(None);
+        return Ok((None, Vec::new()));
     };
     let trimmed = raw.trim();
     if trimmed.is_empty() {
-        return Ok(None);
+        return Ok((None, Vec::new()));
     }
-    if trimmed.chars().count() < 2 {
+
+    /* [266A-1] Parse negative tag prefixes (-tag) from feed search. */
+    let (clean_parts, exclude_tags) = parse_search_exclusions_feed(trimmed);
+    let clean_str = match clean_parts {
+        Some(s) => s,
+        None => {
+            /* Only negative terms — no positive search, but still return exclude_tags. */
+            return Ok((None, exclude_tags));
+        }
+    };
+
+    if clean_str.chars().count() < 2 {
         return Err(AppError::Validation(
             "busqueda debe tener al menos 2 caracteres".into(),
         ));
@@ -112,8 +123,37 @@ fn build_text_search(query: &FeedQuery) -> Result<Option<SampleTextSearch>, AppE
         .busqueda_norm
         .as_ref()
         .map(|v| v.trim().to_ascii_lowercase())
-        .filter(|v| !v.is_empty() && v != &trimmed.to_ascii_lowercase());
-    Ok(Some(SampleTextSearch::new(trimmed.to_string(), normalized)))
+        .filter(|v| !v.is_empty() && v != &clean_str.to_ascii_lowercase());
+    Ok((Some(SampleTextSearch::new(clean_str, normalized)), exclude_tags))
+}
+
+fn parse_search_exclusions_feed(trimmed: &str) -> (Option<String>, Vec<String>) {
+    if !trimmed.contains('-') {
+        return (Some(trimmed.to_string()), Vec::new());
+    }
+
+    let mut positive_parts = Vec::new();
+    let mut exclude_tags = Vec::new();
+
+    for part in trimmed.split_whitespace() {
+        if let Some(tag) = part.strip_prefix('-') {
+            let normalized = tag.trim().to_ascii_lowercase();
+            if !normalized.is_empty() && normalized.len() <= 50 {
+                exclude_tags.push(normalized);
+            }
+        } else {
+            positive_parts.push(part);
+        }
+    }
+
+    let clean = if positive_parts.is_empty() {
+        None
+    } else {
+        let joined = positive_parts.join(" ");
+        if joined.is_empty() { None } else { Some(joined) }
+    };
+
+    (clean, exclude_tags)
 }
 
 #[utoipa::path(
@@ -133,7 +173,7 @@ pub async fn get_feed(
 ) -> Result<Json<FeedResponse>, AppError> {
     let (limit, offset) = normalize_pagination(&query);
     let mode = parse_feed_mode(query.tipo.as_deref());
-    let search = build_text_search(&query)?;
+    let (search, exclude_tags) = build_text_search(&query)?;
 
     /* [304A-2] Solo el modo "descubrir" sin busqueda activa pasa por el motor
      * de recomendacion. Recientes/trending y cualquier busqueda usan el listado
@@ -170,7 +210,7 @@ pub async fn get_feed(
          * En modo recomendador no hay filtros, así que contamos todos los samples
          * activos públicos de una pasada. */
         let total: i64 = sqlx::query_scalar(
-            "SELECT COUNT(*) FROM samples WHERE eliminado_en IS NULL AND estado = 'activo' AND mostrar_en_comunidad = TRUE",
+            "SELECT COUNT(*) FROM samples WHERE eliminado_en IS NULL AND estado = 'activo'",
         )
         .fetch_one(&state.pool)
         .await?;
@@ -203,6 +243,7 @@ pub async fn get_feed(
         music_key: None,
         sample_type: None,
         tags: Vec::new(),
+        exclude_tags,
         premium: None,
         creator: None,
         sort,

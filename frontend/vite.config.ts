@@ -12,6 +12,9 @@ export default defineConfig({
       '@app': fileURLToPath(new URL('./src/legacy', import.meta.url)),
       '@': fileURLToPath(new URL('./src/glory-core', import.meta.url)),
       '@mezclador': fileURLToPath(new URL('./src/mezclador', import.meta.url)),
+      /* [266A-1] @desktop apunta a clients/desktop/src para imports dinamicos del
+       * flujo de auth desktop (authDesktopService) desde el frontend web. */
+      '@desktop': fileURLToPath(new URL('../clients/desktop/src', import.meta.url)),
       /* [204A-1] Stub modulos nativos (Tauri/Capacitor) para builds web.
        * El legacy importa dinamicamente estos modulos solo en desktop/movil; en web
        * Rollup necesita resolverlos a un stub para no fallar el build. */

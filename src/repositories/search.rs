@@ -115,7 +115,6 @@ impl SearchRepository {
                INNER JOIN usuarios_ext u ON u.id = s.creador_id
                WHERE s.eliminado_en IS NULL
                  AND s.estado = 'activo'
-                 AND s.mostrar_en_comunidad = TRUE
                  AND s.titulo ILIKE $1
                ORDER BY COALESCE(s.total_likes, 0) DESC, s.id DESC
                LIMIT $2"#,

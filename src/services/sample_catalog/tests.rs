@@ -1,7 +1,7 @@
 use super::{
     asset_to_public_url, build_sample_detail, normalize_creator, normalize_music_key,
     normalize_sample_type, normalize_search, normalize_similar_limit, normalize_tags,
-    normalize_update_request,
+    normalize_update_request, parse_search_exclusions,
 };
 use crate::models::{SimilarSamplesQuery, UpdateSampleRequest};
 use crate::repositories::SampleCatalogDetailRecord;
@@ -236,4 +236,39 @@ fn rejects_price_when_premium_is_disabled_in_same_patch() {
         ..UpdateSampleRequest::default()
     })
     .is_err());
+}
+
+#[test]
+fn parse_search_exclusions_basic_negative_tag() {
+    let (search, exclude) = parse_search_exclusions(Some("-vocals".into()));
+    assert!(search.is_none());
+    assert_eq!(exclude, vec!["vocals"]);
+}
+
+#[test]
+fn parse_search_exclusions_mixed_positive_and_negative() {
+    let (search, exclude) = parse_search_exclusions(Some("drums -vocals".into()));
+    assert_eq!(search.as_deref(), Some("drums"));
+    assert_eq!(exclude, vec!["vocals"]);
+}
+
+#[test]
+fn parse_search_exclusions_multiple_negatives() {
+    let (search, exclude) = parse_search_exclusions(Some("-vocals -bass guitar".into()));
+    assert_eq!(search.as_deref(), Some("guitar"));
+    assert_eq!(exclude, vec!["vocals", "bass"]);
+}
+
+#[test]
+fn parse_search_exclusions_no_negatives() {
+    let (search, exclude) = parse_search_exclusions(Some("trap beats".into()));
+    assert_eq!(search.as_deref(), Some("trap beats"));
+    assert!(exclude.is_empty());
+}
+
+#[test]
+fn parse_search_exclusions_none_input() {
+    let (search, exclude) = parse_search_exclusions(None);
+    assert!(search.is_none());
+    assert!(exclude.is_empty());
 }

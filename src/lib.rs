@@ -62,4 +62,7 @@ pub struct AppState {
      * El proxy de imágenes lo usa para servir archivos fuera de uploads/
      * (assets/, legacy-assets/). */
     pub static_dir: Option<String>,
+    /* [276A-3] Servicio de moderación con visión (Groq Vision + texto).
+     * Usado para moderación asíncrona de publicaciones con imágenes. */
+    pub moderation: Option<Arc<services::ModerationService>>,
 }

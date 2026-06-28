@@ -197,26 +197,36 @@ fn spawn_background_workers(
     storage: &Arc<dyn glory_backend::services::FileStorage>,
     storage_root: &str,
 ) -> BackgroundWorkerHandles {
-    /* [A] En local (KAMPLES_WORKERS_ENABLED=false) se omiten workers pesados:
-     * audio pipeline, scraping queue y automation (orquesta scraping/extraccion).
-     * ia_queue ya se auto-deshabilita sin API keys. Billing e image_enricher
-     * siguen activos siempre por ser ligeros. */
+    /* [A] Workers pesados controlados por flags:
+     * - KAMPLES_WORKERS_ENABLED: audio pipeline + scraping queue (procesamiento de audio)
+     * - KAMPLES_AUTOMATION_ENABLED: automation worker (scraping + extraccion)
+     * En modo dev, automation OFF por defecto; audio pipeline ON. */
     let workers_enabled = std::env::var("KAMPLES_WORKERS_ENABLED")
         .ok()
         .as_deref()
         .is_none_or(|v| v != "false" && v != "0");
+
+    let automation_enabled = std::env::var("KAMPLES_AUTOMATION_ENABLED")
+        .ok()
+        .as_deref()
+        .is_some_and(|v| v == "true" || v == "1");
 
     if workers_enabled {
         (
             glory_backend::workers::spawn_audio_pipeline_workers(pool, storage),
             glory_backend::workers::spawn_ia_queue_workers(pool),
             glory_backend::workers::spawn_billing_cleanup_worker(pool),
-            glory_backend::workers::spawn_automation_worker(pool),
+            if automation_enabled {
+                glory_backend::workers::spawn_automation_worker(pool)
+            } else {
+                tracing::info!("KAMPLES_AUTOMATION_ENABLED no set — automation worker desactivado");
+                tokio::spawn(async {})
+            },
             glory_backend::workers::spawn_scraping_queue_worker(pool),
             glory_backend::workers::spawn_cancion_image_enricher_worker(pool, storage_root),
         )
     } else {
-        tracing::info!("KAMPLES_WORKERS_ENABLED=false — workers pesados desactivados (audio, scraping, automation)");
+        tracing::info!("KAMPLES_WORKERS_ENABLED=false — workers pesados desactivados (audio, scraping)");
         (
             Vec::new(),
             glory_backend::workers::spawn_ia_queue_workers(pool),

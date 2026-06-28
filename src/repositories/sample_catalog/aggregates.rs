@@ -65,7 +65,6 @@ async fn fetch_genero(
            ) AS g(val)
            WHERE s.eliminado_en IS NULL
              AND s.estado = 'activo'
-             AND s.mostrar_en_comunidad = TRUE
              AND ($1::text IS NULL OR (s.metadata->'genero') ? $1)
              AND ($2::int IS NULL OR s.bpm >= $2)
              AND ($3::int IS NULL OR s.bpm <= $3)
@@ -102,7 +101,6 @@ async fn fetch_instrumento(
            ) AS i(val)
            WHERE s.eliminado_en IS NULL
              AND s.estado = 'activo'
-             AND s.mostrar_en_comunidad = TRUE
              AND ($1::text IS NULL OR (s.metadata->'genero') ? $1)
              AND ($2::int IS NULL OR s.bpm >= $2)
              AND ($3::int IS NULL OR s.bpm <= $3)
@@ -133,7 +131,6 @@ async fn fetch_sentimiento(
            FROM samples s
            WHERE s.eliminado_en IS NULL
              AND s.estado = 'activo'
-             AND s.mostrar_en_comunidad = TRUE
              AND ($1::text IS NULL OR (s.metadata->'genero') ? $1)
              AND ($2::int IS NULL OR s.bpm >= $2)
              AND ($3::int IS NULL OR s.bpm <= $3)
@@ -164,7 +161,6 @@ async fn fetch_tipo(
            FROM samples s
            WHERE s.eliminado_en IS NULL
              AND s.estado = 'activo'
-             AND s.mostrar_en_comunidad = TRUE
              AND ($1::text IS NULL OR (s.metadata->'genero') ? $1)
              AND ($2::int IS NULL OR s.bpm >= $2)
              AND ($3::int IS NULL OR s.bpm <= $3)
@@ -205,7 +201,6 @@ async fn fetch_otro(
            ) AS t(val)
            WHERE s.eliminado_en IS NULL
              AND s.estado = 'activo'
-             AND s.mostrar_en_comunidad = TRUE
              AND ($1::text IS NULL OR (s.metadata->'genero') ? $1)
              AND ($2::int IS NULL OR s.bpm >= $2)
              AND ($3::int IS NULL OR s.bpm <= $3)

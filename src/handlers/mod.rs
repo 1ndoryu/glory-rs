@@ -730,6 +730,13 @@ pub fn create_router(
         scraper_secret: config.scraper_secret,
         allow_duplicate_uploads: config.allow_duplicate_uploads,
         static_dir: Some("frontend/public".to_string()),
+        moderation: match crate::services::ModerationService::from_env() {
+            Ok(svc) => Some(std::sync::Arc::new(svc)),
+            Err(err) => {
+                tracing::warn!(error = %err, "ModerationService not available");
+                None
+            }
+        },
     };
 
     /* CORS: en desarrollo se permite todo. En producción, restringir orígenes */

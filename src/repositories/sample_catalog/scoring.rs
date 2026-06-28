@@ -36,8 +36,7 @@ impl SampleRepository {
             " FROM samples s
               INNER JOIN usuarios_ext u ON u.id = s.creador_id
               WHERE s.eliminado_en IS NULL
-                AND s.estado = 'activo'
-                AND s.mostrar_en_comunidad = TRUE",
+                AND s.estado = 'activo'",
         );
 
         if !exclude_ids.is_empty() {

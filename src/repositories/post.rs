@@ -127,6 +127,31 @@ impl PostRepository {
         Ok(id)
     }
 
+    pub async fn update_moderation_status(
+        pool: &PgPool,
+        post_id: i32,
+        estado: &str,
+        detalle: serde_json::Value,
+        razon: &str,
+    ) -> Result<bool, AppError> {
+        let updated = sqlx::query!(
+            r#"UPDATE publicaciones
+               SET moderacion_estado = $2,
+                   moderacion_detalle = $3,
+                   moderacion_razon = $4
+               WHERE id = $1
+                 AND eliminado_en IS NULL"#,
+            post_id,
+            estado,
+            detalle,
+            razon,
+        )
+        .execute(pool)
+        .await?
+        .rows_affected();
+        Ok(updated > 0)
+    }
+
     pub async fn update(
         pool: &PgPool,
         post_id: i32,

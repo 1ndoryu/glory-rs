@@ -545,7 +545,12 @@ fn normalize_filters(
     query: ListSamplesQuery,
     viewer_id: Option<i32>,
 ) -> Result<SampleListFilters, AppError> {
-    let search = normalize_search(query.search, query.search_normalized)?;
+    /* [266A-1] Parse negative tag prefixes (-tag) from the search string.
+     * "-vocals" → exclude tag "vocals", no positive search.
+     * "drums -vocals" → search "drums", exclude tag "vocals".
+     * "-vocals -bass" → exclude tags ["vocals", "bass"], no positive search. */
+    let (clean_search, exclude_tags) = parse_search_exclusions(query.search);
+    let search = normalize_search(clean_search, query.search_normalized)?;
     let creator = normalize_creator(query.creator)?;
     let tags = normalize_tags(query.tags)?;
 
@@ -558,10 +563,47 @@ fn normalize_filters(
         music_key: normalize_music_key(query.key)?,
         sample_type: normalize_sample_type(query.sample_type)?,
         tags,
+        exclude_tags,
         premium: query.premium,
         creator,
         sort: SampleSortOrder::Smart,
     })
+}
+
+/// Parse `-tag` exclusion prefixes from a search query.
+/// Returns (clean_positive_query, excluded_tags).
+fn parse_search_exclusions(raw: Option<String>) -> (Option<String>, Vec<String>) {
+    let Some(raw) = raw else {
+        return (None, Vec::new());
+    };
+
+    let trimmed = raw.trim();
+    if trimmed.is_empty() || !trimmed.contains('-') {
+        return (Some(raw), Vec::new());
+    }
+
+    let mut positive_parts = Vec::new();
+    let mut exclude_tags = Vec::new();
+
+    for part in trimmed.split_whitespace() {
+        if let Some(tag) = part.strip_prefix('-') {
+            let normalized = tag.trim().to_ascii_lowercase();
+            if !normalized.is_empty() && normalized.len() <= 50 {
+                exclude_tags.push(normalized);
+            }
+        } else {
+            positive_parts.push(part);
+        }
+    }
+
+    let clean = if positive_parts.is_empty() {
+        None
+    } else {
+        let joined = positive_parts.join(" ");
+        if joined.is_empty() { None } else { Some(joined) }
+    };
+
+    (clean, exclude_tags)
 }
 
 fn normalize_similar_limit(query: &SimilarSamplesQuery) -> i64 {

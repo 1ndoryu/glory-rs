@@ -1,7 +1,11 @@
-use axum::extract::{Path, Query, State};
+use std::sync::Arc;
+
+use axum::extract::{Multipart, Path, Query, State};
 use axum::http::StatusCode;
 use axum::routing::{get, post};
 use axum::{Json, Router};
+use chrono::{Datelike, Utc};
+use nanoid::nanoid;
 use serde::{Deserialize, Serialize};
 use utoipa::{IntoParams, ToSchema};
 
@@ -13,6 +17,8 @@ use crate::AppState;
 const MAX_POST_CONTENT: usize = 5_000;
 const MAX_POST_IMAGES: usize = 10;
 const MAX_ATTACHED_SAMPLES: usize = 16;
+const MAX_POST_IMAGE_BYTES: usize = 5 * 1024 * 1024;
+const MAX_POST_IMAGE_MULTIPART: usize = MAX_POST_IMAGE_BYTES + 256 * 1024;
 
 /* [174A-67] Este handler separa publicaciones/reposts del resto de sociales para mantener
  * rutas y validaciones del dominio en un módulo acotado.
@@ -124,6 +130,58 @@ pub async fn create_post(
     let post = PostRepository::get(&state.pool, user.user_id, id, &hidden)
         .await?
         .ok_or_else(|| AppError::Internal(format!("post {id} recién creado no visible")))?;
+
+    /* Moderación asíncrona: texto + imágenes con Groq Vision (capas 1-3 del legacy).
+     * El post se crea como 'aprobado'; si la IA lo rechaza, se actualiza a
+     * 'rechazado' o 'revision' en background sin bloquear la respuesta 201. */
+    if let Some(moderation) = &state.moderation {
+        let moderation = Arc::clone(moderation);
+        let pool = state.pool.clone();
+        let contenido = payload.contenido.clone();
+        let imagenes = payload.imagenes.clone();
+        tokio::spawn(async move {
+            let request = crate::services::ModerationRequest {
+                entity_kind: crate::services::ModerationEntityKind::Publication,
+                entity_id: Some(i64::from(id)),
+                title: String::new(),
+                body: contenido,
+                tags: Vec::new(),
+                primary_folder: None,
+                secondary_folder: None,
+                image_urls: imagenes,
+                extra_context: None,
+            };
+            let result = moderation.moderate(&request).await;
+            let (estado, razon) = match result.decision.verdict {
+                crate::services::ModerationVerdict::Approved => return,
+                crate::services::ModerationVerdict::Review => {
+                    ("revision", result.decision.summary.clone())
+                }
+                crate::services::ModerationVerdict::Rejected => {
+                    ("rechazado", result.decision.summary.clone())
+                }
+            };
+            let detalle = serde_json::json!({
+                "category": result.decision.category.as_str(),
+                "reason_code": &result.decision.reason_code,
+                "ai": result.ai_assessment.as_ref().map(|a| serde_json::json!({
+                    "provider": a.provider.as_str(),
+                    "model": &a.model,
+                    "confidence": a.confidence,
+                })),
+            });
+            if let Err(err) = PostRepository::update_moderation_status(
+                &pool, id, estado, detalle, &razon,
+            )
+            .await
+            {
+                tracing::error!(post_id = id, error = %err, "Failed to update moderation status");
+            } else {
+                tracing::info!(post_id = id, estado, "Post moderation complete");
+            }
+        });
+    }
+
     Ok((
         StatusCode::CREATED,
         Json(PostMutationResponse { ok: true, post }),
@@ -336,9 +394,126 @@ pub async fn unrepost_post(
     Ok(Json(OkResponse { ok: true }))
 }
 
+#[derive(Serialize, ToSchema)]
+struct UploadImageResponse {
+    url: String,
+}
+
+/* POST /publicaciones/imagenes — sube una imagen para adjuntar a una publicación.
+ * Acepta multipart/form-data con campo "imagen" (JPEG, PNG, WEBP, máx 5 MB).
+ * Devuelve la URL pública del archivo subido. */
+#[utoipa::path(
+    post,
+    path = "/api/publicaciones/imagenes",
+    tag = "posts",
+    security(("bearer_auth" = [])),
+    responses(
+        (status = 200, body = UploadImageResponse),
+        (status = 400, description = "Imagen inválida o faltante"),
+        (status = 413, description = "Imagen demasiado grande"),
+    )
+)]
+async fn upload_post_image(
+    State(state): State<AppState>,
+    user: CurrentUser,
+    mut multipart: Multipart,
+) -> Result<Json<UploadImageResponse>, AppError> {
+    let mut bytes: Option<Vec<u8>> = None;
+    let mut extension: Option<&'static str> = None;
+
+    while let Some(mut field) = multipart
+        .next_field()
+        .await
+        .map_err(|e| AppError::BadRequest(format!("multipart inválido: {e}")))?
+    {
+        let name = field.name().unwrap_or_default().to_string();
+        if name != "imagen" {
+            continue;
+        }
+        let filename = field.file_name().map(ToString::to_string);
+        let mut acc = Vec::new();
+        while let Some(chunk) = field
+            .chunk()
+            .await
+            .map_err(|e| AppError::BadRequest(format!("chunk inválido: {e}")))?
+        {
+            if acc.len().saturating_add(chunk.len()) > MAX_POST_IMAGE_BYTES {
+                return Err(AppError::BadRequest(format!(
+                    "Imagen excede {} MB",
+                    MAX_POST_IMAGE_BYTES / (1024 * 1024)
+                )));
+            }
+            acc.extend_from_slice(&chunk);
+        }
+        extension = Some(detect_image_extension(&acc, filename.as_deref())?);
+        bytes = Some(acc);
+        break;
+    }
+
+    let Some(image_bytes) = bytes else {
+        return Err(AppError::BadRequest("Campo 'imagen' faltante".into()));
+    };
+    let ext = extension.unwrap_or("jpg");
+
+    let now = Utc::now();
+    let storage_key = format!(
+        "posts/{}/{:04}/{:02}/{}.{}",
+        user.user_id,
+        now.year(),
+        now.month(),
+        nanoid!(10),
+        ext,
+    );
+    state.storage.put_bytes(&storage_key, &image_bytes).await?;
+
+    let url = if let Some(base) = &state.public_base_url {
+        format!("{}/uploads/{}", base.trim_end_matches('/'), storage_key)
+    } else {
+        format!("/uploads/{storage_key}")
+    };
+
+    Ok(Json(UploadImageResponse { url }))
+}
+
+fn detect_image_extension(bytes: &[u8], filename: Option<&str>) -> Result<&'static str, AppError> {
+    let ext = filename
+        .and_then(|v| std::path::Path::new(v).extension())
+        .and_then(|v| v.to_str())
+        .map(str::to_ascii_lowercase)
+        .unwrap_or_default();
+
+    if bytes.len() >= 3
+        && bytes[0..3] == [0xFF, 0xD8, 0xFF]
+        && matches!(ext.as_str(), "" | "jpg" | "jpeg")
+    {
+        return Ok("jpg");
+    }
+    if bytes.len() >= 8
+        && bytes[0..8] == [0x89, b'P', b'N', b'G', 0x0D, 0x0A, 0x1A, 0x0A]
+        && matches!(ext.as_str(), "" | "png")
+    {
+        return Ok("png");
+    }
+    if bytes.len() >= 12
+        && &bytes[0..4] == b"RIFF"
+        && &bytes[8..12] == b"WEBP"
+        && matches!(ext.as_str(), "" | "webp")
+    {
+        return Ok("webp");
+    }
+
+    Err(AppError::UnsupportedMediaType(
+        "Formato de imagen no válido. Formatos aceptados: JPEG, PNG, WEBP".into(),
+    ))
+}
+
 pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/publicaciones", post(create_post).get(list_posts))
+        .route(
+            "/publicaciones/imagenes",
+            post(upload_post_image).layer(axum::extract::DefaultBodyLimit::max(MAX_POST_IMAGE_MULTIPART)),
+        )
         .route(
             "/publicaciones/:id",
             get(get_post).put(update_post).delete(delete_post),
