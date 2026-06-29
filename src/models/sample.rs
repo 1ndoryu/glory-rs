@@ -145,6 +145,10 @@ pub struct SampleSummary {
     #[schema(value_type = Object)]
     pub metadata: serde_json::Value,
     pub creador: SampleCreatorSummary,
+    /* [296A-1] Flag pre-cargado: sample guardado en al menos 1 coleccion del viewer.
+     * Se computa via EXISTS subquery solo cuando hay usuario autenticado. */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ya_guardado_en_coleccion: Option<bool>,
 }
 
 /// Metadatos de paginación para listados de samples.

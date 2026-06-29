@@ -11,6 +11,7 @@ import {
     listarColecciones,
     crearColeccion,
     agregarSampleAColeccion,
+    quitarSampleDeColeccion,
     obtenerRelevantesParaSample,
 } from '@app/services/apiColecciones';
 import { crearLogger } from '@app/services/logger';
@@ -20,6 +21,8 @@ const log = crearLogger('useModalSeleccionColeccion');
 
 /* Evento global para notificar que un sample fue guardado en una coleccion */
 export const EVENTO_SAMPLE_GUARDADO_EN_COLECCION = 'kamples:sample-guardado-en-coleccion';
+/* [296A-1] Evento global para notificar que un sample fue quitado de una coleccion */
+export const EVENTO_SAMPLE_QUITADO_DE_COLECCION = 'kamples:sample-quitado-de-coleccion';
 
 export const useModalSeleccionColeccion = () => {
     const abierto = useColeccionPickerStore(s => s.abierto);
@@ -123,6 +126,33 @@ export const useModalSeleccionColeccion = () => {
         }
     }, [sample, samples, agregando]);
 
+    /* [296A-1] Quitar sample de una coleccion — toggle inverse de manejarAgregar */
+    const manejarQuitar = useCallback(async (coleccionId: number) => {
+        if (!sample || agregando !== null) return;
+        setAgregando(coleccionId);
+        try {
+            const resp = await quitarSampleDeColeccion(coleccionId, sample.id);
+            if (resp.ok) {
+                setYaGuardadoEn(prev => {
+                    const next = new Set(prev);
+                    next.delete(coleccionId);
+                    return next;
+                });
+                setAgregados(prev => {
+                    const next = new Set(prev);
+                    next.delete(coleccionId);
+                    return next;
+                });
+                window.dispatchEvent(new CustomEvent(EVENTO_SAMPLE_QUITADO_DE_COLECCION, { detail: { sampleId: sample.id } }));
+                log.info('Sample quitado de coleccion', { coleccionId, sampleId: sample.id });
+            }
+        } catch (err) {
+            log.error('Error quitando de coleccion', err);
+        } finally {
+            setAgregando(null);
+        }
+    }, [sample, agregando]);
+
     const manejarCrear = useCallback(async () => {
         if (!busqueda.trim() || !sample || existeConNombre) return;
         setAgregando(-1);
@@ -155,6 +185,6 @@ export const useModalSeleccionColeccion = () => {
         colecciones: coleccionesFiltradas, cargando,
         agregando, agregados, yaGuardadoEn,
         busqueda, setBusqueda, existeConNombre,
-        manejarAgregar, manejarCrear,
+        manejarAgregar, manejarQuitar, manejarCrear,
     };
 };

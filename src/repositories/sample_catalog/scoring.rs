@@ -14,7 +14,7 @@
 
 use sqlx::{PgPool, Postgres, QueryBuilder};
 
-use super::query::{push_auto_hide_filter, SampleSummaryRow, SAMPLE_SUMMARY_SELECT};
+use super::query::{push_auto_hide_filter, push_guardado_en_coleccion_select, SampleSummaryRow, SAMPLE_SUMMARY_SELECT};
 use super::{SampleCatalogSummaryRecord, SampleRepository};
 
 const MAX_SCORING_TAGS: usize = 10;
@@ -32,6 +32,7 @@ impl SampleRepository {
         viewer_id: Option<i32>,
     ) -> Result<Vec<SampleCatalogSummaryRecord>, sqlx::Error> {
         let mut builder = QueryBuilder::<Postgres>::new(SAMPLE_SUMMARY_SELECT);
+        push_guardado_en_coleccion_select(&mut builder, viewer_id);
         builder.push(
             " FROM samples s
               INNER JOIN usuarios_ext u ON u.id = s.creador_id

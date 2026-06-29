@@ -18,7 +18,7 @@ export const ModalSeleccionColeccion = (): JSX.Element | null => {
         abierto, sample, posicion, cerrar,
         colecciones, cargando, agregando, agregados, yaGuardadoEn,
         busqueda, setBusqueda, existeConNombre,
-        manejarAgregar, manejarCrear,
+        manejarAgregar, manejarQuitar, manejarCrear,
     } = useModalSeleccionColeccion();
 
     /* [193A-66] useT DEBE ir antes de cualquier return condicional — Rules of Hooks */
@@ -67,8 +67,9 @@ export const ModalSeleccionColeccion = (): JSX.Element | null => {
                             return (
                                 <BotonBase variante="ghost" key={col.id}
                                     className={`seleccionColeccionItem ${yaGuardado ? 'seleccionColeccionItemGuardado' : ''}`}
-                                    onClick={() => !yaGuardado && manejarAgregar(col.id)}
-                                    disabled={yaGuardado || agregandoEste} type="button">
+                                    /* [296A-1] Toggle: si ya guardado, quitar; si no, agregar */
+                                    onClick={() => yaGuardado ? manejarQuitar(col.id) : manejarAgregar(col.id)}
+                                    disabled={agregandoEste} type="button">
                                     {/* [183A-88] Photon CDN para thumbnails en picker */}
                                     <ImgOptimizada className="seleccionColeccionItemImg"
                                         src={col.imagenUrl || obtenerImagenColor(col.id)} alt="" w={48} quality={75} />

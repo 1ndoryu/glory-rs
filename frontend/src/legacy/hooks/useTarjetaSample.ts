@@ -30,7 +30,7 @@ import { getT } from '@app/utils/i18n';
 import { useAudioPlayback } from './useAudioPlayback';
 import { esDesktop, obtenerDragService, obtenerSyncService } from './utils/tarjetaSampleUtils';
 import { requiereAuth } from '@app/utils/requiereAuth';
-import { EVENTO_SAMPLE_GUARDADO_EN_COLECCION } from './useModalSeleccionColeccion';
+import { EVENTO_SAMPLE_GUARDADO_EN_COLECCION, EVENTO_SAMPLE_QUITADO_DE_COLECCION } from './useModalSeleccionColeccion';
 import { EVENTO_SAMPLE_COMENTADO } from './useComentarios';
 
 export { formatearKey } from './utils/tarjetaSampleUtils';
@@ -86,6 +86,16 @@ export function useTarjetaSample(opciones: UseTarjetaSampleOpciones) {
         };
         window.addEventListener(EVENTO_SAMPLE_GUARDADO_EN_COLECCION, manejar);
         return () => window.removeEventListener(EVENTO_SAMPLE_GUARDADO_EN_COLECCION, manejar);
+    }, [sample.id]);
+
+    /* [296A-1] Escucha evento global cuando este sample es quitado de una coleccion (toggle Bookmark) */
+    useEffect(() => {
+        const manejar = (e: Event) => {
+            const { sampleId } = (e as CustomEvent<{ sampleId: number }>).detail;
+            if (sampleId === sample.id) setGuardado(false);
+        };
+        window.addEventListener(EVENTO_SAMPLE_QUITADO_DE_COLECCION, manejar);
+        return () => window.removeEventListener(EVENTO_SAMPLE_QUITADO_DE_COLECCION, manejar);
     }, [sample.id]);
 
     /* Escucha evento global cuando el usuario comenta en este sample */

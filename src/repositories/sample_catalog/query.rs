@@ -72,6 +72,8 @@ pub(super) struct SampleSummaryRow {
     creator_avatar_url: Option<String>,
     creator_verificado: bool,
     metadata: Value,
+    #[sqlx(default)]
+    ya_guardado_en_coleccion: Option<bool>,
 }
 
 impl From<SampleSummaryRow> for SampleCatalogSummaryRecord {
@@ -106,7 +108,32 @@ impl From<SampleSummaryRow> for SampleCatalogSummaryRecord {
             creator_avatar_url: row.creator_avatar_url,
             creator_verificado: row.creator_verificado,
             metadata: row.metadata,
+            ya_guardado_en_coleccion: row.ya_guardado_en_coleccion,
         }
+    }
+}
+
+/* [296A-1] Subquery EXISTS para saber si el sample está guardado en al menos
+ * 1 coleccion del usuario autenticado. Se agrega al SELECT solo cuando viewer_id
+ * es Some. Usa PK composite (coleccion_id, sample_id) — scan barato. */
+pub(super) fn push_guardado_en_coleccion_select(
+    builder: &mut QueryBuilder<'_, Postgres>,
+    viewer_id: Option<i32>,
+) {
+    if let Some(uid) = viewer_id {
+        builder.push(
+            ", EXISTS(
+                SELECT 1 FROM coleccion_samples cs_gs
+                JOIN colecciones c_gs ON c_gs.id = cs_gs.coleccion_id
+                WHERE cs_gs.sample_id = s.id
+                  AND c_gs.usuario_id = "
+        );
+        builder.push_bind(uid);
+        builder.push(
+            "
+                  AND c_gs.eliminado_en IS NULL
+            ) AS ya_guardado_en_coleccion"
+        );
     }
 }
 

@@ -11,8 +11,8 @@ mod similar;
 pub use aggregates::{TagAggregateFilters, TagAggregateItem, TagAggregatesResult};
 
 use query::{
-    push_auto_hide_filter, push_public_filters, push_public_order, CountRow, SampleSummaryRow,
-    SAMPLE_SUMMARY_SELECT,
+    push_auto_hide_filter, push_guardado_en_coleccion_select, push_public_filters,
+    push_public_order, CountRow, SampleSummaryRow, SAMPLE_SUMMARY_SELECT,
 };
 
 /* [174A-44] Listado público de samples con filtros combinables.
@@ -48,6 +48,7 @@ pub struct SampleListFilters {
     pub music_key: Option<String>,
     pub sample_type: Option<String>,
     pub tags: Vec<String>,
+    pub exclude_tags: Vec<String>,
     pub premium: Option<bool>,
     pub creator: Option<String>,
     pub sort: SampleSortOrder,
@@ -121,6 +122,7 @@ pub struct SampleCatalogSummaryRecord {
     pub creator_avatar_url: Option<String>,
     pub creator_verificado: bool,
     pub metadata: serde_json::Value,
+    pub ya_guardado_en_coleccion: Option<bool>,
 }
 
 #[derive(Debug, Clone)]
@@ -252,6 +254,9 @@ impl SampleRepository {
 
         let mut builder = QueryBuilder::<Postgres>::new(SAMPLE_SUMMARY_SELECT);
 
+        /* [296A-1] Agregar flag ya_guardado_en_coleccion si hay usuario autenticado */
+        push_guardado_en_coleccion_select(&mut builder, filters.viewer_id);
+
         push_public_filters(&mut builder, filters);
         push_public_order(&mut builder, filters);
         builder.push(" LIMIT ");
@@ -284,6 +289,9 @@ impl SampleRepository {
 
         let mut builder = QueryBuilder::<Postgres>::new(SAMPLE_SUMMARY_SELECT);
 
+        /* [296A-1] Agregar flag ya_guardado_en_coleccion si hay usuario autenticado */
+        push_guardado_en_coleccion_select(&mut builder, viewer_id);
+
         builder.push(
             " FROM samples s
               INNER JOIN usuarios_ext u ON u.id = s.creador_id
@@ -293,8 +301,7 @@ impl SampleRepository {
         builder.push(
             "::int[])
               AND s.eliminado_en IS NULL
-              AND s.estado = 'activo'
-              AND s.mostrar_en_comunidad = TRUE",
+              AND s.estado = 'activo'",
         );
         push_auto_hide_filter(&mut builder, "s.id", "s.creador_id", viewer_id);
         builder.push(" ORDER BY array_position(");
@@ -515,7 +522,6 @@ impl SampleRepository {
                  FROM samples
                  WHERE eliminado_en IS NULL
                    AND estado = 'activo'
-                   AND mostrar_en_comunidad = TRUE
                  ORDER BY publicado_at DESC NULLS LAST, created_at DESC, id DESC
                  LIMIT 1000
              )
@@ -678,7 +684,6 @@ impl SampleRepository {
               INNER JOIN usuarios_ext u ON u.id = s.creador_id
               WHERE s.eliminado_en IS NULL
                 AND s.estado = 'activo'
-                AND s.mostrar_en_comunidad = TRUE
                 AND s.cancion_origen_id = ",
         );
         builder.push_bind(cancion_id);

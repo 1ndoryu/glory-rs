@@ -270,6 +270,7 @@ pub(crate) fn build_sample_summary(
         total_comentarios: record.total_comentarios,
         publicado_at: record.publicado_at,
         metadata: record.metadata,
+        ya_guardado_en_coleccion: record.ya_guardado_en_coleccion,
         creador: build_creator_summary(
             record.creator_id,
             record.creator_username,

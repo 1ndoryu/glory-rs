@@ -1,6 +1,6 @@
 use sqlx::{FromRow, PgPool, Postgres, QueryBuilder};
 
-use super::query::{SampleSummaryRow, SAMPLE_SUMMARY_SELECT};
+use super::query::{push_guardado_en_coleccion_select, SampleSummaryRow, SAMPLE_SUMMARY_SELECT};
 use super::{SampleCatalogSummaryRecord, SampleRepository};
 use crate::repositories::AUTO_HIDE_SAMPLE_REPORT_THRESHOLD;
 
@@ -94,6 +94,7 @@ impl SampleRepository {
         viewer_id: Option<i32>,
     ) -> Result<Vec<SampleCatalogSummaryRecord>, sqlx::Error> {
         let mut builder = QueryBuilder::<Postgres>::new(SAMPLE_SUMMARY_SELECT);
+        push_guardado_en_coleccion_select(&mut builder, viewer_id);
         builder.push(
             " FROM samples s
               INNER JOIN usuarios_ext u ON u.id = s.creador_id
@@ -136,6 +137,7 @@ impl SampleRepository {
         viewer_id: Option<i32>,
     ) -> Result<Vec<SampleCatalogSummaryRecord>, sqlx::Error> {
         let mut builder = QueryBuilder::<Postgres>::new(SAMPLE_SUMMARY_SELECT);
+        push_guardado_en_coleccion_select(&mut builder, viewer_id);
         builder.push(
             " FROM samples s
               INNER JOIN usuarios_ext u ON u.id = s.creador_id

@@ -165,6 +165,9 @@ impl From<BibliotecaSampleRow> for SampleCatalogSummaryRecord {
             creator_avatar_url: row.creator_avatar_url,
             creator_verificado: row.creator_verificado,
             metadata: row.metadata,
+            /* [296A-1] Biblioteca ya es del usuario — siempre guardado en sus propias colecciones.
+             * Se fuerza None porque el contexto de biblioteca no requiere este flag. */
+            ya_guardado_en_coleccion: None,
         }
     }
 }
