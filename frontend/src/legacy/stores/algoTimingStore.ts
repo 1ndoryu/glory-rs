@@ -1,15 +1,12 @@
-/*
- * Store: algoTimingStore — Kamples
- * Gestiona el estado del modal de métricas del algoritmo (admin only).
- * Carga el historial desde la API REST y lo expone al modal.
- *
- * [2003A-3] Creado para el modal de rendimiento del algoritmo de feed.
+/* [2003A-3] Creado para el modal de rendimiento del algoritmo de feed.
  * [2003A-3-A] Fix: usar apiPeticion para enviar X-WP-Nonce y evitar 401
  *  (current_user_can require cookie auth + nonce — fetch raw sin nonce falla).
  * [186A-1] Fix: el backend Rust devuelve Vec<TimingEntry> plano (no {ok,historial})
  *  y etapas como Vec<TimingStage> (array de {name,ms}) — convertir a flat map
  *  para que coincida con la interfaz RegistroTiming.etapas.
- */
+ * [296A-1] Fix: el backend ahora registra para todos los usuarios. El endpoint
+ *  GET filtra por admin actual por defecto (?all=true para ver todos).
+ *  Agregado user_id a los tipos raw y normalizado. */
 
 import { create } from 'zustand';
 import { apiPeticion } from '@app/services/apiCliente';
@@ -26,6 +23,7 @@ interface TimingEntryRaw {
     total_ms: number;
     etapas: TimingStageRaw[];
     meta: Record<string, unknown>;
+    user_id: number;
 }
 
 export interface EtapasTiming {
@@ -65,6 +63,7 @@ export interface RegistroTiming {
         offset?: number;
     };
     explain?: ExplainData;
+    userId: number;
 }
 
 interface EstadoAlgoTiming {
@@ -111,6 +110,7 @@ function adaptarTimingEntry(raw: TimingEntryRaw): RegistroTiming {
             bulkFetch: metaRaw.bulk_fetch as boolean | undefined
                 ?? metaRaw.bulkFetch as boolean | undefined,
         },
+        userId: raw.user_id,
     };
 }
 

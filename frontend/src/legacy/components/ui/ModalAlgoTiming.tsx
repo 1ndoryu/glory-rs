@@ -1,7 +1,9 @@
 /* ModalAlgoTiming — Modal de métricas del algoritmo de recomendación (admin only).
- * Tres tabs: última medición, promedio, historial. Historial en WP options.
+ * Tres tabs: última medición, promedio, historial.
  * [2003A-3] Creado para profiling del algoritmo de feed.
- * [2003A-3-B] Desglose EXPLAIN extraído a DesgloseExplain.tsx. */
+ * [2003A-3-B] Desglose EXPLAIN extraído a DesgloseExplain.tsx.
+ * [296A-1] Eliminado hardcodeo 'User ID 1'. Ahora muestra el userId real
+ *   de cada medición y filtra por admin actual por defecto. */
 
 import { useState } from 'react';
 import { RefreshCw, Trash2, Activity } from 'lucide-react';
@@ -187,7 +189,7 @@ const TabHistorial = ({
     onSeleccionar: (r: RegistroTiming) => void;
 }): JSX.Element => {
     if (historial.length === 0) {
-        return <p className="algoTimingVacio">Sin mediciones todavía. Recarga la página siendo user 1.</p>;
+        return <p className="algoTimingVacio">Sin mediciones todavía. Recarga el feed en modo Descubrir.</p>;
     }
 
     return (
@@ -258,7 +260,7 @@ export const ModalAlgoTiming = (): JSX.Element | null => {
                     <div className="algoTimingTitulo">
                         <Activity size={16} />
                         <span>Rendimiento del algoritmo</span>
-                        <span className="algoTimingSubtitulo">User ID 1</span>
+                        <span className="algoTimingSubtitulo">User ID {ultima?.userId ?? '—'}</span>
                     </div>
                     <div className="algoTimingAcciones">
                         <BotonBase

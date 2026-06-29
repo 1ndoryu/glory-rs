@@ -461,12 +461,15 @@ pub async fn save_process_cookies(
 }
 
 /* [174A-57] Endpoint admin para inspeccionar las últimas mediciones del
- * algoritmo. Solo se acumulan para `KAMPLES_ALGO_TIMING_USER_ID` (default 1). */
+ * algoritmo. [296A-1] Ahora registra para todos los usuarios; por defecto
+ * filtra por el admin que consulta. `?all=true` para ver todos. */
 
 #[derive(Debug, Clone, Deserialize, IntoParams)]
 pub struct AlgoTimingQuery {
     /// Máximo de entradas a devolver. Default 50, máximo 100.
     pub limit: Option<usize>,
+    /// Si true, retorna mediciones de todos los usuarios. Por defecto solo las del admin actual.
+    pub all: Option<bool>,
 }
 
 #[utoipa::path(
@@ -486,7 +489,12 @@ pub async fn algo_timing_history(
 ) -> Result<Json<Vec<TimingEntry>>, AppError> {
     user.require_admin()?;
     let limit = query.limit.unwrap_or(50).clamp(1, 100);
-    Ok(Json(ALGO_TIMING.history(limit)))
+    let filter_user = if query.all.unwrap_or(false) {
+        None
+    } else {
+        Some(user.user_id)
+    };
+    Ok(Json(ALGO_TIMING.history(limit, filter_user)))
 }
 
 /* [186A-1] DELETE para limpiar el historial de mediciones. */

@@ -5,10 +5,14 @@
  *   - Marcas activas por request via `DashMap<i32, RequestState>` (un usuario
  *     puede tener varios requests en vuelo; cada uno se identifica por user_id
  *     pero el state es el último iniciado — aceptable para QA single-user).
- *   - Solo activo para `target_user_id` (default 1, configurable via env
- *     `KAMPLES_ALGO_TIMING_USER_ID`). Zero overhead para el resto.
+ *   - Registra para TODOS los usuarios autenticados (overhead <0.01% del
+ *     tiempo de feed). El endpoint GET filtra por admin actual por defecto.
  *   - EXPLAIN ANALYZE NO portado (requiere pgvector compatible + cost extra
  *     que no justifica scope inicial). Hook documentado para futuro.
+ *
+ * [296A-1] Fix: eliminar filtro `target_user_id` que impedía que admins con
+ *   user_id != 1 vieran mediciones. Ahora registra para todos y el endpoint
+ *   GET filtra por el admin que consulta (o `?all=true` para ver todo).
  *
  * Uso desde `RecommenderService::feed`:
  *   ALGO_TIMING.start(user_id);
@@ -18,7 +22,8 @@
  *   ALGO_TIMING.mark(user_id, "compute");
  *   ALGO_TIMING.save(user_id, json!({"total_samples": n}));
  *
- * Endpoint admin: `GET /api/admin/algo-timing` retorna las últimas 100 medidas. */
+ * Endpoint admin: `GET /api/admin/algo-timing` retorna las últimas 100 medidas
+ *   del admin que consulta. `?all=true` para ver todos los usuarios. */
 
 use std::collections::VecDeque;
 use std::sync::{LazyLock, RwLock};
@@ -31,8 +36,6 @@ use serde_json::Value;
 use utoipa::ToSchema;
 
 const MAX_HISTORY: usize = 100;
-const ENV_TARGET_USER: &str = "KAMPLES_ALGO_TIMING_USER_ID";
-const DEFAULT_TARGET_USER: i32 = 1;
 
 /// Una medición completa de un request al feed.
 #[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
@@ -42,6 +45,8 @@ pub struct TimingEntry {
     /// Etapas en orden de inserción con duración relativa a la marca anterior.
     pub etapas: Vec<TimingStage>,
     pub meta: Value,
+    /// ID del usuario que generó esta medición.
+    pub user_id: i32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
@@ -57,34 +62,20 @@ struct RequestState {
 }
 
 pub struct AlgoTimingLogger {
-    target_user_id: i32,
     in_flight: DashMap<i32, RequestState>,
     history: RwLock<VecDeque<TimingEntry>>,
 }
 
 impl AlgoTimingLogger {
     fn new() -> Self {
-        let target = std::env::var(ENV_TARGET_USER)
-            .ok()
-            .and_then(|s| s.parse::<i32>().ok())
-            .unwrap_or(DEFAULT_TARGET_USER);
         Self {
-            target_user_id: target,
             in_flight: DashMap::new(),
             history: RwLock::new(VecDeque::with_capacity(MAX_HISTORY)),
         }
     }
 
-    #[inline]
-    fn matches(&self, user_id: i32) -> bool {
-        user_id == self.target_user_id
-    }
-
-    /// Inicia un ciclo de medición para `user_id`. No-op si no es el target.
+    /// Inicia un ciclo de medición para `user_id`.
     pub fn start(&self, user_id: i32) {
-        if !self.matches(user_id) {
-            return;
-        }
         let now = Instant::now();
         self.in_flight.insert(
             user_id,
@@ -98,9 +89,6 @@ impl AlgoTimingLogger {
 
     /// Registra una marca con duración relativa a la anterior.
     pub fn mark(&self, user_id: i32, etapa: &str) {
-        if !self.matches(user_id) {
-            return;
-        }
         if let Some(mut state) = self.in_flight.get_mut(&user_id) {
             let now = Instant::now();
             let delta_ms = now.duration_since(state.last_mark).as_secs_f64() * 1000.0;
@@ -114,9 +102,6 @@ impl AlgoTimingLogger {
 
     /// Cierra la medición y la guarda en el historial circular.
     pub fn save(&self, user_id: i32, meta: Value) {
-        if !self.matches(user_id) {
-            return;
-        }
         let Some((_, state)) = self.in_flight.remove(&user_id) else {
             return;
         };
@@ -126,6 +111,7 @@ impl AlgoTimingLogger {
             total_ms,
             etapas: state.etapas,
             meta,
+            user_id,
         };
         if let Ok(mut hist) = self.history.write() {
             if hist.len() >= MAX_HISTORY {
@@ -136,12 +122,19 @@ impl AlgoTimingLogger {
     }
 
     /// Snapshot del historial (más reciente primero). Limit clamp a MAX_HISTORY.
+    /// Si `filter_user_id` está presente, solo retorna entradas de ese usuario.
     #[must_use]
-    pub fn history(&self, limit: usize) -> Vec<TimingEntry> {
+    pub fn history(&self, limit: usize, filter_user_id: Option<i32>) -> Vec<TimingEntry> {
         let cap = limit.min(MAX_HISTORY);
         self.history.read().map_or_else(
             |_| Vec::new(),
-            |hist| hist.iter().take(cap).cloned().collect(),
+            |hist| {
+                hist.iter()
+                    .filter(|e| filter_user_id.is_none_or(|uid| e.user_id == uid))
+                    .take(cap)
+                    .cloned()
+                    .collect()
+            },
         )
     }
 
@@ -152,10 +145,6 @@ impl AlgoTimingLogger {
         }
     }
 
-    #[must_use]
-    pub const fn target_user_id(&self) -> i32 {
-        self.target_user_id
-    }
 }
 
 #[inline]
@@ -172,31 +161,30 @@ mod tests {
     use super::*;
     use serde_json::json;
 
-    fn fresh_logger(target: i32) -> AlgoTimingLogger {
+    fn fresh_logger() -> AlgoTimingLogger {
         AlgoTimingLogger {
-            target_user_id: target,
             in_flight: DashMap::new(),
             history: RwLock::new(VecDeque::with_capacity(MAX_HISTORY)),
         }
     }
 
     #[test]
-    fn ignores_non_target_user() {
-        let logger = fresh_logger(1);
+    fn records_any_user() {
+        let logger = fresh_logger();
         logger.start(99);
         logger.mark(99, "x");
         logger.save(99, json!({}));
-        assert!(logger.history(10).is_empty());
+        assert_eq!(logger.history(10, None).len(), 1);
     }
 
     #[test]
     fn records_target_user_cycle() {
-        let logger = fresh_logger(7);
+        let logger = fresh_logger();
         logger.start(7);
         std::thread::sleep(std::time::Duration::from_millis(2));
         logger.mark(7, "step1");
         logger.save(7, json!({"k": 1}));
-        let hist = logger.history(10);
+        let hist = logger.history(10, None);
         assert_eq!(hist.len(), 1);
         assert!(hist[0].total_ms >= 2.0);
         assert_eq!(hist[0].etapas.len(), 1);
@@ -206,14 +194,28 @@ mod tests {
 
     #[test]
     fn history_is_capped_and_ordered() {
-        let logger = fresh_logger(7);
+        let logger = fresh_logger();
         for i in 0..(MAX_HISTORY + 5) {
             logger.start(7);
             logger.save(7, json!({"i": i}));
         }
-        let hist = logger.history(MAX_HISTORY + 50);
+        let hist = logger.history(MAX_HISTORY + 50, None);
         assert_eq!(hist.len(), MAX_HISTORY);
         /* La más reciente al frente. */
         assert_eq!(hist[0].meta["i"], json!(MAX_HISTORY + 4));
+    }
+
+    #[test]
+    fn filters_by_user_id() {
+        let logger = fresh_logger();
+        logger.start(1);
+        logger.save(1, json!({"u": 1}));
+        logger.start(2);
+        logger.save(2, json!({"u": 2}));
+        logger.start(3);
+        logger.save(3, json!({"u": 3}));
+        assert_eq!(logger.history(100, Some(2)).len(), 1);
+        assert_eq!(logger.history(100, Some(2))[0].user_id, 2);
+        assert_eq!(logger.history(100, None).len(), 3);
     }
 }

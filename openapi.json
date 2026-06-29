@@ -86,6 +86,16 @@
               "nullable": true,
               "minimum": 0
             }
+          },
+          {
+            "name": "all",
+            "in": "query",
+            "description": "Si true, retorna mediciones de todos los usuarios. Por defecto solo las del admin actual.",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "nullable": true
+            }
           }
         ],
         "responses": {
@@ -21385,7 +21395,8 @@
           "ts",
           "total_ms",
           "etapas",
-          "meta"
+          "meta",
+          "user_id"
         ],
         "properties": {
           "etapas": {
@@ -21403,6 +21414,11 @@
           "ts": {
             "type": "string",
             "format": "date-time"
+          },
+          "user_id": {
+            "type": "integer",
+            "format": "int32",
+            "description": "ID del usuario que generó esta medición."
           }
         }
       },
