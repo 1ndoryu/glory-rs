@@ -6,6 +6,7 @@
 
 import { apiGet, apiPost, apiPostFormData, type RespuestaApi } from './apiCliente';
 import { crearLogger } from './logger';
+import { normalizarConversacion, normalizarListaConversaciones, normalizarMensaje, normalizarListaMensajes } from './normalizers/messageNormalizer';
 import type { Conversacion, Mensaje } from '../types';
 
 const log = crearLogger('apiMensajes');
@@ -13,7 +14,11 @@ const log = crearLogger('apiMensajes');
 /* Obtener lista de conversaciones */
 export const obtenerConversaciones = async (): Promise<RespuestaApi<Conversacion[]>> => {
     try {
-        return await apiGet<Conversacion[]>('/mensajes/conversaciones');
+        const resp = await apiGet<Conversacion[]>('/mensajes/conversaciones');
+        if (resp.ok && resp.data) {
+            resp.data = normalizarListaConversaciones(resp.data);
+        }
+        return resp;
     } catch (err) {
         log.error('Error obteniendo conversaciones', err);
         return { ok: false, data: [], error: 'Error de red', status: 500 };
@@ -30,7 +35,11 @@ export const obtenerMensajes = async (
     try {
         const params: Record<string, number> = {};
         if (antesDeId && antesDeId > 0) params.antes_de_id = antesDeId;
-        return await apiGet<Mensaje[]>(`/mensajes/${conversacionId}`, params);
+        const resp = await apiGet<Mensaje[]>(`/mensajes/${conversacionId}`, params);
+        if (resp.ok && resp.data) {
+            resp.data = normalizarListaMensajes(resp.data);
+        }
+        return resp;
     } catch (err) {
         log.error('Error obteniendo mensajes', err);
         return { ok: false, data: [], error: 'Error de red', status: 500 };
@@ -43,10 +52,14 @@ export const enviarMensajeTexto = async (
     contenido: string
 ): Promise<RespuestaApi<Mensaje>> => {
     try {
-        return await apiPost<Mensaje>(`/mensajes/${conversacionId}`, {
+        const resp = await apiPost<Mensaje>(`/mensajes/${conversacionId}`, {
             contenido,
             tipo: 'texto',
         });
+        if (resp.ok && resp.data) {
+            resp.data = normalizarMensaje(resp.data);
+        }
+        return resp;
     } catch (err) {
         log.error('Error enviando mensaje texto', err);
         return { ok: false, data: null, error: 'Error de red', status: 500 };
@@ -69,7 +82,11 @@ export const enviarMensajeMultimedia = async (
         formData.append('media', archivo);
         if (contenido) formData.append('contenido', contenido);
 
-        return await apiPostFormData<Mensaje>(`/mensajes/${conversacionId}`, formData);
+        const resp = await apiPostFormData<Mensaje>(`/mensajes/${conversacionId}`, formData);
+        if (resp.ok && resp.data) {
+            resp.data = normalizarMensaje(resp.data);
+        }
+        return resp;
     } catch (err) {
         log.error(`Error enviando mensaje ${tipo}`, err);
         return { ok: false, data: null, error: 'Error de red', status: 500 };
@@ -83,11 +100,15 @@ export const enviarMensajeSample = async (
     contenido?: string
 ): Promise<RespuestaApi<Mensaje>> => {
     try {
-        return await apiPost<Mensaje>(`/mensajes/${conversacionId}`, {
+        const resp = await apiPost<Mensaje>(`/mensajes/${conversacionId}`, {
             tipo: 'sample',
             sampleId,
             contenido: contenido ?? '',
         });
+        if (resp.ok && resp.data) {
+            resp.data = normalizarMensaje(resp.data);
+        }
+        return resp;
     } catch (err) {
         log.error('Error enviando sample por chat', err);
         return { ok: false, data: null, error: 'Error de red', status: 500 };
@@ -121,7 +142,11 @@ export const iniciarConversacion = async (
     usuarioId: number
 ): Promise<RespuestaApi<Conversacion>> => {
     try {
-        return await apiPost<Conversacion>('/mensajes/nueva', { usuarioId });
+        const resp = await apiPost<Conversacion>('/mensajes/nueva', { usuarioId });
+        if (resp.ok && resp.data) {
+            resp.data = normalizarConversacion(resp.data);
+        }
+        return resp;
     } catch (err) {
         log.error('Error iniciando conversación', err);
         return { ok: false, data: null, error: 'Error de red', status: 500 };

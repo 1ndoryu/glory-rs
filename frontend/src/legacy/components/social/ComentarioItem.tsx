@@ -58,15 +58,15 @@ export const ComentarioItem = ({comentario, acciones, onClickAutor, renderMediaC
 
     return (
         <div className={`comentarioItem ${nivelVisual > 0 ? 'comentarioRespuesta' : ''}`}>
-            <div className="comentarioAutor" onClick={() => onClickAutor?.(comentario.autor.username)} role="link" tabIndex={0}>
-                <Avatar src={comentario.autor.avatarUrl} nombre={comentario.autor.nombreVisible} tamano="xs" />
+            <div className="comentarioAutor" onClick={() => onClickAutor?.(comentario.autor?.username)} role="link" tabIndex={0}>
+                <Avatar src={comentario.autor?.avatarUrl} nombre={comentario.autor?.nombreVisible ?? '?'} tamano="xs" />
             </div>
             <div className="comentarioCuerpo">
                 <div className="comentarioCabeceraLinea">
-                    <span className="comentarioNombre" onClick={() => onClickAutor?.(comentario.autor.username)} role="link" tabIndex={0}>
-                        {comentario.autor.nombreVisible}
+                    <span className="comentarioNombre" onClick={() => onClickAutor?.(comentario.autor?.username)} role="link" tabIndex={0}>
+                        {comentario.autor?.nombreVisible}
                         {/* [193A-55] BadgeCheck unificado con TarjetaPublicacion */}
-                        {comentario.autor.verificado && <BadgeCheck size={14} className="comentarioVerificado" />}
+                        {comentario.autor?.verificado && <BadgeCheck size={14} className="comentarioVerificado" />}
                     </span>
                     <span className="comentarioTiempo">{formatearTiempoComentario(comentario.creadoAt)}</span>
                     {comentario.editadoAt && (

@@ -8,6 +8,7 @@ import { apiGet, apiPost, apiDelete, apiPostFormData, apiPut } from './apiClient
 import type { RespuestaApi } from './apiCliente';
 import type { Publicacion, Comentario, TipoReaccion } from '../types';
 import { normalizarListaPublicaciones, normalizarPublicacion } from './normalizers/postNormalizer';
+import { normalizarComentario, normalizarListaComentarios } from './normalizers/commentNormalizer';
 
 type RespuestaListadoPublicacionesRaw = {
     items?: unknown[];
@@ -133,14 +134,22 @@ export const obtenerFeedInicio = async (page = 1): Promise<RespuestaApi<Publicac
 
 /* Comentarios */
 
+/* C-comment-fix: backend devuelve { items, page, per_page } — extraer items y normalizar */
 export const obtenerComentarios = async (
     tipo: TipoComentable,
     targetId: number,
     page = 1
 ): Promise<RespuestaApi<Comentario[]>> => {
-    return apiGet<Comentario[]>(`/comentarios/${tipo}/${targetId}`, { page });
+    const res = await apiGet<Record<string, unknown>>(`/comentarios/${tipo}/${targetId}`, { page });
+    if (!res.ok || !res.data) return res as unknown as RespuestaApi<Comentario[]>;
+    const raw = res.data as Record<string, unknown>;
+    const items = Array.isArray(raw.items) ? raw.items : Array.isArray(raw) ? raw : [];
+    return { ...res, data: normalizarListaComentarios(items) };
 };
 
+/* C-comment-fix: backend devuelve { ok, comment } — extraer comment y normalizar.
+ * BUG: backend espera parent_id (snake_case) en JSON, no parentId (camelCase).
+ * multipart ya acepta ambos nombres en payload.rs. */
 export const crearComentario = async (
     tipo: TipoComentable,
     targetId: number,
@@ -148,13 +157,16 @@ export const crearComentario = async (
     parentId?: number
 ): Promise<RespuestaApi<Comentario>> => {
     const body: Record<string, unknown> = { contenido };
-    if (parentId) body.parentId = parentId;
-    return apiPost<Comentario>(`/comentarios/${tipo}/${targetId}`, body);
+    if (parentId) body.parent_id = parentId;
+    const res = await apiPost<Record<string, unknown>>(`/comentarios/${tipo}/${targetId}`, body);
+    if (!res.ok || !res.data) return res as unknown as RespuestaApi<Comentario>;
+    const raw = res.data as Record<string, unknown>;
+    return { ...res, data: normalizarComentario(raw.comment ?? raw) };
 };
 
-/*
- * C130: Crear comentario multimedia (imagen o audio).
+/* C130: Crear comentario multimedia (imagen o audio).
  * Envía FormData con el archivo + contenido opcional (caption).
+ * C-comment-fix: extraer .comment del wrapper { ok, comment } y normalizar.
  */
 export const crearComentarioMultimedia = async (
     tipo: TipoComentable,
@@ -169,15 +181,30 @@ export const crearComentarioMultimedia = async (
     formData.append('media', archivo);
     if (contenido) formData.append('contenido', contenido);
     if (parentId) formData.append('parentId', String(parentId));
-    return apiPostFormData<Comentario>(`/comentarios/${tipo}/${targetId}`, formData);
+    const res = await apiPostFormData<Record<string, unknown>>(`/comentarios/${tipo}/${targetId}`, formData);
+    if (!res.ok || !res.data) return res as unknown as RespuestaApi<Comentario>;
+    const raw = res.data as Record<string, unknown>;
+    return { ...res, data: normalizarComentario(raw.comment ?? raw) };
 };
 
-/* C264: Editar comentario (solo autor) */
+/* C264: Editar comentario (solo autor).
+ * C-comment-fix: backend devuelve { ok, comment } — extraer comment y normalizar.
+ * updated_at (snake_case) → editadoAt (camelCase). */
 export const editarComentario = async (
     id: number,
     contenido: string
-): Promise<RespuestaApi<{ id: number; contenido: string; editadoAt: string }>> => {
-    return apiPut<{ id: number; contenido: string; editadoAt: string }>(`/comentarios/${id}`, { contenido });
+): Promise<RespuestaApi<{ contenido: string; editadoAt: string }>> => {
+    const res = await apiPut<Record<string, unknown>>(`/comentarios/${id}`, { contenido });
+    if (!res.ok || !res.data) return res as unknown as RespuestaApi<{ contenido: string; editadoAt: string }>;
+    const raw = res.data as Record<string, unknown>;
+    const comment = (raw.comment ?? raw) as Record<string, unknown>;
+    return {
+        ...res,
+        data: {
+            contenido: String(comment.contenido ?? contenido),
+            editadoAt: String(comment.updated_at ?? comment.editadoAt ?? new Date().toISOString()),
+        },
+    };
 };
 
 /* C264: Eliminar comentario (autor o admin) */
@@ -193,24 +220,39 @@ export const reportarComentario = async (
     return apiPost<{ ok: boolean; message: string }>(`/comentarios/${id}/reportar`, { razon });
 };
 
-/* C265: Like/unlike comentario */
+/* C265: Like/unlike comentario.
+ * C-comment-fix: backend devuelve { ok, liked, reaccion } — totalLikes viene del recount
+ * pero no se incluye en LikeResponse. Usamos liked del backend directamente.
+ * BUG: like_comment handler espera Json<CommentLikeRequest> — sin body, Axum devuelve 422.
+ * Fix: enviar {} como body mínimo. */
 export const darLikeComentario = async (
     id: number
-): Promise<RespuestaApi<{ totalLikes: number; liked: boolean }>> => {
-    return apiPost<{ totalLikes: number; liked: boolean }>(`/comentarios/${id}/like`);
+): Promise<RespuestaApi<{ liked: boolean; totalLikes?: number }>> => {
+    const res = await apiPost<Record<string, unknown>>(`/comentarios/${id}/like`, {});
+    if (!res.ok || !res.data) return res as unknown as RespuestaApi<{ liked: boolean }>;
+    const raw = res.data as Record<string, unknown>;
+    return { ...res, data: { liked: Boolean(raw.liked), totalLikes: typeof raw.total_likes === 'number' ? raw.total_likes : undefined } };
 };
 
 export const quitarLikeComentario = async (
     id: number
-): Promise<RespuestaApi<{ totalLikes: number; liked: boolean }>> => {
-    return apiDelete<{ totalLikes: number; liked: boolean }>(`/comentarios/${id}/like`);
+): Promise<RespuestaApi<{ liked: boolean; totalLikes?: number }>> => {
+    const res = await apiDelete<Record<string, unknown>>(`/comentarios/${id}/like`);
+    if (!res.ok || !res.data) return res as unknown as RespuestaApi<{ liked: boolean }>;
+    const raw = res.data as Record<string, unknown>;
+    return { ...res, data: { liked: Boolean(raw.liked), totalLikes: typeof raw.total_likes === 'number' ? raw.total_likes : undefined } };
 };
 
 /* C265: Obtener respuestas de un comentario */
+/* C-comment-fix: backend devuelve { items, limit } — extraer items y normalizar */
 export const obtenerRespuestas = async (
     comentarioId: number
 ): Promise<RespuestaApi<Comentario[]>> => {
-    return apiGet<Comentario[]>(`/comentarios/${comentarioId}/respuestas`);
+    const res = await apiGet<Record<string, unknown>>(`/comentarios/${comentarioId}/respuestas`);
+    if (!res.ok || !res.data) return res as unknown as RespuestaApi<Comentario[]>;
+    const raw = res.data as Record<string, unknown>;
+    const items = Array.isArray(raw.items) ? raw.items : Array.isArray(raw) ? raw : [];
+    return { ...res, data: normalizarListaComentarios(items) };
 };
 
 /* Reposts */

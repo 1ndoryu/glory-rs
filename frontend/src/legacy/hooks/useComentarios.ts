@@ -191,7 +191,9 @@ export const useComentarios = ({ tipo, targetId, cargarAlAbrir = false }: UseCom
             if (resp.ok && resp.data) {
                 setComentarios(prev => actualizarEnLista(prev, id, c => ({
                     ...c,
-                    totalLikes: resp.data!.totalLikes,
+                    /* C-comment-fix: backend no incluye total_likes en LikeResponse —
+                     * solo está disponible si el recount lo incluye. Si no, mantener el valor anterior. */
+                    totalLikes: resp.data!.totalLikes ?? c.totalLikes,
                     liked: resp.data!.liked,
                 })));
             }

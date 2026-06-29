@@ -110,9 +110,12 @@ export default function BarraAccionesPost({
                 )}
             </BotonBase>
 
+            {/* [C-repost-hide] Botón de repost oculto temporalmente.
+             * Descomentar cuando el flujo de repost esté completo. */}
+            {false && (
             <BotonBase variante="ghost"
                 className={`accionesPostBtn ${claseRepost}`}
-                onClick={(!esPropio && onRepost) ? () => onRepost(p.id) : undefined}
+                onClick={(!esPropio && onRepost) ? () => onRepost?.(p.id) : undefined}
                 disabled={esPropio}
                 type="button"
                 aria-label={esPropio ? 'No puedes repostear tu propio contenido' : (p.reposteado ? 'Quitar repost' : 'Repostear')}
@@ -122,6 +125,7 @@ export default function BarraAccionesPost({
                     <span>{formatearConteo(p.totalReposts)}</span>
                 )}
             </BotonBase>
+            )}
         </div>
     );
 }
