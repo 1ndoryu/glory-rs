@@ -123,6 +123,7 @@ impl ColeccionesRepository {
                     c.publica, c.parent_id, c.imagen_url, c.version, c.total_samples, ",
         );
         push_collection_projection(&mut builder, None);
+        builder.push(", NULL::boolean AS contiene_el_sample");
         builder.push(
             " FROM colecciones c \
                JOIN usuarios_ext u ON u.id = c.usuario_id \
@@ -155,6 +156,7 @@ impl ColeccionesRepository {
                     c.publica, c.parent_id, c.imagen_url, c.version, c.total_samples, ",
         );
         push_collection_projection(&mut builder, viewer_id);
+        builder.push(", NULL::boolean AS contiene_el_sample");
         builder.push(
             " FROM colecciones c \
                JOIN usuarios_ext u ON u.id = c.usuario_id \
@@ -310,6 +312,7 @@ impl ColeccionesRepository {
                     c.publica, c.parent_id, c.imagen_url, c.version, c.total_samples, ",
         );
         push_collection_projection(&mut builder, viewer_id);
+        builder.push(", NULL::boolean AS contiene_el_sample");
         builder.push(
             " FROM colecciones c \
                JOIN usuarios_ext u ON u.id = c.usuario_id \
@@ -350,6 +353,7 @@ impl ColeccionesRepository {
                     c.publica, c.parent_id, c.imagen_url, c.version, c.total_samples, ",
         );
         push_collection_projection(&mut builder, viewer_id);
+        builder.push(", NULL::boolean AS contiene_el_sample");
         builder.push(
             " FROM colecciones c \
                JOIN usuarios_ext u ON u.id = c.usuario_id \
@@ -464,6 +468,7 @@ impl ColeccionesRepository {
                     c.publica, c.parent_id, c.imagen_url, c.version, c.total_samples, ",
         );
         push_collection_projection(&mut builder, viewer_id);
+        builder.push(", NULL::boolean AS contiene_el_sample");
         builder.push(
             " FROM colecciones c \
                JOIN usuarios_ext u ON u.id = c.usuario_id \
@@ -537,7 +542,6 @@ impl ColeccionesRepository {
 
 fn push_collection_projection(builder: &mut QueryBuilder<Postgres>, viewer_id: Option<i32>) {
     push_collection_projection_common(builder, viewer_id);
-    builder.push(", NULL::boolean AS contiene_el_sample");
 }
 
 fn push_collection_projection_common(builder: &mut QueryBuilder<Postgres>, viewer_id: Option<i32>) {
