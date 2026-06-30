@@ -1,5 +1,4 @@
 /* [174A-64] Colecciones — port mínimo de ColeccionesCrudController.php.
- * [246A-1] Agregado sync changelog en los 6 handlers mutantes.
  *
  * Endpoints:
  * - POST   /api/colecciones                            Crear
@@ -13,6 +12,7 @@
  *
  * NO portado:
  * - Optimistic locking (version) — TODO.
+ * - Sync changelog.
  * - Subir imagen multipart.
  * - Admin override.
  * - Eliminación con opciones (manejo hijas, borrar samples).
@@ -27,10 +27,10 @@ use utoipa::{IntoParams, ToSchema};
 
 use crate::errors::AppError;
 use crate::middleware::{CurrentUser, OptionalUser};
-use crate::models::{SampleSummary, SyncChangelogTipo};
+use crate::models::SampleSummary;
 use crate::repositories::{
     Coleccion, ColeccionSample, ColeccionesRepository, SampleContextRow, SampleRepository,
-    SavedColeccion, SavedCollectionsRepository, SyncChangelogRepository,
+    SavedColeccion, SavedCollectionsRepository,
 };
 use crate::services::build_sample_summary;
 use crate::AppState;
@@ -134,21 +134,6 @@ pub async fn create_coleccion(
         body.parent_id,
     )
     .await?;
-
-    /* [246A-1] Registrar en changelog para delta sync del desktop. */
-    /* El cast i64→i32 es seguro: coleccion.id es BIGSERIAL pero sync_changelog.entidad_id es INT. */
-    #[allow(clippy::cast_possible_truncation)]
-    let changelog_entidad = col.id as i32;
-    SyncChangelogRepository::insert_entry(
-        &state.pool,
-        user.user_id,
-        SyncChangelogTipo::CollectionCreated,
-        changelog_entidad,
-        serde_json::json!({"nombre": col.nombre}),
-    )
-    .await
-    .ok();
-
     Ok((StatusCode::CREATED, Json(col)))
 }
 
@@ -245,21 +230,6 @@ pub async fn update_coleccion(
     if !ok {
         return Err(AppError::NotFound(format!("coleccion {id} no encontrada")));
     }
-
-    /* [246A-1] Registrar en changelog para delta sync del desktop. */
-    /* El cast i64→i32 es seguro: coleccion.id es BIGSERIAL pero sync_changelog.entidad_id es INT. */
-    #[allow(clippy::cast_possible_truncation)]
-    let changelog_entidad = id as i32;
-    SyncChangelogRepository::insert_entry(
-        &state.pool,
-        user.user_id,
-        SyncChangelogTipo::CollectionRenamed,
-        changelog_entidad,
-        serde_json::json!({}),
-    )
-    .await
-    .ok();
-
     Ok(Json(OkResponse { ok: true }))
 }
 
@@ -287,21 +257,6 @@ pub async fn delete_coleccion(
     if !ok {
         return Err(AppError::NotFound(format!("coleccion {id} no encontrada")));
     }
-
-    /* [246A-1] Registrar en changelog para delta sync del desktop. */
-    /* El cast i64→i32 es seguro: coleccion.id es BIGSERIAL pero sync_changelog.entidad_id es INT. */
-    #[allow(clippy::cast_possible_truncation)]
-    let changelog_entidad = id as i32;
-    SyncChangelogRepository::insert_entry(
-        &state.pool,
-        user.user_id,
-        SyncChangelogTipo::CollectionDeleted,
-        changelog_entidad,
-        serde_json::json!({}),
-    )
-    .await
-    .ok();
-
     Ok(Json(OkResponse { ok: true }))
 }
 
@@ -332,18 +287,6 @@ pub async fn add_sample(
     }
     let _inserted =
         ColeccionesRepository::add_sample(&state.pool, coleccion_id, body.sample_id).await?;
-
-    /* [246A-1] Registrar en changelog para delta sync del desktop. */
-    SyncChangelogRepository::insert_entry(
-        &state.pool,
-        user.user_id,
-        SyncChangelogTipo::SampleAdded,
-        body.sample_id,
-        serde_json::json!({"coleccion_id": coleccion_id}),
-    )
-    .await
-    .ok();
-
     /* Idempotente: insertar duplicado devuelve ok:true (UX legacy). */
     Ok(Json(OkResponse { ok: true }))
 }
@@ -369,18 +312,6 @@ pub async fn remove_sample(
     }
     let _removed =
         ColeccionesRepository::remove_sample(&state.pool, coleccion_id, sample_id).await?;
-
-    /* [246A-1] Registrar en changelog para delta sync del desktop. */
-    SyncChangelogRepository::insert_entry(
-        &state.pool,
-        user.user_id,
-        SyncChangelogTipo::SampleRemoved,
-        sample_id,
-        serde_json::json!({"coleccion_id": coleccion_id}),
-    )
-    .await
-    .ok();
-
     Ok(Json(OkResponse { ok: true }))
 }
 
@@ -726,21 +657,6 @@ pub async fn merge_coleccion(
         ));
     }
     let moved = ColeccionesRepository::merge(&state.pool, target_id, body.source_id).await?;
-
-    /* [246A-1] Registrar en changelog para delta sync del desktop. */
-    /* El cast i64→i32 es seguro: source_id es BIGSERIAL pero sync_changelog.entidad_id es INT. */
-    #[allow(clippy::cast_possible_truncation)]
-    let changelog_entidad = body.source_id as i32;
-    SyncChangelogRepository::insert_entry(
-        &state.pool,
-        user.user_id,
-        SyncChangelogTipo::CollectionMerged,
-        changelog_entidad,
-        serde_json::json!({"target_id": target_id, "moved": moved}),
-    )
-    .await
-    .ok();
-
     Ok(Json(MergeColeccionResponse { ok: true, moved }))
 }
 
