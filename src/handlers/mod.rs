@@ -48,7 +48,7 @@ mod ws;
 
 use axum::Router;
 use tower_http::cors::{Any, CorsLayer};
-use tower_http::services::ServeDir;
+use tower_http::services::{ServeDir, ServeFile};
 use tower_http::trace::TraceLayer;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
@@ -729,7 +729,10 @@ pub fn create_router(
         algo_planner,
         scraper_secret: config.scraper_secret,
         allow_duplicate_uploads: config.allow_duplicate_uploads,
-        static_dir: Some("frontend/public".to_string()),
+        static_dir: Some(
+            std::env::var("STATIC_DIR")
+                .unwrap_or_else(|_| "frontend/public".to_string()),
+        ),
         moderation: match crate::services::ModerationService::from_env() {
             Ok(svc) => Some(std::sync::Arc::new(svc)),
             Err(err) => {
@@ -745,6 +748,12 @@ pub fn create_router(
         .allow_methods(Any)
         .allow_headers(Any);
 
+    /* SPA fallback: servir archivos estáticos del frontend y fallback a index.html
+     * para rutas de cliente (React Router). STATIC_DIR env var o "frontend/public". */
+    let static_dir =
+        std::env::var("STATIC_DIR").unwrap_or_else(|_| "frontend/public".to_string());
+    let index_path = format!("{static_dir}/index.html");
+
     Router::new()
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
         /* [174A-6] Alias /docs → /swagger-ui/ para acceso más natural. */
@@ -755,6 +764,7 @@ pub fn create_router(
         .nest_service("/uploads", ServeDir::new(storage_root))
         .merge(seo::routes())
         .nest("/api", api_routes())
+        .fallback_service(ServeDir::new(&static_dir).fallback(ServeFile::new(index_path)))
         .layer(axum::middleware::from_fn(
             crate::middleware::request_id_middleware,
         ))
