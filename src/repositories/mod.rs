@@ -77,7 +77,7 @@ pub use cola_extraccion::{
     ColaExtraccionRepository, ColaExtraccionRow, ColaExtraidoReclamado, EncolarParams,
 };
 pub use coleccion::{
-    Coleccion, ColeccionSample, ColeccionSampleFile, ColeccionesRepository,
+    Coleccion, ColeccionOp, ColeccionSample, ColeccionSampleFile, ColeccionesRepository,
     LegacyColeccionParentRecord, LegacyColeccionRecord, LegacyColeccionSampleRecord,
 };
 pub use comment::{

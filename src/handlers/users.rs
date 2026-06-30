@@ -10,12 +10,12 @@ use validator::Validate;
 use crate::errors::AppError;
 #[allow(unused_imports)]
 use crate::errors::ErrorResponse;
-use crate::middleware::CurrentUser;
+use crate::middleware::{CurrentUser, OptionalUser};
 use crate::models::{
     BlockUserRequest, ChangeEmailRequest, ChangePasswordRequest, PrivateProfileResponse,
     PublicProfileResponse, SimpleOkResponse, UpdateProfileRequest,
 };
-use crate::repositories::{ModerationRepository, ProfileRepository, UserRepository};
+use crate::repositories::{FollowRepository, ModerationRepository, ProfileRepository, UserRepository};
 use crate::AppState;
 
 const MAX_PROFILE_IMAGE_BYTES: usize = 5 * 1024 * 1024;
@@ -336,6 +336,7 @@ fn public_storage_url(public_base_url: Option<&str>, key: &str) -> String {
 pub async fn public_profile(
     State(state): State<AppState>,
     Path(username): Path<String>,
+    OptionalUser(viewer): OptionalUser,
 ) -> Result<Json<PublicProfileResponse>, AppError> {
     let p = ProfileRepository::find_by_username(&state.pool, &username)
         .await?
@@ -343,7 +344,15 @@ pub async fn public_profile(
     if p.estado != "activo" {
         return Err(AppError::NotFound(format!("usuario {username}")));
     }
-    Ok(Json(PublicProfileResponse::from(p)))
+    /* [296A-2] Consultar si el viewer sigue a este perfil.
+     * Anonimo o self-profile → siguiendo = false. */
+    let is_following = match viewer {
+        Some(v) if v.user_id != p.id => {
+            FollowRepository::is_following(&state.pool, v.user_id, p.id).await?
+        }
+        _ => false,
+    };
+    Ok(Json(PublicProfileResponse::from_with_follow(p, is_following)))
 }
 
 pub fn routes() -> Router<AppState> {

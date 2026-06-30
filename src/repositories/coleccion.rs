@@ -27,6 +27,19 @@ pub use legacy::{LegacyColeccionParentRecord, LegacyColeccionRecord, LegacyColec
 
 pub struct ColeccionesRepository;
 
+/* [296A-1] Resultado de agregar sample a coleccion.
+ * Legacy PHP: UNIQUE(usuario_id, sample_id) => 1 sample = 1 coleccion.
+ * Si el sample ya existia en otra coleccion, se MOVIA silenciosamente. */
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ColeccionOp {
+    /// Sample agregado por primera vez.
+    Agregado,
+    /// Sample ya existia en esta coleccion (no-op).
+    YaExiste,
+    /// Sample movido desde otra coleccion del mismo usuario.
+    Movido { coleccion_anterior: i64 },
+}
+
 #[derive(Debug, Clone, sqlx::FromRow, serde::Serialize, utoipa::ToSchema)]
 pub struct Coleccion {
     pub id: i64,
@@ -190,39 +203,90 @@ impl ColeccionesRepository {
         Ok(res.rows_affected() > 0)
     }
 
+    /* [296A-1] Port de moverAColeccion() legacy.
+     * UNIQUE(usuario_id, sample_id) garantiza 1 sample = 1 coleccion por usuario.
+     * Si ya existe en otra coleccion, se mueve (DELETE viejo + INSERT nuevo).
+     * Si ya existe en esta coleccion, no-op. */
     pub async fn add_sample(
         pool: &PgPool,
         coleccion_id: i64,
         sample_id: i32,
-    ) -> Result<bool, AppError> {
-        /* Orden auto = max+1 dentro de la colección. */
+        usuario_id: i32,
+    ) -> Result<ColeccionOp, AppError> {
         let mut tx = pool.begin().await?;
-        let next_orden: i32 = sqlx::query_scalar!(
-            r#"SELECT COALESCE(MAX(orden), -1) + 1 AS "n!" FROM coleccion_samples WHERE coleccion_id = $1"#,
-            coleccion_id
+
+        /* 1. Verificar si ya pertenece a ESTA coleccion. */
+        let ya_en_esta: bool = sqlx::query_scalar(
+            "SELECT EXISTS(SELECT 1 FROM coleccion_samples WHERE coleccion_id = $1 AND sample_id = $2)",
         )
+        .bind(coleccion_id)
+        .bind(sample_id)
         .fetch_one(&mut *tx)
         .await?;
-        let res = sqlx::query!(
-            "INSERT INTO coleccion_samples (coleccion_id, sample_id, orden) \
-             VALUES ($1, $2, $3) ON CONFLICT (coleccion_id, sample_id) DO NOTHING",
-            coleccion_id,
-            sample_id,
-            next_orden,
+        if ya_en_esta {
+            tx.commit().await?;
+            return Ok(ColeccionOp::YaExiste);
+        }
+
+        /* 2. Buscar si pertenece a OTRA coleccion del mismo usuario. */
+        let col_anterior: Option<i64> = sqlx::query_scalar(
+            "SELECT cs.coleccion_id FROM coleccion_samples cs \
+             WHERE cs.sample_id = $1 AND cs.usuario_id = $2 LIMIT 1",
         )
-        .execute(&mut *tx)
+        .bind(sample_id)
+        .bind(usuario_id)
+        .fetch_optional(&mut *tx)
         .await?;
-        let inserted = res.rows_affected() > 0;
-        if inserted {
-            sqlx::query!(
-                "UPDATE colecciones SET total_samples = total_samples + 1, updated_at = NOW() WHERE id = $1",
-                coleccion_id
+
+        /* 3. Si existe en otra, eliminarlo de la anterior. */
+        if let Some(old_col) = col_anterior {
+            sqlx::query("DELETE FROM coleccion_samples WHERE coleccion_id = $1 AND sample_id = $2")
+                .bind(old_col)
+                .bind(sample_id)
+                .execute(&mut *tx)
+                .await?;
+            sqlx::query(
+                "UPDATE colecciones SET total_samples = GREATEST(total_samples - 1, 0), updated_at = NOW() WHERE id = $1",
             )
+            .bind(old_col)
             .execute(&mut *tx)
             .await?;
         }
+
+        /* 4. Insertar en la nueva coleccion. */
+        let next_orden: i32 = sqlx::query_scalar(
+            r"SELECT COALESCE(MAX(orden), -1) + 1 FROM coleccion_samples WHERE coleccion_id = $1",
+        )
+        .bind(coleccion_id)
+        .fetch_one(&mut *tx)
+        .await?;
+
+        sqlx::query(
+            "INSERT INTO coleccion_samples (coleccion_id, sample_id, usuario_id, orden) \
+             VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING",
+        )
+        .bind(coleccion_id)
+        .bind(sample_id)
+        .bind(usuario_id)
+        .bind(next_orden)
+        .execute(&mut *tx)
+        .await?;
+
+        sqlx::query(
+            "UPDATE colecciones SET total_samples = total_samples + 1, updated_at = NOW() WHERE id = $1",
+        )
+        .bind(coleccion_id)
+        .execute(&mut *tx)
+        .await?;
+
         tx.commit().await?;
-        Ok(inserted)
+
+        Ok(match col_anterior {
+            Some(old) => ColeccionOp::Movido {
+                coleccion_anterior: old,
+            },
+            None => ColeccionOp::Agregado,
+        })
     }
 
     pub async fn remove_sample(

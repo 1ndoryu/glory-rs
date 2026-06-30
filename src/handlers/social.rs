@@ -1,16 +1,16 @@
-use axum::extract::{Path, State};
+use axum::extract::{Path, Query, State};
 use axum::http::StatusCode;
 use axum::routing::{delete, get, post};
 use axum::{Json, Router};
 use serde::{Deserialize, Serialize};
-use utoipa::ToSchema;
+use utoipa::{IntoParams, ToSchema};
 
 use crate::algorithm::InteractionKind;
 use crate::errors::AppError;
 #[allow(unused_imports)]
 use crate::errors::ErrorResponse;
-use crate::middleware::CurrentUser;
-use crate::repositories::{BlockRepository, BlockedUser, FollowRepository};
+use crate::middleware::{CurrentUser, OptionalUser};
+use crate::repositories::{BlockRepository, BlockedUser, FollowRepository, UserRepository};
 use crate::services::NotificationFanoutService;
 use crate::AppState;
 use tracing::warn;
@@ -209,6 +209,7 @@ pub fn routes() -> Router<AppState> {
         .route("/me/bloqueados", get(my_blocks))
         .route("/users/me/seguidos", get(my_following))
         .route("/me/seguidos", get(my_following))
+        .route("/usuarios/:username/seguidores", get(seguidores))
 }
 
 #[derive(Debug, Serialize, ToSchema)]
@@ -237,4 +238,114 @@ pub async fn my_following(
     let ids = FollowRepository::ids_seguidos(&state.pool, user.user_id).await?;
     let data = ids.into_iter().map(|id| FollowedIdItem { id }).collect();
     Ok(Json(FollowedListResponse { data }))
+}
+
+/* [296A-3] GET /api/usuarios/{username}/seguidores
+ * Lista paginada de seguidores de un usuario. Port de SocialController::seguidores (PHP). */
+
+#[derive(Debug, Deserialize, IntoParams)]
+pub struct SeguidoresQuery {
+    #[serde(default = "default_page")]
+    pub page: i64,
+    #[serde(default = "default_per_page")]
+    pub per_page: i64,
+}
+fn default_page() -> i64 {
+    1
+}
+fn default_per_page() -> i64 {
+    20
+}
+
+#[derive(Debug, Clone, Serialize, ToSchema)]
+pub struct SeguidorResumen {
+    pub id: i32,
+    pub username: String,
+    pub nombre_visible: String,
+    pub avatar_url: Option<String>,
+    pub siguiendo: bool,
+}
+
+#[derive(Debug, Serialize, ToSchema)]
+pub struct SeguidoresListResponse {
+    pub data: Vec<SeguidorResumen>,
+    pub page: i64,
+    pub per_page: i64,
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/usuarios/{username}/seguidores",
+    tag = "social",
+    params(("username" = String, Path, description = "Username"), SeguidoresQuery),
+    responses(
+        (status = 200, description = "Lista paginada de seguidores", body = SeguidoresListResponse),
+        (status = 404, body = ErrorResponse),
+    )
+)]
+pub async fn seguidores(
+    State(state): State<AppState>,
+    Path(username): Path<String>,
+    Query(q): Query<SeguidoresQuery>,
+    OptionalUser(viewer): OptionalUser,
+) -> Result<Json<SeguidoresListResponse>, AppError> {
+    let target = UserRepository::find_by_username(&state.pool, &username)
+        .await?
+        .ok_or(AppError::NotFound(format!("usuario {username}")))?;
+
+    let limit = q.per_page.clamp(1, 50);
+    let offset = (q.page.max(1) - 1) * limit;
+    let follower_ids =
+        FollowRepository::ids_seguidores(&state.pool, target.id, limit, offset).await?;
+
+    if follower_ids.is_empty() {
+        return Ok(Json(SeguidoresListResponse {
+            data: vec![],
+            page: q.page,
+            per_page: q.per_page,
+        }));
+    }
+
+    /* Batch lookup de perfiles basicos. */
+    let rows: Vec<(i32, String, String, Option<String>)> = sqlx::query_as(
+        "SELECT id, username, nombre_visible, avatar_url FROM usuarios_ext WHERE id = ANY($1)",
+    )
+    .bind(&follower_ids)
+    .fetch_all(&state.pool)
+    .await?;
+
+    /* Map id → profile para mantener el orden de follows.created_at. */
+    let profile_map: std::collections::HashMap<i32, (String, String, Option<String>)> =
+        rows.into_iter().map(|(id, u, n, a)| (id, (u, n, a))).collect();
+
+    /* Determinar a quién sigue el viewer entre estos seguidores. */
+    let viewer_following_set: std::collections::HashSet<i32> = if let Some(ref v) = viewer {
+        FollowRepository::ids_seguidos(&state.pool, v.user_id)
+            .await?
+            .into_iter()
+            .collect()
+    } else {
+        std::collections::HashSet::new()
+    };
+
+    let data: Vec<SeguidorResumen> = follower_ids
+        .iter()
+        .filter_map(|&fid| {
+            profile_map.get(&fid).map(|(username, nombre_visible, avatar_url)| {
+                SeguidorResumen {
+                    id: fid,
+                    username: username.clone(),
+                    nombre_visible: nombre_visible.clone(),
+                    avatar_url: avatar_url.clone(),
+                    siguiendo: viewer_following_set.contains(&fid),
+                }
+            })
+        })
+        .collect();
+
+    Ok(Json(SeguidoresListResponse {
+        data,
+        page: q.page,
+        per_page: q.per_page,
+    }))
 }

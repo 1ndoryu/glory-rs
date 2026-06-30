@@ -87,4 +87,23 @@ impl FollowRepository {
                 .await?;
         Ok(rows.into_iter().map(|(id,)| id).collect())
     }
+
+    /* [296A-3] IDs de usuarios que SIGUEN al target (seguidores).
+     * Necesario para endpoint GET /usuarios/{username}/seguidores. */
+    pub async fn ids_seguidores(
+        pool: &PgPool,
+        target_id: i32,
+        limit: i64,
+        offset: i64,
+    ) -> Result<Vec<i32>, AppError> {
+        let rows: Vec<(i32,)> = sqlx::query_as(
+            "SELECT seguidor_id FROM follows WHERE seguido_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3",
+        )
+        .bind(target_id)
+        .bind(limit)
+        .bind(offset)
+        .fetch_all(pool)
+        .await?;
+        Ok(rows.into_iter().map(|(id,)| id).collect())
+    }
 }

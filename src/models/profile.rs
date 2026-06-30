@@ -49,6 +49,9 @@ pub struct PublicProfileResponse {
     pub total_samples: i32,
     pub total_descargas: i32,
     pub created_at: Option<DateTime<Utc>>,
+    /* [296A-2] Indica si el viewer autenticado sigue a este usuario.
+     * Siempre false para visitantes anonimos o cuando el viewer es el propio usuario. */
+    pub siguiendo: bool,
 }
 
 /* DTO privado (perfil propio): incluye email y estado. */
@@ -79,7 +82,18 @@ impl From<UserProfile> for PublicProfileResponse {
             total_samples: u.total_samples.unwrap_or(0),
             total_descargas: u.total_descargas.unwrap_or(0),
             created_at: u.created_at,
+            siguiendo: false,
         }
+    }
+}
+
+impl PublicProfileResponse {
+    /* [296A-2] Construye el perfil con el campo `siguiendo` ya calculado.
+     * El caller consulta FollowRepository::is_following() y pasa el resultado. */
+    pub fn from_with_follow(u: UserProfile, is_following: bool) -> Self {
+        let mut resp = Self::from(u);
+        resp.siguiendo = is_following;
+        resp
     }
 }
 

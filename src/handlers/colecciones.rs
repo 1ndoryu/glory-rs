@@ -285,9 +285,14 @@ pub async fn add_sample(
     if body.sample_id <= 0 {
         return Err(AppError::BadRequest("sample_id requerido".into()));
     }
-    let _inserted =
-        ColeccionesRepository::add_sample(&state.pool, coleccion_id, body.sample_id).await?;
-    /* Idempotente: insertar duplicado devuelve ok:true (UX legacy). */
+    let _op = ColeccionesRepository::add_sample(
+        &state.pool,
+        coleccion_id,
+        body.sample_id,
+        user.user_id,
+    )
+    .await?;
+    /* [296A-1] Legacy: 1 sample = 1 coleccion. Si ya existia en otra, se mueve. */
     Ok(Json(OkResponse { ok: true }))
 }
 
