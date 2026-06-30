@@ -1,7 +1,12 @@
 /* [104A-5] Proxy de optimización de imágenes on-demand.
  * Ruta: GET /api/img/{*path}?w={ancho}&q={calidad}&fmt={formato}
  * Procesa imágenes locales de uploads/ y assets/ al vuelo con cache en disco.
- * Headers de cache agresivos (1 año) porque la URL incluye los params. */
+ * Headers de cache agresivos (1 año) porque la URL incluye los params.
+ *
+ * [306A-1] Fallback SVG para legacy-assets/colors/: cuando la imagen no existe
+ * en disco (ej. en producción donde el dir está gitignored), genera un SVG
+ * placeholder con gradiente determinista basado en el nombre del archivo.
+ * Mismo algoritmo que frontend/vite-plugins/colors-placeholder.ts. */
 
 use axum::extract::State;
 use axum::extract::{Path, Query};
@@ -25,6 +30,39 @@ const MAX_QUALITY: u8 = 100;
 /* Anchos permitidos (whitelist) para evitar cache flooding.
  * Solo se permiten estos valores exactos o ninguno (original). */
 const ALLOWED_WIDTHS: &[u32] = &[150, 300, 480, 640, 800, 1024, 1200, 1600, 2400];
+
+/* [306A-1] Prefijo que activa fallback SVG cuando la imagen no existe en disco. */
+const COLORS_PLACEHOLDER_PREFIX: &str = "legacy-assets/colors/";
+
+/// Genera un SVG placeholder con gradiente determinista a partir del nombre de archivo.
+/// Mismo algoritmo que frontend/vite-plugins/colors-placeholder.ts.
+fn generar_svg_placeholder(nombre: &str) -> String {
+    /* Hash determinista del nombre */
+    let hash = {
+        use std::hash::{Hash, Hasher};
+        let mut hasher = std::collections::hash_map::DefaultHasher::new();
+        nombre.hash(&mut hasher);
+        let h = hasher.finish();
+        format!("{h:016x}")
+    };
+
+    let hue1 = u32::from_str_radix(&hash[..6], 16).unwrap_or(0) % 360;
+    let hue2 = (hue1 + 180) % 360;
+    let hue3 = u32::from_str_radix(&hash[4..10], 16).unwrap_or(0) % 360;
+
+    format!(
+        r#"<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="hsl({hue1}, 55%, 35%)"/>
+      <stop offset="50%" stop-color="hsl({hue2}, 50%, 30%)"/>
+      <stop offset="100%" stop-color="hsl({hue3}, 45%, 40%)"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="400" fill="url(#g)"/>
+</svg>"#
+    )
+}
 
 #[derive(Debug, Deserialize)]
 pub struct ImageQueryParams {
@@ -97,15 +135,34 @@ pub async fn image_proxy(
     let (source_root, original_path) = resolve_source_path(&state, &path);
 
     /* Verificar que el archivo existe y está dentro de la raíz permitida */
-    let canonical = original_path.canonicalize().map_err(|e| {
-        tracing::warn!(
-            path = %path,
-            resolved = %original_path.display(),
-            error = %e,
-            "Imagen no encontrada en disco"
-        );
-        AppError::NotFound("Imagen no encontrada".into())
-    })?;
+    let canonical = match original_path.canonicalize() {
+        Ok(c) => c,
+        Err(_) if path.starts_with(COLORS_PLACEHOLDER_PREFIX) => {
+            /* [306A-1] Archivo no existe: generar SVG placeholder para legacy-assets/colors/ */
+            let nombre = &path[COLORS_PLACEHOLDER_PREFIX.len()..];
+            let svg = generar_svg_placeholder(nombre);
+            return Ok((
+                [
+                    (header::CONTENT_TYPE, "image/svg+xml".to_string()),
+                    (
+                        header::CACHE_CONTROL,
+                        "public, max-age=86400".to_string(),
+                    ),
+                    ("X-Placeholder".to_string(), "colors-fallback".to_string()),
+                ],
+                svg.into_bytes(),
+            ));
+        }
+        Err(e) => {
+            tracing::warn!(
+                path = %path,
+                resolved = %original_path.display(),
+                error = %e,
+                "Imagen no encontrada en disco"
+            );
+            return Err(AppError::NotFound("Imagen no encontrada".into()));
+        }
+    };
 
     let source_root = source_root
         .canonicalize()
