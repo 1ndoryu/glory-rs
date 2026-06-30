@@ -63,3 +63,19 @@ clients/kamples-scraper/extractor/.rate_limiter_state
 
 # Symlinks creados por setup local (junctions Windows)
 clients/desktop/public/
+
+# Scripts temporales de debug/deploy (sesión 2026-06-30)
+check-compose.ps1
+check-fqdn.ps1
+check-service.ps1
+fix-fqdn.ps1
+fix-fqdn2.ps1
+get-compose.ps1
+prepare-deploy.ps1
+update-service.ps1
+verify-compose.ps1
+deploy-compose.yml
+docker-compose.coolify.yml
+register_migrations.sql
+test-sine.wav
+clients/kamples-scraper/.lock_daily
