@@ -74,6 +74,10 @@ pub(super) struct SampleSummaryRow {
     metadata: Value,
     #[sqlx(default)]
     ya_guardado_en_coleccion: Option<bool>,
+    #[sqlx(default)]
+    liked: Option<bool>,
+    #[sqlx(default)]
+    reaccion: Option<String>,
 }
 
 impl From<SampleSummaryRow> for SampleCatalogSummaryRecord {
@@ -109,6 +113,8 @@ impl From<SampleSummaryRow> for SampleCatalogSummaryRecord {
             creator_verificado: row.creator_verificado,
             metadata: row.metadata,
             ya_guardado_en_coleccion: row.ya_guardado_en_coleccion,
+            liked: row.liked,
+            reaccion: row.reaccion,
         }
     }
 }
@@ -133,6 +139,38 @@ pub(super) fn push_guardado_en_coleccion_select(
             "
                   AND c_gs.eliminado_en IS NULL
             ) AS ya_guardado_en_coleccion"
+        );
+    }
+}
+
+/* [296A-3] Subqueries para la reaccion del usuario autenticado sobre el sample.
+ * liked = TRUE si tiene reaccion positiva (like o encanta).
+ * reaccion = 'like' | 'dislike' | 'encanta' | NULL si no tiene.
+ * Patron identico a mi_reaccion en comments. */
+pub(super) fn push_reaccion_select(
+    builder: &mut QueryBuilder<'_, Postgres>,
+    viewer_id: Option<i32>,
+) {
+    if let Some(uid) = viewer_id {
+        builder.push(
+            ", (SELECT l_r.reaccion FROM likes l_r
+                WHERE l_r.usuario_id = "
+        );
+        builder.push_bind(uid);
+        builder.push(
+            " AND l_r.tipo = 'sample' AND l_r.target_id = s.id
+                LIMIT 1) AS reaccion"
+        );
+        builder.push(
+            ", EXISTS(
+                SELECT 1 FROM likes l_lk
+                WHERE l_lk.usuario_id = "
+        );
+        builder.push_bind(uid);
+        builder.push(
+            " AND l_lk.tipo = 'sample' AND l_lk.target_id = s.id
+                  AND l_lk.reaccion IN ('like', 'encanta')
+            ) AS liked"
         );
     }
 }

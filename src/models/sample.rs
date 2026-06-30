@@ -149,6 +149,13 @@ pub struct SampleSummary {
      * Se computa via EXISTS subquery solo cuando hay usuario autenticado. */
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ya_guardado_en_coleccion: Option<bool>,
+    /* [296A-3] Reaccion del usuario autenticado sobre este sample.
+     * liked = true si reaccion positiva (like/encanta). reaccion = tipo exacto.
+     * Se omiten en la respuesta JSON si el viewer es anonimo (None). */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub liked: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub reaccion: Option<String>,
 }
 
 /// Metadatos de paginación para listados de samples.

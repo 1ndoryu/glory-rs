@@ -106,12 +106,9 @@ fn build_text_search(query: &FeedQuery) -> Result<(Option<SampleTextSearch>, Vec
 
     /* [266A-1] Parse negative tag prefixes (-tag) from feed search. */
     let (clean_parts, exclude_tags) = parse_search_exclusions_feed(trimmed);
-    let clean_str = match clean_parts {
-        Some(s) => s,
-        None => {
-            /* Only negative terms — no positive search, but still return exclude_tags. */
-            return Ok((None, exclude_tags));
-        }
+    /* Only negative terms — no positive search, but still return exclude_tags. */
+    let Some(clean_str) = clean_parts else {
+        return Ok((None, exclude_tags));
     };
 
     if clean_str.chars().count() < 2 {

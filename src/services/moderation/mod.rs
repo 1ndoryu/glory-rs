@@ -166,12 +166,11 @@ impl ModerationService {
 
         let vision_chain: Vec<String> =
             VISION_GROQ_MODEL_CHAIN.iter().map(ToString::to_string).collect();
-        let vision_client = match GroqClient::with_model_chain(
+        let Ok(vision_client) = GroqClient::with_model_chain(
             load_groq_api_keys(),
             vision_chain,
-        ) {
-            Ok(c) => c,
-            Err(_) => return AiExecutionOutcome::default(),
+        ) else {
+            return AiExecutionOutcome::default();
         };
 
         for image_url in image_urls {
@@ -192,8 +191,7 @@ impl ModerationService {
 
             let request = GroqChatRequest {
                 user_prompt: format!(
-                    "Analiza esta imagen para moderación en una comunidad musical. {}",
-                    VISION_SYSTEM_PROMPT
+                    "Analiza esta imagen para moderación en una comunidad musical. {VISION_SYSTEM_PROMPT}"
                 ),
                 system_prompt: "Eres un moderador de imágenes para una comunidad musical.".into(),
                 temperature: 0.1,
@@ -408,9 +406,8 @@ fn build_decision(
                 ai
             }
         }
-        (Some(_), None) => ai,
+        (Some(_) | None, None) => ai,
         (None, Some(_)) => vision,
-        (None, None) => ai,
     };
 
     if let Some(assessment) = &best_ai.assessment {

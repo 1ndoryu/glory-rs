@@ -271,6 +271,8 @@ pub(crate) fn build_sample_summary(
         publicado_at: record.publicado_at,
         metadata: record.metadata,
         ya_guardado_en_coleccion: record.ya_guardado_en_coleccion,
+        liked: record.liked,
+        reaccion: record.reaccion,
         creador: build_creator_summary(
             record.creator_id,
             record.creator_username,

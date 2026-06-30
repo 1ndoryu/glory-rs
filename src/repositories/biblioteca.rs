@@ -168,6 +168,10 @@ impl From<BibliotecaSampleRow> for SampleCatalogSummaryRecord {
             /* [296A-1] Biblioteca ya es del usuario — siempre guardado en sus propias colecciones.
              * Se fuerza None porque el contexto de biblioteca no requiere este flag. */
             ya_guardado_en_coleccion: None,
+            /* [296A-3] Biblioteca no incluye reaccion del usuario — es su propio contenido.
+             * Los filtros de reaccion se aplican en WHERE, no en el SELECT. */
+            liked: None,
+            reaccion: None,
         }
     }
 }

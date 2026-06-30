@@ -12,7 +12,7 @@ pub use aggregates::{TagAggregateFilters, TagAggregateItem, TagAggregatesResult}
 
 use query::{
     push_auto_hide_filter, push_guardado_en_coleccion_select, push_public_filters,
-    push_public_order, CountRow, SampleSummaryRow, SAMPLE_SUMMARY_SELECT,
+    push_public_order, push_reaccion_select, CountRow, SampleSummaryRow, SAMPLE_SUMMARY_SELECT,
 };
 
 /* [174A-44] Listado público de samples con filtros combinables.
@@ -123,6 +123,8 @@ pub struct SampleCatalogSummaryRecord {
     pub creator_verificado: bool,
     pub metadata: serde_json::Value,
     pub ya_guardado_en_coleccion: Option<bool>,
+    pub liked: Option<bool>,
+    pub reaccion: Option<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -257,6 +259,9 @@ impl SampleRepository {
         /* [296A-1] Agregar flag ya_guardado_en_coleccion si hay usuario autenticado */
         push_guardado_en_coleccion_select(&mut builder, filters.viewer_id);
 
+        /* [296A-3] Agregar liked/reaccion del usuario autenticado */
+        push_reaccion_select(&mut builder, filters.viewer_id);
+
         push_public_filters(&mut builder, filters);
         push_public_order(&mut builder, filters);
         builder.push(" LIMIT ");
@@ -291,6 +296,9 @@ impl SampleRepository {
 
         /* [296A-1] Agregar flag ya_guardado_en_coleccion si hay usuario autenticado */
         push_guardado_en_coleccion_select(&mut builder, viewer_id);
+
+        /* [296A-3] Agregar liked/reaccion del usuario autenticado */
+        push_reaccion_select(&mut builder, viewer_id);
 
         builder.push(
             " FROM samples s
