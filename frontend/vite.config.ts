@@ -19,6 +19,12 @@ export default defineConfig({
        * El legacy importa dinamicamente estos modulos solo en desktop/movil; en web
        * Rollup necesita resolverlos a un stub para no fallar el build. */
       '@tauri-apps/api/app': fileURLToPath(new URL('./src/bootstrap/tauriShim.ts', import.meta.url)),
+      '@tauri-apps/api/core': fileURLToPath(new URL('./src/bootstrap/tauriPluginsShim.ts', import.meta.url)),
+      '@tauri-apps/api/event': fileURLToPath(new URL('./src/bootstrap/tauriPluginsShim.ts', import.meta.url)),
+      '@tauri-apps/api/path': fileURLToPath(new URL('./src/bootstrap/tauriPluginsShim.ts', import.meta.url)),
+      '@tauri-apps/api/window': fileURLToPath(new URL('./src/bootstrap/tauriPluginsShim.ts', import.meta.url)),
+      '@tauri-apps/plugin-deep-link': fileURLToPath(new URL('./src/bootstrap/tauriPluginsShim.ts', import.meta.url)),
+      '@tauri-apps/plugin-dialog': fileURLToPath(new URL('./src/bootstrap/tauriPluginsShim.ts', import.meta.url)),
       '@tauri-apps/plugin-fs': fileURLToPath(new URL('./src/bootstrap/tauriPluginsShim.ts', import.meta.url)),
       '@tauri-apps/plugin-shell': fileURLToPath(new URL('./src/bootstrap/tauriPluginsShim.ts', import.meta.url)),
       '@tauri-apps/plugin-notification': fileURLToPath(new URL('./src/bootstrap/tauriPluginsShim.ts', import.meta.url)),
