@@ -50,7 +50,8 @@ async fn main() -> Result<(), AppError> {
         .connect(&config.database_url)
         .await?;
 
-    sqlx::migrate!().run(&pool).await?;
+    // Migrations se ejecutan por separado (ya aplicadas en la DB de producción)
+    // sqlx::migrate!().run(&pool).await?;
 
     /* [174A-5] Redis opcional. Si REDIS_URL está definido, creamos pool deadpool
      * y testeamos conexión con PING; si falla, abortamos al arrancar. */
