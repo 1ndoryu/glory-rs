@@ -91,11 +91,15 @@ FROM debian:bookworm-slim AS runtime
 #   externos (Stripe, Groq, OpenAI, FCM, SMTP, S3, etc.).
 # libgcc: requerido por binarios Rust que usan stdlib threading.
 # tini: PID 1 limpio que reapea zombies y propaga señales.
+# ffmpeg: necesario para el audio pipeline (generación de mp3 optimizado,
+#   waveform, análisis de audio). Sin esto los samples se quedan en
+#   estado 'procesando' indefinidamente.
 RUN apt-get update && apt-get install -y --no-install-recommends \
         ca-certificates \
         libgcc-s1 \
         tini \
         curl \
+        ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
 # Usuario no-root: limita el impacto si el binario es comprometido.
