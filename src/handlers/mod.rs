@@ -758,6 +758,9 @@ pub fn create_router(
         .layer(axum::middleware::from_fn(
             crate::middleware::request_id_middleware,
         ))
+        .layer(axum::middleware::from_fn(
+            crate::middleware::wp_rewrite_middleware,
+        ))
         .layer(TraceLayer::new_for_http())
         .layer(cors)
         .with_state(state)
