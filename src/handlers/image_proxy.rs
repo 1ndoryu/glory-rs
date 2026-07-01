@@ -148,7 +148,6 @@ pub async fn image_proxy(
                         header::CACHE_CONTROL,
                         "public, max-age=86400".to_string(),
                     ),
-                    ("X-Placeholder".to_string(), "colors-fallback".to_string()),
                 ],
                 svg.into_bytes(),
             ));
