@@ -75,55 +75,9 @@ CREATE INDEX IF NOT EXISTS idx_samples_engagement_activo
     ON samples ((total_likes + total_reproducciones + total_descargas) DESC)
     WHERE estado = 'activo';
 
-CREATE TABLE IF NOT EXISTS colecciones (
-    id              SERIAL PRIMARY KEY,
-    usuario_id      INT NOT NULL REFERENCES usuarios_ext(id) ON DELETE CASCADE,
-    nombre          VARCHAR(200) NOT NULL,
-    slug            VARCHAR(255),
-    descripcion     TEXT DEFAULT '',
-    imagen_url      TEXT,
-    portada_url     TEXT,
-    publica         BOOLEAN DEFAULT TRUE,
-    parent_id       INT NULL REFERENCES colecciones(id) ON DELETE CASCADE,
-    version         INTEGER NOT NULL DEFAULT 1,
-    total_samples   INT DEFAULT 0,
-    created_at      TIMESTAMPTZ DEFAULT NOW(),
-    updated_at      TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE INDEX IF NOT EXISTS idx_colecciones_usuario ON colecciones (usuario_id);
-CREATE INDEX IF NOT EXISTS idx_colecciones_usuario_opt ON colecciones (usuario_id, publica, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_colecciones_publica
-    ON colecciones (publica, created_at DESC) WHERE publica = TRUE;
-CREATE INDEX IF NOT EXISTS idx_colecciones_parent
-    ON colecciones (parent_id) WHERE parent_id IS NOT NULL;
-CREATE UNIQUE INDEX IF NOT EXISTS idx_colecciones_nombre_unico_por_padre
-    ON colecciones (usuario_id, COALESCE(parent_id, 0), LOWER(nombre));
-CREATE UNIQUE INDEX IF NOT EXISTS idx_colecciones_slug
-    ON colecciones (slug) WHERE slug IS NOT NULL;
-CREATE INDEX IF NOT EXISTS idx_colecciones_nombre_trgm
-    ON colecciones USING GIN (nombre gin_trgm_ops);
-
-DROP TRIGGER IF EXISTS trg_colecciones_updated ON colecciones;
-CREATE TRIGGER trg_colecciones_updated
-    BEFORE UPDATE ON colecciones
-    FOR EACH ROW EXECUTE FUNCTION actualizar_updated_at();
-
-CREATE TABLE IF NOT EXISTS coleccion_samples (
-    coleccion_id INT NOT NULL REFERENCES colecciones(id) ON DELETE CASCADE,
-    sample_id    INT NOT NULL REFERENCES samples(id) ON DELETE CASCADE,
-    usuario_id   INT NOT NULL REFERENCES usuarios_ext(id),
-    posicion     INT DEFAULT 0,
-    added_at     TIMESTAMPTZ DEFAULT NOW(),
-    PRIMARY KEY (coleccion_id, sample_id),
-    CONSTRAINT uq_usuario_sample UNIQUE (usuario_id, sample_id)
-);
-
-CREATE INDEX IF NOT EXISTS idx_cs_usuario_id ON coleccion_samples (usuario_id);
-CREATE INDEX IF NOT EXISTS idx_coleccion_samples_sample_coleccion
-    ON coleccion_samples (sample_id, coleccion_id);
-CREATE INDEX IF NOT EXISTS idx_coleccion_samples_sample
-    ON coleccion_samples (sample_id, coleccion_id);
+/* [173A-fix] colecciones y coleccion_samples se crean en 20260418000030_colecciones.up.sql.
+ * Aquí NO se duplican para evitar que CREATE TABLE IF NOT EXISTS bloquee la versión
+ * canónica que incluye eliminado_en, BIGSERIAL, CHECK constraint y índices parciales. */
 
 DROP TRIGGER IF EXISTS trg_samples_updated ON samples;
 CREATE TRIGGER trg_samples_updated
