@@ -13,6 +13,8 @@ import {useNavigationStore} from '@/core/router';
 import type {SampleResumen} from '@app/types';
 import '../../styles/componentes/reproductorIsland.css';
 import { BotonBase } from '../../components/ui/BotonBase';
+import { ImgOptimizada } from '@app/components/ui/ImgOptimizada';
+import { resolverImagenSample } from '@app/services/imagenesColor';
 import { EstadoVacio } from '@app/components/ui/EstadoVacio';
 import { Input } from '../../components/ui/Input';
 import { useT } from '@app/utils/i18n/useT';
@@ -100,7 +102,7 @@ export const ReproductorIsland = (): JSX.Element => {
                     {/* Artwork */}
                     <div className="reproductorIslandArt">
                         {sampleActual.imagenUrl ? (
-                            <img src={sampleActual.imagenUrl} alt={sampleActual.titulo} />
+                            <ImgOptimizada src={resolverImagenSample(sampleActual.imagenUrl, sampleActual.id)} alt={sampleActual.titulo} w={200} />
                         ) : (
                             <div className="reproductorIslandArtPlaceholder">
                                 <Music size={64} />
@@ -226,7 +228,7 @@ const PanelCola = ({cola, sampleActualId, onSeleccionar, onQuitar, onMover, onLi
                 {cola.map((sample, indice) => (
                     <div key={sample.id} className={`reproductorIslandColaItem ${sample.id === sampleActualId ? 'reproductorIslandColaItemActivo' : ''}`}>
                         <BotonBase variante="ghost" className="reproductorIslandColaPlay" onClick={() => onSeleccionar(sample)} type="button">
-                            <div className="reproductorIslandColaImagen">{sample.imagenUrl ? <img src={sample.imagenUrl} alt="" /> : <Music size={14} />}</div>
+                            <div className="reproductorIslandColaImagen">{sample.imagenUrl ? <ImgOptimizada src={resolverImagenSample(sample.imagenUrl, sample.id)} alt="" w={40} /> : <Music size={14} />}</div>
                             <div className="reproductorIslandColaInfo">
                                 <span className="reproductorIslandColaTitulo">{sample.titulo}</span>
                                 <span className="reproductorIslandColaArtista">{sample.creador?.nombreVisible || sample.creador?.username || 'Autor'}</span>

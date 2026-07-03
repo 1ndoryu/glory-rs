@@ -27,6 +27,7 @@ import { SeccionSampleDiscovery } from '@app/components/samples/SeccionSampleDis
 import { BadgeModeracion } from '@app/components/ui/BadgeModeracion';
 import EnlaceCreador from '@app/components/social/EnlaceCreador';
 import { obtenerImagenColor } from '@app/services/imagenesColor';
+import { ImgOptimizada } from '@app/components/ui/ImgOptimizada';
 import { useTabsIsla } from '@app/hooks/useTabsIsla';
 import { useMenuContextualSample } from '@app/hooks/useMenuContextualSample';
 import { ModalInspectorSample } from '@app/components/ui/ModalInspectorSample';
@@ -153,10 +154,11 @@ export const SampleDetalleIsland = ({ slug: slugProp }: SampleDetalleProps): JSX
                         tabIndex={0}
                         aria-label={reproduciendo ? t('cancion.pausarSample') : t('cancion.reproducirSample')}
                     >
-                        <img
+                        <ImgOptimizada
                             src={sample.imagenUrl || obtenerImagenColor(sample.id)}
                             alt={sample.titulo}
                             className="detallePortadaImg"
+                            w={400}
                         />
                         <span className={`detallePortadaEstado ${reproduciendo ? 'detallePortadaEstadoActivo' : ''}`}>
                             {reproduciendo ? <><Pause size={14} /> {t('sample.detalle.sonando')}</> : t('sample.detalle.clickParaReproducir')}

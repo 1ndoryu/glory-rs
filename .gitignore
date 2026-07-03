@@ -79,3 +79,4 @@ docker-compose.coolify.yml
 register_migrations.sql
 test-sine.wav
 clients/kamples-scraper/.lock_daily
+temp/
